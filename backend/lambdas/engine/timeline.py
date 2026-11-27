@@ -75,6 +75,11 @@ def build_timeline(
         out[-1] += outro
         return out
 
+    wm0 = watermark_spec.parse(plan.get("watermark"), strict=False)
+    card = watermark_spec.END_CARD_S if wm0 and wm0.get("mode") == "videomk" and wm0.get("end_card") else 0.0
+    if card:   # the closing "Made with videomk" card is part of the video's length: the scenes aim that much shorter, so the whole video still lands on the length asked (seen on QA: 32.8 s for 30)
+        min_seconds = max(0.0, min_seconds - card) if min_seconds else min_seconds
+        fit_seconds = max(1.0, fit_seconds - card) if fit_seconds else fit_seconds
     if fit_seconds:   # a first render: the pace is worked out from the measured audio
         LEAD_S, TAIL_S = length_mod.tighten(sum(1 for b in plan["beats"] if not b.get("silent")), sum(lengths(LEAD, TAIL)), fit_seconds, LEAD, TAIL)
     else:             # an edit keeps the pace its video was made with

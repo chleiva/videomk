@@ -22,6 +22,16 @@ This pass does exactly that. Same art, a second rig and an automatic gesture sys
 4. **Gestures are automatic and they make sense.** They come from the words and their timings only: a wave on "hello", fingers on "first / a, b and c", left hand then right hand on "but", open palms on a question, an open hand toward the content on "look at this". One per sentence, hands back at the sides in between.
 5. **Still a puppet, honestly:** front-facing only, hands turn in the picture plane (no real palm-up), the feet are side-view shoes turned out, faces have three mouths and no eyebrow motion. See "What is still weak".
 
+### Correction after the owner's second look: the arms at rest were mirrored
+
+The owner: "everything looks better; the only odd thing is the still position: it feels like the arms are swapped." He was right, and three things were the wrong way round (`char3_rest_before_after.jpg`):
+
+1. **The bend of the hanging arm (the main one).** The IK always puts the elbow on the same side of the shoulder-wrist line. That side is right for every gesture and wrong for an arm that hangs: the elbow was tucked IN and the forearm flared OUT, which is the shape of the other arm. Home base now has its own angles (upper arm 7 degrees out, forearm 4 degrees back in, hand curled 11 degrees toward the leg: `REST_UPPER`, `REST_FORE`, `REST_WRIST`), and within 30% of an arm length of home the two bone angles blend into the IK solution (`solve_arm`), passing through straight, so nothing pops.
+2. **The relaxed hand of David and Priya** had its thumb on the outside. The sheets draw the thumb on either side of the forearm piece depending on the character; `presenter.json` now records it (`relaxed_thumb`) and the forearm+hand drawing is mirrored where needed, so the thumb is on the body side for all five.
+3. **The palm shapes (open, one, two, three, thumb) of the four humans** were on the wrong arm: a raised palm had its thumb away from the head and a presenting hand was thumb-down. Now: thumb toward the head when raised, on top when presenting. The fox's sheet happened to be drawn mirrored, so the fox was already right; that is now explicit (`sheet_thumb`).
+
+Checked and not flipped: the shoulder offsets (symmetric) and the sign of the wrist turn. Tests that pin it: `test_rest_pose_elbows_out_forearms_in`, `test_rest_pose_and_hand_sides_per_character`, `test_presenting_hand_is_thumb_up_and_raised_hand_is_thumb_to_the_head`, `test_leaving_home_is_continuous_and_far_from_home_is_plain_ik`. The `char2_` clips show the mirrored version; the `char3_` clips are the corrected ones.
+
 ### What good speakers do (research, short)
 
 Presenter body language:
@@ -50,7 +60,7 @@ New files only; the first rig (`engine/vector_character.py`) and its tests are u
 |---|---|---|
 | Legs | thigh + shin on a two-bone IK, knee always bent, side-view walk | one straight piece per leg, fused at load (thigh scaled to the shin's width at the knee, the inner outline removed), feet planted and turned out, hips about 107 units up; a weight shift tilts the legs by under 2 degrees with the feet fixed |
 | Shoulder | sleeve hung from its top edge, the cap swung away when raised | pivot at the centre of the round cap, arm drawn over the torso: the cap stays on the shoulder at every angle |
-| Elbow | angle keyframes | two-bone IK from a wrist target; the elbow is always on the same side of the shoulder-wrist line, so it cannot flip; reach clamped to 98.5% so the arm never locks or pops |
+| Elbow | angle keyframes | two-bone IK from a wrist target; the elbow is always on the same side of the shoulder-wrist line, so it cannot flip; reach clamped to 98.5% so the arm never locks or pops; at home the arm hangs by its own angles (elbow out, forearm in) and blends into the IK as the hand leaves |
 | Hand | part of the forearm, one sprite | own piece at the wrist (cut found automatically: cuff edge, or narrowest row on a bare forearm), tucked under the cuff, turns at the wrist; 6 shapes |
 | Bones | piece drawn straight down | each piece is turned so its own pivot-to-end line lies on the bone (the art is never exactly vertical), so joints land where the maths says |
 | Fox | no tail, gap at the waist | tail piece behind the body that sways; legs tucked under the waistcoat |

@@ -173,8 +173,8 @@ def direct(prompt: str, *, minutes: float, ask_small: Ask, ask_big: Callable[[st
         info["background"] = {"by": "request", "style": "none"}
     if photos:   # the music has the first seconds and the last seconds to itself: the pictures arrive before the voice does, and the ending is held
         plan["intro_s"], plan["outro_s"] = (SHORT_PHOTO_INTRO_S, SHORT_PHOTO_OUTRO_S) if plan_mod.is_short(minutes) else (PHOTO_INTRO_S, PHOTO_OUTRO_S)
-    if fit_to_target():   # the length is kept by arithmetic (engine/length.py): a script estimated past the length asked loses whole sentences, then a surplus beat; never the opening or the last line
-        fit = length_mod.fit_script(plan, minutes * 60.0, min_beat_words=plan_mod.MIN_BEAT_WORDS, min_beats=plan_mod.expected_beats(minutes, len(photos or [])), drop_beats=not photos)
+    if fit_to_target():   # the length is kept by arithmetic (engine/length.py; the 2.4 s closing card of a watermarked video, when there is one, is part of the length): a script estimated past the length asked loses whole sentences, then a surplus beat; never the opening or the last line
+        fit = length_mod.fit_script(plan, minutes * 60.0 - (2.4 if (options or {}).get("end_card") else 0.0), min_beat_words=plan_mod.MIN_BEAT_WORDS, min_beats=plan_mod.expected_beats(minutes, len(photos or [])), drop_beats=not photos)
         if fit["cut_words"] or not fit["fits"]:   # recorded only when the step acted (or could not): a script that fits leaves no trace
             info["length"] = fit
         if fit["cut_words"]:

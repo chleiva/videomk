@@ -195,3 +195,81 @@ def test_performance_poses_draw_on_the_real_rig():
         im = Image.new("RGBA", (400, 340), (0, 0, 0, 0))
         ch.draw(im, 200, 330, pose)
         assert im.getbbox() is not None and "tail" in pose
+
+
+# ----------------------------------------------------------------------------- the home pose must not be mirrored (owner's review: "the arms look swapped")
+RELAXED_THUMB = {"ines": -1, "david": 1, "priya": 1, "mateo": -1, "fox": -1}     # where the thumb is on each original forearm drawing, read by eye
+
+
+def _rest_checks(g):
+    sk = vp.solve(g)
+    for i, side in enumerate((-1, 1)):
+        s, e, w = sk["shoulders"][i], sk["elbows"][i], sk["wrists"][i]
+        assert (e[0] - s[0]) * side > 0.05 * g.upper            # the upper arm hangs a little OUT: the elbow is outside the shoulder
+        assert (w[0] - e[0]) * side < -0.03 * g.fore            # the forearm comes back IN toward the thigh
+        x_line = s[0] + (w[0] - s[0]) * (e[1] - s[1]) / (w[1] - s[1])
+        assert (e[0] - x_line) * side > 0.02 * g.arm            # so the elbow is on the OUTER side of the line shoulder -> wrist (tucked in = the other arm's shape)
+        assert (w[0] - s[0]) * side > -0.02 * g.arm and w[1] < e[1] < s[1]      # and the hand hangs beside the body, not across it
+        assert abs(dist(s, e) - g.upper) < 1e-6 and abs(dist(e, w) - g.fore) < 1e-6
+    assert sk["wrists"][0][0] == pytest.approx(-sk["wrists"][1][0]) and sk["elbows"][0][0] == pytest.approx(-sk["elbows"][1][0])   # the two arms mirror each other
+
+
+def test_rest_pose_elbows_out_forearms_in():
+    _rest_checks(vp.Geom())
+    assert vp.REST_UPPER > 0 > vp.REST_FORE and cg.REST_WRIST < 0      # and the hand itself curls a little toward the leg
+
+
+@pytest.mark.parametrize("cid", CAST)
+def test_rest_pose_and_hand_sides_per_character(cid):
+    ch = vp.load(cid, 2.0)
+    _rest_checks(ch.g)
+    cfg = json.load(open(os.path.join(vp.DIR, cid, "presenter.json")))
+    assert cfg["relaxed_thumb"] == RELAXED_THUMB[cid] and cfg["sheet_thumb"] == ("right" if cid == "fox" else "left")
+    for s, side in (("l", -1), ("r", 1)):
+        assert ch.thumb_x[("relaxed", s)] * side == -1          # at home the thumb is on the BODY side of the hand
+        for shape in ("open", "one", "two", "three", "thumb"):
+            assert ch.thumb_x[(shape, s)] * side == 1           # palm shapes: thumb on the outer side as stored = toward the head when raised, on top when presenting
+    for name in ("fore", "hand_relaxed", "hand_open", "hand_two", "upper"):     # the left pieces are the right pieces mirrored, never the same drawing twice
+        r, l = ch.pieces[name + "_r"], ch.pieces[name + "_l"]
+        assert l.img.tobytes() == r.img.transpose(Image.FLIP_LEFT_RIGHT).tobytes() and l.pivot[0] == pytest.approx(r.img.width - r.pivot[0])
+    # the open hand, measured on the paint: beside the palm the piece reaches further from the wrist line on the thumb side
+    import numpy as np
+
+    for s in ("l", "r"):
+        pc = ch.pieces["hand_open_" + s]
+        al = np.array(pc.img)[..., 3] > 96
+        rows = [np.nonzero(al[y])[0] for y in range(int(pc.img.height * 0.15), int(pc.img.height * 0.55))]
+        rows = [r for r in rows if r.size]
+        left, right = max(pc.pivot[0] - r.min() for r in rows), max(r.max() - pc.pivot[0] for r in rows)
+        assert (right - left) * ch.thumb_x[("open", s)] > 0.1 * pc.img.width
+
+
+def test_presenting_hand_is_thumb_up_and_raised_hand_is_thumb_to_the_head():
+    """Follow the thumb side of the stored piece through the pose: it must end up on top of a presenting hand and on the head side of a raised hand, on both arms."""
+    ch = vp.load("david", 2.0)
+    A = ch.g.arm
+    for i, (s, side) in enumerate((("l", -1), ("r", 1))):
+        for kind, want in (("present", (0.0, 1.0)), ("count", (-side * 1.0, 0.0)), ("wave", (-side * 1.0, 0.0))):
+            hands = [None, None]
+            hands[i] = (cg.KEY[kind][0][0] * A, cg.KEY[kind][0][1] * A)
+            sk = vp.solve(ch.g, {"hands": tuple(hands)})
+            d = sk["hand_dir"][i]                               # the fingers point along d; the piece's +x axis (as stored, hanging) is d turned a quarter turn
+            thumb = (-d[1] * ch.thumb_x[("open", s)], d[0] * ch.thumb_x[("open", s)])
+            assert thumb[0] * want[0] + thumb[1] * want[1] > 0.5, (s, kind, thumb)
+
+
+def test_leaving_home_is_continuous_and_far_from_home_is_plain_ik():
+    g = vp.Geom()
+    rt = vp.rest_target(g)
+    for kind in ("present", "wave", "count", "open"):
+        key = (cg.KEY[kind][0][0] * g.arm, cg.KEY[kind][0][1] * g.arm)
+        prev = None
+        for n in range(0, 201):
+            h = cg._arc(rt, key, n / 200)
+            sk = vp.solve(g, {"hands": (h, h)})
+            if prev is not None:
+                assert dist(sk["elbows"][1], prev) < 0.035 * g.arm      # the elbow glides from "out" to the gesture's bend: no jump
+            prev = sk["elbows"][1]
+        s = sk["shoulders"][1]
+        e, w = vp.arm_ik(s, (s[0] + key[0], s[1] + key[1]), g.upper, g.fore, 1)
+        assert dist(e, sk["elbows"][1]) < 1e-6 and dist(w, sk["wrists"][1]) < 1e-6

@@ -212,3 +212,37 @@ def test_the_policy_is_on_in_both_stages_and_the_stack_reads_it():
     assert stages["qa"].get("forceWatermark") is True and stages["prod"].get("forceWatermark") is True
     src = open(os.path.join(ROOT, "backend_stack.py"), encoding="utf-8").read()
     assert 'stage_cfg.get("forceWatermark")' in src and 'try_get_context("forceWatermark") is not None' in src   # stages.json decides unless -c forceWatermark=0|1 says otherwise
+
+
+def test_the_closing_card_counts_towards_the_length_asked():
+    """A free video always ends with the 2.4 s card: the scenes aim that much shorter, so the video is still at least the length asked and not 2.4 s over it."""
+    for speech, asked in ((3.0, 30), (8.8, 60), (9.3, 60)):       # too short (held longer), about right, a little long (pauses shortened)
+        n = 6
+        with_card = build_timeline(_plan(n, ALWAYS), [{"duration": speech}] * n, video_id="v", min_seconds=asked, fit_seconds=asked)
+        without = build_timeline(_plan(n), [{"duration": speech}] * n, video_id="v", min_seconds=asked, fit_seconds=asked)
+        assert with_card["scenes"][-1]["id"] == "endcard" and asked <= with_card["duration"] <= asked * 1.05 + 0.01, (speech, with_card["duration"])
+        assert asked <= without["duration"] <= asked * 1.05 + 0.01 and abs(with_card["duration"] - without["duration"]) < 1.6   # the same length with or without the card
+    no_card = {**ALWAYS, "end_card": False}
+    assert build_timeline(_plan(6, no_card), [{"duration": 3.0}] * 6, video_id="v", min_seconds=30, fit_seconds=30)["duration"] >= 30
+
+
+def test_with_plans_the_plan_decides_who_may_use_moments(monkeypatch):
+    """Plans (docs/PLANS.md) list "moments" among a plan's watermark rights; in the engine it is the `presence` of the videomk mark. The plan decides the right, the option decides the rendering."""
+    from common import plans
+    free, pro = list(plans.PLANS["free"]["watermark_modes"]), list(plans.PLANS["pro"]["watermark_modes"])
+    assert "moments" not in free and "moments" in pro and "moments" in plans.PLANS["max"]["watermark_modes"]
+    f = dict(premium=False, forced=True, has_logo=False, modes=free)
+    with pytest.raises(store.WatermarkError) as e:
+        store.resolve({"mode": "videomk", "presence": "moments"}, None, **f)
+    assert e.value.status == 403 and e.value.code == "plan_watermark" and e.value.extra["requires_plan"] == "pro"
+    saved = store.forced_spec(store.resolve(None, {"mode": "videomk", "presence": "moments", "position": "tl"}, **f))    # a saved setting from a plan that ended: quietly the forced mark, corner kept
+    assert saved["presence"] == "always" and saved["style"] == "lockup" and saved["end_card"] is True and saved["position"] == "tl"
+    assert store.forced_spec({})["presence"] == "always"
+    p = dict(premium=False, forced=False, has_logo=False, modes=pro)                                                       # Pro: no own logo, but may hide the mark or let it come and go
+    assert store.resolve({"mode": "videomk"}, None, **p)["presence"] == "moments" and store.resolve({"mode": "videomk", "presence": "always"}, None, **p)["presence"] == "always"
+    assert store.resolve({"mode": "none"}, None, **p) == {"mode": "none"}
+    import watermark_api
+    with pytest.raises(store.WatermarkError) as e:
+        watermark_api._clean({"mode": "videomk", "presence": "moments"}, premium=False, forced=True, modes=free)
+    assert e.value.code == "plan_watermark" and e.value.extra["requires_plan"] == "pro"
+    assert watermark_api._clean({"mode": "videomk", "presence": "moments"}, premium=False, forced=False, modes=pro)["presence"] == "moments"

@@ -123,7 +123,7 @@ public enum MakingProgress {
         case .rendering: what = tr("making.line.rendering")
         }
         let eta = timeLeft(stage: stage, secondsInStage: secondsInStage, minutes: minutes)
-        return Info(segments: segs, current: current, line: "\(what) \(eta)", what: what, eta: eta)
+        return Info(segments: segs, current: current, line: "\(what). \(eta)", what: what, eta: eta)       // the live line carries no full stop of its own
     }
 
     /// Whole minutes left (rounded up) from the typical stage times; nil when under a minute.

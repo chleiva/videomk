@@ -118,7 +118,7 @@ struct UploadTile: View {
             Theme.dangerSolid.opacity(0.55)
             VStack(spacing: 6) {
                 Image(systemName: "arrow.clockwise").font(.role(.headline, weight: .semibold)).foregroundStyle(Theme.onMedia).frame(width: 44, height: 44).background(Theme.onMedia.opacity(0.25), in: Circle())
-                Text(tr("upload.tap_to_retry")).font(.role(.caption, weight: .bold)).foregroundStyle(Theme.danger).padding(.horizontal, 8).frame(height: 22).background(Theme.onMedia, in: Capsule())
+                Text(tr("upload.tap_to_retry")).font(.role(.caption, weight: .bold)).foregroundStyle(Theme.danger).lineLimit(1).minimumScaleFactor(0.7).padding(.horizontal, 8).frame(height: 22).background(Theme.onMedia, in: Capsule())
             }
         case .alreadyThere:
             Theme.mediaInk.opacity(0.38)

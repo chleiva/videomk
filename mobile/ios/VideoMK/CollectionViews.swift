@@ -220,7 +220,7 @@ struct CollectionsListView: View {
             } label: { IconButtonFace(symbol: "ellipsis") }
                 .accessibilityLabel(tr("collections.actions_for", c.name)).accessibilityIdentifier("collectionRowMore")
         }
-        .frame(minHeight: 80)
+        .frame(minHeight: 80).padding(.vertical, typeSize.isAccessibilitySize ? Theme.Space.s : 0)
         .accessibilityElement(children: .contain)
         .accessibilityAction(named: tr("collections.rename")) { renameText = c.name; renaming = c }
         .accessibilityAction(named: tr("collections.delete_collection")) { media.deleteCollection(c, undo: model.undo) }

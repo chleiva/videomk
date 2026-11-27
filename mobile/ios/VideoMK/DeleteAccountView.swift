@@ -122,11 +122,14 @@ struct DeleteAccountView: View {
                     .buttonStyle(DestructiveButtonStyle()).disabled(!model.canDelete).accessibilityIdentifier("deleteConfirmButton")
                     Button(tr("delete.keep")) { dismiss() }.buttonStyle(TonalButtonStyle()).accessibilityIdentifier("deleteKeepButton")
                 }
+                .id("deleteButtons")
             }
             .padding(.horizontal, Theme.gutter).padding(.bottom, Theme.Space.xxl)
             .frame(maxWidth: 640).frame(maxWidth: .infinity)
         }
         .scrollDismissesKeyboard(.interactively)
+        // the word is right: the two buttons come into view above the keyboard (the keyboard stays: the person may still be typing)
+        .onChange(of: model.typed) { _, t in if AccountDeletionFlow.isConfirmation(t) { withAnimation { proxy.scrollTo("deleteButtons", anchor: .bottom) } } }
         .onAppear { if isFailed { scrollToError(proxy) } }          // the page is rebuilt after progress: bring the message into view
         .onChange(of: model.state) { if isFailed { scrollToError(proxy) } }
         }
