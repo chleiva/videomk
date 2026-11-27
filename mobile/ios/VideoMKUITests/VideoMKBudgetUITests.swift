@@ -43,8 +43,13 @@ final class VideoMKBudgetUITests: XCTestCase {
         guard let file = ProcessInfo.processInfo.environment["VMK_DEBUG_PLAYBACK_FILE"], !file.isEmpty else { throw XCTSkip("needs TEST_RUNNER_VMK_DEBUG_PLAYBACK_FILE (a local mp4)") }
         let app = launch(["VMK_DEBUG_FAKE_VIDEOS": "1", "VMK_DEBUG_OPEN": "v3", "VMK_DEBUG_PLAYBACK_FILE": file])
         XCTAssertTrue(app.buttons["shareButton"].waitForExistence(timeout: 20))
-        let words = visibleWords(app)
-        XCTAssertLessThanOrEqual(words, 10, "the video screen has \(words) visible words (title, caption and the system clock)")
+        let seen = app.staticTexts.allElementsBoundByIndex.filter { $0.exists && $0.isHittable }.map { $0.label }
+        // the title is the person's own words; the "Make another" chips are suggestions (as the examples on Create are), counted apart
+        let chips = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "remix-")).allElementsBoundByIndex.map { $0.label }
+        XCTAssertLessThanOrEqual(chips.count, 3, "at most three suggestions")
+        let words = visibleWords(app, excluding: Set(chips + [app.staticTexts["videoTitle"].label]))
+        // design bar rule 4: the video screen has 8 words (the caption "1:20 · 1080p", Share, "Make another")
+        XCTAssertLessThanOrEqual(words, 8, "the video screen has \(words) visible words: \(seen)")
     }
 
     func testFirstRunStaysUnderFourteenWords() {

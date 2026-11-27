@@ -79,7 +79,6 @@ struct VideoDetailView: View {
         TimelineView(.periodic(from: .now, by: 1)) { context in
             MakingScreen(snapshot: model.makingSnapshot(for: video, now: context.date))
         }
-        .accessibilityIdentifier("progressCard")
     }
 
     // MARK: ready
