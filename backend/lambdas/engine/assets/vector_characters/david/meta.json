@@ -1,0 +1,40 @@
+{
+ "name": "David",
+ "role": "software engineer",
+ "species": "human",
+ "age_group": "young adult",
+ "tags": [
+  "tech",
+  "engineer",
+  "apps",
+  "startup",
+  "casual"
+ ],
+ "voice_hint": {
+  "en": [
+   "Matthew"
+  ],
+  "es": [
+   "Pedro"
+  ]
+ },
+ "personality": "friendly, practical, upbeat",
+ "suitable_topics": [
+  "technology",
+  "apps",
+  "productivity",
+  "careers",
+  "how it works"
+ ],
+ "outfit": "mustard hoodie with headphones around the neck, grey jeans, white sneakers",
+ "skin": "dark brown",
+ "hair": "short natural black fade",
+ "id": "david",
+ "rig": "biped front-facing cut-out (head, torso, upper/lower arm, upper/lower leg, 2 eye sets, 3 mouths)",
+ "provenance": {
+  "model": "gpt-image-2.6-flare",
+  "sheet": "1536x1024 medium rig parts sheet",
+  "generated": "2026-11-27",
+  "script": "backend/scripts/vector_character_sheet5.py"
+ }
+}

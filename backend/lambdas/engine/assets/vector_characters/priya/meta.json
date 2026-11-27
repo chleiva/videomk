@@ -1,0 +1,43 @@
+{
+ "name": "Priya",
+ "role": "doctor / scientist",
+ "species": "human",
+ "age_group": "middle-aged adult",
+ "tags": [
+  "health",
+  "medicine",
+  "science",
+  "lab",
+  "calm",
+  "expert"
+ ],
+ "voice_hint": {
+  "en": [
+   "Kajal",
+   "Danielle"
+  ],
+  "es": [
+   "Mia",
+   "Lupe"
+  ]
+ },
+ "personality": "calm, clear, reassuring",
+ "suitable_topics": [
+  "health",
+  "science",
+  "wellbeing",
+  "research",
+  "how the body works"
+ ],
+ "outfit": "white lab coat over teal top, stethoscope, navy trousers",
+ "skin": "medium brown",
+ "hair": "long black, low ponytail",
+ "id": "priya",
+ "rig": "biped front-facing cut-out (head, torso, upper/lower arm, upper/lower leg, 2 eye sets, 3 mouths)",
+ "provenance": {
+  "model": "gpt-image-2.6-flare",
+  "sheet": "1536x1024 medium rig parts sheet",
+  "generated": "2026-11-27",
+  "script": "backend/scripts/vector_character_sheet5.py"
+ }
+}

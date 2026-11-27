@@ -1,0 +1,42 @@
+{
+ "name": "Mateo",
+ "role": "chef",
+ "species": "human",
+ "age_group": "adult",
+ "tags": [
+  "food",
+  "cooking",
+  "chef",
+  "kitchen",
+  "friendly",
+  "farm"
+ ],
+ "voice_hint": {
+  "en": [
+   "Stephen"
+  ],
+  "es": [
+   "Andres",
+   "Pedro"
+  ]
+ },
+ "personality": "warm, enthusiastic, down-to-earth",
+ "suitable_topics": [
+  "food",
+  "cooking",
+  "nutrition",
+  "culture",
+  "small business"
+ ],
+ "outfit": "white chef shirt, green apron, grey checked trousers, brown shoes",
+ "skin": "olive tan",
+ "hair": "short dark brown with short beard",
+ "id": "mateo",
+ "rig": "biped front-facing cut-out (head, torso, upper/lower arm, upper/lower leg, 2 eye sets, 3 mouths)",
+ "provenance": {
+  "model": "gpt-image-2.6-flare",
+  "sheet": "1536x1024 medium rig parts sheet",
+  "generated": "2026-11-27",
+  "script": "backend/scripts/vector_character_sheet5.py"
+ }
+}

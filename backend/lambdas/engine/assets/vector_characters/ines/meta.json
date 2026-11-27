@@ -1,0 +1,42 @@
+{
+ "name": "Inés",
+ "role": "senior teacher / mentor",
+ "species": "human",
+ "age_group": "senior",
+ "tags": [
+  "teacher",
+  "mentor",
+  "education",
+  "grandmother",
+  "calm",
+  "warm"
+ ],
+ "voice_hint": {
+  "en": [
+   "Ruth"
+  ],
+  "es": [
+   "Lupe",
+   "Lucia"
+  ]
+ },
+ "personality": "patient, warm, curious",
+ "suitable_topics": [
+  "education",
+  "learning",
+  "history",
+  "family",
+  "wellbeing"
+ ],
+ "outfit": "rose cardigan, cream blouse, teal trousers, round glasses",
+ "skin": "light tan",
+ "hair": "short wavy white-grey",
+ "id": "ines",
+ "rig": "biped front-facing cut-out (head, torso, upper/lower arm, upper/lower leg, 2 eye sets, 3 mouths)",
+ "provenance": {
+  "model": "gpt-image-2.6-flare",
+  "sheet": "1536x1024 medium rig parts sheet",
+  "generated": "2026-11-27",
+  "script": "backend/scripts/vector_character_sheet5.py"
+ }
+}

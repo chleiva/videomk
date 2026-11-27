@@ -1,0 +1,43 @@
+{
+ "name": "Fox",
+ "role": "guide mascot",
+ "species": "fox (bipedal mascot)",
+ "age_group": "ageless",
+ "tags": [
+  "mascot",
+  "guide",
+  "animal",
+  "friendly",
+  "kids",
+  "explainer"
+ ],
+ "voice_hint": {
+  "en": [
+   "Joanna",
+   "Gregory"
+  ],
+  "es": [
+   "Lucia",
+   "Sergio"
+  ]
+ },
+ "personality": "curious, playful, encouraging",
+ "suitable_topics": [
+  "kids",
+  "nature",
+  "onboarding",
+  "how it works",
+  "tips"
+ ],
+ "outfit": "teal scarf, navy waistcoat, brown boots",
+ "skin": "orange-red fur",
+ "hair": "n/a",
+ "id": "fox",
+ "rig": "biped front-facing cut-out (head, torso, upper/lower arm, upper/lower leg, 2 eye sets, 3 mouths)",
+ "provenance": {
+  "model": "gpt-image-2.6-flare",
+  "sheet": "1536x1024 medium rig parts sheet",
+  "generated": "2026-11-27",
+  "script": "backend/scripts/vector_character_sheet5.py"
+ }
+}

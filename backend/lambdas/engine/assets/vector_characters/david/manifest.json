@@ -1,0 +1,131 @@
+{
+ "id": "david",
+ "parts": {
+  "head": {
+   "file": "head.svg",
+   "w": 290,
+   "h": 345,
+   "svg_bytes": 55742,
+   "pivot": [
+    145.0,
+    345
+   ]
+  },
+  "torso": {
+   "file": "torso.svg",
+   "w": 249,
+   "h": 352,
+   "svg_bytes": 139297,
+   "pivot": [
+    124.5,
+    352
+   ]
+  },
+  "upper_arm": {
+   "file": "upper_arm.svg",
+   "w": 112,
+   "h": 353,
+   "svg_bytes": 43262,
+   "pivot": [
+    55.5,
+    0.0
+   ],
+   "end": [
+    59.5,
+    353.0
+   ]
+  },
+  "lower_arm": {
+   "file": "lower_arm.svg",
+   "w": 114,
+   "h": 359,
+   "svg_bytes": 46789,
+   "pivot": [
+    53.5,
+    0.0
+   ],
+   "end": [
+    66.5,
+    359.0
+   ]
+  },
+  "upper_leg": {
+   "file": "upper_leg.svg",
+   "w": 117,
+   "h": 320,
+   "svg_bytes": 24243,
+   "pivot": [
+    58.0,
+    0.0
+   ],
+   "end": [
+    57.0,
+    320.0
+   ]
+  },
+  "lower_leg": {
+   "file": "lower_leg.svg",
+   "w": 209,
+   "h": 328,
+   "svg_bytes": 79352,
+   "pivot": [
+    60.5,
+    0.0
+   ],
+   "end": [
+    99.5,
+    328.0
+   ]
+  },
+  "eyes_open": {
+   "file": "eyes_open.svg",
+   "w": 257,
+   "h": 146,
+   "svg_bytes": 48752,
+   "pivot": [
+    128.5,
+    73.0
+   ]
+  },
+  "eyes_closed": {
+   "file": "eyes_closed.svg",
+   "w": 251,
+   "h": 121,
+   "svg_bytes": 14809,
+   "pivot": [
+    125.5,
+    60.5
+   ]
+  },
+  "mouth_closed": {
+   "file": "mouth_closed.svg",
+   "w": 183,
+   "h": 48,
+   "svg_bytes": 7962,
+   "pivot": [
+    91.5,
+    24.0
+   ]
+  },
+  "mouth_half": {
+   "file": "mouth_half.svg",
+   "w": 174,
+   "h": 71,
+   "svg_bytes": 21849,
+   "pivot": [
+    87.0,
+    35.5
+   ]
+  },
+  "mouth_wide": {
+   "file": "mouth_wide.svg",
+   "w": 186,
+   "h": 122,
+   "svg_bytes": 25036,
+   "pivot": [
+    93.0,
+    61.0
+   ]
+  }
+ }
+}
