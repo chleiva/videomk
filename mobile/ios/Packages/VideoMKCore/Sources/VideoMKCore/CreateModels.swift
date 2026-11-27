@@ -68,6 +68,10 @@ public struct CreateCapabilities: Codable, Sendable, Equatable {
     public var lengths: Lengths
     /// Present only when the server has presentation decks switched on; the whole feature is hidden otherwise.
     public var deck: DeckCapabilities?
+    /// The chosen, enforced look (`looks.look` and `looks.cast`). nil from a server that does not have it: Create then keeps its older Look menu and sends nothing new.
+    public var looks: LookCapabilities?
+
+    private enum LenientKeys: String, CodingKey { case looks }
 
     enum CodingKeys: String, CodingKey { case aspects, resolutions, platforms, languages, lengths, maxPhotos = "max_photos", intake, deck }
 
@@ -81,6 +85,7 @@ public struct CreateCapabilities: Codable, Sendable, Equatable {
         maxPhotos = (try? c.decode(Int.self, forKey: .maxPhotos)) ?? 100; intake = (try? c.decode(Bool.self, forKey: .intake)) ?? false
         lengths = (try? c.decode(Lengths.self, forKey: .lengths)) ?? Lengths()
         deck = try? c.decode(DeckCapabilities.self, forKey: .deck)
+        looks = LookCapabilities(json: try? d.container(keyedBy: LenientKeys.self).decode(AnyJSON.self, forKey: .looks))      // lenient: a malformed "looks" never fails the capabilities
     }
 
     /// The length chips: the server's presets from 15 seconds up, or 1, 2, 3, 5, 8, 12 when it does not say.
@@ -155,6 +160,8 @@ public struct CreateForm: Equatable, Sendable {
     public var resolution = "1080p"
     public var minutes = CreateOptions.defaultMinutes
     public var look: VideoLook?
+    /// The chosen, enforced look of the video (Auto, Real, Whiteboard, Cartoon with its cast). Only used when the server lists `looks.look`.
+    public var lookChoice = LookChoice()
     public var captions = true
     public var language = "auto"
     /// The person changed the length by hand since the screen opened: a platform pick then keeps it (and only shows its recommendation).
@@ -201,7 +208,7 @@ public struct CreateForm: Equatable, Sendable {
     public mutating func resetTouches() { lengthTouched = false; userTouched = false; resolutionTouched = false }
 
     public var creditsMultiplier: Int { multipliers[resolution] ?? 1 }
-    public var options: CreateOptions { CreateOptions(minutes: minutes, look: look, captions: captions, platform: platform, aspect: aspect, resolution: resolution, language: language, creditsMultiplier: creditsMultiplier, deck: deckPrice) }
+    public var options: CreateOptions { CreateOptions(minutes: minutes, look: look, captions: captions, platform: platform, aspect: aspect, resolution: resolution, language: language, creditsMultiplier: creditsMultiplier, deck: deckPrice, lookChoice: lookChoice) }
 
     /// The resolutions to show for the chosen shape, in the server's order (one that cannot be made in this shape is left out).
     public func resolutionChoices(_ caps: CreateCapabilities) -> [CreateCapabilities.Resolution] { caps.resolutions.filter { $0.supports(aspect: aspect) } }
@@ -276,6 +283,49 @@ public struct CreateForm: Equatable, Sendable {
         }
         if let c = PlatformChips.make(caps).first(where: { $0.members.contains(platform) }), !c.supported { platform = "other"; aspect = caps.readyAspects.first?.id ?? "16:9" }
         if language != "auto", !caps.languages.contains(where: { $0.id == language }) { language = "auto" }
+        lookChoice = LookRules.normalized(lookChoice, caps: caps.looks).choice
+    }
+
+    // MARK: the chosen look
+
+    /// A tap on a look tile. A look that needs a longer video moves the length to the shortest one that works; the nudge says what was done.
+    @discardableResult public mutating func selectLook(_ id: String, caps: CreateCapabilities, attached: LookRules.Attached = .nothing) -> LookRules.LengthNudge? {
+        guard let looks = caps.looks else { return nil }
+        lookChoice = LookRules.select(id, in: lookChoice, caps: looks, attached: attached)
+        userTouched = true
+        return applyLookLength(caps)
+    }
+
+    /// A tap on a face of the cast. Two or three are a conversation, which needs its own shortest length.
+    @discardableResult public mutating func toggleCast(_ member: String, caps: CreateCapabilities) -> (tap: LookRules.CastTap, nudge: LookRules.LengthNudge?) {
+        guard let looks = caps.looks else { return (.full, nil) }
+        let tap = LookRules.toggle(member, in: &lookChoice, caps: looks)
+        userTouched = true
+        return (tap, tap == .added ? applyLookLength(caps) : nil)
+    }
+
+    /// "Auto" in the cast: we choose the characters.
+    public mutating func clearCast() { lookChoice.cast = []; userTouched = true }
+
+    public mutating func setLookExtra(_ id: String, on: Bool) { LookRules.setExtra(id, on: on, in: &lookChoice); userTouched = true }
+
+    private mutating func applyLookLength(_ caps: CreateCapabilities) -> LookRules.LengthNudge? {
+        guard deckPrice == nil, let nudge = lookLengthNudge(caps) else { return nil }
+        minutes = nudge.minutes
+        return nudge
+    }
+
+    /// The length is shorter than the chosen look (or a conversation) needs: the length to use instead.
+    public func lookLengthNudge(_ caps: CreateCapabilities) -> LookRules.LengthNudge? { LookRules.lengthNudge(lookChoice, caps: caps.looks, minutes: minutes, presets: caps.lengthPresets) }
+
+    /// Photos or a presentation were attached (or the server's list changed): a look that is not made from them goes back to Auto.
+    /// Returns the one line that says so, nil when nothing changed.
+    public mutating func reconcileLook(_ caps: CreateCapabilities, attached: LookRules.Attached) -> String? {
+        let was = lookChoice
+        let r = LookRules.normalized(was, caps: caps.looks, attached: attached)
+        lookChoice = r.choice
+        guard let reason = r.reset, let label = caps.looks?.option(was.look)?.label else { return nil }
+        return LookRules.resetLine(reason, was: label)
     }
 }
 
@@ -285,8 +335,10 @@ public struct CreateDefaults: Codable, Sendable, Equatable {
     public var minutes = CreateOptions.defaultMinutes
     public var look: String?
     public var captions = true
+    /// The last chosen look, cast and extras (optional: absent in what older versions stored).
+    public var lookChoice: LookChoice?
     public init() {}
-    public init(_ f: CreateForm) { platform = f.platform; aspect = f.aspect; resolution = f.resolution; minutes = f.minutes; look = f.look?.rawValue; captions = f.captions; language = f.language }
+    public init(_ f: CreateForm) { lookChoice = f.lookChoice.isAuto ? nil : f.lookChoice; platform = f.platform; aspect = f.aspect; resolution = f.resolution; minutes = f.minutes; look = f.look?.rawValue; captions = f.captions; language = f.language }
 
     static func key(_ userID: String?) -> String { "createDefaults.\(userID ?? "anonymous")" }
 
@@ -294,6 +346,8 @@ public struct CreateDefaults: Codable, Sendable, Equatable {
         guard let data = defaults.data(forKey: key(userID)), let d = try? JSONDecoder().decode(CreateDefaults.self, from: data) else { return CreateDefaults() }
         return d
     }
+    /// Forgets the stored choices (tests that need a first run).
+    public static func forget(userID: String?, defaults: UserDefaults = .standard) { defaults.removeObject(forKey: key(userID)) }
     public func save(userID: String?, defaults: UserDefaults = .standard) { if let data = try? JSONEncoder().encode(self) { defaults.set(data, forKey: Self.key(userID)) } }
 
     /// A fresh form with these choices, kept inside the capabilities.
@@ -302,6 +356,7 @@ public struct CreateDefaults: Codable, Sendable, Equatable {
         f.platform = platform; f.aspect = aspect; f.resolution = caps.multiplier(resolution) > 1 ? "1080p" : resolution       // 4K is never a remembered default: always an explicit choice
         f.minutes = caps.lengthPresets.contains(minutes) ? minutes : (caps.lengthPresets.contains(CreateOptions.defaultMinutes) ? CreateOptions.defaultMinutes : (caps.lengthPresets.first ?? CreateOptions.defaultMinutes))
         f.look = look.flatMap(VideoLook.init(rawValue:)); f.captions = captions; f.language = language
+        f.lookChoice = lookChoice ?? LookChoice()
         f.normalize(caps)
         return f
     }
@@ -345,14 +400,17 @@ public struct IntakeAnswer: Codable, Sendable, Equatable {
 }
 
 public struct BriefRequest: Encodable, Sendable {
-    public struct Options: Encodable, Sendable { public let platform, aspect, resolution: String; public let captions: Bool; public let language: String; public let target_minutes: Double }
+    public struct Options: Encodable, Sendable { public let platform, aspect, resolution: String; public let captions: Bool; public let language: String; public let target_minutes: Double
+        /// The chosen look, exactly as in `generate`; absent (not null) for Auto, so an older server sees the request it always saw.
+        public var look: String? = nil; public var cast: [String]? = nil; public var extras: [String]? = nil }
     public let prompt: String
     public let options: Options
     public let media_count: Int
     public let answers: [IntakeAnswer]
     public init(prompt: String, options: CreateOptions, mediaCount: Int, answers: [IntakeAnswer] = []) {
         self.prompt = Brief.normalized(prompt); self.media_count = mediaCount; self.answers = answers
-        self.options = Options(platform: options.platform, aspect: options.aspect, resolution: options.resolution, captions: options.captions, language: options.language, target_minutes: options.minutes)
+        self.options = Options(platform: options.platform, aspect: options.aspect, resolution: options.resolution, captions: options.captions, language: options.language, target_minutes: options.minutes,
+                               look: options.lookChoice.requestLook, cast: options.lookChoice.requestCast, extras: options.lookChoice.requestExtras)
     }
 }
 

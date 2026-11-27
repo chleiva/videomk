@@ -106,6 +106,11 @@ public struct APIClient: Sendable {
 
     /// `clientRequestID` makes a retry of the same attempt idempotent (no double charge, no second video).
     public func startGeneration(prompt: String, clientRequestID: String, options: CreateOptions = CreateOptions(), media: [String] = [], mediaMeta: [String: PhotoMeta] = [:], libraryMedia: [String] = [], brief: [String: String]? = nil, deck: String? = nil, sendMinutes: Bool = true) async throws -> String {
+        try await startVideo(prompt: prompt, clientRequestID: clientRequestID, options: options, media: media, mediaMeta: mediaMeta, libraryMedia: libraryMedia, brief: brief, deck: deck, sendMinutes: sendMinutes).videoID
+    }
+
+    /// The same request, with what the answer says about the look: `look` (what the video gets) and `note` (one sentence when the chosen look had to be adapted).
+    public func startVideo(prompt: String, clientRequestID: String, options: CreateOptions = CreateOptions(), media: [String] = [], mediaMeta: [String: PhotoMeta] = [:], libraryMedia: [String] = [], brief: [String: String]? = nil, deck: String? = nil, sendMinutes: Bool = true) async throws -> StartedVideo {
         var fields: [String: Any] = ["client_request_id": clientRequestID]
         // a presentation: the prompt is optional (who it is for) and the length is only sent when the person chose one (absent: the deck's own, charged exactly that)
         if deck == nil || Brief.isValid(prompt) { fields["prompt"] = Brief.normalized(prompt) }
@@ -116,13 +121,15 @@ public struct APIClient: Sendable {
         let meta = mediaMeta.filter { media.contains($0.key) && !$0.value.isEmpty }.mapValues(\.json).filter { !$0.value.isEmpty }
         if !meta.isEmpty { fields["media_meta"] = meta }
         if let look = options.look { fields["theme"] = look.rawValue }
+        fields.merge(options.lookChoice.fields) { _, new in new }     // look, cast, extras: nothing at all for Auto
         if !options.captions { fields["captions"] = false }   // on is the server default: only the choice to turn them off is sent
         fields["platform"] = options.platform; fields["aspect"] = options.aspect; fields["resolution"] = options.resolution
         if options.language != "auto" { fields["language"] = options.language }
         if let brief, !brief.isEmpty { fields["brief"] = brief }
         let body = try JSONSerialization.data(withJSONObject: fields)
         let (data, _) = try await send("POST", ["videos", "generate"], body: body)
-        return try decode(StartResponse.self, data).videoID
+        guard let started = StartedVideo.decode(data) else { throw APIError.server }
+        return started
     }
 
     /// "Try again" on a video that did not finish: the SAME video starts again on the server with everything it was made with (photos, options, language, watermark), no second row.

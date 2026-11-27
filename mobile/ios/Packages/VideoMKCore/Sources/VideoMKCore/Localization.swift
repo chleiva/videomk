@@ -157,6 +157,8 @@ public extension Localization {
         return d.formatted(Date.RelativeFormatStyle(presentation: .named, locale: locale, calendar: calendar).locale(locale))
     }
     func number(_ n: Int) -> String { n.formatted(.number.locale(locale)) }
+    /// "Fox, Bruno and Mika" / "Fox, Bruno y Mika".
+    func list(_ items: [String]) -> String { let f = ListFormatter(); f.locale = locale; return f.string(from: items) ?? items.joined(separator: ", ") }
     /// "1:05" or "1:02:03" for a video length in seconds.
     func clock(seconds: Double) -> String {
         let s = max(0, Int(seconds.rounded()))

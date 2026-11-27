@@ -69,17 +69,19 @@ public struct VideoItem: Sendable, Equatable, Identifiable, Decodable {
     public let canRetry: Bool?
     /// While it is being made: scenes, the live line, the narration line, scene pictures. nil from a server that does not send it (and once it is finished).
     public let making: MakingInfo?
+    /// The look the video was made in (the video record's `look`, once the plan exists): shown in Info. nil from a server that does not say.
+    public let look: AppliedLook?
 
     public enum DeckStage: String, Sendable, Equatable { case reading = "deck_reading", writing = "deck_writing" }
 
     enum CodingKeys: String, CodingKey {
         case videoID = "video_id", status, title, durationS = "duration_s", createdAt = "created_at"
-        case videoURL = "video_url", previewGifURL = "preview_gif_url", rejectReason = "reject_reason", editable, aspect, resolution, stage, canRetry = "can_retry", making
+        case videoURL = "video_url", previewGifURL = "preview_gif_url", rejectReason = "reject_reason", editable, aspect, resolution, stage, canRetry = "can_retry", making, look
     }
 
     public init(id: String, status: VideoStatus, title: String? = nil, durationSeconds: Double? = nil, createdAt: Date? = nil,
-                videoURL: URL? = nil, previewGifURL: URL? = nil, rejectReason: String? = nil, editable: Bool = false, aspect: String? = nil, resolution: String? = nil, deckStage: DeckStage? = nil, canRetry: Bool? = nil, making: MakingInfo? = nil) {
-        self.deckStage = deckStage; self.canRetry = canRetry; self.making = making
+                videoURL: URL? = nil, previewGifURL: URL? = nil, rejectReason: String? = nil, editable: Bool = false, aspect: String? = nil, resolution: String? = nil, deckStage: DeckStage? = nil, canRetry: Bool? = nil, making: MakingInfo? = nil, look: AppliedLook? = nil) {
+        self.look = look; self.deckStage = deckStage; self.canRetry = canRetry; self.making = making
         self.id = id; self.status = status; self.title = title; self.durationSeconds = durationSeconds; self.createdAt = createdAt
         self.videoURL = videoURL; self.previewGifURL = previewGifURL; self.rejectReason = rejectReason; self.editable = editable; self.aspect = aspect; self.resolution = resolution
     }
@@ -100,6 +102,7 @@ public struct VideoItem: Sendable, Equatable, Identifiable, Decodable {
         deckStage = (try? c.decode(String.self, forKey: .stage)).flatMap(DeckStage.init(rawValue:))
         canRetry = try? c.decode(Bool.self, forKey: .canRetry)
         making = MakingInfo(json: try? c.decode(AnyJSON.self, forKey: .making))       // lenient: a malformed "making" never fails the video
+        look = AppliedLook(json: try? c.decode(AnyJSON.self, forKey: .look))
     }
 
     static func parseDate(_ s: String) -> Date? {
@@ -154,9 +157,11 @@ public struct CreateOptions: Sendable, Equatable {
     public var creditsMultiplier: Int
     /// A presentation is attached: its price at its own length (the server's number), the usual rule for any other length.
     public var deck: DeckPrice?
+    /// The chosen, enforced look (`look`, `cast`, `extras`); Auto sends nothing.
+    public var lookChoice: LookChoice
 
-    public init(minutes: Double = CreateOptions.defaultMinutes, look: VideoLook? = nil, captions: Bool = true, platform: String = "youtube", aspect: String = "16:9", resolution: String = "1080p", language: String = "auto", creditsMultiplier: Int = 1, deck: DeckPrice? = nil) {
-        self.deck = deck; self.creditsMultiplier = max(1, creditsMultiplier); self.minutes = minutes; self.look = look; self.captions = captions; self.platform = platform; self.aspect = aspect; self.resolution = resolution; self.language = language
+    public init(minutes: Double = CreateOptions.defaultMinutes, look: VideoLook? = nil, captions: Bool = true, platform: String = "youtube", aspect: String = "16:9", resolution: String = "1080p", language: String = "auto", creditsMultiplier: Int = 1, deck: DeckPrice? = nil, lookChoice: LookChoice = LookChoice()) {
+        self.lookChoice = lookChoice; self.deck = deck; self.creditsMultiplier = max(1, creditsMultiplier); self.minutes = minutes; self.look = look; self.captions = captions; self.platform = platform; self.aspect = aspect; self.resolution = resolution; self.language = language
     }
 }
 

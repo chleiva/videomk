@@ -353,3 +353,71 @@ public extension CreateCapabilities {
     /// The same capabilities with the deck feature on (the server sends `deck` only when it is enabled).
     func withDeck(_ deck: DeckCapabilities = .fake) -> CreateCapabilities { var c = self; c.deck = deck; return c }
 }
+
+// MARK: the chosen look (fake)
+
+public extension LookCapabilities {
+    /// The picker as docs/CREATE_API.md describes it, without pictures (tiles and faces then draw their placeholders): four looks, ten characters, the board extra.
+    /// Screenshot runs load the real thing, pictures included, from a file (`from(file:)`).
+    static var fake: LookCapabilities {
+        let all = ["16:9", "9:16", "1:1", "4:5"]
+        func m(_ id: String, _ name: String, _ role: String, _ kind: String, _ topic: String) -> Member { Member(id: id, name: name, role: role, kind: kind, topic: topic) }
+        return LookCapabilities(options: [
+            Option(id: "auto", label: "Auto", note: "We pick one look that suits your topic.", minSeconds: 15, aspects: all, bestAspects: all),
+            Option(id: "real", label: "Real", note: "Photos and video footage.", minSeconds: 15, aspects: all, bestAspects: all),
+            Option(id: "whiteboard", label: "Whiteboard", note: "Drawn by hand as it is explained.", withPhotos: false, withDeck: false, minSeconds: 15, aspects: all, bestAspects: ["16:9", "1:1"]),
+            Option(id: "cartoon", label: "Cartoon", note: "Cartoon characters explain it.", withPhotos: false, withDeck: false, minSeconds: 15, aspects: all, bestAspects: ["16:9", "1:1", "4:5"], cast: true,
+                   extras: [Extra(id: "board", label: "Hand-drawn board", note: "The characters explain on a board that is drawn as they speak.")]),
+        ], cast: Cast(min: 1, max: 3, autoLabel: "Auto", autoNote: "We pick characters that suit the topic.", conversationFrom: 2, conversationMinSeconds: 20, conversationNote: "Pick 2 or 3 and they talk it through together.", members: [
+            m("ines", "Inés", "Teacher", "person", "Learning"), m("david", "David", "Engineer", "person", "Technology"), m("priya", "Priya", "Doctor", "person", "Health"), m("mateo", "Mateo", "Chef", "person", "Food"),
+            m("fox", "Fox", "Guide for children", "animal", "For children"), m("owl", "Hugo", "Owl professor", "animal", "Science and history"), m("bear", "Bruno", "Caring bear", "animal", "Feelings and bedtime"),
+            m("cat", "Mika", "Curious cat", "animal", "How things work"), m("parrot", "Paco", "Travelling parrot", "animal", "Travel and languages"), m("turtle", "Tula", "Wise turtle", "animal", "Nature"),
+        ]))
+    }
+
+    /// A capabilities answer saved to a file (`{"looks": {...}}`, the server's own JSON): the fixture of UI tests and screenshots.
+    static func from(file path: String) -> LookCapabilities? {
+        guard let data = FileManager.default.contents(atPath: path), case .object(let o)? = try? JSONDecoder().decode(AnyJSON.self, from: data) else { return nil }
+        return LookCapabilities(json: o["looks"])
+    }
+
+    /// Variants for tests and screenshots: `locked` (Cartoon needs the Pro plan), `soon` (this stage has no Whiteboard), `noboard` (the extra is not listed), `short` (Cartoon needs 30 s).
+    func variant(_ name: String) -> LookCapabilities {
+        var c = self
+        func edit(_ id: String, _ change: (inout Option) -> Void) { if let i = c.options.firstIndex(where: { $0.id == id }) { change(&c.options[i]) } }
+        for part in name.split(separator: ",") {
+            switch part {
+            case "locked": edit("cartoon") { $0.allowed = false; $0.requiresPlan = "Pro" }
+            case "lockedplain": edit("cartoon") { $0.allowed = false; $0.requiresPlan = nil }
+            case "soon": edit("whiteboard") { $0.available = false }
+            case "noboard": edit("cartoon") { $0.extras = [] }
+            case "short": edit("cartoon") { $0.minSeconds = 30 }
+            default: break
+            }
+        }
+        return c
+    }
+}
+
+public extension CreateCapabilities {
+    /// The same capabilities with the look picker (the server sends `looks.look` once the engine has it).
+    func withLooks(_ looks: LookCapabilities? = .fake) -> CreateCapabilities { var c = self; c.looks = looks; return c }
+}
+
+public enum FakeLook {
+    /// What the fake server answers about a chosen look: the contract's cases the app can reach (a conversation in a video that is too short; `force` for screenshots).
+    public static func started(videoID: String, options: CreateOptions, photos: Bool, caps: LookCapabilities?, spanish: Bool = false) -> StartedVideo {
+        let c = options.lookChoice
+        guard !c.isAuto else { return StartedVideo(videoID: videoID) }
+        let label = caps?.option(c.look)?.label ?? c.look
+        if photos, caps?.option(c.look)?.withPhotos == false {
+            return StartedVideo(videoID: videoID, look: AppliedLook(chosen: c.look, applied: "real", reason: "own_photos"),
+                                note: spanish ? "Lo hacemos con tus fotos: el estilo \(label) no se usa con tus propias fotos." : "Made from your photos: the \(label) look is not used with your own photos.")
+        }
+        if c.cast.count >= 2, options.minutes * 60 < (caps?.cast?.conversationMinSeconds ?? 20) {
+            return StartedVideo(videoID: videoID, look: AppliedLook(chosen: c.look, applied: c.look, cast: [c.cast[0]], extras: c.extras, reason: "too_short"),
+                                note: spanish ? "En un video tan corto presenta un solo personaje; una conversación necesita al menos 20 segundos." : "In a video this short one character presents; a conversation needs at least 20 seconds.")
+        }
+        return StartedVideo(videoID: videoID, look: AppliedLook(chosen: c.look, applied: c.look, cast: c.cast, extras: c.extras))
+    }
+}
