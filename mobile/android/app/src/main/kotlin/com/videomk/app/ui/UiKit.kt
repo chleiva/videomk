@@ -1,11 +1,13 @@
 package com.videomk.app.ui
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -13,7 +15,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bolt
-import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -21,9 +22,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import com.videomk.app.R
 import androidx.compose.ui.semantics.Role
@@ -73,11 +76,12 @@ fun CreditsText(minutes: Int, credits: Int, color: Color, modifier: Modifier = M
     }
 }
 
-/** The brand mark: a gradient rounded square with a play triangle. */
+/** The brand mark (Sparklet Trio): the app icon's own layers, a play triangle emitting three sparks on the brand gradient. */
 @Composable
 fun LogoMark(modifier: Modifier = Modifier, size: Dp = 30.dp) {
-    Box(modifier.size(size).clip(RoundedCornerShape(size * 0.3f)).background(Vmk.gradientNow), contentAlignment = Alignment.Center) {
-        Icon(Icons.Filled.PlayArrow, null, tint = Vmk.colors.onPrimary, modifier = Modifier.size(size * 0.62f))
+    Box(modifier.size(size).clip(RoundedCornerShape(size * 0.3f))) {
+        Image(painterResource(R.drawable.ic_launcher_background), null, Modifier.fillMaxSize())
+        Image(painterResource(R.drawable.ic_launcher_foreground), null, Modifier.fillMaxSize().scale(1.3f))
     }
 }
 

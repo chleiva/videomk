@@ -51,7 +51,8 @@ h1, h2, h3 { text-wrap: balance; }
 .site-header-in { max-width: var(--page-width); margin: 0 auto; display: flex; align-items: center; gap: var(--space-3); padding: var(--space-2) var(--screen-margin); min-height: 3.5rem; }
 @media (min-width: 48rem) { .site-header-in { padding-inline: var(--space-6); } }
 .brand { display: inline-flex; align-items: center; gap: var(--space-2); font-weight: 800; letter-spacing: -0.03em; font-size: var(--fs-title3); color: var(--text); text-decoration: none; min-height: var(--min-touch); }
-.brand-mark { width: 2rem; height: 2rem; border-radius: 0.6rem; background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end)); display: inline-flex; align-items: center; justify-content: center; color: var(--on-primary); flex: none; }
+.brand-mark { width: 2rem; height: 2rem; border-radius: 0.6rem; overflow: hidden; background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end)); display: inline-flex; align-items: center; justify-content: center; color: var(--on-primary); flex: none; }
+.brand-mark img { width: 100%; height: 100%; display: block; }
 .nav { display: flex; align-items: center; gap: var(--space-1); margin-left: auto; flex-wrap: wrap; justify-content: flex-end; }
 .nav a { display: inline-flex; align-items: center; min-height: var(--min-touch); padding: 0 var(--space-3); border-radius: var(--radius-pill); color: var(--text-secondary); font-weight: 600; font-size: var(--fs-subhead); text-decoration: none; }
 .nav a:hover { color: var(--text); background: var(--surface-2); }

@@ -24,6 +24,8 @@ const footer = [["/privacy", "footer.privacy"], ["/terms", "footer.terms"], ["/s
 		<title>{pageTitle}</title>
 		<meta name="description" content={pageDescription} />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+		<link rel="manifest" href="/site.webmanifest" />
 		{alternates && <link rel="canonical" href={abs(L)} />}
 		{alternates && <link rel="alternate" hreflang="en" href={abs("en")} />}
 		{alternates && <link rel="alternate" hreflang="es" href={abs("es")} />}
@@ -50,7 +52,7 @@ const footer = [["/privacy", "footer.privacy"], ["/terms", "footer.terms"], ["/s
 		<header class="site-header">
 			<div class="site-header-in">
 				<a href={app ? "/generations/index.html" : pathForLocale("/", L)} class="brand" aria-label="videomk">
-					<span class="brand-mark" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M13.5 2 5 13.5h5.5L9.5 22 19 9.5h-5.7z"/></svg></span>
+					<span class="brand-mark" aria-hidden="true"><img src="/favicon.svg" alt="" width="32" height="32" /></span>
 					<span>videomk</span>
 				</a>
 				{app && (
