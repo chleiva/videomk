@@ -1,0 +1,107 @@
+# 3D volumetric hero background loops (2026-11-27)
+
+Owner request: a few pre-rendered "advanced 3D" gas/nebula backgrounds, modern and lean, usable behind text, as the premium tier above the procedural backgrounds (docs/BACKGROUNDS_ANIMATED.md).
+
+**State:** four loops rendered, checked and stored in the QA bucket; an engine module that plays them, with tests. Nothing is wired into a render yet (the hook-up steps are below; other work owns those files right now) and nothing was deployed.
+
+## What exists
+| id | look | text colour | 1080p | 4K master | worst / mean title contrast in the middle |
+|---|---|---|---|---|---|
+| `gas-brand-dark` | blue-violet gas on navy black (the one the owner watched and liked) | white | 6.7 MB | 43.3 MB | 10.7 : 1 / 18.0 : 1 |
+| `gas-ember-dark` | orange embers and smoke on a warm black | white | 7.4 MB | 49.6 MB | 10.2 : 1 / 18.5 : 1 |
+| `gas-aurora-dark` | teal-green veils on a deep sea black | white | 7.0 MB | 45.1 MB | 7.8 : 1 / 16.6 : 1 |
+| `gas-brand-light` | lavender gas on a paper white | `#0b1020` | 7.0 MB | 56.9 MB | 14.7 : 1 / 17.2 : 1 |
+
+All are 10 s seamless, 30 fps, 16:9, H.264 High, 8 bit. Where they are (QA assets bucket, private):
+```
+s3://videomk-qa-552357225438/backgrounds/loops/index.json
+s3://videomk-qa-552357225438/backgrounds/loops/<id>/1080.mp4     the file the engine plays (keyframe every second)
+s3://videomk-qa-552357225438/backgrounds/loops/<id>/4k.mp4       3840 x 2160 master, for download and marketing
+s3://videomk-qa-552357225438/backgrounds/loops/<id>/poster.jpg   first frame, 1920 x 1080
+```
+`index.json` (source: `backend/scripts/hero_loops_index.json`): `{"version": 1, "loops": [{id, title, palette, mode, mood[], text, seconds, fps, frames, width, height, contrast, description}]}`.
+The pattern follows the music library (`music/catalog.json` + one file per track): a small index the engine reads, files fetched on demand.
+
+Files in the repo:
+* `backend/scripts/blender_hero_loops.py`: the whole scene as one Blender (4.2 LTS, Cycles) script. `--palette brand|ember|aurora`, `--mode dark|light`, `--seed`, `--res`, `--seconds`, `--fps`, `--samples`, `--device`, `--density`, `--emission`, `--clear-floor`. Reproducible: same arguments, same frames.
+* `backend/scripts/hero_loops_gpu.py`: renders on one short-lived GPU instance through the GPU lab (`gpu_lab.py`) and all of its guardrails; test frames first, then a job queue, encode and upload on the instance; `publish` copies the finished files to `backgrounds/loops/`.
+* `backend/lambdas/engine/bg_loops.py` + `backend/tests/test_bg_loops.py` (23 tests): index, fetch, frames. Not imported by anything yet.
+
+The exact commands of the four loops (all with `--res 3840x2160 --seconds 10 --fps 15 --samples 32 --device OPTIX --denoiser OPTIX`):
+```
+gas-brand-dark    --palette brand  --mode dark  (seed 7, density 1)
+gas-ember-dark    --palette ember  --mode dark  --seed 31 --density 1.0
+gas-aurora-dark   --palette aurora --mode dark  --seed 11 --density 1.0
+gas-brand-light   --palette brand  --mode light --seed 7  --density 20
+```
+
+## How it is made
+* A flat volume slab (34 x 3.2 x 20 scene units) in front of a dark world, Principled Volume shader, camera 13 units away looking through it. Density = a 4D noise (detail 8, roughness 0.66) whose lookup is bent by a second, slower noise (domain warp) so the gas curls into filaments; shaped with a smooth threshold so there are voids and wisps.
+* Colour = a palette ramp driven by the density field; emission is **multiplied by the density** in the node graph (Principled Volume's emission ignores density, so without this the whole slab glows evenly: found the hard way).
+* The world behind the gas takes a tint of the palette (a navy black behind orange gas reads as mud).
+* Light mode is a different material: the gas is a coloured **filter** over a pale world (Volume Absorption, no emission, no scattering). Two things that did not work: a Principled Volume with a white colour absorbs nothing (grey haze), and with the ramp as its colour it also scatters, which washes the hue to a dirty mauve. Light mode needs far more density than dark (20, not 1): at 1 to 4 the picture is a blank white page.
+* Text safety: a soft elliptical clearing is cut into the density around the camera axis (centre density x 0.04, 1.0 near the edges). Titles and captions sit on a calm centre; the 9:16 and 1:1 centre crops keep that calm centre.
+* Seamless loop by construction: every animated value is a function of theta = 2 pi (frame-1)/N. The noise is sampled on a circle in (z, w) of 4D space (the gas morphs and returns exactly, it does not merely slide) and the camera drifts on a small ellipse of the same period.
+* Rendered at 15 fps (150 frames for 10 s), 3840 x 2160, 32 samples, adaptive sampling, OptiX denoiser; encoded to 30 fps by blending the neighbouring frames (the gas is smooth, so blending is indistinguishable from rendering every frame, at half the GPU cost). The loop closes on frame 1 (a copy is appended before blending). The 4K master: x264 slow, crf 15, error-diffusion dithering plus one level of grain so dark gradients do not band.
+* The 1080p the engine plays is made from the master: lanczos, one more level of grain AFTER the reduction, crf 18, `aq-mode=3` (more bits for dark areas), a keyframe every 30 frames (so the engine can decode any one-second window on its own). The first attempt (crf 22, no grain after the reduction) banded: 109 one-level stairs in 104 sampled rows of the brand loop's dark gradients; with these settings 4.
+* Licensing: our own procedural scene rendered with Blender (GPL software; its renders are not covered by the GPL). Nothing third party is in the pixels.
+
+## Checks on the finished 1080p files
+Measured on 11 frames of each file (`first`, `last`, and nine in between), nothing judged by eye alone:
+| id | wrap (frame 300 -> 1) vs a normal step | title contrast, worst 32 px cell / mean, middle 60% x 40% | one-level stairs in 104 rows |
+|---|---|---|---|
+| `gas-brand-dark` | 2.41 vs 2.19 (1.10x) | 10.7 : 1 / 18.0 : 1 | 4 |
+| `gas-ember-dark` | 2.52 vs 2.25 (1.12x) | 10.2 : 1 / 18.5 : 1 | 2 |
+| `gas-aurora-dark` | 1.83 vs 1.68 (1.09x) | 7.8 : 1 / 16.6 : 1 | 3 |
+| `gas-brand-light` | 1.60 vs 1.37 (1.16x) | 14.7 : 1 / 17.2 : 1 | 2 |
+
+* Seamless: the difference between the last and the first frame is the same as between any two neighbouring frames (mean absolute difference, 0 to 255 scale; most of it is the grain), against about 15 to 22 between frames half a loop apart.
+* Calm centre: the title colour of the index against every 32 px cell of the middle, WCAG contrast. All are above 7 : 1 (AAA) at their worst cell in every sampled frame. The edges and corners are livelier on purpose; the engine's margins keep text out of them.
+* Banding: runs of equal luma along rows; a "stair" is two flat runs of 40 px or more that differ by one level. A handful in 104 rows of 1920 px is the flat world colour itself, not a gradient.
+* Looks that were tested and dropped (one 720p frame each, before any loop was paid for): light mode at density 1, 2 and 4 in all three palettes (an almost blank page), ember light (reads as a pink-red stain in one corner), aurora light (fine but weaker than the brand one; a candidate for later), brand light at density 30 (the left edge goes to a hard violet) and ember with seed 23 (a dim smear behind where a title sits).
+
+## Cost and speed (measured)
+* **This run (2026-11-27, ember + aurora + light, and the brand loop's 1080p):** one `g5.xlarge` (NVIDIA A10G 24 GB), on demand, eu-north-1b, USD 1.067 per hour. Launched 11:36:04 UTC, terminated 13:22:02 UTC: 106 minutes = USD 1.88, plus the 150 GB disk for that time USD 0.03 = **USD 1.92**. Inside those 106 minutes: boot and install 11 (9 of them lost to the stale package lists, see below), nine test frames 1, ember 31, aurora 32, light 26, the last encode and upload 4; the encodes of the earlier loops (6 to 8 minutes each) ran beside the next render.
+* Per loop on the A10G: 150 frames at 4K, mean 12.5 s per frame for ember and aurora (11.1 alone; slower while the previous loop's encode shares the 4 vCPUs) = 31 to 32 minutes, 26 minutes for the light one; encode of the master and the 1080p 4 minutes alone, 6 to 8 beside a render. About **USD 0.60 per loop** all in. A 720p test frame takes 0.8 s.
+  About half of each frame is CPU work (scene sync, 16 bit PNG), so a GPU twice as fast does not halve it.
+* **The first loop (night of 26 to 27 Nov, brand dark):** one `g6e.xlarge` (L40S), on demand, USD 1.974 per hour, from 01:21 to about 02:30 UTC (CloudTrail start, last CloudWatch datapoint), at most 69 minutes = **USD 2.28** with its disk. It rendered the brand loop in about 21 minutes, and an aurora loop that was never encoded or uploaded (lost with the machine).
+* **Total for the 3D loops: USD 4.20 (2.28 + 1.92) of the USD 6 cap.** The bill is the truth: Cost Explorer shows the day's usage about a day later (filter region eu-north-1, usage types `EUN1-BoxUsage:g5.xlarge`, `EUN1-BoxUsage:g6e.xlarge`, `EUN1-EBS:VolumeUsage.gp3`).
+* Why this instance: the L40S (`g6e.xlarge`, then `g6e.2xlarge`) was tried first, expecting the most frames per dollar, but had **no capacity in any Stockholm zone**; the A10G was next and was available in one zone (eu-north-1b). Measured, the A10G is the cheaper one for this scene anyway: 31 minutes x USD 1.067 = USD 0.55 per loop against about 21 minutes x USD 1.974 = USD 0.69 on the L40S, because half of each frame is CPU work. Use `g5.xlarge`. Spot is not possible on this account: the spot quota for G instances in eu-north-1 is 0 ("All G and VT Spot Instance Requests" = 0), so everything is on demand.
+* Lessons, now in the script: a fresh image has stale package lists, so `apt-get update` must come before installing the X libraries Blender links against (cost nine idle minutes here); each loop is uploaded the moment it is encoded (the first night's second loop died with the instance); a `pkill -f` pattern must not match the shell that sends it.
+
+## How the engine uses a loop (`engine/bg_loops.py`)
+* `load_index()` reads `backgrounds/loops/index.json` (cached 5 minutes; a missing or broken index means "no loops", never an error). `clean_index` keeps only well-formed entries. `pick(loops, mood=, palette=, mode=)` chooses one deterministically (the mode is a hard filter because it decides the text colour); `sanitize(value, loops)` turns a plan value (`"gas-ember-dark"` or `{"loop": id}`) into a `LoopSpec` or None; `prompt_list(loops)` is the menu text for a planner prompt.
+* `ensure_local(id)` downloads `1080.mp4` once per container to `/tmp/bg_loops/` (temporary name, then rename: a half download is never used). About 7 MB per loop.
+* `render(spec, w, h, t)` returns the `(h, w, 3)` uint8 picture for time `t`, the same call shape as `bg_animated.render`. Frame = `round(t * fps) mod frames`, so any `t` works and chunks need no bookkeeping.
+* Only the frames a chunk needs are decoded: one short ffmpeg run per window of 30 frames (one second, one GOP), a bounded number of windows kept (192 MB by default, `BG_LOOPS_CACHE_MB`; a whole loop decoded would be 1.9 GB). At 1080p that is one window in memory at a time.
+* Aspects: the stored loop is 16:9; 9:16, 1:1 and 4:5 take the centre crop (ffmpeg crops before it scales, so nothing bigger than needed is ever in memory).
+* 4K: decoded at half size and enlarged smoothly (bicubic) with one level of grain; gas has no detail to lose. The 4K master is not used by the engine.
+* `release()` frees the decoded frames.
+
+## Hook-up steps (not done: these files belong to other work in flight)
+1. **Canvas** (`engine/canvas.py`, `Canvas.background`): where `anim` is handled today, accept a `bg_loops.LoopSpec` as well: `arr = bg_loops.render(anim, self.W, self.H, t) if isinstance(anim, bg_loops.LoopSpec) else bg_animated.render(anim, self.W, self.H, t)`; the rest (enlarge to the supersampled canvas) stays. Wrap the loop call in `try/except` and fall through to the static glow: a missing file must never fail a render.
+2. **Renderer** (`engine/renderer.py`, where `bg_anim` is settled from `timeline["background"]`): if the cleaned background carries `"loop": "<id>"`, use `bg_loops.sanitize(bg, bg_loops.load_index())`; None falls back to the procedural spec. Call `bg_loops.release()` where the picture caches are emptied. Text colour: the loop's `mode` must equal the theme's mode (dark themes take dark loops, `paper` takes the light one), which keeps every text colour as it is; `spec.text` is there for a caption drawn outside a theme.
+3. **Timeline** (`engine/timeline.py`): nothing new. `bg_t0 = start mod loop` is already written per scene from `background["loop_seconds"]`; set `loop_seconds` to the loop's `seconds` (10) when a loop is chosen, so the picture flows across scene and chunk boundaries.
+4. **Director / planner** (`engine/background.py`): add the loops to the menu as one more style (for example `style: "gas3d"` with `loop: id`), chosen by mood with `bg_loops.pick`; suggested mapping from the index tags: tech / AI / night -> `gas-brand-dark`; energy / history / sport / tense -> `gas-ember-dark`; nature / science / calm -> `gas-aurora-dark`; lifestyle / wellness / bright on the paper theme -> `gas-brand-light`. Keep the rule "one background per video".
+5. **IAM** (`backend_stack.py`): the functions that render frames (the chunk renderer, and any function that renders a preview or thumbnail) need `s3:GetObject` on `arn:aws:s3:::<ASSETS_BUCKET>/backgrounds/loops/*`. The function that builds the plan needs the same on `backgrounds/loops/index.json` if the planner reads the menu. No `ListBucket`, no write.
+6. **Environment:** none required. `ASSETS_BUCKET` is already set; optional `BG_LOOPS_DIR` (default `/tmp/bg_loops`) and `BG_LOOPS_CACHE_MB` (default 192). `/tmp`: 7 MB per loop used, well inside the default 512 MB. A flag in the style of `BG_ANIMATED` (for example `bgLoops` in `stages.json` -> `BG_LOOPS=1`) keeps it QA-only at first.
+7. **Hashes:** a chunk's segment hash must include the loop id (it does if the id sits in `timeline["background"]`, as the procedural spec does), so a changed background re-renders.
+8. **Production:** the files are in the QA bucket only. Before the flag goes on in prod: `aws s3 sync s3://videomk-qa-552357225438/backgrounds/loops/ s3://<prod assets bucket>/backgrounds/loops/`.
+
+## Not verified
+* No render has used a loop yet: the module is tested on its own (synthetic loop file, real ffmpeg), not inside `Renderer`, and not in Lambda (the layer's ffmpeg decoding H.264 High at 1080p is assumed from the clip scenes, which do the same).
+* Per-frame cost inside the engine is not measured; expect one ffmpeg start per second of video (about 0.1 to 0.2 s) plus the enlargement at 4K.
+* The loops were checked by numbers and by still frames; nobody has watched ember, aurora and light in motion yet. Only the brand loop has the owner's eye on it.
+* Portrait crops were checked by construction and by the centre measurements, not by rendering a 9:16 video.
+* The exact bill is not in Cost Explorer yet (it lags about a day); the spend above is computed from launch and termination times and the list price.
+
+## Make another loop
+```
+cd backend/scripts
+python hero_loops_gpu.py job 10_name "name palette mode seed density"     # queue first, so no paid minute waits
+python hero_loops_gpu.py up --type g5.xlarge --minutes 60                 # prints the worst case; test frames land in lab/avatars/hero3d/out/tests/
+python hero_loops_gpu.py status                                           # frames done, log tails
+python gpu_lab.py down                                                    # terminate; then check gpu_lab.py status says "no lab instance exists"
+python hero_loops_gpu.py publish hero_loops_index.json name=gas-name-dark # after adding the entry to the index
+```
+Edit `TESTS` in `hero_loops_gpu.py` to choose the test frames. One loop is about 40 minutes and USD 0.70 on a `g5.xlarge` including boot.

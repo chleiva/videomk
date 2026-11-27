@@ -1,0 +1,17 @@
+{
+ "version": 1,
+ "loops": [
+  {"id": "gas-brand-dark", "title": "Brand gas, dark", "palette": "brand", "mode": "dark", "mood": ["tech", "calm", "science", "night"], "text": "#ffffff",
+   "seconds": 10, "fps": 30, "frames": 300, "width": 1920, "height": 1080, "contrast": {"worst": 10.7, "mean": 18.0},
+   "description": "Slow blue-violet gas with cyan highlights on a navy black; calm dark middle."},
+  {"id": "gas-ember-dark", "title": "Ember gas, dark", "palette": "ember", "mode": "dark", "mood": ["tense", "energy", "history", "drama"], "text": "#ffffff",
+   "seconds": 10, "fps": 30, "frames": 300, "width": 1920, "height": 1080, "contrast": {"worst": 10.2, "mean": 18.5},
+   "description": "Orange embers and smoke curling on a warm black; the liveliest of the set."},
+  {"id": "gas-aurora-dark", "title": "Aurora gas, dark", "palette": "aurora", "mode": "dark", "mood": ["calm", "nature", "science", "wellness"], "text": "#ffffff",
+   "seconds": 10, "fps": 30, "frames": 300, "width": 1920, "height": 1080, "contrast": {"worst": 7.8, "mean": 16.6},
+   "description": "Teal-green veils drifting on a deep sea black; soft and quiet."},
+  {"id": "gas-brand-light", "title": "Brand gas, light", "palette": "brand", "mode": "light", "mood": ["bright", "calm", "lifestyle", "wellness"], "text": "#0b1020",
+   "seconds": 10, "fps": 30, "frames": 300, "width": 1920, "height": 1080, "contrast": {"worst": 14.7, "mean": 17.2},
+   "description": "Lavender gas on a paper white, pale in the middle; for dark text."}
+ ]
+}
