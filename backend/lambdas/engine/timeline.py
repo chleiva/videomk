@@ -12,7 +12,7 @@ TAIL = 0.55     # breathing room after the last word
 MIN_SCENE = 2.8
 END_HOLD = 1.4  # extra on the final scene for the outro fade
 GOP_SECONDS = 2
-RENDER_VERSION = "2"  # bump when scene/renderer code changes: invalidates every cached segment
+RENDER_VERSION = "3"  # bump when scene/renderer code changes: invalidates every cached segment
 MIN_TAIL_CHUNK_S = 8.0
 
 
@@ -155,6 +155,7 @@ def build_timeline(
         "theme": plan.get("theme", "midnight"),
         "mood": plan.get("mood", "calm"),
         "captions": bool(plan.get("captions", True)),
+        "language": str(plan.get("language") or "en"),   # numbers are written the way this language does (engine/numfmt.py)
         "sync": {"items": sync_items, "anchored": sync_anchored, "aligned_beats": sum(1 for b in beat_info if b.get("words"))},
         "duration": round(t, 4),
         "intro_s": round(intro, 3), "outro_s": round(outro, 3),
@@ -213,7 +214,7 @@ def chunk_plan(timeline: Dict[str, Any], target_seconds: float = 30, draft: bool
         prev_f1 = max(f1, f0 + 1)
         h = hashlib.sha256(json.dumps({
             "v": RENDER_VERSION, "fps": fps, "w": timeline["width"], "h": timeline["height"], "theme": timeline.get("theme"),
-            "captions": timeline.get("captions", True), "draft": draft,
+            "captions": timeline.get("captions", True), "language": timeline.get("language", "en"), "draft": draft,
             "scenes": [_scene_fingerprint(x) for x in scenes[lo:hi]],
             "lead": _scene_fingerprint(scenes[lo - 1]) if lo > 0 else None, "outro": hi == len(scenes),
         }, sort_keys=True, ensure_ascii=False).encode("utf-8")).hexdigest()[:24]
@@ -236,7 +237,7 @@ def chunk_timeline(timeline: Dict[str, Any], lo: int, hi: int) -> Dict[str, Any]
     sub = [{**sc, "start": round(float(sc["start"]) - base, 6)} for sc in scenes[lo:hi]]
     return {
         "fps": timeline["fps"], "width": timeline["width"], "height": timeline["height"], "theme": timeline.get("theme", "midnight"),
-        "captions": timeline.get("captions", True), "scenes": sub, "lead": scenes[lo - 1] if lo > 0 else None,
+        "captions": timeline.get("captions", True), "language": timeline.get("language", "en"), "scenes": sub, "lead": scenes[lo - 1] if lo > 0 else None,
         "outro": hi == len(scenes), "duration": round(sum(float(x["duration"]) for x in sub), 6),
         **({"frame": timeline["frame"]} if timeline.get("frame") else {}),
     }

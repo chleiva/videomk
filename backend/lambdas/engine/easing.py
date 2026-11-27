@@ -56,3 +56,18 @@ def reveal_times(n: int, duration: float, cues=None, first=0.10, last=0.72):
         return [duration * first]
     a, b = duration * first, duration * last
     return [a + (b - a) * i / (n - 1) for i in range(n)]
+
+
+COUNT_RUN_S = 1.5     # a count-up lasts about a second and a half (1.2 to 1.8 s is the range the best apps use), never more than 40% of the scene
+COUNT_FLOOR = 0.2     # a number that counts up from nothing starts at 20% of its value: no frame ever reads as "0 <unit>", and no static zero is shown before the count
+
+
+def count_run(scene_dur: float, run: float = COUNT_RUN_S) -> float:
+    """Seconds the count takes: `run`, at most 40% of the scene, at least half a second."""
+    return max(0.5, min(run, 0.4 * float(scene_dur)))
+
+
+def count_up(lt: float, scene_dur: float, floor: float = COUNT_FLOOR) -> float:
+    """Fraction of the final value to show at scene time `lt`: starts at once (no hold), eases out (fast, then settling), holds exactly 1.0 after `count_run`.
+    `floor` is where it starts (0.2 when a number counts up from nothing; 0.0 only when the director gave an explicit start value)."""
+    return floor + (1.0 - floor) * ease_out_cubic(progress(lt, 0.0, count_run(scene_dur)))

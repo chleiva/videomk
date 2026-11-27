@@ -13,6 +13,7 @@ from .scenes.registry import docs_by_family
 from .scenes.style_kit import clean_icon, sanitize_style_props
 from .theme import THEMES
 from . import library as library_mod
+from . import numfmt
 from . import sync as sync_mod
 from . import voices as voice_mod
 from .audio import PLANNER_SFX
@@ -34,9 +35,9 @@ SCENE_DOCS_BASE = """Scene types (props):
 - title: {title (<=70 chars), subtitle (<=110)}. Use for the opening and for chapter openers.
 - bullets: {heading (<=50), items: 2-5 short strings (<=80), optional style, accent, emphasis (index of key item), icons (one icon word per item)}. Lists, steps, key points. style: "rail" (default, numbered: general), "spotlight" (huge type, one line lit at a time: claims, mottos), "icons" (icon tiles: features, tips), "cards" (card grid: parallel ideas), "keywords" (items as "Keyword: explanation"). accent: indigo (tech, trust), coral (energy, food, kids), teal (health, calm), amber (warmth, money, history), emerald (nature, growth), violet (creative, mystery), rose (love, people), sky (travel, science); omit = theme colour. Match style and accent to topic and mood; VARY them, never the same look twice in a row.
 - diagram: {title (<=50), nodes: [{id, label (<=26), optional icon word}] (3-7), edges: [[from_id, to_id, optional label (<=22, 1-3 words)]], optional style, accent, emphasis (index of the key node)}. Processes, causes and effects, architectures, flows. Left-to-right, at most 4 layers (more wraps into two rows). style: "cards" (default: icon cards, connectors that draw on), "pills" (light chips: short steps), "ladder" (rising steps: progress, growth, levels), "stack" (top to bottom: long labels, hierarchy, chains). accent: same names as bullets. The node being narrated lights up, so the narration names the nodes in order. Vary style and accent from the previous visual.
-- chart: {kind: "bar"|"line", title (<=50), labels: 3-7 strings (<=16), values: numbers, unit (<=6, e.g. "%" or "$"), highlight: optional index}. Only use numbers that appear in the grounding notes; never invent statistics. Avoid values that differ by more than 50x.
+- chart: {kind: "bar"|"line", title (<=50), labels: 3-7 strings (<=16), values: plain JSON numbers with a decimal POINT and no separators (3.3 or 1250, never \"3,3\" or \"1,250\", in every language), unit (<=6, e.g. "%" or "$"), highlight: optional index}. Only use numbers that appear in the grounding notes; never invent statistics. Avoid values that differ by more than 50x.
 - timeline: {title (<=50), events: [{date (<=12), label (<=55)}] (3-6)}. History, sequences over time.
-- stat: {value (<=12, e.g. "73%" or "$4.2B"), label (<=70)}. One striking number; only if it is in the grounding notes.
+- stat: {value (<=12: the number with a decimal POINT and no thousands separator, then its unit, e.g. "73%", "$4.2B" or "3.3 billion"; the video shows it the way the viewer's language writes it, so in Spanish you still write 3.3 or the Spanish "3,3 millones" and never "33"), label (<=70)}. One striking number; only if it is in the grounding notes.
 - quote: {text (<=180), attribution (<=50)}. Only real, well-known quotes from the grounding notes.
 """
 
@@ -515,7 +516,7 @@ def _list(v: Any, lo: int, hi: int) -> List[Any]:
 def _num(v: Any) -> float:
     if isinstance(v, bool):
         raise ValueError("not a number")
-    x = float(str(v).replace(",", "")) if isinstance(v, str) else float(v)
+    x = numfmt.parse_float(v)   # locale-aware: '3,3' is 3.3 in a Spanish video (it was 33)
     if x != x or x in (float("inf"), float("-inf")):
         raise ValueError("not finite")
     return x
@@ -731,7 +732,7 @@ def card_text(narration: str, max_words: int = 10) -> str:
     return " ".join(words[:max_words - 2]).rstrip(",;:.") + "…" if words else ""
 
 
-def validate_plan(plan: Dict[str, Any], *, max_beats: int = MAX_BEATS, language: str = "en", region: Optional[str] = None, photo_ids: Optional[List[str]] = None, photo_captions: Optional[Dict[str, str]] = None, silence_share: float = 0.25, max_images: Optional[int] = None, allow_clips: bool = True, rejects: Optional[List[Dict[str, Any]]] = None) -> Tuple[Dict[str, Any], List[str]]:
+def _validate_plan(plan: Dict[str, Any], *, max_beats: int = MAX_BEATS, language: str = "en", region: Optional[str] = None, photo_ids: Optional[List[str]] = None, photo_captions: Optional[Dict[str, str]] = None, silence_share: float = 0.25, max_images: Optional[int] = None, allow_clips: bool = True, rejects: Optional[List[Dict[str, Any]]] = None) -> Tuple[Dict[str, Any], List[str]]:
     """Returns (clean_plan, warnings). Raises ValueError when nothing usable remains. `rejects` collects the scenes that were replaced (narration, the model's scene, the error) so a caller can ask once for a corrected scene. `max_images` caps stock photographs (galleries count each photo)."""
     warnings: List[str] = []
     if plan.get("legit") is not True:
@@ -900,6 +901,12 @@ def enforce_image_budget(beats: List[Dict[str, Any]], budget: int) -> List[str]:
             b["scene"] = _fallback_scene(b["narration"])
             warns.append(f"beat {i}: scene replaced (image budget of {budget} reached)")
     return warns
+
+
+def validate_plan(plan: Dict[str, Any], **kw: Any) -> Tuple[Dict[str, Any], List[str]]:
+    """`_validate_plan` with the video's language in scope, so every number the director wrote ('3,3', '1.234') is read the way that language writes it."""
+    with numfmt.language_scope(kw.get("language", "en")):
+        return _validate_plan(plan, **kw)
 
 
 def generate_plan(topic: str, notes: str, target_minutes: float, llm: Callable[[str, str], str], *, retries: int = 1, language: str = "en", region: Optional[str] = None, today: Optional[str] = None,

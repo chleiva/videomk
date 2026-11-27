@@ -180,12 +180,13 @@ def test_no_element_ever_leaves_the_screen_empty_even_when_its_words_are_spoken_
             assert shown > 0.003, f"{name} shows nothing at {lt:.1f}s of {dur:.0f}s when its parts are spoken late"
 
 
-def test_a_stat_card_is_never_empty_while_it_waits_for_its_number_to_be_spoken():
+def test_a_stat_card_counts_at_once_even_when_its_number_is_spoken_late():
+    """Owner (2026-11-27): the stat sat on a dim static '0 billion' until the narration named the number. It now counts from the first frames; the spoken cue no longer delays it."""
     props = {"value": "73%", "label": "of adults agree"}
     words = [["Well", 0.3, 0.5]] * 3 + [["about", 9.0, 9.2], ["73", 9.4, 9.8], ["percent", 9.8, 10.2]]
     sync.apply("stat", props, words, 15.0)
-    assert props["cues"][0] > 5.0                                                          # the count-up still waits for the spoken number
-    for lt in (1.0, 3.0, 6.0):
+    for lt in (0.3, 1.0, 3.0, 6.0):
         assert changed(blank("midnight", lt, 15.0), render("stat", props, lt, 15.0, "midnight")) > 0.003, lt
-    waiting, counting = render("stat", props, 4.0, 15.0, "midnight"), render("stat", props, props["cues"][0] + 1.6, 15.0, "midnight")
-    assert changed(waiting, counting) > 0.02                                                # and it does change when the number arrives
+    early, settled, later = render("stat", props, 0.3, 15.0, "midnight"), render("stat", props, 2.0, 15.0, "midnight"), render("stat", props, 12.0, 15.0, "midnight")
+    assert changed(early, settled) > 0.01                                                  # it moves in the first second ...
+    assert changed(settled, later) == 0                                                    # ... and then holds the exact figure

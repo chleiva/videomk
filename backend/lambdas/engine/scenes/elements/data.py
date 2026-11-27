@@ -9,6 +9,7 @@ from typing import Any, Dict, List, Optional, Tuple
 import numpy as np
 from PIL import Image, ImageDraw
 
+from ... import numfmt
 from ...canvas import Canvas, with_alpha
 from ...easing import ease_in_out_cubic, ease_out_back, ease_out_cubic, progress, reveal_times, smoothstep
 from ...theme import Theme
@@ -29,7 +30,7 @@ def _num(x: Any) -> Optional[float]:
     if isinstance(x, bool) or x is None:
         return None
     try:
-        v = float(str(x).replace(",", "").strip()) if isinstance(x, str) else float(x)
+        v = numfmt.parse_float(x)   # locale-aware: '3,3' is 3.3 in a Spanish video, never 33
     except (TypeError, ValueError):
         return None
     return v if math.isfinite(v) and abs(v) < 1e15 else None
@@ -333,7 +334,7 @@ def _pg_text(filled: int, total: int) -> Tuple[str, str]:
     g = math.gcd(filled, total) or 1
     a, b = filled // g, total // g
     pct = filled / total * 100
-    pct_s = f"{pct:.1f}".rstrip("0").rstrip(".") + "%"
+    pct_s = numfmt.localize(f"{pct:.1f}".rstrip("0").rstrip(".") + "%")
     if filled and a == 1 and 2 <= b <= 20:
         return f"1 in {b}", pct_s
     return pct_s, ("" if total == 100 else f"{filled} of {total}")
@@ -435,7 +436,7 @@ def _pg_draw(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, th: Theme
     else:  # a percentage counts up with the wave
         pct = filled / total * 100
         part = 1.0 if lt >= t0 + wave + 0.4 or not filled else done / filled
-        shown = big if part >= 1.0 else (f"{pct * part:.1f}".rstrip("0").rstrip(".") + "%" if pct % 1 else f"{round(pct * part)}%")
+        shown = big if part >= 1.0 else (numfmt.localize(f"{pct * part:.1f}".rstrip("0").rstrip(".") + "%") if pct % 1 else f"{round(pct * part)}%")
     size = _fit_one(cv, big, "bold", pw, big_max, 90 if fr.landscape else 70)
     cv.text(pcx, py + big_max * 0.5 * (size / big_max) + (big_max - size) * 0.2, shown, "bold", size, with_alpha(th.accent, a), anchor="mm")
     y = py + big_max * 0.92 + 26
@@ -606,7 +607,7 @@ def _pie_sanitize(props: Dict[str, Any]) -> Dict[str, Any]:
 
 def _share(v: float, total: float) -> str:
     pct = v / total * 100
-    return (f"{pct:.0f}%" if pct >= 9.5 or abs(pct - round(pct)) < 0.05 else f"{pct:.1f}%")
+    return (f"{pct:.0f}%" if pct >= 9.5 or abs(pct - round(pct)) < 0.05 else numfmt.localize(f"{pct:.1f}%"))
 
 
 def _pt(cx: float, cy: float, r: float, ang: float) -> Tuple[float, float]:

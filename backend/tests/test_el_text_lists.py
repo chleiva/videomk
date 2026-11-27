@@ -46,9 +46,10 @@ def test_counter_rejects_non_numeric_and_keeps_format():
         with pytest.raises(ValueError):
             el.sanitize({"value": bad, "label": "x"})
     c = el.sanitize({"value": "1,250", "unit": "km" * 10, "prefix": "$$$$$$", "label": "L" * 200, "from": "2,000", "delta": "d" * 50})
-    assert c["value"] == "1,250" and c["from"] == "2,000" and len(c["unit"]) <= 8 and len(c["prefix"]) <= 4 and len(c["label"]) <= 70 and len(c["delta"]) <= 24
+    assert c["value"] == "1250" and c["decimals"] == 0 and c["grouped"] is True and c["from"] == "2000" and len(c["unit"]) <= 8 and len(c["prefix"]) <= 4 and len(c["label"]) <= 70 and len(c["delta"]) <= 24
     c = el.sanitize({"value": "$4.2B"})
     assert (c["value"], c["prefix"], c["unit"]) == ("4.2", "$", "B")
+    assert el.sanitize(c) == c                           # machine form: re-sanitizing (the editor does) changes nothing
     assert el.sanitize({"value": 73})["value"] == "73"
 
 

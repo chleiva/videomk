@@ -8,6 +8,7 @@ from typing import Any, Callable, Dict, Iterator, List, Optional
 
 from PIL import Image
 
+from . import numfmt
 from .canvas import Canvas
 from .frame import Frame
 from .scenes import SCENES
@@ -15,6 +16,14 @@ from .scenes.formats import draw_framed, is_native
 from .scenes.base import SceneCtx
 from .scenes.captions import draw_captions
 from .theme import get_theme
+
+
+def _bg_anim(timeline: Dict[str, Any], theme: str):
+    """The animated background the timeline asks for (`timeline["background"]`, cleaned), or None. Off unless BG_ANIMATED=1 (prototype, docs/BACKGROUNDS_ANIMATED.md)."""
+    if os.environ.get("BG_ANIMATED", "0") != "1" or not isinstance(timeline.get("background"), dict):
+        return None
+    from . import bg_animated
+    return bg_animated.sanitize(timeline["background"], theme)
 
 TRANSITION_S = 0.4
 OUTRO_FADE_S = 0.7
@@ -65,6 +74,7 @@ class Renderer:
         self.out_w, self.out_h = (max(2, dw // 4 * 2), max(2, dh // 4 * 2)) if draft else (self.W, self.H)   # draft: half size, kept even (yuv420p): 4:5 at 1080p is 540x674, not 675
         self.fallbacks: Dict[str, Dict[str, Any]] = {}   # scene id -> framed-fallback report (scale, min_text_px, readable), for the preview tooling
         self.theme = get_theme(timeline.get("theme", "midnight"))
+        self.bg_anim = _bg_anim(timeline, self.theme.name)
         self.scenes: List[Dict[str, Any]] = timeline["scenes"]
         self.lead: Optional[Dict[str, Any]] = timeline.get("lead")
         self.outro: bool = bool(timeline.get("outro", True))
@@ -72,7 +82,7 @@ class Renderer:
         last = self.scenes[-1]
         self.total = float(timeline.get("duration") or (float(last["start"]) + float(last["duration"])))
         self.total_frames = int(round(self.total * self.fps))
-        self.ctx = SceneCtx(resolve_image=self._load_image, resolve_clip=self._load_clip, captions=bool(timeline.get("captions", True)), frame=self.frame)
+        self.ctx = SceneCtx(resolve_image=self._load_image, resolve_clip=self._load_clip, captions=bool(timeline.get("captions", True)), frame=self.frame, language=numfmt.norm_lang(timeline.get("language")))
         self._clip_loader = clip_loader
         self._clips: Dict[str, Any] = {}
         self._image_loader = image_loader
@@ -120,13 +130,15 @@ class Renderer:
         cv = Canvas(fr.W, fr.H, ss=self.ss)   # design units; the finished image is scaled to the real output size below
         bg_t = max(0.0, lt) + self._ambient_phase(sc)
         amb = sc["type"] != "image"
-        cv.background(self.theme, bg_t, ambience=amb)
+        cv.background(self.theme, bg_t, ambience=amb, anim=self.bg_anim)
         if draw is None:
             cv.text(fr.W / 2, fr.H / 2, f"unknown scene type: {sc['type']}", "semibold", 48, (255, 255, 255, 255), anchor="mm")
         elif is_native(sc["type"], fr):
-            draw[0](cv, sc.get("props") or {}, max(0.0, lt), float(sc["duration"]), self.theme, self.ctx)
+            with numfmt.language_scope(self.ctx.language):   # numbers follow the video's language (3,3 in Spanish)
+                draw[0](cv, sc.get("props") or {}, max(0.0, lt), float(sc["duration"]), self.theme, self.ctx)
         else:   # no layout for this shape yet: the landscape scene as a card on the themed frame (never fails, never blank)
-            rep = draw_framed(cv, draw[0], sc.get("props") or {}, max(0.0, lt), float(sc["duration"]), self.theme, self.ctx, bg_t=bg_t, ambience=amb)
+            with numfmt.language_scope(self.ctx.language):
+                rep = draw_framed(cv, draw[0], sc.get("props") or {}, max(0.0, lt), float(sc["duration"]), self.theme, self.ctx, bg_t=bg_t, ambience=amb)
             self.fallbacks[str(sc.get("id", ""))] = dict(rep, type=sc["type"])
         if self.ctx.captions:
             words = sc.get("words")

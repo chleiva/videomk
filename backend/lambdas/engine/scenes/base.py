@@ -1,10 +1,10 @@
 """Shared pieces for scene modules."""
-import re
 from dataclasses import dataclass
 from typing import Any, Callable, Optional
 
 from PIL import Image
 
+from .. import numfmt
 from ..canvas import Canvas, with_alpha
 from ..easing import ease_out_cubic, progress
 from ..frame import DEFAULT_FRAME, Frame
@@ -23,6 +23,7 @@ class SceneCtx:
     resolve_image: Callable[[str], Optional[Image.Image]] = lambda key: None
     resolve_clip: Callable[[str], Any] = lambda key: None   # key -> engine.clips.ClipFrames | None
     captions: bool = True
+    language: str = "en"   # the video's language ('en'/'es'): numbers are written and read the way that language does (engine/numfmt.py)
     frame: Frame = DEFAULT_FRAME   # the shape being rendered (engine/frame.py): lay out in design units from it, never from 1920/1080 literals
 
     @property
@@ -69,23 +70,12 @@ def heading(cv: Canvas, th: Theme, text: str, lt: float, y: float = 96, size: fl
     return yl + size * 1.28 + 40
 
 
-_NUM = re.compile(r"^([^\d\-+]*)([\-+]?[\d,]*\.?\d+)(.*)$", re.S)
+def parse_number(s: str, lang=None):
+    """'$1,250.5M' -> ('$', 1250.5, 1, 'M', True); in a Spanish video '3,3 millones' -> ('', 3.3, 1, ' millones', False). None when there is no number.
+    Locale-aware (engine/numfmt.py): the video's language comes from the renderer's scope, so '3,3' is never read as 33."""
+    return numfmt.parse_number(s, lang)
 
 
-def parse_number(s: str):
-    """'$1,250.5M' -> ('$', 1250.5, 1, 'M', True). Returns None when there is no number."""
-    m = _NUM.match(str(s).strip())
-    if not m:
-        return None
-    pre, num, suf = m.groups()
-    raw = num.replace(",", "")
-    try:
-        val = float(raw)
-    except ValueError:
-        return None
-    decimals = len(raw.split(".")[1]) if "." in raw else 0
-    return pre, val, decimals, suf, "," in num
-
-
-def format_number(val: float, decimals: int, comma: bool) -> str:
-    return f"{val:,.{decimals}f}" if comma or abs(val) >= 10000 else f"{val:.{decimals}f}"
+def format_number(val: float, decimals: int, comma: bool, lang=None) -> str:
+    """The number as the video's language writes it (English 1,250.5; Spanish 1250,5 and 12 345,6)."""
+    return numfmt.format_number(val, decimals, comma, lang)

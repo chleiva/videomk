@@ -10,7 +10,8 @@ from functools import lru_cache
 from typing import Any, Dict, List, Optional, Tuple
 
 from ...canvas import Canvas, load_font, partial_polyline, with_alpha
-from ...easing import ease_out_back, ease_out_cubic, ease_out_expo, progress, reveal_times
+from ... import numfmt
+from ...easing import COUNT_FLOOR, count_run, count_up, ease_out_back, ease_out_cubic, ease_out_expo, progress, reveal_times
 from ...theme import Theme
 from ..base import SceneCtx, format_number, heading, parse_number
 from ..registry import Element
@@ -198,6 +199,40 @@ def kinetic_cues(props: Props, dur: float) -> List[float]:
     return pick
 
 
+KINETIC_FADE_S = 0.16      # each word fades in over ~160 ms ...
+KINETIC_MOVE_S = 0.32      # ... and settles up into place over ~320 ms, so neighbouring words overlap and the text flows
+KINETIC_MIN_STEP = 0.11    # words never start closer than this (no batch of 3 words popping together) ...
+KINETIC_MAX_STEP = 0.38    # ... nor further apart than this inside a group (about a quick speaking pace), so the text never looks stuck
+KINETIC_MAX_IDLE = 0.5     # between two groups the text may stand still for at most this long: a group whose cue is later comes in up to KINETIC_PULL early ...
+KINETIC_PULL = 0.5         # ... (never more than half a second ahead of the voice; a real pause in the narration stays a pause beyond that)
+
+
+def kinetic_word_times(groups: List[Tuple[List[int], bool]], n_words: int, dur: float, cues=None) -> List[float]:
+    """Start time of EVERY word. A group is the little words and the content word they lead to, and the group's cue (narration, engine/sync.py) is when its CONTENT
+    word is spoken. They used to pop together 70 ms apart at the cue and then nothing moved until the next cue: words came in lumps of 2-3 and the text looked stuck.
+    Now the words of a group arrive at an even pace that ends on the cue (so the little words come in just before the content word, as they are spoken); the pace is
+    between ~110 and ~380 ms a word; groups whose cues cluster are pushed apart so there is never a lump; and the text never holds still for more than half a second
+    between words (a group whose cue is far off comes in up to half a second early rather than leave the heading frozen).
+    Pure function of its arguments: the same times at every frame, in every chunk."""
+    times = reveal_times(len(groups), dur, cues, first=0.15, last=0.7)
+    when = [0.0] * n_words
+    prev: Optional[float] = None                         # start of the previous word
+    for g, (idx, _) in enumerate(groups):
+        n, cue = len(idx), times[g]
+        if prev is None:
+            step = KINETIC_MAX_STEP * 0.65
+            start = max(0.0, cue - (n - 1) * step)
+        else:
+            step = min(KINETIC_MAX_STEP, max(KINETIC_MIN_STEP, (cue - prev) / n))
+            start = max(prev + KINETIC_MIN_STEP, cue - (n - 1) * step)
+            if start - prev > KINETIC_MAX_IDLE:          # a long hold between two groups looks stuck: come in early (at most KINETIC_PULL ahead of the voice)
+                start = max(prev + KINETIC_MAX_IDLE, start - KINETIC_PULL)
+        for k, i in enumerate(idx):
+            when[i] = start + k * step
+        prev = when[idx[-1]]
+    return when
+
+
 def draw_kinetic(cv: Canvas, props: Props, lt: float, dur: float, th: Theme, ctx: SceneCtx) -> None:
     words = tuple(str(props.get("text", "")).split())
     if not words:
@@ -213,22 +248,18 @@ def draw_kinetic(cv: Canvas, props: Props, lt: float, dur: float, th: Theme, ctx
     avail = ctx.bottom - ctx.top - 110
     # the sentence may use the whole width of the content box; narrow frames start larger (fewer words per line, bigger type)
     size, lines, total = _kinetic_layout(words, tuple(flags), cv.ss, int(avail), 1560 if land else fr.W - 2 * fr.margin_x, 136 if land else int(136 * fr.type_scale))
-    when = [0.0] * len(words)
-    times = reveal_times(len(groups), dur, props.get("cues"), first=0.15, last=0.7)
-    for g, (idx, _) in enumerate(groups):
-        for k, i in enumerate(idx):
-            when[i] = times[g] + 0.07 * k
+    when = kinetic_word_times(groups, len(words), dur, props.get("cues"))
     top = _mid_y(ctx) - (total + 60) / 2
     y = top
     for lh, items in lines:
         base = y + lh * 0.84
         for i, ox, ww, fs in items:
-            p = ease_out_back(progress(lt, when[i], 0.45), 1.2)
-            a = ease_out_cubic(progress(lt, when[i], 0.3))
+            p = ease_out_cubic(progress(lt, when[i], KINETIC_MOVE_S))
+            a = ease_out_cubic(progress(lt, when[i], KINETIC_FADE_S))
             col = th.accent if flags[i] else th.text
             cv.text(cx + ox, base + (1 - p) * 34, words[i], "bold", fs, with_alpha(col, a), anchor="ls")
         y += lh
-    end = max(when) + 0.45
+    end = max(when) + KINETIC_MOVE_S
     bw = 220 * ease_out_expo(progress(lt, end, 0.6))
     cv.rrect(cx - bw / 2, y + 36, bw, 10, 5, fill=th.accent)
 
@@ -403,8 +434,14 @@ _PLAIN_NUM = re.compile(r"^[+\-]?[\d,]*\.?\d+$")
 
 
 def _num_parts(v: Any) -> Optional[Tuple[str, float, int, str, bool]]:
+    """(prefix, value, decimals, suffix, grouped) of a director's number, read the way the video's language writes numbers ('3,3' is 3.3 in Spanish)."""
     if isinstance(v, bool) or v is None:
         return None
+    if isinstance(v, (int, float)):
+        if not math.isfinite(v) or abs(v) > 1e15:
+            return None
+        dec = 0 if float(v).is_integer() else min(6, len(repr(float(v)).split(".")[1]))
+        return "", float(v), dec, "", False
     p = parse_number(_s(v, 24))
     if not p or not math.isfinite(p[1]) or abs(p[1]) > 1e15:
         return None
@@ -413,24 +450,40 @@ def _num_parts(v: Any) -> Optional[Tuple[str, float, int, str, bool]]:
     return p
 
 
+def _plan_value(props: Props, key: str) -> Optional[Tuple[str, float, int, str, bool]]:
+    """A stored value is machine form ('1250.5', plain point, `decimals` beside it) and is read as it is in every language; a director's raw text is parsed by language."""
+    raw = props.get(key)
+    if raw in (None, ""):
+        return None
+    dkey = "decimals" if key == "value" else "from_decimals"
+    if numfmt.is_canonical(raw) and isinstance(props.get(dkey), int) and not isinstance(props.get(dkey), bool):
+        return "", float(raw), max(0, min(6, props[dkey])), "", bool(props.get("grouped"))
+    return _num_parts(raw)
+
+
 def counter_sanitize(props: Props) -> Props:
-    p = _num_parts(props.get("value"))
+    p = _plan_value(props, "value")
     if not p:
         raise ValueError("counter needs a numeric value")
-    pre, val, dec, suf, comma = p
+    pre, val, dec, suf, grouped = p
     dec = min(dec, 6)
-    f = _num_parts(props.get("from")) if props.get("from") not in (None, "") else None
+    f = _plan_value(props, "from")
     prefix = _s(props.get("prefix"), 4) or (pre.strip() if len(pre.strip()) <= 4 else "")
     unit = _s(props.get("unit"), 8) or (suf.strip() if len(suf.strip()) <= 8 else "")
-    comma = comma or (f is not None and f[4])
-    clean: Props = {"value": format_number(val, dec, comma)}
+    grouped = grouped or (f is not None and f[4])
+    # kept in machine form (plain decimal point, no grouping) with its decimals: it reads the same in every language and re-sanitizing it changes nothing
+    clean: Props = {"value": numfmt.canonical(val, dec), "decimals": dec}
+    if grouped:
+        clean["grouped"] = True
     if prefix:
         clean["prefix"] = prefix
     if unit:
         clean["unit"] = unit
     clean["label"] = _s(props.get("label"), 70)
     if f is not None and f[1] != 0:
-        clean["from"] = format_number(f[1], dec, comma)
+        fdec = min(f[2], 6)
+        clean["from"] = numfmt.canonical(f[1], fdec)
+        clean["from_decimals"] = fdec
     delta = _s(props.get("delta"), 24)
     if delta:
         clean["delta"] = delta
@@ -438,16 +491,14 @@ def counter_sanitize(props: Props) -> Props:
 
 
 def counter_anchors(props: Props) -> List[str]:
-    return [str(props.get("value", ""))]
+    p = _plan_value(props, "value")
+    if not p:
+        return [str(props.get("value", ""))]
+    return [numfmt.format_number(p[1], p[2], bool(props.get("grouped")), "en")]    # the narration side may say it either way: the sync matches digits
 
 
 def counter_cues(props: Props, dur: float) -> List[float]:
-    return [_count_start(props, dur)]
-
-
-def _count_start(props: Props, dur: float) -> float:
-    cue = (props.get("cues") or [0.4])[0]
-    return max(0.2, min(float(cue), max(0.2, dur - 3.0)))
+    return [0.05]                                      # the count starts the moment the scene does; the narration cue no longer delays it (no static zero)
 
 
 def _tabular_width(cv: Canvas, s: str, size: float) -> float:
@@ -467,14 +518,18 @@ def _tabular_draw(cv: Canvas, x: float, y: float, s: str, size: float, fill) -> 
 
 
 def draw_counter(cv: Canvas, props: Props, lt: float, dur: float, th: Theme, ctx: SceneCtx) -> None:
-    pre, val, dec, _, comma = parse_number(props["value"])  # type: ignore[misc]
-    frm_p = parse_number(props.get("from") or "0")
-    frm = frm_p[1] if frm_p else 0.0
+    pv = _plan_value(props, "value") or (_num_parts(props.get("value")))
+    pre, val, dec, _, comma = pv  # type: ignore[misc]
+    comma = comma or bool(props.get("grouped"))
+    fp = _plan_value(props, "from")
+    frm = fp[1] if fp else 0.0
     prefix, unit = str(props.get("prefix", "")), str(props.get("unit", ""))
     label, delta = str(props.get("label", "")), str(props.get("delta", ""))
-    start = _count_start(props, dur)
-    cdur = max(0.8, min(2.2, dur - start - 0.5))
-    p = ease_out_expo(progress(lt, start, cdur))
+    # The count starts with the scene (no static zero while the narration catches up), eases out over ~1.5 s and then holds the exact value.
+    # From nothing it starts at 20% (never a frame that reads "0 <unit>"); with an explicit `from` it starts there.
+    cdur = count_run(dur)
+    start = 0.0
+    p = count_up(lt, dur, 0.0 if fp else COUNT_FLOOR)
     shown = format_number(frm + (val - frm) * p, dec, comma)
     final = format_number(val, dec, comma)
     # one size for the whole animation, from the widest the number gets
@@ -506,8 +561,8 @@ def draw_counter(cv: Canvas, props: Props, lt: float, dur: float, th: Theme, ctx
     block = size * 0.74 + (78 + len(l_lines) * l_size * 1.25 if label else 0) + (36 + chip_h if delta else 0)
     top = _mid_y(ctx) - block / 2 - 10
     base = top + size * 0.74
-    fade = ease_out_cubic(progress(lt, 0.05, 0.5))
-    rise = (1 - fade) * 30
+    fade = ease_out_cubic(progress(lt, 0.0, 0.3))      # number, unit and prefix fade in together while it is already counting
+    rise = (1 - fade) * 24
     x = cx - total_w / 2 + (total_w - wp - wu - wn) / 2   # keep the digits centred while they grow
     col = with_alpha(th.text, fade)
     if prefix:
@@ -517,7 +572,7 @@ def draw_counter(cv: Canvas, props: Props, lt: float, dur: float, th: Theme, ctx
         cv.text(x + wp + wn + 14, base - size * 0.18 + rise, unit, "bold", small, with_alpha(th.accent, fade), anchor="ls")
     y = base + 78
     if label:
-        a = ease_out_cubic(progress(lt, 0.6, 0.6))
+        a = ease_out_cubic(progress(lt, 0.05, 0.4))     # the label is there with the number: a figure is never shown without what it measures
         for i, line in enumerate(l_lines):
             cv.text(cx, y + i * l_size * 1.25 + (1 - a) * 16, line, "semibold", l_size, with_alpha(th.muted, a), anchor="ma")
         y += len(l_lines) * l_size * 1.25
@@ -542,8 +597,8 @@ def draw_counter(cv: Canvas, props: Props, lt: float, dur: float, th: Theme, ctx
 
 COUNTER = Element(
     name="counter", family="Text",
-    doc=("- counter: {value (a number like \"4.2\", \"73\" or \"1,250\"), unit (<=8, e.g. \"%\" or \"km\"), prefix (<=4, e.g. \"$\"), label (<=70), from (optional start number, default 0), "
-         "delta (<=24, optional, e.g. \"+12% vs 2020\")}. A big number that counts up (or down from `from`) as it is named. Use for one headline figure, a growth, a total. "
+    doc=("- counter: {value (the number alone, plain, with a decimal POINT and no thousands separator: \"4.2\", \"73\" or \"1250\", in every language; the video writes it the way the viewer's language does, 4,2 in Spanish), unit (<=8, e.g. \"%\" or \"km\"), prefix (<=4, e.g. \"$\"), label (<=70), from (optional start number, default 0), "
+         "delta (<=24, optional, e.g. \"+12% vs 2020\")}. A big number that counts up (or down from `from`) the moment the scene starts, settling on the exact value in about a second and a half. Use for one headline figure, a growth, a total. "
          "Only numbers that appear in the grounding notes; never invent or round a figure; not for several numbers (use chart)."),
     sanitize=counter_sanitize, draw=draw_counter, cues=counter_cues, anchors=counter_anchors, formats=("16:9", "9:16", "1:1", "4:5"),
     samples=[{"value": "4.2", "unit": "B", "prefix": "$", "label": "Annual revenue of the company in 2023"},

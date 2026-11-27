@@ -74,10 +74,19 @@ class Canvas:
         return self.im.reduce(self.ss) if self.ss > 1 else self.im
 
     # ---------- background ----------
-    def background(self, theme: Theme, t: float = 0.0, ambience: bool = True) -> None:
+    def background(self, theme: Theme, t: float = 0.0, ambience: bool = True, anim=None) -> None:
         import math
 
         full = (self.W * self.ss, self.H * self.ss)
+        if anim is not None and ambience:   # an animated procedural background (engine/bg_animated.py), opt-in: computed at design size, enlarged smoothly (no detail to lose)
+            from . import bg_animated
+            img = Image.fromarray(bg_animated.render(anim, self.W, self.H, t), "RGB")
+            if self.ss >= 4:   # 4K: half the canvas, then doubled (after the final 2x reduce this is the smooth image, like the glow below)
+                img = img.resize((full[0] // 2, full[1] // 2), Image.BILINEAR).resize(full, Image.NEAREST)
+            elif img.size != full:
+                img = img.resize(full, Image.BILINEAR)
+            self.im.paste(img)
+            return
         if not ambience:
             self.im.paste(_gradient(full[0], full[1], theme.bg_top, theme.bg_bottom))
             return

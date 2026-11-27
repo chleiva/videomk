@@ -212,7 +212,7 @@ def test_galleries_cut_when_the_narration_names_the_next_photo():
     assert pix(cuts[1] - 0.9)[0] > 150 and pix(cuts[1] + 0.3)[1] > 150 and pix(cuts[2] + 0.3)[2] > 150   # the photo is up when its word is said
 
 
-def test_the_stat_counts_up_when_its_number_is_spoken_not_before():
+def test_the_stat_counts_up_at_once_and_does_not_wait_for_its_number_to_be_spoken():
     text = "Many people ask how common this is. The answer is 73 percent of everyone surveyed."
     words = W(text, step=0.4, start=0.4)
     plan = plan_with({"type": "stat", "props": {"value": "73%", "label": "of everyone surveyed"}}, text)
@@ -224,7 +224,8 @@ def test_the_stat_counts_up_when_its_number_is_spoken_not_before():
     before, after = r.frame_at(cue - 0.5), r.frame_at(cue + 1.8)
     text_rgb = np.array(get_theme("midnight").text[:3])
     count = lambda im: int((np.abs(np.asarray(im, dtype=int)[250:800] - text_rgb).sum(axis=2) < 40).sum())      # pixels in the number's own colour
-    assert count(before) < 50 and count(after) > 3000                                                          # nothing of the stat is on screen before its number is spoken
+    # owner 2026-11-27: the old wait showed a dim static zero for seconds. The count now starts with the scene; the cue is still recorded (sound effects) but does not delay it
+    assert count(before) > 3000 and count(after) > 3000 and count(r.frame_at(0.3)) > 1000
 
 
 # ================================================================= the percentage ring never overflows
@@ -315,7 +316,7 @@ def test_text_honours_its_alpha_so_fades_and_hidden_text_work():
     assert np.array_equal(base, np.asarray(cv.to_rgb()))
 
 
-def test_a_stat_label_is_not_visible_before_its_turn():
+def test_a_stat_label_comes_in_with_its_number_not_after_a_wait():
     tl = small_timeline(8.0, ["stat"])
     tl["scenes"][0]["props"] = {"value": "73%", "label": "of everyone surveyed", "cues": [3.0]}
     tl["scenes"][0]["words"] = []
@@ -324,7 +325,7 @@ def test_a_stat_label_is_not_visible_before_its_turn():
     r = Renderer(tl)
     muted = np.array(get_theme("midnight").muted[:3])
     visible = lambda t: int((np.abs(np.asarray(r.frame_at(t), dtype=int)[800:1000] - muted).sum(axis=2) < 40).sum())
-    assert visible(1.0) == 0 and visible(5.5) > 1500                          # the label of the stat appears with the number, not at the start of the scene
+    assert visible(1.0) > 1500 and visible(5.5) > 1500                        # a figure is never shown without what it measures: the label is there from the first second
 
 
 # ================================================================= late mentions, and plans whose list items are never spoken

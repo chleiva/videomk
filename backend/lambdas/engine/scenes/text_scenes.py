@@ -2,7 +2,7 @@ import math
 from typing import Any, Dict, List
 
 from ..canvas import Canvas, with_alpha
-from ..easing import ease_out_back, ease_out_cubic, ease_out_expo, progress, reveal_times
+from ..easing import count_up, ease_out_back, ease_out_cubic, ease_out_expo, progress, reveal_times
 from ..theme import Theme
 from .base import SceneCtx, format_number, heading, parse_number
 
@@ -86,11 +86,9 @@ def stat_cues(props: Dict[str, Any], dur: float) -> List[float]:
 
 
 def draw_stat(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, th: Theme, ctx: SceneCtx) -> None:
-    cue = (props.get("cues") or [0.2])[0]   # the moment the narration names the number (engine/sync.py): the count-up starts then
-    wait = max(0.0, float(cue) - 0.2)
-    waiting = lt < wait    # before the number is spoken the card is not empty: the label and a dim zero wait for it (it once sat blank for 9 seconds)
-    dim = 0.4 * ease_out_cubic(progress(lt, 0.1, 0.5)) if waiting else 1.0
-    lt = 0.9 if waiting else lt - wait
+    # The count starts with the scene. It used to wait for the narration to name the number and showed a dim "0 billion" for seconds, which reads as the claim
+    # "zero". Now it counts at once from 20% of the value (easing out over ~1.5 s, then holding the exact figure) and the label is there with it.
+    dim = 1.0
     value = str(props.get("value", "")).strip()
     label = str(props.get("label", "")).strip()
     fr = ctx.frame
@@ -102,16 +100,16 @@ def draw_stat(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, th: Them
     lab_size, lab_lines = cv.fit_text(label, "semibold", 1300 if land else cw, 150 if land else 190, 54 if land else 54 * fr.type_scale, 32) if label else (0, [])
     lab_h = len(lab_lines) * lab_size * 1.25
     parsed = parse_number(value)
-    count_p = 0.0 if waiting else ease_out_expo(progress(lt, 0.2, 1.3))
+    if parsed and any(ch.isdigit() for ch in parsed[0] + parsed[3]):
+        parsed = None   # "1 in 5", "10 in 2020": more than one number, so it is shown as written, not counted
+    count_p = count_up(lt, dur)   # 0.2 -> 1.0 at once, eased out, exact value held
     if parsed:
         pre, val, dec, suf, comma = parsed
         shown = f"{pre}{format_number(val * count_p, dec, comma)}{suf}"
         is_pct = suf.strip().startswith("%") and 0 <= val <= 100
     else:
         shown, is_pct, val = value, False, 0.0
-        count_p = 0.0 if waiting else ease_out_cubic(progress(lt, 0.2, 0.7))
-        if waiting:
-            shown = ""   # a word-like value waits as the label alone
+        count_p = ease_out_cubic(progress(lt, 0.0, 0.5))
     if not land:      # sized from the FINAL text (it must fit the frame's width and stay put while it counts up), the number and its label centred as one group
         final_txt = f"{pre}{format_number(val, dec, comma)}{suf}" if parsed else value
         if is_pct:
@@ -132,9 +130,9 @@ def draw_stat(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, th: Them
         size = ring_text_size(cv, final, ring_r)
     else:
         size = cv.fit_text(shown, "bold", cw, 300, 250, 80)[0] if land else size_f
-    cv.text(cx, cy + (1 - ease_out_cubic(progress(lt, 0.1, 0.6))) * 30, shown, "bold", size, with_alpha(th.text, ease_out_cubic(progress(lt, 0.05, 0.4)) * dim), anchor="mm")
+    cv.text(cx, cy + (1 - ease_out_cubic(progress(lt, 0.0, 0.4))) * 24, shown, "bold", size, with_alpha(th.text, ease_out_cubic(progress(lt, 0.0, 0.3)) * dim), anchor="mm")
     if label:
-        p = ease_out_cubic(progress(lt, 0.7, 0.6)) * (dim / 0.4 * 0.55 if waiting else 1.0)
+        p = ease_out_cubic(progress(lt, 0.05, 0.4))   # the label comes in with the number
         lines = lab_lines
         base = cy + ((330 if land else ring_r + RING_STROKE / 2 + 34) if is_pct else (190 if land else size * 0.4 + 46))
         for i, line in enumerate(lines):

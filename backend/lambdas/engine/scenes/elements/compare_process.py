@@ -11,6 +11,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from PIL import Image, ImageDraw
 
+from ... import numfmt
 from ...canvas import Canvas, load_font, partial_polyline, with_alpha
 from ...easing import ease_in_out_cubic, ease_out_back, ease_out_cubic, progress, reveal_times
 from ..base import CONTENT_TOP, heading
@@ -30,7 +31,7 @@ def _num(v: Any) -> Optional[float]:
     if isinstance(v, bool) or v is None:
         return None
     try:
-        f = float(v)
+        f = numfmt.parse_float(v)   # locale-aware ('3,3' in a Spanish video is 3.3); plain numbers pass through
     except (TypeError, ValueError):
         return None
     return f if math.isfinite(f) else None
