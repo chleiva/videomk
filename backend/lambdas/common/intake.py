@@ -71,6 +71,8 @@ def clean_options(options: Any) -> Dict[str, Any]:
     for k in ("platform", "aspect", "resolution", "language"):
         if isinstance(options.get(k), str):
             out[k] = _s(options[k], 20)
+    if isinstance(options.get("presenter"), str):   # the presenter the person chose in the form (docs/PRESENTERS.md); generate validates the value
+        out["presenter"] = _s(options["presenter"], 12)
     if options.get("style") in looks.STYLES:   # the look the person chose in the form (docs/CREATE_API.md "Looks"); anything else is ignored here (generate validates it)
         out["style"] = options["style"]
     if isinstance(options.get("captions"), bool):

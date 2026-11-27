@@ -11,7 +11,7 @@ from datetime import date
 
 import logging
 
-from . import background, engagement, language as lang_mod, length as length_mod, plan as plan_mod, quality, research, researcher, skills as skills_mod, staged as staged_mod, vector_policy, voices, whiteboard_policy
+from . import background, engagement, language as lang_mod, length as length_mod, plan as plan_mod, quality, research, researcher, skills as skills_mod, staged as staged_mod, presenter_policy, vector_policy, voices, whiteboard_policy
 from .netsafe import quality_fixes
 
 def fit_to_target() -> bool:
@@ -92,10 +92,12 @@ def direct(prompt: str, *, minutes: float, ask_small: Ask, ask_big: Callable[[st
                                        ask=(lambda sys_, usr: ask_small(sys_, usr, 120)) if whiteboard_policy.enabled() else None)
     if wpolicy.allowed:
         vpolicy = vector_policy.Policy(False, vpolicy.style, "whiteboard_video", aspect=vpolicy.aspect, flag=vpolicy.flag)
-    craft += vpolicy.prompt_block(language) + wpolicy.prompt_block(language)
+    # a presenter character (docs/PRESENTERS.md, flag PRESENTERS): asked for, or on `auto` where it fits (children's and fun explainers, tutorials); never photos, decks, news, whiteboard
+    ppolicy = presenter_policy.decide(prompt, options=options, skill_ids=skill_ids, photos=photos, research_mode=info["mode"], language=language, whiteboard=wpolicy.allowed)
+    craft += vpolicy.prompt_block(language) + wpolicy.prompt_block(language) + ppolicy.prompt_block(language, plan_mod.expected_beats(minutes, len(photos or [])))
     written_from = [notes]   # everything the writer was shown (the grounding check compares the narration with it)
     rate = {"max_images_per_minute": max_images_per_minute} if max_images_per_minute is not None else {}
-    with vector_policy.scope(vpolicy), whiteboard_policy.scope(wpolicy):
+    with vector_policy.scope(vpolicy), whiteboard_policy.scope(wpolicy), presenter_policy.scope(ppolicy):
         if staged_mod.is_staged(minutes, len(photos or [])):
             # a long video is written in stages (outline, then each section on its own, each with its own research): see engine/staged.py
             lock = threading.Lock()
@@ -130,6 +132,10 @@ def direct(prompt: str, *, minutes: float, ask_small: Ask, ask_big: Callable[[st
         return {"legit": False, "reason": plan.get("reason", "")}
     warnings += vector_policy.enforce(plan, vpolicy)   # only catalog ids, the share cap, never two in a row; records plan["vector"]
     warnings += whiteboard_policy.enforce(plan, wpolicy)   # look on: text beats the director left become boards; records plan["whiteboard"]
+    if ppolicy.flag:   # character, side and voice on every presenter scene, the cap, an opening and a closing; records plan["presenter"] (nothing at all where the flag is off)
+        warnings += presenter_policy.enforce(plan, ppolicy)
+        if ppolicy.allowed and vpolicy.allowed:
+            presenter_policy.backdrops(plan, vpolicy.ids())
     rejected = plan.pop("_rejected_scenes", None) or []
     if fetch_errors:
         info["fetch_errors"] = fetch_errors[:20]

@@ -33,7 +33,7 @@ def _body(event: Dict[str, Any]) -> Dict[str, Any]:
 def _look(prompt: str, options: Dict[str, Any], media_count: int, lang: str, chk: Optional[intake.Check] = None) -> Dict[str, Any]:
     """The look part of an answer that lets the video go on (docs/CREATE_API.md "Looks"): `look` = what the person asked for and what the video gets, and `note` = one
     short friendly sentence when a wish was adapted ("Made as a narrated explainer with animated backgrounds; talking characters are coming soon."). Never a blocker."""
-    r = looks.resolve(prompt, options.get("style"), lang, model=chk.look if chk else None, media_count=media_count)
+    r = looks.resolve(prompt, options.get("style"), lang, model=chk.look if chk else None, media_count=media_count, presenter=options.get("presenter"))
     if not r["asked"] and not r["note"]:
         return {}
     out: Dict[str, Any] = {"look": {"style": r["style"], "asked": r["asked"], "adapted": r["adapted"], "presenter": r["presenter"]}}

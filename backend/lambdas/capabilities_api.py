@@ -53,6 +53,31 @@ def looks(loc: str) -> Dict[str, Any]:
     }
 
 
+_THUMBS: Dict[str, str] = {}
+
+
+def presenter(loc: str, on: bool) -> Dict[str, Any]:
+    """The presenter characters (docs/PRESENTERS.md): the create option `presenter` (auto | none | a character id), the words that ask for one, and the cast with a
+    small face picture each (a PNG data URI, 112 px). `available` follows the server switch PRESENTERS; where it is off the cast is still listed, for a "coming soon"."""
+    import json
+    import os
+
+    from engine import presenter_policy as pp
+
+    if not _THUMBS:
+        try:
+            with open(os.path.join(os.path.dirname(os.path.abspath(i18n.__file__)), "presenter_thumbs.json"), encoding="utf-8") as fh:
+                _THUMBS.update(json.load(fh))
+        except Exception:   # noqa: BLE001 - a missing picture never stops the creation options
+            logger.exception("CAPABILITIES_PRESENTER_THUMBS_FAILED")
+    lang = "es" if loc == "es" else "en"
+    return {"param": "presenter", "default": "auto", "available": on,
+            "options": [{"id": "auto", "label": i18n.t("cap.presenter.auto", loc), "note": i18n.t("cap.presenter.auto_note", loc)},
+                        {"id": "none", "label": i18n.t("cap.presenter.none", loc), "note": i18n.t("cap.presenter.none_note", loc)}],
+            "cast": [{"id": cid, "name": pp.CAST[cid]["name"], "role": pp.CAST[cid]["role"][lang], "thumbnail": _THUMBS.get(cid)} for cid in pp.ORDER],
+            "say": i18n.t("cap.presenter.say", loc), "note": i18n.t("cap.presenter.note" if on else "cap.presenter.soon", loc)}
+
+
 def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     path_user = ((event or {}).get("pathParameters") or {}).get("user_id")
     loc = i18n.pick_locale(event)
@@ -69,6 +94,10 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         except Exception:   # noqa: BLE001
             pass
     body["looks"] = looks(loc)
+    try:
+        body["looks"]["presenter"] = presenter(loc, look_flags.flags()["presenters"])
+    except Exception:   # noqa: BLE001
+        logger.exception("CAPABILITIES_PRESENTER_FAILED")
     if plans.enabled():   # a read failure must never stop the creation options: the launcher still enforces
         try:
             add_plan(body, user, event, loc)

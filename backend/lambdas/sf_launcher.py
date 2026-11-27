@@ -150,6 +150,11 @@ def validate_options(body: Dict[str, Any]) -> Dict[str, Any]:
         if body["theme"] not in THEMES:
             raise BadRequest("'theme' must be one of: " + ", ".join(THEMES))
         out["theme"] = body["theme"]
+    if "presenter" in body and body["presenter"] is not None:   # a presenter character (docs/PRESENTERS.md): 'auto' (only where it fits), 'none', or a character id from capabilities
+        if not isinstance(body["presenter"], str) or body["presenter"] not in ("auto", "none", "ines", "david", "priya", "mateo", "fox"):
+            raise BadRequest("'presenter' must be one of: auto, none, ines, david, priya, mateo, fox")
+        if body["presenter"] != "auto":
+            out["presenter"] = body["presenter"]
     if body.get("watermark") is not None:   # {mode, position, opacity, size, style, end_card}: docs/WATERMARK.md; who may use which mode is decided in the handler (it needs the account)
         try:
             out["watermark"] = watermark_spec.parse(body["watermark"], strict=True)
@@ -297,7 +302,7 @@ def look_note(prompt: str, options: Dict[str, Any], loc: str, read: Optional[Dic
     """`note` (and `look`) for the 202 answer when a look the person asked for was adapted (docs/CREATE_API.md "Looks"): the video is made in the closest look this
     stage has, never refused. Empty when nothing was asked. Reads the words, the `style` option and the server switches; no model call of its own."""
     try:
-        r = looks.resolve(prompt, options.get("style"), loc, model=read, media_count=len(options.get("media") or []) + len(options.get("library_media") or []) + (1 if options.get("deck") else 0))
+        r = looks.resolve(prompt, options.get("style"), loc, model=read, presenter=options.get("presenter"), media_count=len(options.get("media") or []) + len(options.get("library_media") or []) + (1 if options.get("deck") else 0))
     except Exception:   # a note must never stop a video
         logger.exception("look note failed")
         return {}

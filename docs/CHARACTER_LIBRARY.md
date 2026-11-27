@@ -1,5 +1,7 @@
 # Character library: first five characters (2026-11-27)
 
+**2026-11-27, later: the five are wired into real videos behind the switch `PRESENTERS` (QA on, production off): see `docs/PRESENTERS.md`.**
+
 Owner decision: generate only **5** new characters, animate them, look at the videos, and only then decide whether to build more. This note is that test. Nothing is deployed and the characters are not wired into the planner.
 
 ## Update, same day: the five as standing speakers
