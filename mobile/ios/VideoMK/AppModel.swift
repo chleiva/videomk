@@ -37,6 +37,8 @@ final class AppModel {
     private var heldStarts: Set<String> = []               // requests the Create screen is still waiting on ("Starting your video"): their outcome goes back to it
     private var heldProblems: [String: CreateProblem] = [:]
     private var liveMaking: [String: MakingInfo] = [:]     // the freshest "making" of a video whose screen is open (the list answer may lag behind)
+    private var lookNotes: [String: String] = [:]          // the server's one sentence when the chosen look had to be adapted (shown on Making)
+    private var startedLooks: [String: AppliedLook] = [:]  // what the start answer said the video gets, until the video record says it itself
     private(set) var revealing: String?                    // the video that has just become ready while its Making screen or card was showing
     var createPrefill: CreatePrefill?                      // "Make another" on a finished video: Create opens with the same sentence and one choice changed
     struct CreatePrefill: Equatable { var text: String; var platformChip: String?; var minutes: Double?; var language: String? }
@@ -97,7 +99,10 @@ final class AppModel {
         media = api.map { MediaModel(api: LibraryClient(api: $0)) }
         createModel = CreateModel(api: api)
         #if DEBUG
-        if ProcessInfo.processInfo.environment["VMK_DEBUG_FAKE_LIBRARY"] == "1" { media = MediaModel(api: FakeLibraryAPI.demo(), fake: true); createModel = CreateModel(api: Self.debugCreateAPI()); userID = "demo-user" }
+        if ProcessInfo.processInfo.environment["VMK_DEBUG_FAKE_LIBRARY"] == "1" {
+            if ProcessInfo.processInfo.environment["VMK_DEBUG_FORGET_CREATE"] == "1" { CreateDefaults.forget(userID: "demo-user") }      // a first run: no remembered platform, length or look
+            media = MediaModel(api: FakeLibraryAPI.demo(), fake: true); createModel = CreateModel(api: Self.debugCreateAPI()); userID = "demo-user"
+        }
         selectedTab = Int(ProcessInfo.processInfo.environment["VMK_DEBUG_TAB"] ?? "") ?? 0
         seedDebugScreens()
         configureDebugDeletion()
@@ -159,6 +164,14 @@ final class AppModel {
     }
 
     func brief(for id: String) -> String? { briefs[id] }
+    /// "Made from your photos: the Cartoon look is not used with your own photos.": only when the server adapted the chosen look.
+    func lookNote(for id: String) -> String? { lookNotes[id] }
+    /// The look the video was made in: the video record's own, else what the start answer said.
+    func appliedLook(for id: String) -> AppliedLook? { video(id)?.look ?? startedLooks[id] }
+    private func remember(_ started: StartedVideo) {
+        if let note = started.note { lookNotes[started.videoID] = note }
+        if let look = started.look { startedLooks[started.videoID] = look }
+    }
     func stage(for id: String) -> (stage: VideoStatus.Stage, since: Date)? { stageSince[id] }
     func requestedMinutes(for id: String) -> Double { minutes[id] ?? CreateOptions.defaultMinutes }
     func video(_ id: String) -> VideoItem? { videos.first { $0.id == id } }
@@ -215,6 +228,7 @@ final class AppModel {
         await media?.wipe()      // another account must never see this one's cached photos or queued uploads
         createModel.deck.wipe()  // a presentation copy left in the temp folder
         composerLibrary = []; libraryIDs = [:]
+        lookNotes = [:]; startedLooks = [:]
         wallet = nil; videos = []; pending = []; deckIDs = [:]; deckMinutes = [:]; deckPrompts = [:]; deckVideos = []; photoData = [:]; photoMeta = [:]; stageSince = [:]; briefs = [:]; minutes = [:]; loadState = .idle
         phase = .signedOut
     }
@@ -562,7 +576,9 @@ final class AppModel {
             if self.media?.isFake == true, deckIDs[id] != nil { acceptFakeDeck(p); return }        // fake runs never reach the backend
             if self.media?.isFake == true { try await acceptFake(p); return }
             #endif
-            let videoID = try await create(brief: deckIDs[id] != nil ? (deckPrompts[id] ?? "") : p.brief, requestID: p.id, options: p.options, media: media, mediaMeta: PhotoMetaReader.mediaMeta(ids: media, metas: photoMeta[id] ?? []), libraryMedia: libraryIDs[id] ?? [], intake: intakeBriefs[id], deck: deckIDs[id], sendMinutes: deckMinutes[id] ?? true)
+            let started = try await create(brief: deckIDs[id] != nil ? (deckPrompts[id] ?? "") : p.brief, requestID: p.id, options: p.options, media: media, mediaMeta: PhotoMetaReader.mediaMeta(ids: media, metas: photoMeta[id] ?? []), libraryMedia: libraryIDs[id] ?? [], intake: intakeBriefs[id], deck: deckIDs[id], sendMinutes: deckMinutes[id] ?? true)
+            let videoID = started.videoID
+            remember(started)
             if deckIDs[id] != nil { deckVideos.insert(videoID) }
             attachments[videoID] = media.count + (libraryIDs[id] ?? []).count + (deckIDs[id] != nil ? 1 : 0)
             deckIDs[id] = nil; deckMinutes[id] = nil; deckPrompts[id] = nil
@@ -599,9 +615,9 @@ final class AppModel {
 
     // MARK: create / play
 
-    func create(brief: String, requestID: String, options: CreateOptions, media: [String] = [], mediaMeta: [String: PhotoMeta] = [:], libraryMedia: [String] = [], intake: [String: String]? = nil, deck: String? = nil, sendMinutes: Bool = true) async throws -> String {
+    func create(brief: String, requestID: String, options: CreateOptions, media: [String] = [], mediaMeta: [String: PhotoMeta] = [:], libraryMedia: [String] = [], intake: [String: String]? = nil, deck: String? = nil, sendMinutes: Bool = true) async throws -> StartedVideo {
         guard let api else { throw APIError.server }
-        do { return try await api.startGeneration(prompt: brief, clientRequestID: requestID, options: options, media: media, mediaMeta: mediaMeta, libraryMedia: libraryMedia, brief: intake, deck: deck, sendMinutes: sendMinutes) }
+        do { return try await api.startVideo(prompt: brief, clientRequestID: requestID, options: options, media: media, mediaMeta: mediaMeta, libraryMedia: libraryMedia, brief: intake, deck: deck, sendMinutes: sendMinutes) }
         catch let e as AuthError where e == .signedOut { await signOut(); throw APIError.unauthorized }
     }
 
@@ -635,6 +651,9 @@ final class AppModel {
         var caps = env["VMK_DEBUG_CREATE"]?.hasPrefix("4k") == true ? FakeCreateAPI.fourKCapabilities : FakeCreateAPI.richCapabilities
         var script = FakeDeckScript()
         if let spec = env["VMK_DEBUG_DECK"] { caps = caps.withDeck(); script = FakeDeckScript.parse(spec) }
+        // `VMK_DEBUG_LOOKS=1|locked|lockedplain|soon|noboard|short` (comma list): the fake server lists the look picker. `VMK_DEBUG_LOOKS_FILE=/path/looks.json` is a saved
+        // capabilities answer with the real pictures (VideoMKUITests/Fixtures); without it tiles and faces draw their placeholders.
+        if let spec = env["VMK_DEBUG_LOOKS"] { caps = caps.withLooks((env["VMK_DEBUG_LOOKS_FILE"].flatMap(LookCapabilities.from(file:)) ?? .fake).variant(spec)) }
         return FakeCreateAPI(capabilities: .success(caps), deck: script)
     }
 
@@ -665,6 +684,7 @@ final class AppModel {
         }
         let videoID = "fakevideo-\(p.id.prefix(6))"
         briefs[videoID] = p.brief; minutes[videoID] = p.options.minutes
+        remember(FakeLook.started(videoID: videoID, options: p.options, photos: p.photoCount > 0 || libraryIDs[p.id] != nil, caps: createModel.caps.looks, spanish: Localization.shared.language == .es))
         videos.insert(VideoItem(id: videoID, status: .running(.starting), title: p.brief, createdAt: .now, aspect: p.options.aspect, resolution: p.options.resolution), at: 0)
         stageSince[videoID] = (.starting, .now)
         if let i = pending.firstIndex(where: { $0.id == p.id }) { pending[i].state = .accepted(videoID: videoID) }
@@ -678,7 +698,7 @@ final class AppModel {
         let total = 6
         func set(_ status: VideoStatus, _ making: MakingInfo?, done: Bool = false) {
             guard let i = videos.firstIndex(where: { $0.id == id }) else { return }
-            videos[i] = VideoItem(id: id, status: status, title: title, durationSeconds: done ? 62 : nil, createdAt: videos[i].createdAt, previewGifURL: done ? URL(string: "fake://\(aspect == "9:16" ? "portrait" : "landscape")/clip_01") : nil, aspect: aspect, resolution: resolution, making: making)
+            videos[i] = VideoItem(id: id, status: status, title: title, durationSeconds: done ? 62 : nil, createdAt: videos[i].createdAt, previewGifURL: done ? URL(string: "fake://\(aspect == "9:16" ? "portrait" : "landscape")/clip_01") : nil, aspect: aspect, resolution: resolution, making: making, look: done ? startedLooks[id] : nil)
         }
         try? await Task.sleep(for: .seconds(2))
         stageSince[id] = (.voiceAndVisuals, .now)
@@ -732,7 +752,8 @@ final class AppModel {
             func pic(_ kind: String, _ name: String) -> URL? { URL(string: "fake://\(kind)/\(name)") }
             videos = [
                 VideoItem(id: "v1", status: .running(.voiceAndVisuals), title: "How honey is made", createdAt: .now, making: making),
-                VideoItem(id: "v3", status: .complete, title: "How a forest breathes", durationSeconds: 91, createdAt: .now.addingTimeInterval(-1800), previewGifURL: pic("landscape", "clip_01"), editable: true, aspect: "16:9", resolution: "1080p"),
+                VideoItem(id: "v3", status: .complete, title: "How a forest breathes", durationSeconds: 91, createdAt: .now.addingTimeInterval(-1800), previewGifURL: pic("landscape", "clip_01"), editable: true, aspect: "16:9", resolution: "1080p",
+                          look: env["VMK_DEBUG_LOOKS"] == nil ? nil : AppliedLook(chosen: "auto", applied: "whiteboard", why: Localization.shared.language == .es ? "Un proceso paso a paso se entiende mejor dibujado." : "A step-by-step process is clearest drawn.", byAuto: true)),
                 VideoItem(id: "v4", status: .complete, title: "How bees make honey", durationSeconds: 124, createdAt: .now.addingTimeInterval(-7200), previewGifURL: pic("landscape", "s_bees"), aspect: "16:9", resolution: "1080p"),
                 VideoItem(id: "v5", status: .complete, title: "3 focus tips", durationSeconds: 30, createdAt: .now.addingTimeInterval(-86400), previewGifURL: pic("portrait", "s_focus"), aspect: "9:16", resolution: "1080p"),
                 VideoItem(id: "v2", status: .failed, title: "Thailand highlights", createdAt: .now.addingTimeInterval(-90000)),
@@ -740,6 +761,7 @@ final class AppModel {
                 VideoItem(id: "v7", status: .complete, title: "The jobs of tomorrow", durationSeconds: 58, createdAt: .now.addingTimeInterval(-272800), previewGifURL: pic("landscape", "s_jobs"), aspect: "16:9", resolution: "1080p"),
             ]
             briefs["v1"] = "How honey is made"; minutes["v1"] = 2
+            if env["VMK_DEBUG_LOOK_NOTE"] == "1" { lookNotes["v1"] = Localization.shared.language == .es ? "En un video tan corto presenta un solo personaje; una conversación necesita al menos 20 segundos." : "In a video this short one character presents; a conversation needs at least 20 seconds." }
             stageSince["v1"] = (.voiceAndVisuals, Date().addingTimeInterval(-40))
         }
         if env["VMK_DEBUG_FAKE_VIDEOS"] == "1" {

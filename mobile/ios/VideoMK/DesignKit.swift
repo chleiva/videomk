@@ -238,6 +238,30 @@ struct Pill<MenuContent: View>: View {
     }
 }
 
+/// The same pill for a choice with pictures: it opens a sheet instead of a menu (the Look). A long value takes a second line, never an ellipsis.
+struct PillButton: View {
+    let value: String
+    let spoken: String
+    var spokenValue: String?
+    var identifier: String = ""
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 6) {
+                Text(value).font(.role(.subhead, weight: .semibold)).foregroundStyle(Theme.text).multilineTextAlignment(.leading).fixedSize(horizontal: false, vertical: true)
+                Image(systemName: "chevron.down").font(.role(.caption, weight: .bold)).foregroundStyle(Theme.textTertiary).accessibilityHidden(true)
+            }
+            .padding(.horizontal, 14).padding(.vertical, 6).frame(minHeight: 38)
+            .background(Theme.surfaceRaised, in: RoundedRectangle(cornerRadius: 19, style: .continuous))
+            .frame(minHeight: Theme.minTouch).contentShape(RoundedRectangle(cornerRadius: 19, style: .continuous))
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(spoken).accessibilityValue(spokenValue ?? value)
+        .accessibilityIdentifier(identifier)
+    }
+}
+
 /// The same pill, not a control: what was chosen, shown while the screen is locked.
 struct StaticPill: View {
     let value: String

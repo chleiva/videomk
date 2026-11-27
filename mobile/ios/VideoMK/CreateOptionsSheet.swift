@@ -15,7 +15,7 @@ struct CreateOptionsSheet: View {
             VStack(alignment: .leading, spacing: Theme.Space.xl) {
                 SheetHeader(title: tr("create.options"), closeLabel: tr("common.done"), closeID: "optionsDone") { dismiss() }
                 group(tr("create.what_is_it_for")) { forChips }
-                group(tr("create.look")) { looks }
+                group(create.caps.looks == nil ? tr("create.look") : tr("create.colours")) { looks }      // with the look picker, "Look" is the pill's word: these are the colours
                 resolutionControl
                 VStack(spacing: 0) {
                     Toggle(isOn: $create.form.captions) { Label(tr("create.subtitles"), systemImage: "captions.bubble").font(.role(.body)).foregroundStyle(Theme.text) }

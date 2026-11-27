@@ -25,6 +25,13 @@ struct MakingScreen: View {
             }
             .padding(.top, Theme.Space.s)
             .animation(Theme.Motion.select, value: snapshot.line)
+            if let note = snapshot.note {       // the chosen look was adapted: the server's one sentence, quietly
+                HStack(alignment: .firstTextBaseline, spacing: 7) {
+                    Image(systemName: "info.circle").font(.role(.footnote, weight: .semibold)).foregroundStyle(Theme.textSecondary).accessibilityHidden(true)
+                    Text(note).font(.role(.footnote)).foregroundStyle(Theme.textSecondary).fixedSize(horizontal: false, vertical: true).accessibilityIdentifier("lookNote")
+                }
+                .padding(.top, Theme.Space.s)
+            }
             strip.padding(.top, 26)
             if snapshot.sceneLine != nil || snapshot.timeAbout != nil {
                 ViewThatFits(in: .horizontal) {

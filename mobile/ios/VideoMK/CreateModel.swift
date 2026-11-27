@@ -24,6 +24,10 @@ final class CreateModel {
     /// An example chosen on the home screen: Create types it into the prompt when it opens.
     var typeIn: String?
     var showMore = false
+    /// The Look sheet (tiles, cast, the board switch). Only when the server lists `looks.look`.
+    var showLook = false
+    /// One line under the attachments when photos or a presentation sent the look back to Auto.
+    private(set) var lookNotice: String?
     /// "My holiday in Thailand" opens Add photos straight away, on My media when the library has photos.
     var autoOpenPhotos: AutoOpen?
     struct AutoOpen: Equatable { var library: Bool }
@@ -72,11 +76,11 @@ final class CreateModel {
     /// A fresh Create screen with the last used choices (the prompt and the photos are never remembered).
     /// `platformChip` and `language`: "Make another" on a finished video opens the same sentence with one choice changed (a Short, another language, a shorter cut).
     func open(prefill: String? = nil, minutes: Double? = nil, platformChip: String? = nil, language: String? = nil) {
-        stage = .form; showMore = false; capsule.reset(); startError = nil; typeIn = nil; checkRun = nil
+        stage = .form; showMore = false; showLook = false; capsule.reset(); startError = nil; typeIn = nil; checkRun = nil
         // A draft (a sentence, photos or a presentation left when Create was closed) is kept: closing never asks and never loses anything.
         // Anything that opens Create with its own content (an example, "Make another", Try again) starts fresh.
         if prefill == nil, minutes == nil, platformChip == nil, language == nil, hasEdits { return }
-        form = CreateDefaults.load(userID: userID).form(caps)
+        form = CreateDefaults.load(userID: userID).form(caps); lookNotice = nil
         if let prefill { form.text = prefill }
         if let platformChip, let chip = PlatformChips.make(caps).first(where: { $0.id == platformChip && $0.supported }) { form.select(chip) }
         if let language, caps.languages.contains(where: { $0.id == language }) { form.language = language }
@@ -128,6 +132,17 @@ final class CreateModel {
 
     /// The price line of the ready card: "4 credits for about 4 minutes", for the length chosen now.
     var deckCostText: String { tr("deck.cost", tr("credits.count", form.options.credits), LengthLabel.spoken(form.minutes)) }
+
+    // MARK: the chosen look
+
+    /// A tap on a look tile; the length moves when the look needs a longer video (the returned nudge says what was done).
+    func pickLook(_ id: String, attached: LookRules.Attached) -> LookRules.LengthNudge? { lookNotice = nil; return form.selectLook(id, caps: caps, attached: attached) }
+
+    /// Photos or a presentation were attached or removed: a look that is not made from them goes back to Auto, with one line saying so.
+    func syncLook(attached: LookRules.Attached) {
+        if let line = form.reconcileLook(caps, attached: attached) { lookNotice = line; UIAccessibility.post(notification: .announcement, argument: line) }
+        else if !attached.any { lookNotice = nil }
+    }
 
     // MARK: status
 
@@ -210,7 +225,7 @@ final class CreateModel {
 
     // MARK: after Create
 
-    func remember() { CreateDefaults(form).save(userID: userID) }
+    func remember() { CreateDefaults(form).save(userID: userID); lookNotice = nil }
 
     #if DEBUG
     /// Screenshots: `VMK_DEBUG_CREATE=linkedin|x|shorts|overmax|shortphotos` picks that platform / length the way a tap would.
@@ -228,6 +243,14 @@ final class CreateModel {
         case "4koff": pick("youtube"); showMore = true                                 // 4K listed but not chosen
         case "4ksummary": pick("youtube"); form.setResolution("2160p")
         default: break
+        }
+        // `VMK_DEBUG_LOOK=whiteboard|cartoon|cartoon:fox+bear|cartoon:fox+bear+cat:board[:sheet]` picks that look the way taps would (needs `VMK_DEBUG_LOOKS`); `sheet` alone opens the picker.
+        guard let spec = ProcessInfo.processInfo.environment["VMK_DEBUG_LOOK"] else { return }
+        for (n, part) in spec.split(separator: ":").enumerated() {
+            if part == "sheet" { showLook = true }
+            else if part == "board" { form.setLookExtra("board", on: true) }
+            else if n == 0 { _ = pickLook(String(part), attached: .nothing) }
+            else { for id in part.split(separator: "+") { _ = form.toggleCast(String(id), caps: caps) } }
         }
     }
 

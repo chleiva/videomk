@@ -12,6 +12,8 @@ struct MakingSnapshot: Equatable {
     var timed = true
     /// Scenes, lines and pictures from the server; nil until it reports them (the calm indeterminate state).
     var info: MakingInfo?
+    /// One sentence from the server when the chosen look had to be adapted ("In a video this short one character presents…"). Shown on the Making screen only.
+    var note: String?
 
     var sceneLine: String? {
         guard let info, let total = info.sceneTotal, let current = info.counterScene else { return nil }
@@ -143,6 +145,6 @@ extension AppModel {
         var line = info?.liveLine ?? MakingProgress.info(stage: stage, secondsInStage: inStage, minutes: minutes).what
         // a video made from a presentation: the deck's own two stages come first, in the same line
         if info?.liveLine == nil, case .running(.writing) = video.status, let deck = video.deckStage { line = tr(deck == .reading ? "making.line.deck_reading" : "making.line.deck_writing") }
-        return MakingSnapshot(title: title, line: line, minutesLeft: MakingProgress.minutesLeft(stage: stage, secondsInStage: inStage, minutes: minutes), info: info)
+        return MakingSnapshot(title: title, line: line, minutesLeft: MakingProgress.minutesLeft(stage: stage, secondsInStage: inStage, minutes: minutes), info: info, note: lookNote(for: video.id))
     }
 }

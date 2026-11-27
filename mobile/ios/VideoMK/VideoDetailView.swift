@@ -87,7 +87,7 @@ struct VideoDetailView: View {
         .onDisappear { player?.pause(); watcher?.stop(); watcher = nil; model.tabBarHidden = false }
         .onAppear { model.tabBarHidden = true }
         .onChange(of: model.isPlayingVideo) { _, playing in if playing { ended = false } }
-        .sheet(isPresented: $showInfo) { VideoInfoSheet(description: videoDescription ?? "") }
+        .sheet(isPresented: $showInfo) { VideoInfoSheet(description: videoDescription ?? "", look: model.appliedLook(for: videoID), looks: model.createModel.caps.looks) }
         .sheet(isPresented: $showFeedback) { FeedbackSheet(composer: model.makeFeedback(.afterVideo)) }
         .fullScreenCover(isPresented: $editing, onDismiss: {
             watcher?.stop(); watcher = nil; player = nil; playbackURL = nil  // the edit may have published a new version
@@ -320,6 +320,8 @@ struct SharedVideo: Transferable {
 /// Info: what the video is (made with AI, captions burned in), then the server's description in its groups (chapters, sources, credits), one Copy button.
 struct VideoInfoSheet: View {
     let description: String
+    var look: AppliedLook?
+    var looks: LookCapabilities?
     @Environment(\.dismiss) private var dismiss
     @State private var copied = false
     var body: some View {
@@ -331,6 +333,13 @@ struct VideoInfoSheet: View {
                     Label(tr("info.captions_burned"), systemImage: "captions.bubble").font(.role(.subhead)).foregroundStyle(Theme.text)
                 }
                 .accessibilityIdentifier("infoAbout")
+                if let look, let title = look.title(caps: looks) {       // the look the video was made in, and why when the director chose it
+                    group(tr("create.look")) {
+                        Label(look.byAuto ? tr("looks.chosen_for_you", title) : title, systemImage: "paintbrush").font(.role(.subhead)).foregroundStyle(Theme.text).fixedSize(horizontal: false, vertical: true)
+                        if let why = look.why { Text(why).font(.role(.subhead)).foregroundStyle(Theme.textSecondary).fixedSize(horizontal: false, vertical: true) }
+                    }
+                    .accessibilityElement(children: .combine).accessibilityIdentifier("infoLook")
+                }
                 ForEach(VideoInfoText.groups(description)) { g in
                     group(g.title) {
                         Text(Linkified.attributed(g.body)).font(.role(.subhead)).foregroundStyle(Theme.text).frame(maxWidth: .infinity, alignment: .leading).fixedSize(horizontal: false, vertical: true).textSelection(.enabled)

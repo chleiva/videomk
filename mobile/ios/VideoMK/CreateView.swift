@@ -51,6 +51,9 @@ struct CreateView: View {
                             if form.hasDeck { Text(tr("deck.prompt_hint")).font(.role(.footnote)).foregroundStyle(Theme.textSecondary).fixedSize(horizontal: false, vertical: true).accessibilityIdentifier("deckPromptHint") }
                             attachments
                             deckSection
+                            if let line = create.lookNotice, !locked {      // photos or a presentation sent the look back to Auto: one line says so
+                                Label(line, systemImage: "info.circle").font(.role(.footnote)).foregroundStyle(Theme.textSecondary).fixedSize(horizontal: false, vertical: true).accessibilityIdentifier("lookNotice")
+                            }
                             if locked { chosen.transition(.opacity) }
                             notice
                         }
@@ -124,6 +127,9 @@ struct CreateView: View {
         } message: { Text(tr("deck.replace_deck.message")) }
         .onChange(of: create.deck.state, initial: true) { _, _ in create.syncDeck() }
         .sheet(isPresented: $create.showMore) { CreateOptionsSheet(create: create) }
+        .sheet(isPresented: $create.showLook) { LookPickerSheet(create: create, attached: attached) }
+        .onChange(of: attached, initial: true) { _, a in create.syncLook(attached: a) }
+        .onChange(of: create.caps.looks) { _, _ in create.syncLook(attached: attached) }
         .sheet(isPresented: Binding(get: { create.stage != .form }, set: { if !$0 { create.dismissOverlay() } })) {
             CreateStageSheet(create: create, balance: balance, mediaCount: totalPhotos, onSubmit: start, onEdit: { create.dismissOverlay(); focused = true })
         }
@@ -307,7 +313,9 @@ struct CreateView: View {
     }
 
     private var forValue: String { form.isCustom(create.caps) ? tr("create.custom") : (form.chip(create.caps).map(shortName) ?? tr("pill.video")) }
-    private var lookValue: String { form.look?.title ?? tr("look.auto") }
+    private var lookValue: String { create.caps.looks.map { LookRules.pillLabel(form.lookChoice, caps: $0) } ?? form.look?.title ?? tr("look.auto") }
+    /// What is attached decides which looks can be made (the person's own photos or slides are the pictures of the video).
+    private var attached: LookRules.Attached { LookRules.Attached(photos: totalPhotos > 0 || create.photos.loading > 0, deck: form.hasDeck || create.deck.isActive) }
 
     private var forPill: some View {
         let current = form.chip(create.caps)
@@ -345,11 +353,16 @@ struct CreateView: View {
         }
     }
 
-    private var lookPill: some View {
-        Pill(value: lookValue, spoken: tr("create.look"), identifier: "lookPill") {
-            Button { create.form.look = nil; Haptics.play(.selection) } label: { if form.look == nil { Label(tr("look.auto"), systemImage: "checkmark") } else { Text(tr("look.auto")) } }
-            ForEach(VideoLook.allCases) { l in
-                Button { create.form.look = l; Haptics.play(.selection) } label: { if form.look == l { Label(l.title, systemImage: "checkmark") } else { Text(l.title) } }
+    /// With the server's look picker: the pill opens the sheet of tiles (Auto, Real, Whiteboard, Cartoon and its cast). Without it (an older server): the menu it always was.
+    @ViewBuilder private var lookPill: some View {
+        if let looks = create.caps.looks {
+            PillButton(value: lookValue, spoken: tr("create.look"), spokenValue: LookRules.spoken(form.lookChoice, caps: looks), identifier: "lookPill") { focused = false; create.showLook = true }
+        } else {
+            Pill(value: lookValue, spoken: tr("create.look"), identifier: "lookPill") {
+                Button { create.form.look = nil; Haptics.play(.selection) } label: { if form.look == nil { Label(tr("look.auto"), systemImage: "checkmark") } else { Text(tr("look.auto")) } }
+                ForEach(VideoLook.allCases) { l in
+                    Button { create.form.look = l; Haptics.play(.selection) } label: { if form.look == l { Label(l.title, systemImage: "checkmark") } else { Text(l.title) } }
+                }
             }
         }
     }
@@ -363,6 +376,9 @@ struct CreateView: View {
             noticeRow(advice.text, id: "fourKAdvice", fix: tr("create.use", create.caps.resolutionLabel(advice.useResolution)), fixID: "use1080p") { create.form.setResolution(advice.useResolution); Haptics.play(.selection) }
         } else if let hint = form.maxLengthHint(create.caps) {
             noticeRow(hint.text, id: "maxLengthHint", fix: tr("create.use", LengthLabel.chip(hint.fixMinutes)), fixID: "maxFixChip") { create.form.setMinutes(hint.fixMinutes); Haptics.play(.selection) }
+        } else if !form.hasDeck, let nudge = form.lookLengthNudge(create.caps) {
+            // the length was shortened after the look was chosen: the video would still be made (one character presents), so this only offers the way back
+            noticeRow(LookWords.needs(nudge, form: form, caps: create.caps), id: "lookLengthHint", fix: tr("create.use", LengthLabel.chip(nudge.minutes)), fixID: "lookLengthFix") { create.form.setMinutes(nudge.minutes); Haptics.play(.selection) }
         }
     }
 
