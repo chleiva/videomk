@@ -211,13 +211,19 @@ def _stress(words: List[Tuple[str, float, float]]) -> List[float]:
     return [a for (w, a, b) in words if len(w.strip(".,;:!?¿¡")) > 5]
 
 
-def performance(props: Dict[str, Any], dur: float, lift: float, side: str, who: Optional[str] = None, slot: int = 0, toward: float = 0.0, content_side: Optional[int] = None) -> cg.Performance:
+def performance(props: Dict[str, Any], dur: float, lift: float, side: str, who: Optional[str] = None, slot: int = 0, toward: float = 0.0, content_side: Optional[int] = None,
+                room: Optional[Tuple[Tuple[float, float], Tuple[float, float]]] = None) -> cg.Performance:
     """Everything a character does in this scene, planned once from the words (kept for the frames that follow). `who` is the character (default: the speaker);
-    a character that is not the speaker LISTENS: it looks toward the speaker (`toward`: -1 left, +1 right) and nods now and then, mouth closed."""
+    a character that is not the speaker LISTENS: it looks toward the speaker (`toward`: -1 left, +1 right), nods now and then, mouth closed, hands at rest or held
+    together. `room`: free space for each hand (`rooms`). The idle life runs on the video's clock (`at`: where the scene starts), and every gesture is home before
+    the scene ends, so a cut to the next scene of the same character shows no jump (docs/PRESENTERS.md "Arms")."""
     words = _speech(props)
     who = who or props.get("character")
     speaking = who == props.get("character")
-    key = (who, speaking, side, slot, round(toward, 2), content_side, round(lift, 3), round(dur, 3), bool(props.get("enter", True)), _seed(props), tuple(words))
+    at = _num(props.get("at")) or 0.0
+    room = ((None, None), (None, None)) if room is None else tuple(tuple(round(float(r), 1) for r in pair) for pair in room)
+    key = (who, speaking, side, slot, round(toward, 2), content_side, round(lift, 3), round(dur, 3), bool(props.get("enter", True)), _seed(props), tuple(words), round(at, 3), room,
+           props.get("prev_speaker"), props.get("next_speaker"))
     perf = _PERF.get(key)
     if perf is not None:
         _PERF.move_to_end(key)
@@ -225,18 +231,54 @@ def performance(props: Dict[str, Any], dur: float, lift: float, side: str, who: 
     if content_side is None:
         content_side = 1 if side == "left" else -1
     seed = _seed(props) if speaking and not props.get("cast") else ((zlib.crc32(str(who).encode("utf-8")) % 991) / 991.0 * 0.6 + 0.4 * _seed(props)) % 1.0
-    perf = cg.Performance(seed=seed, content_side=content_side, tail=bool(CAST.get(who, {}).get("tail")), lift=lift)
+    # a listener that also listened in the scene before / listens in the next one keeps its hands together across the cut
+    fold = (props.get("prev_speaker") not in (None, who), props.get("next_speaker") not in (None, who)) if (props.get("cast") and not speaking) else (False, False)
+    perf = cg.Performance(seed=seed, content_side=content_side, tail=bool(CAST.get(who, {}).get("tail")), lift=lift, who=who, clock=at, limit=dur, room=room[0], clear=room[1], fold=fold,
+                          quiet=0.0 if props.get("enter", True) else QUIET_S)
+    if props.get("enter", True):
+        perf.enter(0.10 + 0.16 * slot, from_side=-content_side, distance=55.0)   # each steps in from its own edge of the picture, one after another
     if speaking and words:
         perf.speak(words, None, words[-1][2])
         perf.mouth(0.0, MOUTH_FPS, mouth_track(words, dur))
     elif not speaking and words:
         perf.listen(max(0.0, words[0][1] - 0.25), words[-1][2] + 0.1, toward, _stress(words))
-    if props.get("enter", True):
-        perf.enter(0.10 + 0.16 * slot, from_side=-content_side, distance=55.0)   # each steps in from its own edge of the picture, one after another
     _PERF[key] = perf
     while len(_PERF) > 24:
         _PERF.popitem(last=False)
     return perf
+
+
+QUIET_S = 0.36       # a scene that follows another one of the same character fades in over it (renderer.TRANSITION_S 0.4): no gesture starts during that
+CARD_PAD = 36.0      # design units of empty margin inside a card: a hand may come over the card's edge this far, never over its text (a board or a picture: 0)
+
+
+def rooms(lay: Dict[str, Any], fig: Optional[Dict[str, Any]], geom: Any, size: float, frame_w: float, pad: float = CARD_PAD) -> Tuple[Tuple[float, float], Tuple[float, float]]:
+    """How far each hand of a figure may go outward from its shoulder, in the rig's units -> (held, on the way), each (left, right).
+    held: before the hand would cover the card's text or the board, another figure, or leave the picture. on the way: the same without the picture's edge
+    (a hand may leave the picture for a few frames as it swings up). Content above the figures (the tall and square layouts) is in nobody's way."""
+    x = fig["x"] if fig else lay["x"]
+    u = (fig["ppu"] if fig else lay["ppu"]) * size
+    ground = fig["ground"] if fig else lay["ground"]
+    edge = [0.0 - 0.3 * geom.hand * u, frame_w + 0.3 * geom.hand * u]            # finger tips may touch the picture's edges
+    lim = [-1e9, 1e9]
+    x0, y0, x1, y1 = lay["content"]
+    if x1 > x0 and y1 > ground - 215.0 * u:                                      # the content reaches down to where hands work (beside the figure, not above it)
+        if x1 <= x:
+            lim[0] = max(lim[0], x1 - pad)
+        elif x0 >= x:
+            lim[1] = min(lim[1], x0 + pad)
+    for o in lay.get("figures") or []:
+        if fig is None or o is fig:
+            continue
+        if o["x"] < x:
+            lim[0] = max(lim[0], o["x"] + 46.0 * o["ppu"])
+        else:
+            lim[1] = min(lim[1], o["x"] - 46.0 * o["ppu"])
+    sway = 5.0                                                                    # the body shifts its weight and leans: the hand goes with it
+    sl, sr = x - geom.shoulder_x * u, x + geom.shoulder_x * u
+    way = (max(8.0, (sl - lim[0]) / u - sway), max(8.0, (lim[1] - sr) / u - sway))
+    held = (min(way[0], max(8.0, (sl - edge[0]) / u - sway)), min(way[1], max(8.0, (edge[1] - sr) / u - sway)))
+    return held, way
 
 
 # ----------------------------------------------------------------------------- layout
@@ -347,7 +389,8 @@ def _draw_character(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, la
     k = cv.im.width / 2.0 / cv.W
     try:
         ch = vp.load_cached(cid, round(lay["ppu"] * k, 4), CAST[cid]["size"])
-        perf = performance(props, dur, lay["lift"], lay["side"], cid, fig["slot"], fig["toward"], fig["content_side"]) if fig else performance(props, dur, lay["lift"], lay["side"])
+        room = rooms(lay, fig, ch.g, CAST[cid]["size"], cv.W, 0.0 if (props.get("board") or props.get("asset")) else CARD_PAD)
+        perf = performance(props, dur, lay["lift"], lay["side"], cid, fig["slot"], fig["toward"], fig["content_side"], room=room) if fig else performance(props, dur, lay["lift"], lay["side"], room=room)
         pose, ex = perf.pose(lt, ch.g)
         if ex["alpha"] <= 0.003:
             return

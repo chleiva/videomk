@@ -30,32 +30,118 @@ KINDS = ("wave", "count", "compare", "shrug", "present", "thumb", "open", "beat"
 PRIORITY = {k: i for i, k in enumerate(KINDS)}
 
 # ----------------------------------------------------------------------------- limits (tests check them)
-PREP_S = 0.42               # preparation: the hand leaves home this long before the stroke
-RETRACT_S = 0.60            # back to home base
+# Kendon's phases: preparation, stroke, hold, retraction. The times are per gesture because a hand that goes further takes longer: every one keeps the forearm
+# under about 300 degrees a second at its fastest (engine/arm_check.py holds the animation to 400).
+# PREP and RETRACT are the time the planner RESERVES (the longest an arm may need: a forearm folded right up beside a card). Each arm then takes only what its own
+# way asks for (arm_times): it leaves later and is home sooner when the way is short, so the stroke still lands on the word.
+PREP = {"wave": 0.94, "count": 0.90, "thumb": 0.90, "open": 0.90, "present": 0.78, "compare": 0.90, "shrug": 0.86, "beat": 0.60}
+RETRACT = {"wave": 1.30, "count": 1.25, "thumb": 1.25, "open": 1.25, "present": 1.05, "compare": 1.25, "shrug": 1.20, "beat": 0.70}
+PREP_S = 0.60               # the shortest preparation
+RETRACT_S = 0.85            # the shortest retraction
+RISE_DPS = 200.0            # degrees a second the forearm averages on the way up (its top speed is about 1.5 times that)
+FALL_DPS = 150.0            # ... and on the way home
 MIN_HOLD_S = 0.45
 MAX_HOLD_S = 1.9
-GAP_S = 0.20                # hands rest at least this long between two gestures
+SEEN_S = 0.28               # a gesture has been seen this long after its stroke: only then may the next one take the arm over
+GAP_S = 0.20                # two stretches of speech: the hands rest at least this long between their gestures
+BRIDGE_S = 0.90             # the next gesture of the same arm starts sooner than this after the arm would be home: the arm holds and goes straight to it
 STROKE_LEAD_S = 0.06        # the stroke lands this much BEFORE the word starts (never after)
-MAX_PER_MINUTE = 22.0       # meaningful gestures (beats are counted separately)
-MAX_BUSY = 0.78             # share of the talk during which the hands are away from home base
-BEAT_GAP_S = 1.1
-TWIN_LAG_S = 0.075          # the second hand of a two-handed gesture follows this much later
-REST_WRIST = -11.0         # at home the hand hangs a little toward the leg, not flared out
-GESTURE_BOX_TOP = 0.18      # wrist height above the shoulder, as a share of the arm length, that no gesture but the wave may pass
+MAX_PER_MINUTE = 13.0       # meaningful gestures (beats are counted separately): about one every four or five seconds at most, and not on every sentence
+MAX_BUSY = 0.60             # share of the talk during which the hands are away from rest
+BEAT_GAP_S = 1.6
+TWIN_LAG_S = 0.13           # the second hand of a two-handed gesture follows three frames later (and lands on another pose): no mirror-image flapping
+LEAD_S = 0.035              # the upper arm leads the forearm by a frame on the way up and follows it by a frame on the way down
+DRAG_K, DRAG_MAX, DRAG_DT = 0.040, 13.0, 0.05     # the hand trails the forearm: degrees per (degree a second), its limit, and the look-back
+WAVE_HZ = 2.0
+REST_WRIST = -11.0          # at home the hand hangs a little toward the leg, not flared out
+REST_CHANGE_S = 2.4         # an arm takes this long to settle from one relaxed pose into another
+FOLD_S = 1.05               # hands coming together in front, or apart again
+FOLD_MIN_S = 4.2            # a shot shorter than this is too short to bring the hands together and apart again
+FOLD_DROP = 38.0            # units below the shoulder: where held hands meet (the navel)
+FOLD_FLEX = -10.0
 
-# key poses: wrist target relative to the shoulder as a share of the arm length (x away from the body, y up), wrist turn in degrees, hand shape
-KEY: Dict[str, Tuple[Vec, float, str]] = {
-    "open": ((0.62, -0.50), 14.0, "open"),
-    "present": ((0.90, -0.24), 8.0, "open"),
-    "present_low": ((0.74, -0.42), 10.0, "open"),
-    "count": ((0.47, 0.13), -4.0, "one"),
-    "compare": ((0.70, -0.38), 16.0, "open"),
-    "shrug": ((0.64, -0.40), 30.0, "open"),
-    "wave": ((0.50, 0.50), -6.0, "open"),
-    "thumb": ((0.50, 0.08), -4.0, "thumb"),
-    "beat": ((0.19, -0.88), 10.0, "relaxed"),
+# Arm poses are bone ANGLES in degrees from straight down, positive away from the body: (upper arm, forearm, wrist turn). See vector_presenter.solve "arms".
+Arm = Tuple[float, float, float]
+# Rest: the arm relaxed at the side, never a straight stick and never the same on both sides for long. The first is the pinned home pose (elbow out, forearm in).
+REST_POSES: Tuple[Arm, ...] = ((7.0, -4.0, REST_WRIST), (9.0, -12.0, -7.0), (6.0, -1.0, -12.0), (8.0, -8.0, -9.0))
+# Characters that hold their hands loosely together in front while they LISTEN (the others keep them relaxed at the sides). By body: everyone whose hands meet
+# over the belly; the fox's forearms are too short (they would cross like an X), so it keeps its arms at its sides.
+FOLDERS = frozenset({"ines", "priya", "david", "mateo", "owl", "bear", "cat", "parrot", "turtle"})
+# Gestures: the speaker's box between waist and shoulders, elbows near the body, open hands. (lead arm, the other arm of a two-handed gesture, hand shape).
+# The two arms of a two-handed gesture are deliberately different.
+KEY: Dict[str, Tuple[Arm, Optional[Arm], str]] = {
+    "open": ((15.0, 116.0, 8.0), (12.0, 103.0, 5.0), "open"),
+    "present": ((34.0, 99.0, 6.0), None, "open"),
+    "count": ((24.0, 160.0, -4.0), None, "one"),
+    "compare": ((15.0, 112.0, 10.0), (13.0, 123.0, 8.0), "open"),
+    "shrug": ((9.0, 97.0, 22.0), (8.0, 104.0, 25.0), "open"),
+    "wave": ((46.0, 176.0, 0.0), None, "open"),
+    "thumb": ((21.0, 154.0, -6.0), None, "thumb"),
+    "beat": ((9.0, 22.0, 4.0), None, "relaxed"),
 }
+TWO_HANDED = ("open", "shrug", "compare")
 COUNT_SHAPES = ("one", "two", "three")
+HAND_REACH = 1.15           # a gesture hand is drawn this much longer than the relaxed one
+
+
+PALMS = ("open", "shrug", "compare", "present")
+RAISED = ("wave", "count", "thumb")
+PATH_NEED = 50.0            # units outward of the shoulder a hand sweeps through on its way up (forearm level, hand trailing): every character's is 50 to 53
+LOW_ROOM = 30.0             # with less room than this beside it an open-palm gesture is made low, by the hip (folded up it would be "hands up")
+
+
+def fit_key(kind: str, lead: bool, geom: Any, room: Optional[float] = None, clear: Optional[float] = None) -> Tuple[List[float], str]:
+    """The key pose of a gesture for one arm of one character -> ([upper, fore, flex], shape).
+    room   units outward of the shoulder the HELD hand may reach (the card's text, the board, another figure, the frame's edge)
+    clear  units the hand may SWEEP through on its way (the same without the frame's edge: a hand may leave the picture for a few frames)
+    With room for the way up: the table's pose, the forearm folded up as far as `room` asks; a waving hand goes beside the head, not in front of the face.
+    Without (clear < PATH_NEED, or an open palm with less than LOW_ROOM): the same gesture made LOW by the hip, forearm out only as far as there is room, so the
+    hand never crosses the card or a neighbour on its way."""
+    a, b, shape = KEY[kind]
+    up, fo, fl = a if (lead or b is None) else b
+    U, F, H = geom.upper, geom.fore, geom.hand * HAND_REACH
+    tight = min(x for x in (room, clear, 1e9) if x is not None)
+    low = (clear is not None and clear < PATH_NEED and kind != "beat") or (kind in PALMS and room is not None and room < LOW_ROOM)
+    if low:
+        from engine.vector_presenter import elbow_need
+
+        fo = 20.0
+        for f in range(58, 19, -2):                           # the widest low pose that fits
+            u = elbow_need(float(f)) + 2.0
+            if U * math.sin(math.radians(u)) + (F + H) * math.sin(math.radians(f + 14.0)) <= tight - 2.0:
+                fo = float(f) - (0.0 if lead else 6.0)
+                break
+        return [elbow_need(fo) + 2.0, fo, 8.0 if kind != "shrug" else 16.0], shape
+    if kind == "wave":                                        # the waving hand goes beside the head, not in front of the face
+        need = 0.5 * getattr(geom, "head_w", 92.0) + 0.55 * H - geom.shoulder_x
+        rest = need - (F + 0.5 * H) * math.sin(math.radians(fo))
+        if U * math.sin(math.radians(up)) < rest:
+            up = max(up, min(70.0, math.degrees(math.asin(min(0.94, rest / U)))))
+    if room is not None:
+        def tip(u: float, f: float) -> float:
+            return U * math.sin(math.radians(u)) + (F + H) * math.sin(math.radians(min(180.0, f + max(0.0, fl))))
+
+        top = min(172.0, up + 126.0)                          # folded as far as an elbow folds
+        if tip(up, fo) > room and fo < top:
+            lo, hi = fo, top
+            for _ in range(18):
+                mid = 0.5 * (lo + hi)
+                lo, hi = (mid, hi) if tip(up, mid) > room else (lo, mid)
+            fo = hi
+        if tip(up, fo) > room:
+            lo, hi = 5.0, up
+            for _ in range(18):
+                mid = 0.5 * (lo + hi)
+                lo, hi = (lo, mid) if tip(mid, fo) > room else (mid, hi)
+            up = lo
+    return [up, fo, fl], shape
+
+
+def arm_times(kind: str, key: Sequence[float]) -> Tuple[float, float]:
+    """(preparation, retraction) seconds for an arm whose key pose is `key`: as long as its forearm's way from rest asks for, inside what the planner reserved."""
+    sweep = abs(key[1] - REST_POSES[0][1]) + 10.0
+    return (max(min(PREP_S, PREP[kind]), min(PREP[kind], sweep / RISE_DPS)), max(min(RETRACT_S, RETRACT[kind]), min(RETRACT[kind], sweep / FALL_DPS)))
+
 
 # ----------------------------------------------------------------------------- text cues (EN + ES)
 _GREET = {"hello", "hi", "hey", "welcome", "hola", "bienvenido", "bienvenida", "bienvenidos", "bienvenidas", "buenas", "buenos"}
@@ -100,36 +186,27 @@ class Gesture:
         return f"Gesture({self.kind} {self.hand} {self.t0:.2f}>{self.stroke:.2f}>{self.hold_end:.2f}>{self.t1:.2f} '{self.word}')"
 
 
-def _far(kind: str) -> float:
-    """How much longer the way home is for the gestures that go high."""
-    return 1.35 if kind == "wave" else 1.15 if kind in ("count", "thumb") else 1.0
-
-
 def _last_beat(g: Gesture) -> float:
     """The last moment of a gesture that must be seen: its stroke, or its last step (the third finger of a count, the second hand of a comparison); the wave keeps a second."""
     return max([g.stroke + (1.0 if g.kind == "wave" else 0.0)] + [s[0] for s in g.steps])
 
 
 def _fit(prev: Gesture, g: Gesture) -> bool:
-    """Make room so that g starts after prev is back home: prev lets go sooner (never before its last beat has been seen for MIN_HOLD_S), prev returns a little faster,
-    g prepares a little faster. False when that is not enough (nothing is changed then)."""
-    need = prev.t1 + GAP_S - g.t0
-    if need <= 0:
+    """May g follow prev? Yes when prev is home BRIDGE_S or more before g starts (the hands rest in between), and yes when g starts once prev has been seen
+    (its last beat plus MIN_HOLD_S): the arm then holds prev and goes straight to g, never by way of rest (Performance._link). To get there g may prepare up to a
+    quarter faster. False when even that is not enough (nothing is changed then)."""
+    seen = _last_beat(prev) + MIN_HOLD_S
+    if g.t0 >= seen:
         return True
-    room = max(0.0, prev.hold_end - (_last_beat(prev) + MIN_HOLD_S))
-    quick = max(0.0, (prev.t1 - prev.hold_end) - 0.44 * _far(prev.kind))
-    prep = max(0.0, (g.stroke - g.t0) - 0.30)
-    if room + quick + prep < need:
+    if g.stroke - seen < 0.75 * (g.stroke - g.t0):
         return False
-    a = min(room, need)
-    prev.hold_end -= a
-    prev.t1 -= a
-    need -= a
-    a = min(quick, need)
-    prev.t1 -= a
-    need -= a
-    g.t0 += need
+    g.t0 = seen
     return True
+
+
+def busy_share(gs: Sequence[Gesture], total: float) -> float:
+    """The share of a talk during which the hands are away from rest: the usual way up and home of each gesture and its hold (not the time reserved for it)."""
+    return sum(min(g.stroke - g.t0, PREP_S) + (g.hold_end - g.stroke) + RETRACT_S for g in gs) / max(total, 1e-6)
 
 
 def sentences(words: Sequence[Word]) -> List[List[int]]:
@@ -254,7 +331,9 @@ def plan_gestures(words: Sequence[Word], seed: float = 0.0, content_side: int = 
             if kind == "present" and content_side == 0 and _h01(seed, si, "p") < 0.35:
                 continue
             ws = words[c["i"]][1]
-            prep = PREP_S * (0.9 + 0.3 * _h01(seed, si, "prep")) * (1.6 if kind == "wave" else 1.35 if kind in ("count", "thumb") else 1.0)     # a longer way up takes longer
+            if kind == "open" and _h01(seed, si, "skip") < 0.30:    # emphasis is not underlined every time: a still speaker now and then is the stronger one
+                continue
+            prep = PREP[kind] * (0.96 + 0.12 * _h01(seed, si, "prep"))
             stroke = max(ws - STROKE_LEAD_S, prep)                 # a talk that opens on its cue word: the hand still gets its full preparation (the only late stroke)
             t0 = max(0.0, stroke - prep)
             hand, lead, side, steps = "both", last_hand, 0, []
@@ -274,7 +353,7 @@ def plan_gestures(words: Sequence[Word], seed: float = 0.0, content_side: int = 
                 else:
                     hand, lead = "both", first_hand
                     t2 = words[c["second"]][1] - STROKE_LEAD_S
-                    steps = [(max(t2, stroke + 0.35), "second")]
+                    steps = [(max(t2, stroke + 0.35 + PREP["compare"] * 0.5), "second")]
                     hold_end = min(max(steps[0][0] + 0.8, s_end - 0.1), steps[0][0] + 1.7)
             elif kind == "present":
                 side = content_side or (1 if _h01(seed, si, "side") < 0.5 else -1)
@@ -284,15 +363,15 @@ def plan_gestures(words: Sequence[Word], seed: float = 0.0, content_side: int = 
                 hold_end = min(hold_end, stroke + 1.1)
             elif kind in ("open", "shrug"):
                 lead = "l" if last_hand == "r" else "r"
-            g = Gesture(kind, t0, stroke, hold_end, hold_end + RETRACT_S * _far(kind), hand, lead if hand == "both" else hand, steps, side, 0.92 + 0.16 * _h01(seed, si, "amp"), words[c["i"]][0])
+            g = Gesture(kind, t0, stroke, hold_end, hold_end + RETRACT[kind], hand, lead if hand == "both" else hand, steps, side, 0.92 + 0.16 * _h01(seed, si, "amp"), words[c["i"]][0])
             if picked and not _fit(picked[-1], g):
                 if kind == "compare" and g.steps:                 # no room for the first half: keep the "other hand" on the contrast word
                     t2 = g.steps[0][0]
                     g = Gesture(kind, t2 - prep, t2, max(t2 + MIN_HOLD_S, min(s_end - 0.1, t2 + MAX_HOLD_S)), 0.0, lead, lead, (), 0, g.amp, words[c["second"]][0])
-                    g.t1 = g.hold_end + RETRACT_S
+                    g.t1 = g.hold_end + RETRACT[kind]
                     hand = lead
                 if not _fit(picked[-1], g):
-                    if PRIORITY[kind] < PRIORITY[picked[-1].kind] and (len(picked) < 2 or picked[-2].t1 + GAP_S <= g.t0):
+                    if PRIORITY[kind] < PRIORITY[picked[-1].kind] and (len(picked) < 2 or _last_beat(picked[-2]) + MIN_HOLD_S <= g.t0):
                         picked.pop()                              # the more telling gesture wins
                     else:
                         continue
@@ -305,10 +384,10 @@ def plan_gestures(words: Sequence[Word], seed: float = 0.0, content_side: int = 
             break
     # limits: not too many, hands mostly at home
     def busy(gs: List[Gesture]) -> float:
-        return sum(g.t1 - g.t0 for g in gs) / max(total, 1e-6)
+        return busy_share(gs, total)
 
     if busy(picked) > max_busy:                                   # first let every hold go sooner, down to the shortest hold
-        fixed = sum((g.t1 - g.t0) - (g.hold_end - _last_beat(g)) for g in picked)
+        fixed = sum(min(g.stroke - g.t0, PREP_S) + (_last_beat(g) - g.stroke) + RETRACT_S for g in picked)
         holds = sum(g.hold_end - _last_beat(g) for g in picked)
         k = max(0.0, min(1.0, (max_busy * total - fixed) / max(holds, 1e-6)))
         for g in picked:
@@ -338,13 +417,13 @@ def plan_gestures(words: Sequence[Word], seed: float = 0.0, content_side: int = 
                 continue
             ok = True
             for g in picked:
-                if g.t0 - 0.35 < tb < g.stroke + 0.3 or g.hold_end - 0.25 < tb < g.t1 + 0.15 or (g.kind in ("wave", "count", "thumb", "shrug") and g.t0 < tb < g.t1):
+                if g.t0 - 0.45 < tb < g.stroke + 0.4 or g.hold_end - 0.35 < tb < g.t1 + 0.45 or (g.kind in ("wave", "count", "thumb", "shrug") and g.t0 < tb < g.t1):
                     ok = False
                 if any(abs(tb - s[0]) < 0.3 for s in g.steps):
                     ok = False
             if not ok:
                 continue
-            if _h01(seed, si, i, "beat") < 0.22:              # not every stress gets a beat
+            if _h01(seed, si, i, "beat") < 0.40:              # not every stress gets a beat
                 continue
             beats.append((tb, hand, 0.7 + 0.5 * _h01(seed, i, "bs")))
             hand = "l" if hand == "r" else "r"
@@ -364,60 +443,77 @@ def _smoother(u: float) -> float:
     return u * u * u * (u * (6 * u - 15) + 10)
 
 
-def _pulse(tau: float, rise: float = 0.13, fall: float = 0.34) -> float:
-    """A beat: quick up, slower down, zero outside."""
+def _pulse(tau: float, rise: float = 0.18, fall: float = 0.40) -> float:
+    """A beat: up, slower down, zero outside (smooth at both ends)."""
     if tau <= -rise or tau >= fall:
         return 0.0
     return _smooth((tau + rise) / rise) if tau < 0 else 1.0 - _smoother(tau / fall)
 
 
-def _reach(g: Gesture, t: float, lag: float = 0.0) -> float:
-    """0 at home, 1 on the key pose: slow in and out, a tiny wind-up before leaving, a small overshoot that settles after the stroke."""
-    t -= lag
-    if t <= g.t0 or t >= g.t1:
-        return 0.0
-    if t < g.stroke:
-        u = (t - g.t0) / max(g.stroke - g.t0, 1e-6)
-        return _smoother(u) - 0.04 * math.sin(math.pi * min(1.0, u * 2.6)) ** 2 * (1 - u)
-    if t <= g.hold_end:
-        tau = t - g.stroke
-        return 1.0 + 0.05 * math.exp(-7.0 * tau) * math.sin(13.0 * tau)
-    return 1.0 - _smoother((t - g.hold_end) / max(g.t1 - g.hold_end, 1e-6))
+def _trap(u: float, a: float, d: float) -> float:
+    """0..1 with a speed that grows evenly over the first `a` of the time, stays, and falls evenly over the last `d`: the lowest top speed for a given time
+    (1 / (1 - a/2 - d/2) of the average), where an S-curve would be half as fast again in the middle."""
+    u = min(1.0, max(0.0, u))
+    v = 1.0 / (1.0 - 0.5 * a - 0.5 * d)
+    if u < a:
+        return 0.5 * v * u * u / a
+    if u <= 1.0 - d:
+        return v * (u - 0.5 * a)
+    return 1.0 - 0.5 * v * (1.0 - u) ** 2 / d
 
 
-def _polar(v: Vec) -> Tuple[float, float]:
-    """(angle from straight down, positive outward, in radians; radius)."""
-    return math.atan2(v[0], -v[1]), math.hypot(v[0], v[1])
+def _rise(u: float) -> float:
+    """Preparation into the stroke: a tiny wind-up the other way (anticipation), then slow in and slow out."""
+    u = min(1.0, max(0.0, u))
+    return _trap(u, 0.36, 0.34) - 0.03 * math.sin(math.pi * min(1.0, u * 3.0)) ** 2 * (1.0 - u)
 
 
-def _from_polar(a: float, r: float) -> Vec:
-    return (r * math.sin(a), -r * math.cos(a))
+def _fall(u: float) -> float:
+    """Retraction: leaves gently, travels, and takes longest over the last part (the arm is put down, not let go)."""
+    return _trap(u, 0.26, 0.48)
 
 
-def _arc(rest: Vec, key: Vec, e: float) -> Vec:
-    """The wrist path between home and a key pose: an arc about the shoulder (angle and radius are blended, not x and y), pulled a little toward the body mid-way,
-    the way a forearm folds while the arm lifts."""
-    a0, r0 = _polar(rest)
-    a1, r1 = _polar(key)
-    a = a0 + (a1 - a0) * e
-    tuck = 0.08 + 0.30 * min(1.0, abs(a1 - a0) / 2.4)             # the further round the hand goes, the more the arm folds on the way (a raised hand passes close to the body)
-    r = (r0 + (r1 - r0) * e) * (1.0 - tuck * math.sin(math.pi * min(1.0, max(0.0, e))) ** 1.5)
-    return _from_polar(a, r)
+def _soft_max(v: float, lo: float, w: float = 3.0) -> float:
+    """max(v, lo) without the corner."""
+    x = lo - v
+    return v + 0.5 * (x + math.sqrt(x * x + w * w))
+
+
+def _lerp3(a: Sequence[float], b: Sequence[float], w: Sequence[float]) -> List[float]:
+    return [a[i] + (b[i] - a[i]) * w[i] for i in range(3)]
 
 
 class Performance:
     """Everything one character does in a shot, as a pure function of time.
 
-      perf = Performance(seed=0.3, content_side=+1)
+      perf = Performance(seed=0.3, content_side=+1, who="fox")
       perf.speak(words, level=...)                 # one or more stretches of narration by THIS character (plans gestures and beats)
       perf.listen(t0, t1, toward=-1, nods=[...])   # another character speaks on that side
       perf.enter(t0, from_side=-1) / perf.leave(t0, to_side=+1) / perf.side_step(t0, dx_units)
       pose, extra = perf.pose(t, geom)             # extra: {"x": sideways offset in units, "alpha": 0..1}
+
+    The arms (docs/PRESENTERS.md "Arms") are bone ANGLES, never wrist targets: rest pose -> gesture layers -> beats -> the elbow rule -> joint limits.
+      who      the character: its idle life (breath, weight, sway, blinks, the rest pose it drifts between) runs on the VIDEO's clock with a seed of its own, so
+               it goes on unbroken across a cut to the next scene; None = the scene's seed (a single clip)
+      clock    the video time at which this shot starts
+      limit    the shot's length: every gesture is back at rest by then (the next shot starts from the rest pose)
+      room     (left, right) free space in units outward from each shoulder to the nearest thing a HELD hand must not cover (the card's text, the board, another
+               figure, the frame's edge); None = unlimited. Gesture poses fold the forearm up to stay inside it
+      clear    (left, right) the same for a hand on its WAY (without the frame's edge). An arm without the room to swing up makes its gesture low, by the hip;
+               a wave, a count or a thumb goes to the other hand when that one has the room (fit_key, _place)
+      fold     (at the start, at the end): a listener that holds its hands together already when the shot starts / still when it ends
+      quiet    seconds at the start of the shot during which no gesture begins (the crossfade from the shot before)
     """
 
-    def __init__(self, seed: float = 0.0, content_side: int = 0, energy: float = 1.0, tail: bool = False, lift: float = 0.0):
+    def __init__(self, seed: float = 0.0, content_side: int = 0, energy: float = 1.0, tail: bool = False, lift: float = 0.0, who: Optional[str] = None,
+                 clock: float = 0.0, limit: Optional[float] = None, room: Optional[Tuple[Optional[float], Optional[float]]] = None,
+                 clear: Optional[Tuple[Optional[float], Optional[float]]] = None, fold: Tuple[bool, bool] = (False, False), quiet: float = 0.0):
         self.seed, self.content_side, self.energy, self.tail = seed, content_side, energy, tail
-        self.lift = lift                                     # low gestures are made this much higher (share of the arm length): for waist-up framing
+        self.lift = lift                                     # waist-up framing: a beat at rest is made this much higher so that it shows above the frame's edge
+        self.who, self.clock, self.limit, self.room, self.fold = who, float(clock), limit, room or (None, None), fold
+        self.clear = clear or self.room
+        self.quiet = quiet                                   # no gesture starts before this (the crossfade from the shot before: two pictures of one arm)
+        self.life = _h01("life", who) if who else seed       # the seed of everything that must not change at a cut
         self.gestures: List[Gesture] = []
         self.beats: List[Tuple[float, str, float]] = []
         self.nods: List[Tuple[float, float]] = []            # (time, strength)
@@ -427,15 +523,42 @@ class Performance:
         self.moves: List[Tuple[str, float, float, float]] = []      # ("enter" | "leave" | "step", t0, amount in units, duration)
         self._shift: Optional[List[Tuple[float, float]]] = None
         self._gaze: Optional[List[Tuple[float, float, float]]] = None
+        self._rest: Optional[List[List[Tuple[float, int]]]] = None
+        self._falls: Optional[Dict[Tuple[int, str], Tuple[float, float]]] = None
+        self._keys: Dict[Any, Any] = {}
 
     # --- script
     def speak(self, words: Sequence[Word], level: Optional[Sequence[float]] = None, end: Optional[float] = None) -> None:
         if not words:
             return
         gs, beats = plan_gestures(words, self.seed + 0.01 * len(self.talk), self.content_side, level, end)
+        if self.limit is not None:                           # the shot ends: hands are home by then, or the gesture is not made
+            kept = []
+            for g in gs:
+                over = g.t1 - (self.limit - 0.04)
+                if over > 0:
+                    if g.hold_end - over < _last_beat(g) + 0.30:
+                        continue
+                    g.hold_end -= over
+                    g.t1 -= over
+                kept.append(g)
+            gs = kept
+            beats = [b for b in beats if b[0] < self.limit - 0.7]
+        gs = [g for g in gs if self._place(g) or g.kind == "wave"]       # a count or a thumb that could only be made low by the hip is not made
+        if self.quiet > 0.0:                                 # the shot fades in over the one before: an arm already on its way would show twice
+            kept = []
+            for g in gs:
+                if g.t0 < self.quiet:
+                    if g.stroke - self.quiet < 0.75 * PREP[g.kind]:
+                        continue
+                    g.t0 = self.quiet
+                kept.append(g)
+            gs = kept
+            beats = [b for b in beats if b[0] > self.quiet + 0.3]
         # a later stretch of speech never cuts into an earlier gesture
         gs = [g for g in gs if all(g.t0 >= o.t1 + GAP_S or g.t1 + GAP_S <= o.t0 for o in self.gestures)]
         self.gestures = sorted(self.gestures + gs, key=lambda g: g.t0)
+        self._falls = None
         self.beats = sorted(self.beats + beats)
         self.talk.append((words[0][1], end if end is not None else words[-1][2]))
         # nods: on the stroke of most gestures and on about half of the other stressed words, never closer than 0.8 s
@@ -445,15 +568,36 @@ class Performance:
                 self.nods.append((t, s))
         self.nods.sort()
 
+    def _place(self, g: Gesture) -> bool:
+        """A raised one-handed gesture is given to the hand that has the room to go up (the other one when the planned hand has none). False: neither has."""
+        if g.kind not in RAISED or g.hand == "both":
+            return True
+        ok = {s: (self.clear[i] is None or self.clear[i] >= PATH_NEED) for i, s in enumerate(("l", "r"))}
+        if not ok[g.hand]:
+            other = "r" if g.hand == "l" else "l"
+            if not ok[other]:
+                return False
+            g.hand = g.lead = other
+        return True
+
     def gesture(self, kind: str, stroke: float, hold: float = 1.2, hand: Optional[str] = None, side: int = 0) -> None:
-        """A gesture asked for by the scene itself (everyone waves at the end): it replaces any planned gesture it would overlap."""
+        """A gesture asked for by the scene itself (everyone waves at the end). It may follow another closely or cut into its hold: the arm then goes from the
+        pose it is in straight to the new one (never by way of rest). It only waits until the gesture before it has been seen (its stroke plus SEEN_S)."""
         if kind not in KEY:
             raise ValueError(f"unknown gesture {kind!r}")
-        two = kind in ("open", "shrug")
+        two = kind in TWO_HANDED
         h = hand or ("both" if two else ("l" if _h01(self.seed, kind, round(stroke, 2)) < 0.5 else "r"))
-        t0 = max(0.0, stroke - PREP_S * 1.2)
-        g = Gesture(kind, t0, stroke, stroke + hold, stroke + hold + RETRACT_S * _far(kind), h, "r" if h == "both" else h, (), side)
-        self.gestures = sorted([o for o in self.gestures if o.t1 + GAP_S <= g.t0 or o.t0 >= g.t1 + GAP_S] + [g], key=lambda x: x.t0)
+        if kind == "present" and side:
+            h = "r" if side > 0 else "l"
+        prep = PREP[kind]
+        for o in self.gestures:                               # the one before must have landed and been seen
+            if o.t0 <= stroke - prep < o.stroke + SEEN_S and (o.hand == "both" or h == "both" or o.hand == h):
+                stroke = o.stroke + SEEN_S + prep
+        t0 = max(0.0, stroke - prep)
+        g = Gesture(kind, t0, stroke, stroke + hold, stroke + hold + RETRACT[kind], h, "r" if h == "both" else h, (), side)
+        self._place(g)
+        self.gestures = sorted([o for o in self.gestures if not (o.t0 >= g.t0 and o.t0 < g.t1)] + [g], key=lambda x: x.t0)
+        self._falls = None
 
     def mouth(self, t0: float, fps: float, shapes: Sequence[str]) -> None:
         self.mouths.append((t0, fps, shapes))
@@ -471,39 +615,41 @@ class Performance:
         self.moves.append(("enter", t0, from_side * distance, dur))
 
     def leave(self, t0: float, to_side: int = 1, distance: float = 70.0, dur: float = 0.65) -> None:
-        self.moves.append(("leave", t0, to_side * distance, dur))  
+        self.moves.append(("leave", t0, to_side * distance, dur))
 
     def side_step(self, t0: float, dx: float, dur: float = 0.8) -> None:
-        self.moves.append(("step", t0, dx, dur))                   
+        self.moves.append(("step", t0, dx, dur))
 
-    # --- idle life
+    # --- idle life (on the video's clock: T = clock + t)
     def _shifts(self) -> List[Tuple[float, float]]:
         if self._shift is None:
-            out, t, i, cur = [(0.0, 1.6 * (_h01(self.seed, "s0") - 0.5))], 2.5 + 3.0 * _h01(self.seed, "st"), 1, 0.0
-            while t < 600.0:
-                cur = (2.2 + 1.6 * _h01(self.seed, i, "sa")) * (1 if cur <= 0 else -1)
+            sd = self.life
+            out, t, i, cur = [(0.0, 1.6 * (_h01(sd, "s0") - 0.5))], 2.5 + 3.0 * _h01(sd, "st"), 1, 0.0
+            while t < 900.0:
+                cur = (2.2 + 1.6 * _h01(sd, i, "sa")) * (1 if cur <= 0 else -1)
                 out.append((t, cur))
-                t += 5.0 + 5.0 * _h01(self.seed, i, "sd")
+                t += 5.0 + 5.0 * _h01(sd, i, "sd")
                 i += 1
             self._shift = out
         return self._shift
 
-    def weight(self, t: float) -> float:
-        """Sideways pelvis offset in units: the weight moves from one foot to the other every 5 to 10 s, in about a second."""
+    def weight(self, T: float) -> float:
+        """Sideways pelvis offset in units at video time T: the weight moves from one foot to the other every 5 to 10 s, in about a second."""
         s = self._shifts()
-        i = bisect.bisect_right([a for a, _ in s], t) - 1
+        i = bisect.bisect_right([a for a, _ in s], T) - 1
         if i <= 0:
             return s[0][1]
-        return s[i - 1][1] + (s[i][1] - s[i - 1][1]) * _smoother((t - s[i][0]) / 1.1)
+        return s[i - 1][1] + (s[i][1] - s[i - 1][1]) * _smoother((T - s[i][0]) / 1.1)
 
     def _gazes(self) -> List[Tuple[float, float, float]]:
         if self._gaze is None:
-            out, t, i = [(0.0, 0.0, 0.0)], 1.0 + 1.5 * _h01(self.seed, "g0"), 1
-            while t < 600.0:
-                if _h01(self.seed, i, "gk") < 0.3:                       # a short glance away, then back to the viewer
-                    out.append((t, 2.6 * (_h01(self.seed, i, "gx") - 0.5), 1.0 * (_h01(self.seed, i, "gy") - 0.6)))
-                    out.append((t + 0.35 + 0.5 * _h01(self.seed, i, "gd"), 0.0, 0.0))
-                t += 1.6 + 2.6 * _h01(self.seed, i, "gt")
+            sd = self.life
+            out, t, i = [(0.0, 0.0, 0.0)], 1.0 + 1.5 * _h01(sd, "g0"), 1
+            while t < 900.0:
+                if _h01(sd, i, "gk") < 0.3:                       # a short glance away, then back to the viewer
+                    out.append((t, 2.6 * (_h01(sd, i, "gx") - 0.5), 1.0 * (_h01(sd, i, "gy") - 0.6)))
+                    out.append((t + 0.35 + 0.5 * _h01(sd, i, "gd"), 0.0, 0.0))
+                t += 1.6 + 2.6 * _h01(sd, i, "gt")
                 i += 1
             self._gaze = out
         return self._gaze
@@ -511,98 +657,243 @@ class Performance:
     def blink(self, t: float) -> bool:
         from engine.vector_character import blink_natural       # the same irregular blinks as the first rig
 
-        if blink_natural(t, self.seed):
+        if blink_natural(self.clock + t, self.life):
             return True
         return any(0.0 <= t - (g.t0 + 0.05) < 0.11 and _h01(self.seed, round(g.t0, 2), "gb") < 0.4 for g in self.gestures)   # people often blink as a gesture starts
 
     def speaking(self, t: float) -> bool:
         return any(a - 0.05 <= t < b + 0.1 for a, b in self.talk)
 
-    # --- hands
-    def _hand(self, t: float, s: str, A: float, rest: Vec) -> Tuple[Vec, float, str, float]:
-        """-> (wrist target relative to the shoulder in units, wrist turn, shape, how far from home 0..1) for hand "l" or "r"."""
-        tgt, wr, shape, away = rest, 0.0, "relaxed", 0.0
+    # --- rest
+    def _rests(self) -> List[List[Tuple[float, int]]]:
+        """Per arm: [(video time, index into REST_POSES)]. Each arm settles into another relaxed pose every 8 to 16 s, the two arms at different moments."""
+        if self._rest is None:
+            out = []
+            for s in ("l", "r"):
+                seq, t, i = [(-1e9, int(_h01(self.life, s, "r0") * len(REST_POSES)))], 3.0 + 9.0 * _h01(self.life, s, "rt"), 1
+                while t < 900.0:
+                    nxt = int(_h01(self.life, s, i, "rk") * len(REST_POSES))
+                    if nxt == seq[-1][1]:
+                        nxt = (nxt + 1) % len(REST_POSES)
+                    seq.append((t, nxt))
+                    t += 8.0 + 8.0 * _h01(self.life, s, i, "rd")
+                    i += 1
+                out.append(seq)
+            self._rest = out
+        return self._rest
+
+    def folded(self, t: float, i: int = 0) -> float:
+        """0..1: how far this (listening) character has its hands together in front at shot time t (arm i moves a little after the other)."""
+        if self.who not in FOLDERS or self.talk or self.gestures:
+            return 0.0
+        a0, a1 = self.fold
+        if a0 and a1:
+            return 1.0
+        end = self.limit if self.limit is not None else (self.listening[-1][1] + 0.6 if self.listening else 0.0)
+        if (not self.listening and not a0) or (end < FOLD_MIN_S and not a0):
+            return 0.0
+        lag = 0.22 * i if _h01(self.life, "fl") < 0.5 else 0.22 * (1 - i)
+        t_in = (1.25 if any(m[0] == "enter" for m in self.moves) else 0.45) + 0.5 * _h01(self.seed, "fi")
+        up = 1.0 if a0 else _smoother((t - t_in - lag) / FOLD_S)
+        down = 1.0 if a1 else 1.0 - _smoother((t - (end - FOLD_S - 0.30) - lag) / FOLD_S)
+        return up * down
+
+    def _rest_arm(self, t: float, i: int, geom: Any) -> List[float]:
+        """The arm's rest pose at shot time t: the relaxed pose of the moment, alive (breath, a slow sway, the weight shift), or the hands held together."""
+        T = self.clock + t
+        seq = self._rests()[i]
+        j = bisect.bisect_right([a for a, _ in seq], T) - 1
+        cur = REST_POSES[seq[j][1]]
+        if j > 0:
+            w = _smoother((T - seq[j][0]) / REST_CHANGE_S)
+            cur = [a + (b - a) * w for a, b in zip(REST_POSES[seq[j - 1][1]], cur)]
+        up, fo, fl = cur
+        sd, side = self.life, (-1 if i == 0 else 1)
+        k = 0.5 - 0.5 * math.cos(2 * math.pi * (T / (3.7 + 0.6 * _h01(sd, "bp")) + _h01(sd, "bo")))
+        calm = 1.0
+        f = self.folded(t, i)
+        if f > 0.0:
+            ku, kf = self._key_fold(geom, i)
+            up, fo, fl = up + (ku - up) * f, fo + (kf - fo) * f, fl + (FOLD_FLEX - fl) * f
+            calm = 1.0 - 0.30 * f                             # hands that hold each other move together, and little
+        sway = 1.8 * math.sin(2 * math.pi * T / (5.3 + 1.1 * i) + 6.28 * _h01(sd, i, "sw")) + 0.5 * math.sin(2 * math.pi * T / (3.1 + 0.4 * i) + 6.28 * _h01(sd, i, "sx"))
+        pend = 0.40 * side * self.weight(T - 0.28)            # the hanging arm swings a hair behind the weight shift
+        fo += calm * (sway + pend) + 0.5 * k
+        up += calm * (0.7 * math.sin(2 * math.pi * T / (6.7 + i) + 6.28 * _h01(sd, i, "su")) + 0.25 * pend) + 0.35 * k
+        fl += 1.6 * math.sin(2 * math.pi * T / 4.1 + i)
+        return [up, fo, fl]
+
+    def _key_fold(self, geom: Any, i: int) -> Tuple[float, float]:
+        """Hands loosely together in front of the navel (as far in as the arms reach): elbows out, forearms in, one hand a little above the other."""
+        key = ("fold", id(geom), i)
+        if key not in self._keys:
+            from engine.vector_presenter import reach_angles
+
+            top = i == (0 if _h01(self.life, "ft") < 0.5 else 1)
+            x = -(geom.shoulder_x - (2.0 + 0.20 * geom.hand))
+            up, fo = reach_angles(geom, (x, -(FOLD_DROP + (0.0 if top else 4.0))), -1)
+            if up < 1.0:                                      # long arms: the elbow stays at the side and the hands meet lower
+                up, fo = 1.0, math.degrees(math.asin(max(-1.0, min(0.0, (x - geom.upper * math.sin(math.radians(1.0))) / geom.fore)))) - (0.0 if top else 5.0)
+            self._keys[key] = (up, fo)
+        return self._keys[key]
+
+    # --- gestures
+    def _arm_key(self, g: Gesture, s: str, geom: Any) -> Tuple[List[float], str, float, float]:
+        """(key pose, hand shape, preparation, retraction) of arm s in gesture g for this character, in this place."""
+        lead = g.hand != "both" or g.lead == s
+        ck = (g.kind, lead, s, id(geom))
+        if ck not in self._keys:
+            i = 0 if s == "l" else 1
+            key, shape = fit_key(g.kind, lead, geom, self.room[i], self.clear[i])
+            self._keys[ck] = (key, shape) + arm_times(g.kind, key)
+        return self._keys[ck]
+
+    @staticmethod
+    def _arm_stroke(g: Gesture, s: str) -> float:
+        if g.kind == "compare" and g.hand == "both" and s != g.lead and g.steps:       # the second hand comes up on the contrast word
+            return g.steps[0][0]
+        return g.stroke + (TWIN_LAG_S if (g.hand == "both" and g.lead != s) else 0.0)
+
+    def _link(self) -> Dict[Tuple[int, str], Tuple[float, float]]:
+        """When each arm of each gesture stops holding: (start, None) = at the end of its hold, the arm then goes home in its own time; (start, end) = the NEXT
+        gesture of the same arm begins before this one would be home (or less than BRIDGE_S after): the arm holds until that one has taken over and this one
+        lets go underneath it, so the arm never visits rest in between."""
+        if self._falls is None:
+            falls: Dict[Tuple[int, str], Tuple[float, float]] = {}
+            gs = self.gestures
+            for a, g in enumerate(gs):
+                for s in ("l", "r"):
+                    if g.hand not in ("both", s):
+                        continue
+                    lag = TWIN_LAG_S if (g.hand == "both" and g.lead != s) else 0.0
+                    falls[(id(g), s)] = (g.hold_end + lag, None)
+                    for h in gs[a + 1:]:
+                        if h.hand in ("both", s):
+                            st = self._arm_stroke(h, s)                        # when THIS arm of the next gesture lands (the second hand of a comparison comes later)
+                            if st - PREP[h.kind] < g.t1 + BRIDGE_S:
+                                falls[(id(g), s)] = (st + 0.02, st + 0.30)
+                            break
+            self._falls = falls
+        return self._falls
+
+    def _weight(self, g: Gesture, s: str, t: float, geom: Any) -> float:
+        """How much of gesture g arm s shows at t: 0 at rest (or under the next gesture), 1 on the key pose, a little over 1 as it lands (overshoot, settles),
+        a little under 0 as it comes home (the arm swings a hair past rest and back)."""
+        lag = TWIN_LAG_S if (g.hand == "both" and g.lead != s) else 0.0
+        _, _, prep, retract = self._arm_key(g, s, geom)
+        st = self._arm_stroke(g, s)
+        t0 = max(g.t0, st - prep)
+        if t <= t0:
+            return 0.0
+        fs, fe = self._link()[(id(g), s)]
+        if fe is None:
+            fe = fs + min(retract, max(0.5, g.t1 + lag - fs))
+        if t < st:
+            return _rise((t - t0) / max(st - t0, 1e-6))
+        if t <= fs:
+            tau = t - st
+            return 1.0 + 0.045 * math.exp(-6.0 * tau) * (1.0 - math.cos(14.0 * tau))
+        if t < fe:
+            return 1.0 - _fall((t - fs) / max(fe - fs, 1e-6))
+        tau = t - fe
+        return -0.022 * math.exp(-5.0 * tau) * (1.0 - math.cos(10.0 * tau)) if tau < 1.4 else 0.0
+
+    def _key(self, g: Gesture, s: str, t: float, geom: Any) -> Tuple[List[float], str]:
+        """The key pose of gesture g for arm s at t (most are still; the wave waves, a count pumps, a comparison gives way) and its hand shape."""
+        lead = g.hand != "both" or g.lead == s
+        (up, fo, fl), shape, _, _ = self._arm_key(g, s, geom)
+        tau = t - g.stroke
+        if g.kind == "wave":
+            on = _smooth((tau + 0.10) / 0.45) * _smooth((g.hold_end - t) / 0.45)        # the hand starts to wave as it arrives and stops before it leaves
+            fo += 10.0 * math.sin(2 * math.pi * WAVE_HZ * tau) * on
+            fl += 9.0 * math.sin(2 * math.pi * WAVE_HZ * tau - 0.9) * on
+        elif g.kind == "count":
+            for ts, v in g.steps:
+                if t >= ts - 0.06:
+                    shape = COUNT_SHAPES[max(0, min(2, int(v) - 1))]
+                if ts != g.stroke:
+                    fo -= 6.0 * _pulse(t - ts, 0.16, 0.36)                               # a small pump as each finger comes up
+        elif g.kind == "compare" and g.hand == "both" and g.steps and lead:
+            give = _smooth((t - g.steps[0][0] + 0.25) / 0.6)                              # the first hand gives way a little when the second one speaks
+            fo -= 12.0 * give
+            up -= 2.0 * give
+        # a moving hold: the held hand is never frozen
+        drift = _smooth(tau / 0.8)
+        fo += drift * 1.4 * math.sin(2 * math.pi * (t / 2.3) + (0.0 if s == "l" else 1.9))
+        fl += drift * 1.5 * math.sin(2 * math.pi * (t / 1.9) + (0.7 if s == "l" else 0.0))
+        return [up, fo, fl], shape
+
+    def _arm_raw(self, t: float, i: int, geom: Any) -> Tuple[List[float], str, float]:
+        """-> ([upper, fore, flex], hand shape, how far from rest 0..1) before the wrist drag and the elbow rule."""
+        s = "l" if i == 0 else "r"
+        pose = self._rest_arm(t, i, geom)
+        shape, away = "relaxed", 0.0
         for g in self.gestures:
-            if not (g.t0 <= t < g.t1 + TWIN_LAG_S + 0.02):
+            if g.hand not in ("both", s) or t <= g.t0 or t > g.t1 + 2.0:
                 continue
-            if g.hand != "both" and g.hand != s:
+            w = self._weight(g, s, t, geom)
+            if w == 0.0:
                 continue
-            lag = 0.0 if (g.hand != "both" or g.lead == s) else TWIN_LAG_S
-            key, kw, kshape = KEY["present_low" if (g.kind == "present" and self.content_side == 0) else g.kind]
-            amp = g.amp * (0.94 if lag else 1.0)
-            e = _reach(g, t, lag)
-            if g.kind == "compare" and g.hand == "both":
-                t2 = g.steps[0][0]
-                if s != g.lead:                                   # the second hand comes up on the contrast word and both leave together
-                    g2 = Gesture("compare", t2 - PREP_S, t2, g.hold_end, g.t1, s)
-                    e = _reach(g2, t, 0.03)
-                else:
-                    e *= 1.0 - 0.22 * _smooth((t - t2 + 0.2) / 0.4) # the first hand gives way a little when the second one speaks
-            kx, ky = key[0] * A, (key[1] + (self.lift if key[1] < -0.1 else 0.0)) * A
-            if g.kind == "wave":
-                tau = t - g.stroke
-                on = _smooth((tau + 0.15) / 0.3) * _smooth((g.hold_end - t) / 0.35)      # the hand starts to wave as it arrives and stops before it leaves
-                kx += 0.085 * A * math.sin(2 * math.pi * 2.3 * tau) * on
-                kw += 16.0 * math.sin(2 * math.pi * 2.3 * tau - 0.9) * on
-            if g.kind == "count":
-                for ts, v in g.steps:
-                    if t >= ts - 0.06:
-                        kshape = COUNT_SHAPES[max(0, min(2, int(v) - 1))]
-                    ky += 0.045 * A * _pulse(t - ts, 0.10, 0.30) * (0.0 if ts == g.stroke else 1.0)    # a small pump as each finger comes up
-            ee = min(1.06, e * (0.9 + 0.1 * amp))
-            tgt = _arc(rest, (kx, ky), ee)
-            wr = kw * min(1.0, max(0.0, e))
-            # the hand drags behind the forearm while the arm travels and catches up after it stops
-            dt = 0.045
-            v = (_reach(g, t - 0.03, lag) - _reach(g, t - 0.03 - dt, lag)) / dt
-            wr -= max(-20.0, min(20.0, 7.5 * v))
+            key, kshape = self._key(g, s, t, geom)
+            fs = self._link()[(id(g), s)][0]
+            wu = self._weight(g, s, t + LEAD_S * (1.0 - 2.0 * _smooth((t - g.stroke - 0.1) / max(0.25, fs - g.stroke - 0.2))), geom)     # the upper arm starts first on the way up and arrives last on the way down
+            pose = _lerp3(pose, key, (wu, w, w))
+            wc = min(1.0, max(0.0, w))
             late = g.kind in ("count", "thumb")                 # a finger or a thumb shows only when the hand is nearly up: half way it would read as pointing
-            shape = kshape if e > ((0.80 if late else 0.30) if t < g.stroke else (0.70 if late else 0.42)) else "relaxed"
-            away = min(1.0, max(0.0, e))
-        # beats ride on top: at home a small lift of the forearm, during a hold a small drop-and-return of the held hand
+            if wc > ((0.86 if late else 0.35) if t < g.stroke else (0.84 if late else 0.45)):
+                shape = kshape
+            elif wc > 0.5:
+                shape = "relaxed"
+            away = max(away * (1.0 - wc), wc)
         for tb, hb, sb in self.beats:
-            if not (-0.2 < t - tb < 0.45):
+            if not (-0.25 < t - tb < 0.5):
                 continue
             p = _pulse(t - tb) * sb * self.energy
-            if away > 0.5:
-                tgt = (tgt[0] + 0.012 * A * p, tgt[1] - 0.05 * A * p)
-                wr -= 7.0 * p
-            elif hb == s:
-                b = _arc(rest, (KEY["beat"][0][0] * A, (KEY["beat"][0][1] + self.lift) * A), p * (1.0 - away))
-                tgt = (tgt[0] + (b[0] - rest[0]), tgt[1] + (b[1] - rest[1]))
-                wr += KEY["beat"][1] * p * (1.0 - away) - 9.0 * (_pulse(t - tb + 0.05) - _pulse(t - tb)) * sb
+            if away > 0.5:                                        # during a hold: the held hand dips and returns
+                pose[1] -= 5.5 * p
+                pose[2] -= 5.0 * p
+            elif hb == s:                                         # at rest: the forearm lifts a little, elbow with it
+                k = p * (1.0 - away)
+                pose[0] += 3.5 * k
+                pose[1] += (13.0 + 30.0 * self.lift) * k
+                pose[2] += 6.0 * k
             else:                                                 # the other hand answers faintly, a little later
                 p2 = _pulse(t - tb - 0.09) * sb * 0.3 * (1.0 - away)
-                b = _arc(rest, (KEY["beat"][0][0] * A, KEY["beat"][0][1] * A), p2)
-                tgt = (tgt[0] + (b[0] - rest[0]), tgt[1] + (b[1] - rest[1]))
-        return tgt, wr, shape, away
+                pose[1] += 5.0 * p2
+        return pose, shape, away
+
+    def arm(self, t: float, i: int, geom: Any) -> Tuple[float, float, float, str, float]:
+        """-> (upper, fore, flex, hand shape, away) of arm i (0 = left of the picture) at shot time t. The hand drags behind the forearm while it travels and
+        catches up after it stops; the elbow moves out when the forearm swings out (vector_presenter.elbow_need)."""
+        from engine.vector_presenter import elbow_need
+
+        (up, fo, fl), shape, away = self._arm_raw(t, i, geom)
+        if away > 0.0 or self.gestures or self.beats:
+            (_, fo0, _), _, _ = self._arm_raw(t - DRAG_DT, i, geom)
+            v = (fo - fo0) / DRAG_DT
+            fl -= DRAG_MAX * math.tanh(DRAG_K * v / DRAG_MAX)
+        up = _soft_max(up, elbow_need(fo))
+        return up, fo, fl, shape, away
 
     # --- everything
     def pose(self, t: float, geom: Any) -> Tuple[Dict[str, Any], Dict[str, float]]:
-        from engine.vector_presenter import rest_target
-
-        sd = self.seed
-        A = geom.arm
-        k = 0.5 - 0.5 * math.cos(2 * math.pi * (t / (3.7 + 0.6 * _h01(sd, "bp")) + _h01(sd, "bo")))          # breath 0..1
-        dx = self.weight(t)
-        # idle arm sway: the hanging arms swing a hair with the weight shift and the breath, each a little out of step
-        rest0 = rest_target(geom)
-        hands, wrists, shapes, away = [], [], [], []
-        for i, s in enumerate(("l", "r")):
-            side = -1 if i == 0 else 1
-            sway = 0.010 * A * math.sin(2 * math.pi * t / (5.3 + i) + 3.0 * _h01(sd, s)) + 0.012 * A * side * (self.weight(t - 0.25) / 3.0) + 0.006 * A * k
-            rest = (rest0[0] + sway, rest0[1] + 0.008 * A * k)
-            tg, wr, sh, aw = self._hand(t, s, A, rest)
-            hands.append(tg)
-            wrists.append(wr + 2.0 * math.sin(2 * math.pi * t / 4.1 + i) + REST_WRIST * (1.0 - aw))
+        sd = self.life
+        T = self.clock + t
+        k = 0.5 - 0.5 * math.cos(2 * math.pi * (T / (3.7 + 0.6 * _h01(sd, "bp")) + _h01(sd, "bo")))          # breath 0..1
+        dx = self.weight(T)
+        arms, wrists, shapes = [], [], []
+        for i in (0, 1):
+            up, fo, fl, sh, _aw = self.arm(t, i, geom)
+            arms.append((up, fo))
+            wrists.append(fl)
             shapes.append(sh)
-            away.append(aw)
         # gestures colour the body: lean toward the presenting side, shoulders up in a shrug, head tilts
         lean, shrug, tilt, look_x, look_y = -0.28 * dx, 0.0, 0.0, 0.0, 0.0
         for g in self.gestures:
-            if not (g.t0 <= t < g.t1):
+            if not (g.t0 <= t < g.t1 + 0.4):
                 continue
-            e = min(1.0, max(0.0, _reach(g, t)))
+            ls = g.lead if g.hand == "both" else g.hand
+            e = min(1.0, max(0.0, self._weight(g, ls, t, geom))) if t < g.hold_end else 1.0 - _fall((t - g.hold_end) / max(g.t1 - g.hold_end, 1e-6))
             if g.kind == "present":
                 lean += 1.6 * g.side * e
                 tilt += 3.0 * g.side * e
@@ -613,8 +904,8 @@ class Performance:
                 tilt += (5.0 if g.lead == "r" else -5.0) * e
             elif g.kind == "compare":
                 first = -1.0 if g.lead == "l" else 1.0
-                if g.hand != "both":
-                    first = -1.0 if g.hand == "l" else 1.0
+                if g.hand != "both" or not g.steps:
+                    first = -1.0 if ls == "l" else 1.0
                     tilt += 3.0 * first * e
                 else:
                     sw = _smooth((t - g.steps[0][0] + 0.25) / 0.45)
@@ -638,22 +929,22 @@ class Performance:
                 look_x += 3.4 * toward * w
                 lean += 0.7 * toward * w
         gz = self._gazes()
-        i = bisect.bisect_right([a for a, _, _ in gz], t) - 1
+        i = bisect.bisect_right([a for a, _, _ in gz], T) - 1
         if i >= 0 and abs(look_x) < 0.5:
             a, gx, gy = gz[i]
             px_, py_ = (gz[i - 1][1], gz[i - 1][2]) if i > 0 else (0.0, 0.0)
-            w = _smooth((t - a) / 0.07)                                # a saccade takes two frames
+            w = _smooth((T - a) / 0.07)                                # a saccade takes two frames
             look_x += px_ + (gx - px_) * w
             look_y += py_ + (gy - py_) * w
         pose: Dict[str, Any] = {
             "dx": dx, "dy": 0.0, "lean": lean, "torso_sy": 1.0 + 0.013 * k, "shrug": shrug,
-            "hands": tuple(hands), "wrist": tuple(wrists), "hand_shape": tuple(shapes),
-            "head_tilt": tilt + 0.9 * math.sin(2 * math.pi * t / (4.9 + sd) + 6.0 * _h01(sd, "ht")) + 0.25 * dx,
+            "arms": tuple(arms), "wrist": tuple(wrists), "hand_shape": tuple(shapes),
+            "head_tilt": tilt + 0.9 * math.sin(2 * math.pi * T / (4.9 + sd) + 6.0 * _h01(sd, "ht")) + 0.25 * dx,
             "head_dy": 1.0 * k - 1.7 * nod, "head_dx": 0.25 * look_x, "head_sy": 1.0 - 0.012 * nod,
             "look": (look_x, look_y - 0.5 * nod), "blink": self.blink(t), "mouth": self._mouth(t),
         }
         if self.tail:
-            pose["tail"] = 5.0 * math.sin(2 * math.pi * t / 2.9 + sd) + 3.0 * math.sin(2 * math.pi * t / 1.3) * (1.0 if self.speaking(t) else 0.3) - 4.0 * nod
+            pose["tail"] = 5.0 * math.sin(2 * math.pi * T / 2.9 + sd) + 3.0 * math.sin(2 * math.pi * T / 1.3) * (1.0 if self.speaking(t) else 0.3) - 4.0 * nod
         extra = {"x": 0.0, "alpha": 1.0}
         feet = [[-geom.stance, 0.0], [geom.stance, 0.0]]
         for kind, t0, amt, dur in self.moves:
