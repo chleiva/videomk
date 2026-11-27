@@ -882,6 +882,8 @@ def _validate_plan(plan: Dict[str, Any], *, max_beats: int = MAX_BEATS, language
         sp = voice_mod.speaker_id(b.get("speaker"))
         if sp:
             beat["speaker"] = sp
+        if _s(b.get("translation"), 400) and not silent:   # a line of a multilingual conversation, said again in the video's language (engine/polyglot.py); no other plan has one
+            beat["translation"] = _s(b.get("translation"), 400)
         if _s(b.get("chapter"), 60):
             beat["chapter"] = _s(b.get("chapter"), 60)
         beats.append(beat)

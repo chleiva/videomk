@@ -4,6 +4,7 @@ import json
 from typing import Any, Dict, List, Sequence
 
 from . import length as length_mod
+from . import plan_langs
 from . import sync as sync_mod
 from . import watermark_spec
 from .align import estimate_words
@@ -183,6 +184,7 @@ def build_timeline(
                 "cues": [round(c, 3) for c in cues[:8]],
                 "transition": "fade",
                 **({"sfx": beat["sfx"]} if beat.get("sfx") else {}),
+                **plan_langs.scene_extras(plan, beat),   # {} unless the plan has characters speaking different languages
             }
         )
         if beat.get("chapter"):
@@ -251,7 +253,7 @@ def beat_info_from_plan(plan: Dict[str, Any]) -> List[Dict[str, Any]]:
 
 
 def _scene_fingerprint(sc: Dict[str, Any]) -> Dict[str, Any]:
-    return {**{k: sc.get(k) for k in ("id", "type", "duration", "props", "words", "transition")}, **({"bg_t0": sc["bg_t0"]} if "bg_t0" in sc else {})}   # bg_t0: only with an animated background
+    return {**{k: sc.get(k) for k in ("id", "type", "duration", "props", "words", "transition")}, **({"bg_t0": sc["bg_t0"]} if "bg_t0" in sc else {}), **({"translation": sc["translation"]} if sc.get("translation") else {})}   # bg_t0: only with an animated background
 
 
 def chunk_plan(timeline: Dict[str, Any], target_seconds: float = 30, draft: bool = False, max_frames: int = 0) -> List[Dict[str, Any]]:

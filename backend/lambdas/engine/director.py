@@ -11,7 +11,7 @@ from datetime import date
 
 import logging
 
-from . import art_direction, background, engagement, language as lang_mod, length as length_mod, plan as plan_mod, quality, research, researcher, skills as skills_mod, staged as staged_mod, presenter_policy, vector_policy, voices, whiteboard_policy
+from . import art_direction, background, engagement, language as lang_mod, length as length_mod, plan as plan_mod, polyglot as polyglot_mod, quality, research, researcher, skills as skills_mod, staged as staged_mod, presenter_policy, vector_policy, voices, whiteboard_policy
 from .netsafe import quality_fixes
 
 def fit_to_target() -> bool:
@@ -88,12 +88,23 @@ def direct(prompt: str, *, minutes: float, ask_small: Ask, ask_big: Callable[[st
     # `extras`, the older `style` / `presenter`, or plain words) is taken as it is; otherwise the director commits to one named recipe with a reason. The three
     # older policies (cartoon scenes, whiteboard, presenter) are built FROM that decision, so they can no longer each add a little of their own.
     n_expected = plan_mod.expected_beats(minutes, len(photos or []))
-    direction = art_direction.decide(prompt, options=options, skill_ids=skill_ids, photos=photos, research_mode=info["mode"], minutes=minutes, language=language,
+    poly, poly_options = None, options   # characters that speak different languages (engine/polyglot.py): only where POLYGLOT is on
+    if polyglot_mod.enabled() and not photos:
+        poly = polyglot_mod.extract(prompt, options, main=language, ask=lambda sys_, usr: ask_small(sys_, usr, 400))
+        if poly is not None:
+            poly_options, poly_note = polyglot_mod.shape_options(options, poly, prompt, skill_ids=skill_ids, language=language, minutes=minutes)
+            if poly_note:
+                poly.notes.append(poly_note)
+    direction = art_direction.decide(prompt, options=poly_options, skill_ids=skill_ids, photos=photos, research_mode=info["mode"], minutes=minutes, language=language,
                                      ask=lambda sys_, usr: ask_small(sys_, usr, 320))
     vpolicy, wpolicy, ppolicy = art_direction.policies(direction, prompt, options=options, skill_ids=skill_ids, minutes=minutes, expected_beats=n_expected, language=language,
                                                        vector_search=vector_search, ask=(lambda sys_, usr: ask_small(sys_, usr, 160)) if vector_policy.enabled() else None)
     info["look"] = direction.summary()
+    if poly is not None:
+        polyglot_mod.bind(poly, direction, minutes=minutes, photos=bool(photos))   # fills poly.speakers (empty when the look cannot hold it)
+    poly_notes = polyglot_mod.note_texts(poly) if poly is not None and not poly.speakers else []   # asked for, not made (one look cannot hold it): said, never silent
     craft += vpolicy.prompt_block(language) + wpolicy.prompt_block(language) + art_direction.prompt_block(direction, language, minutes, (options or {}).get("aspect") or "16:9")
+    craft += polyglot_mod.block(poly, direction, language, minutes)
     written_from = [notes]   # everything the writer was shown (the grounding check compares the narration with it)
     rate = {"max_images_per_minute": max_images_per_minute} if max_images_per_minute is not None else {}
     with vector_policy.scope(vpolicy), whiteboard_policy.scope(wpolicy), presenter_policy.scope(ppolicy):
@@ -138,6 +149,7 @@ def direct(prompt: str, *, minutes: float, ask_small: Ask, ask_big: Callable[[st
     if direction.look == "cartoon":   # the character is in every scene by design
         warnings = [w for w in warnings if "presenter twice in a row" not in w]
     warnings += art_direction.enforce(plan, direction, backdrops=vpolicy.ids() if vpolicy.allowed else [])   # every scene fits the direction or is converted to it; records plan["look"]
+    polyglot_mod.prepare(plan, poly)   # records plan["polyglot"] and gives each speaker a voice of its language (the cartoon repair above cast them all in the main language)
     rejected = plan.pop("_rejected_scenes", None) or []
     if fetch_errors:
         info["fetch_errors"] = fetch_errors[:20]
@@ -205,6 +217,12 @@ def direct(prompt: str, *, minutes: float, ask_small: Ask, ask_big: Callable[[st
     plan["sources"] = sources
     if direction.look != "real":   # the steps after the first check (scene repair, grounding, the length fit) cannot take a scene out of the look, but the record is made again on the final plan
         warnings += [w for w in art_direction.enforce(plan, direction, backdrops=vpolicy.ids() if vpolicy.allowed else []) if w.startswith("look ")]
+    if poly is not None and poly.speakers:   # last, after every repair and the length fit: each line in its speaker's language, translations, the audit
+        warnings += polyglot_mod.finish(plan, poly, lambda sys_, usr: ask_small(sys_, usr, 3000))
+        info["polyglot"] = {**poly.summary(), "audit_ok": (plan.get("polyglot") or {}).get("audit", {}).get("ok")}
+    elif poly_notes:
+        warnings += [f"polyglot: {n}" for n in poly_notes]
+        info["polyglot"] = {**poly.summary(), "notes": poly_notes}
     if direction.board:
         art_direction.settle_boards(plan)
     if wpolicy.allowed:   # the narration is final now: every board is tied to the words really said and gets emphasis marks where its pen would rest

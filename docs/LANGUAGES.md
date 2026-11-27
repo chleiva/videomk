@@ -127,3 +127,11 @@ The closing card is in the language for all nine (tested). App and server messag
 ## Adding a language later
 
 `engine/voices.py` (`LANGUAGES`, `NATIVE`, `READY`, `_DEFAULT`), a word list in `engine/language.py`, a sample sentence in `scripts/polly_voice_catalog.py` (then `--write --measure`), a pangram and a speech fixture in `tests/test_languages.py`, its number style in `engine/numfmt.COMMA_LANGUAGES`, a label in `format_options.LANGUAGE_LABELS`, the closing-card line in `engine/language.py`.
+
+## Several languages in one video (switch `POLYGLOT`, QA only)
+
+Design: `docs/MULTILINGUAL_CONVERSATIONS_DESIGN_2026-11-27.md`; request contract (`cast` entries with a language, `translation`): `docs/CREATE_API.md`.
+
+The video keeps ONE main language (the viewer's: title, description, end card, translation row). In a cartoon conversation of 2 or 3 characters each character may speak its own language, with a voice of that language (`plan.polyglot.speakers`, `plan.voices`). Code: `engine/polyglot.py` (intent from the form, then from the words; one small model call only when the words do not settle it; languages to characters; the writer's paragraph; `prepare` and `finish` called by `director.direct`), `engine/plan_langs.py` (language of each line: heuristic, then one batched small call; one rewrite; the audit voice language equals line language), `scenes/captions.py` (the translation row, smaller, under the caption row, shown even with captions off). Without `POLYGLOT` nothing here runs and plans are unchanged.
+
+Limits of this first stage: at most 3 languages (more are reduced to the characters' languages, with a note), cartoon conversation only (a whiteboard or footage look the person chose stays one language, with a note), no code-switching inside one line, Dutch, Polish and Finnish only with women's voices. Not yet: the length fit estimates each line with the plan's main language (`engine/length.py`, waits for the voices merge), phrasebook mode.
