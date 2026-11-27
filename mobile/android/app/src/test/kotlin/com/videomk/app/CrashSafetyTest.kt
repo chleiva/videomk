@@ -68,4 +68,22 @@ class CrashSafetyTest {
             assertNull(CrashLog.last(File(dir, "missing")))
         } finally { Thread.setDefaultUncaughtExceptionHandler(before); dir.deleteRecursively() }
     }
+
+    /** Android's regex engine is ICU, not the JVM's: it rejects the (?U) flag (PatternSyntaxException at class load). That crashed Create > My media in builds 475200 and 475315. */
+    @Test fun `no source file uses a regex flag Android rejects`() {
+        val root = generateSequence(java.io.File("").absoluteFile) { it.parentFile }.map { java.io.File(it, "app/src/main/kotlin") }.firstOrNull { it.isDirectory }
+            ?: java.io.File("src/main/kotlin")
+        val bad = root.walkTopDown().filter { it.isFile && it.extension == "kt" }.flatMap { f ->
+            f.readLines().mapIndexedNotNull { n, line -> if (Regex("""Regex\(\s*"+\(\?[a-zA-Z]*U""").containsMatchIn(line) || "UNICODE_CHARACTER_CLASS" in line) "${f.name}:${n + 1}" else null }
+        }.toList()
+        assertTrue("Android rejects (?U) / UNICODE_CHARACTER_CLASS: $bad", bad.isEmpty())
+        assertTrue(root.walkTopDown().any { it.name == "MediaLogic.kt" })   // the scan really found the sources
+    }
+
+    @Test fun `the prompt search still understands accented Spanish without the flag`() {
+        assertTrue(com.videomk.app.core.PromptSearch.looksLikePhotoRequest("un video de mis vacaciones en Tailandia"))
+        assertTrue(com.videomk.app.core.PromptSearch.looksLikePhotoRequest("fotos de mi cumpleaños"))
+        assertTrue(com.videomk.app.core.PromptSearch.looksLikePhotoRequest("imágenes de nuestra boda"))
+        assertTrue(com.videomk.app.core.PromptSearch.looksLikePhotoRequest("a video of my holidays in Thailand in 2024"))
+    }
 }

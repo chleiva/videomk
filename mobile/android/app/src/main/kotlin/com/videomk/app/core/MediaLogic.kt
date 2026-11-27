@@ -125,10 +125,12 @@ data class SearchState(val query: String = "", val dropped: List<String> = empty
 
 /** Does the video prompt itself describe photos from the library ("a video of my holidays in Thailand in 2024")? Offers "Photos from your prompt". */
 object PromptSearch {
-    // English and Spanish: the prompt may be written in either
-    private val OWN = Regex("""(?U)\b(my|our|mine|mi|mis|nuestr[oa]s?)\b""", RegexOption.IGNORE_CASE)
-    private val PHOTOISH = Regex("""(?U)\b(photos?|pictures?|pics?|images?|holidays?|vacations?|trips?|travels?|wedding|birthday|summer|winter|beach|family|kids?|children|baby|graduation|christmas|fotos?|imágenes|imagen|vacaciones|viajes?|boda|cumpleaños|verano|invierno|playa|familia|niños?|hijos?|bebé|graduación|navidad)\b""", RegexOption.IGNORE_CASE)
-    private val EXPLICIT = Regex("""(?U)\b(photos?|pictures?|pics?|images?|fotos?|imágenes|imagen)\s+(of|from|in|at|with|de|del|en|con)\b""", RegexOption.IGNORE_CASE)
+    // English and Spanish: the prompt may be written in either.
+    // NEVER the (?U) flag here: Android's regex engine (ICU) rejects it with PatternSyntaxException, which crashed the app the moment the My media picker opened
+    // (JVM unit tests accept it, so they could not see it). ICU's \b is already Unicode-aware, so accented words match without it.
+    private val OWN = Regex("""\b(my|our|mine|mi|mis|nuestr[oa]s?)\b""", RegexOption.IGNORE_CASE)
+    private val PHOTOISH = Regex("""\b(photos?|pictures?|pics?|images?|holidays?|vacations?|trips?|travels?|wedding|birthday|summer|winter|beach|family|kids?|children|baby|graduation|christmas|fotos?|imágenes|imagen|vacaciones|viajes?|boda|cumpleaños|verano|invierno|playa|familia|niños?|hijos?|bebé|graduación|navidad)\b""", RegexOption.IGNORE_CASE)
+    private val EXPLICIT = Regex("""\b(photos?|pictures?|pics?|images?|fotos?|imágenes|imagen)\s+(of|from|in|at|with|de|del|en|con)\b""", RegexOption.IGNORE_CASE)
 
     fun looksLikePhotoRequest(prompt: String): Boolean {
         val t = prompt.trim()
