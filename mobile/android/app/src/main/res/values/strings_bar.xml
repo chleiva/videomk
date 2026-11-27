@@ -16,4 +16,6 @@
     <string name="notify_channel">Video ready</string>
     <string name="notify_ready_title">Your video is ready</string>
     <string name="notify_failed_title">Your video didn\'t finish</string>
+    <!-- Videos -->
+    <string name="lib_play">Play</string>
 </resources>

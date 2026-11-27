@@ -2,7 +2,7 @@
 <resources>
     <!-- navigation, tabs, player -->
     <string name="nav_tab_videos">Videos</string>
-    <string name="nav_tab_media">My media</string>
+    <string name="nav_tab_media">Media</string>
     <string name="nav_load_videos_failed">Couldn\'t load your videos.</string>
     <string name="nav_minutes_short">%1$d min</string>
     <string name="player_full_screen">Full screen</string>

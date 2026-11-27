@@ -43,3 +43,38 @@ object DayGroups {
         return out
     }
 }
+
+/** One row of the Videos screen (docs/DESIGN_BAR_2026.md, `phone_2_videos`): what is being made, then the newest video large, then the rest two by two. */
+sealed interface FeedRow {
+    val key: String
+    /** A request on its way or a video being made: the Making card. */
+    data class Live(val entry: LibraryEntry) : FeedRow { override val key get() = entry.id }
+    /** The newest finished video, as a large poster. */
+    data class Hero(val video: VideoItem) : FeedRow { override val key get() = video.id }
+    /** Two finished videos side by side ([right] is null for an odd one out). */
+    data class Pair(val left: VideoItem, val right: VideoItem?) : FeedRow { override val key get() = "pair-" + left.id }
+    /** A video that did not finish or was not allowed: one card with what happened and the way out. */
+    data class Problem(val video: VideoItem) : FeedRow { override val key get() = video.id }
+}
+
+object FeedLayout {
+    private const val RECENT_SECONDS = 24 * 3600L
+
+    /**
+     * Making cards first; then anything that failed in the last day (it wants an answer: try again or remove); then the newest finished video large and the others
+     * in pairs, newest first as the server lists them; older failures last. Every entry appears exactly once.
+     */
+    fun rows(entries: List<LibraryEntry>, now: Instant): List<FeedRow> {
+        val out = ArrayList<FeedRow>()
+        val videos = entries.filterIsInstance<LibraryEntry.Video>().map { it.video }
+        entries.filter { it is LibraryEntry.Pending || (it is LibraryEntry.Video && it.video.status.isRunning) }.forEach { out += FeedRow.Live(it) }
+        val problems = videos.filter { !it.status.isRunning && it.status != VideoStatus.Complete }
+        val (recent, old) = problems.partition { v -> v.createdAt?.let { now.epochSecond - it.epochSecond < RECENT_SECONDS } ?: false }
+        recent.forEach { out += FeedRow.Problem(it) }
+        val ready = videos.filter { it.status == VideoStatus.Complete }
+        ready.firstOrNull()?.let { out += FeedRow.Hero(it) }
+        ready.drop(1).chunked(2).forEach { out += FeedRow.Pair(it[0], it.getOrNull(1)) }
+        old.forEach { out += FeedRow.Problem(it) }
+        return out
+    }
+}

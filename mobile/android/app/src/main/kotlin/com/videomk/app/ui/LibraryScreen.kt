@@ -35,6 +35,8 @@ import com.videomk.app.core.CreateOptions
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.ui.zIndex
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -160,18 +162,17 @@ fun LibraryScreen(app: AppViewModel, composer: ComposerViewModel, onOpenVideo: (
     Scaffold(
         containerColor = Vmk.colors.background,
         contentWindowInsets = WindowInsets(0),
-        topBar = { MainTopBar(state.wallet, onOpenWallet, onOpenSettings) },
-        bottomBar = {
-            Column {
+        topBar = { MainTopBar(state.wallet, person, onOpenWallet, onOpenSettings) },
+    ) { padding ->
+        Box(Modifier.fillMaxSize().padding(padding)) {
+            // the slim pill while photos upload or are being organized floats above the tab bar (never two pills: uploads first)
+            Column(Modifier.align(Alignment.BottomCenter).padding(bottom = LocalBarSpace.current).zIndex(1f)) {
                 val progress = container?.mediaUploads?.queue?.progress?.collectAsState()?.value
                 val imeVisible = WindowInsets.ime.getBottom(androidx.compose.ui.platform.LocalDensity.current) > 0
                 val org = container?.organize?.bar?.collectAsState()?.value
                 if (progress != null && progress.active && !imeVisible) UploadPill(progress, onOpenMedia)
-                else if (org != null && !imeVisible) OrganizePill(org, onOpenMedia)   // never two pills: uploads first
+                else if (org != null && !imeVisible) OrganizePill(org, onOpenMedia)
             }
-        },
-    ) { padding ->
-        Box(Modifier.fillMaxSize().padding(padding)) {
             val many = com.videomk.app.DebugHooks.manyVideos(context)
             val entries = if (com.videomk.app.DebugHooks.emptyHome(context)) emptyList() else if (many > 1) state.entries.flatMap { e ->
                 if (e is LibraryEntry.Video) (0 until many).map { i -> LibraryEntry.Video(e.video.copy(id = e.video.id + "#" + i)) } else listOf(e)
@@ -189,37 +190,43 @@ fun LibraryScreen(app: AppViewModel, composer: ComposerViewModel, onOpenVideo: (
                 else -> {
                     var refreshing by remember { mutableStateOf(false) }
                     PullToRefreshBox(isRefreshing = refreshing, onRefresh = { scope.launch { refreshing = true; app.refresh(); refreshing = false } }) {
-                        val rows = remember(entries) { DayGroups.rows(entries, java.time.Instant.now(), java.time.ZoneId.systemDefault()) }
-                        val now = remember(entries) { System.currentTimeMillis() }
+                        val nowInstant = remember(entries) { java.time.Instant.now() }
+                        val rows = remember(entries) { com.videomk.app.core.FeedLayout.rows(entries, nowInstant) }
+                        val zone = remember { java.time.ZoneId.systemDefault() }
+                        val barSpace = LocalBarSpace.current
+                        @Composable fun day(v: VideoItem): String = dayLabel(DayGroups.bucket(v.createdAt, nowInstant, zone))
                         LazyColumn(
-                            Modifier.fillMaxSize().testTag("videoList"), state = listState, contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 16.dp),
-                            verticalArrangement = Arrangement.spacedBy(12.dp),
+                            Modifier.fillMaxSize().testTag("videoList"), state = listState,
+                            contentPadding = PaddingValues(start = Vmk.space.screen, end = Vmk.space.screen, top = Vmk.space.s, bottom = Vmk.space.xxl + barSpace),
+                            verticalArrangement = Arrangement.spacedBy(Vmk.space.xl),
                         ) {
-                            item(key = "title") { Text(stringResource(R.string.lib_title), style = MaterialTheme.typography.headlineMedium, color = Vmk.colors.text, modifier = Modifier.padding(bottom = 2.dp).semantics { heading() }) }
                             if (state.offline) item(key = "offline") { OfflineBanner(onRetry = { scope.launch { app.refresh() } }) }
-                            items(rows, key = { it.key }, contentType = { if (it is LibraryRow.Header) "header" else if ((it as LibraryRow.Item).entry is LibraryEntry.Pending) "pending" else "video" }) { row ->
+                            items(rows, key = { it.key }, contentType = { it::class }) { row ->
                                 when (row) {
-                                    is LibraryRow.Header -> DayHeader(row.bucket)
-                                    is LibraryRow.Item -> when (val entry = row.entry) {
+                                    is com.videomk.app.core.FeedRow.Live -> when (val entry = row.entry) {
                                         is LibraryEntry.Pending -> PendingCard(entry.pending, onRetry = { app.retry(entry.pending.id) }, onDismiss = { app.dismissPending(entry.pending.id) })
-                                        is LibraryEntry.Video -> {
-                                            val v = entry.video
-                                            val kind = if (v.status.isRunning) 0 else if (v.status == VideoStatus.Complete) 1 else 2
-                                            // one item per video: Making settles into Ready with a cross-fade instead of a pop
-                                            SettleCrossfade(kind, Modifier.animateItem()) { k ->
-                                                when (k) {
-                                                    0 -> MakingCard(rememberMakingSnapshot(v, state), Modifier.testTag("runningRow"), onClick = { onOpenVideo(v.id) }, videoId = v.id)
-                                                    1 -> VideoRow(v, null, remember(v.id, onOpenVideo) { { onOpenVideo(v.id) } })
-                                                    else -> FailedRow(
-                                                        title = state.briefs[v.id] ?: v.displayTitle, rejected = v.status == VideoStatus.Rejected, detail = v.rejectReason,
-                                                        thumb = v.previewGifUrl, tag = "videoRow",
-                                                        // "Try again" starts THIS video again on the server (all its photos and options): no new row. Not offered for a refused video, a used-up presentation or one out of retries.
-                                                        onRetry = if (v.status == VideoStatus.Failed && v.canRetry != false && v.id !in state.deckVideos && v.id !in state.retrying) { { app.tryAgain(v) } } else null,
-                                                        onDismiss = { app.removeFailed(v) },
-                                                    )
-                                                }
-                                            }
+                                        is LibraryEntry.Video -> MakingCard(rememberMakingSnapshot(entry.video, state), Modifier.animateItem().testTag("runningRow"), onClick = { onOpenVideo(entry.video.id) }, videoId = entry.video.id)
+                                    }
+                                    // the Making card settles into the poster: the same list item, cross-faded by the list's own item animation
+                                    is com.videomk.app.core.FeedRow.Hero -> PosterCard(row.video, day(row.video), large = true, onClick = { onOpenVideo(row.video.id) }, modifier = Modifier.animateItem())
+                                    is com.videomk.app.core.FeedRow.Pair -> {
+                                        if (isLargeText()) Column(Modifier.animateItem(), verticalArrangement = Arrangement.spacedBy(Vmk.space.xl)) {
+                                            PosterCard(row.left, day(row.left), large = false, onClick = { onOpenVideo(row.left.id) })
+                                            row.right?.let { r -> PosterCard(r, day(r), large = false, onClick = { onOpenVideo(r.id) }) }
+                                        } else Row(Modifier.animateItem(), horizontalArrangement = Arrangement.spacedBy(Vmk.space.l)) {
+                                            PosterCard(row.left, day(row.left), large = false, onClick = { onOpenVideo(row.left.id) }, modifier = Modifier.weight(1f))
+                                            row.right?.let { r -> PosterCard(r, day(r), large = false, onClick = { onOpenVideo(r.id) }, modifier = Modifier.weight(1f)) } ?: Spacer(Modifier.weight(1f))
                                         }
+                                    }
+                                    is com.videomk.app.core.FeedRow.Problem -> {
+                                        val v = row.video
+                                        FailedRow(
+                                            title = state.briefs[v.id] ?: v.displayTitle, rejected = v.status == VideoStatus.Rejected, detail = v.rejectReason,
+                                            thumb = v.previewGifUrl, tag = "problemRow", modifier = Modifier.animateItem(),
+                                            // "Try again" starts THIS video again on the server (all its photos and options): no new row. Not offered for a refused video, a used-up presentation or one out of retries.
+                                            onRetry = if (v.status == VideoStatus.Failed && v.canRetry != false && v.id !in state.deckVideos && v.id !in state.retrying) { { app.tryAgain(v) } } else null,
+                                            onDismiss = { app.removeFailed(v) },
+                                        )
                                     }
                                 }
                             }
@@ -231,28 +238,51 @@ fun LibraryScreen(app: AppViewModel, composer: ComposerViewModel, onOpenVideo: (
     }
 }
 
+/** A finished video on Videos: the poster (the newest one large, the others half width), its length on the picture, then the title and the day. One tap plays it. */
 @Composable
-private fun MainTopBar(wallet: com.videomk.app.core.WalletInfo?, onOpenWallet: () -> Unit, onOpenSettings: () -> Unit) {
-    Row(Modifier.fillMaxWidth().statusBarsPadding().heightIn(min = 52.dp).padding(horizontal = 16.dp), verticalAlignment = Alignment.CenterVertically) {
-        // the mark is the name: the app is called videomk on the icon and in the store, so no wordmark here
-        Row(Modifier.weight(1f).semantics(mergeDescendants = true) { contentDescription = "videomk" }, verticalAlignment = Alignment.CenterVertically) { LogoMark(size = 32.dp) }
+private fun PosterCard(video: VideoItem, day: String, large: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    val shape = RoundedCornerShape(Vmk.radii.videoCard)
+    val desc = stringResource(R.string.lib_ready_desc, video.displayTitle) + " " + day + "."
+    Column(
+        modifier.fillMaxWidth().clip(shape).clickable(role = Role.Button, onClickLabel = stringResource(R.string.lib_play), onClick = onClick)
+            .semantics(mergeDescendants = true) { contentDescription = desc }.testTag("videoRow"),
+        verticalArrangement = Arrangement.spacedBy(Vmk.space.s),
+    ) {
+        Box(Modifier.fillMaxWidth().aspectRatio(if (large) 16f / 9f else 4f / 3f).clip(shape).background(Vmk.makingGradient).clearAndSetSemantics { }) {
+            if (video.previewGifUrl != null) StableImage(video.previewGifUrl!!, ContentScale.Crop, Modifier.fillMaxSize())
+            else Icon(Sym.PlayArrow, null, tint = Color.White.copy(alpha = 0.9f), modifier = Modifier.align(Alignment.Center).size(if (large) 44.dp else 32.dp))
+            if (video.aspect != null && video.aspect != "16:9") GlassChip(video.aspect!!, Modifier.align(Alignment.TopStart).padding(Vmk.space.s))
+            video.durationSeconds?.let { GlassChip(duration(it), Modifier.align(Alignment.BottomEnd).padding(Vmk.space.s)) }
+        }
+        Column(Modifier.padding(horizontal = 2.dp).padding(bottom = 2.dp)) {
+            Text(video.displayTitle, style = if (large) VmkType.makingTitle else MaterialTheme.typography.titleSmall, color = Vmk.colors.text, maxLines = if (isLargeText()) 3 else 2, overflow = TextOverflow.Ellipsis)
+            Text(day, style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary)
+        }
+    }
+}
+
+/** Videos: the name of the place at the large-title size, the credits and the account on the right. Nothing else. */
+@Composable
+private fun MainTopBar(wallet: com.videomk.app.core.WalletInfo?, email: String?, onOpenWallet: () -> Unit, onOpenSettings: () -> Unit) {
+    VmkTopBar(title = stringResource(R.string.lib_title), large = true) {
         wallet?.let { w ->
-            val shape = CircleShape
             val unlimitedDesc = stringResource(R.string.lib_unlimited_credits)
             val creditsDesc = pluralStringResource(R.plurals.lib_credits_desc, w.balance, w.balance)
-            Row(
-                Modifier.heightIn(min = 44.dp).clip(shape).background(Vmk.colors.surface).border(1.dp, Vmk.colors.outline, shape)
-                    .clickable(role = Role.Button, onClickLabel = stringResource(R.string.lib_show_credits), onClick = onOpenWallet).padding(horizontal = 14.dp)
-                    .semantics(mergeDescendants = true) { contentDescription = if (w.unlimited) unlimitedDesc else creditsDesc }
-                    .testTag("balanceChip"),
-                verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp),
-            ) {
-                Icon(Sym.Bolt, null, tint = Vmk.colors.primary, modifier = Modifier.size(18.dp))
-                Text(if (w.unlimited) "∞" else "${w.balance}", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = Vmk.colors.text)
+            Box(Modifier.heightIn(min = Vmk.minTouch).clip(CircleShape).clickable(role = Role.Button, onClickLabel = stringResource(R.string.lib_show_credits), onClick = onOpenWallet)
+                .semantics(mergeDescendants = true) { contentDescription = if (w.unlimited) unlimitedDesc else creditsDesc }.testTag("balanceChip"), contentAlignment = Alignment.Center) {
+                Row(Modifier.heightIn(min = Vmk.iconButton).clip(CircleShape).background(Vmk.colors.surfaceRaised).padding(horizontal = Vmk.space.l), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Icon(Sym.Bolt, null, tint = Vmk.colors.primary, modifier = Modifier.size(18.dp))
+                    Text(if (w.unlimited) "∞" else "${w.balance}", style = MaterialTheme.typography.titleSmall, color = Vmk.colors.text)
+                }
             }
         }
-        IconButton(onClick = onOpenSettings, modifier = Modifier.size(48.dp).testTag("settingsButton")) {
-            Icon(Sym.AccountCircle, stringResource(R.string.lib_settings), tint = Vmk.colors.textSecondary, modifier = Modifier.size(28.dp))
+        val settings = stringResource(R.string.lib_settings)
+        val initial = email?.trim()?.firstOrNull { it.isLetterOrDigit() }?.uppercase()
+        Box(Modifier.size(Vmk.minTouch).clip(CircleShape).clickable(role = Role.Button, onClickLabel = settings, onClick = onOpenSettings).semantics { contentDescription = settings }.testTag("settingsButton"), contentAlignment = Alignment.Center) {
+            Box(Modifier.size(Vmk.iconButton).clip(CircleShape).background(Vmk.colors.surfaceRaised), contentAlignment = Alignment.Center) {
+                if (initial != null) Text(initial, style = MaterialTheme.typography.titleSmall, color = Vmk.colors.textSecondary, modifier = Modifier.clearAndSetSemantics { })
+                else Icon(Sym.Person, null, tint = Vmk.colors.textSecondary, modifier = Modifier.size(22.dp))
+            }
         }
     }
 }
@@ -268,22 +298,20 @@ private fun OfflineBanner(onRetry: () -> Unit) {
     }
 }
 
-/** Skeleton rows with the final shape of a video row while the list loads (the title is real: the screen never looks empty). */
+/** Skeletons in the final shapes (a large poster, its two lines, two half posters) while the list loads: nothing jumps when the videos arrive. */
 @Composable
 private fun SkeletonFeed() {
     val still = reduceMotion(LocalContext.current)
     val loadingDesc = stringResource(R.string.lib_loading_desc)
     val a = if (still) 0.7f else rememberInfiniteTransition(label = "sk").animateFloat(0.45f, 0.9f, infiniteRepeatable(tween(1000), RepeatMode.Reverse), label = "a").value
-    Column(Modifier.fillMaxSize().padding(16.dp).semantics { contentDescription = loadingDesc }, verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Text(stringResource(R.string.lib_title), style = MaterialTheme.typography.headlineMedium, color = Vmk.colors.text)
-        repeat(4) {
-            Row(Modifier.fillMaxWidth().alpha(a).clip(RoundedCornerShape(Vmk.radii.card)).background(Vmk.colors.surface).padding(12.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                Box(Modifier.width(128.dp).height(72.dp).clip(RoundedCornerShape(Vmk.radii.thumb)).background(Vmk.colors.surfaceRaised))
-                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Box(Modifier.fillMaxWidth().height(14.dp).clip(CircleShape).background(Vmk.colors.surfaceRaised))
-                    Box(Modifier.fillMaxWidth(0.6f).height(12.dp).clip(CircleShape).background(Vmk.colors.surfaceRaised))
-                }
-            }
+    val block = Vmk.colors.surfaceRaised
+    val shape = RoundedCornerShape(Vmk.radii.videoCard)
+    Column(Modifier.fillMaxSize().padding(horizontal = Vmk.space.screen).padding(top = Vmk.space.s).alpha(a).semantics { contentDescription = loadingDesc }.testTag("skeleton"), verticalArrangement = Arrangement.spacedBy(Vmk.space.m)) {
+        Box(Modifier.fillMaxWidth().aspectRatio(16f / 9f).clip(shape).background(block))
+        Box(Modifier.fillMaxWidth(0.6f).height(18.dp).clip(CircleShape).background(block))
+        Box(Modifier.fillMaxWidth(0.25f).height(12.dp).clip(CircleShape).background(block))
+        Row(Modifier.padding(top = Vmk.space.s), horizontalArrangement = Arrangement.spacedBy(Vmk.space.l)) {
+            repeat(2) { Box(Modifier.weight(1f).aspectRatio(4f / 3f).clip(shape).background(block)) }
         }
     }
 }

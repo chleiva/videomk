@@ -8,10 +8,15 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -102,26 +107,12 @@ private fun SignedInNav(app: AppViewModel, composer: ComposerViewModel, containe
     var madeFromSelection by androidx.compose.runtime.saveable.rememberSaveable { androidx.compose.runtime.mutableStateOf(false) }
     val showTabs = (route == "library" || route == "media") && !(route == "media" && mediaSelecting)
     val mediaFactory = viewModelFactory { initializer { MediaViewModel(container.mediaApi, null, MediaCache(FilePageDisk(java.io.File(application.cacheDir, "media-pages"))), Int.MAX_VALUE, container.mediaUploads?.arrivals ?: com.videomk.app.core.ArrivalTracker()) } }
-    Scaffold(
-        containerColor = Vmk.colors.background, contentWindowInsets = WindowInsets(0),
-        bottomBar = {
-            // the tab bar floats as a rounded pill; Create is a separate round (+) beside it, so it never covers a row (docs/UX_2026_REDESIGN.md section 3)
-            if (showTabs) Row(Modifier.fillMaxWidth().background(Vmk.colors.background).padding(horizontal = Vmk.space.screen).padding(top = 6.dp, bottom = 8.dp).navigationBarsPadding(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                if (container.mediaApi != null) NavigationBar(Modifier.weight(1f).clip(RoundedCornerShape(32.dp)), containerColor = Vmk.colors.surface, windowInsets = WindowInsets(0)) {
-                    NavigationBarItem(selected = route == "library", onClick = { navigateTab(nav, "library") }, icon = { Icon(Sym.Movie, null) }, label = { Text(stringResource(R.string.nav_tab_videos)) }, colors = tabColors(), modifier = Modifier.testTag("tabVideos"))
-                    NavigationBarItem(selected = route == "media", onClick = { navigateTab(nav, "media") }, icon = { Icon(Sym.PhotoLibrary, null) }, label = { Text(stringResource(R.string.nav_tab_media)) }, colors = tabColors(), modifier = Modifier.testTag("tabMedia"))
-                } else Spacer(Modifier.weight(1f))
-                val newVideo = stringResource(R.string.lib_new_video)
-                Box(
-                    Modifier.size(56.dp).vmkShadow(2, CircleShape, Vmk.colors.dark).clip(CircleShape).background(Vmk.gradientNow)
-                        .clickable(role = Role.Button, onClickLabel = newVideo) { composer.openCreate(container.createPrefs?.load(email)); nav.navigate("create") }
-                        .semantics { contentDescription = newVideo }.testTag("newVideoFab"),
-                    contentAlignment = Alignment.Center,
-                ) { Icon(Sym.AutoAwesome, null, tint = Vmk.colors.onPrimary, modifier = Modifier.size(26.dp)) }
-            }
-        },
-    ) { inner ->
-    NavHost(nav, startDestination = "library", modifier = Modifier.padding(inner).consumeWindowInsets(inner)) {
+    // the tab bar and the New video button float over the content; the page fades out beneath them (docs/DESIGN_BAR_2026.md: glass only for what floats)
+    val navBottom = with(androidx.compose.ui.platform.LocalDensity.current) { WindowInsets.navigationBars.getBottom(this).toDp() }
+    val barSpace = if (showTabs) BAR_HEIGHT + navBottom else 0.dp
+    Box(Modifier.fillMaxSize().background(Vmk.colors.background)) {
+    androidx.compose.runtime.CompositionLocalProvider(LocalBarSpace provides barSpace) {
+    NavHost(nav, startDestination = "library", modifier = Modifier.fillMaxSize()) {
         composable("library") {
             LibraryScreen(
                 app, composer,
@@ -176,17 +167,64 @@ private fun SignedInNav(app: AppViewModel, composer: ComposerViewModel, containe
         }
     }
     }
+    if (showTabs) FloatingBar(
+        route, showMedia = container.mediaApi != null, onTab = { navigateTab(nav, it) },
+        onNew = { composer.openCreate(container.createPrefs?.load(email)); nav.navigate("create") }, modifier = Modifier.align(Alignment.BottomCenter),
+    )
+    }
     feedbackFrom?.let { FeedbackSheet(container.feedbackApi, container.feedbackDraft, it, onClose = { feedbackFrom = null }) }
     val appState = app.state.collectAsState().value
     RatingHost(container, onLibrary = route == "library", creating = route == "create" || appState.pending.any { it.state == com.videomk.app.core.PendingVideo.State.Sending })
     androidx.compose.runtime.LaunchedEffect(Unit) { container.mediaUploads?.resumeIfAny(); container.organize?.resumeIfAny() }   // an interrupted upload queue continues on the next launch
 }
 
+/** How much of the bottom of a top-level screen the floating bar covers (0 where there is no bar): lists add it to their bottom padding so the last row can scroll clear. */
+val LocalBarSpace = compositionLocalOf { 0.dp }
+private val BAR_HEIGHT = 84.dp
+
+/**
+ * The floating bar: a pill with the two places (Videos, Media) and, apart from it, the round New video button with the play-sparkle glyph (never a bare plus).
+ * The page fades into the background beneath it, so content never ends in a hard line.
+ */
 @Composable
-private fun tabColors() = androidx.compose.material3.NavigationBarItemDefaults.colors(
-    selectedIconColor = Vmk.colors.primary, selectedTextColor = Vmk.colors.primary, indicatorColor = Vmk.colors.primaryContainer,
-    unselectedIconColor = Vmk.colors.textSecondary, unselectedTextColor = Vmk.colors.textSecondary,
-)
+private fun FloatingBar(route: String?, showMedia: Boolean, onTab: (String) -> Unit, onNew: () -> Unit, modifier: Modifier = Modifier) {
+    val bg = Vmk.colors.background
+    Row(
+        modifier.fillMaxWidth().background(androidx.compose.ui.graphics.Brush.verticalGradient(0f to bg.copy(alpha = 0f), 0.55f to bg.copy(alpha = 0.92f), 1f to bg))
+            .navigationBarsPadding().padding(horizontal = Vmk.space.screen).padding(top = Vmk.space.xl, bottom = Vmk.space.s),
+        verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Vmk.space.m),
+    ) {
+        if (showMedia) Row(
+            Modifier.vmkShadow(2, CircleShape, Vmk.colors.dark).clip(CircleShape).background(Vmk.colors.surface).padding(4.dp).semantics { isTraversalGroup = true },
+            horizontalArrangement = Arrangement.spacedBy(2.dp),
+        ) {
+            BarTab(stringResource(R.string.nav_tab_videos), if (route == "library") Sym.VideosFilled else Sym.Videos, route == "library", "tabVideos") { onTab("library") }
+            BarTab(stringResource(R.string.nav_tab_media), if (route == "media") Sym.MediaFilled else Sym.PhotoLibrary, route == "media", "tabMedia") { onTab("media") }
+        }
+        Spacer(Modifier.weight(1f))
+        val newVideo = stringResource(R.string.lib_new_video)
+        Box(
+            Modifier.size(Vmk.primaryButton).vmkGlow(CircleShape).clip(CircleShape).background(Vmk.gradient)
+                .clickable(role = Role.Button, onClickLabel = newVideo, onClick = onNew).semantics { contentDescription = newVideo }.testTag("newVideoFab"),
+            contentAlignment = Alignment.Center,
+        ) { Icon(Sym.PlaySparkle, null, tint = Vmk.colors.onPrimary, modifier = Modifier.size(28.dp)) }
+    }
+}
+
+/** One place in the bar: icon over its name; the selected one sits on a tonal pill and says so to TalkBack (state is never colour alone: the icon fills too). */
+@Composable
+private fun BarTab(label: String, icon: androidx.compose.ui.graphics.vector.ImageVector, selected: Boolean, tag: String, onClick: () -> Unit) {
+    val haptics = rememberHaptics()
+    val c = if (selected) Vmk.colors.primary else Vmk.colors.textSecondary
+    androidx.compose.foundation.layout.Column(
+        Modifier.heightIn(min = Vmk.minTouch).widthIn(min = 88.dp).clip(CircleShape).background(if (selected) Vmk.colors.primaryContainer else androidx.compose.ui.graphics.Color.Transparent)
+            .selectable(selected, role = Role.Tab) { haptics.play(com.videomk.app.core.DesignTokens.Haptic.Selection); onClick() }.padding(horizontal = Vmk.space.l, vertical = 6.dp).testTag(tag),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Icon(icon, null, tint = c, modifier = Modifier.size(22.dp))
+        Text(label, style = androidx.compose.material3.MaterialTheme.typography.labelSmall, color = c, maxLines = 1)
+    }
+}
 
 private fun navigateTab(nav: androidx.navigation.NavHostController, route: String) {
     nav.navigate(route) { popUpTo("library") { saveState = true }; launchSingleTop = true; restoreState = true }

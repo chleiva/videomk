@@ -212,7 +212,7 @@ fun MediaScreen(
             }
         }
         if (barExpanded) Box(Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.18f)).clickable(onClickLabel = stringResource(R.string.media_close_upload_details)) { barExpanded = false })
-        Column(Modifier.align(Alignment.BottomCenter).padding(bottom = 8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Column(Modifier.align(Alignment.BottomCenter).padding(bottom = 8.dp + LocalBarSpace.current), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             toast?.let { MediaToast(it, stringResource(R.string.media_got_it), { toast = null }) }
             orgDone?.let { msg ->
                 LaunchedEffect(msg) { view.announceForAccessibility(msg); kotlinx.coroutines.delay(8000); organize?.consumeDone() }

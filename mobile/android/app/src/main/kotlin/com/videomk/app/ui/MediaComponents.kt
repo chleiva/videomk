@@ -169,7 +169,7 @@ fun PhotoGrid(
                     }
                 }
             },
-        contentPadding = PaddingValues(bottom = 24.dp),
+        contentPadding = PaddingValues(bottom = 24.dp + LocalBarSpace.current),
         verticalArrangement = Arrangement.spacedBy(2.dp),
     ) {
         if (header != null) item(key = "header") { header() }
