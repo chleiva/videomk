@@ -669,6 +669,38 @@ In all 10 searches where the reviewer could see the other sources' photos it fou
 * Pixabay and Pexels are not photo sources of the engine today (only video sources); adding Pixabay photos (the key exists) would give the first group better pictures: not built.
 * The editor's candidate list shows the other sources first too.
 
+### E2. Why Openverse still lost to Unsplash, and the fix (2026-11-27, round 2)
+QA after the ranking change: 13 of 17 photos were still Unsplash. The beat logs said "photo review failed: no thumbnails could be loaded" 11 times, "HTTP 403" on one search (three times), and "reviewer rejected all" 9 times. Probed against the live API (`engine/stock.py`; the API's own schema at `api.openverse.org/v1/schema/` and Wikimedia's pages, read 2026-11-27):
+
+| What was logged | Real cause | Fix |
+|---|---|---|
+| "no thumbnails could be loaded" | **Not a rate limit** (the response headers showed 19,850 of 20,000 thumbnails a day and 98 of 100 searches a minute left). Openverse's thumbnail endpoint answers **HTTP 424 for every Wikimedia Commons picture** (25 of 25: "Failed to render thumbnail" / "Thumbnail unavailable from provider"), and Commons is most of what it returns for many searches. `gather()` kept the first six candidates, often all Commons, so the reviewer saw nothing and the photo came from Unsplash. | A Commons picture is shown AND fetched from **Wikimedia's own renderings at its standard widths** (500 px for the reviewer, 1920 px for the video, 3840 px for a 4K video; `wikimedia_step`). Any other width is refused by Wikimedia with HTTP 400; its robot policy says "Prefer thumbnails to downloading of originals" (the engine used to download originals of up to 15 MB). The original stays as the way back (`full_alt`). Twelve candidates of the other sources are kept and **the reviewer is shown the first six whose thumbnails load** (`review_photos`), so a candidate that cannot be shown no longer uses up a place. |
+| HTTP 403 on a search, three times | Cloudflare in front of the API answers some search WORDS with a challenge page (`cf-mitigated: challenge`), whatever the client says it is: every search containing "outdoors" did, while "walking" and "toddler walking" passed. The same question three times got the same answer. | A 403 is never asked again as it was: the search is repeated with **one word left out** (the last word first, at most three other wordings). Server errors and timeouts are still tried three times. |
+| "reviewer rejected all" (9) | **Not a fault**: brand photos (Coca-Cola, Nike logos) and war scenes that the reviewer is told to reject. | none |
+
+Also: Wikimedia asks automated clients for "a total concurrency of at most 2" and answers HTTP 429 with a wait (11 s measured) after about 18 requests in 10 s. So no more than three Commons pictures stand among the reviewer's six when other sources have some (`_spread`), a 429 thumbnail is simply skipped, and the chosen picture waits ONCE when the wait is 12 s or less (`fetch_full`). Twelve beats are made in parallel, so the limit can still be met under load: the photo then comes from the next source, as before.
+
+**Measured on 20 real searches** (the same 20, old code then new code, real Openverse, Unsplash and reviewer, the chosen photo downloaded as the engine does; `docs/clips_on_demand/openverse_measure_2026-11-27.jsonl`):
+
+| | Before | After |
+|---|---|---|
+| Searches in which the reviewer could see at least one Openverse photo (19 had candidates) | 13 | **19** |
+| Openverse photos the reviewer was shown | 36 of 108 given | **108** (six a search wherever six exist; 208 candidates kept) |
+| Thumbnails that failed to load | 72 | 6 (Wikimedia's 429; each was replaced by the next candidate) |
+| Searches whose whole Openverse review failed ("no thumbnails could be loaded") | 6 | 0 |
+| Photo chosen from Openverse / Unsplash | 11 / 9 | **17 / 3** |
+| Licences of the Openverse photos chosen | CC0 only (11) | CC0 (11), CC BY (6): Commons pictures can now win, and CC BY needs its credit (already written by the engine) |
+The three that are still Unsplash: one search has a single Openverse result (a diagram), one has none even after the firewall retry (it is about a toddler), and in one the reviewer found no bicycle among six Openverse photos. Two searches took 15 and 20 s because the chosen Commons picture waited out a 429. Twenty searches are a sample, not a rate.
+
+**A registered Openverse application (optional; the owner's to do).** The API works without a key and the fix above needs none: none of the three causes was the anonymous limit. A registered application gets "slightly higher limits" and larger pages (the API's own words; numbers are not published), which matters when volume grows: **the anonymous limit is 1,000 searches a day and 100 a minute per network address**, and a video makes 4 to 10. To register (not done; nobody was registered by this work):
+1. `curl -X POST https://api.openverse.org/v1/auth_tokens/register/ -H 'Content-Type: application/json' -d '{"name": "<a unique application name>", "description": "<what the application does with the API>", "email": "<an address Openverse can write to>"}'`. The answer holds `client_id` and `client_secret` ONCE ("you will not be able to retrieve them later").
+2. Click the link in the e-mail Openverse sends ("Until you do that, the application will be subject to the same rate limits as an anonymous user").
+3. Store both as one SecureString, `<client_id>:<client_secret>`: `aws ssm put-parameter --name /videomk/openverse_api_key --type SecureString --value '<client_id>:<client_secret>'` in each account. The beat function may already read `/videomk/*_api_key`: no deploy change.
+The code then asks for a token (`POST /v1/auth_tokens/token/`, grant `client_credentials`), keeps it in the container until a minute before it expires, and sends it only with the SEARCH (never with a thumbnail or a picture, never stored with a candidate). A missing parameter is remembered for 15 minutes; a refused or failing credential falls back to the anonymous search. **Not verified with a real credential** (it needs the registration); tested against stand-ins of the documented answers. Whether a registered application passes the firewall's word rule is unknown.
+
+**What this does not fix**: Openverse's own thumbnail fault for Commons pictures (theirs to fix; we no longer depend on it); the picture quality point of E above (the reviewer now sees more Openverse photos, so it also has more to choose from); credits still on the frame. The editor's candidate list can now hold up to 18 photos (12 + 6) instead of 12.
+Tests: `backend/tests/test_stock_openverse.py` (12: Commons renderings and their limits, 4K, the six that load, a dead source still falls back to Unsplash, three Commons pictures at most among six, the 403 retry and its bound, server errors still tried three times, the token used once and only for the search, a failing or refused credential, the optional parameter, the 429 wait and the fall back to the original); `test_stock_ranking.py` updated for the pool of twelve.
+
 ## Tests added on 2026-11-27 (targeted files; the full suite was NOT run)
 | File | Tests | What |
 |---|---|---|

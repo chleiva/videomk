@@ -38,7 +38,7 @@ def world(monkeypatch):
     w = W()
     w.shown, w.broken, w.tracked = [], set(), []
     monkeypatch.setattr(stock, "unsplash_search", lambda q, key, fetch, **kw: list(w.unsplash))
-    monkeypatch.setattr(stock, "openverse_search", lambda q, fetch: list(w.openverse))
+    monkeypatch.setattr(stock, "openverse_search", lambda q, fetch, **kw: list(w.openverse))
     monkeypatch.setattr(stock, "track_download", lambda c, key, fetch=None: w.tracked.append(c["id"]) or True)
 
     def review(group, narration, alt, query, *, fetch_bytes_fn=None):
@@ -58,14 +58,14 @@ def world(monkeypatch):
 
 def test_the_other_sources_come_first_and_unsplash_last(world):
     cands = stock.gather("sea", unsplash_key="k")
-    assert [c["id"] for c in cands] == [f"o{i}" for i in range(6)] + [f"u{i}" for i in range(6)]            # up to six of each: the last resort is always still there
+    assert [c["id"] for c in cands] == [f"o{i}" for i in range(8)] + [f"u{i}" for i in range(6)]            # up to twelve of the others (the reviewer is shown the first six that load), six of the last resort: it is always still there
     world.openverse = []
     assert [c["provider"] for c in stock.gather("sea", unsplash_key="k")] == ["unsplash"] * 6
     assert stock.is_last_resort({"provider": "unsplash"}) and not stock.is_last_resort({"provider": "openverse"}) and stock.LAST_RESORT == ("unsplash",)
 
 
 def test_one_source_failing_never_blocks_the_other(world, monkeypatch):
-    monkeypatch.setattr(stock, "openverse_search", lambda q, fetch: (_ for _ in ()).throw(FetchError("504")))
+    monkeypatch.setattr(stock, "openverse_search", lambda q, fetch, **kw: (_ for _ in ()).throw(FetchError("504")))
     assert [c["provider"] for c in stock.gather("sea", unsplash_key="k")] == ["unsplash"] * 6
     out = world.run()
     assert out["chosen"] == "unsplash:u0" and out["credit"] == "Photo: Ana 0 / Unsplash"
@@ -75,8 +75,8 @@ def test_a_suitable_photo_from_another_source_wins_and_unsplash_is_never_even_lo
     world.pick = lambda group: 2
     out = world.run()
     assert out["chosen"] == "openverse:o2" and out["credit"] == "Photo: Bob 2 (CC0 1.0)" and out["entry"]["source"] == "openverse"   # the credit of that source, exactly as before
-    assert world.shown == [[f"o{i}" for i in range(6)]] and world.tracked == ["o2"] or world.tracked == []                           # one review, of the other sources only
-    assert [c["provider"] for c in out["candidates"]] == ["openverse"] * 6 + ["unsplash"] * 6 and out["review"]["cost_usd"] == pytest.approx(0.001)
+    assert world.shown == [[f"o{i}" for i in range(8)]] and world.tracked == ["o2"] or world.tracked == []                           # one review, of the other sources only
+    assert [c["provider"] for c in out["candidates"]] == ["openverse"] * 8 + ["unsplash"] * 6 and out["review"]["cost_usd"] == pytest.approx(0.001)
 
 
 def test_unsplash_is_used_only_when_nothing_else_suits_and_its_credit_stays_exactly_as_today(world):
@@ -84,14 +84,14 @@ def test_unsplash_is_used_only_when_nothing_else_suits_and_its_credit_stays_exac
     out = world.run()
     assert out["chosen"] == "unsplash:u1" and out["credit"] == "Photo: Ana 1 / Unsplash"                     # the on-frame credit, unchanged
     assert out["entry"]["license"] == "Unsplash License" and out["entry"]["attribution"] == "Photo by Ana 1 on Unsplash"
-    assert world.shown == [[f"o{i}" for i in range(6)], [f"u{i}" for i in range(6)]] and world.tracked == ["u1"]   # the download ping Unsplash asks for, once, for the photo used
+    assert world.shown == [[f"o{i}" for i in range(8)], [f"u{i}" for i in range(6)]] and world.tracked == ["u1"]   # the download ping Unsplash asks for, once, for the photo used
     assert out["review"] == {"source": "llm", "reason": "because", "cost_usd": pytest.approx(0.002)}          # both reviews are counted
 
 
 def test_nothing_suitable_anywhere_is_still_rejected_all(world):
     world.pick = lambda group: None
     out = world.run()
-    assert out["rejected_all"] is True and out["jpeg"] is None and len(out["candidates"]) == 12 and len(world.shown) == 2
+    assert out["rejected_all"] is True and out["jpeg"] is None and len(out["candidates"]) == 14 and len(world.shown) == 2
 
 
 def test_a_single_other_candidate_is_still_reviewed_before_it_displaces_unsplash(world):
@@ -106,7 +106,7 @@ def test_a_single_other_candidate_is_still_reviewed_before_it_displaces_unsplash
 def test_a_chosen_photo_that_cannot_be_downloaded_falls_to_the_next_group_not_to_an_unchosen_one(world):
     world.broken = {"https://f/o0"}
     out = world.run()
-    assert out["chosen"] == "unsplash:u0" and world.shown == [[f"o{i}" for i in range(6)], [f"u{i}" for i in range(6)]]
+    assert out["chosen"] == "unsplash:u0" and world.shown == [[f"o{i}" for i in range(8)], [f"u{i}" for i in range(6)]]
     world.broken = {"https://f/o0", "https://f/u0"}
     assert world.run()["chosen"] == "unsplash:u1"                                                            # inside the last group: the next candidate, as always
 
