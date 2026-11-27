@@ -71,7 +71,8 @@ def test_invalid_values_are_a_400_and_charge_nothing(launcher, all_ready, extra)
 def test_the_400_messages_name_the_field_and_the_choices(launcher):
     assert "'aspect' must be one of: 16:9, 9:16, 1:1, 4:5" in json.loads(post(launcher, aspect="3:2")["body"])["message"]
     assert "'resolution' must be one of: 720p, 1080p" in json.loads(post(launcher, resolution="2k")["body"])["message"]
-    assert "'language' must be 'auto' or one of: en, es" in json.loads(post(launcher, language="de")["body"])["message"]
+    assert "'language' must be 'auto' or one of: en, es" in json.loads(post(launcher, language="ja")["body"])["message"]   # a language no video can be made in
+    assert json.loads(post(launcher, language="de")["body"])["message"] == "This language is not available yet"            # German exists, but is not offered on this stage
 
 
 def test_language_auto_is_valid(launcher):

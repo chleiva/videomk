@@ -555,10 +555,13 @@ def test_default_voice_follows_the_viewers_region_and_the_brief_can_override():
     assert voices.clean_region(" gb ") == "GB" and voices.clean_region("GBR") is None and voices.clean_region("1A") is None and voices.clean_region(None) is None
     assert voices.clean_cast(None, "en", "IN") == {"narrator": "Kajal"} and voices.clean_cast({"narrator": "Brian"}, "en", "IN") == {"narrator": "Brian"}
     p_in = plan_mod.system_prompt("en", "IN")
-    assert "The viewer is in IN" in p_in and "default voice is Kajal (Indian)" in p_in and "The brief always wins" in p_in
-    assert "The viewer is in" not in plan_mod.system_prompt("en") and "default voice is Ruth (American)" in plan_mod.system_prompt("en")
-    assert "default voice is Lucia (Spanish (Spain))" in plan_mod.system_prompt("es") and "default voice is Mia (Mexican)" in plan_mod.system_prompt("es", "MX")
-    assert "Ruth (American, female)" in plan_mod.system_prompt("en") and "Lupe" not in plan_mod.system_prompt("en") and "DIFFERENT voices" in plan_mod.system_prompt("en")
+    assert "The viewer is in IN" in p_in and "viewer's default voice (Indian)" in p_in and "The brief always wins" in p_in
+    assert "The viewer is in" not in plan_mod.system_prompt("en") and "viewer's default voice (American)" in plan_mod.system_prompt("en")
+    assert "viewer's default voice (Spanish (Spain))" in plan_mod.system_prompt("es") and "viewer's default voice (Mexican)" in plan_mod.system_prompt("es", "MX")
+    # the catalogue is not in the prompt: the director says what it wants (accent, gender, pace) and the resolver casts it
+    en = plan_mod.system_prompt("en")
+    assert "American | British | Australian | Indian | Irish | New Zealand | South African | Singaporean" in en and "different accents" in en
+    assert not any(f"{n} (" in en for n in voices.names("en")) and "Lupe" not in en and "Ruth" not in en
 
 
 def test_spanish_plans_get_spanish_voices_only():
@@ -568,7 +571,7 @@ def test_spanish_plans_get_spanish_voices_only():
     assert plan["language"] == "es" and plan["voices"]["ana"] == "Lupe" and plan["voices"]["eva"] == "Mia"
     assert voices.language_of(plan["voices"]["luis"]) == "es" and plan["voices"]["luis"] not in ("Lupe", "Mia")  # Luis keeps his lines, with a Spanish voice
     assert voices.CATALOG[plan["voices"]["luis"]][2] == "male"  # and, being the one that had to be replaced, a different gender from the speaker before
-    assert any("voices adjusted" in w for w in warns)
+    assert any("Matthew is not a voice for Spanish" in w for w in warns) and plan["voice_notes"] and plan["voice_notes"][0].startswith("luis: ")
     assert plan_mod.validate_plan(_plan_with(None, [None]), language="es")[0]["voices"] == {"narrator": "Lucia"}
     assert plan_mod.validate_plan(_plan_with(None, [None]), language="es", region="MX")[0]["voices"] == {"narrator": "Mia"}
     assert plan_mod.validate_plan(_plan_with(None, [None]))[0]["voices"] == {"narrator": "Ruth"} and plan_mod.validate_plan(_plan_with(None, [None]))[0]["language"] == "en"
@@ -593,10 +596,10 @@ def test_language_detection_is_free_when_clear_and_declines_unsupported_language
     assert language.heuristic("Quelle est l'histoire de Paris et de sa tour ?") is None  # French is not mistaken for Spanish
     assert language.heuristic("Explique-moi pourquoi le ciel est bleu, dans le détail") is None
     assert language.heuristic("Cómo funciona la fotosíntesis") is None and language.heuristic("Explica cómo funciona la fotosíntesis, ¿por qué?") == "es"
-    assert language.detect("Quelle est l'histoire de Paris et de sa tour ?", ask) == "other" and asked == ["Quelle est l'histoire de Paris et de sa tour ?"]
+    assert language.detect("Quelle est l'histoire de Paris et de sa tour ?", ask) == "fr" and asked == ["Quelle est l'histoire de Paris et de sa tour ?"]
     assert language.detect("???", ask) == "en"  # cannot tell: English
     assert language.detect("Napoleon Bonaparte", lambda s, u: (_ for _ in ()).throw(RuntimeError("down"))) == "en"  # a failing model never fails the video
-    assert "English and Spanish" in language.unsupported_message()
+    assert "English and Spanish" in language.unsupported_message()   # French has voices, but a video is made only in the languages enabled on the stage
 
 
 def test_research_reads_the_wikipedia_of_the_videos_language():

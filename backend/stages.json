@@ -9,7 +9,8 @@
     "vectorScenes": true,
     "forceWatermark": true,
     "whiteboard": true,
-    "presenters": true
+    "presenters": true,
+    "videoLanguages": "en,es,fr,de,it,pt,nl,pl,fi"
   },
   "prod": {
     "account": "464863885161",

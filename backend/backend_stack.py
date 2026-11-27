@@ -398,6 +398,7 @@ class BackendStack(Stack):
                 compatible_architectures=[_lambda.Architecture.X86_64],
                 description="Engine v2: numpy, Pillow, static ffmpeg (all manylinux wheels)",
             )
+            video_languages = str(self.node.try_get_context("videoLanguages") or stage_cfg.get("videoLanguages") or "")
             engine_env = {
                 "TTS_PROVIDER": str(self.node.try_get_context("ttsProvider") or "polly"),
                 "MAX_VIDEO_COST_USD": str(self.node.try_get_context("maxVideoCostUsd") or "1.50"),
@@ -428,6 +429,9 @@ class BackendStack(Stack):
             # characters are part of the engine code (no bucket, no new function, no new right): only this variable.
             if str(self.node.try_get_context("presenters") or ("1" if stage_cfg.get("presenters") else "")).lower() in ("1", "true"):
                 engine_env["PRESENTERS"] = "1"
+            # the languages a video may be made in (docs/LANGUAGES.md): stages.json "videoLanguages" or -c videoLanguages=en,es,fr; English and Spanish where nothing is set
+            if video_languages:
+                engine_env["VIDEO_LANGUAGES"] = video_languages
             for ctx_key, env_key in (("editDailyLimit", "EDIT_DAILY_LIMIT"), ("planModelId", "PLAN_MODEL_ID"), ("reviewModelId", "REVIEW_MODEL_ID"), ("unsplashAppName", "UNSPLASH_APP_NAME"), ("httpUserAgent", "HTTP_USER_AGENT"), ("ttsVoice", "TTS_VOICE"), ("pollyEngine", "POLLY_ENGINE"), ("pollyRegion", "POLLY_REGION")):
                 if self.node.try_get_context(ctx_key):
                     engine_env[env_key] = str(self.node.try_get_context(ctx_key))
@@ -639,6 +643,10 @@ class BackendStack(Stack):
             if str(self.node.try_get_context(ctx_key) or ("1" if stage_cfg.get(ctx_key) else "")).lower() in ("1", "true"):
                 for fn in (intake.brief_fn, launcher_fn):
                     fn.add_environment(env_key, "1")
+        # the request check names the languages a video can be made in on this stage (the same list the engine gets): a variable on existing functions only
+        if str(self.node.try_get_context("videoLanguages") or stage_cfg.get("videoLanguages") or ""):
+            for fn in (intake.brief_fn, launcher_fn):
+                fn.add_environment("VIDEO_LANGUAGES", str(self.node.try_get_context("videoLanguages") or stage_cfg.get("videoLanguages")))
 
         # ----------------------------------------------------------------------------
         # Account deletion (docs/ACCOUNT_DELETION.md): POST /users/{user}/account/delete, an SQS worker that removes everything and then the Cognito user.

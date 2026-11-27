@@ -17,7 +17,8 @@ API = "https://en.wikipedia.org/w/api.php"
 
 
 def api_for(language: str) -> str:
-    return f"https://{language if language in ('en', 'es') else 'en'}.wikipedia.org/w/api.php"
+    from . import voices   # every language a video can be made in has its own Wikipedia
+    return f"https://{language if language in voices.LANGUAGES else 'en'}.wikipedia.org/w/api.php"
 MAX_NOTES_CHARS = 7000
 
 
@@ -37,13 +38,18 @@ def fetch_extract(title: str, chars: int = 2600, fetch: Callable[[str], Any] = f
     return {"title": str(page.get("title") or title), "url": str(page.get("fullurl") or ""), "text": text}
 
 
+def _language_name(language: str) -> str:
+    from . import voices
+    return voices.LANGUAGES.get(language, "English")
+
+
 def queries_for(topic: str, language: str, ask: Optional[Callable[[str, str], str]]) -> List[str]:
     """1-3 short encyclopedia queries for the brief. A whole sentence as a search query finds unrelated pages (which would then be
     cited as sources), so a small model writes proper queries; any failure falls back to the brief itself."""
     if ask is None:
         return [topic]
     try:
-        text = ask(f"Write up to 3 short Wikipedia search queries (2 to 5 words each, in {'Spanish' if language == 'es' else 'English'}) for the pages "
+        text = ask(f"Write up to 3 short Wikipedia search queries (2 to 5 words each, in {_language_name(language)}) for the pages "
                    "needed to explain the user's request accurately. One query per line, no numbering, no quotes.", topic[:600])
     except Exception:
         return [topic]

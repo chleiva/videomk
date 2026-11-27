@@ -31,10 +31,16 @@ _FULL = re.compile(r"^\s*(?P<sign>[+\-−]?)\s*(?P<num>" + _TOKEN + r")\s*$")
 _GROUPED = re.compile(r"^\d{1,3}(?:[" + re.escape(_SEPS) + r"]\d{3})+(?:[.,]\d+)?$")
 
 
+# Languages that write the decimal mark as a comma. They all share one style here, the one built for Spanish ("es"): a decimal comma, and a non-breaking space
+# between thousands from five integer digits (the international form, right in French, Polish and Finnish; German, Italian, Dutch and Brazilian Portuguese more
+# often group with a point, "12.345,6", but read the spaced form without doubt). Parsing accepts both groupings.
+COMMA_LANGUAGES = ("es", "fr", "de", "it", "pt", "nl", "pl", "fi")
+
+
 def norm_lang(lang: Optional[str]) -> str:
-    """'es', 'es-MX', 'Spanish' -> 'es'; anything else -> 'en'."""
+    """The number STYLE of a language: 'es' (decimal comma) for 'es', 'es-MX', 'Spanish', 'fr', 'de', ...; 'en' (decimal point) for everything else."""
     s = str(lang or "").strip().lower()
-    return "es" if s.startswith("es") or s.startswith("span") else "en"
+    return "es" if s[:2] in COMMA_LANGUAGES and not s.startswith("eng") or s.startswith("span") else "en"
 
 
 def current_language() -> str:

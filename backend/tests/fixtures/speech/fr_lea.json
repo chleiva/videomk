@@ -1,0 +1,141 @@
+{
+ "text": "Pourquoi le ciel est-il bleu ? La réponse, étonnamment, n'a presque rien à voir avec l'océan : la lumière du soleil se disperse dans l'air, et la lumière bleue se disperse le plus.",
+ "voice": "Lea",
+ "engine": "neural",
+ "language": "fr",
+ "rate": 8000,
+ "marks": [
+  {
+   "word": "Pourquoi",
+   "start": 0.1
+  },
+  {
+   "word": "le",
+   "start": 0.5
+  },
+  {
+   "word": "ciel",
+   "start": 0.687
+  },
+  {
+   "word": "est-il",
+   "start": 1.0
+  },
+  {
+   "word": "bleu",
+   "start": 1.25
+  },
+  {
+   "word": "?",
+   "start": null
+  },
+  {
+   "word": "La",
+   "start": 2.13
+  },
+  {
+   "word": "réponse,",
+   "start": 2.255
+  },
+  {
+   "word": "étonnamment,",
+   "start": 3.13
+  },
+  {
+   "word": "n'a",
+   "start": 3.98
+  },
+  {
+   "word": "presque",
+   "start": 4.13
+  },
+  {
+   "word": "rien",
+   "start": 4.567
+  },
+  {
+   "word": "à",
+   "start": null
+  },
+  {
+   "word": "voir",
+   "start": 4.88
+  },
+  {
+   "word": "avec",
+   "start": 5.067
+  },
+  {
+   "word": "l'océan",
+   "start": 5.317
+  },
+  {
+   "word": ":",
+   "start": null
+  },
+  {
+   "word": "la",
+   "start": 6.13
+  },
+  {
+   "word": "lumière",
+   "start": 6.255
+  },
+  {
+   "word": "du",
+   "start": 6.567
+  },
+  {
+   "word": "soleil",
+   "start": 6.742
+  },
+  {
+   "word": "se",
+   "start": 7.092
+  },
+  {
+   "word": "disperse",
+   "start": 7.205
+  },
+  {
+   "word": "dans",
+   "start": 7.692
+  },
+  {
+   "word": "l'air,",
+   "start": 7.817
+  },
+  {
+   "word": "et",
+   "start": 8.442
+  },
+  {
+   "word": "la",
+   "start": 8.567
+  },
+  {
+   "word": "lumière",
+   "start": 8.655
+  },
+  {
+   "word": "bleue",
+   "start": 9.005
+  },
+  {
+   "word": "se",
+   "start": 9.267
+  },
+  {
+   "word": "disperse",
+   "start": 9.38
+  },
+  {
+   "word": "le",
+   "start": 9.88
+  },
+  {
+   "word": "plus.",
+   "start": 10.005
+  }
+ ]
+}

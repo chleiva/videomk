@@ -166,8 +166,8 @@ def build_timeline(
     if wm and wm["mode"] == "none":
         wm = None
     if wm and wm.get("end_card") and scenes:   # optional closing card (VideoMK mark only): a silent 'Made with VideoMK' scene after the last one
-        es = str(plan.get("language") or "en").lower().startswith("es")
-        props = {"title": "Hecho con VideoMK" if es else "Made with VideoMK", "subtitle": "videomk.com"}
+        from . import language as lang_mod
+        props = {"title": lang_mod.made_with(plan.get("language")), "subtitle": "videomk.com"}
         scenes.append({"id": "endcard", "type": "title", "start": round(t, 4), "duration": watermark_spec.END_CARD_S, "props": props, "words": [], "audio_key": None, "silent": True,
                        "narration_offset": 0.0, "cues": [round(c, 3) for c in SCENES["title"][1](props, watermark_spec.END_CARD_S)[:8]], "transition": "fade"})
         t += watermark_spec.END_CARD_S

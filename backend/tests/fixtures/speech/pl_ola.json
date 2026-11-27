@@ -1,0 +1,105 @@
+{
+ "text": "Dlaczego niebo jest niebieskie? Odpowiedź, co zaskakujące, ma niewiele wspólnego z oceanem: światło słoneczne rozprasza się w powietrzu, a światło niebieskie rozprasza się najmocniej.",
+ "voice": "Ola",
+ "engine": "neural",
+ "language": "pl",
+ "rate": 8000,
+ "marks": [
+  {
+   "word": "Dlaczego",
+   "start": 0.137
+  },
+  {
+   "word": "niebo",
+   "start": 0.625
+  },
+  {
+   "word": "jest",
+   "start": 0.937
+  },
+  {
+   "word": "niebieskie?",
+   "start": 1.25
+  },
+  {
+   "word": "Odpowiedź,",
+   "start": 2.492
+  },
+  {
+   "word": "co",
+   "start": 3.067
+  },
+  {
+   "word": "zaskakujące,",
+   "start": 3.23
+  },
+  {
+   "word": "ma",
+   "start": 4.23
+  },
+  {
+   "word": "niewiele",
+   "start": 4.442
+  },
+  {
+   "word": "wspólnego",
+   "start": 4.792
+  },
+  {
+   "word": "z",
+   "start": 5.305
+  },
+  {
+   "word": "oceanem:",
+   "start": 5.417
+  },
+  {
+   "word": "światło",
+   "start": 6.18
+  },
+  {
+   "word": "słoneczne",
+   "start": 6.605
+  },
+  {
+   "word": "rozprasza",
+   "start": 7.067
+  },
+  {
+   "word": "się",
+   "start": 7.592
+  },
+  {
+   "word": "w",
+   "start": 7.667
+  },
+  {
+   "word": "powietrzu,",
+   "start": 7.73
+  },
+  {
+   "word": "a",
+   "start": 8.48
+  },
+  {
+   "word": "światło",
+   "start": 8.605
+  },
+  {
+   "word": "niebieskie",
+   "start": 8.98
+  },
+  {
+   "word": "rozprasza",
+   "start": 9.417
+  },
+  {
+   "word": "się",
+   "start": 9.98
+  },
+  {
+   "word": "najmocniej.",
+   "start": 10.055
+  }
+ ]
+}
