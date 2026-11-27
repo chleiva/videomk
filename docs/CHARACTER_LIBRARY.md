@@ -2,6 +2,31 @@
 
 Owner decision: generate only **5** new characters, animate them, look at the videos, and only then decide whether to build more. This note is that test. Nothing is deployed and the characters are not wired into the planner.
 
+## Update, same day: the five as standing speakers
+
+After the owner's review ("they look like they are sitting, the arms are not natural, they are speakers, they do not need to walk") the five got a second rig and an automatic gesture system.
+The full note, with the research on how speakers stand and gesture, is in `docs/CHARACTER_ANIMATION_PROOF.md` ("Second pass"). In short:
+
+- **Rig** `backend/lambdas/engine/vector_presenter.py`: straight fused legs on planted feet, shoulder pivot inside the sleeve cap, wrist joint, IK arms that cannot flip, six hand shapes, the fox's tail, no walk (slide-in, side step), framing presets `full` / `three_quarter` / `waist_up`, left or right, for 16:9, 9:16, 1:1 and 4:5.
+- **Gestures** `backend/lambdas/engine/character_gestures.py`: chosen from the narration's words and timings, no model: wave, count 1-2-3, compare left and right, shrug, present toward the content with the open hand, thumb up, open palms, beats, nods; breathing, blinks, weight shift and eye darts all the time; listening for group scenes.
+- **New pieces per character** (in the same folder): `hand_open.svg`, `hand_one.svg`, `hand_two.svg`, `hand_three.svg`, `hand_thumb.svg`, `presenter.json` (their sizes and wrist pivots; for the fox also `tail.svg` and where it attaches). The relaxed hand is cut from the existing `lower_arm.svg` at load. Made with `backend/scripts/vector_character_hands.py` (`generate` then `build`).
+- **Demo** `backend/scripts/vector_character_presenter_demo.py` (`--talk`, `--team`, `--compare david priya`, `--framing`, `--peaks` for stills at every gesture).
+- **Tests** `backend/tests/test_character_gestures.py`, `backend/tests/test_vector_presenter.py`.
+
+Rating as speakers (SHIP = fine in a customer video; all five use the same rig, differences come from the art):
+
+| | Inés | David | Priya | Mateo | Fox |
+|---|---|---|---|---|---|
+| Standing, idle life | SHIP | SHIP | SHIP | SHIP | SHIP |
+| Talk with automatic gestures | SHIP | SHIP | SHIP | SHIP | SHIP |
+| Wave, count, thumb | SHIP | SHIP | SHIP | SHIP | SHIP (paw has a thumb and three fingers: "three" uses all of them) |
+| Present / compare / shrug with open hands | SHIP | SHIP | SHIP (white sleeve: the elbow overlap is visible up close) | SHIP (same; thick short sleeve) | SHIP |
+| Enter by slide, side step | SHIP | SHIP | SHIP | SHIP | SHIP |
+| Raised arm up close | NEEDS WORK (thick cardigan sleeve) | SHIP | NEEDS WORK (white on white) | NEEDS WORK | SHIP |
+
+Quality bar for a new character on this rig, in addition to the list below: `pytest backend/tests/test_vector_presenter.py` with the id added to `CAST` (all six hand shapes present, wrist found, fused leg, joints covered by paint in the extreme poses, folder under 1 MB), then `vector_character_presenter_demo.py --talk --peaks --only <id>` and a look at the peak sheet: straight legs, sleeve on the shoulder, each hand readable.
+Spend of this pass: USD 0.1774 for five hand sheets, about USD 0.06 of Polly. Walking is no longer offered for these characters.
+
 ## The five
 
 | id | Name | Role | Age group | Look (house-v2 flat cartoon) | EN voice (Polly generative) | ES voice hint |
@@ -32,7 +57,7 @@ A character is accepted only if the test clip (`vector_character_cast_demo.py --
 3. walk across: feet planted on the ground (the walk uses the distance travelled, so this holds by construction);
 4. no vertical black strip wider than ~1.5% of the torso on either side; the torso hem does not float above the hips.
 
-## Result of this test (honest)
+## Result of the first test (first rig, superseded for talking and standing by the update above)
 
 Per-action rating, SHIP = fine in a customer video, NEEDS WORK = fine in wide shots only:
 

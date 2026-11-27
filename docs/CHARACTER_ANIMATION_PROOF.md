@@ -8,6 +8,110 @@ improves, the screen is split: **BEFORE** (the original rig) on the left, **AFTE
 Joint close-ups at 100%: `joint_crops_100pct.png` (1 px = 1 px of the reel, each tile also shows a 3x enlargement).
 Script: `backend/scripts/vector_character_proof.py` (`--measure` prints the numbers below, `--joint-strip` the crops, `--stills name:t` single frames).
 
+## Second pass: the speaker (2026-11-27, after the owner's review)
+
+The owner looked at the five-character clips and said: the characters look nice, but the legs look like everybody is sitting, the arms are not natural, the hands need a natural style,
+the motion should be natural by itself (no model deciding what to move), they are SPEAKERS so they should stand and gesture like good speakers, and they do not need to walk.
+This pass does exactly that. Same art, a second rig and an automatic gesture system. Clips: `~/Downloads/videomk-looks/web/char2_*` (captions in `captions_char2.json`).
+
+### Verdict of this pass
+
+1. **The sitting look is gone.** It came from the rig, not from the art: the walking rig kept every knee bent (hip at 95.5% of the leg length means a 17 degree bend at hip and knee). The presenter rig has one straight fused piece per leg, feet planted and turned out, about hip width.
+2. **Arms attach.** The sleeve now turns about the centre of its round cap, the elbow joint is inside both pieces, and the hand is its own piece at the wrist. No floating cap, no gap at any pose we could produce (tested in pixels at the extremes).
+3. **Hands read.** Six shapes per character (relaxed, open palm, one, two, three, thumb up), drawn by the same image model in the same style, tinted to the character's exact skin colour. Nobody points with a finger: showing something is done with the open hand.
+4. **Gestures are automatic and they make sense.** They come from the words and their timings only: a wave on "hello", fingers on "first / a, b and c", left hand then right hand on "but", open palms on a question, an open hand toward the content on "look at this". One per sentence, hands back at the sides in between.
+5. **Still a puppet, honestly:** front-facing only, hands turn in the picture plane (no real palm-up), the feet are side-view shoes turned out, faces have three mouths and no eyebrow motion. See "What is still weak".
+
+### What good speakers do (research, short)
+
+Presenter body language:
+- **Stance:** feet planted about shoulder width, weight even, no swaying or pacing; to move, move on purpose, plant, then speak. A semi-relaxed, upright posture. [Toastmasters, "Back to the Basics: Gestures" (2023)](https://toastmasters.org/magazine/magazine-issues/2023/apr/back-to-the-basics-gestures), [U. Waterloo presentation guidelines](https://ece.uwaterloo.ca/~dwharder/Presentations/Guidelines/PresentationSkills/Composure/Stance/). (Soft, not locked, knees is common coaching advice; no page we read states it.)
+- **Home base:** the hands need one place to return to. Most often: arms relaxed at the sides whenever the hands add nothing (Toastmasters 2023; [Buckley School](https://buckleyschool.com/magazine/articles/how-to-use-gestures-in-a-presentation)). Some coaches prefer hands loosely together at navel height ([Science of People](https://www.scienceofpeople.com/what-to-do-with-hands/)). We use the sides: it is the only one of the two a flat front-facing puppet can do without the forearms crossing the body.
+- **Gesture box:** from the top of the chest to the bottom of the waist, about shoulder width; outside it gestures look frantic. Gesture away from the torso, not with elbows pinned. [Science of People, "Hand Gestures"](https://www.scienceofpeople.com/hand-gestures/), Buckley.
+- **Open hands, never a pointing finger:** in a study of the same talk given by 8 lecturers, palms-up got 84% positive ratings, palms-down 52%, finger pointing 28% (as reported by Science of People; we did not read the original). Indicate with the whole open hand.
+- **Numbers and contrasts:** show the number on the fingers when a number is said, count points off, give each side of a contrast its own hand. Give each main point its own gesture; both open hands for emphasis. (Science of People; Toastmasters 2023.)
+- **Avoid:** hands in pockets, clasped ("fig leaf") or behind the back, crossed arms, shifting and pacing, circling hands, repeating one gesture, jerky pre-planned moves. (Toastmasters 2023, Buckley, Science of People.)
+- **How many:** the best-rated TED talks averaged about 26 gestures a minute, the lowest about 15 (observational; [Science of People](https://www.scienceofpeople.com/secrets-of-a-successful-ted-talk)). About half of natural gestures are plain beats ([Cassell, Vilhjálmsson, Bickmore: BEAT, SIGGRAPH 2001](https://www.media.mit.edu/gnl/publications/siggraph2001.pdf)).
+- **Timing:** a gesture has a preparation, a stroke, a hold and a retraction (Kendon); the stroke comes on or just before the stressed syllable, never after (McNeill). Measured: gesture apex within a few tens of ms of the pitch accent ([review](https://arxiv.org/pdf/1312.4640), [Loehr-type measurements](https://repositori.upf.edu/server/api/core/bitstreams/35c60503-71f3-45ff-acb1-115509e6309b/content)); so the preparation must start 0.3 to 0.45 s earlier.
+- **Choosing gestures from text without a model** is an old, proven idea: BEAT (above) picks beats for new information, the two-hand "on one hand / on the other" for exactly two contrasted items, gaze toward the listener at the end of an utterance, and aligns the stroke with the word using the speech synthesiser's timings.
+
+Animating cut-out characters so they feel alive (the classic principles applied to a rig):
+- **Arcs, slow in and slow out, overlap and drag** (the forearm lags the upper arm, the hand lags the forearm), **anticipation**, **moving holds** (a character is never quite still). [StudioBinder on the 12 principles](https://www.studiobinder.com/blog/what-are-the-12-principles-of-animation/), [Adobe](https://www.adobe.com/creativecloud/animation/discover/principles-of-animation).
+- **No twinning:** mirror-image arms with identical timing look flat; lead with one hand and offset the other by 2 to 4 frames. [Animator Island](https://www.animatorisland.com/defining-the-art-twinning/).
+- **Idle life:** a breathing cycle with head shifts and small fidgets layered at different lengths ([AnimSchool](https://blog.animschool.edu/2024/06/14/breathing-life-into-idle-animations)); blinks 10 to 20 a minute, 100 to 150 ms, closing faster than opening ([Disney Research](https://la.disneyresearch.com/wp-content/uploads/Modeling-and-Animating-Eye-Blinks-Paper.pdf)).
+- **IK where the hand has a goal** (present toward content, planted feet), plain rotation arcs for swings. Adobe Character Animator's own rig has the same pieces: breathing, auto-blink with randomness, limb IK with an elbow-flip threshold, lip sync from audio ([help page](https://helpx.adobe.com/adobe-character-animator/using/behaviors/body--auto-animating-.html), read from search results only).
+- Not found: Duik, Moho, Spine or Toon Boom documentation (not needed for the decisions here).
+
+### What changed
+
+New files only; the first rig (`engine/vector_character.py`) and its tests are untouched and still pass.
+
+| Part | Before | Now (`engine/vector_presenter.py`) |
+|---|---|---|
+| Legs | thigh + shin on a two-bone IK, knee always bent, side-view walk | one straight piece per leg, fused at load (thigh scaled to the shin's width at the knee, the inner outline removed), feet planted and turned out, hips about 107 units up; a weight shift tilts the legs by under 2 degrees with the feet fixed |
+| Shoulder | sleeve hung from its top edge, the cap swung away when raised | pivot at the centre of the round cap, arm drawn over the torso: the cap stays on the shoulder at every angle |
+| Elbow | angle keyframes | two-bone IK from a wrist target; the elbow is always on the same side of the shoulder-wrist line, so it cannot flip; reach clamped to 98.5% so the arm never locks or pops |
+| Hand | part of the forearm, one sprite | own piece at the wrist (cut found automatically: cuff edge, or narrowest row on a bare forearm), tucked under the cuff, turns at the wrist; 6 shapes |
+| Bones | piece drawn straight down | each piece is turned so its own pivot-to-end line lies on the bone (the art is never exactly vertical), so joints land where the maths says |
+| Fox | no tail, gap at the waist | tail piece behind the body that sways; legs tucked under the waistcoat |
+| Walking | walk cycle | removed. Entering: a 0.75 s slide with a lean into the move, a fade and a settle. Repositioning: a side step (leading foot lifts and lands, weight follows, other foot closes) |
+| Framing | one size | `framing(preset, side, W, H)`: full, three_quarter, waist_up; left or right; any frame shape (wide: content beside; tall and square: content above) |
+
+Hands and tail were generated with the existing pipeline (`scripts/vector_character_hands.py`, one sheet per character, cuffs cut off, tinted to the skin colour sampled from the character's own forearm, vectorised by the same tracer at 42% size to keep each character under 1 MB).
+
+### The gesture system (`engine/character_gestures.py`)
+
+Input: the words of the narration with their start and end times (from the audio, `engine.align`), optionally the loudness of each word, the side where the content is, a seed. Output: a pose for any time t. No model call, no state: the same input gives the same frames on any machine, in any order.
+
+| Gesture | Chosen when (English and Spanish cue words) | What it looks like |
+|---|---|---|
+| wave | hello / hi / welcome / hola in the first sentence; thanks / bye / gracias / adiós in the last | hand up beside the head (the only gesture above the shoulders), the hand rocks about 2.3 times a second; uses the hand away from the content |
+| count | a sentence that starts with first / second / third; a list "a, b and c"; a number 2 or 3 | forearm upright beside the shoulder, one, two, three fingers, each arriving on its word with a small pump |
+| compare | but / however / instead / on the other hand / pero / sin embargo | one open hand for the first idea, the other hand comes up on the contrast word, the head tilts from one to the other; when the sentence opens with "but": the other hand alone |
+| shrug | a question | both open hands out, shoulders up, head to one side |
+| present | this / these / here / look / mira / aquí | the open hand of the content side reaches toward the content, a glance and a slight lean that way, eyes back to the viewer |
+| thumb | great / perfect / exactly / genial | fist with the thumb up beside the shoulder |
+| open | very / important / never / always / every / remember, or a sentence ending in "!" | both open hands at waist height ("setting it down") |
+| beat | the most stressed content word of a sentence, about 3 in 4 times | at home: a small lift of one forearm with a wrist flick, the other hand answers faintly; during a held gesture: a small drop and return |
+| nod | on most gesture strokes and beats, at most every 0.8 s | head dips 1.7 units with a slight squash |
+
+Rules (each one is a test):
+- at most one meaningful gesture per sentence; never the same one twice in a row (a running count is one idea); priority when a sentence offers several: wave, count, compare, shrug, present, thumb, open;
+- phases: preparation about 0.42 s (longer for the high gestures), stroke 0.06 s before the word, hold until the phrase ends (0.45 to 1.9 s), return 0.6 s; gestures never overlap and the hands rest at least 0.2 s at home between them; when there is no room, the earlier hold is shortened, then the return is quickened a little, then the gesture is dropped;
+- limits: 22 meaningful gestures a minute, hands away from home at most about 80% of the talk;
+- path: the wrist travels on an arc about the shoulder (angle and radius are blended, not x and y) and folds toward the body on long ways; slow in and slow out, a small wind-up, a 5% overshoot that settles; the hand drags behind the forearm and catches up; the second hand of a two-handed gesture follows 75 ms later and 6% smaller;
+- a finger or thumb shape appears only when the hand is nearly up (half way it would read as pointing);
+- idle life, always on: breathing (3.7 to 4.3 s), irregular blinks (and often one as a gesture starts), weight from one foot to the other every 5 to 10 s over planted feet, a slow head sway, eye darts of two frames with the gaze on the viewer most of the time, arms that swing a hair with the weight;
+- listening (`Performance.listen`): head and eyes toward the speaker, a small nod a beat after some of the speaker's stressed words, no gestures;
+- `Performance.gesture(kind, time)` lets a scene ask for one (everybody waves at the end).
+
+### What is still weak (exactly)
+
+- **Hands do not rotate out of the picture plane.** "Palm up" is drawn as an open palm facing the viewer with the fingers along the forearm. It reads as an open hand, not as a cupped, offering palm.
+- **Home base is arms at the sides only.** Hands loosely together at the navel needs a foreshortened forearm (pointing at the viewer), which flat pieces cannot do without the forearm crossing the body and the elbow flipping.
+- **Feet:** side-view shoes turned out to left and right. It reads as standing; a drawn front-view shoe would be more correct.
+- **Elbow shape on white sleeves** (Priya, Mateo): attached, but a bent arm is still two overlapping rounded pieces, and on white you can see that. A drawn elbow would hide it.
+- **Thick sleeves** (Inés's cardigan, Mateo's short chef sleeve) make the upper arm look heavy when it is raised sideways.
+- **Face:** three mouth shapes, no eyebrow motion, no smile change; the eyes move as a pair with the brows attached.
+- **Beats** are small and all the same shape; the first cut had them too wide ("penguin"), they are now modest.
+- **Cue words are a word list**, not understanding: "second" the unit of time is handled, but a list is recognised only as "a, b and c", and an unlisted word never triggers a gesture. A sentence with no cue gets a beat or nothing, which is the safe side.
+- **Word timings** come from the audio by pause matching (accurate to roughly a tenth of a second on these clips, confidence 1.0); a stroke can still land a few frames off a word inside a long phrase.
+- **Tall frames:** the presenting hand reaches sideways, while the content is above the presenter.
+- **Speed:** about 0.12 to 0.14 s per 720p frame for one character on this (busy) Mac: PIL rotates about 14 pieces per frame. Not optimised; fine offline, not ready for the renderer.
+- Not wired into the planner or the renderer (on purpose: another change is in progress there).
+
+### Cost of this pass
+
+OpenAI: 5 hand sheets (the fox's includes the tail), USD 0.1774 (ledger `docs/vector_character_spend.jsonl`, run `vector-character-hands`; no retries were needed). Polly generative: about 2,000 characters of narration, about USD 0.06. Total about USD 0.24 of the USD 3 cap.
+
+### Tests
+
+`tests/test_character_gestures.py` (plan is deterministic, phases in order, no overlap, home between gestures, limits, cue words EN and ES, no pointing, gesture box, nothing pops, pure function of time, no twinning, idle life, listening, entering / side step / leaving with whole legs) and `tests/test_vector_presenter.py` (IK keeps bone lengths, the elbow never flips, standing pose is straight, feet stay planted in a weight shift, shoulders stay on the torso at every extreme, joints are covered by paint in drawn extreme poses for all five characters, every hand shape draws, framing presets for 16:9, 9:16, 1:1, 4:5). The first rig's tests still pass.
+
+---
+
+# First pass (earlier the same day): the proof with the first rig
+
 ## Verdict in four lines
 
 1. **The rig is not broken.** It moves smoothly, the feet do not skate (measured), the mouth follows the voice, and after this pass it no longer looks mechanical when standing, talking or waving.

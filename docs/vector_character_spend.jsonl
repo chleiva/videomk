@@ -3,3 +3,8 @@
 {"ts": "2026-11-27T01:34:20.185145Z", "run": "vector-character-cast5", "item": "sheet_priya", "what": "gpt-image-2.6-flare 1536x1024 medium rig parts sheet", "usd": 0.0361, "run_total": 0.10806}
 {"ts": "2026-11-27T01:34:29.279853Z", "run": "vector-character-cast5", "item": "sheet_mateo", "what": "gpt-image-2.6-flare 1536x1024 medium rig parts sheet", "usd": 0.036, "run_total": 0.14408}
 {"ts": "2026-11-27T01:34:37.569077Z", "run": "vector-character-cast5", "item": "sheet_fox", "what": "gpt-image-2.6-flare 1536x1024 medium rig parts sheet", "usd": 0.0361, "run_total": 0.18018}
+{"ts": "2026-11-27T15:42:31.325272Z", "run": "vector-character-hands", "item": "hands_david", "what": "gpt-image-2.6-flare 1536x1024 medium hand shapes sheet", "usd": 0.0354, "run_total": 0.03543}
+{"ts": "2026-11-27T15:42:55.865753Z", "run": "vector-character-hands", "item": "hands_ines", "what": "gpt-image-2.6-flare 1536x1024 medium hand shapes sheet", "usd": 0.0355, "run_total": 0.07085}
+{"ts": "2026-11-27T15:43:00.993977Z", "run": "vector-character-hands", "item": "hands_priya", "what": "gpt-image-2.6-flare 1536x1024 medium hand shapes sheet", "usd": 0.0354, "run_total": 0.10633}
+{"ts": "2026-11-27T15:43:06.856773Z", "run": "vector-character-hands", "item": "hands_mateo", "what": "gpt-image-2.6-flare 1536x1024 medium hand shapes sheet", "usd": 0.0354, "run_total": 0.14169}
+{"ts": "2026-11-27T15:43:12.169077Z", "run": "vector-character-hands", "item": "hands_fox", "what": "gpt-image-2.6-flare 1536x1024 medium hand shapes sheet", "usd": 0.0357, "run_total": 0.17741}

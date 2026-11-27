@@ -1,0 +1,64 @@
+{
+ "hands": {
+  "open": {
+   "file": "hand_open.svg",
+   "w": 120,
+   "h": 199,
+   "svg_bytes": 60472,
+   "pivot": [
+    73.5,
+    187.06
+   ],
+   "wrist_w": 64.0,
+   "scale": 1.0
+  },
+  "one": {
+   "file": "hand_one.svg",
+   "w": 92,
+   "h": 190,
+   "svg_bytes": 45415,
+   "pivot": [
+    45.5,
+    178.6
+   ],
+   "wrist_w": 62.0,
+   "scale": 1.0
+  },
+  "two": {
+   "file": "hand_two.svg",
+   "w": 94,
+   "h": 190,
+   "svg_bytes": 49030,
+   "pivot": [
+    48.0,
+    178.6
+   ],
+   "wrist_w": 63.0,
+   "scale": 1.0
+  },
+  "three": {
+   "file": "hand_three.svg",
+   "w": 92,
+   "h": 197,
+   "svg_bytes": 53983,
+   "pivot": [
+    46.5,
+    185.18
+   ],
+   "wrist_w": 62.0,
+   "scale": 1.0
+  },
+  "thumb": {
+   "file": "hand_thumb.svg",
+   "w": 82,
+   "h": 170,
+   "svg_bytes": 39001,
+   "pivot": [
+    30.0,
+    159.8
+   ],
+   "wrist_w": 57.0,
+   "scale": 1.0
+  }
+ }
+}
