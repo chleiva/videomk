@@ -98,7 +98,7 @@ def prepare(video_id: str, user_id: str, media_ids: List[str], *, get: Callable[
         pid = f"P{len(photos) + 1}"
         akey = f"{asset_prefix}user_{pid}.jpg"
         extra = {k: v for k, v in (meta.get(mid) or {}).items() if k in ("taken", "lat", "lon", "where")}
-        photos.append({"id": pid, "key": akey, **facts, **({"taken": extra["taken"]} if extra.get("taken") else {}), **({k: extra[k] for k in ("lat", "lon") if k in extra}), **({"where": str(extra["where"])[:80]} if extra.get("where") else {})})
+        photos.append({"id": pid, "key": akey, "src": mid, **facts, **({"taken": extra["taken"]} if extra.get("taken") else {}), **({k: extra[k] for k in ("lat", "lon") if k in extra}), **({"where": str(extra["where"])[:80]} if extra.get("where") else {})})
         thumbs.append(thumb)
         pending.append((key, akey, full))
 

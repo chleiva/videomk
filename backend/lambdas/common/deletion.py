@@ -389,6 +389,8 @@ def step_executions(user: str, budget: Budget) -> Dict[str, int]:
             budget.check()
             if VIDEO_RE.match(v):
                 stop(f"{base}:{v}")   # the launcher names the execution after the video id
+                for n in range(1, 4):   # a retried video runs as <video id>-r<n> (lambdas/video_retry.py, at most 3 retries)
+                    stop(f"{base}:{v}-r{n}")
     edit = os.environ.get("EDIT_STATE_MACHINE_ARN", "")
     if edit and vids:
         prefixes = tuple(f"{v}-r" for v in vids)

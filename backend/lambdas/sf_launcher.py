@@ -1,4 +1,4 @@
-"""POST /users/{user_id}/videos/generate
+"""POST /users/{user_id}/videos/generate   (also POST .../videos/{video_id}/retry and DELETE .../videos/{video_id}: lambdas/video_retry.py)
 
 Validates the caller, enforces the daily quota, registers the video item and
 starts the Step Functions workflow. Only the minimum (user_id, video_id, prompt)
@@ -18,6 +18,7 @@ from botocore.exceptions import ClientError
 
 from common.http import json_response
 from common.identity import extract_cognito_sub
+import video_retry
 from common import deck_limits, i18n, intake, library, safety, usage, wallet, watermark_store
 from engine import format_options, watermark_spec
 from common.photo_ids import MAX_PHOTOS, PhotoError, upload_key, valid_media_ids, valid_media_meta
@@ -239,7 +240,8 @@ def request_timezone(event: Dict[str, Any]) -> Optional[str]:
     return tz if 1 <= len(tz) <= 40 and all(ch.isalnum() or ch in "/_+-" for ch in tz) else None
 
 
-def _register_intent(user_id: str, prompt: str, video_id: str, usage_day: str, *, idempotent: bool, credits: int = 0, charge: Any = None, resolution: Optional[str] = None) -> None:
+def _register_intent(user_id: str, prompt: str, video_id: str, usage_day: str, *, idempotent: bool, credits: int = 0, charge: Any = None, resolution: Optional[str] = None,
+                     request: Optional[Dict[str, Any]] = None) -> None:
     item = {
         "video_id": video_id,
         "user_id": user_id,
@@ -252,6 +254,12 @@ def _register_intent(user_id: str, prompt: str, video_id: str, usage_day: str, *
     }
     if format_options.credits_multiplier(resolution) != 1:   # a 4K video: the record says why it cost double (other videos are recorded exactly as before)
         item.update({"resolution": resolution, "credits_multiplier": format_options.credits_multiplier(resolution)})
+    if request is not None:   # what the workflow is started with, so "Try again" can run THIS video again (docs/CREATE_API.md, lambdas/video_retry.py)
+        raw = json.dumps(request, sort_keys=True)
+        if len(raw.encode("utf-8")) <= video_retry.MAX_REQUEST_BYTES:
+            item["request_json"] = raw
+        if request["options"].get("deck"):
+            item["deck"] = True   # a presentation is used up when the video starts: its video cannot be retried
     kwargs: Dict[str, Any] = {"Item": item}
     if idempotent:
         kwargs["ConditionExpression"] = "attribute_not_exists(video_id)"
@@ -274,6 +282,11 @@ def safety_gate(user_id: str, prompt: str, brief: Dict[str, Any], options: Dict[
 
 
 def handler(event: Dict[str, Any], context: Any):
+    resource, method = str((event or {}).get("resource") or ""), str((event or {}).get("httpMethod") or "").upper()
+    if resource.endswith("/{video_id}/retry"):   # POST /users/{user_id}/videos/{video_id}/retry: the same video again (lambdas/video_retry.py)
+        return video_retry.retry_handler(event, context)
+    if resource.endswith("/{video_id}") and method == "DELETE":   # DELETE /users/{user_id}/videos/{video_id}: remove a video that did not finish
+        return video_retry.delete_handler(event, context)
     path_user_id = ((event or {}).get("pathParameters") or {}).get("user_id")
     auth_user_id = extract_cognito_sub(event)
     loc = i18n.pick_locale(event)
@@ -332,6 +345,7 @@ def handler(event: Dict[str, Any], context: Any):
     if bad_wm:
         return bad_wm
 
+    library_ids = list(options.get("library_media") or [])   # kept for a retry: their 2-day working copies can be made again from the library
     try:
         if not bring_library_photos(user_id, options):
             return json_response(400, {"message": i18n.t("create.photo_missing", loc)})
@@ -367,7 +381,8 @@ def handler(event: Dict[str, Any], context: Any):
                                    **({"resolution": resolution, "credits_multiplier": multiplier} if multiplier != 1 else {})})
 
     try:
-        _register_intent(user_id, prompt, video_id, usage_day, idempotent=idempotent, credits=credits, charge=charged, resolution=resolution)
+        _register_intent(user_id, prompt, video_id, usage_day, idempotent=idempotent, credits=credits, charge=charged, resolution=resolution,
+                         request={"options": options, "library_media": library_ids})
         resp = _sfn.start_execution(
             stateMachineArn=sm_arn,
             name=video_id,  # one execution per video; duplicate starts fail fast

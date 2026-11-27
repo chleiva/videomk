@@ -189,8 +189,10 @@ def dated_share(photos: List[Dict[str, Any]]) -> float:
     return sum(1 for p in photos if p.get("taken")) / len(photos) if photos else 0.0
 
 
-def _dt(taken: str):
+def _dt(taken: Any):
     import datetime
+    if not isinstance(taken, str) or not taken:   # a photo without a capture time carries `taken: None` (usermedia.normalize): never a crash (it failed a 64-photo video with 'NoneType' is not subscriptable)
+        return None
     try:
         return datetime.datetime.strptime(taken[:19], "%Y-%m-%dT%H:%M:%S")
     except ValueError:

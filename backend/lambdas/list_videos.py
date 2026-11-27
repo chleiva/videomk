@@ -269,6 +269,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         for it in enriched:
             out = {k: v for k, v in it.items() if k in allowed_keys}
             out["editable"] = bool(it.get("plan_key"))  # made by the v2 engine: has an editable plan
+            if str(it.get("status") or "") in ("FAILED", "CANCELLED"):   # "Try again" reuses this very video (POST .../videos/{id}/retry): worth offering unless it was retried enough or its presentation is used up
+                out["can_retry"] = int(it.get("retries") or 0) < int(os.environ.get("MAX_VIDEO_RETRIES", "3")) and not (it.get("deck") or str(it.get("stage") or "").startswith("deck"))
             if "preview_gif_url" in it:
                 out["preview_gif_url"] = it["preview_gif_url"]
             sanitized.append(out)

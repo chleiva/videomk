@@ -1,4 +1,5 @@
 """Step 1: ground (Wikipedia) -> direct (LLM) -> validate -> store plan_r1.json. Rejects bad prompts here."""
+import json
 import logging
 import os
 from typing import Any, Dict, Optional
@@ -35,6 +36,17 @@ def _web_tools(spent: Dict[str, float]):
     return websearch.TavilyProvider(key), ask_tools
 
 
+def _remember_photos(video_id: str, photos: Any) -> None:
+    """The cleaned photos in the order they were numbered (P1, P2, ...) with the original upload id and the capture time and place name each had, kept on the video record. Only
+    the place NAME is kept (never coordinates). Without this a failed video could not be given its photos back once the originals were deleted (lambdas/video_retry.py)."""
+    try:
+        from generate_video.db import set_attributes
+        rows = [{"s": p.get("src"), "t": p.get("taken") or None, "w": p.get("where") or None} for p in photos]
+        set_attributes(video_id, {"photo_restore": json.dumps(rows, separators=(",", ":"))})
+    except Exception:   # noqa: BLE001 - never stops a video
+        logging.warning("PHOTO_RESTORE_NOT_SAVED video=%s", video_id)
+
+
 def _user_photos(video_id: str, user_id: str, media_ids: Any, spent: Dict[str, float], prompt: str, minutes: float, media_meta: Any = None, big: bool = False):
     """The user's uploads made safe and understood. Returns (usable photos, skipped [{id, reason}], story).
     Cheap by design (engine/curate.py): the photos are shown to a small model on contact sheets of 10, then one text-only call works out the story."""
@@ -43,6 +55,7 @@ def _user_photos(video_id: str, user_id: str, media_ids: Any, spent: Dict[str, f
                                                 delete=awsio.delete, asset_prefix=awsio.prefix(video_id) + "assets/", meta=media_meta if isinstance(media_meta, dict) else None,
                                                 **({"max_side": usermedia.MAX_SIDE_4K} if big else {}))   # a 4K video keeps the photos larger; everything else exactly as before
     named = usermedia.attach_places(photos)   # place names from the rounded coordinates; the coordinates are forgotten right here
+    _remember_photos(video_id, photos)        # what "Try again" needs to give this video its photos back (the originals are gone from here on)
 
     def ask_vision(system: str, user: str, images: Any) -> str:
         text, meta = llm.complete(system, user, images=images, max_tokens=1800, model=llm.REVIEW_MODEL, effort="low")
