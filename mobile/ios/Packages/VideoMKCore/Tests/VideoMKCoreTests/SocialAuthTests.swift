@@ -13,6 +13,16 @@ private func query(_ url: URL) -> [String: String] {
         #expect(SocialProvider.apple.rawValue == "SignInWithApple" && SocialProvider.google.rawValue == "Google")
     }
 
+    @Test func theAppsLanguagePassesThrough() async {
+        let a = auth()
+        #expect(query(await a.beginSignIn())["lang"] == nil)
+        #expect(query(await a.beginSignIn(language: "es"))["lang"] == "es")
+        for p in SocialProvider.allCases {
+            let q = query(await a.beginSignIn(provider: p, language: "es"))
+            #expect(q["lang"] == "es" && q["identity_provider"] == p.rawValue)
+        }
+    }
+
     @Test func socialURLAddsOnlyTheProviderParameter() async {
         let a = auth()
         let plain = query(await a.beginSignIn())

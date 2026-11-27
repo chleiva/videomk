@@ -171,7 +171,7 @@ final class AppModel {
         let ephemeral = SignInFlow.useEphemeralSession(afterExplicitSignOut: UserDefaults.standard.bool(forKey: Self.signedOutKey))
         do {
             try await SignInFlow.run {
-                let callback = try await web.authenticate(url: await auth.beginSignIn(provider: provider), callbackScheme: config.callbackScheme, ephemeral: ephemeral)
+                let callback = try await web.authenticate(url: await auth.beginSignIn(provider: provider, language: Localization.shared.language.rawValue), callbackScheme: config.callbackScheme, ephemeral: ephemeral)
                 try await auth.completeSignIn(callback: callback)
             }
             UserDefaults.standard.removeObject(forKey: Self.signedOutKey)

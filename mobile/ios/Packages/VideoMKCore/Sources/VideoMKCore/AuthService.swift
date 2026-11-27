@@ -26,7 +26,8 @@ public actor AuthService: AuthorizationProviding {
 
     // MARK: sign in
 
-    public func beginSignIn(provider: SocialProvider? = nil) -> URL {
+    /// `language` ("en", "es") is passed to the hosted pages as `lang`, so the email sign-in page speaks the app's language (the providers' own pages follow the phone).
+    public func beginSignIn(provider: SocialProvider? = nil, language: String? = nil) -> URL {
         let pkce = PKCE.generate()
         let state = PKCE.generate().verifier
         pending = (pkce, state)
@@ -37,6 +38,7 @@ public actor AuthService: AuthorizationProviding {
             .init(name: "state", value: state), .init(name: "code_challenge_method", value: "S256"), .init(name: "code_challenge", value: pkce.challenge),
         ]
         if let provider { c.queryItems?.append(.init(name: "identity_provider", value: provider.rawValue)) }
+        if let language, !language.isEmpty { c.queryItems?.append(.init(name: "lang", value: language)) }
         return c.url!
     }
 

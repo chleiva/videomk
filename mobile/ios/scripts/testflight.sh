@@ -3,6 +3,8 @@
 # Needs the App Store Connect API key variables in the repo's .env (gitignored) and an app record for com.videomk.app in App Store Connect.
 #   mobile/ios/scripts/testflight.sh            upload
 #   mobile/ios/scripts/testflight.sh --local    only build a signed .ipa (no upload, no app record needed)
+# The provider sign-in buttons follow the environment (project.yml keeps them off by default):
+#   VMK_AUTH_GOOGLE=YES VMK_AUTH_APPLE=YES mobile/ios/scripts/testflight.sh
 set -euo pipefail
 root="$(cd "$(dirname "$0")/../../.." && pwd)"
 get() { grep -E "^$1=" "$root/.env" | head -1 | cut -d= -f2- | sed -E "s/^['\"]//; s/['\"]$//; s/[[:space:]]+$//"; }
@@ -26,8 +28,13 @@ PLIST
 cd "$root/mobile/ios"
 xcodegen generate >/dev/null
 # Archive unsigned (a development profile would need a registered test device); the export step signs for distribution.
+switches=()
+[ -n "${VMK_AUTH_GOOGLE:-}" ] && switches+=("VMK_AUTH_GOOGLE=$VMK_AUTH_GOOGLE")
+[ -n "${VMK_AUTH_APPLE:-}" ] && switches+=("VMK_AUTH_APPLE=$VMK_AUTH_APPLE")
+echo "sign-in switches: ${switches[*]:-none (email only)}"
 xcodebuild archive -project VideoMK.xcodeproj -scheme VideoMK-TestFlight -configuration Beta -destination 'generic/platform=iOS' \
-  -archivePath "$out/VideoMK.xcarchive" CODE_SIGNING_ALLOWED=NO CODE_SIGN_IDENTITY="" | tail -1
+  -archivePath "$out/VideoMK.xcarchive" CODE_SIGNING_ALLOWED=NO CODE_SIGN_IDENTITY="" ${switches[@]+"${switches[@]}"} | tail -1
+/usr/libexec/PlistBuddy -c "Print :VMKAuthGoogle" -c "Print :VMKAuthApple" "$out/VideoMK.xcarchive/Products/Applications/VideoMK.app/Info.plist" | paste -sd' ' - | sed 's/^/in the archive (Google Apple): /'
 xcodebuild -exportArchive -archivePath "$out/VideoMK.xcarchive" -exportPath "$out/export" -exportOptionsPlist "$out/ExportOptions.plist" \
   -allowProvisioningUpdates -authenticationKeyPath "$KP" -authenticationKeyID "$KID" -authenticationKeyIssuerID "$ISS" 2>&1 | grep -E "error|EXPORT|Upload" || true
 echo "output in $out"

@@ -61,6 +61,31 @@ final class VideoMKUITests: XCTestCase {
         try? app.screenshot().pngRepresentation.write(to: URL(fileURLWithPath: dir).appendingPathComponent("\(name).png"))
     }
 
+    /// The round trip as far as it goes without an account (network: the QA sign-in pages; opt in with `TEST_RUNNER_VMK_LIVE_SIGNIN=1`):
+    /// each provider button opens the system sign-in sheet on that provider's own page, and Cancel comes back to a usable sign-in screen with no error.
+    func testProviderButtonsOpenTheProviderAndCancelComesBack() throws {
+        guard ProcessInfo.processInfo.environment["VMK_LIVE_SIGNIN"] == "1" else { throw XCTSkip("opens the real QA sign-in pages: set TEST_RUNNER_VMK_LIVE_SIGNIN=1") }
+        let app = XCUIApplication.english()
+        app.launchEnvironment["VMK_DEBUG_RESET"] = "1"; app.launchEnvironment["VMK_DEBUG_AUTH_APPLE"] = "1"; app.launchEnvironment["VMK_DEBUG_AUTH_GOOGLE"] = "1"
+        app.launch()
+        let springboard = XCUIApplication(bundleIdentifier: "com.apple.springboard")
+        for (button, words, name) in [("signInGoogle", ["Google", "google"], "google"), ("signInApple", ["Apple", "apple"], "apple")] {
+            XCTAssertTrue(element(app, button).waitForExistence(timeout: 15))
+            element(app, button).tap()
+            let consent = springboard.buttons["Continue"]        // iOS asks before an app opens a sign-in page
+            if consent.waitForExistence(timeout: 8) { consent.tap() }
+            let page = app.webViews.firstMatch
+            XCTAssertTrue(page.waitForExistence(timeout: 30), "\(name): the sign-in sheet opens")
+            let onProvider = NSPredicate { _, _ in words.contains { w in page.staticTexts.matching(NSPredicate(format: "label CONTAINS %@", w)).count > 0 || app.otherElements.matching(NSPredicate(format: "value CONTAINS[c] %@ OR label CONTAINS[c] %@", w + ".com", w + ".com")).count > 0 } }
+            wait(for: [XCTNSPredicateExpectation(predicate: onProvider, object: nil)], timeout: 30)
+            shot(app, "signin-live-\(name)")
+            app.buttons["Cancel"].firstMatch.tap()
+            XCTAssertTrue(element(app, button).waitForExistence(timeout: 10), "\(name): Cancel comes back to the sign-in screen")
+            XCTAssertFalse(element(app, "signInError").exists, "cancelling is not an error")
+            XCTAssertTrue(element(app, button).isEnabled && app.buttons["signInButton"].isEnabled, "and it can be tried again")
+        }
+    }
+
     /// No backend needed: signed out, the social buttons exist only when their (debug) switch is on.
     func testSocialSignInButtonsFollowTheSwitches() {
         let off = XCUIApplication.english()
