@@ -283,3 +283,11 @@ frontend/dist-app/
 
 # the home page sample videos (frontend/public/samples, about 9 MB in total) are source files, not build output
 !frontend/public/samples/*.mp4
+
+# Credentials: never commit
+*.p8
+AuthKey_*
+client_secret_*.json
+*.pem
+*.jks
+*service-account*.json
