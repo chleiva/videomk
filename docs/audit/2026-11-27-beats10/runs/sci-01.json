@@ -1,0 +1,619 @@
+{
+ "id": "sci-01",
+ "category": "concept explainer (science)",
+ "language": "en",
+ "difficulty": "vague",
+ "prompt": "explain entropy",
+ "great": "Intuitive definition (disorder is a poor word; microstates/energy spreading), ice melting or a shuffled deck as an example, second law, arrow of time, why it does not forbid life; one memorable takeaway; no invented numbers.",
+ "minutes": 2.0,
+ "time_sensitive": false,
+ "options": {
+  "target_minutes": 2.0,
+  "language_passed": null,
+  "region": "US",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-27T12:24:49",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "encyclopedia",
+  "decided": "encyclopedia",
+  "reason": "Entropy is a timeless scientific concept (thermodynamics and information theory) that an encyclopedia covers accurately; no recent or fast-changing information is needed.",
+  "queries": [],
+  "searches": 2,
+  "reads": null,
+  "iterations": null,
+  "seconds": null,
+  "error": null,
+  "fallback": null,
+  "section_searches": null,
+  "skills": [
+   "explainer-education",
+   "science-wonder"
+  ],
+  "staged": null,
+  "escalated": {
+   "from_chars": 0,
+   "searches": 2,
+   "reads": 0,
+   "sources": 7,
+   "seconds": 4.6,
+   "cost_usd": 0.0007007,
+   "error": ""
+  },
+  "fetch_errors": [
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 1,
+    "retry_after": 9.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 0,
+    "error": "skipped: Wikimedia asked us to wait"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 0,
+    "error": "skipped: Wikimedia asked us to wait"
+   }
+  ],
+  "fetch_errors_n": 3,
+  "grounding": {
+   "beats": 14,
+   "candidates": 0,
+   "checked": 0,
+   "flagged": 0,
+   "repaired": 0,
+   "unsupported": 0,
+   "common": 0,
+   "supported": 0,
+   "skipped_on_screen": 0,
+   "leaks": 0,
+   "calls": 0
+  },
+  "scene_repair": {
+   "rejected": 1,
+   "repaired": 1,
+   "calls": 1
+  },
+  "notes_len": 6876,
+  "n_sources": 4,
+  "n_fetched": 7,
+  "fetched": [
+   "12.3 Second Law of Thermodynamics: Entropy - Physics | OpenStax",
+   "Second Law - Entropy | Glenn Research Center | NASA",
+   "Entropy (statistical thermodynamics) - Wikipedia",
+   "Introduction to entropy (video) | Entropy | Khan Academy",
+   "Is ENTROPY Really a \"Measure of Disorder\"? Physics of Entropy EXPLAINED and MADE EASY",
+   "Entropy Definition & Interpretation — Entropy definitions and microscopic interpretation (conceptual) - Physical Chemistry 1 | Varsity Tutors",
+   "Entropy and the Second Law of Thermodynamics – Introductory Chemistry – 1st Canadian Edition"
+  ],
+  "research_agent_cost_usd": null
+ },
+ "warnings": [
+  "beat 10: scene replaced (versus needs 2+ rows)",
+  "scenes corrected: 1 of 1"
+ ],
+ "notes": "## 12.3 Second Law of Thermodynamics: Entropy - Physics | OpenStax\nThe second law of thermodynamics states that the total entropy of a system either increases or remains constant in any spontaneous process; it never decreases. An important implication of this law is that heat transfers energy spontaneously from higher- to lower-temperature objects, but never spontaneously in the reverse direction. This is because entropy increases for heat transfer of energy from hot to cold (Figure 12.9). Because the change in entropy is Q/T, there is a larger change in at [...] Because Q is the amount of energy heat adds to the ice, its value is positive, and T is the melting temperature of ice, So the change in entropy is The change in entropy is positive, because heat transfers energy into the ice to cause the phase change. This is a significant increase in entropy, because it takes place at a relatively low temperature. It is accompanied by an increase in the disor\n\n## Second Law - Entropy | Glenn Research Center | NASA\nThe second law states that there exists a useful state variable called entropy. The change in entropy (delta S, \\\\(\\\\Delta S\\\\)) is equal to the heat transfer (delta Q, \\\\(\\\\Delta Q\\\\)) divided by the temperature (T). \\\\(\\\\LARGE \\\\Delta S=\\\\frac{\\\\Delta Q}{T}\\\\) For a given physical process, the entropy of the system and the environment will remain a constant if the process can be reversed. If we denote the initial and final states of the system by “i” and “f”, then: [...] \\\\(\\\\LARGE T\\_{h}=\\\\frac{T\\_{1}+T\\_{f}}{2}\\\\) Similarly, for the cold object, the final temperature is Tf and the average temperature during the process is Tc which is the average of Tf and T2. \\\\(\\\\LARGE T\\_{c}=\\\\frac{T\\_{2}+T\\_{f}}{2}\\\\) Th will always be greater than Tc, because T1 is greater than T2. \\\\(\\\\LARGE T\\_{h}>T\\_{c}\\\\) The entropy change for the hot object will be (-Q/Th), with the minus sign applied becau\n\n## Entropy (statistical thermodynamics) - Wikipedia\nBoltzmann's entropy describes the system when all the accessible microstates are equally likely. It is the configuration corresponding to the maximum of entropy at equilibrium. The randomness or disorder is maximal, and so is the lack of distinction (or information) of each microstate. Entropy is a thermodynamic property just like pressure, volume, or temperature. Therefore, it connects the microscopic and the macroscopic world view. [...] Ludwig Boltzmann defined entropy as a measure of the number of possible microscopic states (microstates) of a system in thermodynamic equilibrium, consistent with its macroscopic thermodynamic properties, which constitute the macrostate of the system. A useful illustration is the example of a sample of gas contained in a container. The easily measurable parameters volume, pressure, and temperature of the gas describe its macroscopic condition (state). \n\n## Introduction to entropy (video) | Entropy | Khan Academy\nentropy to the number of microstates. According to this equation, entropy, symbolized by S, is equal to Boltzmann's constant, k, times the natural log of W, and W represents the number of microstates in a system. So if the number of microstates of a system increases, that represents an increase in entropy, and if the number of microstates decreases, that represents a decrease in the entropy of the system. Sometimes, instead of using the word microstates, people will describe an increase in [...] an increase in entropy as an increase in disorder or an increase in the dispersal of either matter or energy. Sometimes, using these terms helps us think about entropy. However, when we're using the equation developed by Boltzmann, we should think about these terms as meaning an increase in the number of microstates and therefore an increase in the entropy of the system. And if we think about a d\n\n## Is ENTROPY Really a \"Measure of Disorder\"? Physics of Entropy EXPLAINED and MADE EASY\nThe statistical mechanics definition of entropy tells us that a system's entropy is equal to the Boltzmann constant multiplied by the natural logarithm of the total number of possible microstates. This is explained much better in the video, so stop reading this description lol. If you're not confident with logarithms, check out this page on what ln means: [...] This also brings us to the common description of entropy, as being a \"measure of disorder\". If a system has lots of possible microstates it can be arranged in, this means that the particles in that system can be arranged in many ways, and the entropy of the system is larger. These systems are known as \"disordered\" because of the large number of ways in which they could be arranged. However, systems with fewer possible microstates are more \"ordered\", and they have smaller values of entropy. [...] [6:47] depends on how many microsta\n\n## Entropy Definition & Interpretation — Entropy definitions and microscopic interpretation (conceptual) - Physical Chemistry 1 | Varsity Tutors\nEntropy is the central state function of the second law of thermodynamics. The Clausius definition (dS = đQrev/T) provides an experimentally accessible measure of entropy changes, connecting the concept to measurable heat and temperature along reversible paths. The Boltzmann formula (S = kB ln Ω) reveals the microscopic meaning: entropy counts the number of microstates consistent with a given macrostate. The Gibbs formula (S = −kB Σ pᵢ ln pᵢ) generalizes this to non-uniform probability [...] kB = 1.381 × 10⁻²³ J K⁻¹ is the Boltzmann constant, and Ω is the number of microstates consistent with the macrostate. The logarithm ensures that entropy is additive for independent subsystems: if system A has ΩA microstates and B has ΩB, the combined system has Ωtotal = ΩA × ΩB, and Stotal = SA + SB. GIBBS ENTROPY (GENERAL STATISTICAL FORMULA) [...] Clausius (Thermodynamic) Entropy rev/ T. This defi\n\n## Entropy and the Second Law of Thermodynamics – Introductory Chemistry – 1st Canadian Edition\nLudwig Boltzmann (1844–1906) pioneered the concept that entropy could be calculated by examining the positions and energies of molecules. He developed an equation, known as the Boltzmann equation, which relates entropy to the number of microstates (W): S=k \\ln W where k is the Boltzmann constant (1.38 × 10−23 J/K), and W is the number of microstates. [...] Key Takeaways - Entropy is the level of randomness (or disorder) of a system. It could also be thought of as a measure of the energy dispersal of the molecules in the system. - Microstates are the number of different possible arrangements of molecular position and kinetic energy at a particular thermodynamic state. - Any change that results in a higher temperature, more molecules, or a larger volume yields an increase in entropy. ### Media Attributions [...] - “Portrait of Ludwig Boltzmann” © American Institute of Physics, Emilio Segrè",
+ "plan": {
+  "title": "Entropy: Why Heat Never Flows Backward",
+  "description": "Entropy counts the ways a system can be arranged, and the second law says it never decreases on its own. This explains why ice melts, heat flows from hot to cold, and time seems to run one way.",
+  "language": "en",
+  "mood": "calm",
+  "theme": "midnight",
+  "voices": {
+   "narrator": "Ruth"
+  },
+  "beats": [
+   {
+    "id": "39824440",
+    "narration": "A hot coffee always cools down. A cold room never makes it hot again. Why does heat only travel one way?",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "steaming coffee cup on table",
+      "clip_queries": [
+       "steaming coffee cup on table",
+       "ice melting in a glass"
+      ],
+      "alt": "hot coffee cooling"
+     }
+    },
+    "chapter": "A one-way street"
+   },
+   {
+    "id": "b501ed13",
+    "narration": "The answer is a quantity called entropy. Many people call it disorder, but that word hides the real idea.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Entropy is about counting possibilities.",
+      "emphasis": "counting"
+     }
+    }
+   },
+   {
+    "id": "2f60076b",
+    "narration": "Picture a messy desk and a tidy desk. There are countless ways to be messy, but very few ways to be tidy.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "messy desk with papers",
+      "clip_queries": [
+       "messy desk with papers",
+       "tidy empty desk"
+      ],
+      "alt": "cluttered desk"
+     }
+    }
+   },
+   {
+    "id": "71a46efc",
+    "narration": "Physicists call each exact arrangement of molecules a microstate. The overall look, like pressure and temperature, is the macrostate.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "Two levels",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Microstates",
+        "icon": "atom"
+       },
+       {
+        "id": "b",
+        "label": "Macrostate",
+        "icon": "gauge"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b",
+        "add up to"
+       ]
+      ],
+      "style": "pills",
+      "accent": "sky"
+     }
+    },
+    "chapter": "Counting microstates"
+   },
+   {
+    "id": "fa07df13",
+    "narration": "Ludwig Boltzmann turned this into an equation. Entropy equals a constant, k, times the natural log of W, the number of microstates.",
+    "scene": {
+     "type": "equation",
+     "props": {
+      "steps": [
+       {
+        "formula": "S = k ln W",
+        "note": "W is the number of microstates"
+       }
+      ],
+      "title": "Boltzmann's entropy"
+     }
+    }
+   },
+   {
+    "id": "1ddfd946",
+    "narration": "More microstates means more entropy. A higher temperature, more molecules, or a larger volume all give a system more ways to arrange itself.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "What raises entropy",
+      "items": [
+       "Higher temperature",
+       "More molecules",
+       "Larger volume"
+      ],
+      "style": "icons",
+      "accent": "violet",
+      "icons": [
+       "flame",
+       "atom",
+       "box"
+      ]
+     }
+    }
+   },
+   {
+    "id": "44e40e05",
+    "narration": "Open a bottle of perfume and the scent spreads across the room. Spread-out molecules have vastly more arrangements than packed ones.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "perfume spraying in air",
+      "clip_queries": [
+       "perfume spraying in air",
+       "smoke spreading in air"
+      ],
+      "alt": "spray mist spreading"
+     }
+    }
+   },
+   {
+    "id": "0199b343",
+    "narration": "The second law says total entropy in a spontaneous process either increases or stays constant. It never decreases.",
+    "scene": {
+     "type": "definition",
+     "props": {
+      "term": "Second law of thermodynamics",
+      "definition": "In any spontaneous process, total entropy increases or stays constant. It never decreases."
+     }
+    },
+    "chapter": "The second law"
+   },
+   {
+    "id": "fa7a91ee",
+    "narration": "For heat, the change in entropy is the heat transferred, Q, divided by the temperature, T.",
+    "scene": {
+     "type": "equation",
+     "props": {
+      "steps": [
+       {
+        "formula": "Delta S = Q / T",
+        "note": "heat over temperature"
+       }
+      ],
+      "title": "Clausius entropy change"
+     }
+    }
+   },
+   {
+    "id": "1b2614a3",
+    "narration": "Heat leaving a hot object lowers its entropy a little. The same heat entering a colder object raises entropy more. Overall, entropy goes up.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "Heat flow",
+      "nodes": [
+       {
+        "id": "h",
+        "label": "Hot object",
+        "icon": "flame"
+       },
+       {
+        "id": "c",
+        "label": "Cold object",
+        "icon": "snowflake"
+       },
+       {
+        "id": "e",
+        "label": "Total entropy rises",
+        "icon": "arrow-up"
+       }
+      ],
+      "edges": [
+       [
+        "h",
+        "c",
+        "heat Q"
+       ],
+       [
+        "c",
+        "e"
+       ]
+      ],
+      "style": "cards",
+      "accent": "coral"
+     }
+    }
+   },
+   {
+    "id": "fb07aae4",
+    "narration": "That is why heat flows from hot to cold, and never the reverse by itself. The reverse would lower total entropy.",
+    "scene": {
+     "type": "versus",
+     "props": {
+      "a": {
+       "name": "Hot to cold",
+       "tagline": "Happens by itself"
+      },
+      "b": {
+       "name": "Cold to hot",
+       "tagline": "Never spontaneous"
+      },
+      "rows": [
+       {
+        "label": "Total entropy",
+        "a": "Increases",
+        "b": "Would decrease"
+       },
+       {
+        "label": "Happens by itself",
+        "a": "Yes",
+        "b": "No"
+       }
+      ],
+      "verdict": "Entropy sets the direction",
+      "winner": "a"
+     }
+    }
+   },
+   {
+    "id": "ebc2fe98",
+    "narration": "Melting ice shows it. Heat flows in, and the rigid crystal becomes free-moving liquid with many more microstates.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "ice cubes melting",
+      "clip_queries": [
+       "ice cubes melting",
+       "water pouring into glass"
+      ],
+      "alt": "melting ice close view"
+     }
+    }
+   },
+   {
+    "id": "6d9a2456",
+    "narration": "Entropy can fall in one place if it rises more elsewhere. A fridge cools food, but its heat raises entropy in the room.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Local drop, total rise",
+      "items": [
+       "Fridge cools food",
+       "Heat dumped into room",
+       "Total entropy still rises"
+      ],
+      "style": "rail",
+      "accent": "teal"
+     }
+    }
+   },
+   {
+    "id": "ed15c344",
+    "narration": "So entropy is not mess. It is the count of ways things can be, and nature drifts toward the most likely arrangement.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Heat flows downhill because there are more ways to be spread out.",
+      "emphasis": "more ways"
+     }
+    }
+   }
+  ],
+  "sources": [
+   {
+    "title": "12.3 Second Law of Thermodynamics: Entropy - Physics | OpenStax",
+    "url": "https://openstax.org/books/physics/pages/12-3-second-law-of-thermodynamics-entropy",
+    "publisher": "openstax.org",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Second Law - Entropy | Glenn Research Center | NASA",
+    "url": "https://www1.grc.nasa.gov/beginners-guide-to-aeronautics/second-law-entropy",
+    "publisher": "www1.grc.nasa.gov",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Entropy (statistical thermodynamics) - Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Entropy_(statistical_thermodynamics)",
+    "publisher": "en.wikipedia.org",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Introduction to entropy (video) | Entropy | Khan Academy",
+    "url": "https://www.khanacademy.org/science/ap-chemistry-beta/x2eef969c74e0d802:applications-of-thermodynamics/x2eef969c74e0d802:entropy/v/introduction-to-entropy-ap",
+    "publisher": "khanacademy.org",
+    "license": "",
+    "date": ""
+   }
+  ],
+  "skills": [
+   "explainer-education",
+   "science-wonder"
+  ],
+  "region": "US"
+ },
+ "timings": {
+  "total_s": 53.4,
+  "before_first_script_call_s": 7.6,
+  "script_s": 45.9
+ },
+ "cost": {
+  "script_small": 0.00123,
+  "research": 0.0007,
+  "script_big": 0.15692,
+  "search_api": 0.016,
+  "total": 0.17485
+ },
+ "calls": {
+  "small": 5,
+  "tools": 2,
+  "big": 3
+ },
+ "tokens": {
+  "in": 63406,
+  "out": 6864
+ },
+ "rules": {
+  "length": {
+   "words": 291,
+   "expected_words": 260,
+   "ratio": 1.119,
+   "beats": 14,
+   "expected_beats": 12,
+   "est_speech_s": 134.6,
+   "flag_short": false,
+   "flag_long": false,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 21,
+   "hook_greeting": false,
+   "hook_question": false,
+   "hook_long": false,
+   "close_words": 22,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "A hot coffee always cools down. A cold room never makes it hot again. Why does heat only travel one way?",
+   "close_text": "So entropy is not mess. It is the count of ways things can be, and nature drifts toward the most likely arrangement."
+  },
+  "variety": {
+   "distinct": 7,
+   "counts": {
+    "clip": 4,
+    "kinetic_text": 2,
+    "diagram": 2,
+    "equation": 2,
+    "bullets": 2,
+    "definition": 1,
+    "versus": 1
+   },
+   "max_run": 1,
+   "entropy": 2.66,
+   "top_type": "clip",
+   "top_share": 0.29,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 0,
+   "ungrounded_numbers": [],
+   "entities": 1,
+   "ungrounded_entities": [],
+   "ungrounded_share": 0.0,
+   "ungrounded_number_share": 0.0,
+   "no_notes": false
+  },
+  "repeats": [],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {
+   "scene_replaced": 1,
+   "other": 1
+  },
+  "sources": {
+   "cited": 4,
+   "fetched": 7,
+   "notes_len": 6876,
+   "flag_thin_notes": false,
+   "flag_no_sources": false,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": false,
+   "cue": false,
+   "needs_web": false,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "en",
+   "detected": "en",
+   "flag_wrong": false
+  },
+  "question_beats": 0.07,
+  "flags": [
+   "scenes_replaced"
+  ],
+  "mismatch_scenes": []
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 4,
+    "reason": "Core claims match the notes: Boltzmann S=k ln W, second law, ΔS=Q/T, and the fridge example. Small imprecision: the 'higher temperature, more molecules, larger volume' list is stated as a rule, and the hot-to-cold explanation skips the point that the temperatures are treated as roughly constant."
+   },
+   "coverage": {
+    "score": 3,
+    "reason": "Covers microstates, the second law, heat flow and melting ice, and corrects the 'disorder' idea. It omits the arrow of time, why life doesn't violate the second law, and a shuffled-deck example, and it spends a lot of time on formulas."
+   },
+   "structure": {
+    "score": 4,
+    "reason": "The order is clear: hook, microstates, equation, second law, examples, takeaway. Beat 6 (what raises entropy) sits awkwardly before the perfume example, and the formula-heavy middle makes the pacing dense."
+   },
+   "hook_ending": {
+    "score": 3,
+    "reason": "The coffee question is a decent hook. The ending restates the thesis ('nature drifts toward the most likely arrangement') rather than giving a vivid closing image."
+   },
+   "tone": {
+    "score": 4,
+    "reason": "Conversational and clear for beginners, but the equations and the natural-log mention lean technical for a 2-minute explainer."
+   },
+   "visuals": {
+    "score": 4,
+    "reason": "Good variety of clips, diagrams, equations and a versus card, and each matches its narration. The two equation scenes and several text-heavy scenes are somewhat dry, and the beat 10 diagram edge is odd."
+   },
+   "originality": {
+    "score": 3,
+    "reason": "The messy desk, perfume, ice and fridge examples are standard textbook fare. The 'disorder hides the real idea' reframing is good but common."
+   },
+   "instructions": {
+    "score": 4,
+    "reason": "English, roughly the right length, and it explains entropy. It misses some of the expected items (arrow of time, life)."
+   },
+   "language": {
+    "score": 4,
+    "reason": "Fluent, with short clear sentences. 'Heat flows downhill because there are more ways to be spread out' is slightly loose."
+   }
+  },
+  "defects": [
+   {
+    "dimension": "coverage",
+    "severity": "major",
+    "quote": "So entropy is not mess. It is the count of ways things can be, and nature drifts toward the most likely arrangement.",
+    "issue": "The script never addresses the arrow of time or why life and order don't violate the second law. The fridge is the only gesture toward local decreases.",
+    "beat": 14
+   },
+   {
+    "dimension": "hook_ending",
+    "severity": "minor",
+    "quote": "nature drifts toward the most likely arrangement",
+    "issue": "The ending is a summary line rather than a memorable image or takeaway.",
+    "beat": 14
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "A higher temperature, more molecules, or a larger volume all give a system more ways to arrange itself.",
+    "issue": "This is an oversimplified rule of thumb stated as universal.",
+    "beat": 6
+   },
+   {
+    "dimension": "structure",
+    "severity": "minor",
+    "quote": "For heat, the change in entropy is the heat transferred, Q, divided by the temperature, T.",
+    "issue": "A second equation, after S = k ln W, adds density to a 2-minute video and is not tied back to the microstate idea.",
+    "beat": 9
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "Heat leaving a hot object lowers its entropy a little. The same heat entering a colder object raises entropy more.",
+    "issue": "The explanation is fine, but it never says that this works because T is lower for the cold object.",
+    "beat": 10
+   }
+  ],
+  "missing": [
+   "Arrow of time",
+   "Why life and order don't violate the second law (the Earth receives low-entropy sunlight)",
+   "A shuffled-deck example",
+   "A memorable closing image"
+  ],
+  "wrong_facts": [],
+  "would_publish": false,
+  "summary": "A clear, accurate, well-ordered explainer that reframes entropy as counting microstates, but it is equation-heavy and leans on stock examples. It skips the arrow of time and life, and it ends on a plain summary.",
+  "mean": 3.67,
+  "cost_usd": 0.025844,
+  "tokens": [
+   6217,
+   1341
+  ]
+ }
+}

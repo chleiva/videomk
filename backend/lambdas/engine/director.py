@@ -134,6 +134,12 @@ def direct(prompt: str, *, minutes: float, ask_small: Ask, ask_big: Callable[[st
         if g["flagged"]:
             warnings.append(f"grounding: {g['flagged']} beats had unsupported specifics, {g['repaired']} rewritten")
 
+    if quality_fixes() and not photos:   # beat 1 is never a title card: a photograph of the subject (photo budget permitting) or the card's line as moving words (plan.enforce_opening)
+        per_min = plan_mod.DEFAULT_MAX_IMAGES_PER_MINUTE if max_images_per_minute is None else min(plan_mod.MAX_IMAGES_PER_MINUTE, max(0.0, float(max_images_per_minute)))
+        opened = plan_mod.enforce_opening(plan["beats"], plan_mod.image_budget(minutes, per_min))
+        if opened:
+            warnings += opened
+            info["opening"] = opened[0].split(": ", 1)[-1]
     if theme in ("midnight", "paper", "sunrise"):  # the user's choice beats the model's
         plan["theme"] = theme
     fetched: List[str] = [s["title"] for s in sources]

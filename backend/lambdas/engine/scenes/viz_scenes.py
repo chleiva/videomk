@@ -117,8 +117,19 @@ def _fmt(v: float, unit: str) -> str:
     return s + (unit if unit in ("%", "x") else (" " + unit if unit else ""))
 
 
+CHART_FIRST_CUE_S = 1.2   # a chart never sits on empty axes waiting for the voice to name its first value (QA review: 6 s of empty axes): the first bar or point is up by now
+
+
+def chart_times(n: int, dur: float, cues: Any) -> List[float]:
+    """When each value of a chart appears: with the voice, except that the first one never waits longer than CHART_FIRST_CUE_S (the later ones keep their own moments)."""
+    times = list(reveal_times(n, dur, cues, first=0.15, last=0.7))
+    if times and times[0] > CHART_FIRST_CUE_S:
+        times[0] = CHART_FIRST_CUE_S
+    return times
+
+
 def chart_cues(props: Dict[str, Any], dur: float) -> List[float]:
-    return reveal_times(len(props.get("values") or []), dur, props.get("cues"), first=0.15, last=0.7)
+    return chart_times(len(props.get("values") or []), dur, props.get("cues"))
 
 
 def draw_chart(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, th: Theme, ctx: SceneCtx) -> None:
@@ -157,7 +168,7 @@ def draw_chart(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, th: The
         cv.line([(x0, gy), (x1, gy)], with_alpha(th.card_outline if th.name != "paper" else (31, 41, 55, 30), gp * (1.0 if k else 1.6)), 2, round_caps=False)
         if k:
             cv.text(x0 - 16, gy, _fmt(vmin + rng * k / 4, unit if unit != "%" else "%"), "regular", 24 * ts, with_alpha(th.muted, gp), anchor="rm")
-    times = reveal_times(n, dur, props.get("cues"), first=0.15, last=0.7)
+    times = chart_times(n, dur, props.get("cues"))
     slot = (x1 - x0) / n
     highlight = props.get("highlight")
     if kind == "line":
@@ -211,7 +222,7 @@ def _hbars(cv: Canvas, props: Dict[str, Any], ctx: SceneCtx, lt: float, dur: flo
     vmin = min(min(values[:n]), 0.0)
     rng = (vmax - vmin) or 1.0
     zero_x = x0 + (-vmin) / rng * bar_w
-    times = reveal_times(n, dur, props.get("cues"), first=0.15, last=0.7)
+    times = chart_times(n, dur, props.get("cues"))
     highlight = props.get("highlight")
     gp = ease_out_cubic(progress(lt, 0.0, 0.6))
     cv.line([(zero_x, y_top), (zero_x, y_bot)], with_alpha(th.card_outline if th.name != "paper" else (31, 41, 55, 40), gp), 2, round_caps=False)

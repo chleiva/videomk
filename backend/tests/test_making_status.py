@@ -410,6 +410,8 @@ def test_the_plan_step_stores_the_manifest_and_each_beat_reports(aws, monkeypatc
     monkeypatch.setenv("ASSETS_BUCKET", "videomk.com")
     monkeypatch.setattr("engine.awsio._s3", None)
     monkeypatch.setattr(research, "gather_notes", lambda topic, **k: ("notes", []))
+    from engine import plan as plan_mod
+    monkeypatch.setattr(plan_mod, "enforce_opening", lambda beats, budget=None: [])   # the toy script opens on a title card on purpose; the opening rule has its own tests
     monkeypatch.setattr(llm, "complete", lambda s, u, **k: (json.dumps(PLAN_WITH_IMAGE), {"model": "m", "cost_usd": 0.01, "tokens_in": 1, "tokens_out": 1}))
     monkeypatch.setattr(stock, "scout_reviewed", lambda q, n, alt="", **k: {"jpeg": _jpeg((3000, 1700)), "entry": {}, "credit": "Photo: Ann / Unsplash", "chosen": "unsplash:uA", "candidates": [], "review": {"cost_usd": 0.0}})
     table = aws.Table("Videos")

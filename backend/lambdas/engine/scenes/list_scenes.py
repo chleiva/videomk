@@ -151,8 +151,8 @@ def _icons(cv, items, props, lt, times, th, pal, top, bot, emph, ctx):
     t_full = sprite(cv, tile, tile, 22, pal.c1, pal.c2)
     for i, text in enumerate(items):
         a, e = pop(lt, times[i])
-        if a < 1:
-            paste_sprite(cv, base, LEFT + cw / 2, y0 + pitch * (i + 0.5), 1.0, 0.3 * (1 - a))   # an empty slot: the structure is there before the voice reaches it
+        if a < 1 and land:   # an empty slot: the structure is there before the voice reaches it. Landscape only: in 9:16, 1:1 and 4:5 the empty slots filled most of the frame for seconds (docs/QUALITY_REVIEW.md), so there the list simply grows
+            paste_sprite(cv, base, LEFT + cw / 2, y0 + pitch * (i + 0.5), 1.0, 0.3 * (1 - a))
         if a <= 0:
             continue
         f = focus(times, lt, i)
@@ -219,7 +219,7 @@ def _cards(cv, items, props, lt, times, th, pal, top, bot, emph, ctx):
         x = LEFT + (cols - in_row) * (cw + gap) / 2 + c_ * (cw + gap)
         y = y_start + r_ * (ch + gap) + (stagger if c_ % 2 == 1 else 0)
         a, e = pop(lt, times[i], 0.7, 1.6)
-        if a < 1:
+        if a < 1 and land:   # empty slots in landscape only (see _icons)
             paste_sprite(cv, base, x + cw / 2, y + ch / 2, 1.0, 0.3 * (1 - a))
         if a <= 0:
             continue

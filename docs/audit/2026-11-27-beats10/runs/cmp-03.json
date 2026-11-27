@@ -1,0 +1,480 @@
+{
+ "id": "cmp-03",
+ "category": "comparison (A vs B)",
+ "language": "en",
+ "difficulty": "vague",
+ "prompt": "Kindle vs paper books",
+ "great": "Short fair comparison: portability, eye strain, battery, feel, price, environmental angle; takeaway by reader type.",
+ "minutes": 1.0,
+ "time_sensitive": false,
+ "options": {
+  "target_minutes": 1.0,
+  "language_passed": null,
+  "region": "US",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-27T12:25:52",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "encyclopedia",
+  "decided": "encyclopedia",
+  "reason": "Comparing Kindle e-readers with paper books is a timeless explanation of how the two formats differ in reading experience, cost, durability, and environmental impact. Established facts cover this well",
+  "queries": [],
+  "searches": 2,
+  "reads": null,
+  "iterations": null,
+  "seconds": null,
+  "error": null,
+  "fallback": null,
+  "section_searches": null,
+  "skills": [
+   "comparison-versus"
+  ],
+  "staged": null,
+  "escalated": {
+   "from_chars": 0,
+   "searches": 2,
+   "reads": 0,
+   "sources": 8,
+   "seconds": 5.6,
+   "cost_usd": 0.0008602000000000001,
+   "error": ""
+  },
+  "fetch_errors": [
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 0,
+    "error": "skipped: Wikimedia asked us to wait"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 0,
+    "error": "skipped: Wikimedia asked us to wait"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 0,
+    "error": "skipped: Wikimedia asked us to wait"
+   }
+  ],
+  "fetch_errors_n": 3,
+  "grounding": {
+   "beats": 7,
+   "candidates": 0,
+   "checked": 0,
+   "flagged": 0,
+   "repaired": 0,
+   "unsupported": 0,
+   "common": 0,
+   "supported": 0,
+   "skipped_on_screen": 0,
+   "leaks": 0,
+   "calls": 0
+  },
+  "scene_repair": null,
+  "notes_len": 7719,
+  "n_sources": 3,
+  "n_fetched": 8,
+  "fetched": [
+   "Comparing Comprehension of a Long Text Read in Print Book and on Kindle: Where in the Text and When in the Story?",
+   "Is Your Kindle Making You Forget What You Read?",
+   "Is it better to read on paper or an e-reader?",
+   "Study settles debate over best way to read — books or screens",
+   "Print Book Sales Flat in First Half of 2026",
+   "Print Sales Fell 3.1% in the First Quarter of 2026",
+   "Print Sales Stay Flat Through September",
+   "Why Book Sales Figures Are So Hard to Interpret (and Complete Sales Figures Nearly Impossible to Find) | Jane Friedman"
+  ],
+  "research_agent_cost_usd": null
+ },
+ "warnings": [
+  "length: the narration totals 153 words in 7 beats but a 1-minute video needs about 130 (at most 136). Cut about 23 words: write 6 to 8 beats of at most 26 words each (you averaged 21), shorter sentences, drop the least important details; keep the hook, the key points and the ending, and do not go under 119 words"
+ ],
+ "notes": "## Comparing Comprehension of a Long Text Read in Print Book and on Kindle: Where in the Text and When in the Story?\npaper (Kim and Kim, 2013; Mangen et al., 2013; Rasmusson, 2014), whereas others show no differences between paper and screen (Margolin et al., 2013; Rockinson-Szapkiw et al., 2013; Porion et al., 2016). However, a recent meta-analysis (Delgado et al., 2018) of 54 experiments published between 2000 and 2017 comparing the reading of comparable texts on paper and screens does find an advantage for paper both for between-participants and for within-participants studies. The meta-analysis revealed [...] The results showed that, on most of the measures, there were no differences between the Kindle and the print pocket book. This is in line with some recent reviews of reading comprehension on paper and screen (Hermena et al., 2017; Xu et al., 2017). This was particularly the case concerning the reading time which has been a matter of controversies in the literature, with some authors reporting \n\n## Is Your Kindle Making You Forget What You Read?\nA 2018 meta-analysis reviewing 54 studies showed a clear paper-based reading advantage. More recently, a 2024 in-depth eye-tracking study, while small, observed the same pattern, finding that students not only scored lower on-screen but were largely unaware of how differently they were processing the digital text. [...] ### The \"Screen Inferiority Effect” The \"screen inferiority effect” describes the consistent finding that people often understand and remember less from digital texts compared to print. [...] ## Sources Delgado, P., Vargas, C., Ackerman, R., & Salmerón, L. (2018). Don't throw away your printed books: A meta-analysis on the effects of reading media on reading comprehension. Educational Research Review, 25, 23–38. Fitzsimmons, G., Weal, M. J., & Drieghe, D. (2019). The impact of hyperlinks on reading text. PloS one, 14(2), e0210900.\n\n## Is it better to read on paper or an e-reader?\nNew research from the University of Valencia, Spain, has synthesised research from the last two decades and has found that when it comes to text comprehension – reading to learn – that print reading on paper may still be bettering glossy new screens. Importantly, for teachers and school leaders, age really mattered in this synthesis of research when it came to the impact of the mode of reading. [...] What the research indicates is that reading 10 hours of print on paper may prove more likely to be retained. We don’t exactly know all the reasons why this is the case, but the ‘reading mindset’ of traditional texts likely makes a difference. With digital texts, we can scroll and click, but that can potentially disturb the careful act of reading. Pop ups and additional texts or graphics may distract and much as add value to reading comprehension. [...] When learning to read, such as in prima\n\n## Study settles debate over best way to read — books or screens\nThis indicates that device users needed more brain power to later reconstruct the story during the final test, leading to the conclusion that paper readers had built a stronger “schema” in their minds during the initial reading. Advertisement 3 A cheerful girl reads an e-book on a sofa at home. [...] The findings, published in the journal PLOS ONE, revealed that the brain may process and connect story details more efficiently by reading content printed on a page, whereas an e-reader presents letters and pictures on a static screen, thus providing fewer physical cues to help the reader grasp a story. 3 A close-up of a person's hand turning the page of a book. Advertisement [...] # Paper or pixel? Science settles divisive debate over best way to read — real books or screens See more of our coverage in your search results. Here’s the word on the best medium for reading A new study may have \n\n## Print Book Sales Flat in First Half of 2026\nThe Millions logo # Print Book Sales Flat in First Half of 2026 Unit sales of print books slipped 0.3% in the first six months of 2026—the period ended July 4—compared to the same period a year ago at outlets that report to Circana BookScan. The relatively small slippage was thanks to a strong showing by the adult fiction category, which offset weakness in adult nonfiction. [...] Unit Sales of Print Books First Six Months, 2025 v. 2026| | | | | --- --- | | Source: Circana BookScan | 2025 | 2026 | Change | | Total | 353,7,705 | 352,815 | -0.3% | | Category | | | | | Adult Fiction | 94,869 | 100,311 | 5.7% | | Adult Nonfiction | 129,883 | 122,332 | -5.8% | | Children’s Fiction | 78,002 | 82,103 | 5.3% | | Children’s Nonfiction | 28,442 | 29,442 | 4.0% | | Young Adult Fiction | 14,877 | 11,074 | -25.6% | | Young Adult Nonfiction | 2,183 | 2,022 | -7.4% | [...] Another weak performance by ad\n\n## Print Sales Fell 3.1% in the First Quarter of 2026\nThe Millions logo # Print Sales Fell 3.1% in the First Quarter of 2026 Unit sales of print books had a slow start in 2026, according to data from Circana BookScan. Total unit sales fell 3.1% compared to a year ago for the quarter ending March 28, 2026, dropping to 163.5 million copies sold. Only the children's category posted a sales increase over the first quarter of 2025. [...] Source: Circana BookScan google plus facebook twitter rss P W x y z Logo | | | --- | | | | Loading... Password Log In Forgot Password Log In Forgot Password New to PW? To set up immediate access, click here. [...] NOTE: If you had a previous PW subscription, click here to reactivate your immediate access. PW site license members have access to PW’s subscriber-only website content. If working at an office location and you are not \"logged in\", simply close and relaunch your preferred browser. For off-site access, \n\n## Print Sales Stay Flat Through September\nSo far, unit sales of print books continue to sell at about the same pace in 2026 as they did in 2025. Through the nine-month period ended October 3, 2026, total unit sales were down just 0.1% from the comparable period in 2025, to 531.3 million units sold, according to Circana BookScan. [...] Adult nonfiction shows no sign of making a rebound in 2026, with sales down 6.4% for the year, slightly higher than the 5.8% decline the category had in the first half of the year. Self-help had the largest decline with sales down 23%; sales for business and economic titles were down 12.1%. The best performing nonfiction subcategory was crafts/hobbies/antiques/games, where sales rose 17.4%. [...] The children’s category continued to post modest improvement over 2025, with fiction sales up 4.8% and nonfiction sales rising 1% over the first nine months of 2026. But young adult continued to struggle, \n\n## Why Book Sales Figures Are So Hard to Interpret (and Complete Sales Figures Nearly Impossible to Find) | Jane Friedman\nIt can’t be stated often enough: Circana BookScan figures are limited to US print retail sales. That means sales through the register into a customer’s hands. BookScan doesn’t include direct sales by publishers and authors. It doesn’t include ebook sales or audiobook sales. It doesn’t include library sales. It doesn’t include reading and listening activity through subscription platforms. It doesn’t include foreign sales. And more. So it’s an incomplete picture, but again, big publishers and [...] For authors who want a reality check on print unit sales of new releases, Publishers Weekly bestseller lists are the best resource, as they include BookScan figures. If you want to determine if a particular book might be performing better in another format, check Amazon Charts, which incorporates Kindle and Audible sales and reads. USA Today is notable for trying to offer a bestseller list that",
+ "plan": {
+  "title": "Kindle vs Paper: Which Helps You Remember More?",
+  "description": "A quick look at what research says about reading on a Kindle versus paper books. Learn where paper wins on comprehension, where the two tie, and how to choose.",
+  "language": "en",
+  "mood": "calm",
+  "theme": "paper",
+  "voices": {
+   "narrator": "Ruth"
+  },
+  "beats": [
+   {
+    "id": "1dbc240e",
+    "narration": "You may remember less from a Kindle than from a paper book. Scientists have tested this for twenty years, and the answer is not simple.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "person reading on e-reader",
+      "clip_queries": [
+       "person reading on e-reader",
+       "hands turning book pages"
+      ],
+      "alt": "woman reading tablet on sofa"
+     }
+    },
+    "chapter": "The memory gap"
+   },
+   {
+    "id": "15805d48",
+    "narration": "A 2018 meta-analysis combined 54 experiments. Its verdict: paper has a clear advantage for understanding what you read.",
+    "scene": {
+     "type": "stat",
+     "props": {
+      "value": "54",
+      "label": "experiments combined in a 2018 meta-analysis, favoring paper"
+     }
+    },
+    "sfx": "impact"
+   },
+   {
+    "id": "ae77f26b",
+    "narration": "Researchers call it the screen inferiority effect. People often understand and remember less from digital text than from print.",
+    "scene": {
+     "type": "definition",
+     "props": {
+      "term": "Screen inferiority effect",
+      "definition": "People often understand and remember less from digital texts than from print."
+     }
+    }
+   },
+   {
+    "id": "59eaa3ad",
+    "narration": "But a study of a long story found no difference on most measures between a Kindle and a pocket book. Even reading time matched.",
+    "scene": {
+     "type": "versus",
+     "props": {
+      "a": {
+       "name": "Kindle"
+      },
+      "b": {
+       "name": "Paper book"
+      },
+      "rows": [
+       {
+        "label": "Most comprehension measu",
+        "a": "No difference",
+        "b": "No difference"
+       },
+       {
+        "label": "Reading time",
+        "a": "Similar",
+        "b": "Similar"
+       },
+       {
+        "label": "Meta-analysis",
+        "a": "Lower",
+        "b": "Advantage"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "38f7dec8",
+    "narration": "Why might paper help? Scrolling, clicking and pop-ups can break the careful act of reading. A page gives more physical cues for building the story.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "Why paper may help",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Scrolling and clicks",
+        "icon": "phone"
+       },
+       {
+        "id": "b",
+        "label": "Distraction",
+        "icon": "cloud"
+       },
+       {
+        "id": "c",
+        "label": "Weaker story schema",
+        "icon": "brain"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b"
+       ],
+       [
+        "b",
+        "c"
+       ]
+      ],
+      "style": "pills",
+      "accent": "violet"
+     }
+    }
+   },
+   {
+    "id": "89abd45c",
+    "narration": "Readers still love print. Through the first nine months of 2026, US print unit sales were down just 0.1%.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "people browsing bookstore shelves",
+      "alt": "customers in a bookshop"
+     }
+    }
+   },
+   {
+    "id": "cbb00e00",
+    "narration": "So for study or deep reading, choose paper. For travel and casual reading, a Kindle is fine. Match the device to the job.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "For learning, choose paper. For leisure, choose either.",
+      "emphasis": "paper"
+     }
+    }
+   }
+  ],
+  "sources": [
+   {
+    "title": "Comparing Comprehension of a Long Text Read in Print Book and on Kindle: Where in the Text and When in the Story?",
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6384527",
+    "publisher": "pmc.ncbi.nlm.nih.gov",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Is Your Kindle Making You Forget What You Read?",
+    "url": "https://evakeiffenheim.substack.com/p/is-your-kindle-making-you-forget",
+    "publisher": "evakeiffenheim.substack.com",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Print Sales Stay Flat Through September",
+    "url": "https://www.publishersweekly.com/pw/by-topic/industry-news/financial-reporting/article/101512-print-sales-stay-flat-through-september.html",
+    "publisher": "publishersweekly.com",
+    "license": "",
+    "date": ""
+   }
+  ],
+  "skills": [
+   "comparison-versus"
+  ],
+  "region": "US"
+ },
+ "timings": {
+  "total_s": 24.2,
+  "before_first_script_call_s": 8.2,
+  "script_s": 16.0
+ },
+ "cost": {
+  "script_small": 0.00026,
+  "research": 0.00086,
+  "script_big": 0.08738,
+  "search_api": 0.016,
+  "total": 0.10449
+ },
+ "calls": {
+  "small": 4,
+  "tools": 2,
+  "big": 2
+ },
+ "tokens": {
+  "in": 39606,
+  "out": 3048
+ },
+ "rules": {
+  "length": {
+   "words": 156,
+   "expected_words": 130,
+   "ratio": 1.2,
+   "beats": 7,
+   "expected_beats": 6,
+   "est_speech_s": 71.7,
+   "flag_short": false,
+   "flag_long": true,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 25,
+   "hook_greeting": false,
+   "hook_question": false,
+   "hook_long": false,
+   "close_words": 23,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "You may remember less from a Kindle than from a paper book. Scientists have tested this for twenty years, and the answer is not simple.",
+   "close_text": "So for study or deep reading, choose paper. For travel and casual reading, a Kindle is fine. Match the device to the job."
+  },
+  "variety": {
+   "distinct": 6,
+   "counts": {
+    "clip": 2,
+    "stat": 1,
+    "definition": 1,
+    "versus": 1,
+    "diagram": 1,
+    "kinetic_text": 1
+   },
+   "max_run": 1,
+   "entropy": 2.52,
+   "top_type": "clip",
+   "top_share": 0.29,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 4,
+   "ungrounded_numbers": [],
+   "entities": 2,
+   "ungrounded_entities": [],
+   "ungrounded_share": 0.0,
+   "ungrounded_number_share": 0.0,
+   "no_notes": false
+  },
+  "repeats": [],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {
+   "length": 1
+  },
+  "sources": {
+   "cited": 3,
+   "fetched": 8,
+   "notes_len": 7719,
+   "flag_thin_notes": false,
+   "flag_no_sources": false,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": false,
+   "cue": false,
+   "needs_web": false,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "en",
+   "detected": "en",
+   "flag_wrong": false
+  },
+  "question_beats": 0.0,
+  "flags": [
+   "too_long"
+  ],
+  "mismatch_scenes": [
+   "beat 5 (diagram): its narration never says ['Distraction', 'Weaker story schema']"
+  ]
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 3,
+    "reason": "The 54-experiment 2018 meta-analysis and the 0.1% print sales dip are traceable to the notes. But the diagram shows 'Scrolling and clicks' on a Kindle, which has no pop-ups, and the 'Weaker story schema' node is attached to a distraction chain the sources don't make. 'Tested for twenty years' is loosely supported."
+   },
+   "coverage": {
+    "score": 2,
+    "reason": "The script covers only comprehension. It skips portability, eye strain, battery, price, feel and the environmental angle, all of which the reviewer's note expects."
+   },
+   "structure": {
+    "score": 4,
+    "reason": "The order is clear: claim, meta-analysis, counter-study, why, then takeaway. The sales beat is a detour."
+   },
+   "hook_ending": {
+    "score": 3,
+    "reason": "The opening claim 'You may remember less from a Kindle' is decent. The ending is a generic 'Match the device to the job'."
+   },
+   "tone": {
+    "score": 4,
+    "reason": "Neutral, clear and suited to a general US audience."
+   },
+   "visuals": {
+    "score": 3,
+    "reason": "Scene types vary. The versus table has a truncated label ('Most comprehension measu') and an odd 'No difference' vs 'No difference' row. The diagram uses phone and cloud icons that fit poorly."
+   },
+   "originality": {
+    "score": 3,
+    "reason": "The 'screen inferiority effect' is a useful term, but the script is otherwise a generic research summary with no vivid example."
+   },
+   "instructions": {
+    "score": 2,
+    "reason": "It was asked for a short, fair comparison of Kindle and paper across practical factors. It delivers a narrow memory-research piece and misses most requested points. Length is about right."
+   },
+   "language": {
+    "score": 4,
+    "reason": "Fluent, clean sentences, with a slightly redundant repeat in beat 3."
+   }
+  },
+  "defects": [
+   {
+    "dimension": "coverage",
+    "severity": "major",
+    "quote": "Match the device to the job.",
+    "issue": "The script omits portability, eye strain, battery, price, feel and the environment, which a Kindle vs paper comparison needs.",
+    "beat": 7
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "major",
+    "quote": "Scrolling, clicking and pop-ups can break the careful act of reading.",
+    "issue": "This is applied to Kindles, but the notes describe general digital text. E-readers rarely have pop-ups, so the claim is misleading.",
+    "beat": 5
+   },
+   {
+    "dimension": "visuals",
+    "severity": "minor",
+    "quote": "Most comprehension measu",
+    "issue": "The row label is truncated on screen, and the table is confusing, with 'No difference' in both columns.",
+    "beat": 4
+   },
+   {
+    "dimension": "structure",
+    "severity": "minor",
+    "quote": "Readers still love print. Through the first nine months of 2026, US print unit sales were down just 0.1%.",
+    "issue": "Sales figures don't bear on which format is better, so the beat is off-topic and does not support the conclusion.",
+    "beat": 6
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "For travel and casual reading, a Kindle is fine.",
+    "issue": "The travel advice is not backed by anything in the notes.",
+    "beat": 7
+   },
+   {
+    "dimension": "instructions",
+    "severity": "minor",
+    "quote": "Which Helps You Remember More?",
+    "issue": "The title narrows the brief to memory, whereas the request was a general comparison.",
+    "beat": 1
+   }
+  ],
+  "missing": [
+   "Portability and storage of many books",
+   "Eye strain and backlight versus e-ink",
+   "Battery life",
+   "Price of devices versus books and e-book pricing",
+   "Tactile feel and sense of ownership",
+   "Environmental footprint",
+   "Recommendation by reader type"
+  ],
+  "wrong_facts": [
+   "Attributing scrolling and pop-ups to Kindle reading is shaky; the notes cover digital text in general."
+  ],
+  "would_publish": false,
+  "summary": "The script is clean and well sourced on comprehension research, but it ignores most of what a Kindle vs paper comparison should cover, such as portability, eye strain, battery, price and environment. The visuals have flaws, and the ending is generic.",
+  "mean": 3.11,
+  "cost_usd": 0.024396,
+  "tokens": [
+   5513,
+   1337
+  ]
+ }
+}

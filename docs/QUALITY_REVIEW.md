@@ -72,3 +72,28 @@ No regression in accuracy, language or instruction following. Gains are small an
 
 ## 9. Decisions for the owner
 Keep `ENGAGEMENT_PROMPT` default ON? Allow the plan.py beat-length change? Confirm the 9:16 caption position against a real TikTok/Reels preview (sources disagree 320-420 px). Retention analytics would end the guessing.
+
+## 10. Backlog items done (2026-11-27, R045; tests `backend/tests/test_quality_backlog.py`)
+| Backlog | What changed | Where |
+|---|---|---|
+| 1. Beat length 14 s to 10 s | `plan.BEAT_S = 10`: a minute is 6 beats (was 4), 3 minutes 18 (13), 12 minutes 72 (51; the cap is 90); about 21 words a beat. Videos of the person's own photos keep 14 s (`PHOTO_BEAT_S`); 15 to 45 s were already 10 s. | `engine/plan.py expected_beats` |
+| 2. Beat 1 is not a title card | The scene list no longer offers the title card for the opening, and the director replaces one that still arrives (also a first scene that was invalid and fell back to a card): a photograph of the subject (search words from the card's own title) when the photo budget has room, else the card's line as moving words. Narration, captions and timing are untouched. Only for a new video: never on an edit, never for photo videos; off with `QUALITY_FIXES=0`. Recorded in `research.opening`. | `plan.enforce_opening`, `director.direct` |
+| 5. Chart first cue | The first bar or point is up by 1.2 s (`CHART_FIRST_CUE_S`) even when the voice names it later; the other values keep their moments. | `scenes/viz_scenes.chart_times` |
+| 3. Ghost slots | In 9:16, 1:1 and 4:5 the cards and icons list styles and the diagrams no longer draw empty slots and faint tracks before the voice reaches an item: the list grows in place. Landscape is unchanged (the structure reads well there). Items are not re-centred as they appear (they would have to move): they appear in their final places. | `scenes/list_scenes.py`, `scenes/flow_scenes.py` |
+| Icon picker no-match | An item whose words name no icon used to get a rotating decoration (sparkles, target, lightbulb ...). Now: when most items of the list or diagram have a real icon the others get a plain marker (`circle-dot`); when fewer than half do (most Spanish lists, abstract steps) the whole list is numbered 1, 2, 3. The 16:9 reference pictures of 8 samples changed for this (fixture regenerated for those only). | `scenes/style_kit.py icon_for / group_icon`, `flow_scenes.icon_for_node` |
+| also | A stat whose value is a year or a decade ("1970s") is shown as written instead of counting up to it (seen on QA: "1912s" on the way). | `scenes/text_scenes.is_calendar_year` |
+
+**Audit before/after (cheap re-run: 6 of the A/B prompts, plan stage only, QA, USD 1.01; `docs/audit/2026-11-27-beats10/`, before = the same prompts in `2026-11-26-engagement/after2`).** n = 6, one run each: differences of 0.1 to 0.3 in judge scores are noise.
+| metric | before | after |
+|---|---|---|
+| beats per plan | 10.5 | 14.0 |
+| words per beat | 28.1 | 21.2 |
+| scene types per plan | 7.5 | 8.3 |
+| plans opening on a title card | 0 % | 0 % (the backstop did not have to act) |
+| judge overall (mean of the per-plan means) | 3.37 | 3.44 |
+| judge accuracy / coverage / originality | 3.17 / 2.50 / 2.50 | 3.50 / 2.67 / 2.83 |
+| judge structure / visuals / tone / language | 3.67 / 3.67 / 4.00 / 4.17 | 3.67 / 3.67 / 4.00 / 4.17 |
+| judge hook and ending | 3.50 | 3.17 |
+| cost per plan USD | 0.118 | 0.142 (+20 %) |
+| plan seconds | 40.4 | 47.6 |
+Reading: the visual change rate went up by a third as intended and nothing regressed beyond noise; the judge does not see pictures, so it cannot reward it. The plan costs about 2 cents more (more scenes to write), and each extra beat is one more voice call and one more stock lookup at generation. Rollback: `plan.BEAT_S = 14`.

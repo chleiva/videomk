@@ -1,0 +1,671 @@
+{
+ "id": "mkt-02",
+ "category": "marketing / product / business",
+ "language": "en",
+ "difficulty": "vague",
+ "prompt": "launch video for a note-taking app",
+ "great": "Reasonable positioning even with missing details: avoids inventing specific features/numbers or flags them as placeholders; problem-solution-benefit arc, call to action.",
+ "minutes": 3.0,
+ "time_sensitive": false,
+ "options": {
+  "target_minutes": 3.0,
+  "language_passed": null,
+  "region": "US",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-27T12:26:25",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "encyclopedia",
+  "decided": "encyclopedia",
+  "reason": "",
+  "queries": [],
+  "searches": null,
+  "reads": null,
+  "iterations": null,
+  "seconds": null,
+  "error": null,
+  "fallback": null,
+  "section_searches": null,
+  "skills": [
+   "product-marketing"
+  ],
+  "staged": null,
+  "escalated": null,
+  "fetch_errors": null,
+  "fetch_errors_n": null,
+  "grounding": {
+   "beats": 18,
+   "candidates": 18,
+   "checked": 14,
+   "flagged": 3,
+   "repaired": 3,
+   "unsupported": 3,
+   "common": 5,
+   "supported": 6,
+   "skipped_on_screen": 0,
+   "leaks": 0,
+   "calls": 1
+  },
+  "scene_repair": null,
+  "notes_len": 5279,
+  "n_sources": 2,
+  "n_fetched": 5,
+  "fetched": [
+   "Living+",
+   "New product development",
+   "Marketing communications",
+   "Content marketing",
+   "Note-taking"
+  ],
+  "research_agent_cost_usd": null
+ },
+ "warnings": [
+  "grounding: 3 beats had unsupported specifics, 3 rewritten"
+ ],
+ "notes": "## Living+\n\"Living+\" is the sixth episode of the fourth season of the American satirical comedy-drama television series Succession, and the 35th episode overall. It was written by Georgia Pritchett and Will Arbery and directed by Lorene Scafaria, and originally aired on HBO on April 30, 2023.\nSuccession centers on the Roy family, the owners of global media and entertainment conglomerate Waystar RoyCo, and their fight for control of the company amidst uncertainty about the health of the family's patriarch Logan (Brian Cox), who has passed away by this point of the series. The episode sees the Roys preparing the launch of \"Living+\", Logan's unrealized initiative on Waystar's Investor Day, as the ambition of Kendall (Jeremy Strong) and the unresolved grief of Roman (Kieran Culkin) threaten to destabilize the company. The episode notably features Cox's first appearance since Logan's death three episodes prior in \"Connor's Wedding\", as Logan appears via videos he had recorded for the launch.\n“Living+\" received critical acclaim, with praise for the performances (especially from Strong, Sarah Snook and Matthew Macfadyen), direction, and satirical elements. The episode earned Primetime Emmy Award nominations...\n\n## New product development\nIn business and engineering, new product development (NPD) or simply product development is the complete process of bringing a new product to market. Product development also includes renewing an existing product and introducing a product into a new market. New product development is the realization of a market opportunity by making a product available for purchase. The products developed by a commercial organization provide the means to generate income. A central aspect of NPD is product design.\nMany technology-intensive organizations exploit technological innovation in a rapidly changing consumer market. A product can be a tangible asset or good or intangible services or user experiences. NPD requires an understanding of customer needs and wants, the competitive environment, and the nature of the market.\nCost, time, and quality are the main variables that drive customer needs. Aiming at these three variables, innovative companies develop continuous practices and strategies to better satisfy customer requirements and to increase their own market share by regular development of new products. There are many uncertainties and challenges which companies must face throughout the process.\n\n## Marketing communications\nMarketing communications (also known MC, marcom(s), marcomm(s) or just simply communications) refers to the combined use of different marketing channels and tools. Marketing communication channels focus on how businesses communicate a message to their desired market, or the greater market in general. It can also include the internal communications of the organization. Marketing communication tools include advertising, personal selling, direct marketing, sponsorship, communication, public relations, social media, customer journey, and promotion.\nMC are made up of the marketing mix which is made up of the 4 Ps (Price, Promotion, Place and Product), for a business selling goods, and made up of 7 Ps: Price, Promotion, Place, Product, People, Physical evidence and Process, for a service-based business.\n\n## Content marketing\nContent marketing is a form of marketing focused on creating, publishing, and distributing content for a targeted audience online. It is often used to achieve the following business goals: attract attention and generate leads, expand their customer base, generate or increase online sales, increase brand awareness or credibility, and engage a community of online users. Content marketing attracts new customers by creating and sharing valuable free content as well as by helping companies create sustainable brand loyalty, providing valuable information to consumers, and creating a willingness to purchase products from the company in the future.\nContent marketing starts with identifying the customer's needs. After that, the information can be presented in a variety of long form and short form formats, including news, video, white papers, e-books, infographics, email newsletters, case studies, podcasts, how-to guides, question and answer articles, photos, blogs, etc. Examples of short form content include short blog posts and social media posts.\nContent marketing requires continuous delivery of large amounts of content, preferably within a content marketing strategy.\n\n## Note-taking\nNote-taking (sometimes written as notetaking or note taking) is the practice of recording information from different sources and platforms. By taking notes, the writer records the essence of the information, freeing their mind from having to recall everything. Notes are commonly drawn from a transient source, such as an oral discussion at a meeting, or a lecture (notes of a meeting are usually called minutes), in which case the notes may be the only record of the event. Since the advent of writing and literacy, notes traditionally were almost always handwritten (often in notebooks), but the introduction of notetaking software and websites has made digital notetaking possible and widespread. Note-taking is a foundational skill in personal knowledge management.",
+ "plan": {
+  "title": "Capture it once: meet your new note-taking app",
+  "description": "A launch video for a note-taking app that shows why notes matter and how capturing them frees your mind. It covers the move from notebooks to digital notes and how to start with your first note.",
+  "language": "en",
+  "mood": "bright",
+  "theme": "paper",
+  "voices": {
+   "narrator": "Ruth"
+  },
+  "beats": [
+   {
+    "id": "35ffecb3",
+    "narration": "Your meeting ended ten minutes ago. Can you say what was decided? Memory fades fast, and nobody can replay a conversation.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "people in business meeting",
+      "clip_queries": [
+       "people in business meeting",
+       "man looking at laptop thinking"
+      ],
+      "alt": "team talking around conference table"
+     }
+    },
+    "chapter": "Why notes matter"
+   },
+   {
+    "id": "dcf2a709",
+    "narration": "For a lecture or a talk, your notes may be the only record that it ever happened. That is a lot to trust to memory.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Sometimes your notes are the only record of what happened.",
+      "emphasis": "only record"
+     }
+    }
+   },
+   {
+    "id": "975f8782",
+    "narration": "Note-taking is the practice of recording information from different sources. You capture the essence, so your mind is free to listen.",
+    "scene": {
+     "type": "definition",
+     "props": {
+      "term": "Note-taking",
+      "definition": "The practice of recording information from different sources, capturing its essence so you do not have to recall everything."
+     }
+    }
+   },
+   {
+    "id": "cf2effee",
+    "narration": "For a long time, notes were handwritten, usually in notebooks. Pages filled up. Pages got lost. Finding one idea meant flipping through them all.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "hand writing in notebook",
+      "clip_queries": [
+       "hand writing in notebook",
+       "student writing at desk"
+      ],
+      "alt": "person writing notes on paper"
+     }
+    },
+    "chapter": "From notebooks to digital"
+   },
+   {
+    "id": "016cf82f",
+    "narration": "Handwriting filled notebooks. Then software and websites arrived, and digital notes became widespread. Our app starts from that shift.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "How notes evolved",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Handwriting",
+        "icon": "pen"
+       },
+       {
+        "id": "b",
+        "label": "Notebooks",
+        "icon": "book"
+       },
+       {
+        "id": "c",
+        "label": "Software",
+        "icon": "laptop"
+       },
+       {
+        "id": "d",
+        "label": "Websites",
+        "icon": "cloud"
+       },
+       {
+        "id": "e",
+        "label": "Digital notes",
+        "icon": "phone"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b"
+       ],
+       [
+        "b",
+        "c"
+       ],
+       [
+        "c",
+        "d"
+       ],
+       [
+        "d",
+        "e"
+       ]
+      ],
+      "style": "pills",
+      "accent": "amber",
+      "emphasis": 4
+     }
+    },
+    "sfx": "whoosh"
+   },
+   {
+    "id": "cb3031a6",
+    "narration": "So here is the promise. Capture a thought quickly. Keep everything in one place. Find it again when it matters.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "One simple promise",
+      "items": [
+       "Capture",
+       "Keep",
+       "Find"
+      ],
+      "style": "spotlight",
+      "accent": "indigo"
+     }
+    },
+    "chapter": "What the app does"
+   },
+   {
+    "id": "251782d5",
+    "narration": "Capturing should be easy. You are in a meeting, a lecture or on a busy street, and the idea is safe before it slips away.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "typing on laptop in cafe",
+      "clip_queries": [
+       "typing on laptop in cafe",
+       "student in lecture hall taking notes",
+       "person typing on phone walking street"
+      ],
+      "alt": "person using phone and laptop at a cafe"
+     }
+    }
+   },
+   {
+    "id": "4855cbe9",
+    "narration": "Ideas move in a few steps. First you capture. Then you organize. Then you revisit, and ideas turn into something you can use.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "Your notes, step by step",
+      "nodes": [
+       {
+        "id": "c",
+        "label": "Capture",
+        "icon": "pen"
+       },
+       {
+        "id": "o",
+        "label": "Organize",
+        "icon": "folder"
+       },
+       {
+        "id": "r",
+        "label": "Revisit",
+        "icon": "search"
+       }
+      ],
+      "edges": [
+       [
+        "c",
+        "o"
+       ],
+       [
+        "o",
+        "r"
+       ]
+      ],
+      "style": "cards",
+      "accent": "teal"
+     }
+    }
+   },
+   {
+    "id": "d137b7d0",
+    "narration": "Without notes, you recall fuzzy outlines, forgotten details, and your attention splits. With notes, details are saved and your mind is free.",
+    "scene": {
+     "type": "versus",
+     "props": {
+      "a": {
+       "name": "Memory alone"
+      },
+      "b": {
+       "name": "With notes"
+      },
+      "rows": [
+       {
+        "label": "Recall",
+        "a": "Fuzzy",
+        "b": "Clear"
+       },
+       {
+        "label": "Details",
+        "a": "Forgotten",
+        "b": "Saved"
+       },
+       {
+        "label": "Focus",
+        "a": "Split",
+        "b": "Free"
+       }
+      ],
+      "verdict": "Let notes carry the details",
+      "winner": "b"
+     }
+    }
+   },
+   {
+    "id": "25f40928",
+    "narration": "Notes come from everywhere. Lectures. Meetings. Spoken conversations. Whatever the source, they belong in one place.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Where notes come from",
+      "items": [
+       "Lectures",
+       "Meetings",
+       "Conversations"
+      ],
+      "style": "icons",
+      "accent": "coral",
+      "icons": [
+       "book",
+       "users",
+       "message-circle"
+      ]
+     }
+    }
+   },
+   {
+    "id": "0ca48d29",
+    "narration": "Meeting notes are usually called minutes. They keep a team on the same page, long after everyone has left the room.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "team collaborating in office",
+      "alt": "colleagues discussing at a desk"
+     }
+    }
+   },
+   {
+    "id": "eec6148e",
+    "narration": "Note-taking is a foundational skill in personal knowledge management. In plain words, it is how you build what you know.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Notes are how you build what you know.",
+      "emphasis": "build"
+     }
+    },
+    "chapter": "Built for how you think"
+   },
+   {
+    "id": "fd0e7b3e",
+    "narration": "Students use it to study. Professionals use it to prepare. Writers use it to catch the first rough spark of a story.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "students studying in library",
+      "clip_queries": [
+       "students studying in library",
+       "professional working at desk",
+       "writer working on laptop"
+      ],
+      "alt": "students reading and writing in a library"
+     }
+    }
+   },
+   {
+    "id": "38febe8c",
+    "narration": "Remember what matters: capture quickly, keep it organized, find it fast, and stay focused on the person in front of you.",
+    "scene": {
+     "type": "checklist",
+     "props": {
+      "heading": "What you get",
+      "items": [
+       "Capture quickly",
+       "Keep it organized",
+       "Find it fast",
+       "Stay focused on people"
+      ]
+     }
+    }
+   },
+   {
+    "id": "4fe8d816",
+    "narration": "We built this by starting with a need, not a feature list. Product development begins with understanding what people actually want.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "team brainstorming whiteboard office",
+      "alt": "colleagues planning with sticky notes"
+     }
+    }
+   },
+   {
+    "id": "985faf84",
+    "narration": "Picture your next week. A class, a call, a project kickoff. Every important word captured, and none of it left to chance.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "person planning week with notebook",
+      "clip_queries": [
+       "person planning week with notebook",
+       "woman on video call at home desk"
+      ],
+      "alt": "desk with planner and coffee"
+     }
+    },
+    "chapter": "Start today"
+   },
+   {
+    "id": "09c82801",
+    "narration": "Getting started takes a minute. Open a new note. Write the first thing on your mind. Come back tomorrow and find it waiting.",
+    "scene": {
+     "type": "steps",
+     "props": {
+      "title": "Your first note",
+      "steps": [
+       {
+        "label": "Open a new note"
+       },
+       {
+        "label": "Write the first thing on your mind"
+       },
+       {
+        "label": "Come back tomorrow"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "7f1f8b87",
+    "narration": "Your memory has better things to do. Let your notes carry the details, and keep your mind for the ideas.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Let your notes carry the details. Keep your mind for the ideas.",
+      "emphasis": "keep your mind for the ideas"
+     }
+    }
+   }
+  ],
+  "sources": [
+   {
+    "title": "New product development",
+    "url": "https://en.wikipedia.org/wiki/New_product_development",
+    "publisher": "Wikipedia",
+    "license": "CC BY-SA 4.0"
+   },
+   {
+    "title": "Note-taking",
+    "url": "https://en.wikipedia.org/wiki/Note-taking",
+    "publisher": "Wikipedia",
+    "license": "CC BY-SA 4.0"
+   }
+  ],
+  "skills": [
+   "product-marketing"
+  ],
+  "region": "US"
+ },
+ "timings": {
+  "total_s": 59.2,
+  "before_first_script_call_s": 6.3,
+  "script_s": 52.9
+ },
+ "cost": {
+  "script_small": 0.00192,
+  "script_big": 0.08852,
+  "search_api": 0.0,
+  "total": 0.09044
+ },
+ "calls": {
+  "small": 5,
+  "big": 1
+ },
+ "tokens": {
+  "in": 19918,
+  "out": 8706
+ },
+ "rules": {
+  "length": {
+   "words": 388,
+   "expected_words": 390,
+   "ratio": 0.995,
+   "beats": 18,
+   "expected_beats": 18,
+   "est_speech_s": 178.8,
+   "flag_short": false,
+   "flag_long": false,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 21,
+   "hook_greeting": false,
+   "hook_question": false,
+   "hook_long": false,
+   "close_words": 20,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "Your meeting ended ten minutes ago. Can you say what was decided? Memory fades fast, and nobody can replay a conversation.",
+   "close_text": "Your memory has better things to do. Let your notes carry the details, and keep your mind for the ideas."
+  },
+  "variety": {
+   "distinct": 8,
+   "counts": {
+    "clip": 7,
+    "kinetic_text": 3,
+    "definition": 1,
+    "diagram": 2,
+    "bullets": 2,
+    "versus": 1,
+    "checklist": 1,
+    "steps": 1
+   },
+   "max_run": 2,
+   "entropy": 2.59,
+   "top_type": "clip",
+   "top_share": 0.39,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 0,
+   "ungrounded_numbers": [],
+   "entities": 0,
+   "ungrounded_entities": [],
+   "ungrounded_share": 0.0,
+   "ungrounded_number_share": 0.0,
+   "no_notes": false
+  },
+  "repeats": [
+   {
+    "phrase": "your mind is free",
+    "count": 2
+   }
+  ],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {
+   "other": 1
+  },
+  "sources": {
+   "cited": 2,
+   "fetched": 5,
+   "notes_len": 5279,
+   "flag_thin_notes": false,
+   "flag_no_sources": false,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": false,
+   "cue": false,
+   "needs_web": false,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "en",
+   "detected": "en",
+   "flag_wrong": false
+  },
+  "question_beats": 0.0,
+  "flags": [
+   "repeated_phrase"
+  ],
+  "mismatch_scenes": []
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 4,
+    "reason": "It makes no invented numbers or features, and the note-taking claims trace to the notes. The \"Getting started takes a minute\" claim and the \"find it fast\" promise are unsupported, and the diagram presents the history as a strict linear chain."
+   },
+   "coverage": {
+    "score": 2,
+    "reason": "It is mostly a generic essay on note-taking. It has no concrete product features (sync, search, platforms, pricing), no placeholders, no named app, and no real call to action such as a download or link."
+   },
+   "structure": {
+    "score": 3,
+    "reason": "The chapters are clear, but the history section is long for a launch video. Beats 9-11 repeat the capture/keep/find idea and the meetings/lectures point, and the product pitch arrives late."
+   },
+   "hook_ending": {
+    "score": 4,
+    "reason": "The opener, \"Your meeting ended ten minutes ago. Can you say what was decided?\", is a strong hook. The ending line is decent but is a recap with no call to action."
+   },
+   "tone": {
+    "score": 4,
+    "reason": "The voice is warm, conversational and suited to a general US audience. It leans slightly toward explainer rather than launch excitement."
+   },
+   "visuals": {
+    "score": 4,
+    "reason": "The scene types vary well (clips, diagram, versus, steps, checklist), and the queries fit the narration. There is no app UI or screenshot placeholder, and the diagram and versus are a bit filler."
+   },
+   "originality": {
+    "score": 2,
+    "reason": "It is generic and repeats the Wikipedia definition. Lines like \"Product development begins with understanding what people actually want\" are filler that fits any product."
+   },
+   "instructions": {
+    "score": 3,
+    "reason": "It is a launch video of about the right length, with a problem-solution arc. It lacks a product name, differentiators and a call to action, and it spends time on a textbook definition."
+   },
+   "language": {
+    "score": 4,
+    "reason": "The prose is fluent, with short punchy sentences. It has a few stiff textbook phrases such as \"Spoken conversations\" and \"Meeting notes are usually called minutes\"."
+   }
+  },
+  "defects": [
+   {
+    "dimension": "coverage",
+    "severity": "major",
+    "quote": "Our app starts from that shift.",
+    "issue": "The app is never named and no concrete features or differentiators are given. The video does not say what makes it different from Apple Notes, Notion or Evernote.",
+    "beat": 5
+   },
+   {
+    "dimension": "instructions",
+    "severity": "major",
+    "quote": "Come back tomorrow and find it waiting.",
+    "issue": "There is no real call to action (download, link, availability, pricing), which a launch video needs.",
+    "beat": 17
+   },
+   {
+    "dimension": "originality",
+    "severity": "major",
+    "quote": "Product development begins with understanding what people actually want.",
+    "issue": "This is a textbook line lifted from the research and says nothing specific about this app. It is filler for a launch.",
+    "beat": 15
+   },
+   {
+    "dimension": "structure",
+    "severity": "minor",
+    "quote": "Meeting notes are usually called minutes.",
+    "issue": "This is an encyclopedic aside that interrupts the pitch. It also duplicates the earlier meetings and sources material.",
+    "beat": 11
+   },
+   {
+    "dimension": "structure",
+    "severity": "minor",
+    "quote": "Notes come from everywhere. Lectures. Meetings. Spoken conversations.",
+    "issue": "It repeats the earlier examples, so the middle drags and padding is evident.",
+    "beat": 10
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "Getting started takes a minute.",
+    "issue": "This is an unsupported product claim presented as fact, with no placeholder flag.",
+    "beat": 17
+   },
+   {
+    "dimension": "coverage",
+    "severity": "minor",
+    "quote": "Handwriting filled notebooks. Then software and websites arrived",
+    "issue": "The history lesson takes up a large share of a short video and delays the product.",
+    "beat": 5
+   }
+  ],
+  "missing": [
+   "App name and a concrete differentiator (flagged as placeholder if unknown)",
+   "Specific feature highlights such as search, sync across devices, or tagging",
+   "A real call to action: download link, availability, or free trial",
+   "A product UI or mockup scene",
+   "A social proof or beta-user moment, flagged as placeholder if needed"
+  ],
+  "wrong_facts": [],
+  "would_publish": false,
+  "summary": "The script opens well and reads smoothly, but it is a generic essay on note-taking built from encyclopedia text rather than a product launch. It has no app identity, no features and no call to action.",
+  "mean": 3.33,
+  "cost_usd": 0.025548,
+  "tokens": [
+   5579,
+   1439
+  ]
+ }
+}

@@ -33,7 +33,7 @@ MAX_WORD_CHARS = 24
 WORDS_PER_MIN = 150
 
 SCENE_DOCS_BASE = """Scene types (props):
-- title: {title (<=70 chars), subtitle (<=110)}. Use for the opening and for chapter openers.
+- title: {title (<=70 chars), subtitle (<=110)}. Use for chapter openers and section breaks; never as the first scene (open on a picture, a number or a clip).
 - bullets: {heading (<=50), items: 2-5 short strings (<=80), optional style, accent, emphasis (index of key item), icons (one icon word per item)}. Lists, steps, key points. style: "rail" (default, numbered: general), "spotlight" (huge type, one line lit at a time: claims, mottos), "icons" (icon tiles: features, tips), "cards" (card grid: parallel ideas), "keywords" (items as "Keyword: explanation"). accent: indigo (tech, trust), coral (energy, food, kids), teal (health, calm), amber (warmth, money, history), emerald (nature, growth), violet (creative, mystery), rose (love, people), sky (travel, science); omit = theme colour. Match style and accent to topic and mood; VARY them, never the same look twice in a row.
 - diagram: {title (<=50), nodes: [{id, label (<=26), optional icon word}] (3-7), edges: [[from_id, to_id, optional label (<=22, 1-3 words)]], optional style, accent, emphasis (index of the key node)}. Processes, causes and effects, architectures, flows. Left-to-right, at most 4 layers (more wraps into two rows). style: "cards" (default: icon cards, connectors that draw on), "pills" (light chips: short steps), "ladder" (rising steps: progress, growth, levels), "stack" (top to bottom: long labels, hierarchy, chains). accent: same names as bullets. The node being narrated lights up, so the narration names the nodes in order. Vary style and accent from the previous visual.
 - chart: {kind: "bar"|"line", title (<=50), labels: 3-7 strings (<=16), values: plain JSON numbers with a decimal POINT and no separators (3.3 or 1250, never \"3,3\" or \"1,250\", in every language), unit (<=6, e.g. "%" or "$"), highlight: optional index}. Only use numbers that appear in the grounding notes; never invent statistics. Avoid values that differ by more than 50x.
@@ -313,6 +313,8 @@ BEAT_OVERHEAD_S = 0.95        # lead-in and tail of every spoken beat
 MIN_LENGTH_SHARE = 0.93       # a script under this share of the words the length needs is sent back, then accepted (the timeline makes up the rest, never shorter than asked)
 
 
+BEAT_S = 10.0                 # one beat (one scene) per about 10 seconds from a minute up: it was 14, and a new picture only every 13 to 15 s was the main brake on visual change (docs/QUALITY_REVIEW.md backlog 1)
+PHOTO_BEAT_S = 14.0           # videos of the person's own photos: unchanged
 SHORT_FORM_MINUTES = 1.0      # under a minute (15, 30, 45 s) the video is "short-form": its own beat and word budgets, framing and repair thresholds (docs/SHORT_VIDEOS.md)
 SHORT_BEAT_S = 10.0           # one beat per about 10 seconds in short-form (2 beats at 15 s, 3 at 30 s, 4 at 45 s)
 SHORT_WORDS_CALIBRATION = 0.94   # measured on QA (docs/SHORT_VIDEOS.md): the writer lands 8 to 10 percent over any stated word count in 15 to 45 s, so the count asked for is a little lower
@@ -326,7 +328,8 @@ def is_short(target_minutes: float) -> bool:
 def expected_beats(target_minutes: float, n_photos: int = 0) -> int:
     if is_short(target_minutes):
         return max(2, round(target_minutes * 60 / SHORT_BEAT_S), n_photos)
-    return max(4, round(target_minutes * 60 / 14), n_photos)
+    # a video of the person's photos keeps the calmer rhythm (the pictures set the pace; fewer photos than beats would only add cards between them)
+    return max(4, round(target_minutes * 60 / (PHOTO_BEAT_S if n_photos else BEAT_S)), n_photos)
 
 
 PHOTO_FRAME_S = 6.0           # a video of the person's photos opens and ends on music alone (director.PHOTO_INTRO_S + PHOTO_OUTRO_S): that time is not narration
@@ -868,6 +871,46 @@ def _validate_plan(plan: Dict[str, Any], *, max_beats: int = MAX_BEATS, language
         },
         warnings,
     )
+
+
+_OPENING_STOP = frozenset("a an the of in on at to for from by with and or but is are was were be been it its this that these those how why what when where who which do does did "
+                          "can could will would should your you our we my i not no vs than then so as into about el la los las un una unos unas de del en y o que por para con se es son "
+                          "como qué por cómo cuándo dónde su sus al lo más".split())
+MAX_KINETIC_PER_VIDEO = 3
+
+
+def opening_query(title: str, narration: str = "") -> str:
+    """A stock-photo search (2 to 6 plain words) for the subject of an opening card: the card's own words without the little ones, else the first words of the narration."""
+    for text in (title, narration):
+        words = [w for w in re.findall(r"[^\W\d_]{3,}", str(text or ""), re.UNICODE) if w.lower() not in _OPENING_STOP]
+        if len(words) >= 2:
+            return " ".join(words[:6]).lower()
+    return ""
+
+
+def enforce_opening(beats: List[Dict[str, Any]], budget: Optional[int] = None) -> List[str]:
+    """Beat 1 is never a title card (docs/QUALITY_REVIEW.md: most openings were a title with a subtitle held 6 to 12 s under a good hook line). The writer is told so; this is
+    the backstop for the plans that do it anyway, including a first scene that was invalid and fell back to a card. Called by the director for a NEW video only
+    (never by the plan validation itself, which also runs on every edit: an edit must not change the opening of a finished video). The narration is not touched, so the voice, the captions
+    and the timing stay as written: only the picture changes, to a photograph of the subject when the photo budget has room, else to the card's own line as big moving words."""
+    if not beats:
+        return []
+    first = beats[0]
+    scene = first.get("scene") or {}
+    if scene.get("type") != "title" or first.get("silent"):
+        return []
+    props = scene.get("props") or {}
+    title = _s(props.get("title"), 140)
+    query = opening_query(title, first.get("narration", ""))
+    used = sum(count_images(b) for b in beats)
+    if query and (budget is None or used < budget):
+        first["scene"] = {"type": "image", "props": {"image_query": query, "alt": title[:70] or query}}
+        return ["beat 0: the opening title card became a photograph of the subject"]
+    line = title or card_text(first.get("narration", ""))
+    if line and sum(1 for b in beats if b["scene"]["type"] == "kinetic_text") < MAX_KINETIC_PER_VIDEO:
+        first["scene"] = {"type": "kinetic_text", "props": {"text": line}}
+        return ["beat 0: the opening title card became moving words"]
+    return ["beat 0: the video opens on a title card (no photo budget and no room for moving words)"]
 
 
 def count_images(beat: Dict[str, Any]) -> int:

@@ -1,0 +1,605 @@
+{
+ "id": "fin-02",
+ "category": "personal finance",
+ "language": "es",
+ "difficulty": "vague",
+ "prompt": "explícame la inflación",
+ "great": "Qué es (alza generalizada y sostenida de precios), cómo se mide (IPC), causas (demanda, costes, monetaria), efectos en poder adquisitivo, ejemplo cotidiano, qué hacen los bancos centrales; claro.",
+ "minutes": 2.0,
+ "time_sensitive": false,
+ "options": {
+  "target_minutes": 2.0,
+  "language_passed": null,
+  "region": "ES",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-27T12:25:46",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "encyclopedia",
+  "decided": "encyclopedia",
+  "reason": "La inflación es un concepto económico estable y atemporal: su definición, causas y efectos se explican bien con conocimiento general, sin necesidad de datos recientes.",
+  "queries": [
+   "qué es la inflación",
+   "causas de la inflación",
+   "inflación explicación economía"
+  ],
+  "searches": 3,
+  "reads": null,
+  "iterations": null,
+  "seconds": null,
+  "error": null,
+  "fallback": null,
+  "section_searches": null,
+  "skills": [
+   "finance-business",
+   "explainer-education"
+  ],
+  "staged": null,
+  "escalated": {
+   "from_chars": 0,
+   "searches": 3,
+   "reads": 0,
+   "sources": 7,
+   "seconds": 11.2,
+   "cost_usd": 0.0015758999999999999,
+   "error": ""
+  },
+  "fetch_errors": [
+   {
+    "url": "https://es.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 1,
+    "retry_after": 11.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://es.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 0,
+    "error": "skipped: Wikimedia asked us to wait"
+   },
+   {
+    "url": "https://es.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 0,
+    "error": "skipped: Wikimedia asked us to wait"
+   }
+  ],
+  "fetch_errors_n": 3,
+  "grounding": {
+   "beats": 13,
+   "candidates": 1,
+   "checked": 1,
+   "flagged": 0,
+   "repaired": 0,
+   "unsupported": 0,
+   "common": 0,
+   "supported": 1,
+   "skipped_on_screen": 0,
+   "leaks": 0,
+   "calls": 1
+  },
+  "scene_repair": null,
+  "notes_len": 5308,
+  "n_sources": 5,
+  "n_fetched": 7,
+  "fetched": [
+   "Nota de Prensa: Índice de Precios de Consumo (IPC). Índice de Precios de Consumo Armonizado (IPCA). Octubre 2026.",
+   "Nota de Prensa: Indicador adelantado del Índice de Precios de Consumo (IPC). Indicador adelantado del Índice de Precios de Consumo Armonizado (IPCA). Noviembre ",
+   "La inflación en España se modera en casi un punto en noviembre, hasta el 4,1%, por la bajada de los carburantes",
+   "¿Qué es la inflación y cómo afecta la economía? ¿Cómo se mide la inflación en un país? ¿Cuáles son las causas de la inflación? ¿Cómo puedo proteger mis ahorros ",
+   "¿Por qué tener un objetivo de inflación del 2 % en lugar del 0 %?",
+   "Price stability objective and the strategy review",
+   "¿Qué es la inflación?"
+  ],
+  "research_agent_cost_usd": null
+ },
+ "warnings": [],
+ "notes": "## Nota de Prensa: Índice de Precios de Consumo (IPC). Índice de Precios de Consumo Armonizado (IPCA). Octubre 2026.\nPublished: Fri, 13 Nov 2026 09:00:00 GMT\n## Principales resultados - La tasa de variación anual del IPC del mes de octubre se situó en el 4,9%, la misma que la registrada en septiembre. - La tasa anual de la inflación subyacente se mantuvo en el 3,1%. - La variación mensual del índice general fue del 0,6%. - El Índice de Precios de Consumo Armonizado (IPCA) situó su tasa anual en el 4,9%, una décima por debajo del mes anterior.\n\n## Nota de Prensa: Indicador adelantado del Índice de Precios de Consumo (IPC). Indicador adelantado del Índice de Precios de Consumo Armonizado (IPCA). Noviembre \nPublished: Fri, 27 Nov 2026 08:00:00 GMT\n## Principales resultados - El indicador adelantado del IPC sitúa su variación anual en el 4,1% en noviembre, ocho décimas menos que la registrada en octubre. - La tasa anual del indicador adelantado de la inflación subyacente disminuye cinco décimas, hasta el 2,6%. - La variación anual del indicador adelantado del IPCA es del 4,1%.\n\n## La inflación en España se modera en casi un punto en noviembre, hasta el 4,1%, por la bajada de los carburantes\nPublished: Fri, 27 Nov 2026 08:00:00 GMT\nLa inflación empieza a moderarse gracias a la caída de precios del petróleo y a la inexistencia de señales que anticipen grandes efectos indirectos o de segunda ronda sobre el resto de bienes y servicios que consumen los españoles. El IPC de noviembre se moderó en casi un punto (0,8 puntos), en comparación con el de octubre, según el dato adelantado este viernes por el INE. De esta forma, la inflación se situó en el 4,1%, el dato más bajo desde el mes de julio. Inflación IPC [...] La inflación empieza a moderarse gracias a la caída de precios del petróleo y a la inexistencia de señales que anticipen grandes efectos indirectos o de segunda ronda sobre el resto de bienes y servicios que consumen los españoles. El IPC de noviembre se moderó en casi un punto (0,8 puntos), en comparación con el de octubre, según el dato adelantado este viernes por el INE. De esta forma, la inflación se situó \n\n## ¿Qué es la inflación y cómo afecta la economía? ¿Cómo se mide la inflación en un país? ¿Cuáles son las causas de la inflación? ¿Cómo puedo proteger mis ahorros \nLa inflación es el aumento sostenido y generalizado en el nivel de precios de bienes y servicios en una economía durante un periodo de tiempo.\n\n## ¿Por qué tener un objetivo de inflación del 2 % en lugar del 0 %?\nAdemás, como la inflación de la eurozona se mide como una media ponderada de la inflación de todos los países miembros, el objetivo del 2 % permite abordar las implicaciones de las diferencias entre los países, mientras que, si el objetivo fuese del 0 %, algunos países tendrían que sufrir tasas de inflación negativas, es decir, deflación. [...] Finalmente, el objetivo del 2 % proporciona cierto espacio a los tipos de interés nominales respecto al límite inferior efectivo de los tipos de interés. Dado que, en el largo plazo, los tipos de interés nominales son iguales a los tipos reales de equilibrio más las expectativas de inflación, cuanto mayor sea el objetivo de inflación, si es creíble, mayores serán las expectativas de inflación, lo que se traducirá en unos tipos nominales más altos y por tanto más espacio para poder reducirlos en [...] El objetivo del 2 % también permite salvar prob\n\n## Price stability objective and the strategy review\n# Nuestro objetivo de estabilidad de precios y la revisión de la estrategia Nuestra función es mantener los precios estables. La economía ha cambiado mucho desde la última vez que revisamos nuestra estrategia, en 2003. Queremos asegurarnos de que nuestro objetivo de estabilidad de precios sea claro, predecible y fácilmente entendible en este entorno económico cambiante. Por este motivo, el Consejo de Gobierno ha acordado un objetivo de inflación del 2 % a medio plazo. [...] Tenemos claro que estabilidad de precios significa evitar una inflación excesivamente elevada o excesivamente reducida. Por este motivo, nuestro objetivo es lograr una tasa de inflación del 2 % a medio plazo. Nuestro compromiso con este objetivo de inflación es simétrico: consideramos que una inflación demasiado baja es tan negativa como una inflación demasiado alta. Ambas son igual de indeseables. ### ¿Por qué es mal\n\n## ¿Qué es la inflación?\nNuestro trabajo es mantener la estabilidad de precios. Para ello nos aseguramos de que la inflación —la tasa de variación de los precios a lo largo del tiempo— sea baja, estable y predecible: 2 % a medio plazo. #### Comparabilidad entre países [...] En una economía de mercado los precios de los bienes y de los servicios están sujetos a cambios. Algunos aumentan y otros disminuyen. Existe inflación cuando se produce un aumento general de los precios, no solo de artículos individuales, que da como resultado que por cada euro puedan adquirirse hoy menos bienes y servicios que ayer. Es decir, la inflación reduce el valor de la moneda con el tiempo. ## Algunas variaciones de precios son más importantes que otras [...] ### Conoce los datos #### Zona del euro: inflación de los precios de consumo desde 1961 En las décadas de los setenta y ochenta se registraron elevadas tasas de inflación en muc",
+ "plan": {
+  "title": "La inflación explicada con los datos de hoy",
+  "description": "Qué es la inflación, cómo se mide con el IPC y por qué el objetivo es el 2 %. Con los últimos datos de España: 4,9 % en octubre y 4,1 % en noviembre.",
+  "language": "es",
+  "mood": "calm",
+  "theme": "paper",
+  "voices": {
+   "narrator": "Lucia"
+  },
+  "beats": [
+   {
+    "id": "0dcec77d",
+    "narration": "Hoy un euro compra menos que ayer. Eso es la inflación, y en octubre en España los precios subían un 4,9 % al año.",
+    "scene": {
+     "type": "counter",
+     "props": {
+      "value": "4.9",
+      "decimals": 1,
+      "unit": "%",
+      "label": "Inflación anual en España, octubre"
+     }
+    },
+    "chapter": "Qué es la inflación"
+   },
+   {
+    "id": "d7853850",
+    "narration": "Los precios de algunas cosas suben y los de otras bajan. Hay inflación cuando suben de forma general, no solo un artículo.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "people shopping in supermarket",
+      "clip_queries": [
+       "people shopping in supermarket",
+       "fruit and vegetables market stall"
+      ],
+      "alt": "customers in grocery store aisle"
+     }
+    }
+   },
+   {
+    "id": "1adfb9db",
+    "narration": "Por eso la inflación reduce el valor de la moneda con el tiempo: por cada euro puedes comprar menos bienes y servicios.",
+    "scene": {
+     "type": "definition",
+     "props": {
+      "term": "Inflación",
+      "definition": "Aumento sostenido y generalizado del nivel de precios de bienes y servicios durante un periodo de tiempo."
+     }
+    }
+   },
+   {
+    "id": "c8692a77",
+    "narration": "Entonces, ¿cómo se mide? Se sigue el precio de una cesta de productos que consumimos de forma habitual, mes tras mes.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "shopping basket groceries",
+      "alt": "hand placing groceries in basket"
+     }
+    }
+   },
+   {
+    "id": "39313aad",
+    "narration": "El INE recoge los precios y calcula el IPC, el Índice de Precios de Consumo. Su variación anual es la tasa de inflación.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "De los precios a la tasa",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Precios de la cesta",
+        "icon": "van"
+       },
+       {
+        "id": "b",
+        "label": "INE",
+        "icon": "building"
+       },
+       {
+        "id": "c",
+        "label": "IPC",
+        "icon": "chart-column"
+       },
+       {
+        "id": "d",
+        "label": "Tasa anual",
+        "icon": "percent"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b"
+       ],
+       [
+        "b",
+        "c"
+       ],
+       [
+        "c",
+        "d"
+       ]
+      ],
+      "style": "pills",
+      "accent": "indigo"
+     }
+    },
+    "chapter": "Cómo se mide"
+   },
+   {
+    "id": "a196a66a",
+    "narration": "En octubre el IPC subió un 4,9 %. La inflación subyacente, que deja fuera lo más volátil, fue del 3,1 %.",
+    "scene": {
+     "type": "chart",
+     "props": {
+      "kind": "bar",
+      "title": "Octubre 2026",
+      "labels": [
+       "IPC general",
+       "Subyacente"
+      ],
+      "values": [
+       4.9,
+       3.1
+      ],
+      "unit": "%",
+      "highlight": 0
+     }
+    }
+   },
+   {
+    "id": "09dec71d",
+    "narration": "En noviembre el dato adelantado bajó al 4,1 %, ocho décimas menos que en octubre. Es el más bajo desde julio.",
+    "scene": {
+     "type": "chart",
+     "props": {
+      "kind": "line",
+      "title": "Inflación anual",
+      "labels": [
+       "Octubre",
+       "Noviembre"
+      ],
+      "values": [
+       4.9,
+       4.1
+      ],
+      "unit": "%",
+      "highlight": 1
+     }
+    },
+    "chapter": "Por qué baja o sube"
+   },
+   {
+    "id": "bf3fa2af",
+    "narration": "El petróleo más barato lo explica, y con él los carburantes a la baja. Además, no hay señales de efectos de segunda ronda.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Qué la frena",
+      "items": [
+       "Petróleo más barato",
+       "Carburantes a la baja"
+      ],
+      "style": "icons",
+      "accent": "teal",
+      "icons": [
+       "amphora",
+       "fuel"
+      ]
+     }
+    }
+   },
+   {
+    "id": "4e8f21be",
+    "narration": "Si la inflación sube, ¿por qué no apuntar a cero? Porque un objetivo del 0 % dejaría a algunos países en deflación, con precios cayendo.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "empty shopping street",
+      "clip_queries": [
+       "empty shopping street",
+       "closed shop window"
+      ],
+      "alt": "quiet commercial street"
+     }
+    }
+   },
+   {
+    "id": "f2a2b35e",
+    "narration": "El Banco Central Europeo fija el 2 % a medio plazo. Es simétrico: una inflación demasiado baja es tan mala como una demasiado alta.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Estabilidad de precios",
+      "items": [
+       "Inflación demasiado baja: mala",
+       "Objetivo: 2 %"
+      ],
+      "style": "spotlight",
+      "accent": "amber",
+      "emphasis": 1
+     }
+    },
+    "chapter": "El objetivo del 2 %"
+   },
+   {
+    "id": "62dad625",
+    "narration": "Además, el 2 % deja más espacio para bajar los tipos de interés cuando la economía lo necesita.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Un 2 % deja espacio para actuar.",
+      "emphasis": "2 %"
+     }
+    }
+   },
+   {
+    "id": "8f26a691",
+    "narration": "La inflación no es solo una cifra. Es lo que pasa con tu dinero: ni precios disparados, ni cayendo. Estabilidad.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "person paying at checkout",
+      "alt": "hands paying with coins and cash"
+     }
+    }
+   },
+   {
+    "id": "eb3c7e1a",
+    "narration": "Recuérdalo así: la inflación es cuánto más cuesta vivir hoy que hace un año, y el objetivo es que suba despacio.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Inflación: cuánto más cuesta vivir que hace un año.",
+      "emphasis": "cuánto más cuesta"
+     }
+    }
+   }
+  ],
+  "sources": [
+   {
+    "title": "Nota de Prensa: Índice de Precios de Consumo (IPC). Índice de Precios de Consumo Armonizado (IPCA). Octubre 2026.",
+    "url": "https://www.ine.es/dyngs/Prensa/IPC1026.htm",
+    "publisher": "ine.es",
+    "license": "",
+    "date": "Fri, 13 Nov 2026 09:00:00 GMT"
+   },
+   {
+    "title": "La inflación en España se modera en casi un punto en noviembre, hasta el 4,1%, por la bajada de los carburantes",
+    "url": "https://www.elconfidencial.com/economia/2026-11-27/inflacion-modera-casi-un-punto-noviembre-4-1-bajada-carburantes_4473856",
+    "publisher": "elconfidencial.com",
+    "license": "",
+    "date": "Fri, 27 Nov 2026 08:00:00 GMT"
+   },
+   {
+    "title": "¿Por qué tener un objetivo de inflación del 2 % en lugar del 0 %?",
+    "url": "https://www.bde.es/wbe/es/areas-actuacion/politica-monetaria/politica-monetaria-area-euro/bce-estrategia-politica-monetaria/por-que-2-en-lugar-del-0.html",
+    "publisher": "bde.es",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Price stability objective and the strategy review",
+    "url": "https://www.ecb.europa.eu/mopo/strategy/strategy-review/html/price-stability-objective.es.html",
+    "publisher": "ecb.europa.eu",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "¿Qué es la inflación?",
+    "url": "https://www.ecb.europa.eu/ecb-and-you/explainers/tell-me-more/html/what_is_inflation.es.html",
+    "publisher": "ecb.europa.eu",
+    "license": "",
+    "date": ""
+   }
+  ],
+  "skills": [
+   "finance-business",
+   "explainer-education"
+  ],
+  "region": "ES"
+ },
+ "timings": {
+  "total_s": 57.3,
+  "before_first_script_call_s": 14.3,
+  "script_s": 43.0
+ },
+ "cost": {
+  "script_small": 0.00069,
+  "research": 0.00158,
+  "script_big": 0.16121,
+  "search_api": 0.024,
+  "total": 0.18748
+ },
+ "calls": {
+  "small": 5,
+  "tools": 3,
+  "big": 3
+ },
+ "tokens": {
+  "in": 63611,
+  "out": 7930
+ },
+ "rules": {
+  "length": {
+   "words": 282,
+   "expected_words": 260,
+   "ratio": 1.085,
+   "beats": 13,
+   "expected_beats": 12,
+   "est_speech_s": 129.8,
+   "flag_short": false,
+   "flag_long": false,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 24,
+   "hook_greeting": false,
+   "hook_question": false,
+   "hook_long": false,
+   "close_words": 21,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "Hoy un euro compra menos que ayer. Eso es la inflación, y en octubre en España los precios subían un 4,9 % al año.",
+   "close_text": "Recuérdalo así: la inflación es cuánto más cuesta vivir hoy que hace un año, y el objetivo es que suba despacio."
+  },
+  "variety": {
+   "distinct": 7,
+   "counts": {
+    "counter": 1,
+    "clip": 4,
+    "definition": 1,
+    "diagram": 1,
+    "chart": 2,
+    "bullets": 2,
+    "kinetic_text": 2
+   },
+   "max_run": 2,
+   "entropy": 2.62,
+   "top_type": "clip",
+   "top_share": 0.31,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 5,
+   "ungrounded_numbers": [],
+   "entities": 7,
+   "ungrounded_entities": [
+    "Banco Central Europeo"
+   ],
+   "ungrounded_share": 0.083,
+   "ungrounded_number_share": 0.0,
+   "no_notes": false
+  },
+  "repeats": [],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {},
+  "sources": {
+   "cited": 5,
+   "fetched": 7,
+   "notes_len": 5308,
+   "flag_thin_notes": false,
+   "flag_no_sources": false,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": false,
+   "cue": false,
+   "needs_web": false,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "es",
+   "detected": "es",
+   "flag_wrong": false
+  },
+  "question_beats": 0.0,
+  "flags": [],
+  "mismatch_scenes": []
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 3,
+    "reason": "The data match the notes, but \"no hay señales de efectos de segunda ronda\" overstates the source, and \"Hoy un euro compra menos que ayer\" is imprecise for a 4.9% annual rate. The script also treats the Nov 27 flash estimate as known although today is Nov 25."
+   },
+   "coverage": {
+    "score": 3,
+    "reason": "It covers the definition, the IPC, the core rate and the ECB's 2% target. It lacks the causes (demand, costs, monetary), the effect on purchasing power with an everyday example, and what central banks do beyond a brief mention of rates."
+   },
+   "structure": {
+    "score": 3,
+    "reason": "The order is logical, but the middle section is heavily data-driven and the jump to the 0% question in beat 9 is abrupt. The ending repeats the definition."
+   },
+   "hook_ending": {
+    "score": 3,
+    "reason": "\"Hoy un euro compra menos que ayer\" is a decent hook. The ending is a flat definition recap with a mnemonic."
+   },
+   "tone": {
+    "score": 4,
+    "reason": "Clear, accessible and neutral for a beginner, and it uses tú consistently."
+   },
+   "visuals": {
+    "score": 4,
+    "reason": "Scene types vary (counter, diagram, charts, definition, clips) and the charts use real figures. A two-point line chart is weak, and the clip of an empty street for deflation is loose."
+   },
+   "originality": {
+    "score": 3,
+    "reason": "The current data and the 2% vs 0% rationale add some specificity. The rest is a fairly standard explainer."
+   },
+   "instructions": {
+    "score": 3,
+    "reason": "It is in Spanish and about the right length. It omits requested-style essentials such as causes and an everyday example, and it leans on news data more than a general explanation."
+   },
+   "language": {
+    "score": 4,
+    "reason": "Fluent and correct Spanish with only minor stiffness."
+   }
+  },
+  "defects": [
+   {
+    "dimension": "accuracy",
+    "severity": "major",
+    "quote": "En noviembre el dato adelantado bajó al 4,1 %",
+    "issue": "The November flash estimate is published on Nov 27, but today is Nov 25, so presenting it as already known is inconsistent with the date.",
+    "beat": 7
+   },
+   {
+    "dimension": "coverage",
+    "severity": "major",
+    "quote": "El petróleo más barato lo explica",
+    "issue": "The causes of inflation (demand, costs, monetary) are never explained. Only one short-term factor is given.",
+    "beat": 8
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "Hoy un euro compra menos que ayer.",
+    "issue": "Overstated: the loss of purchasing power is gradual, over a year.",
+    "beat": 1
+   },
+   {
+    "dimension": "coverage",
+    "severity": "major",
+    "quote": "La inflación no es solo una cifra. Es lo que pasa con tu dinero",
+    "issue": "There is no concrete everyday example (such as the price of a coffee or a shopping basket) showing the loss of purchasing power.",
+    "beat": 12
+   },
+   {
+    "dimension": "structure",
+    "severity": "minor",
+    "quote": "Si la inflación sube, ¿por qué no apuntar a cero?",
+    "issue": "The logic is muddled. The question does not follow from what was just said, since inflation has been falling.",
+    "beat": 9
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "Además, no hay señales de efectos de segunda ronda.",
+    "issue": "The jargon is unexplained and the claim is stated more categorically than in the source.",
+    "beat": 8
+   }
+  ],
+  "missing": [
+   "Causes: demand, costs, monetary",
+   "A concrete everyday example",
+   "What central banks do (raising rates) to control inflation",
+   "Who loses and who gains (savers, wages)"
+  ],
+  "wrong_facts": [
+   "The November flash estimate is presented as available before its Nov 27 publication date."
+  ],
+  "would_publish": false,
+  "summary": "A clear, accurate, data-driven script with decent visuals, but it skips the causes and everyday examples that a basic inflation explainer needs. It also has a date inconsistency and a weak ending that just repeats the definition.",
+  "spanish": {
+   "naturalness": 4,
+   "issues": [
+    {
+     "quote": "Por eso la inflación reduce el valor de la moneda con el tiempo",
+     "issue": "",
+     "problem": "Stiff, copied from the source text",
+     "better": "Por eso, con el tiempo, el dinero pierde valor"
+    },
+    {
+     "quote": "El petróleo más barato lo explica, y con él los carburantes a la baja.",
+     "problem": "Awkward word order",
+     "better": "Lo explica el abaratamiento del petróleo y, con él, el de los carburantes."
+    }
+   ]
+  },
+  "mean": 3.33,
+  "cost_usd": 0.027612,
+  "tokens": [
+   6291,
+   1503
+  ]
+ }
+}

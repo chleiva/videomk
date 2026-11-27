@@ -56,7 +56,7 @@ def test_beats_and_words_for_short_videos():
     for m, words in zip(SHORT, w):   # the words fill the target (to within the calibration)
         secs = words / plan_mod.SPOKEN_WORDS_PER_S + plan_mod.expected_beats(m) * plan_mod.BEAT_OVERHEAD_S + plan_mod.SHORT_END_S
         assert 0.85 * m * 60 <= secs <= m * 60
-    assert plan_mod.expected_beats(1) == 4 and plan_mod.expected_words(1) == int((60 - 4 * plan_mod.BEAT_OVERHEAD_S) * plan_mod.SPOKEN_WORDS_PER_S)   # a minute is unchanged
+    assert plan_mod.expected_beats(1) == 6 and plan_mod.expected_words(1) == int((60 - 6 * plan_mod.BEAT_OVERHEAD_S) * plan_mod.SPOKEN_WORDS_PER_S)   # a minute: the same 10 s per beat as the short forms
 
 
 def test_photo_frame_is_scaled_down_under_a_minute():

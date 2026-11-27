@@ -179,12 +179,16 @@ def sanitize_style_props(stype: str, p: Dict[str, Any], out: Dict[str, Any], n: 
     return out
 
 
-_FALLBACK_ICONS = ("sparkles", "target", "lightbulb", "star", "zap", "flag", "compass", "layers")
+NUMBER_ICON = "#"   # an "icon" that is the item's number: '#1', '#2' ... (drawn as a bold numeral by `icon`)
+
+
+def number_icon(i: int) -> str:
+    return f"{NUMBER_ICON}{i + 1}"
 
 
 @lru_cache(maxsize=512)
-def auto_icon(text: str, k: int) -> str:
-    """The icon for an item's text: the first content word the icon set knows, else a steady, varied fallback (never the same glyph twice in a row)."""
+def match_icon(text: str) -> str:
+    """The icon the item's own words name, or '' when the icon set knows none of them (most Spanish items, abstract phrases)."""
     from .elements._pm_icons import find_icon
     from ..sync import content_tokens
 
@@ -197,17 +201,43 @@ def auto_icon(text: str, k: int) -> str:
         name, how = find_icon(w)
         if how in order:
             cands.append((order[how], idx, name))
-    best = min(cands)[2] if cands else ""
-    return best or _FALLBACK_ICONS[k % len(_FALLBACK_ICONS)]
+    return min(cands)[2] if cands else ""
+
+
+def auto_icon(text: str, k: int) -> str:
+    """The icon for an item's text: the first content word the icon set knows, else the item's NUMBER. It used to be a rotating decoration (sparkles, target, lightbulb ...)
+    that had nothing to do with the item (docs/QUALITY_REVIEW.md backlog: icon picker no-match); a number is honest and reads as order."""
+    return match_icon(text) or number_icon(k)
+
+
+def _item_text(it: Any) -> str:
+    if isinstance(it, dict):
+        return str(it.get("text") or it.get("label") or it.get("title") or "")
+    return str(it or "")
+
+
+def _given_icon(props: Dict[str, Any], i: int) -> str:
+    icons = props.get("icons")
+    return clean_icon(icons[i]) if isinstance(icons, list) and i < len(icons) and icons[i] else ""
+
+
+NEUTRAL_ICON = "circle-dot"   # the plain marker of an item no icon fits, in a list where most items do have one
+
+
+def group_icon(found: List[str], i: int) -> str:
+    """The icon of item i given what was found for every item of its list ('' = nothing fits). Most items have one: they keep it and the others get a plain marker.
+    Fewer than half do: the whole list is numbered (1, 2, 3 ...), never a mix of pictures and numbers and never a decoration that means nothing."""
+    if i >= len(found) or sum(1 for f in found if f) * 2 < len(found):
+        return number_icon(i)
+    return found[i] or NEUTRAL_ICON
 
 
 def icon_for(props: Dict[str, Any], i: int, text: str) -> str:
-    icons = props.get("icons")
-    if isinstance(icons, list) and i < len(icons) and icons[i]:
-        v = clean_icon(icons[i])
-        if v:
-            return v
-    return auto_icon(text, i)
+    """The icon of item i of a list: the one the writer gave, else the one its words name, else what `group_icon` decides for a list with gaps."""
+    items = props.get("items")
+    if isinstance(items, list) and items:
+        return group_icon([_given_icon(props, j) or match_icon(_item_text(it)) for j, it in enumerate(items)], i)
+    return _given_icon(props, i) or auto_icon(text, i)
 
 
 # ----------------------------------------------------------------------------- motion
@@ -301,6 +331,11 @@ def soft_shadow(cv: Canvas, x: float, y: float, w: float, h: float, r: float, al
 
 
 def icon(cv: Canvas, cx: float, cy: float, name: str, size: float, color, scale: float = 1.0) -> None:
+    if name.startswith(NUMBER_ICON) and name[1:].isdigit():   # the item's number in place of a picture (no icon fits the item)
+        a = int(color[3]) if len(color) == 4 else 255
+        if a > 0 and scale > 0.02:
+            cv.text(cx, cy, name[1:], "bold", size * 0.92 * scale, color, anchor="mm")
+        return
     from .elements._pm_icons import draw_icon
 
     draw_icon(cv, cx, cy, name, size, color, scale)

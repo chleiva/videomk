@@ -1,0 +1,546 @@
+{
+ "id": "kid-01",
+ "category": "education / lesson for kids",
+ "language": "en",
+ "difficulty": "medium",
+ "prompt": "Explain how volcanoes erupt for six-year-olds",
+ "great": "Simple vocabulary, analogy (shaken soda bottle), magma vs lava, layers, safe fun facts, playful tone, short sentences, a closing question or recap.",
+ "minutes": 2.0,
+ "time_sensitive": false,
+ "options": {
+  "target_minutes": 2.0,
+  "language_passed": null,
+  "region": "US",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-27T12:26:54",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "encyclopedia",
+  "decided": "encyclopedia",
+  "reason": "How volcanoes erupt is a timeless science explanation that does not depend on recent information, so an encyclopedia source is sufficient for a child-friendly script.",
+  "queries": [],
+  "searches": null,
+  "reads": null,
+  "iterations": null,
+  "seconds": null,
+  "error": null,
+  "fallback": null,
+  "section_searches": null,
+  "skills": [
+   "kids-family",
+   "explainer-education"
+  ],
+  "staged": null,
+  "escalated": null,
+  "fetch_errors": [
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 1,
+    "retry_after": 3.0,
+    "error": "fetch failed: HTTPError 429"
+   }
+  ],
+  "fetch_errors_n": 1,
+  "grounding": {
+   "beats": 13,
+   "candidates": 0,
+   "checked": 0,
+   "flagged": 0,
+   "repaired": 0,
+   "unsupported": 0,
+   "common": 0,
+   "supported": 0,
+   "skipped_on_screen": 0,
+   "leaks": 0,
+   "calls": 0
+  },
+  "scene_repair": null,
+  "notes_len": 6238,
+  "n_sources": 4,
+  "n_fetched": 6,
+  "fetched": [
+   "Arenal Volcano",
+   "2022 Hunga Tonga–Hunga Haʻapai eruption and tsunami",
+   "Magma chamber",
+   "Volcanic gas",
+   "Volcanic eruption",
+   "List of largest volcanic eruptions"
+  ],
+  "research_agent_cost_usd": null
+ },
+ "warnings": [],
+ "notes": "## Arenal Volcano\nArenal Volcano (Spanish: Volcán Arenal) is a recently active andesitic stratovolcano in north-western Costa Rica around 90 km (56 mi) northwest of San José, in the province of Alajuela, canton of San Carlos, and district of La Fortuna. The Arenal volcano stands 1,633 metres (5,358 ft) high. It is conically shaped with a crater 140 metres (460 ft) in diameter. Geologically, Arenal is considered a young volcano and it is estimated to be less than 7,500 years old. It is also known as \"Pan de Azúcar\", \"Canaste\", \"Volcan Costa Rica\", \"Volcan Río Frío\" or \"Guatusos Peak\".\nThe volcano was dormant for hundreds of years and exhibited two craters at its summit, with minor fumaroles activity, covered by dense vegetation. In 1968 it erupted unexpectedly, destroying the small town of Tabacón. Due to the eruption three more craters were created on the western flanks but only one of them exists today. By duration, Arenal's eruption from 1968 to 2010 is the tenth longest volcanic eruption on Earth since 1750. Since 2010, Arenal has been dormant.\n\n## 2022 Hunga Tonga–Hunga Haʻapai eruption and tsunami\nIn December 2021, an eruption began on Hunga Tonga–Hunga Haʻapai, a submarine volcano in the Tongan archipelago in the southern Pacific Ocean. The eruption reached a very large and powerful climax nearly four weeks later, on 15 January 2022. Hunga Tonga–Hunga Haʻapai is 65 kilometres (40 mi) north of Tongatapu, the country's main island, and is part of the highly active Tonga–Kermadec Islands volcanic arc, a subduction zone extending from New Zealand to Fiji. On the Volcanic Explosivity Index scale, the eruption was rated at least a VEI-5. Described by scientists as a \"magma hammer\", the volcano at its height produced a series of four underwater thrusts, displaced 10 cubic kilometres (2.4 cu mi) of rock, ash and sediment, and generated the largest atmospheric explosion recorded by modern instrumentation.\nThe eruption produced a volcanic tsunami that affected Tonga, Fiji, American Samoa, Samoa, Vanuatu, New Zealand, Japan, the United States, the Russian Far East, Chile and Peru. At least four people were killed, some were injured, and some remain possibly missing in Tonga from tsunami waves up to 20 m (66 ft) high. Tsunami waves with run-up heights up to 45 m (148 ft) struck the uninhabited...\n\n## Magma chamber\nA magma chamber is a large pool of liquid rock beneath the surface of the Earth. The molten rock, or magma, in such a chamber is less dense than the surrounding country rock, which produces buoyant forces on the magma that tend to drive it upwards. If the magma finds a path to the surface, then the result will be a volcanic eruption; consequently, many volcanoes are situated over magma chambers. \nThese chambers are hard to detect deep within the Earth, and therefore most of those known are close to the surface, commonly between 1 km and 10 km down.\n\n## Volcanic gas\nVolcanic gases are gases given off by active (or, at times, by dormant) volcanoes. These include gases trapped in cavities (vesicles) in volcanic rocks, dissolved or dissociated gases in magma and lava, or gases emanating from lava, from volcanic craters or vents. Volcanic gases can also be emitted through groundwater heated by volcanic action.\nThe sources of volcanic gases on Earth include:\nprimordial and recycled constituents from the Earth's mantle,\nassimilated constituents from the Earth's crust,\ngroundwater and the Earth's atmosphere.\nSubstances that may become gaseous or give off gases when heated are termed volatile substances.\nVolcanic gases are not only released during an eruption; they can also seep out slowly when a volcano is inactive through a continuous process known as passive degassing, which can persist for years. Even small emissions can affect the surrounding environment by changing soil and water chemistry and impacting plants and animals. By studying changes in gas composition and emission rates, scientists can monitor volcanic activity and assess potential hazards before an eruption occurs.\n\n## Volcanic eruption\nA volcanic eruption occurs when material is expelled from a volcanic vent or fissure. Several types of volcanic eruptions have been distinguished by volcanologists. These are often named after famous volcanoes where that type of behavior has been observed. Some volcanoes may exhibit only one characteristic type of eruption during a period of activity, while others may display an entire sequence of types all in one eruptive series.\nThere are three main types of volcanic eruptions. Magmatic eruptions involve the decompression of gas within magma that propels it forward. Phreatic eruptions are driven by the superheating of steam due to the close proximity of magma. This type exhibits no magmatic release, instead causing the granulation of existing rock. Phreatomagmatic eruptions are driven by the direct interaction of magma and water, as opposed to phreatic eruptions, where no fresh magma reaches the surface.\nWithin these broad eruptive types are several subtypes. The weakest are Hawaiian and submarine, then Strombolian, followed by Vulcanian and Surtseyan. The stronger eruptive types are Pelean eruptions, followed by Plinian eruptions; the strongest eruptions are called ultra-Plinian...\n\n## List of largest volcanic eruptions\nIn a volcanic eruption, lava, volcanic bombs, ash, and various gases are expelled from a volcanic vent and fissure. While many eruptions only pose dangers to the immediately surrounding area, Earth's largest eruptions can have a major regional or even global impact, with some affecting the climate and contributing to mass extinctions. Volcanic eruptions can generally be characterized as either explosive eruptions, sudden ejections of rock and ash, or effusive eruptions, relatively gentle outpourings of lava. A separate list is given below for each type.\nThere have likely been many such eruptions during Earth's history beyond those shown in these lists. However, erosion and plate tectonics have taken their toll, and many eruptions have not left enough evidence for geologists to establish their size. Even for the eruptions listed here, estimates of the volume erupted can be subject to considerable uncertainty.",
+ "plan": {
+  "title": "How Volcanoes Erupt, Explained for Kids",
+  "description": "A gentle explainer for six-year-olds about how volcanoes erupt. Learn about magma, gas, and why a mountain can blow its top.",
+  "language": "en",
+  "mood": "bright",
+  "theme": "sunrise",
+  "voices": {
+   "narrator": "Ruth"
+  },
+  "beats": [
+   {
+    "id": "fabd1923",
+    "narration": "Did you know a mountain can burp fire? Some mountains have hot, melted rock hiding inside. Sometimes it shoots out! Can you guess why?",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "volcano erupting lava",
+      "alt": "lava fountain from a volcano"
+     }
+    },
+    "chapter": "A mountain with a secret"
+   },
+   {
+    "id": "cb46df10",
+    "narration": "This mountain is called a volcano. Deep under it, the ground is so hot that rock melts like warm chocolate.",
+    "scene": {
+     "type": "definition",
+     "props": {
+      "term": "Volcano",
+      "definition": "A mountain with an opening where hot melted rock can come out."
+     }
+    }
+   },
+   {
+    "id": "b8359a2a",
+    "narration": "Melted rock has a special name. It is called magma. It waits in a giant underground pool called a magma chamber.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Under the volcano",
+      "items": [
+       "Magma: melted rock",
+       "Magma chamber: a giant pool",
+       "Very hot and very deep"
+      ],
+      "style": "icons",
+      "accent": "coral",
+      "icons": [
+       "flame",
+       "droplet",
+       "mountain"
+      ]
+     }
+    }
+   },
+   {
+    "id": "9039a647",
+    "narration": "That pool can be one to ten kilometers down. That is deeper than any hole you could ever dig!",
+    "scene": {
+     "type": "stat",
+     "props": {
+      "value": "1-10 km",
+      "label": "How deep a magma chamber often is"
+     }
+    }
+   },
+   {
+    "id": "af16ebc7",
+    "narration": "Magma is lighter than the rock around it. So it floats upward, like a bubble rising in a glass of juice.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "Magma rises",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Hot magma pool",
+        "icon": "flame"
+       },
+       {
+        "id": "b",
+        "label": "Lighter than rock"
+       },
+       {
+        "id": "c",
+        "label": "Floats upward"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b"
+       ],
+       [
+        "b",
+        "c"
+       ]
+      ],
+      "style": "ladder",
+      "accent": "amber"
+     }
+    }
+   },
+   {
+    "id": "e3613ebc",
+    "narration": "Magma also has gas inside it. Think of a fizzy soda bottle. The bubbles are tiny, but they want to get out.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "bubbles in fizzy drink",
+      "alt": "soda bubbles rising in a glass"
+     }
+    }
+   },
+   {
+    "id": "42c94652",
+    "narration": "As magma rises, the gas bubbles grow and push. Pressure builds up, and up, and up.",
+    "scene": {
+     "type": "steps",
+     "props": {
+      "title": "Pressure builds",
+      "steps": [
+       {
+        "label": "Magma rises"
+       },
+       {
+        "label": "Gas bubbles grow"
+       },
+       {
+        "label": "Pressure builds"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "64bf6874",
+    "narration": "Then the magma finds a crack, and whoosh! It bursts out of the volcano. That is an eruption!",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "volcano eruption ash cloud",
+      "alt": "explosive volcanic eruption"
+     }
+    },
+    "sfx": "impact"
+   },
+   {
+    "id": "af8ee71e",
+    "narration": "Once magma is outside, we call it lava. Some volcanoes ooze lava slowly. Others blast ash and rocks into the sky.",
+    "scene": {
+     "type": "gallery",
+     "props": {
+      "image_queries": [
+       "lava flow volcano night",
+       "volcanic ash cloud",
+       "lava fountain Hawaii"
+      ],
+      "alt": "lava flows and ash clouds"
+     }
+    }
+   },
+   {
+    "id": "4d902bb4",
+    "narration": "A volcano in Costa Rica named Arenal slept for hundreds of years. Then in 1968 it woke up and rumbled for over forty years!",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "Arenal Volcano Costa Rica",
+      "alt": "Arenal Volcano cone",
+      "ken_burns": "in"
+     }
+    }
+   },
+   {
+    "id": "0045cf83",
+    "narration": "Today Arenal is asleep again. Many volcanoes nap for a long, long time before they wake.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Volcanoes can sleep for hundreds of years.",
+      "emphasis": "sleep"
+     }
+    }
+   },
+   {
+    "id": "e7f657ff",
+    "narration": "Scientists watch volcanoes closely. They check the gas coming out and the shaking ground, so people can stay safe.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "scientist volcano monitoring",
+      "alt": "volcanologist working near a volcano"
+     }
+    }
+   },
+   {
+    "id": "898c146d",
+    "narration": "So remember: hot magma rises, gas pushes, and pressure builds. When it can't wait any more, the mountain erupts!",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "How a volcano erupts",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Magma rises"
+       },
+       {
+        "id": "b",
+        "label": "Gas pushes"
+       },
+       {
+        "id": "c",
+        "label": "Pressure builds"
+       },
+       {
+        "id": "d",
+        "label": "Eruption!"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b"
+       ],
+       [
+        "b",
+        "c"
+       ],
+       [
+        "c",
+        "d"
+       ]
+      ],
+      "style": "pills",
+      "accent": "coral",
+      "emphasis": 3
+     }
+    }
+   }
+  ],
+  "sources": [
+   {
+    "title": "Arenal Volcano",
+    "url": "https://en.wikipedia.org/wiki/Arenal_Volcano",
+    "publisher": "Wikipedia",
+    "license": "CC BY-SA 4.0"
+   },
+   {
+    "title": "Magma chamber",
+    "url": "https://en.wikipedia.org/wiki/Magma_chamber",
+    "publisher": "Wikipedia",
+    "license": "CC BY-SA 4.0"
+   },
+   {
+    "title": "Volcanic gas",
+    "url": "https://en.wikipedia.org/wiki/Volcanic_gas",
+    "publisher": "Wikipedia",
+    "license": "CC BY-SA 4.0"
+   },
+   {
+    "title": "Volcanic eruption",
+    "url": "https://en.wikipedia.org/wiki/Volcanic_eruption",
+    "publisher": "Wikipedia",
+    "license": "CC BY-SA 4.0"
+   }
+  ],
+  "skills": [
+   "kids-family",
+   "explainer-education"
+  ],
+  "region": "US"
+ },
+ "timings": {
+  "total_s": 44.9,
+  "before_first_script_call_s": 8.2,
+  "script_s": 36.6
+ },
+ "cost": {
+  "script_small": 0.00024,
+  "script_big": 0.14861,
+  "search_api": 0.0,
+  "total": 0.14884
+ },
+ "calls": {
+  "small": 3,
+  "big": 3
+ },
+ "tokens": {
+  "in": 48967,
+  "out": 5541
+ },
+ "rules": {
+  "length": {
+   "words": 260,
+   "expected_words": 260,
+   "ratio": 1.0,
+   "beats": 13,
+   "expected_beats": 12,
+   "est_speech_s": 120.7,
+   "flag_short": false,
+   "flag_long": false,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 24,
+   "hook_greeting": false,
+   "hook_question": true,
+   "hook_long": false,
+   "close_words": 19,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "Did you know a mountain can burp fire? Some mountains have hot, melted rock hiding inside. Sometimes it shoots out! Can you guess why?",
+   "close_text": "So remember: hot magma rises, gas pushes, and pressure builds. When it can't wait any more, the mountain erupts!"
+  },
+  "variety": {
+   "distinct": 9,
+   "counts": {
+    "clip": 4,
+    "definition": 1,
+    "bullets": 1,
+    "stat": 1,
+    "diagram": 2,
+    "steps": 1,
+    "gallery": 1,
+    "image": 1,
+    "kinetic_text": 1
+   },
+   "max_run": 1,
+   "entropy": 2.93,
+   "top_type": "clip",
+   "top_share": 0.31,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 1,
+   "ungrounded_numbers": [],
+   "entities": 2,
+   "ungrounded_entities": [],
+   "ungrounded_share": 0.0,
+   "ungrounded_number_share": 0.0,
+   "no_notes": false
+  },
+  "repeats": [],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {},
+  "sources": {
+   "cited": 4,
+   "fetched": 6,
+   "notes_len": 6238,
+   "flag_thin_notes": false,
+   "flag_no_sources": false,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": false,
+   "cue": false,
+   "needs_web": false,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "en",
+   "detected": "en",
+   "flag_wrong": false
+  },
+  "question_beats": 0.08,
+  "flags": [],
+  "mismatch_scenes": []
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 4,
+    "reason": "Mostly correct (magma lighter, gas bubbles, 1-10 km, Arenal 1968 to 2010), but \"deeper than any hole you could ever dig\" is loose, and the Arenal dormancy and timing are simplified."
+   },
+   "coverage": {
+    "score": 3,
+    "reason": "It covers magma vs lava, the soda analogy, pressure and monitoring. It has no layers or crust/mantle, no volcano types, and the soda analogy is thin. The Arenal section adds little for a six-year-old."
+   },
+   "structure": {
+    "score": 4,
+    "reason": "The order is logical: what a volcano is, magma, rising, gas, eruption, lava, example, safety, recap. The Arenal beats slightly interrupt the flow."
+   },
+   "hook_ending": {
+    "score": 3,
+    "reason": "The hook \"Did you know a mountain can burp fire?\" is playful. The ending is a bare recap with no closing question or image."
+   },
+   "tone": {
+    "score": 4,
+    "reason": "The tone is warm and playful with short sentences, but \"gas bubbles grow and push\" and a few terms such as \"magma chamber\" are slightly advanced."
+   },
+   "visuals": {
+    "score": 4,
+    "reason": "The scene types vary and match the narration. The soda clip and the pressure diagram fit. The stat and bullets are fine. The diagram in beat 13 repeats the earlier steps scene."
+   },
+   "originality": {
+    "score": 3,
+    "reason": "The warm chocolate and napping volcano images are charming, but most of the content is standard. The juice-bubble comparison is slightly muddled with the soda one."
+   },
+   "instructions": {
+    "score": 4,
+    "reason": "It is English and child-appropriate, with an analogy and a recap. The length is about 245 words, close to the 260 target. It lacks a closing question."
+   },
+   "language": {
+    "score": 5,
+    "reason": "Fluent, natural, simple English with short sentences."
+   }
+  },
+  "defects": [
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "That is deeper than any hole you could ever dig!",
+    "issue": "Overclaim. Deep mines and boreholes go well beyond 1 km, and the Kola borehole is 12 km deep.",
+    "beat": 4
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "So it floats upward, like a bubble rising in a glass of juice.",
+    "issue": "Two different bubble analogies in a row (juice, then soda) blur the one key analogy. Buoyancy and gas pressure are conflated.",
+    "beat": 5
+   },
+   {
+    "dimension": "hook_ending",
+    "severity": "minor",
+    "quote": "When it can't wait any more, the mountain erupts!",
+    "issue": "The ending is only a recap. There is no closing question or memorable image, and the hook's question \"Can you guess why?\" is never explicitly answered.",
+    "beat": 13
+   },
+   {
+    "dimension": "coverage",
+    "severity": "minor",
+    "quote": "A volcano in Costa Rica named Arenal slept for hundreds of years.",
+    "issue": "Two beats go to a specific volcano with little value for six-year-olds, while no layers or crust are explained and the soda-shaking analogy is not fully used.",
+    "beat": 10
+   },
+   {
+    "dimension": "structure",
+    "severity": "minor",
+    "quote": "Volcanoes can sleep for hundreds of years.",
+    "issue": "This kinetic text repeats the previous beat's point and adds nothing new.",
+    "beat": 11
+   }
+  ],
+  "missing": [
+   "Earth's layers or crust, to show where magma comes from",
+   "A fuller shaken-soda explanation (pop the cap, fizz bursts out)",
+   "A closing question or playful final image",
+   "Safe fun facts such as lava cooling into new rock or islands"
+  ],
+  "wrong_facts": [
+   "\"deeper than any hole you could ever dig\" is an overclaim; boreholes reach about 12 km."
+  ],
+  "would_publish": false,
+  "summary": "A clear, friendly, well-ordered script that gets the core mechanism right (magma rises, gas builds pressure, eruption). It is held back by a flat recap ending, a weak soda analogy, no layers, and a detour into Arenal that serves a six-year-old poorly.",
+  "mean": 3.78,
+  "cost_usd": 0.024698,
+  "tokens": [
+   5564,
+   1357
+  ]
+ }
+}

@@ -45,6 +45,8 @@ def env(aws, monkeypatch):
     monkeypatch.setitem(costs.TTS_PER_CHAR, "mock", 0.0001)  # exercise cost accounting
     monkeypatch.setattr(research, "gather_notes", lambda topic, **k: ("notes", [{"title": "Rainbow", "url": "https://en.wikipedia.org/wiki/Rainbow", "publisher": "Wikipedia"}]))
     monkeypatch.setattr(timeline_handler, "CHUNK_SECONDS", 2)  # ~one scene per chunk even in a short test video
+    from engine import plan as plan_mod
+    monkeypatch.setattr(plan_mod, "enforce_opening", lambda beats, budget=None: [])   # the toy script opens on a title card on purpose (these tests are about the pipeline and the editor); the opening rule has its own tests (test_quality_backlog.py)
     calls = {"scout": 0, "fetch_full": []}
 
     def scout(query, narration, alt="", **k):

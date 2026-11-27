@@ -360,21 +360,37 @@ def draw(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, th: Theme, ct
     for a_id, b_id, label in edges:
         back = layer[b_id] <= layer[a_id]
         pts = route(pos_row[a_id], pos_row[b_id], back, vertical)
-        faint = ease_out_cubic(progress(lt, 0.2, 0.7)) * 0.55
+        faint = ease_out_cubic(progress(lt, 0.2, 0.7)) * 0.55 if ctx.frame.landscape else 0.0   # the faint structure (tracks and empty slots) is for landscape: in 9:16, 1:1 and 4:5 it filled most of the frame before anything was said
         if faint > 0.01:
             cv.line(pts, with_alpha(pal.track, faint), 4)
         _draw_edge(cv, th, pal, pts, lt, t_of[a_id], t_of[b_id], label, 26)
     for nid in order:
         a, e = pop(lt, t_of[nid], 0.62, 1.8)
         f = focus(times, lt, rank[nid])
-        ghost = 1.0 - a
+        ghost = (1.0 - a) if ctx.frame.landscape else 0.0
         mw, ml = fits[nid]
         lines = cv.wrap(lab[nid], "semibold", size, mw)[:ml]
         _node(cv, th, pal, pos[nid], variant, lab[nid], icon_for_node(props, by_id[nid], rank[nid], lab[nid]), lines, size, a, e, f, nid == strong_id, ghost)
 
 
 def icon_for_node(props: Dict[str, Any], node: Dict[str, Any], i: int, label: str) -> str:
-    from .style_kit import auto_icon, clean_icon
+    from .style_kit import auto_icon, clean_icon, group_icon, match_icon
 
-    v = clean_icon(node.get("icon")) if node.get("icon") else ""
-    return v or auto_icon(label, i)
+    def given(n: Dict[str, Any]) -> str:
+        return clean_icon(n.get("icon")) if isinstance(n, dict) and n.get("icon") else ""
+
+    nodes = props.get("nodes")
+    if isinstance(nodes, list) and nodes and 0 <= i < len(nodes):   # as in a list: a step no icon fits gets a plain marker, and a diagram where most steps have none is numbered
+        found = [given(n) or match_icon(str(n.get("label") or "") if isinstance(n, dict) else str(n)) for n in nodes]
+        mine = given(node) or match_icon(label)
+        k = next((j for j, n in enumerate(nodes) if n is node), None)
+        if k is not None:
+            found[k] = mine
+        if sum(1 for f in found if f) * 2 < len(found):
+            from .style_kit import number_icon
+
+            return number_icon(i)   # i is the step's place in the order shown
+        from .style_kit import NEUTRAL_ICON
+
+        return mine or NEUTRAL_ICON
+    return given(node) or auto_icon(label, i)

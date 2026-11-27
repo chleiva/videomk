@@ -32,6 +32,7 @@ THEME_PALETTES: Dict[str, Tuple[str, ...]] = {
 MOOD_STYLE = {"calm": "aurora", "bright": "bokeh", "tense": "smoke"}
 MOOD_SPEED = {"calm": 0.7, "bright": 1.0, "tense": 1.15}
 LOOP_SECONDS = 12.0
+INTENSITY = 0.8   # a little under the showreel's 1.0: in the first real 4K video the smoke's ribbons were bright enough to compete with a diagram
 
 SYSTEM = """You choose the moving background that sits quietly behind the text scenes of a short explainer video. Pick by the MOOD of the topic, not by its literal subject.
 Styles:
@@ -114,7 +115,7 @@ def choose(prompt: str, plan: Dict[str, Any], ask: Optional[Callable[[str, str],
     by = "director" if str(wish.get("style") or "").strip().lower() in STYLES else "mood"
     style, palette = settle(wish.get("style"), wish.get("palette"), mood, theme)
     seed = zlib.crc32(str(plan.get("title") or prompt or "").encode("utf-8")) % 9973 + 1
-    return {"style": style, "palette": palette, "mode": mode_of(theme), "speed": MOOD_SPEED[mood], "intensity": 1.0, "seed": seed, "loop_seconds": LOOP_SECONDS, "by": by}
+    return {"style": style, "palette": palette, "mode": mode_of(theme), "speed": MOOD_SPEED[mood], "intensity": INTENSITY, "seed": seed, "loop_seconds": LOOP_SECONDS, "by": by}
 
 
 def phase(start: float, background: Dict[str, Any]) -> float:

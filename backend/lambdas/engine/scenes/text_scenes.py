@@ -85,6 +85,16 @@ def stat_cues(props: Dict[str, Any], dur: float) -> List[float]:
     return [0.2, 0.2 + 1.3]
 
 
+def is_calendar_year(parsed, value: str) -> bool:
+    """True when a stat's value is a year or a decade rather than an amount: a whole number from 1000 to 2100 written without separators, alone or followed by 's'
+    ("1969", "1970s", "2024 "). "1,250", "1500 km", "$2000" and "2000%" are amounts and still count."""
+    pre, val, dec, suf, _comma = parsed
+    if pre.strip() or dec or not (1000 <= val <= 2100) or float(val) != int(val):
+        return False
+    digits = "".join(ch for ch in str(value) if ch.isdigit())
+    return len(digits) == 4 and str(int(val)) in str(value) and suf.strip().lower() in ("", "s")
+
+
 def draw_stat(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, th: Theme, ctx: SceneCtx) -> None:
     # The count starts with the scene. It used to wait for the narration to name the number and showed a dim "0 billion" for seconds, which reads as the claim
     # "zero". Now it counts at once from 20% of the value (easing out over ~1.5 s, then holding the exact figure) and the label is there with it.
@@ -102,6 +112,8 @@ def draw_stat(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, th: Them
     parsed = parse_number(value)
     if parsed and any(ch.isdigit() for ch in parsed[0] + parsed[3]):
         parsed = None   # "1 in 5", "10 in 2020": more than one number, so it is shown as written, not counted
+    if parsed and is_calendar_year(parsed, value):
+        parsed = None   # a year or a decade ("1970s", "1912", "2024") is a name, not a quantity: counting up to it showed "1912s" on the way (seen on QA)
     count_p = count_up(lt, dur)   # 0.2 -> 1.0 at once, eased out, exact value held
     if parsed:
         pre, val, dec, suf, comma = parsed

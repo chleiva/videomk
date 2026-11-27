@@ -48,7 +48,7 @@ def test_flag_on_the_director_picks_by_mood_and_the_choice_is_recorded(monkeypat
     bg = out["plan"]["background"]
     assert (bg["style"], bg["palette"], bg["mode"], bg["by"]) == ("aurora", "ocean", "dark", "director") and bg["speed"] == 0.7 and bg["loop_seconds"] == bgsel.LOOP_SECONDS
     assert out["research"]["background"] == {"style": "aurora", "palette": "ocean", "by": "director"}
-    assert B.sanitize(bg, "midnight") == B.BgSpec(style="aurora", palette="ocean", mode="dark", speed=0.7, intensity=1.0, seed=bg["seed"], loop_seconds=12.0)   # what the renderer makes of it
+    assert B.sanitize(bg, "midnight") == B.BgSpec(style="aurora", palette="ocean", mode="dark", speed=0.7, intensity=0.8, seed=bg["seed"], loop_seconds=12.0)   # what the renderer makes of it
 
 
 @pytest.mark.parametrize("answer", ["", "no idea", '{"style": "plasma"}', "[1, 2]", RuntimeError("throttled")])

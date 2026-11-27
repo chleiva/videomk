@@ -203,7 +203,7 @@ def test_timeless_topics_and_missing_keys_use_the_encyclopedia_path_without_extr
     assert r["research"]["mode"] == "encyclopedia" and seen == ["wiki"] and "Today's date" not in prompts[0]
     calls = []
     r = director.direct("Who won the match yesterday?", minutes=1, language="en", today=TODAY, ask_small=lambda s, u, n=120: calls.append(u) or '{"legit":true}', ask_big=_big([]))
-    assert {k: v for k, v in r["research"].items() if k != "grounding"} == {"mode": "encyclopedia", "skills": ["explainer-education"]} and not any("Who won" in c and "research" in c for c in calls)   # no provider: no decision call, no web (the producer step only adds the guides it picked)
+    assert {k: v for k, v in r["research"].items() if k not in ("grounding", "opening")} == {"mode": "encyclopedia", "skills": ["explainer-education"]} and not any("Who won" in c and "research" in c for c in calls)   # no provider: no decision call, no web (the producer step only adds the guides it picked)
 
 
 def test_when_web_research_finds_nothing_the_director_falls_back_to_the_encyclopedia(monkeypatch):
