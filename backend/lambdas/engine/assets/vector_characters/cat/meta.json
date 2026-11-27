@@ -1,0 +1,43 @@
+{
+ "name": "Mika",
+ "role": "tech explorer",
+ "species": "cat (bipedal mascot)",
+ "age_group": "ageless",
+ "tags": [
+  "mascot",
+  "animal",
+  "curious",
+  "clever",
+  "technology",
+  "kids",
+  "explainer"
+ ],
+ "voice_hint": {
+  "en": [
+   "Olivia",
+   "Salli"
+  ],
+  "es": [
+   "Mia",
+   "Lucia"
+  ]
+ },
+ "personality": "curious, clever, quick",
+ "suitable_topics": [
+  "technology",
+  "how things work",
+  "gadgets",
+  "coding"
+ ],
+ "outfit": "orange hoodie, navy trousers, white-and-red sneakers",
+ "skin": "grey tabby fur, white paws",
+ "hair": "n/a",
+ "id": "cat",
+ "rig": "biped front-facing cut-out (head, torso, upper/lower arm, upper/lower leg, 2 eye sets, 3 mouths)",
+ "provenance": {
+  "model": "gpt-image-2.6-flare",
+  "sheet": "1536x1024 medium rig parts sheet",
+  "generated": "2026-11-27",
+  "script": "backend/scripts/vector_character_sheet5.py --animals"
+ }
+}

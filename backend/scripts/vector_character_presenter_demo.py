@@ -37,6 +37,8 @@ from engine import vector_scene as vs  # noqa: E402
 from engine.audio import SR  # noqa: E402
 
 ORDER = ["ines", "david", "priya", "mateo", "fox"]
+ANIMALS = ["owl", "bear", "cat", "parrot", "turtle"]                # the animal cast: rendered when named in --only (talk) or with --animals (the group still)
+TAILS = {"fox", "owl", "cat", "parrot", "turtle"}
 # script, framing, side of the frame where the character stands, the card beside it (title, [(word that reveals the line, line)])
 TALK: Dict[str, Dict[str, Any]] = {
     "ines": {"text": "Hello, I'm Inés. Learning something new takes three things: time, practice and patience. Some days it feels slow, but every small step counts. So, what will you learn today? Thank you for listening!",
@@ -49,8 +51,19 @@ TALK: Dict[str, Dict[str, Any]] = {
               "framing": "full", "side": "right", "scene": "home_garden_backyard", "card": ("Fresh tomatoes", [("ripe,", "Ripe"), ("red", "Red"), ("flavour.", "Full of flavour")])},
     "fox": {"text": "Hi! I'm Fox, your guide. Today we explore the forest together. On one side there are tall old trees, but on the other side, a quiet river. Stay close, and remember: every path leads home. Ready? Great, follow me!",
             "framing": "three_quarter", "side": "left", "scene": "autumn_forest_path", "card": ("The forest", [("trees,", "Tall old trees"), ("river.", "A quiet river")])},
+    "owl": {"text": "Good day! I'm Hugo. Why is the sky blue? Sunlight is made of many colours. First, it meets the air. Second, the blue light scatters the most. So look up: that blue is sunlight, playing. Thank you for listening!",
+            "framing": "three_quarter", "side": "left", "scene": "library_interior_view", "card": ("Why the sky is blue", [("colours.", "Light has many colours"), ("First,", "1  It meets the air"), ("Second,", "2  Blue scatters most")])},
+    "bear": {"text": "Hello, I'm Bruno. Feeling worried is okay. Here are three things that help: breathe slowly, name the feeling, and tell someone you trust. Big feelings come, but they also go. You are doing great. Sleep well!",
+             "framing": "three_quarter", "side": "right", "scene": "bedroom_window_morning", "card": ("When you feel worried", [("slowly,", "Breathe slowly"), ("name", "Name the feeling"), ("tell", "Tell someone you trust")])},
+    "cat": {"text": "Hi, I'm Mika! How does a robot work? It needs three things: sensors, a brain and motors. First, the sensors look around. Second, the brain decides. And look at this: the motors make it move. Thanks for watching!",
+            "framing": "three_quarter", "side": "left", "scene": "robotics_lab_window", "card": ("How a robot works", [("sensors,", "Sensors: it looks"), ("brain", "Brain: it decides"), ("motors.", "Motors: it moves")])},
+    # the parrot speaks Spanish (a Spanish Polly voice): the natural Spanish-first character
+    "parrot": {"text": "¡Hola! Soy Paco. Hoy aprendemos a saludar en tres idiomas. Primero, en español: hola. Segundo, en inglés: hello. Y tercero, en francés: bonjour. Mira qué fácil. ¡Gracias, y buen viaje!",
+               "framing": "three_quarter", "side": "right", "scene": "tropical_river_jungle", "card": ("Saludar en tres idiomas", [("Primero,", "Español: hola"), ("Segundo,", "Inglés: hello"), ("tercero,", "Francés: bonjour")])},
+    "turtle": {"text": "Hello, I'm Tula. The sea is full of life. First, sunlight feeds tiny plants. Second, small fish eat them. Third, bigger fish follow. Take your time and look closely: the sea tells its story. Thank you!",
+               "framing": "three_quarter", "side": "left", "scene": "deep_ocean_reef", "card": ("Life in the sea", [("First,", "1  Sunlight feeds tiny plants"), ("Second,", "2  Small fish eat them"), ("Third,", "3  Bigger fish follow")])},
 }
-SIZE = {c: old.CAST[c]["size"] for c in ORDER}
+SIZE = {c: old.CAST[c]["size"] for c in ORDER + ANIMALS}
 
 
 def ramp(t: float, a: float, b: float) -> float:
@@ -73,7 +86,7 @@ def shifted(words: List[cg.Word], t0: float) -> List[cg.Word]:
 
 
 def performer(cid: str, n: Dict[str, Any], t0: float, fps: int, seed: float, content_side: int, lift: float = 0.0) -> cg.Performance:
-    perf = cg.Performance(seed=seed, content_side=content_side, tail=cid == "fox", lift=lift)
+    perf = cg.Performance(seed=seed, content_side=content_side, tail=cid in TAILS, lift=lift)
     perf.speak(shifted(n["words"], t0), n["level"], t0 + n["dur"])
     perf.mouth(t0, fps, n["mouth"])
     return perf
@@ -188,7 +201,7 @@ def backdrop(store: str, scene: str, W: int, H: int, dim: float = 0.0):
 def build_talk(cid: str, W: int, H: int, fps: int, store: str, cache: str, framing: Optional[str] = None, side: Optional[str] = None, captions: bool = True):
     cfg = TALK[cid]
     fr = vp.framing(framing or cfg["framing"], side or cfg["side"], W, H)
-    seed = 0.3 + 0.17 * ORDER.index(cid)
+    seed = 0.3 + 0.17 * (ORDER + ANIMALS).index(cid)
     ch = vp.load(cid, fr["ppu"], SIZE[cid])
     n = narrate(cid, f"talk3_{cid}", cfg["text"], cache, fps)
     t_talk = 1.0
@@ -239,7 +252,7 @@ def build_compare(cid: str, W: int, H: int, fps: int, store: str, cache: str):
     hw = W // 2
     ppu = 0.70 * H / 290.0
     ground = 0.90 * H
-    seed = 0.3 + 0.17 * ORDER.index(cid)
+    seed = 0.3 + 0.17 * (ORDER + ANIMALS).index(cid)
     ac = old.Actor(cid, hw, H, fps, ppu, seed)
     ac.add_talk(t_talk, n["audio"])
     t_w = t_talk + n["dur"] + 0.2
@@ -365,6 +378,31 @@ def framing_sheet(out: str, store: str, cell_h: int = 420) -> None:
 
 
 # ----------------------------------------------------------------------------- encode
+def animal_group(out: str, store: str, W: int = 1920, H: int = 1080, scene: str = "flower_meadow") -> None:
+    """One still of the six animals together (the fox and the animal cast), each at a different gesture, on a cartoon scene."""
+    ids = ["fox"] + ANIMALS
+    img = backdrop(store, scene, W, H, 0.06)(2.0, 10.0)
+    ppu = H / 425.0
+    K = cg.KEY
+    kinds = ["wave", "count", "thumb", "count", "thumb", "wave"]            # gestures that stay close to the body: six figures stand shoulder to shoulder
+    shapes = ["open", "two", "thumb", "three", "thumb", "open"]
+    for i, cid in enumerate(ids):
+        ch = vp.load(cid, ppu, SIZE[cid])
+        A = ch.g.arm
+        kind = kinds[i % len(kinds)]
+        key = (K[kind][0][0] * A, K[kind][0][1] * A)
+        shape = shapes[i % len(shapes)]
+        left = i < len(ids) / 2                                  # the outer arm gestures: the left arm on the left half of the picture
+        rest = (cg.REST_WRIST, K[kind][1])
+        pose: Dict[str, Any] = {"hands": (key, key) if kind == "open" else (key, None) if left else (None, key),
+                                "hand_shape": (shape, shape) if kind == "open" else (shape, "relaxed") if left else ("relaxed", shape),
+                                "wrist": (K[kind][1], K[kind][1]) if kind == "open" else rest[::-1] if left else rest, "mouth": ("half", "closed", "wide")[i % 3], "tail": (-5.0, 4.0)[i % 2]}
+        ch.draw(img, W * (0.09 + 0.158 * i), H * 0.93, pose)
+        label(img, old.CAST[cid]["name"], W * (0.09 + 0.158 * i) - W * 0.035, H * 0.94)
+    img.convert("RGB").save(out, quality=90)
+    print("wrote", out)
+
+
 def encode(frame, audio: np.ndarray, total: float, W: int, H: int, fps: int, out: str, music: Optional[str] = None) -> None:
     tmp = out + ".silent.mp4"
     p = subprocess.Popen(["nice", "-n", "12", "ffmpeg", "-v", "error", "-y", "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", f"{W}x{H}", "-r", str(fps), "-i", "-", "-c:v", "libx264",
@@ -428,6 +466,7 @@ def main() -> int:
     ap.add_argument("--peaks", action="store_true")
     ap.add_argument("--plan", action="store_true")
     ap.add_argument("--no-video", action="store_true")
+    ap.add_argument("--animals", action="store_true", help="one still of the six animals together (animal_cast_all.jpg)")
     a = ap.parse_args()
     W, H = (int(x) for x in a.size.lower().split("x"))
     os.makedirs(a.out, exist_ok=True)
@@ -445,8 +484,10 @@ def main() -> int:
         if not a.no_video:
             encode(frame, audio, total, W, H, a.fps, os.path.join(a.out, name + ".mp4"), music)
 
+    if a.animals:
+        animal_group(os.path.join(a.out, "animal_cast_all.jpg"), a.store)
     if a.talk:
-        for cid in ORDER:
+        for cid in ORDER + [c for c in ANIMALS if c in (a.only or [])]:
             if a.only and cid not in a.only:
                 continue
             run(f"talk_{cid}", build_talk(cid, W, H, a.fps, a.store, a.cache))

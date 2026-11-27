@@ -1,0 +1,136 @@
+{
+ "id": "turtle",
+ "parts": {
+  "head": {
+   "file": "head.svg",
+   "w": 337,
+   "h": 337,
+   "svg_bytes": 44360,
+   "pivot": [
+    168.5,
+    337
+   ]
+  },
+  "torso": {
+   "file": "torso.svg",
+   "w": 333,
+   "h": 329,
+   "svg_bytes": 158177,
+   "pivot": [
+    166.5,
+    329
+   ]
+  },
+  "upper_arm": {
+   "file": "upper_arm.svg",
+   "w": 105,
+   "h": 315,
+   "svg_bytes": 19301,
+   "pivot": [
+    51.5,
+    0.0
+   ],
+   "end": [
+    60.5,
+    315.0
+   ]
+  },
+  "lower_arm": {
+   "file": "lower_arm.svg",
+   "w": 124,
+   "h": 361,
+   "svg_bytes": 37320,
+   "pivot": [
+    56.5,
+    0.0
+   ],
+   "end": [
+    64.5,
+    361.0
+   ]
+  },
+  "upper_leg": {
+   "file": "upper_leg.svg",
+   "w": 163,
+   "h": 306,
+   "svg_bytes": 34774,
+   "pivot": [
+    80.5,
+    0.0
+   ],
+   "end": [
+    86.0,
+    306.0
+   ]
+  },
+  "lower_leg": {
+   "file": "lower_leg.svg",
+   "w": 214,
+   "h": 316,
+   "svg_bytes": 59106,
+   "pivot": [
+    63.0,
+    0.0
+   ],
+   "end": [
+    93.5,
+    316.0
+   ]
+  },
+  "eyes_open": {
+   "file": "eyes_open.svg",
+   "w": 271,
+   "h": 168,
+   "svg_bytes": 52127,
+   "pivot": [
+    135.5,
+    84.0
+   ]
+  },
+  "eyes_closed": {
+   "file": "eyes_closed.svg",
+   "w": 268,
+   "h": 109,
+   "svg_bytes": 17559,
+   "pivot": [
+    134.0,
+    54.5
+   ]
+  },
+  "mouth_closed": {
+   "file": "mouth_closed.svg",
+   "w": 223,
+   "h": 65,
+   "svg_bytes": 11334,
+   "pivot": [
+    111.5,
+    32.5
+   ]
+  },
+  "mouth_half": {
+   "file": "mouth_half.svg",
+   "w": 220,
+   "h": 101,
+   "svg_bytes": 27315,
+   "pivot": [
+    110.0,
+    50.5
+   ]
+  },
+  "mouth_wide": {
+   "file": "mouth_wide.svg",
+   "w": 241,
+   "h": 148,
+   "svg_bytes": 32791,
+   "pivot": [
+    120.5,
+    74.0
+   ]
+  }
+ },
+ "face": {
+  "eyes_y": 0.55,
+  "eyes_w": 0.46,
+  "mouth_y": 0.78
+ }
+}

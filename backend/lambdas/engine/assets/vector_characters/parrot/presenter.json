@@ -1,0 +1,80 @@
+{
+ "hands": {
+  "open": {
+   "file": "hand_open.svg",
+   "w": 106,
+   "h": 159,
+   "svg_bytes": 50363,
+   "pivot": [
+    62.0,
+    149.46
+   ],
+   "wrist_w": 57.0,
+   "scale": 1.0
+  },
+  "one": {
+   "file": "hand_one.svg",
+   "w": 79,
+   "h": 162,
+   "svg_bytes": 42111,
+   "pivot": [
+    37.5,
+    152.28
+   ],
+   "wrist_w": 58.0,
+   "scale": 1.0
+  },
+  "two": {
+   "file": "hand_two.svg",
+   "w": 84,
+   "h": 165,
+   "svg_bytes": 44689,
+   "pivot": [
+    43.0,
+    155.1
+   ],
+   "wrist_w": 57.0,
+   "scale": 1.0
+  },
+  "three": {
+   "file": "hand_three.svg",
+   "w": 92,
+   "h": 170,
+   "svg_bytes": 51950,
+   "pivot": [
+    46.5,
+    159.8
+   ],
+   "wrist_w": 56.0,
+   "scale": 1.0
+  },
+  "thumb": {
+   "file": "hand_thumb.svg",
+   "w": 76,
+   "h": 150,
+   "svg_bytes": 38536,
+   "pivot": [
+    33.0,
+    141.0
+   ],
+   "wrist_w": 57.0,
+   "scale": 1.0
+  }
+ },
+ "relaxed_thumb": 1,
+ "sheet_thumb": "left",
+ "tail": {
+  "file": "tail.svg",
+  "w": 92,
+  "h": 216,
+  "svg_bytes": 65391,
+  "pivot": [
+   45.5,
+   207.35999999999999
+  ],
+  "height_u": 72.0,
+  "x": 6.0,
+  "y": 8.0,
+  "angle": -148.0
+ }
+}

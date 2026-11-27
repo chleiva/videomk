@@ -134,6 +134,26 @@ def test_no_words_is_a_quiet_presenter_and_a_missing_character_never_fails(monke
     ("Por qué el cielo es azul, explicado por un zorro", ["science-wonder"], "fox"),
     ("Cómo dormir mejor, con un presentador", ["health-wellbeing"], "priya"),
     ("How compound interest works, with animated characters", ["finance-business"], "ines"),
+    # the animal cast: by name anywhere, by topic in children's and fun videos only
+    ("Why the sky is blue, explained by an owl", ["science-wonder"], "owl"),
+    ("Los planetas, con un búho", ["science-wonder"], "owl"),
+    ("Por qué dormimos, explicado por un oso", ["health-wellbeing"], "bear"),
+    ("The planets for kids, with a character", ["kids-family"], "owl"),
+    ("History of the pyramids for children, with a presenter", ["kids-family", "history-story"], "owl"),
+    ("What to do when you feel worried, for kids, with a character", ["kids-family"], "bear"),
+    ("Por qué hay que lavarse los dientes, para niños, con personajes", ["kids-family"], "bear"),
+    ("How robots work, for kids, with a character", ["kids-family"], "cat"),
+    ("Cómo funciona internet, para niños, con un personaje", ["kids-family"], "cat"),
+    ("Robots, by a cat", ["science-wonder"], "cat"),
+    ("Fun facts about countries for kids, with a character", ["kids-family"], "parrot"),
+    ("Aprende los colores en inglés, para niños, con un personaje", ["kids-family"], "parrot"),
+    ("Los volcanes, explicado por un loro", ["science-wonder"], "parrot"),
+    ("Life in the sea for kids, with a character", ["kids-family"], "turtle"),
+    ("How to plant a seed step by step, for kids, with a presenter", ["kids-family"], "turtle"),
+    ("Las mareas, con una tortuga", ["science-wonder"], "turtle"),
+    ("How sleep works, with a presenter", ["health-wellbeing"], "priya"),              # an adult topic keeps its person
+    ("The history of Rome, with a presenter", ["history-story"], "ines"),
+    ("How the internet works, with a presenter", ["explainer-education"], "david"),
 ])
 def test_casting_by_topic_and_by_name(prompt, skills, want):
     p = pp.decide(prompt, skill_ids=skills)
@@ -157,6 +177,10 @@ def test_auto_only_where_it_fits_and_never_on_photos_decks_news_or_whiteboard(mo
     assert pp.decide("The water cycle for kids", skill_ids=["kids-family"], options={"presenter": "none"}).reason == "asked_none"
     assert pp.decide("How tides work", skill_ids=["science-wonder"], options={"presenter": "mateo"}).character == "mateo"   # the option names one: that one
     assert pp.decide("Tides, explained by a fox", skill_ids=["science-wonder"], options={"presenter": "priya"}).character == "priya"   # the option wins over the words
+    # a Spanish children's video with no topic of another animal gets the parrot; fun videos and English ones keep the fox
+    assert pp.decide("El ciclo del agua para niños", skill_ids=["kids-family"], language="es").character == "parrot"
+    assert pp.decide("Algo divertido sobre calcetines", skill_ids=["funny-light"], language="es").character == "fox"
+    assert pp.voice_for("parrot", "es") == "Pedro" and pp.voice_for("owl", "en") == "Brian" and pp.voice_for("bear", "en") == "Stephen"
     monkeypatch.setenv("PRESENTERS", "0")
     off = pp.decide("The water cycle for kids, explained by a fox", skill_ids=["kids-family"])
     assert not off.allowed and off.reason == "flag_off" and off.prompt_block() == ""
@@ -167,6 +191,11 @@ def test_auto_only_where_it_fits_and_never_on_photos_decks_news_or_whiteboard(mo
     ("Las mareas, con un presentador", "any"), ("Las mareas con personajes", "any"), ("Las mareas, explicado por un zorro", "fox"), ("Las mareas explicadas por una doctora", "priya"),
     ("A recipe told by a friendly chef", "mateo"), ("Vaccines, with a doctor as the presenter", "priya"), ("Tides, no presenter please", "none"), ("Las mareas, sin presentador", "none"),
     ("A story about a fox who learns to share", None), ("The teachers' strike", None), ("A debate between two characters about pizza", None), ("How tides work", None),
+    ("Tides explained by an owl", "owl"), ("Las mareas, con un búho", "owl"), ("Las mareas explicadas por un búho", "owl"), ("Why we sleep, with a bear", "bear"),
+    ("Por qué dormimos, explicado por un oso", "bear"), ("Feelings, told by a friendly bear", "bear"), ("A story about an owl who learns to fly", None),
+    ("A story with a bear who loses his hat", None), ("Why owls hunt at night", None), ("Los osos polares", None),
+    ("Robots, by a cat", "cat"), ("Cómo funciona un motor, con un gato", "cat"), ("Countries of the world, explained by a parrot", "parrot"), ("Los colores, con un loro", "parrot"),
+    ("The sea, hosted by a wise turtle", "turtle"), ("El mar, explicado por una tortuga", "turtle"), ("Why cats purr", None), ("Sea turtles and their long journey", None),
 ])
 def test_the_words_that_ask_for_a_presenter_in_english_and_spanish(text, want):
     assert looks.presenter_wish(text) == want
@@ -216,7 +245,7 @@ def test_a_dialogue_gets_one_presenter_per_speaker_each_with_their_own_voice_and
         {"id": "b2", "speaker": "leo", "narration": "But I admit it looks rather good.", "scene": {"type": "presenter", "props": E.sanitize(pres)}}]}
     pp.enforce(plan, pol)
     a, b = plan["beats"][0]["scene"]["props"], plan["beats"][2]["scene"]["props"]
-    assert a["character"] == "fox" and a["side"] == "left" and b["character"] != "fox" and b["side"] == "right"
+    assert a["character"] == "fox" and a["side"] == "left" and b["character"] in set(pp.ANIMALS) - {"fox"} and b["side"] == "right"      # an animal talks with another animal
     assert set(plan["voices"]) == {"maya", "leo"} and plan["voices"]["maya"] != plan["voices"]["leo"] and plan["presenter"]["cast"] == {"maya": "fox", "leo": b["character"]}
 
 
@@ -272,13 +301,18 @@ def test_capabilities_lists_the_cast_with_labels_in_both_languages(monkeypatch):
     import capabilities_api
     en, es = capabilities_api.presenter("en", True), capabilities_api.presenter("es", True)
     assert en["param"] == "presenter" and en["default"] == "auto" and en["available"] is True and [o["id"] for o in en["options"]] == ["auto", "none"]
-    assert [c["id"] for c in en["cast"]] == ["ines", "david", "priya", "mateo", "fox"] and [c["name"] for c in en["cast"]] == ["Inés", "David", "Priya", "Mateo", "Fox"]
-    assert [c["role"] for c in en["cast"]] == ["Teacher", "Engineer", "Doctor", "Chef", "Guide for children"] and [c["role"] for c in es["cast"]][:3] == ["Profesora", "Ingeniero", "Doctora"]
+    assert [c["id"] for c in en["cast"]] == list(pp.ORDER) and [c["id"] for c in en["cast"]][:5] == ["ines", "david", "priya", "mateo", "fox"]
+    assert [c["name"] for c in en["cast"]] == ["Inés", "David", "Priya", "Mateo", "Fox", "Hugo", "Bruno", "Mika", "Paco", "Tula"]
+    assert [c["role"] for c in en["cast"]] == ["Teacher", "Engineer", "Doctor", "Chef", "Guide for children", "Owl professor", "Caring bear", "Curious cat", "Travelling parrot", "Wise turtle"]
+    assert [c["role"] for c in es["cast"]] == ["Profesora", "Ingeniero", "Doctora", "Chef", "Guía para niños", "Búho profesor", "Oso cariñoso", "Gata curiosa", "Loro viajero", "Tortuga sabia"]
     assert all(c["thumbnail"].startswith("data:image/png;base64,") and len(c["thumbnail"]) < 8000 for c in en["cast"])
     assert en["say"] == "with a presenter" and es["say"] == "con un presentador" and es["options"][1]["label"] == "Sin presentador"
     off = capabilities_api.presenter("en", False)
-    assert off["available"] is False and off["note"] == "Presenter characters are coming soon." and len(off["cast"]) == 5
-    assert set(pp.CAST) == set(el.CAST) == set(pp.ORDER)
+    assert off["available"] is False and off["note"] == "Presenter characters are coming soon." and len(off["cast"]) == len(pp.ORDER)
+    assert set(pp.CAST) == set(el.CAST) == set(pp.ORDER) and set(pp.ANIMALS) < set(pp.ORDER) and set(pp.KIDS_TOPICS) < set(pp.ANIMALS)
+    assert {c for c, v in el.CAST.items() if v.get("tail")} == {c for c in pp.ORDER if "tail" in json.load(open(os.path.join(vp.DIR, c, "presenter.json")))}   # the tail sways only where there is one
+    import sf_launcher
+    assert sf_launcher.PRESENTER_OPTIONS == ("auto", "none") + pp.ORDER
     from engine import voices
     for c in pp.CAST.values():
         for lang, names in c["voices"].items():
