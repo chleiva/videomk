@@ -86,6 +86,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
+import com.videomk.app.core.ListKeys
 import com.videomk.app.core.MediaGrouping
 import com.videomk.app.core.MediaLabels
 import com.videomk.app.core.MediaPhoto
@@ -139,7 +140,8 @@ fun PhotoGrid(
     order: Map<String, Int> = emptyMap(), dimUnselected: Boolean = false, localTiles: (@Composable () -> Unit)? = null, hiddenIds: Set<String> = emptySet(),
 ) {
     val bestFirst = stringResource(R.string.media_best_first)
-    val shown = remember(photos, hiddenIds) { if (hiddenIds.isEmpty()) photos else photos.filter { it.id !in hiddenIds } }
+    // one tile per photo id: the row keys below are built from ids, and a repeated id (an overlapping page, a search result listing a photo twice) would crash the list with "Key was already used"
+    val shown = remember(photos, hiddenIds) { (if (hiddenIds.isEmpty()) photos else photos.filter { it.id !in hiddenIds }).distinctBy { it.id } }
     val sections = remember(shown, flat) { if (flat) listOf(MediaSection("relevance", bestFirst, shown)) else MediaGrouping.group(shown) }
     val indexById = remember(photos) { photos.withIndex().associate { it.value.id to it.index } }
     val bounds = remember { HashMap<String, Rect>() }
@@ -258,8 +260,10 @@ fun MediaSearchBar(vm: MediaViewModel, modifier: Modifier = Modifier, label: Str
         if (label != null || vm.understoodChips.isNotEmpty()) {
             androidx.compose.foundation.lazy.LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
                 if (label != null) item { Text(label, style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary) }
-                items(vm.understoodChips.size, key = { vm.understoodChips[it].label }) { i ->
-                    val chip = vm.understoodChips[i]
+                val chips = vm.understoodChips.toList()
+                val chipKeys = ListKeys.unique(chips.map { it.label })
+                items(chips.size, key = { chipKeys[it] }) { i ->
+                    val chip = chips[i]
                     InputChip(
                         selected = true, onClick = { vm.dropChip(chip.label) }, label = { Text(chip.label) },
                         trailingIcon = { Icon(Icons.Filled.Close, null, Modifier.size(16.dp)) },

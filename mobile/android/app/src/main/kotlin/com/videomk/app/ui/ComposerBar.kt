@@ -164,6 +164,10 @@ internal fun PhotoStrip(composer: ComposerViewModel) {
     val library = composer.library.size
     val source = stringResource(when { phone > 0 && library > 0 -> R.string.composer_source_both; library > 0 -> R.string.composer_source_library; else -> R.string.composer_source_phone })
     val total = composer.photos.size + composer.library.size
+    // plain copies for the lazy row: a lazy item lambda that reads the live SnapshotStateList can run after the list changed (library cleared or trimmed in an effect)
+    // and crash with IndexOutOfBounds; a copy taken in composition always agrees with the count it was taken with
+    val stripPhotos = composer.photos.toList()
+    val stripLibrary = composer.library.toList().distinctBy { it.id }
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             Text(
@@ -175,13 +179,13 @@ internal fun PhotoStrip(composer: ComposerViewModel) {
         if (composer.loading > 0) Text(composer.preparingText, style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary, modifier = Modifier.testTag("photosPreparing"))
         composer.notice?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = Vmk.colors.warning, modifier = Modifier.testTag("photosNotice")) }
         LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), contentPadding = PaddingValues(end = 4.dp)) {
-            itemsIndexed(composer.photos, key = { _, p -> p.id }) { index, photo ->
+            itemsIndexed(stripPhotos, key = { _, p -> p.id }) { index, photo ->
                 val photoDescription = stringResource(R.string.composer_photo_n_of, index + 1, total)
                 StripTile(Modifier.semantics { contentDescription = photoDescription }.testTag("attachedPhoto"), stringResource(R.string.composer_remove_photo_n, index + 1), { composer.removePhoto(photo.id) }) {
                     photo.thumbnail?.let { Image(it, it.hashCode()) }
                 }
             }
-            itemsIndexed(composer.library, key = { _, p -> "lib-${p.id}" }) { _, photo ->
+            itemsIndexed(stripLibrary, key = { _, p -> "lib-${p.id}" }) { _, photo ->
                 val libraryDescription = stringResource(R.string.composer_from_library_photo, MediaLabels.photo(photo))
                 StripTile(Modifier.semantics { contentDescription = libraryDescription }.testTag("attachedLibraryPhoto"), stringResource(R.string.composer_remove_from_video), { composer.removeLibrary(photo.id) }) {
                     PhotoThumb(photo, Modifier.size(56.dp))

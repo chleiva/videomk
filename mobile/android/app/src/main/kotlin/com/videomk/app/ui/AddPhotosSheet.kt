@@ -48,6 +48,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -102,10 +103,13 @@ fun AddPhotosSheet(composer: ComposerViewModel, api: MediaApi?, tracker: Arrival
     val container = LocalContainerOrNull.current
 
     if (vm != null) {
-        LaunchedEffect(Unit) { vm.start(); vm.startPicker(initialLibrary); vm.onVisible() }
+        // the picker is "ready" once it has taken over what is already chosen; before that the selection is empty and writing it into the composer would wipe the
+        // library behind the sheet for a frame (the strip then measured items that were gone)
+        var ready by remember { mutableStateOf(false) }
+        LaunchedEffect(Unit) { vm.start(); vm.startPicker(initialLibrary); ready = true; vm.onVisible() }
         LaunchedEffect(phoneCount) { vm.setLimit(PhotoLimits.MAX_PHOTOS - phoneCount) }
         // live: the strip behind the sheet is always what is chosen
-        LaunchedEffect(vm.selection.toList()) { composer.setLibrary(vm.selectedPhotos()) }
+        LaunchedEffect(vm.selection.toList(), ready) { if (ready) composer.setLibrary(vm.selectedPhotos()) }
         DisposableEffect(vm) { onDispose { vm.stopWaiting() } }
     }
 
@@ -208,7 +212,7 @@ private fun PhoneTab(composer: ComposerViewModel, onPick: () -> Unit) {
                     Text(stringResource(R.string.photos_choose), style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold, color = Vmk.colors.primary, modifier = Modifier.padding(top = 6.dp))
                 }
             }
-            itemsIndexed(composer.photos, key = { _, p -> p.id }) { index, photo ->
+            itemsIndexed(composer.photos.toList(), key = { _, p -> p.id }) { index, photo ->
                 val tileDesc = stringResource(R.string.photos_tile_desc, index + 1)
                 Box(
                     Modifier.aspectRatio(1f).clickable(role = Role.Checkbox, onClickLabel = stringResource(R.string.common_remove)) { composer.removePhoto(photo.id) }

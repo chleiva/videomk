@@ -33,14 +33,14 @@ class MediaListing(private val clock: () -> Long = System::currentTimeMillis) {
 
     fun replace(page: MediaPage) {
         byId.clear(); page.items.forEach { byId[it.id] = it }
-        order = page.items.map { it.id }; cursor = page.cursor; fetchedAt = clock()
+        order = page.items.map { it.id }.distinct(); cursor = page.cursor; fetchedAt = clock()
     }
 
     /** Adds the next page (an item that is already listed keeps its place and gets the fresher data). */
     fun append(page: MediaPage) {
         val known = order.toHashSet()
         page.items.forEach { byId[it.id] = it }
-        order = order + page.items.map { it.id }.filter { it !in known }
+        order = order + page.items.map { it.id }.filter { it !in known }.distinct()
         cursor = page.cursor; fetchedAt = clock()
     }
 
@@ -49,7 +49,7 @@ class MediaListing(private val clock: () -> Long = System::currentTimeMillis) {
         val fresh = page.items.map { it.id }.toSet()
         val keep = order.filter { it !in fresh }
         page.items.forEach { byId[it.id] = it }
-        order = page.items.map { it.id } + keep
+        order = page.items.map { it.id }.distinct() + keep
         if (keep.isEmpty()) cursor = page.cursor
         fetchedAt = clock()
     }
