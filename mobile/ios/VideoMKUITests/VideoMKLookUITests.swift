@@ -233,11 +233,22 @@ final class VideoMKLookUITests: XCTestCase {
 
     // MARK: captures
 
+    /// The picker with Real chosen (the fourth of the four looks), in the same modes as `testCaptures`.
+    func testCaptureReal() throws {
+        guard ProcessInfo.processInfo.environment["VMK_SHOTS_DIR"] != nil else { throw XCTSkip("set TEST_RUNNER_VMK_SHOTS_DIR") }
+        let app = launch(spanish: mode == "es", large: mode == "large", dark: mode == "dark", ["VMK_DEBUG_LOOK": "real:sheet"])
+        XCTAssertTrue(el(app, "lookTile-real").waitForExistence(timeout: 20)); sleep(1)
+        shot(app, "04b-sheet-real")
+        app.buttons["lookDone"].tap(); sleep(1)
+        shot(app, "03b-create-real")
+    }
+
     /// Every state, in the appearance `TEST_RUNNER_VMK_SHOTS_MODE` asks for (default light; `dark`, `large`, `es`). Skipped without a folder to write to.
     func testCaptures() throws {
         guard ProcessInfo.processInfo.environment["VMK_SHOTS_DIR"] != nil else { throw XCTSkip("set TEST_RUNNER_VMK_SHOTS_DIR") }
-        let es = mode == "es", large = mode == "large", dark = mode == "dark"
-        func start(looks: String? = "1", _ env: [String: String] = [:]) -> XCUIApplication { launch(spanish: es, large: large, dark: dark, looks: looks, env) }
+        let es = mode == "es", dark = mode == "dark"
+        let large = mode == "large" || mode == "small"      // a small phone scrolls the tall sheets too: take the scrolled shots there as well
+        func start(looks: String? = "1", _ env: [String: String] = [:]) -> XCUIApplication { launch(spanish: es, large: mode == "large", dark: dark, looks: looks, env) }
         func settle(_ app: XCUIApplication, _ id: String) { XCTAssertTrue(el(app, id).waitForExistence(timeout: 20), id); sleep(1) }
 
         var app = start(); settle(app, "lookPill"); shot(app, "01-create-auto")
