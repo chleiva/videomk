@@ -100,6 +100,7 @@ EN: Dict[str, str] = {
     "plan.purchases_unavailable": "Plans cannot be bought yet.",
     "plan.device_unverified": "We could not verify this device.",
     "wm.premium": "Your own logo as a watermark is part of the Pro plan.",
+    "wm.premium_max": "Your own logo as a watermark is part of the Max plan.",   # where plans are on (docs/PLANS.md): own logo is Max only
     "wm.logo_missing": "Add your logo first, then choose it as the watermark.",
     "wm.logo_size": "That logo is too large. Please use a file under {mb} MB.",
     "wm.logo_type": "That file is not a PNG, JPEG or SVG image.",
@@ -249,6 +250,7 @@ ES: Dict[str, str] = {
     "plan.purchases_unavailable": "Todavía no se pueden comprar planes.",
     "plan.device_unverified": "No pudimos verificar este dispositivo.",
     "wm.premium": "Usar tu propio logo como marca de agua forma parte del plan Pro.",
+    "wm.premium_max": "Usar tu propio logo como marca de agua forma parte del plan Max.",
     "wm.logo_missing": "Primero añade tu logo y luego elígelo como marca de agua.",
     "wm.logo_size": "Ese logo es demasiado grande. Usa un archivo de menos de {mb} MB.",
     "wm.logo_type": "Ese archivo no es una imagen PNG, JPEG o SVG.",
