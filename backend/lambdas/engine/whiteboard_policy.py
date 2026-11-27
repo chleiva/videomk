@@ -120,7 +120,9 @@ class Policy:
             "is tied to: about 4 words for a drawing, a title or a chart, 1 or 2 words for an arrow, a mark or a small label. So the first item of a beat is tied to its 4th to 6th word (the pen is already "
             "moving while the first words are said), a drawing's `say` word comes at least 3 words after the previous item's, and two items are never tied to the same or to neighbouring words. "
             "Arrows and marks have their own `say` word: an arrow on the verb that links two things (\"heats\", \"becomes\", \"earns\"), an underline, circle, box or tick on the word that stresses "
-            "something already on the board. A board whose pen rests for more than a second looks dead.\n"
+            "something already on the board. One mark per item at most (never an underline AND a box on the same word); a circle or box needs free space round its item, "
+            "so circle a thing that stands alone, underline a label that sits beside a drawing. An arrow joins two things with free space between them: "
+            "neighbours, never across a third thing. A board whose pen rests for more than a second looks dead.\n"
             "  * Arrows join NEIGHBOURS (items in adjacent zones); an arrow never has to cross a third item.\n"
             "  * Writing is for titles, key terms, numbers and short formulas, never whole sentences. A board's title is written large (size l) in the top row by its first beat. Numbers and results are WRITTEN "
             "big (size l or xl) and then circled or underlined; a comparison is two written numbers; a list is one `write` with a line per point (\"1. ...\\n2. ...\", at most 4 lines of 1 to 3 words) in a "
@@ -351,8 +353,10 @@ def retie(props: Dict[str, Any], narration: str) -> Dict[str, int]:
 
 def keep_busy(props: Dict[str, Any], narration: str, max_items: int = 20) -> int:
     """The cheap pacing check: where the narration runs for FILL_EVERY_WORDS words or more with nothing tied to it, an emphasis mark (underline, circle, box,
-    tick, in turn) is added on the last unmarked thing drawn before the gap (when everything is marked already: a second, different mark on the latest thing),
-    tied to a word in the middle of the gap. Deterministic, no model. Call after `retie`. -> marks added."""
+    tick, in turn) is added on the last unmarked thing drawn before the gap, tied to a word in the middle of the gap. A thing has at most ONE emphasis mark
+    (an underline and a box on the same word piled up on the first Portuguese video): when everything drawn so far is marked, nothing is added and the pen
+    rests. Whether the mark has room is the layout's business (engine/whiteboard/spec.py fits it, turns it into an underline or leaves it out).
+    Deterministic, no model. Call after `retie`. -> marks added."""
     items: List[Dict[str, Any]] = props.get("items") or []
     words = _words(narration)
     if len(words) < FILL_EVERY_WORDS or not items:
@@ -382,7 +386,7 @@ def keep_busy(props: Dict[str, Any], narration: str, max_items: int = 20) -> int
             ok = [q for q in range(ka + 1, kb) if words[q] and words[q] not in words[ka + 1:q] and all(q != m[3] for m in inserts)]
             ok = [q for q in ok if not any(m[0] == ia and m[3] >= q for m in inserts)]
             drawn = [i for i in range(ia + 1) if items[i].get("draw") or items[i].get("write") or items[i].get("chart")]
-            before = [i for i in drawn if items[i]["id"] not in marked] or [i for i in drawn if items[i]["id"] not in twice]
+            before = [i for i in drawn if items[i]["id"] not in marked]
             if not ok or not before:
                 break
             q = min(ok, key=lambda q_: abs(q_ - aim))
@@ -682,6 +686,88 @@ def make_safe(plan: Dict[str, Any], aspect: str = "16:9") -> Dict[str, Any]:
     return tot
 
 
+def make_clean(plan: Dict[str, Any], aspect: str = "16:9") -> Dict[str, Any]:
+    """No board ships with an emphasis mark or an arrow that touches something. The layout already guarantees it (engine/whiteboard/spec.py fits every mark
+    and arrow to the real ink, and takes off what cannot be fitted), so this finds nothing; it is the plan's own last check, like `make_safe` for overlaps:
+    whatever the renderer's layout still reports as a collision (score.defects) is taken out of the plan, with what pointed at it, until it reports none.
+    -> {"removed": [item ids], "left": collisions it could not undo (0 unless the layout fails)}."""
+    from .whiteboard import score
+
+    beats = plan.get("beats") or []
+    captions = bool(plan.get("captions", True))
+    out: Dict[str, Any] = {"removed": [], "left": 0}
+    for g in score.boards_of(beats):
+        props_list = [beats[i]["scene"]["props"] for i in g]
+        for _ in range(40):
+            try:
+                hits = score.defects(props_list, aspect, captions)["collisions"]
+            except Exception:  # noqa: BLE001 - shown as a plain card by the renderer
+                hits = []
+            if not hits:
+                break
+            name = str(hits[0][0])
+            j, iid = (int(name.split(":", 1)[0]), name.split(":", 1)[1]) if len(g) > 1 and ":" in name else (0, name)
+            p = props_list[j]
+            gone = {iid}
+            while True:
+                more = {it["id"] for it in p["items"] if it["id"] not in gone and not _solid(it) and (it.get("on") in gone or it.get("from") in gone or it.get("to") in gone)}
+                if not more:
+                    break
+                gone |= more
+            n0 = len(p["items"])
+            p["items"] = [it for it in p["items"] if it["id"] not in gone or _solid(it)]
+            if len(p["items"]) == n0:
+                out["left"] += len(hits)
+                break
+            out["removed"] += sorted(gone)
+    return out
+
+
+_LARGER = {"xs": "s", "s": "m", "m": "l", "l": "xl"}
+
+
+def fill_out(props_list: List[Dict[str, Any]], aspect: str = "16:9", captions: bool = True, target: Optional[float] = None) -> Dict[str, Any]:
+    """A board that "looks empty" after the director's one rewrite (its drawings and writing cover less of the picture than the bar) is filled by what is
+    already on it: one thing at a time, written texts first (a key term one size larger is the biggest gain), then drawings, each is made one size larger
+    and KEPT only if the renderer's own layout then shows more of the picture covered, nothing overlapping or off the board, no text written smaller than
+    before and no arrow or mark lost. Stops at the bar. Deterministic, no model, the narration and the ties untouched. -> {"larger": n, "coverage": [before, after]}."""
+    from .whiteboard import score
+
+    target = score.MIN_COVERAGE if target is None else target
+    try:
+        d = score.defects(props_list, aspect, captions)
+    except Exception:  # noqa: BLE001
+        return {"larger": 0, "coverage": [None, None]}
+    out = {"larger": 0, "coverage": [d["coverage"], d["coverage"]]}
+    if d["overlaps"] or d["off_board"]:
+        return out
+    things = [it for p in props_list for it in p.get("items") or [] if _solid(it) and not it.get("chart")]
+    things.sort(key=lambda it: (0 if it.get("write") and not it.get("near") else 1 if it.get("draw") and not it.get("near") else 2))
+    for _ in range(2):
+        for it in things:
+            if d["coverage"] >= target:
+                return out
+            had = it.get("size")
+            cur = had or ("l" if it.get("draw") and not it.get("near") else ("xs" if it.get("draw") else "m"))
+            if cur not in _LARGER:
+                continue
+            it["size"] = _LARGER[cur]
+            try:
+                t = score.defects(props_list, aspect, captions)
+            except Exception:  # noqa: BLE001
+                t = None
+            if t and not t["overlaps"] and not t["off_board"] and not t["collisions"] and t["lost"] <= d["lost"] and t["coverage"] > d["coverage"] + 0.002 \
+                    and all(v >= d["text_sizes"].get(k, 0.0) - 0.5 for k, v in t["text_sizes"].items()):
+                d = t
+                out["larger"] += 1
+                out["coverage"][1] = t["coverage"]
+            elif had is None:
+                it.pop("size", None)
+            else:
+                it["size"] = had
+    return out
+
+
 def _renamed(items: List[Dict[str, Any]], j: int, ties: bool = True) -> List[Dict[str, Any]]:
     """The items of the j-th beat of a shared board under names that are unique on the board (every scene of the board uses the same names, so an item looks
     the same in all of them)."""
@@ -758,7 +844,8 @@ def fill_rests(props: Dict[str, Any], cues: Optional[List[float]], end: Optional
     """Pacing with the REAL word times (they exist only once the voice is made: the timeline's `link` calls this; the self-check calls it with estimated
     times). Wherever the pen would rest for more than REST_S between two tied things, at the start of a beat that continues a board, or between the last
     thing and the last word (`end`), an emphasis mark is added at a fixed time of the rest: a circle, underline, box or tick on something already on the
-    board (this beat's or an earlier beat's of the same board) that has no mark yet. At most MAX_REST_MARKS a scene. Deterministic. -> marks added."""
+    board (this beat's or an earlier beat's of the same board) that has no mark yet: a thing has at most one emphasis mark, so when all are marked the pen
+    rests. At most MAX_REST_MARKS a scene. Deterministic. -> marks added."""
     items: List[Dict[str, Any]] = list(props.get("items") or [])
     before = list(props.get("before") or [])
     if not cues or any("+r" in str(it.get("id", "")) for it in items):
@@ -785,7 +872,7 @@ def fill_rests(props: Dict[str, Any], cues: Optional[List[float]], end: Optional
             if len(added) >= MAX_REST_MARKS:
                 break
             drawn = [it for it in before + items[:at_i] if _solid(it)]
-            pool = [it for it in drawn if it["id"] not in marked] or [it for it in drawn if (it["id"], "tick") not in marked]
+            pool = [it for it in drawn if it["id"] not in marked]
             if not pool:
                 break
             target = pool[-1]
@@ -955,9 +1042,29 @@ def review(plan: Dict[str, Any], policy: Optional[Policy], ask: Optional[Callabl
                 print("WHITEBOARD_SCORE " + json.dumps({"pass": "safe", **score.summary(scores), **{k: safe[k] for k in ("split", "moved", "smaller", "dropped", "left")}}, ensure_ascii=False))
                 notes.append(f"whiteboard self-check: board(s) {', '.join(map(str, safe['boards']))} still had things overlapping or off the board: {safe['split']} beat(s) given a board of "
                              f"their own, {safe['moved']} thing(s) moved to a free zone, {safe['smaller']} made smaller, {safe['dropped']} taken off")
+        # ... nor one on which a mark or an arrow touches something (the layout takes care of that; this is the plan's own check of it)
+        if any(s.get("collisions") or s.get("crossed") for s in scores):
+            clean = make_clean(plan, policy.aspect)
+            scores = score.score_plan(plan, policy.aspect)
+            info["made_clean"] = clean
+            print("WHITEBOARD_SCORE " + json.dumps({"pass": "clean", **score.summary(scores), "removed": clean["removed"], "left": clean["left"]}, ensure_ascii=False))
+            notes.append(f"whiteboard self-check: {len(clean['removed'])} mark(s) or arrow(s) that touched something taken off")
+        # A board that still "looks empty" is filled by what is on it (larger writing and drawings, while the layout stays clean): no second model call
+        groups = score.boards_of(beats)
+        grown = []
+        for s, g in zip(scores, groups):
+            if any("looks empty" in c for c in s["complaints"]):
+                r = fill_out([beats[i]["scene"]["props"] for i in g], policy.aspect, bool(plan.get("captions", True)))
+                if r["larger"]:
+                    grown.append({"board": s["board"], **r})
+        if grown:
+            scores = score.score_plan(plan, policy.aspect)
+            info["filled_out"] = grown
+            print("WHITEBOARD_SCORE " + json.dumps({"pass": "fill", **score.summary(scores), "boards": grown}, ensure_ascii=False))
+            notes.append("whiteboard self-check: " + "; ".join(f"board {x['board']} looked empty, {x['larger']} thing(s) made larger ({x['coverage'][0] * 100:.0f} % -> {x['coverage'][1] * 100:.0f} % covered)" for x in grown))
         final = score.summary(scores)
         plan.setdefault("whiteboard", policy.summary())["score"] = {**final, **{k: v for k, v in info.items() if k != "first"}, "first": first,
-                                                                    "boards_detail": [{k: v for k, v in s.items() if k not in ("overlaps", "crossed", "off_board", "late")} for s in scores]}
+                                                                    "boards_detail": [{k: v for k, v in s.items() if k not in ("overlaps", "crossed", "off_board", "late", "collisions", "blocked")} for s in scores]}
         if final["failed"]:
             notes.append(f"whiteboard self-check: {final['failed']} of {final['boards']} board(s) still below the bar: " + "; ".join(c for s in scores for c in s["complaints"])[:300])
     except Exception as e:  # noqa: BLE001

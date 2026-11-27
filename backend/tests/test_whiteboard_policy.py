@@ -226,12 +226,14 @@ def test_compose_gives_every_thing_its_own_zone_on_the_board():
 def test_fill_rests_uses_the_real_word_times():
     before = [{"id": "0:t", "write": "Title", "zone": "top"}, {"id": "0:s", "draw": "sun", "zone": "left"}]
     props = {"before": list(before), "items": [{"id": "1:n", "write": "350", "zone": "right", "say": "350"}, {"id": "1:m", "mark": "underline", "on": "1:n", "say": "cases"}]}
-    assert wp.fill_rests(props, [3.2, 7.5], end=10.0) == 3                     # the wait before the number, the gap before the mark, the breath after the last word
-    ids = [it["id"] for it in props["items"]]
-    assert ids[0].startswith("+r") and ids[1] == "1:n" and ids[2].startswith("+r") and ids[3] == "1:m" and ids[4].startswith("+r")
-    lead, mid, tail = props["items"][0], props["items"][2], props["items"][4]
+    assert wp.fill_rests(props, [3.2, 7.5], end=10.0) == 2                     # the wait before the number, the gap before the mark; in the breath after the last word
+    ids = [it["id"] for it in props["items"]]                                  # everything on the board has its ONE mark already: the pen rests
+    assert ids[0].startswith("+r") and ids[1] == "1:n" and ids[2].startswith("+r") and ids[3] == "1:m" and len(ids) == 4
+    lead, mid = props["items"][0], props["items"][2]
     assert lead["on"] == "0:s" and 0.4 <= lead["at"] < 2.0 and "say" not in lead    # something an earlier beat drew, at a fixed time inside the wait
-    assert 3.5 < mid["at"] < 7.0 and 7.8 < tail["at"] < 10.0 and len({lead["on"], mid["on"], tail["on"]}) == 3
+    assert 3.5 < mid["at"] < 7.0 and mid["on"] == "0:t"
+    on = [it["on"] for it in props["items"] if it.get("mark")]
+    assert len(on) == len(set(on))                                             # never two marks on one thing
     assert ELEMENTS["whiteboard"].anchors(props) == ["350", "cases"]              # the scene's cue list is untouched
     assert wp.fill_rests(props, [3.2, 7.5], end=10.0) == 0                      # once
     calm = {"items": [{"id": "a", "draw": "sun", "zone": "left", "say": "sun"}, {"id": "b", "draw": "piggy_bank", "zone": "right", "say": "pig"}]}
@@ -252,12 +254,16 @@ def test_link_fills_rests_and_knows_the_breath_after_the_last_word():
     assert [s["props"] for s in again] == [s["props"] for s in scenes]            # an edit rebuilds the timeline: linking twice changes nothing
 
 
-def test_keep_busy_fills_five_word_gaps_and_marks_a_thing_twice_at_most():
+def test_keep_busy_fills_five_word_gaps_and_marks_a_thing_once():
     p = _board([{"id": "t", "write": "Sleep", "zone": "top", "say": "sleep"}])
     narration = "Sleep is when the brain files away what it learned during the whole long day and clears out waste so you think clearly."
     n = wp.keep_busy(p, narration)
     marks = [it for it in p["items"] if it.get("mark")]
-    assert n == len(marks) == 2 and len({m["mark"] for m in marks}) == 2 and all(m["on"] == "t" for m in marks)     # one thing only: two different marks, never a third
+    assert n == len(marks) == 1 and marks[0]["on"] == "t"     # one thing only: ONE mark (an underline and a box piled up on one word in the first Portuguese video)
+    two = _board([{"id": "t", "write": "Sleep", "zone": "top", "say": "sleep"}, {"id": "b", "draw": "sun", "zone": "left", "say": "brain"}])
+    wp.keep_busy(two, narration)
+    on = [it["on"] for it in two["items"] if it.get("mark")]
+    assert len(on) == len(set(on)) == 2                        # two things: one mark each
     assert wp.FILL_EVERY_WORDS == 5
 
 

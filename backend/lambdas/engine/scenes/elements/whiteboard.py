@@ -219,7 +219,7 @@ def board_items(props: Dict[str, Any]) -> Tuple[List[Dict[str, Any]], List[str],
     return before + list(props["items"]) + after, [it["id"] for it in before], [it["id"] for it in after]
 
 
-def build(props: Dict[str, Any], dur: float, ctx: SceneCtx, w: int, h: int, *, load=None, layout_only: bool = False):
+def build(props: Dict[str, Any], dur: float, ctx: SceneCtx, w: int, h: int, *, load=None, layout_only: bool = False, tidy: bool = True):
     from ...whiteboard import library, spec
 
     geo = geometry(ctx, w, h)
@@ -235,7 +235,7 @@ def build(props: Dict[str, Any], dur: float, ctx: SceneCtx, w: int, h: int, *, l
     items, done, hidden = board_items(props)
     board, cam, report = spec.compile_board(items, anchors, dur, geo["units"], geo["scale"], load or library.load, hand=props.get("hand", "neat"), tool=props.get("tool", "marker"),
                                             pad=geo["pad"], frame_aspect=geo["box"][2] / geo["box"][3], tail=_tail(props, dur), done=done, hidden=hidden,
-                                            t_min=PAN_S + 0.1 if props.get("prev") else (0.05 if props.get("before") else 0.3), layout_only=layout_only)
+                                            t_min=PAN_S + 0.1 if props.get("prev") else (0.05 if props.get("before") else 0.3), layout_only=layout_only, tidy=tidy)
     return board, cam, geo, report
 
 
