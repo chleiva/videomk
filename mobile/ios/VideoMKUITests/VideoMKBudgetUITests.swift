@@ -31,12 +31,29 @@ final class VideoMKBudgetUITests: XCTestCase {
         return words
     }
 
-    func testCreateSurfaceStaysUnderFourteenWords() {
-        let app = launch(["VMK_DEBUG_CREATE": "empty"])
+    /// The Create surface after the redesign (docs/design_bar/CREATE_SCREEN_REDESIGN_BRIEF.md): a returning account sees the sentence, three pills and the tool row,
+    /// nothing else: no examples, no helper line, no caption.
+    func testCreateSurfaceStaysUnderTenWords() {
+        let app = launch(["VMK_DEBUG_CREATE": "empty", "VMK_DEBUG_FAKE_VIDEOS": "bar", "VMK_DEBUG_BALANCE": "12"])
         XCTAssertTrue(app.textFields["composerField"].waitForExistence(timeout: 20))
+        sleep(1)
         let words = visibleWords(app, excluding: ["9:41"])
-        // the prompt placeholder (3), the three pills (Video, 2 min, Auto = 4 words), the button (Create, 2 = 2) and one caption (4): 13 at most
-        XCTAssertLessThanOrEqual(words, 16, "Create's surface has \(words) visible words, over its budget")
+        let seen = app.staticTexts.allElementsBoundByIndex.filter { $0.exists && $0.isHittable }.map { $0.label }
+        // the three pills (Video, 2 min, Auto = 4 words), "Options", "Create": 6; the prompt placeholder (3) is the field's own
+        XCTAssertLessThanOrEqual(words, 10, "Create's surface has \(words) visible words, over its budget: \(seen)")
+        XCTAssertTrue(app.staticTexts["Describe your video"].exists == false, "the helper line is gone")
+    }
+
+    /// The first video of an account: the same surface plus two or three examples and ONE caption that teaches the price ("2 credits. You have 11.").
+    func testFirstVideoCreateSurfaceStaysUnderTwentyTwoWords() {
+        let app = launch(["VMK_DEBUG_CREATE": "empty", "VMK_DEBUG_BALANCE": "11"])
+        XCTAssertTrue(app.textFields["composerField"].waitForExistence(timeout: 20))
+        sleep(1)
+        let chips = app.buttons.matching(identifier: "createExample").allElementsBoundByIndex.map { $0.label }
+        XCTAssertTrue((2...3).contains(chips.count), "two or three examples: \(chips)")
+        let words = visibleWords(app, excluding: ["9:41"])
+        let seen = app.staticTexts.allElementsBoundByIndex.filter { $0.exists && $0.isHittable }.map { $0.label }
+        XCTAssertLessThanOrEqual(words, 22, "the first-video surface has \(words) visible words: \(seen)")
     }
 
     func testVideoScreenStaysUnderSixWords() throws {

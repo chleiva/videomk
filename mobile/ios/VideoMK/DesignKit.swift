@@ -48,16 +48,19 @@ struct PrimaryButtonStyle: ButtonStyle {
     var fullWidth = true
     var compact = false         // beside other controls (Share next to the quiet icons): less padding, the same height
     var looksDisabled = false   // cannot act yet but still takes the tap (Create shakes its caption): drawn as disabled
+    var height: CGFloat?        // Create on the tool row: 48 (52 when it has its own row); the default is `primaryHeight`
+    var minWidth: CGFloat?
+    var calm = false            // a small shadow instead of the full glow (the compact Create pill)
     @Environment(\.isEnabled) private var isEnabled
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     func makeBody(configuration: Configuration) -> some View {
         let off = !isEnabled || looksDisabled
         return configuration.label
             .font(.role(.headline)).foregroundStyle(off ? Theme.textSecondary : Theme.onPrimary).multilineTextAlignment(.center)
-            .padding(.horizontal, compact ? Theme.Space.l : Theme.Space.xxl).padding(.vertical, Theme.Space.s)
-            .frame(maxWidth: fullWidth ? .infinity : nil, minHeight: Theme.primaryHeight)
+            .padding(.horizontal, compact ? Theme.Space.l : (minWidth != nil ? Theme.Space.xl : Theme.Space.xxl)).padding(.vertical, minWidth != nil ? Theme.Space.xs : Theme.Space.s)
+            .frame(minWidth: minWidth).frame(maxWidth: fullWidth ? .infinity : nil, minHeight: height ?? Theme.primaryHeight)
             .background(off ? AnyShapeStyle(Theme.surface3) : AnyShapeStyle(Theme.gradient), in: Capsule())
-            .shadow(color: Theme.gradientStart.opacity(off ? 0 : 0.32), radius: 14, y: 8)
+            .shadow(color: Theme.gradientStart.opacity(off ? 0 : (calm ? 0.24 : 0.32)), radius: calm ? 6 : 14, y: calm ? 3 : 8)
             .opacity(configuration.isPressed ? 0.88 : 1)
             .scaleEffect(configuration.isPressed && !reduceMotion ? 0.98 : 1)
             .animation(Theme.Motion.press, value: configuration.isPressed)
@@ -215,20 +218,35 @@ extension TopBar where Trailing == EmptyView {
 
 // MARK: pills and chips
 
+/// The small glyph that leads a pill (the shape of the format, a clock for the length, a sparkle for the look): 16 pt, quiet, never spoken.
+struct PillGlyph: View {
+    var symbol: String?
+    var aspect: String?
+    var body: some View {
+        Group {
+            if let aspect { AspectGlyph(ratio: aspect, line: 1.5, radius: 2.5).frame(width: 14, height: 14) }
+            else if let symbol { Image(systemName: symbol).font(.role(.footnote, weight: .semibold)) }
+        }
+        .foregroundStyle(Theme.textSecondary).frame(width: 16, height: 16).accessibilityHidden(true)
+    }
+}
+
 /// A choice that is already made: its value and a chevron, nothing else (no key label). Opens a native menu.
 struct Pill<MenuContent: View>: View {
     let value: String
     let spoken: String
     var identifier: String = ""
+    var glyph: PillGlyph?
     @ViewBuilder var menu: MenuContent
 
     var body: some View {
         Menu { menu } label: {
             HStack(spacing: 6) {
+                if let glyph { glyph }
                 Text(value).font(.role(.subhead, weight: .semibold)).foregroundStyle(Theme.text).lineLimit(1).truncationMode(.tail)
                 Image(systemName: "chevron.down").font(.role(.caption, weight: .bold)).foregroundStyle(Theme.textTertiary).accessibilityHidden(true)
             }
-            .padding(.horizontal, 14).frame(minHeight: 38)
+            .padding(.leading, glyph == nil ? 14 : 12).padding(.trailing, glyph == nil ? 14 : 12).frame(minHeight: 38)
             .background(Theme.surfaceRaised, in: Capsule())
             .frame(minHeight: Theme.minTouch).contentShape(Capsule())
         }
@@ -245,17 +263,19 @@ struct PillButton<Accessory: View>: View {
     let spoken: String
     var spokenValue: String?
     var identifier: String = ""
+    var glyph: PillGlyph?
     let action: () -> Void
     @ViewBuilder var accessory: Accessory
 
     var body: some View {
         Button(action: action) {
             HStack(spacing: 6) {
+                if let glyph { glyph }
                 if !value.isEmpty { Text(value).font(.role(.subhead, weight: .semibold)).foregroundStyle(Theme.text).lineLimit(1) }
                 accessory
                 Image(systemName: "chevron.down").font(.role(.caption, weight: .bold)).foregroundStyle(Theme.textTertiary).accessibilityHidden(true)
             }
-            .padding(.horizontal, 14).frame(minHeight: 38)
+            .padding(.leading, glyph == nil ? 14 : 12).padding(.trailing, glyph == nil ? 14 : 12).frame(minHeight: 38)
             .background(Theme.surfaceRaised, in: Capsule())
             .frame(minHeight: Theme.minTouch).contentShape(Capsule())
         }
@@ -267,8 +287,8 @@ struct PillButton<Accessory: View>: View {
 }
 
 extension PillButton where Accessory == EmptyView {
-    init(value: String, spoken: String, spokenValue: String? = nil, identifier: String = "", action: @escaping () -> Void) {
-        self.init(value: value, spoken: spoken, spokenValue: spokenValue, identifier: identifier, action: action) { EmptyView() }
+    init(value: String, spoken: String, spokenValue: String? = nil, identifier: String = "", glyph: PillGlyph? = nil, action: @escaping () -> Void) {
+        self.init(value: value, spoken: spoken, spokenValue: spokenValue, identifier: identifier, glyph: glyph, action: action) { EmptyView() }
     }
 }
 

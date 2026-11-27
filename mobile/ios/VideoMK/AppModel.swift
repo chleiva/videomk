@@ -119,6 +119,10 @@ final class AppModel {
         return FeedbackComposer(context: context, api: feedbackAPI, version: version)
     }
 
+    /// The account has made a video (or the list is not known yet, which counts the same: nothing first-time is shown to someone who may be a regular).
+    /// Create's example chips and its "2 credits. You have 11." caption are for the first video only.
+    var hasFinishedVideo: Bool { loadState != .loaded || videos.contains { $0.status == .complete } }
+
     var hasRunningVideos: Bool { videos.contains { $0.status.isRunning } || pending.contains { $0.state == .sending } }
     /// Videos that are being deleted (the Undo toast is still up): hidden everywhere, not yet removed on the server.
     var entries: [LibraryEntry] { LibraryMerge.entries(pending: pending, server: videos.filter { !deleting.contains($0.id) }) }

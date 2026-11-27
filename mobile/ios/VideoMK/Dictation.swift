@@ -41,6 +41,9 @@ final class Dictation {
     func start(currentText: String) async {
         guard !isListening else { return }
         discarding = false
+        #if DEBUG
+        if ProcessInfo.processInfo.environment["VMK_DEBUG_LISTENING"] == "1" { state = .listening; return }      // screenshots and UI tests: the recording state without a microphone
+        #endif
         state = .starting
 
         // 1. What does the phone allow? Ask for what is still undecided; a denial is not an error, it switches to the fallback.

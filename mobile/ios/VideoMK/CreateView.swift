@@ -2,9 +2,11 @@ import PhotosUI
 import SwiftUI
 import VideoMKCore
 
-/// Create is one sentence (docs/DESIGN_BAR_2026.md, signatures 1 and 2): a caret and "A video about…", three examples that type themselves in,
-/// two icons (photos, mic), three choices already made (platform, length, look) and one gradient button with its price. After the tap the form
-/// dims and locks, the button becomes the live capsule ("Checking your request", then "Starting your video") and Cancel is the only control.
+/// Create is one sentence (docs/DESIGN_BAR_2026.md, signatures 1 and 2): a caret and "A video about…", examples that type themselves in (until the first
+/// video), then ONE dock: a row of pills (platform, length, look, and Characters only for a look with a cast: never a fifth control, the rest is in
+/// Options) and ONE tool row: photos, mic, Options on the left, the compact Create pill with its price at the trailing end. After the tap the form
+/// dims and locks, the pill springs into the live capsule ("Checking your request", then "Starting your video") and Cancel is the only control.
+/// (docs/design_bar/CREATE_SCREEN_REDESIGN_BRIEF.md)
 struct CreateView: View {
     @Environment(AppModel.self) private var model
     @Environment(\.dismiss) private var dismiss
@@ -18,6 +20,7 @@ struct CreateView: View {
     @State private var phoneItems: [PhotosPickerItem] = []
     @State private var pendingSource: PhotoSource?     // what to open once a presentation was replaced (after asking)
     @State private var keyboardUp = false
+    @State private var explaining = false              // a tap on the inactive Create: the line says what is missing, for a few seconds
     enum PhotoSource { case phone, library }
     @State private var flash = false
     @State private var shake: CGFloat = 0
@@ -38,7 +41,8 @@ struct CreateView: View {
     private var status: ComposerStatus { create.status(balance: balance, dictating: dictation.isListening) }
     private var unaffordable: Bool { status.kind == .notAffordable || status.kind == .noCredits }
     private var form: CreateForm { create.form }
-    private var showsExamples: Bool { !locked && form.text.isEmpty && typingTarget == nil && totalPhotos == 0 && create.photos.loading == 0 && !form.hasDeck && !create.deck.isActive }
+    /// Chips are the first-run accelerator: only an empty prompt, and only until the account has made its first video.
+    private var showsExamples: Bool { !locked && !model.hasFinishedVideo && form.text.isEmpty && typingTarget == nil && totalPhotos == 0 && create.photos.loading == 0 && !form.hasDeck && !create.deck.isActive }
 
     var body: some View {
         NavigationStack {
@@ -151,11 +155,16 @@ struct CreateView: View {
     /// Three examples. A tap types the sentence into the prompt (Reduce Motion and VoiceOver: it is simply there).
     private var examples: some View {
         WrapLayout(spacing: Theme.Space.s) {
-            ForEach(ExamplePrompt.all) { e in
+            ForEach(ExamplePrompt.all.prefix(shortScreen ? 2 : 3)) { e in
                 SparkleChip(title: e.label, identifier: "createExample", hint: tr("videos.fills_in_the_description_it")) { Haptics.play(.selection); typeIn(e.text) }
             }
         }
         .padding(.top, Theme.Space.xs)
+    }
+
+    /// A short screen (iPhone SE, any large text size) shows two examples, not three.
+    private var shortScreen: Bool {
+        typeSize.isAccessibilitySize || ((UIApplication.shared.connectedScenes.first as? UIWindowScene)?.screen.bounds.height ?? 800) < 700
     }
 
     private func typeIn(_ text: String) {
@@ -326,7 +335,7 @@ struct CreateView: View {
 
     private var forPill: some View {
         let current = form.chip(create.caps)
-        return Pill(value: forValue, spoken: tr("create.what_is_it_for"), identifier: "forPill") {
+        return Pill(value: forValue, spoken: tr("create.what_is_it_for"), identifier: "forPill", glyph: PillGlyph(symbol: form.isCustom(create.caps) ? "rectangle" : nil, aspect: form.isCustom(create.caps) ? nil : form.aspect)) {
             ForEach(PlatformChips.make(create.caps)) { chip in
                 let selected = current?.id == chip.id && !form.isCustom(create.caps)
                 Button {
@@ -344,7 +353,7 @@ struct CreateView: View {
 
     private var lengthPill: some View {
         let max = form.chip(create.caps)?.maxMinutes
-        return Pill(value: LengthLabel.chip(form.minutes), spoken: tr("create.length"), identifier: "lengthPill") {
+        return Pill(value: LengthLabel.chip(form.minutes), spoken: tr("create.length"), identifier: "lengthPill", glyph: PillGlyph(symbol: "clock")) {
             ForEach(create.caps.lengthPresets, id: \.self) { m in
                 let credits = ComposerPlan.credits(forMinutes: m, multiplier: form.creditsMultiplier)
                 let over = max.map { m > $0 + 1e-9 } ?? false
@@ -363,9 +372,9 @@ struct CreateView: View {
     /// With the server's look picker: the pill says the look only and opens the sheet of four tiles (the characters have their own pill). Without it (an older server): the menu it always was.
     @ViewBuilder private var lookPill: some View {
         if create.caps.looks != nil {
-            PillButton(value: lookValue, spoken: tr("create.look"), identifier: "lookPill") { focused = false; create.dismissLookNotice(); create.showLook = true }
+            PillButton(value: lookValue, spoken: tr("create.look"), identifier: "lookPill", glyph: PillGlyph(symbol: "sparkle")) { focused = false; create.dismissLookNotice(); create.showLook = true }
         } else {
-            Pill(value: lookValue, spoken: tr("create.look"), identifier: "lookPill") {
+            Pill(value: lookValue, spoken: tr("create.look"), identifier: "lookPill", glyph: PillGlyph(symbol: "sparkle")) {
                 Button { create.form.look = nil; Haptics.play(.selection) } label: { if form.look == nil { Label(tr("look.auto"), systemImage: "checkmark") } else { Text(tr("look.auto")) } }
                 ForEach(VideoLook.allCases) { l in
                     Button { create.form.look = l; Haptics.play(.selection) } label: { if form.look == l { Label(l.title, systemImage: "checkmark") } else { Text(l.title) } }
@@ -415,20 +424,16 @@ struct CreateView: View {
 
     // MARK: bottom bar
 
-    /// Editing: photos and mic, the options icon, the three pills, the ONE gradient button with its price. After the tap: the live capsule and Cancel.
+    /// Editing: ONE dock. A row of pills (what it is for, how long, which look; Characters only for a look with a cast), then ONE tool row: photos, mic and
+    /// Options on the left, the compact Create pill and its price at the trailing end. Nothing else is there unless it has something to say (a status line
+    /// above the pills; before the first video, one caption under the tool row). After the tap: the live capsule and Cancel.
     private func bottomBar(_ proxy: ScrollViewProxy) -> some View {
         let s = status
         return VStack(spacing: 0) {
             if locked { waiting.transition(.opacity) }
             else {
-                VStack(spacing: Theme.Space.m) {
-                    HStack(spacing: Theme.Space.s) {
-                        photoButton
-                        mic
-                        if dictation.isListening { Text(tr("create.listening_tap_to_stop")).font(.role(.footnote)).foregroundStyle(Theme.textSecondary).accessibilityIdentifier("listeningHint") }
-                        Spacer(minLength: Theme.Space.s)
-                        IconButton(symbol: "slider.horizontal.3", label: tr("create.options"), identifier: "moreOptions") { focused = false; create.showMore = true }
-                    }
+                VStack(spacing: Theme.Space.s) {
+                    statusLine(s)
                     if !(keyboardUp && typeSize.isAccessibilitySize) {      // largest text with the keyboard up: the room goes to the sentence
                         VStack(alignment: .leading, spacing: Theme.Space.s) {
                             if let line = create.lookNotice {      // the look was changed for the person (photos sent it back to Auto): said right above the pill it is about
@@ -438,41 +443,93 @@ struct CreateView: View {
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
                     }
-                    createButton(s, proxy).padding(.top, Theme.Space.xs)
-                    caption(s)
+                    toolRow(s, proxy)
+                    costCaption(s)
                 }
+                .accessibilityElement(children: .contain).accessibilityIdentifier("createDock")
                 .transition(.opacity)
             }
         }
-        .padding(.horizontal, Theme.gutter).padding(.top, Theme.Space.s).padding(.bottom, Theme.Space.s)
+        .padding(.horizontal, Theme.gutter).padding(.top, Theme.Space.s).padding(.bottom, Theme.Space.m)
         .dynamicTypeSize(...DynamicTypeSize.accessibility1)      // the bar that is always visible stays compact; the sentence above scrolls at full size
         .background { if !locked { Theme.background.ignoresSafeArea(edges: .bottom) } }
         .animation(reduceMotion ? Theme.Motion.fade : Theme.Motion.spring, value: capsule.phase)
+        .animation(reduceMotion ? nil : Theme.Motion.select, value: statusText(s))
     }
 
-    private func createButton(_ s: ComposerStatus, _ proxy: ScrollViewProxy) -> some View {
+    /// The tools (48 pt high) and Create. One row while it fits: photos, mic, Options on the left, Create at the trailing end (mic stays far from Create: a
+    /// mis-tap next to it would spend credits). At accessibility text sizes, or where the row does not fit, Create drops to its own full-width row.
+    @ViewBuilder private func toolRow(_ s: ComposerStatus, _ proxy: ScrollViewProxy) -> some View {
+        if typeSize.isAccessibilitySize { twoRows(s, proxy) }
+        else { ViewThatFits(in: .horizontal) { oneRow(s, proxy); twoRows(s, proxy) } }
+    }
+
+    private func oneRow(_ s: ComposerStatus, _ proxy: ScrollViewProxy) -> some View {
+        HStack(spacing: Theme.Space.xs) { tools; middle; createButton(s, proxy, full: false) }
+    }
+
+    private func twoRows(_ s: ComposerStatus, _ proxy: ScrollViewProxy) -> some View {
+        VStack(spacing: Theme.Space.s) {
+            HStack(spacing: Theme.Space.xs) { tools; middle }
+            createButton(s, proxy, full: true)
+        }
+    }
+
+    /// Photos, mic, Options. While listening the mic is a filled Stop and the other two are off; Options keeps only its icon to leave room for "Listening…".
+    private var tools: some View {
+        HStack(spacing: Theme.Space.xs) {
+            photoButton.disabled(dictation.isListening)
+            mic
+            optionsButton(labelled: !dictation.isListening).disabled(dictation.isListening)
+        }
+    }
+
+    /// The flexible middle of the tool row: empty, or "Listening…" centred between the tools and Create.
+    @ViewBuilder private var middle: some View {
+        Spacer(minLength: Theme.Space.xs)
+        if dictation.isListening {
+            Text(tr("composer.listening")).font(.role(.footnote)).foregroundStyle(Theme.textSecondary).lineLimit(1).accessibilityIdentifier("listeningHint").transition(.opacity)
+            Spacer(minLength: Theme.Space.xs)
+        }
+    }
+
+    /// The sliders icon with its word: quality, subtitles, language and the format tiles (the platform and the look are pills).
+    private func optionsButton(labelled: Bool) -> some View {
+        Button { focused = false; create.showMore = true } label: {
+            HStack(spacing: 2) {
+                IconButtonFace(symbol: "slider.horizontal.3")
+                if labelled { Text(tr("create.options")).font(.role(.subhead, weight: .medium)).foregroundStyle(Theme.text).lineLimit(1).padding(.trailing, Theme.Space.s) }
+            }
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(tr("create.options")).accessibilityIdentifier("moreOptions")
+    }
+
+    /// The ONE primary action: a compact pill, 48 pt high (52 on its own row), 112 pt wide at least, "Create", a bolt and the price as one unit.
+    /// Inactive (nothing to send yet): an opaque fill, the secondary label, no shadow; it still takes the tap and says what is missing.
+    private func createButton(_ s: ComposerStatus, _ proxy: ScrollViewProxy, full: Bool) -> some View {
         // Cannot afford this length but can afford a shorter one: the fix is written on the button ("Create · 1 min · 1") and one tap makes that video.
         let affordable = affordableFix(s)
         let credits = affordable?.credits ?? form.options.credits
-        // "Cannot do this yet" is visible: the opaque disabled look. The tap still lands, so the caption can say (and shake) what is missing.
-        // An empty prompt is not a problem state: the button rests in its gradient and the first tap puts the caret in the sentence.
-        let dimmed = !s.canSend && affordable == nil && !(s.kind == .price || s.kind == .ready)
+        let inactive = !s.canSend && affordable == nil
         return Button { if let affordable { create.form.setMinutes(affordable.minutes); Haptics.play(.selection) }; tapCreate(status, proxy) } label: {
-            PrimaryLabel(title: affordable.map { tr("create.create_length", LengthLabel.chip($0.minutes)) } ?? tr("create.create_video"), spread: true) {
+            HStack(spacing: 6) {
+                Text(affordable.map { tr("create.create_length", LengthLabel.chip($0.minutes)) } ?? tr("create.create_video")).lineLimit(1)
                 if showsPrice {          // not while a presentation is still being read: its price is not known yet
-                    HStack(spacing: 4) { Image(systemName: "bolt.fill").font(.role(.subhead)); Text("\(credits)").monospacedDigit() }.accessibilityHidden(true)
+                    HStack(spacing: 3) { Image(systemName: "bolt.fill").font(.role(.subhead)); Text("\(credits)").monospacedDigit() }.accessibilityHidden(true)
                 }
             }
-            .matchedGeometryEffect(id: "label", in: morph, properties: .position)
         }
-        .buttonStyle(PrimaryButtonStyle(looksDisabled: dimmed))
-        .matchedGeometryEffect(id: "cta", in: morph)
-        .accessibilityLabel(affordable.map { tr("create.create_length", LengthLabel.spoken($0.minutes)) } ?? (typeSize.isAccessibilitySize ? tr("create.create_a11y_credits", tr("credits.count", form.options.credits)) : tr("create.create_video")))
-        .accessibilityValue(s.canSend || affordable != nil ? tr("create.ready_costs", tr("credits.count", credits)) : tr("create.not_ready", s.message))
-        .accessibilityHint(s.canSend || affordable != nil ? tr("create.starts_video") : tr("create.tells_missing"))
-        .accessibilityAddTraits(dimmed ? .isButton : .isButton)
+        .buttonStyle(PrimaryButtonStyle(fullWidth: full, looksDisabled: inactive, height: full ? 52 : 48, minWidth: full ? nil : 112, calm: true))
+        .modifier(Morph(on: !reduceMotion, namespace: morph))
+        .accessibilityLabel(affordable.map { tr("create.create_length", LengthLabel.spoken($0.minutes)) } ?? tr("create.create_video"))
+        .accessibilityValue(!inactive ? tr("create.ready_costs", tr("credits.count", credits)) : tr("create.not_ready", explanation(s)))
+        .accessibilityHint(!inactive ? tr("create.starts_video") : tr("create.tells_missing"))
         .accessibilityIdentifier("sendButton")
     }
+
+    /// What is missing, in words (the empty prompt has no line of its own until it is asked for).
+    private func explanation(_ s: ComposerStatus) -> String { s.kind == .price ? tr("create.describe_to_continue") : s.message }
 
     /// The length the balance can pay for, when the chosen one costs too much and the sentence is otherwise ready to send.
     private func affordableFix(_ s: ComposerStatus) -> (minutes: Double, credits: Int)? {
@@ -496,7 +553,7 @@ struct CreateView: View {
             .padding(.horizontal, 22).padding(.vertical, Theme.Space.s).frame(maxWidth: .infinity, minHeight: 64)
             .background(Theme.surface, in: Capsule())
             .overlay(LiveRing(shape: Capsule(), lineWidth: 2))
-            .matchedGeometryEffect(id: "cta", in: morph)
+            .modifier(Morph(on: !reduceMotion, namespace: morph))
             .elevation(3)
             .accessibilityElement(children: .combine).accessibilityLabel(capsuleTitle).accessibilityValue(capsuleSub).accessibilityAddTraits(.updatesFrequently).accessibilityIdentifier("createCapsule")
             Button { stopChecking() } label: {       // the text colour on an opaque capsule: readable on the aura in both appearances
@@ -513,31 +570,59 @@ struct CreateView: View {
     private var capsuleTitle: String { capsule.phase == .starting ? tr("create.starting_your_video") : tr("create.checking_your_request") }
     private var capsuleSub: String { capsule.phase == .starting ? tr("create.starting_sub") : capsule.isSlow ? tr("create.checking_slow") : tr("create.checking_sub") }
 
-    /// One line under the button, only when it says something: what is left, what is missing, or what went wrong (with its one-tap fix).
-    @ViewBuilder private func caption(_ s: ComposerStatus) -> some View {
-        Group {
-            if let error = create.startError, s.canSend {
-                Label(error, systemImage: "exclamationmark.circle").font(.role(.footnote, weight: .medium)).foregroundStyle(Theme.text).multilineTextAlignment(.center).fixedSize(horizontal: false, vertical: true)
-                    .labelStyle(DangerMarkLabel()).accessibilityIdentifier("startError")
-            } else if s.kind == .ready || s.kind == .price || (s.kind == .tooShort && !form.hasContent) {
-                if let balance, balance - form.options.credits >= 0 {
-                    HStack(spacing: 3) { Image(systemName: "bolt.fill").font(.role(.caption)).accessibilityHidden(true); Text(tr("create.left_short", balance - form.options.credits)).font(.role(.caption)).monospacedDigit() }
-                        .foregroundStyle(Theme.textSecondary).accessibilityElement(children: .ignore).accessibilityLabel(tr("create.credits_left", balance - form.options.credits)).accessibilityIdentifier("costLine")
-                } else { Color.clear.frame(height: 0) }
-            } else {
-                HStack(spacing: Theme.Space.s) {
-                    Image(systemName: s.isProblem && s.kind != .tooShort ? "exclamationmark.circle" : "info.circle").font(.role(.footnote, weight: .semibold)).foregroundStyle(tint(s)).accessibilityHidden(true)
-                    Text(s.message).font(.role(.footnote, weight: .medium)).foregroundStyle(Theme.text).fixedSize(horizontal: false, vertical: true)
-                        .modifier(Shake(travel: reduceMotion ? 0 : 4, value: shake))
-                        .accessibilityIdentifier(unaffordable ? "notEnoughCredits" : s.kind == .photoHint ? "photoCapacityHint" : "costLine")
-                    Spacer(minLength: Theme.Space.xs)
-                    if let fix = s.fix, affordableFix(s) == nil { FixChip(title: fix.title) { applyFix(fix) }.accessibilityIdentifier("fixChip") }       // a shorter length that fits is on the button itself
+    /// What the status line says, or nil while the screen is quiet: only a real problem, or (for a few seconds) what a tap on the inactive Create asked for.
+    private func statusText(_ s: ComposerStatus) -> String? {
+        if let error = create.startError, s.canSend { return error }
+        switch s.kind {
+        case .ready, .sending: return nil
+        case .price: return explaining ? tr("create.describe_to_continue") : nil
+        case .dictating: return explaining ? s.announcement : nil
+        default: return s.message
+        }
+    }
+
+    /// One line above the pills, only when it says something: what is missing, what went wrong (with its one-tap fix). Never a standing helper.
+    @ViewBuilder private func statusLine(_ s: ComposerStatus) -> some View {
+        if let text = statusText(s) {
+            Group {
+                if let error = create.startError, s.canSend {
+                    Label(error, systemImage: "exclamationmark.circle").font(.role(.footnote, weight: .medium)).foregroundStyle(Theme.text).multilineTextAlignment(.leading).fixedSize(horizontal: false, vertical: true)
+                        .labelStyle(DangerMarkLabel()).accessibilityIdentifier("startError")
+                } else {
+                    HStack(spacing: Theme.Space.s) {
+                        Image(systemName: s.isProblem && s.kind != .tooShort ? "exclamationmark.circle" : "info.circle").font(.role(.footnote, weight: .semibold)).foregroundStyle(tint(s)).accessibilityHidden(true)
+                        Text(text).font(.role(.footnote, weight: .medium)).foregroundStyle(Theme.text).fixedSize(horizontal: false, vertical: true)
+                            .modifier(Shake(travel: reduceMotion ? 0 : 4, value: shake))
+                            .accessibilityIdentifier(unaffordable ? "notEnoughCredits" : s.kind == .photoHint ? "photoCapacityHint" : "costLine")
+                        Spacer(minLength: Theme.Space.xs)
+                        if let fix = s.fix, affordableFix(s) == nil { FixChip(title: fix.title) { applyFix(fix) }.accessibilityIdentifier("fixChip") }       // a shorter length that fits is on the button itself
+                    }
+                    .padding(.horizontal, flash ? 6 : 0).background(flash ? Theme.warningContainer : .clear, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
                 }
-                .padding(.horizontal, flash ? 6 : 0).background(flash ? Theme.warningContainer : .clear, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+            }
+            .frame(maxWidth: .infinity, alignment: .leading).frame(minHeight: 18)
+            .accessibilityElement(children: .contain).accessibilityIdentifier("statusLine")
+            .transition(.opacity)
+        }
+    }
+
+    /// Teaches the price once: before the first video, "2 credits. You have 11." under Create. Afterwards the balance lives in the header chip, and this
+    /// line only returns when it runs low (fewer credits would be left than this video costs).
+    @ViewBuilder private func costCaption(_ s: ComposerStatus) -> some View {
+        let calm = s.kind == .ready || s.kind == .price || (s.kind == .tooShort && !form.hasContent)
+        let cost = affordableFix(s)?.credits ?? form.options.credits
+        if calm, showsPrice, let balance, balance >= cost {
+            let first = !model.hasFinishedVideo
+            if first || balance - cost < cost {
+                HStack(spacing: 3) {
+                    Image(systemName: "bolt.fill").font(.role(.caption)).accessibilityHidden(true)
+                    Text(first ? tr("create.first_cost", tr("credits.count", cost), balance) : tr("create.credits_left", balance - cost)).font(.role(.caption)).monospacedDigit()
+                }
+                .foregroundStyle(Theme.textSecondary).frame(maxWidth: .infinity, alignment: .trailing)
+                .accessibilityElement(children: .ignore).accessibilityLabel(first ? tr("create.first_cost", tr("credits.count", cost), balance) : tr("create.credits_left", balance - cost)).accessibilityIdentifier("costCaption")
+                .transition(.opacity)
             }
         }
-        .frame(minHeight: 18)
-        .accessibilityElement(children: .contain).accessibilityIdentifier("statusLine")
     }
 
     private var showsPrice: Bool { create.deckComposer == .none || create.deckComposer == .ready }
@@ -557,13 +642,14 @@ struct CreateView: View {
         guard s.canSend else {
             Haptics.play(.warning)
             withAnimation(.linear(duration: 0.28)) { shake += 1 }
-            withAnimation(Theme.Motion.press) { flash = true }
+            withAnimation(Theme.Motion.press) { flash = true; explaining = true }
             Task { try? await Task.sleep(for: .milliseconds(450)); withAnimation(Theme.Motion.select) { flash = false } }
+            Task { try? await Task.sleep(for: .seconds(4)); withAnimation(Theme.Motion.select) { explaining = false } }
             UIAccessibility.post(notification: .announcement, argument: s.kind == .tooShort || s.kind == .price ? tr("create.describe_to_continue") : s.announcement)
             if s.kind == .tooShort || s.kind == .price { withAnimation { proxy.scrollTo("prompt", anchor: .top) }; focused = true }
             return
         }
-        dictation.cancel(); focused = false
+        dictation.cancel(); focused = false; explaining = false
         Haptics.play(.send)
         create.create(mediaCount: totalPhotos, submit: start)
         if capsule.canCancel { UIAccessibility.post(notification: .announcement, argument: tr("create.checking_your_request")) }
@@ -636,5 +722,14 @@ struct Aura: View {
 struct DangerMarkLabel: LabelStyle {
     func makeBody(configuration: Configuration) -> some View {
         HStack(alignment: .firstTextBaseline, spacing: 6) { configuration.icon.foregroundStyle(Theme.danger); configuration.title }
+    }
+}
+
+/// The Create pill and the live capsule are one shape that springs from one to the other. Reduce Motion: no travel, the two simply cross-fade.
+private struct Morph: ViewModifier {
+    let on: Bool
+    let namespace: Namespace.ID
+    func body(content: Content) -> some View {
+        if on { content.matchedGeometryEffect(id: "cta", in: namespace) } else { content }
     }
 }
