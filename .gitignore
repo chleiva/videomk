@@ -280,3 +280,6 @@ backend/layers/bin/
 *.mobileprovision
 AuthKey_*
 frontend/dist-app/
+
+# the home page sample videos (frontend/public/samples, about 9 MB in total) are source files, not build output
+!frontend/public/samples/*.mp4
