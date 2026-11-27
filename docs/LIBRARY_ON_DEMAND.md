@@ -628,6 +628,42 @@ Built and tested against local stores only. **Not run against QA or prod.** The 
 * No real refusal by either provider's moderation was provoked (it would mean sending a bad prompt on purpose); the clients are tested against stand-ins of the documented answers.
 * The kill switches are the existing ones: `master_enabled` and the per-type switches (`clips_admin.py config set master_enabled false`, live within a minute).
 
+### C7. Over-refusal by single words, and the regression set (2026-11-27, round 2)
+QA refused a **bee smoker** (tobacco), a **beekeeper** (a real person), a **lighthouse Fresnel lens** (a named place), a **christmas tree** (religion) and a **water gun** (weapons): one listed WORD decided, in the word lists (`common/media_policy.py`, `clip_brief.py`) and in the model rubric ("when unsure, refuse" with no examples of what is NOT touched).
+* **Whole-phrase allow lists** (`BENIGN`, `TECHNICAL`, `IN_CONTEXT` in `media_policy.py`; `cleared(text)` reads a cleared phrase as the plain noun "thing"): only the phrase itself is cleared, every other word of the wording is still read ("water gun fight between soldiers" is still refused for "fight" and "soldiers"; "christmas nativity scene" for "nativity"). Festive OBJECTS only (tree, lights, baubles, gifts, eggs); a nativity scene, a church, a cross, an angel, a prayer are still religion. Used by `text_reason`, `clip_brief.pre_filter` and `post_filter`, and by the drawing-name filter in `object_ondemand.missing` (the privacy filter only knows single words). Adding a phrase is one line; when in doubt, do not add it.
+* **The models are told what is NOT touched** (`ALLOWED`, in the text rubric; a shorter version in the vision rubric): an ordinary occupation or generic role as an anonymous figure is not a real person (`real_people` is only a NAMED, famous or recognisable individual or a real face); an object whose name holds a policy word but is not that thing; a festive object with no religious scene; a quiet volcano or a cloud; a term of science whose common name comes from a person or place. The names rubric answers `"specific"` for a NAMED place, person or work (the Eiffel Tower): never drawn, no generic stand-in made for it.
+* **Other fixes found on the way**: "baby crawling" is logged as the children policy, not `personal`; "shooting stars" is not "shooting"; the brief's `max_tokens` 400 cut one answer in six short (read as a refusal): 1200; a tag that is already a word of the brief is read in its phrase, the others alone.
+* **Regression set** `backend/tests/fixtures/media_policy_regression.json`: 135 clearly safe educational asks (objects, animals, science, jobs, tools, food, weather, sports, festive) and 92 unsafe asks covering all 17 categories in English and Spanish plus 8 in German and French. `test_media_policy_regression.py` (the free layers, no model): every safe ask passes, every word-list unsafe ask is refused and keeps its reason; 12 rows (German and French, "hypodermic needle") only the model refuses.
+* **Measured** (2026-11-27, the same 227 asks, the real names rubric on Bedrock, about USD 0.014 for both runs):
+
+| | Before (538c351) | After |
+|---|---|---|
+| Safe asks passed, free layers only (word lists + search filters) | 83 / 135 (61 %) | **135 / 135 (100 %)** |
+| Safe asks passed, whole names check (lists + model) | 81 / 135 (60 %) | **135 / 135** |
+| Unsafe word-list asks refused, free layers | 80 / 80 | 80 / 80 |
+| Unsafe asks refused, whole names check (92 incl. German, French) | 91 / 92 ("Eiffel Tower at sunset" passed as an ordinary tower) | **92 / 92** |
+Unsafe recall did not drop. The vision check (finished drawings) was NOT measured on new images: its rubric got the same "not touched" examples and is tested against stand-ins only.
+
+### C8. Drawings on demand: the offer names the key objects, with a description (2026-11-27, round 2)
+QA, a sundial video with the offer on: the director asked for a drawing named "stick" only, and the library's wall clock stood in for the dial; labels did not match drawings. Cause: the offer wording ("a KEY OBJECT not in the list: give its plain name") left the director to decide what is key, and a list drawing that is only SIMILAR looked good enough.
+* **Wording** (`whiteboard_policy._NEW_LINE`, only when the offer is on): decide first what the video is ABOUT; a list drawing may stand for an object only when it IS that object ("a clock is not a sundial, a house is not a windmill, a lighthouse is not an iron lattice tower, a cheese is not a honeycomb"; "would a viewer recognise the object itself?"); new names (at most 6, unchanged) in order of importance, the thing the video is about FIRST; never spent on small extras; every new name carries `describe`, 6 to 14 plain words of what it looks like; a named landmark is never drawn by name: its generic kind plus `describe`, the name WRITTEN beside it.
+* **The description reaches the generator**: `describe` on the item (kept by the element only for a drawing that is asked for), checked by the word lists and the plain-English test (`object_ondemand.descriptions`), sent as the optional `describe` of the tracer call and appended to the name in the sheet prompt (`object_maker.make`). An older tracer ignores the key; a refused description is dropped and the drawing is made from its name alone. The generator's own prompt moderation still reads it. **The tracer function must be redeployed to use descriptions** (not deployed by this work).
+* **Measured with the real director at plan stage** (offer on, 6 names, 16:9, 40 s, QA models):
+
+| Topic | Before (old wording) | After | Cost |
+|---|---|---|---|
+| Sundial | QA: asked for "stick" only, the wall clock stood in for the dial. Re-run with the old wording (USD 0.153): the dial was the library's `clock` three times, and "sundial" was named once but would have matched an hourglass | asks **sundial**, with "a flat round plate with numbers around the edge and a thin pointer standing up that throws a shadow"; the policy lets it pass | USD 0.149 |
+| Windmill | (not run before) | `windmill` is in the library: used; asks **millstone** with a description; no stand-ins | 0.194 |
+| Eiffel Tower history | used `lighthouse` as the tower | second wording: asks **iron lattice tower** with a description (the named tower itself is refused by policy: "specific"; first wording had asked for nothing) | 0.075 + 0.189 |
+| How a compass works | (not run before) | every key object is in the library (compass, magnet, compass rose): nothing asked, correct | 0.206 |
+* **Landmarks and maps** (real names rubric): "eiffel tower" is refused (`specific`), "world map" and "map of france" are refused (`policy:flags_maps`); the label stays written in a box. A generic "iron lattice tower" is accepted.
+* Not measured: what the generator draws from a description (the QA sheet costs about USD 0.04 and the budget went to the director runs); the match score that decides "stand-in or ask" is unchanged (`object_sure_score` 0.55).
+Tests: `test_library_on_demand.py` (description reaches the maker, a refused description is dropped, an older maker is called as before, the element keeps it only for asked drawings, the wording).
+
+### C9. Small things found in the same QA run (2026-11-27, round 2)
+* A drawing name refused by the free filters used to leave no trace: each is now a decision `filter:<why>` (`object_ondemand.missing(..., refused=)`, logged by `fill`, counted in the day's decisions).
+* `clips_admin.py report`: the clips' block now reads only clip rows (image and drawing latencies and reasons were mixed in); `spend_by_day_all_media` shows a test account's spend on images and drawings by day (it showed "none"); the account totals stay the three types together; and the library of drawings made on demand is counted (`by_media.object.library`: how many, how many uses, top reused) because **reuse of library drawings is counted now** (`object_ondemand.count_reuse`: `uses`, `videos`, `used_library`, the `Used` metric).
+
 ## Part D. The tracer function: sketch objects on Lambda (2026-11-27, tracker R153; built, tested, NOT deployed)
 
 **Why its own stack**: the maker needs scipy and vtracer; the engine layer is 148 MB and may not grow by about 100 MB (250 MB limit); the main stack `videomk-<stage>` is near 500 resources.
