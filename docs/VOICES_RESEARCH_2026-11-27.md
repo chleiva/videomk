@@ -1,5 +1,7 @@
 # Voice (TTS) research: is there something much better than Polly generative? (2026-11-27)
 
+> Update, same day: prices and the OpenAI status were read again and the cost question (share of a credit, OpenAI, self-hosting on EC2, recommendation) is answered in `docs/SPEECH_COST_2026-11-27.md`. Corrections to this document: all three OpenAI speech models shut down on 2027-01-06 (not 01-14 for `gpt-4o-mini-tts`); section 3.11 predates Ming-3.0-tts (MIT, Elo 1179); Gemini 3.8 Flash TTS is labelled Preview on the Cloud price page. The full list of Polly generative voices is `docs/POLLY_GENERATIVE_VOICES_2026-11-27.md`.
+
 Read-only desk research. No accounts, purchases or paid API calls. Prices are list prices read on 2026-11-27.
 
 Labels: **VERIFIED** = I read the provider's own page (or the independent leaderboard page itself) today. **SECONDARY** = blog, aggregator, press or a vendor-run benchmark. **UNVERIFIED** = not found in anything I read; do not rely on it.
