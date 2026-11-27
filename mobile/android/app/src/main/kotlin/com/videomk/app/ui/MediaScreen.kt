@@ -51,6 +51,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.ui.semantics.Role
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -184,15 +185,14 @@ fun MediaScreen(
                 if (vm.selecting) SelectionTopBar(vm)
                 else MediaHeader(vm, organize, menuOpen, { menuOpen = it }, onStorage = { storageOpen = true })
             },
-            bottomBar = { SelectionBar(vm, onMakeVideo) },
         ) { padding ->
-            Column(Modifier.fillMaxSize().padding(padding)) {
+            Column(Modifier.fillMaxSize().padding(top = padding.calculateTopPadding())) {
                 val s = vm.summary
                 // the one labelled primary action of this screen: Add photos (the empty state carries its own button); hidden while selecting
-                if (!vm.selecting && s?.readOnly != true && (vm.photos.isNotEmpty() || items.isNotEmpty())) AddPhotosButton(choose, Modifier.padding(horizontal = 16.dp, vertical = 4.dp))
-                if (s != null && StorageMeter.shouldShow(used?.first ?: s.usedBytes, used?.second ?: s.limitBytes)) StorageMeterRow(used?.first ?: s.usedBytes, used?.second ?: s.limitBytes, { storageOpen = true }, Modifier.padding(horizontal = 16.dp))
-                if (vm.summary?.readOnly == true) Text(stringResource(R.string.media_read_only), style = MaterialTheme.typography.bodySmall, color = Vmk.colors.warning, modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp).testTag("readOnlyNote"))
-                MediaSearchBar(vm, Modifier.padding(horizontal = 16.dp, vertical = 8.dp))
+                MediaSearchBar(vm, Modifier.padding(horizontal = Vmk.space.screen, vertical = 4.dp))
+                if (!vm.selecting && s?.readOnly != true && (vm.photos.isNotEmpty() || items.isNotEmpty())) AddPhotosButton(choose, Modifier.padding(horizontal = Vmk.space.screen, vertical = Vmk.space.s))
+                if (s != null && StorageMeter.shouldShow(used?.first ?: s.usedBytes, used?.second ?: s.limitBytes)) StorageMeterRow(used?.first ?: s.usedBytes, used?.second ?: s.limitBytes, { storageOpen = true }, Modifier.padding(horizontal = Vmk.space.screen))
+                if (vm.summary?.readOnly == true) Text(stringResource(R.string.media_read_only), style = MaterialTheme.typography.bodySmall, color = Vmk.colors.warning, modifier = Modifier.padding(horizontal = Vmk.space.screen, vertical = 4.dp).testTag("readOnlyNote"))
                 NoticeLine(vm)
                 val columns = rememberColumns()
                 val batchIds = remember(items) { items.mapNotNull { it.mediaId }.toSet() }
@@ -211,6 +211,7 @@ fun MediaScreen(
                 )
             }
         }
+        Box(Modifier.align(Alignment.BottomCenter)) { SelectionBar(vm, onMakeVideo) }
         if (barExpanded) Box(Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.18f)).clickable(onClickLabel = stringResource(R.string.media_close_upload_details)) { barExpanded = false })
         Column(Modifier.align(Alignment.BottomCenter).padding(bottom = 8.dp + LocalBarSpace.current), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             toast?.let { MediaToast(it, stringResource(R.string.media_got_it), { toast = null }) }
@@ -249,10 +250,10 @@ private fun MediaHeader(vm: MediaViewModel, organize: com.videomk.app.data.Organ
         }
     }
     val titleLine: @Composable (Modifier) -> Unit = { m ->
-        Text(stringResource(R.string.media_title), style = MaterialTheme.typography.headlineMedium, color = Vmk.colors.text, modifier = m.semantics { heading() })
+        Text(stringResource(R.string.media_title), style = MaterialTheme.typography.headlineLarge, color = Vmk.colors.text, modifier = m.semantics { heading() })
     }
-    if (bigText) Column(Modifier.fillMaxWidth().statusBarsPadding().padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 6.dp), horizontalAlignment = Alignment.End) { titleLine(Modifier.fillMaxWidth()); actions() }
-    else Row(Modifier.fillMaxWidth().statusBarsPadding().padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 6.dp), verticalAlignment = Alignment.CenterVertically) { titleLine(Modifier.weight(1f)); actions() }
+    if (bigText) Column(Modifier.fillMaxWidth().statusBarsPadding().padding(start = Vmk.space.screen, end = Vmk.space.screen, top = 8.dp, bottom = 6.dp), horizontalAlignment = Alignment.End) { titleLine(Modifier.fillMaxWidth()); actions() }
+    else Row(Modifier.fillMaxWidth().statusBarsPadding().padding(start = Vmk.space.screen, end = Vmk.space.screen, top = 8.dp, bottom = 6.dp), verticalAlignment = Alignment.CenterVertically) { titleLine(Modifier.weight(1f)); actions() }
 }
 
 /** While selecting: Close (X), "N selected" and Select all replace the title. Back closes it too (the system back gesture never leaves the screen with photos half-picked). */
@@ -278,13 +279,18 @@ fun SelectionTopBar(vm: MediaViewModel) {
     }
 }
 
-/** "Add photos": icon and words, a full-width pill. */
+/** "Add photos": the photo-plus glyph and the words on a tonal pill (the gradient belongs to the one primary action: New video, or Make a video while selecting). */
 @Composable
 private fun AddPhotosButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
-    PrimaryButton(stringResource(R.string.media_add_photos), onClick, modifier.testTag("addMedia"), content = {
-        Icon(Sym.AddPhotoAlternate, null, Modifier.size(22.dp)); Spacer(Modifier.width(8.dp))
-        Text(stringResource(R.string.media_add_photos), style = MaterialTheme.typography.titleMedium, color = Vmk.colors.onPrimary)
-    })
+    val label = stringResource(R.string.media_add_photos)
+    Row(
+        modifier.fillMaxWidth().heightIn(min = Vmk.primaryButton).clip(CircleShape).background(Vmk.colors.primaryContainer).clickable(role = Role.Button, onClick = onClick)
+            .padding(horizontal = Vmk.space.xxl, vertical = Vmk.space.m).testTag("addMedia"),
+        verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Vmk.space.s, Alignment.CenterHorizontally),
+    ) {
+        Icon(Sym.AddPhotoAlternate, null, Modifier.size(22.dp), tint = Vmk.colors.primary)
+        Text(label, style = VmkType.cta, color = Vmk.colors.primary)
+    }
 }
 
 /** Rate-limited, aggregated TalkBack announcements while uploading (docs/UI_DESIGN.md section m.5). */
@@ -331,11 +337,13 @@ fun CollectionScreen(vm: MediaViewModel, collectionId: String, onBack: () -> Uni
                 }
             }
         },
-        bottomBar = { SelectionBar(vm, onMakeVideo, inCollection = true) },
     ) { padding ->
-        Column(Modifier.fillMaxSize().padding(padding)) {
-            NoticeLine(vm)
-            MediaBody(vm, onAdd = null, onOpenCollection = {}, onMakeVideo = onMakeVideo, header = null)
+        Box(Modifier.fillMaxSize().padding(top = padding.calculateTopPadding())) {
+            Column(Modifier.fillMaxSize()) {
+                NoticeLine(vm)
+                MediaBody(vm, onAdd = null, onOpenCollection = {}, onMakeVideo = onMakeVideo, header = null)
+            }
+            Box(Modifier.align(Alignment.BottomCenter)) { SelectionBar(vm, onMakeVideo, inCollection = true) }
         }
     }
     if (rename && collection != null) NameDialog(stringResource(R.string.media_rename_collection), collection.name, stringResource(R.string.common_save), onDismiss = { rename = false }) { vm.renameCollection(collection.id, it); rename = false }
@@ -407,7 +415,7 @@ private fun StateMessage(title: String, text: String, button: String?, onClick: 
 private fun NoticeLine(vm: MediaViewModel) {
     val n = vm.notice ?: return
     LaunchedEffect(n) { kotlinx.coroutines.delay(4000); if (vm.notice == n) vm.notice = null }
-    Text(n, style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary, modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp).semantics { contentDescription = n }.testTag("mediaNotice"))
+    Text(n, style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary, modifier = Modifier.padding(horizontal = Vmk.space.screen, vertical = 4.dp).semantics { contentDescription = n }.testTag("mediaNotice"))
 }
 
 @Composable
@@ -417,14 +425,14 @@ private fun MediaNotes(hasPhotos: Boolean) {
     var privacySeen by remember { mutableStateOf(settings.mediaPrivacySeen) }
     var hintSeen by remember { mutableStateOf(settings.mediaSelectHintSeen) }
     if (!privacySeen) {
-        Column(Modifier.padding(horizontal = 16.dp).clip(RoundedCornerShape(14.dp)).background(Vmk.colors.surfaceRaised).padding(14.dp).testTag("privacyNote")) {
+        Column(Modifier.padding(horizontal = Vmk.space.screen).clip(RoundedCornerShape(14.dp)).background(Vmk.colors.surfaceRaised).padding(14.dp).testTag("privacyNote")) {
             Text(stringResource(R.string.media_private_title), style = MaterialTheme.typography.titleSmall, color = Vmk.colors.text)
             Text(PRIVACY_COPY, style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.textSecondary, modifier = Modifier.padding(top = 4.dp))
             TextButton(onClick = { settings.mediaPrivacySeen = true; privacySeen = true }, modifier = Modifier.heightIn(min = 48.dp).testTag("privacyGotIt")) { Text(stringResource(R.string.media_got_it)) }
         }
     } else if (!hintSeen && hasPhotos) {
         // the one-time tip: how a person gets from photos to a video
-        Row(Modifier.padding(horizontal = 16.dp).fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(Vmk.colors.surfaceRaised).padding(start = 14.dp, top = 4.dp, bottom = 4.dp, end = 4.dp).testTag("selectHint"), verticalAlignment = Alignment.CenterVertically) {
+        Row(Modifier.padding(horizontal = Vmk.space.screen).fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(Vmk.colors.surfaceRaised).padding(start = 14.dp, top = 4.dp, bottom = 4.dp, end = 4.dp).testTag("selectHint"), verticalAlignment = Alignment.CenterVertically) {
             Icon(Sym.Movie, null, tint = Vmk.colors.primary, modifier = Modifier.size(20.dp))
             Text(stringResource(R.string.media_select_hint), style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.text, modifier = Modifier.weight(1f).padding(horizontal = 10.dp))
             TextButton(onClick = { settings.mediaSelectHintSeen = true; hintSeen = true }, modifier = Modifier.heightIn(min = 48.dp).testTag("selectHintGotIt")) { Text(stringResource(R.string.media_got_it)) }
@@ -447,11 +455,11 @@ private fun CollectionsStrip(vm: MediaViewModel, pref: com.videomk.app.core.Orga
             Icon(Sym.CreateNewFolder, null, Modifier.size(20.dp)); Spacer(Modifier.width(8.dp)); Text(stringResource(R.string.media_new_collection_text), fontWeight = FontWeight.SemiBold)
         }
     } else {
-    Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp), verticalAlignment = Alignment.CenterVertically) {
+    Row(Modifier.fillMaxWidth().padding(horizontal = Vmk.space.screen), verticalAlignment = Alignment.CenterVertically) {
         Text(stringResource(R.string.media_collections), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = Vmk.colors.text, modifier = Modifier.weight(1f).semantics { heading() })
         TextButton(onClick = onSeeAll, modifier = Modifier.heightIn(min = 44.dp).testTag("seeAllCollections")) { Text(stringResource(R.string.media_see_all), fontWeight = FontWeight.SemiBold) }
     }
-    LazyRow(contentPadding = PaddingValues(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.testTag("collectionsStrip")) {
+    LazyRow(contentPadding = PaddingValues(horizontal = Vmk.space.screen), horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.testTag("collectionsStrip")) {
         items(vm.collections, key = { it.id }) { c ->
             Box {
                 Column(
@@ -498,7 +506,7 @@ fun CollectionMenu(open: Boolean, onDismiss: () -> Unit, onRename: () -> Unit, o
     DropdownMenu(open, onDismiss) {
         DropdownMenuItem(text = { Text(stringResource(R.string.media_rename)) }, onClick = onRename, modifier = Modifier.testTag("collectionRename"))
         DropdownMenuItem(text = { Text(stringResource(R.string.media_delete_collection), color = Vmk.colors.danger) }, onClick = onDelete, modifier = Modifier.testTag("collectionDelete"))
-        Text(stringResource(R.string.media_collection_menu_note), style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary, modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp).widthIn(max = 240.dp))
+        Text(stringResource(R.string.media_collection_menu_note), style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary, modifier = Modifier.padding(horizontal = Vmk.space.screen, vertical = 8.dp).widthIn(max = 240.dp))
     }
 }
 
@@ -536,18 +544,18 @@ fun SelectionBar(vm: MediaViewModel, onMakeVideo: (List<MediaPhoto>) -> Unit, in
     val used = minOf(n, max)   // a video takes at most [max] photos: the button says how many it will really use
     val makeLabel = if (n > 0) stringResource(R.string.media_make_video_count, used) else stringResource(R.string.media_make_video_none)
     val makeDesc = if (n > 0) stringResource(R.string.media_make_video_desc, used) else stringResource(R.string.media_make_video_none)
-    Surface(color = Vmk.colors.surface, shadowElevation = 8.dp) {
-      Column(Modifier.fillMaxWidth().navigationBarsPadding()) {
-        if (n > max) Text(stringResource(R.string.media_make_video_limit, max), style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary, modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 8.dp).testTag("makeVideoLimit"))
-        Row(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp).testTag("selectionBar"), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            GlassIconButton(Sym.CreateNewFolder, stringResource(R.string.media_add_to_collection), { pick = true }, Modifier.testTag("addToCollection"), enabled = n > 0)
-            GlassIconButton(Sym.Delete, stringResource(R.string.media_delete_selected), { confirm = true }, Modifier.testTag("deleteSelected"), enabled = n > 0)
+    // floats over the photos, which fade out beneath it: one labelled primary (Make a video · N) and two quiet icons
+    val bg = Vmk.colors.background
+    Column(Modifier.fillMaxWidth().background(androidx.compose.ui.graphics.Brush.verticalGradient(0f to bg.copy(alpha = 0f), 0.45f to bg.copy(alpha = 0.92f), 1f to bg)).navigationBarsPadding().padding(top = Vmk.space.xl)) {
+        if (n > max) Text(stringResource(R.string.media_make_video_limit, max), style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary, modifier = Modifier.padding(horizontal = Vmk.space.screen).testTag("makeVideoLimit"))
+        Row(Modifier.fillMaxWidth().padding(horizontal = Vmk.space.screen, vertical = Vmk.space.s).testTag("selectionBar"), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Vmk.space.s)) {
             PrimaryButton(makeLabel, { onMakeVideo(vm.selectedPhotos().take(max)) }, Modifier.weight(1f).testTag("makeVideo").semantics { contentDescription = makeDesc }, enabled = n > 0, content = {
-                Icon(Sym.Movie, null, Modifier.size(20.dp), tint = Vmk.colors.onPrimary); Spacer(Modifier.width(8.dp))
-                Text(makeLabel, style = MaterialTheme.typography.titleMedium, color = Vmk.colors.onPrimary, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Icon(Sym.PlaySparkle, null, Modifier.size(22.dp), tint = Vmk.colors.onPrimary)
+                Text(makeLabel, style = VmkType.cta, color = Vmk.colors.onPrimary, maxLines = 2, overflow = TextOverflow.Ellipsis)
             })
+            GlassIconButton(Sym.CreateNewFolder, stringResource(R.string.media_add_to_collection), { pick = true }, Modifier.testTag("addToCollection"), enabled = n > 0, size = 56.dp, raised = true)
+            GlassIconButton(Sym.Delete, stringResource(R.string.media_delete_selected), { confirm = true }, Modifier.testTag("deleteSelected"), enabled = n > 0, size = 56.dp, tint = Vmk.colors.danger, raised = true)
         }
-      }
     }
     if (pick) CollectionPickerDialog(vm, onDismiss = { pick = false }) { c -> vm.addToCollection(c, vm.selection.toList()); pick = false }
     if (confirm) AlertDialog(

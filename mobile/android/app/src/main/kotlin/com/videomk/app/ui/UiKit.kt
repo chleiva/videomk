@@ -158,10 +158,13 @@ fun hairlineColor(): Color = Vmk.colors.outline
 fun GlassIconButton(
     icon: ImageVector, description: String, onClick: () -> Unit, modifier: Modifier = Modifier,
     filled: Boolean = false, enabled: Boolean = true, badge: String? = null, size: Dp = Vmk.minTouch, onDark: Boolean = false, tint: Color? = null,
+    /** Floating over content (the selection bar): an opaque surface circle with the one soft shadow instead of the tonal fill. */
+    raised: Boolean = false,
 ) {
     val container = when {
         filled -> null
         onDark -> Color.Black.copy(alpha = 0.45f)
+        raised -> Vmk.colors.surface
         else -> Vmk.colors.surfaceRaised
     }
     val iconTint = tint ?: if (filled) Vmk.colors.onPrimary else if (onDark) Color.White else Vmk.colors.text
@@ -178,7 +181,7 @@ fun GlassIconButton(
                 contentAlignment = Alignment.Center,
             ) {
                 Box(
-                    Modifier.size(size - 4.dp).clip(CircleShape).then(if (filled) Modifier.background(Vmk.gradient) else Modifier.background(container!!)),
+                    Modifier.size(size - 4.dp).then(if (raised) Modifier.vmkShadow(2, CircleShape, Vmk.colors.dark) else Modifier).clip(CircleShape).then(if (filled) Modifier.background(Vmk.gradient) else Modifier.background(container!!)),
                     contentAlignment = Alignment.Center,
                 ) { Icon(icon, null, tint = iconTint, modifier = Modifier.size(22.dp)) }
             }

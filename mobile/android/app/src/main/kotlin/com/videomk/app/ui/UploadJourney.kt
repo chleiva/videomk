@@ -90,7 +90,7 @@ fun UploadBatchSection(
     val addingDesc = pluralStringResource(R.plurals.upload_adding_desc, items.size, items.size, done)
     Column(Modifier.fillMaxWidth().testTag("uploadBatch")) {
         Row(
-            Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp).semantics(mergeDescendants = true) { heading(); contentDescription = addingDesc },
+            Modifier.fillMaxWidth().padding(horizontal = Vmk.space.screen, vertical = 8.dp).semantics(mergeDescendants = true) { heading(); contentDescription = addingDesc },
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(addingText, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = Vmk.colors.text, modifier = Modifier.weight(1f))
@@ -301,7 +301,7 @@ private fun Expanded(
     progress: QueueProgress, items: List<QueueItem>, stats: UploadTiles.Stats, onRetry: (QueueItem) -> Unit, onRetryAll: () -> Unit,
     onPause: () -> Unit, onResume: () -> Unit, onCancelAsk: () -> Unit,
 ) {
-    Column(Modifier.padding(horizontal = 16.dp).padding(bottom = 14.dp, top = 6.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    Column(Modifier.padding(horizontal = Vmk.space.screen).padding(bottom = 14.dp, top = 6.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Stat("${stats.added}", stringResource(R.string.upload_stat_added), Modifier.weight(1f)); Stat("${stats.gettingReady}", stringResource(R.string.upload_stat_getting_ready), Modifier.weight(1f))
             Stat("${stats.waiting}", stringResource(R.string.upload_stat_waiting), Modifier.weight(1f)); Stat("${stats.needYou}", stringResource(R.string.upload_stat_need_you), Modifier.weight(1f), danger = stats.needYou > 0)

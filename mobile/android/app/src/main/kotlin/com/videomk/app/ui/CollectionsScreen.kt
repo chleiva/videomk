@@ -61,7 +61,7 @@ fun CollectionsScreen(vm: MediaViewModel, pref: OrganizePref, onBack: () -> Unit
             }
         },
     ) { padding ->
-        LazyColumn(Modifier.fillMaxSize().padding(padding).testTag("collectionsList"), contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)) {
+        LazyColumn(Modifier.fillMaxSize().padding(padding).testTag("collectionsList"), contentPadding = PaddingValues(horizontal = Vmk.space.screen, vertical = 8.dp)) {
             item {
                 Text(stringResource(R.string.media_collections), style = MaterialTheme.typography.headlineMedium, color = Vmk.colors.text, modifier = Modifier.semantics { heading() })
                 Text(stringResource(R.string.collections_subtitle), style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.textSecondary, modifier = Modifier.padding(top = 4.dp, bottom = 12.dp))

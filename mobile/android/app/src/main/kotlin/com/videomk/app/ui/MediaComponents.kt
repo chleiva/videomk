@@ -169,7 +169,7 @@ fun PhotoGrid(
                     }
                 }
             },
-        contentPadding = PaddingValues(bottom = 24.dp + LocalBarSpace.current),
+        contentPadding = PaddingValues(bottom = 120.dp + LocalBarSpace.current),   // room for the floating bar (tabs, or the selection bar)
         verticalArrangement = Arrangement.spacedBy(2.dp),
     ) {
         if (header != null) item(key = "header") { header() }
@@ -211,7 +211,7 @@ fun PhotoGrid(
 private fun SectionHeader(section: MediaSection) {
     Text(
         section.title, style = MaterialTheme.typography.titleSmall, color = Vmk.colors.text,
-        modifier = Modifier.fillMaxWidth().background(Vmk.colors.background.copy(alpha = 0.96f)).padding(horizontal = 16.dp, vertical = 8.dp).semantics { contentDescription = Txt.n(R.plurals.media_section_desc, section.items.size, section.title) },
+        modifier = Modifier.fillMaxWidth().background(Vmk.colors.background.copy(alpha = 0.96f)).padding(horizontal = Vmk.space.screen, vertical = 8.dp).semantics { contentDescription = Txt.n(R.plurals.media_section_desc, section.items.size, section.title) },
     )
 }
 

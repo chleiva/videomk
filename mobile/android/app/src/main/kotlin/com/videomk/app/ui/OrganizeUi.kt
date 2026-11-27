@@ -200,7 +200,7 @@ private fun SingleBody(offer: OrganizeSheet.Offer, controller: OrganizeControlle
         value = name, onValueChange = { name = it.take(80) }, singleLine = true,
         textStyle = MaterialTheme.typography.bodyLarge.copy(color = Vmk.colors.text), cursorBrush = SolidColor(Vmk.colors.primary),
         modifier = Modifier.fillMaxWidth().testTag("organizeName"),
-        decorationBox = { inner -> Box(Modifier.fillMaxWidth().heightIn(min = 52.dp).clip(shape).background(Vmk.colors.surfaceRaised).border(2.dp, Vmk.colors.primary, shape).padding(horizontal = 16.dp), contentAlignment = Alignment.CenterStart) { inner() } },
+        decorationBox = { inner -> Box(Modifier.fillMaxWidth().heightIn(min = 52.dp).clip(shape).background(Vmk.colors.surfaceRaised).border(2.dp, Vmk.colors.primary, shape).padding(horizontal = Vmk.space.screen), contentAlignment = Alignment.CenterStart) { inner() } },
     )
     if (offer.suggestions.isNotEmpty()) {
         Overline(stringResource(R.string.organize_suggestions), Modifier.padding(top = 14.dp, bottom = 6.dp))
@@ -291,7 +291,7 @@ fun OrganizePill(state: OrganizeState, onClick: () -> Unit) {
     val (done, total) = when (state) { is OrganizeState.Running -> state.done to state.total; is OrganizeState.Offline -> state.done to state.total; else -> return }
     val text = if (state is OrganizeState.Offline) stringResource(R.string.organize_paused) else stringResource(R.string.organize_pill_progress, done, total)
     Row(Modifier.fillMaxWidth().padding(horizontal = 12.dp).heightIn(min = 44.dp).clickable(role = Role.Button, onClickLabel = stringResource(R.string.organize_open_media), onClick = onClick), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
-        Row(Modifier.heightIn(min = 36.dp).clip(CircleShape).background(Vmk.colors.surface).border(1.dp, Vmk.colors.outline, CircleShape).padding(horizontal = 16.dp).semantics(mergeDescendants = true) { contentDescription = text }.testTag("organizePill"),
+        Row(Modifier.heightIn(min = 36.dp).clip(CircleShape).background(Vmk.colors.surface).border(1.dp, Vmk.colors.outline, CircleShape).padding(horizontal = Vmk.space.screen).semantics(mergeDescendants = true) { contentDescription = text }.testTag("organizePill"),
             verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Icon(Sym.AutoAwesome, null, tint = Vmk.colors.primary, modifier = Modifier.size(18.dp))
             Text(text, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold, color = Vmk.colors.text)

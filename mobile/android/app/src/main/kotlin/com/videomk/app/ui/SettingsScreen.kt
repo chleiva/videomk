@@ -63,7 +63,7 @@ fun SettingsScreen(
             VmkTopBar(title = stringResource(R.string.settings_title), onBack = onBack)
         },
     ) { padding ->
-        Column(Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(horizontal = 16.dp).padding(bottom = 24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        Column(Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(horizontal = Vmk.space.screen).padding(bottom = 24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
             // account: the email is the header row; signing out is a plain row (not destructive: no red)
             Card {
                 Column {
@@ -143,7 +143,7 @@ fun SettingsScreen(
 @Composable
 private fun SwitchRow(title: String, checked: Boolean, tag: String, onChange: (Boolean) -> Unit) {
     Row(
-        Modifier.fillMaxWidth().heightIn(min = 56.dp).toggleable(value = checked, role = Role.Switch, onValueChange = onChange).testTag(tag),
+        Modifier.fillMaxWidth().heightIn(min = 56.dp).toggleable(value = checked, role = Role.Switch, onValueChange = onChange).padding(vertical = Vmk.space.s).testTag(tag),
         verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         Text(title, color = Vmk.colors.text, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
@@ -167,7 +167,7 @@ private fun OrganizeSetting(controller: com.videomk.app.data.OrganizeController)
     androidx.compose.runtime.LaunchedEffect(Unit) { controller.refreshPref() }
     var open by remember { mutableStateOf(false) }
     androidx.compose.foundation.layout.Box(Modifier.fillMaxWidth().testTag("organizeSetting")) {
-        Row(Modifier.fillMaxWidth().heightIn(min = 56.dp).clickable(role = Role.DropdownList, onClickLabel = stringResource(R.string.settings_organize_title)) { open = true }, verticalAlignment = Alignment.CenterVertically) {
+        Row(Modifier.fillMaxWidth().heightIn(min = 56.dp).clickable(role = Role.DropdownList, onClickLabel = stringResource(R.string.settings_organize_title)) { open = true }.padding(vertical = Vmk.space.s), verticalAlignment = Alignment.CenterVertically) {
             Text(stringResource(R.string.settings_organize_title), style = MaterialTheme.typography.bodyLarge, color = Vmk.colors.text, modifier = Modifier.weight(1f))
             Text(pref.label, style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.textSecondary)
             Icon(Sym.ExpandMore, null, tint = Vmk.colors.textSecondary)
