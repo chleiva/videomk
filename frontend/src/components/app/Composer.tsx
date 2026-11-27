@@ -1,0 +1,350 @@
+// Create (docs/WEB_REDESIGN_2026.md 6.3): "What should we make?", ONE composer card: prompt, photo / presentation / voice buttons, three pills (made for, length, look), an Options
+// popover for everything else, Create with its price. Everything the server offers comes from capabilities (docs/CREATE_API.md); the AI decides voice, music and pace.
+// Same flow as the apps: request check (kind questions, or a polite "we can't make this") then generate; a retry can never bill twice (same request id).
+import "../../styles/app-b.css";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Sheet, Spinner } from "../ui";
+import { AIcon as Icon } from "./icons";
+import { Menu, Popover, Segmented } from "./Menu";
+import DeckPicker, { useDeck } from "../DeckPicker";
+import MediaPicker from "./MediaPicker";
+import Shortcuts from "./Shortcuts";
+import { useUploadQueue } from "./useUploadQueue";
+import { newRequestId, startGeneration, getWallet } from "../../lib/api";
+import type { Wallet } from "../../lib/api";
+import {
+  FALLBACK_CAPS, LOOKS, MAX_VIDEO_PHOTOS, buildOptions, checkRequest, creditsFor, defaultForm, fourKAdvice, getCapabilities, lengthLabel, lengthMenu, loadSaved, mediaExtras, minutesForPhotos,
+  normalize, overPlatformLimit, photoCapacity, pillValues, platformOf, qualityChoices, resolutionsFor, saveChoices, selectPlatform,
+} from "../../lib/create";
+import type { Answer, Capabilities, Form, Question } from "../../lib/create";
+import { DECK_ASPECT, deckAspectWarning, deckCredits, deckGenerateExtras, deckMinutes } from "../../lib/deck";
+import { appendDictation, dictationSupported, speechLang, startDictation } from "../../lib/dictation";
+import type { Dictation } from "../../lib/dictation";
+import { APP_PATHS } from "../../lib/links";
+import { pictureFiles } from "../../lib/upload";
+import { directDeps } from "../../lib/uploadDeps";
+import { useLocale } from "../../lib/useLocale";
+import type { Photo } from "../../lib/library";
+
+const EXAMPLES = ["create.example1", "create.example2", "create.example3"];
+const HANDOFF = "vmk_compose_library";       // My media -> "Make a video": the chosen photos wait here for the composer
+// The scene-style row stays hidden until the server's VECTOR_SCENES switch is on in this environment (docs/VECTOR_SCENE_POLICY.md): set PUBLIC_SCENE_STYLE=1 at build time then.
+const SCENE_STYLE_ON = ["1", "true", "on"].includes(String(((import.meta as any).env ?? {}).PUBLIC_SCENE_STYLE ?? "").toLowerCase());
+
+type Stage =
+  | { k: "form" }
+  | { k: "checking" }
+  | { k: "questions"; questions: Question[]; i: number; answers: Answer[] }
+  | { k: "stop"; kind: "not_supported" | "blocked" | "paused"; message?: string; suggestion?: string };
+interface LibPick { id: string; thumb_url: string }
+
+function readHandoff(): LibPick[] {
+  try {
+    const raw = sessionStorage.getItem(HANDOFF);
+    if (!raw) return [];
+    sessionStorage.removeItem(HANDOFF);
+    const a = JSON.parse(raw);
+    return Array.isArray(a) ? a.filter((p: any) => typeof p?.id === "string").map((p: any) => ({ id: p.id, thumb_url: typeof p.thumb_url === "string" ? p.thumb_url : "" })).slice(0, MAX_VIDEO_PHOTOS) : [];
+  } catch { return []; }
+}
+
+export default function Composer() {
+  const { t, locale } = useLocale();
+  const [caps, setCaps] = useState<Capabilities | null>(null);
+  const [live, setLive] = useState(false);
+  const [form, setForm] = useState<Form | null>(null);
+  const [wallet, setWallet] = useState<Wallet | null>(null);
+  const [stage, setStage] = useState<Stage>({ k: "form" });
+  const [hint, setHint] = useState<{ text: string; credits?: boolean } | null>(null);
+  const [sending, setSending] = useState(false);
+  const [other, setOther] = useState("");
+  const [picker, setPicker] = useState(false);
+  const [libPicks, setLibPicks] = useState<LibPick[]>([]);
+  const [previews, setPreviews] = useState<Record<string, string>>({});
+  const [listening, setListening] = useState(false);
+  const [micError, setMicError] = useState(false);
+  const [picked, setPicked] = useState<number | null>(null);   // the length chosen for a deck video (null: the deck's suggestion)
+  const req = useRef<{ key: string; id: string }>({ key: "", id: "" });
+  const area = useRef<HTMLTextAreaElement>(null);
+  const files = useRef<HTMLInputElement>(null);
+  const deckInput = useRef<HTMLInputElement>(null);
+  const dict = useRef<Dictation | null>(null);
+  const dictBase = useRef("");
+  const urls = useRef<string[]>([]);
+
+  const photos = useUploadQueue(directDeps);
+
+  useEffect(() => {
+    let alive = true;
+    const prompt = new URLSearchParams(location.search).get("prompt")?.slice(0, 500) ?? "";
+    getCapabilities().then((c) => { if (!alive) return; const cc = c ?? FALLBACK_CAPS; setLive(!!c); setCaps(cc); setForm({ ...defaultForm(cc, loadSaved()), text: prompt }); });
+    getWallet().then((w) => alive && setWallet(w));
+    setLibPicks(readHandoff());
+    return () => { alive = false; dict.current?.stop(); urls.current.forEach((u) => URL.revokeObjectURL(u)); };
+  }, []);
+
+  const c = caps ?? FALLBACK_CAPS;
+  const f = form;
+  const set = useCallback((patch: Partial<Form>) => setForm((x) => (x ? normalize({ ...x, ...patch }, c) : x)), [c]);
+  const deck = useDeck(c.deck);
+  const ready = deck.state.k === "ready" ? deck.state : null;
+  const deckId = ready?.id;
+  useEffect(() => { setPicked(null); if (deckId) setForm((x) => (x ? normalize({ ...x, aspect: DECK_ASPECT }, c) : x)); }, [deckId]); // eslint-disable-line react-hooks/exhaustive-deps
+  const deckActive = deck.state.k !== "idle";
+  const busyDeck = deck.state.k === "uploading" || deck.state.k === "processing";
+
+  // ---- photos
+  const directReady = photos.queue.readyIds();
+  const directItems = photos.items.filter((i) => i.state !== "cancelled");
+  const addingPhotos = photos.items.some((i) => i.state === "queued" || i.state === "preparing" || i.state === "uploading");
+  const totalPhotos = directItems.filter((i) => i.state !== "failed" && i.state !== "unsupported" && i.state !== "no_space").length + libPicks.length;
+  const room = Math.max(0, MAX_VIDEO_PHOTOS - totalPhotos);
+
+  function addFiles(list: FileList | File[] | null | undefined) {
+    const pics = pictureFiles(list ? Array.from(list) : []);
+    if (!pics.length) return;
+    const take = pics.slice(0, room);
+    if (take.length < pics.length) setHint({ text: t("create.photos_max", { n: MAX_VIDEO_PHOTOS }) });
+    if (!take.length) return;
+    const keys = photos.queue.add(take);
+    const next: Record<string, string> = {};
+    keys.forEach((k, i) => { const u = URL.createObjectURL(take[i]); urls.current.push(u); next[k] = u; });
+    setPreviews((p) => ({ ...p, ...next }));
+  }
+  function removePhoto(key: string) { photos.queue.remove(key); const u = previews[key]; if (u) { URL.revokeObjectURL(u); setPreviews((p) => { const { [key]: _x, ...rest } = p; return rest; }); } }
+
+  // ---- dictation (only where the browser has it)
+  const canDictate = useMemo(() => dictationSupported(), []);
+  function toggleDictation() {
+    if (listening) { dict.current?.stop(); return; }
+    setMicError(false);
+    dictBase.current = f?.text ?? "";
+    const d = startDictation(speechLang(locale), (heard) => setForm((x) => (x ? { ...x, text: appendDictation(dictBase.current, heard).slice(0, 1500) } : x)), (why) => { setListening(false); if (why === "denied") setMicError(true); area.current?.focus(); });
+    if (d) { dict.current = d; setListening(true); } else setMicError(true);
+  }
+
+  // ---- price
+  const minutes = f ? (ready ? deckMinutes(ready, picked) : f.minutes) : 1;
+  const credits = f ? (ready ? deckCredits(ready, picked, f.resolution, c) : creditsFor(f.minutes, f.resolution, c)) : 1;
+  const enough = wallet ? wallet.unlimited || wallet.balance >= credits : true;
+  const advice = f ? fourKAdvice(f, c) : null;
+  const limit = f ? overPlatformLimit({ ...f, minutes }, c) : null;
+  const platform = f ? platformOf(c, f.platform) : undefined;
+  const capacity = photoCapacity(minutes);
+  const fitHint = totalPhotos > capacity ? (() => { const better = minutesForPhotos(totalPhotos, c); return better ? t("create.photos_fit_better", { n: capacity, total: totalPhotos, length: lengthLabel(minutes), better: lengthLabel(better) }) : t("create.photos_fit", { n: capacity, total: totalPhotos, length: lengthLabel(minutes) }); })() : null;
+
+  // ---- sending
+  async function generate(brief?: Record<string, string>) {
+    if (!f) return;
+    setSending(true); setHint(null); setStage({ k: "form" });
+    const text = f.text.trim();
+    const { target_minutes: _len, ...rest } = buildOptions(f, c, live);
+    const base = ready ? { ...rest, ...deckGenerateExtras(ready.id, picked) } : buildOptions(f, c, live);
+    const options = { ...base, ...(ready ? {} : mediaExtras(directReady, libPicks.map((p) => p.id), photos.queue.metaById())) };
+    const key = JSON.stringify([text, options, brief ?? null]);
+    if (req.current.key !== key) req.current = { key, id: newRequestId() };   // same request, same id: a retry cannot bill twice
+    try {
+      const r = await startGeneration(text, req.current.id, { ...options, ...(brief ? { brief } : {}) });
+      if (!r.ok) {
+        setSending(false);
+        if (ready && r.kind === "invalid" && r.code?.startsWith("deck_") && r.code !== "deck_not_ready") { deck.reportError(r.code, ready.name); return; }
+        if (r.kind === "blocked" || r.kind === "paused") setStage({ k: "stop", kind: r.kind, message: r.message });
+        else setHint({ text: r.message, credits: r.kind === "credits" });
+        return;
+      }
+      if (!ready) saveChoices(f);
+      location.assign(`${APP_PATHS.videos}?started=1`);
+    } catch (e) {
+      console.error(e);
+      setSending(false); setHint({ text: t("gen.start_error") });
+    }
+  }
+
+  async function submit(e?: React.FormEvent) {
+    e?.preventDefault();
+    if (!f || sending || stage.k !== "form" || busyDeck || addingPhotos) return;
+    const text = f.text.trim();
+    if (ready) {
+      if (!enough) { setHint({ text: t("create.not_enough", { needed: credits, balance: wallet?.balance ?? 0 }), credits: true }); return; }
+      await generate(); return;   // the prompt is optional with a deck; the deck is checked on the server
+    }
+    if (!text) { area.current?.focus(); return; }
+    if (text.length < 15) { setHint({ text: t("gen.more_detail") }); area.current?.focus(); return; }
+    if (!enough) { setHint({ text: t("create.not_enough", { needed: credits, balance: wallet?.balance ?? 0 }), credits: true }); return; }
+    if (!live || c.intake === false) { await generate(); return; }
+    setHint(null); setStage({ k: "checking" });
+    followBrief(await checkRequest(text, buildOptions(f, c, live), []), []);
+  }
+  function followBrief(out: Awaited<ReturnType<typeof checkRequest>>, answers: Answer[]) {
+    if (out.status === "questions") { setOther(""); setStage({ k: "questions", questions: out.questions, i: 0, answers }); }
+    else if (out.status === "ok") void generate(out.brief);
+    else setStage({ k: "stop", kind: out.status, message: out.message, suggestion: out.status === "not_supported" ? out.suggestion : undefined });
+  }
+  async function answer(a: Answer) {
+    if (stage.k !== "questions" || !f) return;
+    const answers = [...stage.answers, a];
+    if (stage.i + 1 < stage.questions.length) { setOther(""); setStage({ ...stage, i: stage.i + 1, answers }); return; }
+    await finish(answers);
+  }
+  async function finish(answers: Answer[]) {
+    if (!f) return;
+    setStage({ k: "checking" });
+    const out = await checkRequest(f.text.trim(), buildOptions(f, c, live), answers);
+    if (out.status === "ok") void generate(out.brief); else if (out.status === "questions") void generate(); else followBrief(out, answers);   // asked enough: make it
+  }
+
+  // ---- screens
+  if (!f || !caps) return <section className="page compose"><p className="muted" role="status"><Spinner /> {t("gen.loading")}</p></section>;
+
+  const pv = pillValues(f, c, t("create.other_platform"));
+  const lookLabel = (l: string) => t(`create.look_${l}`);
+  const forItems = c.platforms.map((p) => ({ id: p.id, label: p.id === "other" ? t("create.other_platform") : p.label, checked: f.platform === p.id }));
+  const lenRows = lengthMenu(c, f);
+  const lengthItems = [
+    ...(ready ? [{ id: "suggested", label: t("deck.suggested_chip", { length: lengthLabel(ready.suggested_minutes) }), checked: picked === null }] : []),
+    ...lenRows.filter((r) => !ready || r.minutes !== ready.suggested_minutes).map((r) => ({ id: String(r.minutes), label: lengthLabel(r.minutes), detail: <span className="vm-menu-price">{t("create.credits", { n: ready ? deckCredits({ ...ready, suggested_minutes: r.minutes }, r.minutes, f.resolution, c) : r.credits })}</span>, checked: ready ? picked === r.minutes : f.minutes === r.minutes, disabled: r.over })),
+  ];
+  const lookItems = LOOKS.map((l) => ({ id: l, label: <span className="look-item"><i className={`swatch swatch-${l}`} aria-hidden="true" />{lookLabel(l)}</span>, checked: f.look === l }));
+  const wm = c.watermark;
+  const quality = qualityChoices(c, f);
+  const aspects = c.aspects.filter((a) => a.ready);
+  const questionTitle = stage.k === "questions" ? t("create.questions_title") : stage.k === "stop" ? (stage.kind === "paused" ? t("create.paused_title") : t("create.cant_make_title")) : "";
+  const canSend = !sending && !busyDeck && !addingPhotos && stage.k === "form" && (ready ? true : f.text.trim().length > 0);
+  const empty = !f.text.trim() && !deckActive && totalPhotos === 0;
+
+  return (
+    <section className="page compose">
+      <div className="compose-head">
+        <h1 className="compose-title">{t("create.heading")}</h1>
+      </div>
+
+      <form className="composer-card" onSubmit={submit} onDragOver={(e) => { if (e.dataTransfer.types.includes("Files")) e.preventDefault(); }} onDrop={(e) => { if (e.dataTransfer.files.length) { e.preventDefault(); addFiles(e.dataTransfer.files); } }}>
+        <label htmlFor="create-text" className="sr-only-vmk">{t("create.prompt_label")}</label>
+        <textarea id="create-text" ref={area} data-autofocus autoFocus rows={3} className="compose-text" value={f.text} maxLength={1500} placeholder={ready ? t("deck.placeholder") : t("create.placeholder")} aria-describedby="create-hint"
+          onChange={(e) => { setHint(null); set({ text: e.target.value }); }}
+          onKeyDown={(e) => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); void submit(); } }}
+          onPaste={(e) => { const pics = pictureFiles(Array.from(e.clipboardData.files)); if (pics.length) { e.preventDefault(); addFiles(pics); } }} />
+
+        {(directItems.length > 0 || libPicks.length > 0) && (
+          <div className="attach-strip" role="list" aria-label={t("create.photos_n", { n: totalPhotos })}>
+            {libPicks.map((p) => (
+              <div key={p.id} role="listitem" className="attach"><img src={p.thumb_url} alt="" /><button type="button" className="attach-x" aria-label={t("create.photo_remove")} onClick={() => setLibPicks((x) => x.filter((y) => y.id !== p.id))}><Icon name="close" size={14} /></button></div>
+            ))}
+            {directItems.map((i) => (
+              <div key={i.key} role="listitem" className={`attach is-${i.state}`}>
+                {previews[i.key] && <img src={previews[i.key]} alt="" />}
+                {(i.state === "preparing" || i.state === "uploading" || i.state === "queued") && <span className="attach-busy" aria-hidden="true"><Spinner /></span>}
+                {(i.state === "failed" || i.state === "unsupported" || i.state === "no_space") && <span className="attach-bad" aria-hidden="true">!</span>}
+                <button type="button" className="attach-x" aria-label={t("create.photo_remove")} onClick={() => removePhoto(i.key)}><Icon name="close" size={14} /></button>
+              </div>
+            ))}
+            <p className="attach-count">{t("create.photos_n", { n: totalPhotos })}</p>
+          </div>
+        )}
+        {(photos.summary.unsupported > 0 || photos.summary.failed > 0) && (
+          <p className="hint hint-bad" role="status">
+            {photos.summary.unsupported > 0 && t("create.photos_unreadable", { n: photos.summary.unsupported })} {photos.summary.failed > 0 && <>{t("create.photos_failed", { n: photos.summary.failed })} <button type="button" className="cost-link" onClick={() => photos.queue.retryFailed()}>{t("create.photos_retry")}</button></>}
+          </p>
+        )}
+
+        {deckActive && c.deck && live && <DeckPicker caps={c.deck} deck={deck} />}
+
+        <div className="composer-bar">
+          <div className="composer-tools">
+            <Menu label={t("create.add_photos")} className="tool" triggerClass="icon-btn tool-btn" trigger={<Icon name="image" size={22} />} align="start"
+              items={[{ id: "device", label: t("create.from_device"), disabled: room === 0 || deckActive }, { id: "media", label: t("create.from_media"), disabled: room === 0 || deckActive }]}
+              onPick={(id) => { if (id === "device") files.current?.click(); else setPicker(true); }} />
+            {c.deck && live && <button type="button" className="icon-btn tool-btn" aria-label={t("deck.add_title")} title={t("deck.add_title")} disabled={totalPhotos > 0 || busyDeck} onClick={() => deckInput.current?.click()}><Icon name="slides" size={22} /></button>}
+            {canDictate && <button type="button" className={`icon-btn tool-btn ${listening ? "is-live" : ""}`} aria-pressed={listening} aria-label={listening ? t("create.dictating") : t("create.dictate")} title={t("create.dictate")} onClick={toggleDictation}><Icon name="mic" size={22} /></button>}
+          </div>
+
+          <div className="composer-pills">
+            {c.platforms.length > 0 && <Menu label={t("create.pill_for")} triggerClass="pill" trigger={<><span>{pv.for}</span><Icon name="chevdown" size={16} /></>} items={forItems} onPick={(id) => setForm(selectPlatform(f, c, id))} />}
+            <Menu label={t("create.pill_length")} triggerClass="pill" trigger={<><span>{ready ? lengthLabel(minutes) : pv.length}</span><Icon name="chevdown" size={16} /></>} items={lengthItems}
+              onPick={(id) => (ready ? setPicked(id === "suggested" ? null : Number(id)) : set({ minutes: Number(id) }))} />
+            <Menu label={t("create.pill_look")} triggerClass="pill" trigger={<><Icon name="sparkle" size={16} /><span>{lookLabel(f.look)}</span><Icon name="chevdown" size={16} /></>} items={lookItems} onPick={(id) => set({ look: id as Form["look"] })} />
+            {live && (
+              <Popover label={t("create.options")} triggerClass="icon-btn tool-btn" trigger={<Icon name="sliders" size={22} />}>
+                {(close) => (
+                  <div className="opts">
+                    <div className="opts-head"><h2 className="h2">{t("create.options")}</h2><button type="button" className="btn btn-tonal btn-sm" onClick={close}>{t("create.done")}</button></div>
+                    {aspects.length > 1 && <div className="opt"><p className="label" id="o-format">{t("create.format")}</p><Segmented label={t("create.format")} value={f.aspect} options={aspects.map((a) => ({ id: a.id, label: a.label }))} onChange={(v) => set({ aspect: v })} /></div>}
+                    {quality.length > 1 && <div className="opt"><p className="label">{t("create.resolution")}</p><Segmented label={t("create.resolution")} value={f.resolution} options={quality.map((r) => ({ id: r.id, label: r.label, hint: r.credits_multiplier > 1 ? `${r.credits_multiplier}×` : undefined }))} onChange={(v) => set({ resolution: v })} />
+                      {resolutionsFor(c, f.aspect).find((r) => r.id === f.resolution)?.credits_multiplier! > 1 && <p className="hint">{t("create.cost_4k_double")}</p>}</div>}
+                    <label className="opt-row" htmlFor="o-captions"><span>{t("create.subtitles")}</span><input id="o-captions" type="checkbox" role="switch" className="vm-switch" checked={f.captions} onChange={(e) => set({ captions: e.target.checked })} /></label>
+                    {c.languages.length > 0 && <label className="opt-row" htmlFor="o-lang"><span>{t("create.narration")}</span><select id="o-lang" className="field field-inline" value={f.language} onChange={(e) => set({ language: e.target.value })}><option value="auto">{t("create.lang_auto")}</option>{c.languages.map((l) => <option key={l.id} value={l.id}>{l.label}</option>)}</select></label>}
+                    {SCENE_STYLE_ON && !ready && <div className="opt"><p className="label">{t("create.scenes_title")}</p><Segmented label={t("create.scenes_a11y")} value={f.scenes} options={[{ id: "auto", label: t("create.scenes_auto") }, { id: "cartoon", label: t("create.scenes_illustrated") }, { id: "real", label: t("create.scenes_real") }]} onChange={(v) => set({ scenes: v })} /><p className="hint">{t("create.scenes_hint")}</p></div>}
+                    {wm && <div className="opt"><p className="label">{t("create.wm_title")}</p>
+                      <Segmented label={t("create.wm_title")} value={f.watermark ?? "saved"} options={[
+                        ...(wm.forced ? [] : [{ id: "saved", label: t("create.wm_saved") }]),
+                        ...wm.modes.map((m) => ({ id: m.id, label: t(m.id === "none" ? "create.wm_none" : m.id === "videomk" ? "create.wm_videomk" : m.available ? "create.wm_custom" : "create.wm_custom_locked"), disabled: !m.available })),
+                      ]} onChange={(v) => set({ watermark: v === "saved" ? null : (v as Form["watermark"]) })} />
+                      {wm.forced && <p className="hint">{t("create.wm_forced")}</p>}</div>}
+                    <p className="hint">{t("create.options_note")}</p>
+                  </div>
+                )}
+              </Popover>
+            )}
+          </div>
+
+          <button type="submit" className="btn btn-primary compose-go" disabled={!canSend} aria-busy={sending || stage.k === "checking"} aria-label={t("create.cta_a11y", { credits: t("create.credits", { n: credits }) })}>
+            {sending || stage.k === "checking" ? <><Spinner /><span>{stage.k === "checking" ? t("create.checking") : t("gen.starting")}</span></> : addingPhotos ? <><Spinner /><span>{t("create.photos_wait")}</span></> : <><span>{t("create.cta", { n: credits })}</span><Icon name="bolt" size={18} /></>}
+          </button>
+        </div>
+        <input ref={files} type="file" hidden tabIndex={-1} accept="image/*" multiple onChange={(e) => { addFiles(e.target.files); e.target.value = ""; }} />
+        {c.deck && <input ref={deckInput} type="file" hidden tabIndex={-1} accept={c.deck.formats.map((x) => (x === "pdf" ? ".pdf" : ".pptx")).join(",")} onChange={(e) => { const file = e.target.files?.[0]; if (file) void deck.begin(file); e.target.value = ""; }} />}
+      </form>
+
+      <div className="compose-notes" aria-live="polite">
+        {listening && <p className="hint"><span className="live-dot" aria-hidden="true" /> {t("create.dictating")}</p>}
+        {micError && <p className="hint hint-bad" role="status">{t("create.dictate_denied")}</p>}
+        {hint && <p id="create-hint" className="hint hint-bad" role="status">{hint.text}{hint.credits && <> <a href={APP_PATHS.credits}>{t("create.see_credits")}</a></>}</p>}
+        {!hint && <p id="create-hint" className="sr-only-vmk" />}
+        {!hint && wallet && !wallet.unlimited && <p className="hint">{enough ? t("create.left", { n: wallet.balance - credits }) : t("create.you_have", { n: wallet.balance })}</p>}
+        {limit != null && platform && <p className="hint">{t("create.max_length", { platform: platform.label, length: lengthLabel(limit) })}</p>}
+        {fitHint && <p className="hint">{fitHint}</p>}
+        {advice && <p className="hint">{advice}</p>}
+        {ready && deckAspectWarning(f.aspect) && <p className="hint">{t("deck.vertical_warn")} <button type="button" className="cost-link" onClick={() => set({ aspect: DECK_ASPECT })}>{t("deck.use_landscape")}</button></p>}
+      </div>
+
+      {empty && (
+        <div className="chips compose-examples" role="group" aria-label={t("create.try_one")}>
+          {EXAMPLES.map((k) => <button key={k} type="button" className="chip" onClick={() => { setHint(null); set({ text: t(k) }); area.current?.focus(); }}>{t(k)}</button>)}
+        </div>
+      )}
+
+      {picker && <MediaPicker max={room} initialQuery={f.text} onClose={() => setPicker(false)} onUse={(photos: Photo[]) => { setPicker(false); setLibPicks((x) => [...x, ...photos.filter((p) => !x.some((y) => y.id === p.id)).map((p) => ({ id: p.id, thumb_url: p.thumb_url }))].slice(0, MAX_VIDEO_PHOTOS)); }} />}
+
+      {(stage.k === "questions" || stage.k === "stop") && (
+        <Sheet title={questionTitle} onClose={() => setStage({ k: "form" })}>
+          {stage.k === "questions" ? (() => {
+            const q = stage.questions[stage.i];
+            return (
+              <div className="mt-4">
+                <div className="dots" aria-label={t("create.question_n", { n: stage.i + 1, total: stage.questions.length })}>{stage.questions.map((_, i) => <i key={i} className={i <= stage.i ? "on" : ""} />)}</div>
+                <p className="q-title">{q.text}</p>
+                <div className="chips mt-4">{q.options.map((o) => <button key={o.id} type="button" className="chip" onClick={() => void answer({ id: q.id, option: o.id })}>{o.label}</button>)}
+                  <button type="button" className="chip" onClick={() => void answer({ id: q.id, skip: true })}><Icon name="sparkle" size={16} />{t("create.you_decide")}</button></div>
+                {q.allow_other && (
+                  <div className="mt-4 flex gap-2">
+                    <input className="field" aria-label={t("create.type_answer")} placeholder={t("create.type_answer")} maxLength={200} value={other} onChange={(e) => setOther(e.target.value)} />
+                    <button type="button" className="btn btn-tonal btn-sm shrink-0" disabled={!other.trim()} onClick={() => void answer({ id: q.id, text: other.trim() })}>{t("create.use_this")}</button>
+                  </div>
+                )}
+                <div className="mt-6 flex justify-end"><button type="button" className="btn btn-line btn-sm" onClick={() => void finish(stage.answers)}>{t("create.make_it_now")}</button></div>
+              </div>
+            );
+          })() : (
+            <div className="mt-4 space-y-4">
+              <p className={`notice ${stage.kind === "paused" ? "notice-warn" : "notice-info"}`} role="alert">{stage.message || (stage.kind === "paused" ? t("create.paused_fallback") : stage.kind === "blocked" ? t("create.blocked_fallback") : t("create.unsupported_fallback"))}</p>
+              {stage.suggestion && <p className="muted">{stage.suggestion}</p>}
+              <p className="caption">{t("create.nothing_charged")}</p>
+              {stage.kind !== "paused" && <button type="button" className="btn btn-primary btn-block" onClick={() => { setStage({ k: "form" }); setTimeout(() => area.current?.focus(), 20); }}>{t("create.edit_request")}</button>}
+            </div>
+          )}
+        </Sheet>
+      )}
+      <Shortcuts />
+    </section>
+  );
+}

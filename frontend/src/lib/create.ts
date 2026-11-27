@@ -9,8 +9,23 @@ export interface Resolution { id: string; label: string; credits_multiplier: num
 export interface Platform { id: string; label: string; aspect: string; resolution: string; recommended_minutes: number; max_minutes: number | null; other_aspects?: string[]; note?: string; supports_4k?: boolean; note_4k?: string | null }
 export interface Capabilities {
   aspects: Aspect[]; resolutions: Resolution[]; platforms: Platform[]; languages: { id: string; label: string }[];
-  lengths: { min_minutes: number; max_minutes: number; presets: number[] }; max_photos?: number; intake?: boolean; deck?: DeckCaps;
+  lengths: { min_minutes: number; max_minutes: number; presets: number[] }; max_photos?: number; intake?: boolean; deck?: DeckCaps; watermark?: WatermarkCaps;
 }
+
+/** `capabilities.watermark` (docs/WATERMARK.md): present only where the stack has the feature on. Modes carry `available` (false: locked or hidden) and `requires`. */
+export interface WatermarkMode { id: "none" | "videomk" | "custom"; label: string; available: boolean; requires?: string }
+export interface WatermarkCaps { modes: WatermarkMode[]; forced: boolean; premium: boolean }
+export function parseWatermarkCaps(raw: any): WatermarkCaps | undefined {
+  if (!raw || !Array.isArray(raw.modes)) return undefined;
+  const modes: WatermarkMode[] = raw.modes.filter((m: any) => m && (m.id === "none" || m.id === "videomk" || m.id === "custom") && typeof m.label === "string")
+    .map((m: any) => ({ id: m.id, label: m.label, available: m.available !== false, requires: typeof m.requires === "string" ? m.requires : undefined }));
+  return modes.length ? { modes, forced: raw.forced === true, premium: raw.premium === true } : undefined;
+}
+/** The scene style the person can pick for this video (docs/VECTOR_SCENE_POLICY.md section 7): auto sends nothing. */
+export type SceneStyle = "auto" | "cartoon" | "real";
+export const LOOKS = ["auto", "midnight", "paper", "sunrise"] as const;
+export type Look = (typeof LOOKS)[number];
+export type WatermarkChoice = "none" | "videomk" | "custom";
 
 /** `capabilities.deck`: present only when the server enables decks (docs/CREATE_API.md). */
 export interface DeckCaps { max_mb: number; max_slides: number; formats: string[] }
@@ -30,7 +45,10 @@ export const FALLBACK_CAPS: Capabilities = {
   lengths: { min_minutes: 0.25, max_minutes: 12, presets: [0.5, 1, 2, 3, 5] }, intake: false,
 };
 
-export interface Form { text: string; platform: string; aspect: string; resolution: string; minutes: number; captions: boolean; language: string }
+export interface Form {
+  text: string; platform: string; aspect: string; resolution: string; minutes: number; captions: boolean; language: string;
+  look: Look; scenes: SceneStyle; watermark: WatermarkChoice | null;   // look auto and scenes auto send nothing; watermark null = the saved default applies (nothing is sent)
+}
 
 const readyAspects = (c: Capabilities) => c.aspects.filter((a) => a.ready);
 
@@ -39,6 +57,12 @@ export function resolutionOf(c: Capabilities, id: string): Resolution | undefine
 
 /** The resolutions the chosen aspect can be made in (the pair must not be offered otherwise). */
 export function resolutionsFor(c: Capabilities, aspect: string): Resolution[] { return c.resolutions.filter((r) => !r.aspects || r.aspects.includes(aspect)); }
+
+/** What the Options popover offers as quality: the aspect's resolutions, without the paid-up ones on a platform that does not show them (YouTube and general keep 4K). */
+export function qualityChoices(c: Capabilities, f: Pick<Form, "aspect" | "platform">): Resolution[] {
+  const plat = platformOf(c, f.platform);
+  return resolutionsFor(c, f.aspect).filter((r) => r.credits_multiplier <= 1 || !plat || plat.supports_4k !== false);
+}
 
 /** Keeps every choice inside what the server lists; a choice that is no longer offered moves to the nearest valid one. */
 export function normalize(f: Form, c: Capabilities): Form {
@@ -50,6 +74,12 @@ export function normalize(f: Form, c: Capabilities): Form {
   if (c.platforms.length && !platformOf(c, out.platform)) out.platform = (platformOf(c, "other") ?? c.platforms[0]).id;
   out.minutes = clampMinutes(out.minutes, c);
   if (out.language !== "auto" && !c.languages.some((l) => l.id === out.language)) out.language = "auto";
+  if (!LOOKS.includes(out.look)) out.look = "auto";
+  if (out.scenes !== "cartoon" && out.scenes !== "real") out.scenes = "auto";
+  if (out.watermark !== null && !(c.watermark?.modes.find((m) => m.id === out.watermark)?.available)) out.watermark = null;
+  // 4K is offered for the platforms that show it (YouTube, general): a platform that does not (supports_4k false) never keeps a 4K choice
+  const plat = platformOf(c, out.platform);
+  if (plat && plat.supports_4k === false && (resolutionOf(c, out.resolution)?.credits_multiplier ?? 1) > 1) out.resolution = resolutionsFor(c, out.aspect).find((r) => r.id === plat.resolution)?.id ?? resolutionsFor(c, out.aspect).find((r) => r.credits_multiplier === 1)?.id ?? out.resolution;
   return out;
 }
 
@@ -61,7 +91,7 @@ export function clampMinutes(m: number, c: Capabilities): number {
 
 export function defaultForm(c: Capabilities, saved?: Partial<Form> | null): Form {
   const p = platformOf(c, saved?.platform ?? "other") ?? platformOf(c, "other") ?? c.platforms[0];
-  const base: Form = { text: "", platform: p?.id ?? "other", aspect: p?.aspect ?? "16:9", resolution: p?.resolution ?? "1080p", minutes: p?.recommended_minutes ?? 1, captions: true, language: "auto" };
+  const base: Form = { text: "", platform: p?.id ?? "other", aspect: p?.aspect ?? "16:9", resolution: p?.resolution ?? "1080p", minutes: p?.recommended_minutes ?? 1, captions: true, language: "auto", look: "auto", scenes: "auto", watermark: null };
   return normalize({ ...base, ...(saved ?? {}), text: "" }, c);
 }
 
@@ -99,7 +129,39 @@ export function overPlatformLimit(f: Form, c: Capabilities): number | null {
 /** The fields generate and brief accept next to the prompt. With no capabilities from the server nothing but the length is sent. */
 export function buildOptions(f: Form, c: Capabilities, live: boolean): Record<string, unknown> {
   if (!live) return { target_minutes: f.minutes };
-  return { platform: f.platform, aspect: f.aspect, resolution: f.resolution, captions: f.captions, language: f.language, target_minutes: f.minutes };
+  return {
+    platform: f.platform, aspect: f.aspect, resolution: f.resolution, captions: f.captions, language: f.language, target_minutes: f.minutes,
+    ...(f.look !== "auto" ? { theme: f.look } : {}),
+    ...(f.scenes !== "auto" ? { style: f.scenes } : {}),
+    ...(f.watermark && c.watermark ? { watermark: { mode: f.watermark } } : {}),   // only when the person changed it for this video: otherwise the saved default applies
+  };
+}
+
+// ---------------------------------------------------------------- the composer's summary pills and the length menu
+/** Text of each of the three pills: For, Length, Look. */
+export function pillValues(f: Form, c: Capabilities, otherLabel: string): { for: string; length: string; look: Look } {
+  const p = platformOf(c, f.platform);
+  return { for: p && p.id !== "other" ? p.label : otherLabel, length: lengthLabel(f.minutes), look: f.look };
+}
+
+/** Rows of the Length menu: each preset with its credit price, greyed over the platform's soft limit. */
+export function lengthMenu(c: Capabilities, f: Pick<Form, "platform" | "resolution">): { minutes: number; credits: number; over: boolean }[] {
+  const max = platformOf(c, f.platform)?.max_minutes ?? null;
+  return c.lengths.presets.map((m) => ({ minutes: m, credits: creditsFor(m, f.resolution, c), over: max != null && m > max }));
+}
+
+// ---------------------------------------------------------------- photos in a video (docs/PHOTOS.md): the generate body carries them
+export const MAX_VIDEO_PHOTOS = 100;
+/** About 51 photos per minute fit (collages show several at once). Returns how many fit in `minutes`, and the shortest length that holds `n` photos in the presets. */
+export const photoCapacity = (minutes: number): number => Math.floor(51 * minutes);
+export function minutesForPhotos(n: number, c: Capabilities): number | null { return c.lengths.presets.find((m) => photoCapacity(m) >= n) ?? null; }
+
+/** `media` (direct uploads of this video), `library_media` (My media ids) and `media_meta` (capture time and position per direct id), at most 100 photos in all. */
+export function mediaExtras(direct: string[], library: string[], meta: Record<string, { taken?: string; lat?: number; lon?: number }> = {}): Record<string, unknown> {
+  const d = direct.slice(0, MAX_VIDEO_PHOTOS), l = library.filter((id) => !d.includes(id)).slice(0, Math.max(0, MAX_VIDEO_PHOTOS - d.length));
+  const m: Record<string, unknown> = {};
+  for (const id of d) if (meta[id] && Object.keys(meta[id]).length) m[id] = meta[id];   // library photos already carry their date and place on the server
+  return { ...(d.length ? { media: d } : {}), ...(l.length ? { library_media: l } : {}), ...(Object.keys(m).length ? { media_meta: m } : {}) };
 }
 
 // ---------------------------------------------------------------- saved choices (never the text)
@@ -143,7 +205,7 @@ export async function getCapabilities(): Promise<Capabilities | null> {
     if (!res.ok) return null;
     const b = await res.json();
     if (!Array.isArray(b?.aspects) || !Array.isArray(b?.resolutions) || !b?.lengths?.presets?.length) return null;
-    return { aspects: b.aspects, resolutions: b.resolutions, platforms: Array.isArray(b.platforms) ? b.platforms : [], languages: Array.isArray(b.languages) ? b.languages : [], lengths: b.lengths, max_photos: b.max_photos, intake: b.intake !== false, deck: parseDeckCaps(b.deck) };
+    return { aspects: b.aspects, resolutions: b.resolutions, platforms: Array.isArray(b.platforms) ? b.platforms : [], languages: Array.isArray(b.languages) ? b.languages : [], lengths: b.lengths, max_photos: b.max_photos, intake: b.intake !== false, deck: parseDeckCaps(b.deck), watermark: parseWatermarkCaps(b.watermark) };
   } catch {
     return null;
   }

@@ -1,8 +1,8 @@
 ---
 import AppLayout from "../layouts/AppLayout.astro";
-import GenerationsPage from "../components/GenerationsPage";
+import VideosPage from "../components/app/VideosPage";
 ---
-<AppLayout title="Generations — videomk" titleKey="gen.page_title" active="videos">
+<AppLayout title="Videos — videomk" titleKey="gen.page_title" active="videos">
 	<script>
 		{`
 		  import('/src/lib/auth.ts').then(async (m) => {
@@ -10,5 +10,5 @@ import GenerationsPage from "../components/GenerationsPage";
 		  });
 		`}
 	</script>
-	<GenerationsPage client:only="react" />
+	<VideosPage client:only="react" />
 </AppLayout>

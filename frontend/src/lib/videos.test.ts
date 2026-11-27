@@ -62,3 +62,32 @@ describe("making progress", () => {
     for (const id of ["a", "b", "zzz", "123"]) expect([0, 1, 2, 3]).toContain(placeholderTone(id));
   });
 });
+
+import { filterVideos, nextPollMs, reuseUnchanged, stableThumbs } from "./videos";
+import type { TaskItem } from "./videos";
+describe("redesigned list helpers", () => {
+  it("search needs every word, ignores case and accents", () => {
+    const items = [{ title: "How a forest breathes" }, { title: "Cómo respira un bosque" }, { title: "Mortgage rates" }];
+    expect(filterVideos(items, "FOREST breathes")).toHaveLength(1);
+    expect(filterVideos(items, "como bosque")).toHaveLength(1);
+    expect(filterVideos(items, "  ")).toHaveLength(3);
+    expect(filterVideos(items, "zzz")).toHaveLength(0);
+  });
+  it("the first thumbnail link of an id is kept even when the next poll brings a new signature", () => {
+    const a = stableThumbs({}, [{ id: "1", preview_gif_url: "https://x/1.gif?sig=a" }, { id: "2", preview_gif_url: null }]);
+    const b = stableThumbs(a, [{ id: "1", preview_gif_url: "https://x/1.gif?sig=b" }, { id: "2", preview_gif_url: "https://x/2.gif?sig=a" }]);
+    expect(b).toEqual({ "1": "https://x/1.gif?sig=a", "2": "https://x/2.gif?sig=a" });
+  });
+  it("an unchanged item keeps its object so it is not redrawn", () => {
+    const a: TaskItem = { id: "1", status: "complete", title: "A", preview_gif_url: "https://x/1?s=a" };
+    const same = reuseUnchanged([a], [{ ...a, preview_gif_url: "https://x/1?s=b" }]);
+    expect(same[0]).toBe(a);
+    const changed = reuseUnchanged([a], [{ ...a, title: "B" }]);
+    expect(changed[0]).not.toBe(a);
+  });
+  it("polling backs off to 30 s, stops when nothing is being made or the tab is hidden", () => {
+    expect([0, 1, 2, 20].map((n) => nextPollMs(n, true, false))).toEqual([5000, 8000, 11000, 30000]);
+    expect(nextPollMs(0, false, false)).toBeNull();
+    expect(nextPollMs(0, true, true)).toBeNull();
+  });
+});

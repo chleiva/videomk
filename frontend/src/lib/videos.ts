@@ -113,3 +113,37 @@ export function placeholderTone(id: string): number {
 export function minutesLeft(etaSeconds: number | null | undefined): number | null {
   return typeof etaSeconds === "number" && etaSeconds >= 0 ? Math.floor((etaSeconds + 59) / 60) : null;
 }
+
+// ---------------------------------------------------------------- the redesigned list: search and a flicker-free thumbnail
+const fold = (s: string) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+/** Videos whose title contains every word of the query (case and accents ignored). An empty query keeps all. */
+export function filterVideos<T extends { title?: string }>(items: T[], q: string): T[] {
+  const words = fold(q).split(/\s+/).filter(Boolean);
+  if (!words.length) return items;
+  return items.filter((i) => { const t = fold(i.title ?? ""); return words.every((w) => t.includes(w)); });
+}
+
+/** Presigned thumbnail links change on every poll (new signature); the picture behind an id does not. Keeping the first link per id stops the list from re-requesting and flashing. */
+export function stableThumbs(prev: Record<string, string>, items: { id: string; preview_gif_url?: string | null }[]): Record<string, string> {
+  const next = { ...prev };
+  for (const i of items) if (i.preview_gif_url && !next[i.id]) next[i.id] = i.preview_gif_url;
+  return next;
+}
+
+/** Keeps the previous object for items whose visible fields did not change, so React skips them: a poll that changes one card redraws one card. */
+export function reuseUnchanged(prev: TaskItem[], next: TaskItem[]): TaskItem[] {
+  const by = new Map(prev.map((p) => [p.id, p] as const));
+  return next.map((n) => {
+    const p = by.get(n.id);
+    if (!p) return n;
+    const same = p.status === n.status && p.stage === n.stage && p.title === n.title && p.eta_seconds === n.eta_seconds && p.duration_s === n.duration_s && p.editable === n.editable
+      && p.reject_reason === n.reject_reason && (p.preview_gif_url ? true : !n.preview_gif_url) && p.created_at === n.created_at;
+    return same ? p : n;
+  });
+}
+
+/** Poll delay: quick while something is being made (5 s, 8 s, 12 s ... up to 30 s), none when everything is finished or the tab is hidden. */
+export function nextPollMs(attempt: number, anyMaking: boolean, hidden: boolean): number | null {
+  if (!anyMaking || hidden) return null;
+  return Math.min(30000, 5000 + attempt * 3000);
+}

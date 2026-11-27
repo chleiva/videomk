@@ -1,0 +1,7 @@
+---
+import AppLayout from "../../layouts/AppLayout.astro";
+import MediaPage from "../../components/app/MediaPage";
+---
+<AppLayout title="My media — videomk" titleKey="media.title" active="media">
+	<MediaPage client:only="react" />
+</AppLayout>

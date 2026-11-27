@@ -81,3 +81,71 @@ describe("request check", () => {
     expect(parseBrief(200, { status: "questions", questions: [{ nope: 1 }] })).toEqual({ status: "ok" });
   });
 });
+
+// ---------------------------------------------------------------- the web redesign: pills, quality, look, scenes, watermark, photos
+import { lengthMenu, mediaExtras, minutesForPhotos, parseWatermarkCaps, photoCapacity, pillValues, qualityChoices } from "./create";
+
+describe("pills and menus", () => {
+  it("For shows the platform (the neutral one reads as the 'other' label), Length shows the chosen length", () => {
+    const f = defaultForm(caps);
+    expect(pillValues(f, caps, "Video")).toEqual({ for: "Video", length: "1 min", look: "auto" });
+    expect(pillValues(selectPlatform(f, caps, "youtube"), caps, "Video")).toMatchObject({ for: "YouTube", length: "3 min" });
+  });
+  it("the Length menu prices every preset and greys the ones over the platform's soft limit", () => {
+    const f = selectPlatform(defaultForm(caps), caps, "tiktok");
+    const rows = lengthMenu(caps, f);
+    expect(rows.find((r) => r.minutes === 0.5)).toEqual({ minutes: 0.5, credits: 1, over: false });
+    expect(rows.find((r) => r.minutes === 5)).toEqual({ minutes: 5, credits: 5, over: true });
+    expect(lengthMenu(caps, { platform: "youtube", resolution: "2160p" }).find((r) => r.minutes === 3)).toMatchObject({ credits: 6, over: false });
+  });
+});
+
+describe("quality", () => {
+  it("4K is offered on YouTube and the neutral platform, not where the platform does not show it", () => {
+    expect(qualityChoices(caps, { aspect: "16:9", platform: "youtube" }).map((r) => r.id)).toEqual(["720p", "1080p", "2160p"]);
+    expect(qualityChoices(caps, { aspect: "16:9", platform: "tiktok" }).map((r) => r.id)).toEqual(["720p", "1080p"]);
+    expect(qualityChoices(caps, { aspect: "9:16", platform: "other" }).map((r) => r.id)).toEqual(["720p", "1080p"]);   // the aspect decides too
+  });
+  it("switching to a platform without 4K drops a 4K choice to the platform's resolution", () => {
+    const yt = { ...selectPlatform(defaultForm(caps), caps, "youtube"), resolution: "2160p" };
+    expect(selectPlatform(yt, caps, "tiktok").resolution).toBe("1080p");
+    expect(normalize({ ...yt, platform: "other" }, caps).resolution).toBe("2160p");
+  });
+});
+
+describe("look, scenes and watermark in the request", () => {
+  const wcaps = { ...caps, watermark: { modes: [{ id: "none" as const, label: "None", available: true }, { id: "videomk" as const, label: "videomk", available: true }, { id: "custom" as const, label: "Your logo (Pro)", available: false, requires: "premium" }], forced: false, premium: false } };
+  it("nothing extra is sent for the defaults (auto look, auto scenes, saved watermark)", () => {
+    expect(buildOptions(defaultForm(wcaps), wcaps, true)).toEqual({ platform: "other", aspect: "16:9", resolution: "1080p", captions: true, language: "auto", target_minutes: 1 });
+  });
+  it("look sends theme; Illustrated sends style cartoon, Real sends style real; a changed watermark sends its mode", () => {
+    const f = { ...defaultForm(wcaps), look: "paper" as const, scenes: "cartoon" as const, watermark: "videomk" as const };
+    expect(buildOptions(f, wcaps, true)).toMatchObject({ theme: "paper", style: "cartoon", watermark: { mode: "videomk" } });
+    expect(buildOptions({ ...f, scenes: "real" }, wcaps, true)).toMatchObject({ style: "real" });
+  });
+  it("a watermark mode the account cannot use (locked) or the server does not list is dropped", () => {
+    expect(normalize({ ...defaultForm(wcaps), watermark: "custom" }, wcaps).watermark).toBeNull();
+    expect(normalize({ ...defaultForm(caps), watermark: "videomk" }, caps).watermark).toBeNull();
+    expect(buildOptions({ ...defaultForm(caps), watermark: "videomk" }, caps, true)).not.toHaveProperty("watermark");
+  });
+  it("capabilities.watermark is parsed defensively", () => {
+    expect(parseWatermarkCaps(undefined)).toBeUndefined();
+    expect(parseWatermarkCaps({ modes: [{ id: "bogus", label: "x" }] })).toBeUndefined();
+    expect(parseWatermarkCaps({ modes: [{ id: "videomk", label: "videomk" }], forced: true })).toEqual({ modes: [{ id: "videomk", label: "videomk", available: true, requires: undefined }], forced: true, premium: false });
+  });
+});
+
+describe("photos in a video", () => {
+  it("about 51 photos fit per minute; the hint finds the shortest preset that holds them", () => {
+    expect(photoCapacity(1)).toBe(51); expect(photoCapacity(2)).toBe(102);
+    expect(minutesForPhotos(100, caps)).toBe(2); expect(minutesForPhotos(40, caps)).toBe(1); expect(minutesForPhotos(900, caps)).toBeNull();
+  });
+  it("the body carries direct ids as media, My media ids as library_media, at most 100 together, dates only for direct ones", () => {
+    const direct = Array.from({ length: 60 }, (_, i) => `d${i}`), lib = Array.from({ length: 60 }, (_, i) => `l${i}`);
+    const e = mediaExtras(direct, lib, { d0: { taken: "2024-07-14T10:00:00", lat: 7.88, lon: 98.39 }, l0: { taken: "x" } }) as any;
+    expect(e.media).toHaveLength(60); expect(e.library_media).toHaveLength(40);
+    expect(e.media_meta).toEqual({ d0: { taken: "2024-07-14T10:00:00", lat: 7.88, lon: 98.39 } });
+    expect(mediaExtras([], [])).toEqual({});
+    expect((mediaExtras(["a"], ["a", "b"]) as any).library_media).toEqual(["b"]);   // a photo is never sent twice
+  });
+});
