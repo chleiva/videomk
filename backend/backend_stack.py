@@ -456,6 +456,11 @@ class BackendStack(Stack):
         if v2 is not None and str(self.node.try_get_context("imageCatalog") or "").lower() in ("1", "true"):
             self.catalog = ImageCatalog(self, "ImageCatalog", stage=stage, account=self.account, region=self.region, is_prod=is_prod, beat_fn=v2.beat_fn,
                                         min_score=str(self.node.try_get_context("catalogMinScore") or ""))
+            if str(self.node.try_get_context("clipsOnDemand") or ("1" if stage_cfg.get("clipsOnDemand") else "")).lower() in ("1", "true"):
+                # images on demand (docs/LIBRARY_ON_DEMAND.md part A): the beat function may ADD a picture to the catalog (three objects, one vector, one row). Statements only, no resource.
+                v2.beat_fn.add_to_role_policy(iam.PolicyStatement(actions=["s3:PutObject"], resources=[f"{self.catalog.bucket.bucket_arn}/{p}/*" for p in ("o", "p", "t")]))
+                v2.beat_fn.add_to_role_policy(iam.PolicyStatement(actions=["dynamodb:PutItem"], resources=[self.catalog.table.table_arn]))
+                v2.beat_fn.add_to_role_policy(iam.PolicyStatement(actions=["s3vectors:PutVectors"], resources=[self.catalog.index_arn]))
             if vector_scenes:   # the functions that draw frames read one scene package at a time: v/<scene id>/* of the catalog bucket, nothing else, no listing, no write
                 for fn in (v2.chunk_fn, v2.selftest_fn):
                     fn.add_to_role_policy(iam.PolicyStatement(actions=["s3:GetObject"], resources=[f"{self.catalog.bucket.bucket_arn}/v/*"]))

@@ -26,9 +26,9 @@ VIDEO = P + "video:"              # + video id; sort = "n" (generations of the v
 STAGES = {"qa": {"profile": "qa", "region": "eu-west-1", "account": "552357225438"}, "prod": {"profile": "default", "region": "us-west-2", "account": "464863885161"}}
 
 
-def spend_pk(kind: str, span: str) -> str:
-    """kind: 'paid' | 'test'; span: 'day' | 'month'. Sort key = the UTC day or month."""
-    return f"{P}spend:{kind}:{span}"
+def spend_pk(kind: str, span: str, media: str = "clip") -> str:
+    """kind: 'paid' | 'test'; span: 'day' | 'month'; media: 'clip' | 'image' | 'object' (each type has its own budgets). Sort key = the UTC day or month."""
+    return f"{P}spend:{kind}:{span}" + ("" if media == "clip" else f":{media}")
 
 
 def ledger_pk(month: str) -> str:

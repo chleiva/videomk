@@ -23,106 +23,12 @@ from common import clip_config, clip_store as cs
 
 from . import clip_brief, clip_gate, clip_gen, clip_library as lib
 
-NAMESPACE = "videomk/Clips"
-PAYING_SOURCES = ("apple", "google", "web")
-NO_CREDIT_STATUSES = ("FAILED", "CANCELLED", "REJECTED")   # their credits were given back
+from .ondemand import (NAMESPACE, PAYING_SOURCES, NO_CREDIT_STATUSES, _readers, set_readers, reset, emit, _stat, decision, context, plan_of, entitlement, credits_used,   # noqa: F401 - the shared framework
+                       allowance_usd, reserve, release, spent_today)
+
 LOCK_S = 600
 WAIT_AFTER_S = 40.0                # after the provider's own limit: the gate, the embeddings and the writes
 MIN_FILL = 0.75                    # clips.MIN_FILL: footage shorter than this share of the scene is never used
-
-_readers: Dict[str, Callable[..., Any]] = {}
-
-
-def set_readers(*, video: Optional[Callable[[str], Optional[Dict[str, Any]]]] = None, credits: Optional[Callable[[str, float], int]] = None) -> None:
-    """Tests: how the video row and the account's credits of the month are read."""
-    for k, v in (("video", video), ("credits", credits)):
-        if v is not None:
-            _readers[k] = v
-
-
-def reset() -> None:
-    _readers.clear()
-
-
-# ----------------------------------------------------------------------------- observability
-def emit(name: str, value: float = 1, unit: str = "Count", **dims: str) -> None:
-    """One CloudWatch metric through the function's log (embedded metric format: no API call, no permission)."""
-    print(json.dumps({"_aws": {"Timestamp": int(time.time() * 1000), "CloudWatchMetrics": [{"Namespace": NAMESPACE, "Dimensions": [sorted(dims)], "Metrics": [{"Name": name, "Unit": unit}]}]},
-                      name: value, **dims}))
-
-
-def _stat(store: cs.Store, **counters: int) -> None:
-    try:
-        store.add(cs.STATS, cs.day(), {k: int(v) for k, v in counters.items()}, fields={"ttl": int(time.time()) + 400 * 86400})
-    except Exception:
-        logging.exception("clip stat not written")
-
-
-def decision(store: Optional[cs.Store], outcome: str, **info: Any) -> None:
-    """Every decision, with its reason: a log line, a metric by reason code, and a counter of the day."""
-    code = outcome.split(":", 1)[0]
-    logging.warning("CLIP_DECISION %s", json.dumps({"outcome": outcome, **{k: v for k, v in info.items() if v is not None}}, ensure_ascii=False, default=str)[:900])
-    emit("Decisions", Outcome=code)
-    if store is not None:
-        _stat(store, **{f"d_{code}": 1})
-
-
-# ----------------------------------------------------------------------------- who is asking
-def context(video_id: str) -> Optional[Dict[str, Any]]:
-    """What the video row says about who made the video: {user_id, plan, plan_interval, plan_source, plan_state}. None when it cannot be read (then nobody is entitled)."""
-    try:
-        if "video" in _readers:
-            return _readers["video"](video_id)
-        import boto3
-        it = boto3.resource("dynamodb").Table(os.environ.get("VIDEOS_TABLE", "Videos")).get_item(
-            Key={"video_id": video_id}, ProjectionExpression="user_id, #p, plan_interval, plan_source, plan_state", ExpressionAttributeNames={"#p": "plan"}).get("Item")
-        return dict(it) if it else None
-    except Exception:
-        logging.exception("clip context unreadable")
-        return None
-
-
-def plan_of(ctx: Optional[Dict[str, Any]]) -> str:
-    p = str((ctx or {}).get("plan") or "free")
-    return p if p in clip_config.PLANS_ALL else "free"
-
-
-def entitlement(ctx: Optional[Dict[str, Any]]) -> Optional[str]:
-    """'paid' (an active Max plan bought in a store or on the web: the paying budget and the margin formula), 'test' (an unlimited test account, or a Max plan an admin
-    granted: no revenue, so the separate test budget), or None (Free, Pro, a plan in its grace period, unknown: never generates)."""
-    plan = plan_of(ctx)
-    if plan == "test":
-        return "test"
-    if plan != "max" or plan not in clip_config.GENERATE_PLANS:
-        return None
-    if str(ctx.get("plan_state") or "active") != "active":
-        return None
-    return "paid" if ctx.get("plan_source") in PAYING_SOURCES else "test"
-
-
-def credits_used(user_id: str, now: Optional[float] = None) -> int:
-    """Credits charged to the account's videos created this calendar month (UTC) and not given back."""
-    if "credits" in _readers:
-        return int(_readers["credits"](user_id, now or time.time()))
-    import boto3
-    from boto3.dynamodb.conditions import Key
-
-    tbl = boto3.resource("dynamodb").Table(os.environ.get("VIDEOS_TABLE", "Videos"))
-    start = time.strftime("%Y-%m-01T00:00:00Z", time.gmtime(now))
-    total, kw = 0, {}
-    while True:
-        r = tbl.query(IndexName=os.environ.get("GSI_USER_VIDEOS", "GSI_UserVideos"), KeyConditionExpression=Key("user_id").eq(user_id) & Key("created_at").gte(start),
-                      ProjectionExpression="credits_charged, #s", ExpressionAttributeNames={"#s": "status"}, **kw)
-        total += sum(int(i.get("credits_charged") or 0) for i in r.get("Items", []) if i.get("status") not in NO_CREDIT_STATUSES)
-        if not r.get("LastEvaluatedKey"):
-            return total
-        kw["ExclusiveStartKey"] = r["LastEvaluatedKey"]
-
-
-def allowance_usd(kind: str, ctx: Dict[str, Any], cfg: Dict[str, Any], now: Optional[float] = None) -> float:
-    if kind == "test":
-        return float(cfg["test_account_cap_usd"])
-    return clip_config.account_allowance_usd(str(ctx.get("plan_interval") or "month"), credits_used(str(ctx["user_id"]), now), cfg)
 
 
 # ----------------------------------------------------------------------------- the demand log
@@ -164,8 +70,8 @@ def _silent(mp4: bytes) -> bytes:
 class Job:
     """One decision that ended in 'a library clip may come': either already known (`clip_id` set), or a generation running in the background."""
 
-    def __init__(self, store: cs.Store, *, clip_id: Optional[str] = None, outcome: str = "") -> None:
-        self.store, self.clip_id, self.outcome = store, clip_id, outcome
+    def __init__(self, store: cs.Store, *, clip_id: Optional[str] = None, outcome: str = "", media: str = "clip") -> None:
+        self.store, self.clip_id, self.outcome, self.media = store, clip_id, outcome, media
         self.thread: Optional[threading.Thread] = None
         self.deadline = 0.0
         self.generated = False
@@ -176,8 +82,8 @@ class Job:
         if self.thread is not None:
             self.thread.join(timeout=max(0.0, self.deadline - time.time()))
             if self.thread.is_alive():
-                decision(self.store, "timeout", brief=self.info.get("brief"), waited=round(time.time() - self.info.get("t0", time.time()), 1))
-                emit("Timeout")
+                decision(self.store, "timeout", self.media, brief=self.info.get("brief"), waited=round(time.time() - self.info.get("t0", time.time()), 1))
+                emit("Timeout", **({} if self.media == "clip" else {"Media": self.media}))
                 return None
         return self.clip_id
 
@@ -192,9 +98,8 @@ def _run(job: Job, *, store: cs.Store, cfg: Dict[str, Any], lines: List[Dict[str
         except clip_gen.GenError as e:
             outcome, reason = ("timeout" if e.kind == "timeout" else "provider_failed"), e.kind
             if not e.billed:   # refused before anything was made: the reservation goes back
-                store.release(lines)
+                release(store, lines, media="clip", kind=kind, price=price)
                 charged = 0.0
-                emit("SpendUsd", -price, "None", Kind=kind)
             emit("ProviderError", Kind=e.kind)
             return
         emit("GenerationSeconds", round(time.time() - t0, 1), "Seconds")
@@ -247,7 +152,7 @@ def begin(*, video_id: str, beat_id: str, query: str, alt: str, narration: str, 
         kind = entitlement(ctx)
         if kind is None:
             return None   # Free, Pro, grace, unknown: not even a decision line (it would be every video)
-        if not cfg["enabled"]:
+        if not cfg["enabled"] or not cfg["master_enabled"]:
             decision(store, "kill_switch")
             return None
         if is_edit:
@@ -283,8 +188,7 @@ def begin(*, video_id: str, beat_id: str, query: str, alt: str, narration: str, 
         asked = log_demand(store, brief["brief"], bvec, video_id, cfg)
         budget_kind = "paid" if kind == "paid" else "test"
         day_limit, month_limit = float(cfg[f"{'platform' if kind == 'paid' else 'test'}_day_usd"]), float(cfg[f"{'platform' if kind == 'paid' else 'test'}_month_usd"])
-        spent_today = cs.usd((store.get(cs.spend_pk(budget_kind, "day"), cs.day(t)) or {}).get("spent"))
-        need_asks = max(int(cfg["min_demand"]), int(cfg["min_demand_tight"]) if day_limit > 0 and spent_today >= float(cfg["tight_share"]) * day_limit else 0)
+        need_asks = max(int(cfg["min_demand"]), int(cfg["min_demand_tight"]) if day_limit > 0 and spent_today(store, budget_kind, "clip", t) >= float(cfg["tight_share"]) * day_limit else 0)
         if asked < need_asks:
             decision(store, "low_demand", brief=brief["brief"], asked=asked, needed=need_asks)
             return None
@@ -294,35 +198,21 @@ def begin(*, video_id: str, beat_id: str, query: str, alt: str, narration: str, 
             return None
 
         price = clip_config.price_usd(seconds, cfg)
-        allowance = allowance_usd(kind, ctx, cfg, t)
-        keep = int(t) + 400 * 86400
-        lines = [cs.line(cs.VIDEO + video_id, "n", 1, int(cfg["video_cap_clips"]), field="n", extra={"spent": cs.micro(price)}, ttl=int(t) + 90 * 86400),
-                 cs.line(cs.ACCT + str(ctx["user_id"]), cs.month(t), cs.micro(price), cs.micro(allowance), extra={"n": 1}, ttl=keep),
-                 cs.line(cs.spend_pk(budget_kind, "day"), cs.day(t), cs.micro(price), cs.micro(day_limit), extra={"n": 1}, ttl=keep),
-                 cs.line(cs.spend_pk(budget_kind, "month"), cs.month(t), cs.micro(price), cs.micro(month_limit), extra={"n": 1}, ttl=keep)]
-        failed = store.reserve(lines)
-        if failed is not None:
-            cap = ("video", "account", f"{'platform' if kind == 'paid' else 'test'}_day", f"{'platform' if kind == 'paid' else 'test'}_month")[failed] if failed >= 0 else "busy"
+        lines, why, allowance = reserve(store, cfg, media="clip", kind=budget_kind, ctx=ctx, video_id=video_id, price=price, now=t)
+        if lines is None:
             store.delete(cs.LOCK, lock_key)
-            emit("CapHit", Cap=cap)
-            _stat(store, **{f"cap_{cap}": 1})
-            if failed >= 2:
-                emit("BudgetStop", Kind=budget_kind)
-            decision(store, {"video": "cap_video", "account": "cap_account", "busy": "busy"}.get(cap, "budget_day" if cap.endswith("day") else "budget_month"),
-                     brief=brief["brief"], kind=kind, price_usd=price, allowance_usd=allowance)
+            decision(store, why, brief=brief["brief"], kind=kind, price_usd=price, allowance_usd=allowance)
             return None
-        emit("SpendUsd", price, "None", Kind=budget_kind)
         if not store.put(claim[0], claim[1], {"state": "started", "brief": brief["brief"], "at": int(t), "ttl": int(t) + 90 * 86400}, only_if_absent=True):
-            store.release(lines)   # another attempt of the same beat got here first
+            release(store, lines, media="clip", kind=budget_kind, price=price)   # another attempt of the same beat got here first
             store.delete(cs.LOCK, lock_key)
-            emit("SpendUsd", -price, "None", Kind=budget_kind)
             decision(store, "retry", state="raced")
             return None
         prompt = clip_brief.build_prompt(brief["brief"], people=str(brief.get("people") or "none"), aspect=aspect)
         ledger = (cs.ledger_pk(cs.month(t)), f"{int(t * 1000):013d}-{uuid.uuid4().hex[:6]}")
         store.put(ledger[0], ledger[1], {"at": int(t), "outcome": "started", "brief": brief["brief"], "query": clip_brief_safe(query), "seconds": seconds, "aspect": aspect, "kind": budget_kind,
                                          "reserved_usd": price, "charged_usd": price, "account": lib.account_ref(str(ctx["user_id"])), "video": lib.video_ref(video_id),
-                                         "asked": asked, "allowance_usd": allowance, "ttl": int(t) + 500 * 86400})
+                                         "asked": asked, "allowance_usd": allowance, "media": "clip", "ttl": int(t) + 500 * 86400})
         job = Job(store, outcome="generating")
         job.info = {"brief": brief["brief"], "t0": time.time(), "price": price, "kind": budget_kind}
         job.deadline = time.time() + float(cfg["gen_timeout_s"]) + WAIT_AFTER_S

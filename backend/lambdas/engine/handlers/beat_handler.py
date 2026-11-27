@@ -14,7 +14,7 @@ from ..scenes import ELEMENTS
 from ..scenes.registry import PrepareCtx
 from common import clip_config
 
-from .. import align, assets, audio, awsio, catalog_pick, clip_ondemand, clips, costs, format_options, making_progress, plan as plan_mod, stock, timeline as timeline_mod, tts, voices
+from .. import align, assets, audio, awsio, catalog_pick, clip_ondemand, clips, costs, image_ondemand, format_options, making_progress, plan as plan_mod, stock, timeline as timeline_mod, tts, voices
 
 
 def _provider(cfg: Dict[str, Any]):
@@ -94,7 +94,7 @@ def make_audio(plan: Dict[str, Any], beat: Dict[str, Any], video_id: str, cost_f
     return out
 
 
-def make_photo(plan: Dict[str, Any], beat: Dict[str, Any], video_id: str, cost_field: str) -> Dict[str, Any]:
+def make_photo(plan: Dict[str, Any], beat: Dict[str, Any], video_id: str, cost_field: str, started: Optional[float] = None) -> Dict[str, Any]:
     pfx = awsio.prefix(video_id)
     props = beat["scene"]["props"]
     query, pick = props["image_query"], beat.get("pick")
@@ -125,11 +125,21 @@ def make_photo(plan: Dict[str, Any], beat: Dict[str, Any], video_id: str, cost_f
         if result:
             costs.add_cost(video_id, float(result["review"].get("cost_usd", 0.0)), field=cost_field, part="stock")
     if result is None:
+        job = None
+        if clip_config.flag() and not pick:   # images on demand (docs/LIBRARY_ON_DEMAND.md): our catalog has nothing for this search; a general picture may be made for it while the stock search runs
+            job = image_ondemand.begin(video_id=video_id, beat_id=str(beat["id"]), query=query, alt=props.get("alt", ""), narration=_context(beat), plan=plan,
+                                       ctx=clip_ondemand.context(video_id), is_edit=cost_field != "cost_usd", beat_started=started)
         result = stock.scout_reviewed(query, _context(beat), props.get("alt", ""), unsplash_key=unsplash_key, **({"big": True} if big else {}))
         if result:
             costs.add_cost(video_id, float(result.get("review", {}).get("cost_usd", 0.0)), field=cost_field, part="stock")
             if result.get("candidates"):
                 awsio.put_json(cands_key, {"query": query, "candidates": result["candidates"]})
+        if job is not None:   # ours when it comes in time and suits the narration: read back from the catalog, no credit line; otherwise the stock photo found meanwhile
+            cid = job.wait()
+            mine = image_ondemand.use(cid, query, _context(beat), props.get("alt", ""), video_id, aspect=str((plan.get("frame") or {}).get("aspect") or "16:9"), big=big, generated=job.generated) if cid else None
+            if mine:
+                costs.add_cost(video_id, float(mine["review"].get("cost_usd", 0.0)), field=cost_field, part="stock")
+                result = mine
     if result and result.get("jpeg"):
         key = f"{pfx}assets/img_{beat['id']}_{hashlib.sha1(result['jpeg']).hexdigest()[:8]}.jpg"
         awsio.put_bytes(key, result["jpeg"], "image/jpeg")
@@ -234,7 +244,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         raise ValueError(f"beat {beat_id} not in plan")
     media = make_audio(plan, beat, video_id, cost_field)
     if beat["scene"]["type"] == "image":
-        media.update(make_photo(plan, beat, video_id, cost_field))
+        media.update(make_photo(plan, beat, video_id, cost_field, began))
     elif beat["scene"]["type"] == "gallery":
         media.update(make_gallery(plan, beat, video_id, cost_field))
     elif beat["scene"]["type"] == "clip":

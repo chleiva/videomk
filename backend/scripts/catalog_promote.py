@@ -40,7 +40,7 @@ def promote(src, dst, *, dry_run: bool = True, now: str = "") -> Dict[str, Any]:
         if vec is None or any(not src.has(k) for k in keys):
             rep["refused"].append({"id": cid, "why": "the source is missing an object or the vector"})
             continue
-        if _sha(src.get(keys[0])) != cid:
+        if _sha(src.get(keys[0])) != (item.get("stored_sha256") or cid):   # an image marked as ours (scripts/ownership_admin.py) keeps its id; its file's own hash is recorded on the row
             rep["refused"].append({"id": cid, "why": "the original does not match its content hash in the source"})
             continue
         have = dst.get_item(cid)

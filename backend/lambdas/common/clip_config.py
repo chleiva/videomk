@@ -19,7 +19,8 @@ GENERATE_PLANS = ("max", "test")   # code, not a knob: Free and Pro never genera
 
 # name: (default, kind, lowest, highest). Documented in docs/CLIPS_ON_DEMAND.md section 3.
 KNOBS: Dict[str, tuple] = {
-    "enabled": (False, "bool", None, None),                 # the kill switch for GENERATION
+    "master_enabled": (True, "bool", None, None),           # the master kill switch: false stops generation of EVERY media type at once
+    "enabled": (False, "bool", None, None),                 # the kill switch for CLIP generation
     "reuse_enabled": (True, "bool", None, None),            # library clips are offered to videos at all
     "reuse_plans": (list(PLANS_ALL), "plans", None, None),  # plans whose videos may use library clips
     "platform_day_usd": (10.0, "float", 0.0, 10000.0),      # every generation of paying accounts in one UTC day (hard stop)
@@ -49,6 +50,35 @@ KNOBS: Dict[str, tuple] = {
     "min_demand_tight": (2, "int", 1, 100),                 # ... only briefs asked for by this many videos are generated
     "gate_min_score": (7, "int", 0, 10),
     "model": ("gemini-omni-1.2-flash", "text", None, None),
+    # ---- the account's share for clips inside the one allowance (images and objects below have theirs): section 2 of docs/LIBRARY_ON_DEMAND.md
+    "clip_account_cap_usd": (1.75, "float", 0.0, 100.0),     # 3 generations of 8 s a month for a monthly Max account
+    # ---- images (docs/LIBRARY_ON_DEMAND.md part A): the same OpenAI model and tier as the image catalog
+    "image_enabled": (False, "bool", None, None),            # the kill switch for image generation
+    "image_price_usd": (0.05, "float", 0.0, 5.0),            # one generation at 2048x1152 high with its check and embeddings (measured 0.0442 + 0.001)
+    "image_account_cap_usd": (1.00, "float", 0.0, 100.0),
+    "image_test_account_cap_usd": (1.00, "float", 0.0, 100.0),
+    "image_video_cap": (4, "int", 0, 50),
+    "image_day_usd": (3.0, "float", 0.0, 10000.0),
+    "image_month_usd": (40.0, "float", 0.0, 100000.0),
+    "image_test_day_usd": (1.0, "float", 0.0, 1000.0),
+    "image_test_month_usd": (10.0, "float", 0.0, 10000.0),
+    "image_timeout_s": (75, "int", 5, 240),
+    "image_reuse_min_score": (0.62, "float", 0.0, 1.0),      # brief vs the catalog (text to image): at or above = we already have this picture
+    "image_model": ("gpt-image-2.6-flare", "text", None, None),
+    # ---- whiteboard sketch objects (part B): one call per video for all its missing objects
+    "object_enabled": (False, "bool", None, None),
+    "object_plans": (["max", "test"], "plans", None, None),  # plans whose whiteboard videos may have objects made (never Free)
+    "object_call_usd": (0.04, "float", 0.0, 5.0),            # one sheet at 2048x1152 medium (measured 0.038)
+    "object_gate_usd": (0.007, "float", 0.0, 1.0),           # the gate and naming call, per object
+    "object_max_per_call": (6, "int", 1, 6),
+    "object_account_cap_usd": (0.15, "float", 0.0, 100.0),
+    "object_test_account_cap_usd": (0.30, "float", 0.0, 100.0),
+    "object_video_cap": (1, "int", 0, 10),                   # calls per video
+    "object_day_usd": (1.0, "float", 0.0, 10000.0),
+    "object_month_usd": (10.0, "float", 0.0, 100000.0),
+    "object_test_day_usd": (0.5, "float", 0.0, 1000.0),
+    "object_test_month_usd": (5.0, "float", 0.0, 10000.0),
+    "object_timeout_s": (30, "int", 5, 120),                 # the plan step waits at most this long; later or rejected = the written label
 }
 
 _cache: Dict[str, Any] = {"at": 0.0, "raw": None}
@@ -140,6 +170,19 @@ def config(now: Optional[float] = None) -> Dict[str, Any]:
             _cache["raw"] = _cache["raw"] if _cache["raw"] is not None else {}
         _cache["at"] = now
     return clean_config(_cache["raw"])
+
+
+def limits(cfg: Dict[str, Any], media: str, kind: str) -> Dict[str, float]:
+    """The four limits of one media type for a paying ('paid') or a no-revenue ('test') account: generations per video, the account's share of the month for
+    this type, and this type's day and month budgets. The account's TOTAL of the month (all types) is account_allowance_usd / test_account_cap_usd."""
+    paid = kind == "paid"
+    if media == "clip":
+        return {"video_cap": cfg["video_cap_clips"], "account_cap": cfg["clip_account_cap_usd"] if paid else cfg["test_account_cap_usd"],
+                "day": cfg["platform_day_usd"] if paid else cfg["test_day_usd"], "month": cfg["platform_month_usd"] if paid else cfg["test_month_usd"]}
+    if media not in ("image", "object"):
+        raise ValueError(media)
+    return {"video_cap": cfg[f"{media}_video_cap"], "account_cap": cfg[f"{media}_account_cap_usd" if paid else f"{media}_test_account_cap_usd"],
+            "day": cfg[f"{media}_day_usd" if paid else f"{media}_test_day_usd"], "month": cfg[f"{media}_month_usd" if paid else f"{media}_test_month_usd"]}
 
 
 def generation_on(cfg: Optional[Dict[str, Any]] = None) -> bool:

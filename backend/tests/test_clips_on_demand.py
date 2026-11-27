@@ -425,7 +425,20 @@ def test_at_most_two_generations_per_video(env):
     assert spent(env.store) == pytest.approx(2 * 0.581)        # the refused one moved no counter
 
 
+def test_clips_have_their_own_share_of_the_account_allowance(env):
+    made = 0
+    for i in range(5):
+        env.rows[f"w{i}"] = dict(env.rows["v1"])
+        job = ask(env, video=f"w{i}", query=_different_scene(env, i))
+        if job:
+            job.wait()
+            made += 1
+    assert made == 3 and outcomes(env.store)["cap_account_type"] == 2          # 3 x 0.581 = 1.743 <= 1.75: the rest of the 2.915 is kept for images and objects
+    assert cs.usd(env.store.get(cs.ACCT + "u1", cs.month())["spent"]) == cs.usd(env.store.get(cs.ACCT + "u1", cs.month() + ":clip")["spent"]) == pytest.approx(1.743)
+
+
 def test_the_account_allowance_stops_the_sixth_generation_of_the_month(env):
+    cc.set_config({**ON, "clip_account_cap_usd": 3.0})                          # the type share out of the way: the TOTAL of the account is what stops it
     made = 0
     for i in range(7):
         env.rows[f"w{i}"] = dict(env.rows["v1"])
