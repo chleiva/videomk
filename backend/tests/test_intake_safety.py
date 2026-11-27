@@ -87,7 +87,7 @@ def test_parse_output_garbage_is_none_and_fields_are_normalised():
     for junk in ("", "ok", "[]", "{}", '{"foo": 1}', "{{{", "null"):
         assert intake.parse_output(junk) is None
     p = intake.parse_output('```json\n{"block": "none", "unsupported": {"message": 5}, "questions": "x"}\n```')
-    assert p == {"block": None, "unsupported": None, "questions": []}
+    assert p == {"block": None, "unsupported": None, "questions": [], "look": None}
     assert intake.parse_output('{"block": "bananas"}')["block"] == "other_harm"      # a block with an unknown id is still a block
     assert intake.parse_output('{"block": true}')["block"] == "other_harm"
 
