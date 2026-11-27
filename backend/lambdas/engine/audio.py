@@ -4,7 +4,7 @@ Music and SFX are generated with numpy, so they carry no licence, no Content ID 
 to store. (A curated CC0 pack can replace them per theme later; the interface is the same.)
 """
 import wave
-from typing import Dict, List, Sequence, Tuple
+from typing import Dict, List, Optional, Sequence, Tuple
 
 import numpy as np
 
@@ -45,6 +45,41 @@ def trim_silence(a: np.ndarray, sr: int, thresh: float = 0.012, keep: float = 0.
         return a
     k = int(keep * sr)
     return a[max(0, idx[0] - k): min(a.size, idx[-1] + k)]
+
+
+# The level every beat of narration is brought to before the mix: Ruth's own (measured on QA stems, 2026-11-27), the voice the music bed and its ducking were
+# tuned with. Polly's voices do not come at one level: Sergio -23.6 dB, Beatrice -22.9 (and -23.7 to -21.3 from one beat to the next), Ruth -21.7, Kiara
+# -20.4, Tina -16.3. The music is ducked by how loud the voice is (media.mix_audio), so under a quieter voice it was both ducked less and nearer to it: 9.9 dB
+# under Beatrice where it was 11.5 to 14.1 dB under the earlier voices.
+SPEECH_LEVEL_DB = -21.7
+MAX_LEVEL_GAIN_DB = 6.0
+
+
+def speech_level_db(a: np.ndarray, sr: int) -> Optional[float]:
+    """The level of the speech itself in dB (mean power of the 20 ms frames that carry speech: within 40 dB of the loudest, then within 10 dB of their mean,
+    the gating loudness meters use). None for silence. Pauses do not count, so a slow reading and a fast one of the same voice measure alike."""
+    h = max(1, int(0.02 * sr))
+    n = a.size // h
+    if n < 5:
+        return None
+    e = np.mean(a[: n * h].astype(np.float64).reshape(n, h) ** 2, axis=1)
+    top = float(e.max())
+    if top <= 1e-9:
+        return None
+    loud = e[e > top * 1e-4]
+    act = loud[loud > float(loud.mean()) * 0.1]
+    return float(10.0 * np.log10(float(act.mean()))) if act.size else None
+
+
+def level_speech(a: np.ndarray, sr: int, target_db: float = SPEECH_LEVEL_DB) -> np.ndarray:
+    """One beat of narration at the common speech level (at most MAX_LEVEL_GAIN_DB either way, and never past a peak of 0.97)."""
+    lvl = speech_level_db(a, sr)
+    if lvl is None:
+        return a
+    gain = 10.0 ** (max(-MAX_LEVEL_GAIN_DB, min(MAX_LEVEL_GAIN_DB, target_db - lvl)) / 20.0)
+    peak = float(np.max(np.abs(a))) or 1.0
+    gain = min(gain, 0.97 / peak) if gain > 1.0 else gain
+    return (a * gain).astype(np.float32)
 
 
 def build_narration(beats: Sequence[Dict], total_duration: float, sr: int = SR) -> np.ndarray:

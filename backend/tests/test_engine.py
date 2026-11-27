@@ -550,14 +550,15 @@ def test_default_voice_follows_the_viewers_region_and_the_brief_can_override():
 
     d = voices.default_voice
     assert [d("en", r) for r in (None, "US", "us", "CA", "FR", "GB", "IN", "AU", "IE", "NZ", "ZA", "SG")] == \
-        ["Ruth", "Ruth", "Ruth", "Ruth", "Ruth", "Amy", "Kajal", "Olivia", "Niamh", "Aria", "Ayanda", "Jasmine"]  # Canada: no Canadian voice, so American
-    assert [d("es", r) for r in (None, "ES", "MX", "AR", "CO", "CL", "PE", "US", "FR")] == ["Lucia", "Lucia", "Lupe", "Lupe", "Lupe", "Lupe", "Lupe", "Lupe", "Lucia"]   # Latin America: Lupe, the lively voice (voices.STEADY)
+        ["Ruth", "Ruth", "Ruth", "Ruth", "Ruth", "Amy", "Kiara", "Olivia", "Niamh", "Aria", "Ayanda", "Jasmine"]  # Canada: no Canadian voice, so American
+    assert [d("es", r) for r in (None, "ES", "MX", "AR", "CO", "CL", "PE", "US", "FR")] == ["Lupe", "Sergio", "Lupe", "Lupe", "Lupe", "Lupe", "Lupe", "Lupe", "Lupe"]   # Spain: a Castilian voice (Sergio); everyone else, known or not: Lupe, the lively voice (voices.STEADY)
     assert voices.clean_region(" gb ") == "GB" and voices.clean_region("GBR") is None and voices.clean_region("1A") is None and voices.clean_region(None) is None
-    assert voices.clean_cast(None, "en", "IN") == {"narrator": "Kajal"} and voices.clean_cast({"narrator": "Brian"}, "en", "IN") == {"narrator": "Brian"}
+    assert voices.clean_cast(None, "en", "IN") == {"narrator": "Kiara"} and voices.clean_cast({"narrator": "Brian"}, "en", "IN") == {"narrator": "Brian"}
     p_in = plan_mod.system_prompt("en", "IN")
     assert "The viewer is in IN" in p_in and "viewer's default voice (Indian)" in p_in and "The brief always wins" in p_in
     assert "The viewer is in" not in plan_mod.system_prompt("en") and "viewer's default voice (American)" in plan_mod.system_prompt("en")
-    assert "viewer's default voice (Spanish (Spain))" in plan_mod.system_prompt("es") and "viewer's default voice (Latin American (US))" in plan_mod.system_prompt("es", "MX")
+    assert "viewer's default voice (Spanish (Spain))" in plan_mod.system_prompt("es", "ES") and "viewer's default voice (Latin American (US))" in plan_mod.system_prompt("es", "MX")
+    assert "viewer's default voice (Latin American (US))" in plan_mod.system_prompt("es")   # no region known: Lupe, not a Castilian voice
     # the catalogue is not in the prompt: the director says what it wants (accent, gender, pace) and the resolver casts it
     en = plan_mod.system_prompt("en")
     assert "American | British | Australian | Indian | Irish | New Zealand | South African | Singaporean" in en and "different accents" in en
@@ -572,7 +573,7 @@ def test_spanish_plans_get_spanish_voices_only():
     assert voices.language_of(plan["voices"]["luis"]) == "es" and plan["voices"]["luis"] not in ("Lupe", "Mia")  # Luis keeps his lines, with a Spanish voice
     assert voices.CATALOG[plan["voices"]["luis"]][2] == "male"  # and, being the one that had to be replaced, a different gender from the speaker before
     assert any("Matthew is not a voice for Spanish" in w for w in warns) and plan["voice_notes"] and plan["voice_notes"][0].startswith("luis: ")
-    assert plan_mod.validate_plan(_plan_with(None, [None]), language="es")[0]["voices"] == {"narrator": "Lucia"}
+    assert plan_mod.validate_plan(_plan_with(None, [None]), language="es")[0]["voices"] == {"narrator": "Lupe"}
     assert plan_mod.validate_plan(_plan_with(None, [None]), language="es", region="MX")[0]["voices"] == {"narrator": "Lupe"}
     assert plan_mod.validate_plan(_plan_with(None, [None]))[0]["voices"] == {"narrator": "Ruth"} and plan_mod.validate_plan(_plan_with(None, [None]))[0]["language"] == "en"
 
