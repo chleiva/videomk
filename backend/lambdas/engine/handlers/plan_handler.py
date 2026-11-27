@@ -154,6 +154,9 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             return {**base, "plot": {"legit": False, "reason": "None of your photos could be used" + (f" ({skipped[0]['reason']})" if skipped else "") + ". Try different photos."}}
     provider, ask_tools = _web_tools(spent)
     catalog = library.load_catalog(awsio.get_json)
+    if os.environ.get("CLIPS_ON_DEMAND") == "1":   # whiteboard drawings made on demand so far are part of the library the director may draw from (docs/LIBRARY_ON_DEMAND.md part B)
+        from .. import object_ondemand
+        object_ondemand.load_dynamic()
     if event.get("deck") and os.environ.get("DECK_TO_VIDEO") == "1":
         result = _deck_result(event, video_id, user_id, prompt, minutes, spent, ask_small, ask_big, catalog)
     else:
@@ -173,6 +176,11 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     if not result["legit"]:
         return {**base, "plot": {"legit": False, "reason": result.get("reason", "")}}
     plan, language, region = result["plan"], result["plan"]["language"], result["plan"].get("region")
+    if os.environ.get("CLIPS_ON_DEMAND") == "1":   # the boards' missing drawings: made once for OUR library (one call, bounded in time), then drawn in this video; anything else stays a written label
+        from .. import clip_ondemand, object_ondemand
+        got = object_ondemand.fill(plan, video_id=video_id, ctx=clip_ondemand.context(video_id))
+        if got.get("asked"):
+            logging.warning("whiteboard objects on demand: %s", {k: got[k] for k in ("asked", "made", "reason")})
 
     known = {t["id"] for t in catalog}
     chosen = plan_mod.sanitize_music(plan.get("music"), len(plan["beats"]), known)   # only recordings that really exist; no catalogue, no music

@@ -8,6 +8,7 @@ Rendering is a pure function of the scene-local time, so chunks agree with each 
 at 1080p) and kept while its frames are drawn. A drawing that cannot be fetched is written as a boxed label; a board that cannot be built at all shows its
 written items as a plain card: a render never fails for this scene.
 """
+import os
 import hashlib
 import json
 import re
@@ -83,11 +84,15 @@ def _sanitize(props: Dict[str, Any]) -> Dict[str, Any]:
             if it.get("draw"):
                 name = _clean_text(it.get("draw"), 48)
                 oid = name if library.has(name) else library.by_name(name)
+                guess = None
                 if oid is None:
                     hit = library.search(name, 1)
                     oid = hit[0]["id"] if hit else None
+                    guess = hit[0]["score"] if hit else None
                 if oid is not None:
                     o["draw"] = oid
+                    if guess is not None and os.environ.get("CLIPS_ON_DEMAND") == "1":   # found by MEANING only (a honeycomb can come back as a cheese): remembered, so the
+                        o["asked"], o["match"] = name.replace("_", " ")[:28], guess    # drawing itself can be made on demand (engine/object_ondemand.py). Nothing changes without the flag
                     if it.get("ink") in INKS:
                         o["ink"] = it["ink"]
                     if it.get("fill") is False:

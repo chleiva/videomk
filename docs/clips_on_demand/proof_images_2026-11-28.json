@@ -1,0 +1,207 @@
+{
+ "models_usd": 0.00156,
+ "images": [
+  {
+   "video": "vid-max",
+   "query": "wooden beehives in a meadow",
+   "job": "generating",
+   "generated": true,
+   "id": "bddb738f8684c225c40e6c55a5d5b7366d145f45e08916832ec3d20da41f15e8",
+   "wall_s": 11.0,
+   "used": true,
+   "credit": "",
+   "marks": {
+    "asset_id": "bddb738f8684c225c40e6c55a5d5b7366d145f45e08916832ec3d20da41f15e8",
+    "source_type": "http://cv.iptc.org/newscodes/digitalsourcetype/trainedAlgorithmicMedia",
+    "credit": "VideoMK",
+    "creator": "Agilegency Ltd",
+    "rights": "\u00a9 2026 Agilegency Ltd (VideoMK). All rights reserved. AI-generated image from the VideoMK library; not licensed for standalone use.",
+    "email": "hello@videomk.com",
+    "marked": "True",
+    "owner": "Agilegency Ltd",
+    "exif_artist": "Agilegency Ltd",
+    "exif_copyright": "(c) 2026 Agilegency Ltd (VideoMK). All rights reserved. AI-generated image from the VideoMK library; not licensed for standalone use."
+   },
+   "bytes": 328998
+  },
+  {
+   "video": "vid-max",
+   "query": "president signing a law",
+   "job": null,
+   "generated": false,
+   "id": null,
+   "wall_s": 0.0
+  },
+  {
+   "video": "vid-max",
+   "query": "jar of honey on a table",
+   "job": "generating",
+   "generated": false,
+   "id": null,
+   "wall_s": 8.2
+  },
+  {
+   "video": "vid-max2",
+   "query": "empty classroom with wooden desks",
+   "job": "generating",
+   "generated": true,
+   "id": "7aca6f4e3ca2785096b1eb7c2df5c5288240bfd3e31f347d05c3e266ac4d04bb",
+   "wall_s": 10.5,
+   "used": true,
+   "credit": "",
+   "marks": {
+    "asset_id": "7aca6f4e3ca2785096b1eb7c2df5c5288240bfd3e31f347d05c3e266ac4d04bb",
+    "source_type": "http://cv.iptc.org/newscodes/digitalsourcetype/trainedAlgorithmicMedia",
+    "credit": "VideoMK",
+    "creator": "Agilegency Ltd",
+    "rights": "\u00a9 2026 Agilegency Ltd (VideoMK). All rights reserved. AI-generated image from the VideoMK library; not licensed for standalone use.",
+    "email": "hello@videomk.com",
+    "marked": "True",
+    "owner": "Agilegency Ltd",
+    "exif_artist": "Agilegency Ltd",
+    "exif_copyright": "(c) 2026 Agilegency Ltd (VideoMK). All rights reserved. AI-generated image from the VideoMK library; not licensed for standalone use."
+   },
+   "bytes": 173616
+  },
+  {
+   "video": "vid-free",
+   "query": "honey jar on a kitchen table",
+   "job": null,
+   "generated": false,
+   "id": null,
+   "wall_s": 0.0,
+   "search": [
+    {
+     "id": "bddb738f8684c225c40e6c55a5d5b7366d145f45e08916832ec3d20da41f15e8",
+     "score": 0.2172
+    }
+   ]
+  }
+ ],
+ "objects": [],
+ "ledger": [
+  {
+   "account": "7c86f60b8ac2ffb3",
+   "allowance_usd": 3.0,
+   "asked_n": 6,
+   "at": 1795807711,
+   "brief": "honeycomb, beehive, skateboard, violin, kite, teapot",
+   "charged_usd": 0.082,
+   "clip_id": "beehive,honeycomb,kite,skateboard,teapot,violin",
+   "kind": "test",
+   "latency_s": 10.3,
+   "made_n": 6,
+   "media": "object",
+   "outcome": "generated",
+   "provider_usd": 0.0375,
+   "reason": "ok",
+   "rejected_n": 0,
+   "reserved_usd": 0.082,
+   "sk": "1795807711439-5205b4",
+   "video": "5e40c3979edbe23a"
+  },
+  {
+   "account": "d91ff63265173293",
+   "allowance_usd": 3.0,
+   "asked_n": 4,
+   "at": 1795807724,
+   "brief": "igloo, accordion, sundial, trowel",
+   "charged_usd": 0.068,
+   "clip_id": "accordion,igloo,sundial,trowel",
+   "kind": "test",
+   "latency_s": 11.7,
+   "made_n": 4,
+   "media": "object",
+   "outcome": "generated",
+   "provider_usd": 0.0376,
+   "reason": "ok",
+   "rejected_n": 0,
+   "reserved_usd": 0.068,
+   "sk": "1795807724023-a1cf23",
+   "video": "383c829e17a6a456"
+  },
+  {
+   "account": "7c86f60b8ac2ffb3",
+   "allowance_usd": 3.0,
+   "at": 1795807747,
+   "brief": "row of wooden beehive boxes standing among tall wildflowers in a sunlit summer meadow",
+   "charged_usd": 0.05,
+   "clip_id": "bddb738f8684c225c40e6c55a5d5b7366d145f45e08916832ec3d20da41f15e8",
+   "gate_score": 8.0,
+   "kind": "test",
+   "latency_s": 9.7,
+   "media": "image",
+   "outcome": "generated",
+   "provider_usd": 0.044255,
+   "query": "wooden beehives in a meadow",
+   "reason": "ok",
+   "reserved_usd": 0.05,
+   "sk": "1795807747476-c63d5b",
+   "video": "5e40c3979edbe23a"
+  },
+  {
+   "account": "7c86f60b8ac2ffb3",
+   "allowance_usd": 3.0,
+   "at": 1795807759,
+   "brief": "golden honey in a glass jar on a wooden table, warm morning window light",
+   "charged_usd": 0.05,
+   "clip_id": null,
+   "gate_score": 8.0,
+   "kind": "test",
+   "latency_s": 7.2,
+   "media": "image",
+   "outcome": "gate_rejected",
+   "provider_usd": 0.04424500000000001,
+   "query": "jar of honey on a table",
+   "reason": "calm_bottom",
+   "reserved_usd": 0.05,
+   "sk": "1795807759298-6e36c3",
+   "video": "5e40c3979edbe23a"
+  },
+  {
+   "account": "d91ff63265173293",
+   "allowance_usd": 3.0,
+   "at": 1795807767,
+   "brief": "empty school classroom with rows of wooden desks in soft morning light",
+   "charged_usd": 0.05,
+   "clip_id": "7aca6f4e3ca2785096b1eb7c2df5c5288240bfd3e31f347d05c3e266ac4d04bb",
+   "gate_score": 8.0,
+   "kind": "test",
+   "latency_s": 9.6,
+   "media": "image",
+   "outcome": "generated",
+   "provider_usd": 0.04422500000000001,
+   "query": "empty classroom with wooden desks",
+   "reason": "ok",
+   "reserved_usd": 0.05,
+   "sk": "1795807767508-6d439f",
+   "video": "383c829e17a6a456"
+  }
+ ],
+ "stats": {
+  "image": {
+   "d_filter": 1,
+   "d_gate_rejected": 1,
+   "d_generated": 2,
+   "g_gate_rejected": 1,
+   "g_generated": 2,
+   "g_latency_ds": 265,
+   "g_n": 3,
+   "used_generated": 2
+  },
+  "object": {
+   "d_generated": 2,
+   "g_generated": 2,
+   "g_latency_ds": 220,
+   "g_n": 2,
+   "o_asked": 10,
+   "o_made": 10,
+   "o_rejected": 0,
+   "used_generated": 10
+  }
+ },
+ "spend": {
+  "image": 0.15,
+  "object": 0.15
+ }
+}

@@ -78,6 +78,7 @@ KNOBS: Dict[str, tuple] = {
     "object_month_usd": (10.0, "float", 0.0, 100000.0),
     "object_test_day_usd": (0.5, "float", 0.0, 1000.0),
     "object_test_month_usd": (5.0, "float", 0.0, 10000.0),
+    "object_sure_score": (0.55, "float", 0.0, 1.0),          # a drawing found by MEANING below this score is not trusted: the asked drawing is made (a honeycomb is not a cheese)
     "object_timeout_s": (30, "int", 5, 120),                 # the plan step waits at most this long; later or rejected = the written label
 }
 

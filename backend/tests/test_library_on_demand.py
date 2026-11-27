@@ -313,3 +313,123 @@ def test_the_photo_step_shows_our_image_without_a_credit_and_falls_back_to_stock
     monkeypatch.setenv("CLIPS_ON_DEMAND", "0")
     monkeypatch.setattr(io_, "begin", lambda **k: (_ for _ in ()).throw(AssertionError("must not run")))
     assert beat_handler.make_photo({"beats": []}, dict(beat, id="b3"), "v1", "cost_usd")["chosen"] == "unsplash:9"
+
+
+# ================================================================= whiteboard sketch objects on demand
+from engine import object_ondemand as oo   # noqa: E402
+from engine.whiteboard import library as wblib   # noqa: E402
+
+
+def _board_plan(*names):
+    return {"beats": [{"id": "w1", "scene": {"type": "whiteboard", "props": {"items": [{"id": f"i{k}", "write": n, "boxed": True, "zone": "centre"} for k, n in enumerate(names)] + [{"id": "t", "write": "Bees make honey"}]}}}]}
+
+
+def _pkg(oid, name):
+    return {"id": oid, "what": name, "w": 300, "h": 200, "width": 16.0, "ink": "<path/>", "fills": [], "fill_colours": [], "strokes": [[[0, 0], [10, 10]]], "pen_length": 14.1,
+            "meta": {"title_en": name.title(), "title_es": name + " es", "synonyms_en": [name + " comb"], "synonyms_es": ["celdas de abejas"], "tags": ["bees"], "description": f"A {name}.", "score": 8}}
+
+
+@pytest.fixture
+def wb(env, tmp_path, monkeypatch):
+    monkeypatch.setenv("WHITEBOARD_DIR", str(tmp_path))
+    cc.set_config({**ON, "object_enabled": True})
+    saved = json.loads(json.dumps(wblib.index()))
+    calls = []
+
+    def maker(objs, timeout):
+        calls.append(list(objs))
+        ok = [o for o in objs if o[1] != "blob thing"]
+        return [_pkg(oid, name) for oid, name in ok], {"sheet_usd": 0.038, "rejected": {oid: "gate: blob" for oid, name in objs if name == "blob thing"}}
+    oo.set_maker(maker)
+    env.calls, env.dir = calls, tmp_path
+    yield env
+    oo.set_maker(None)
+    wblib._index = saved
+    for fn in (wblib.by_name, wblib.search):
+        for a in ("_t", "_m"):
+            if hasattr(fn, a):
+                delattr(fn, a)
+
+
+def test_missing_drawings_are_made_stored_in_our_library_and_drawn_in_this_video(wb):
+    plan = _board_plan("honeycomb", "blob thing", "honeycomb")
+    got = oo.fill(plan, video_id="v1", ctx=od.context("v1"))
+    assert got["asked"] == ["honeycomb", "blob thing"] and got["made"] == ["honeycomb"] and len(wb.calls) == 1                 # ONE call for the video's missing drawings
+    items = plan["beats"][0]["scene"]["props"]["items"]
+    assert items[0] == {"id": "i0", "draw": "honeycomb", "zone": "centre"} and items[2]["draw"] == "honeycomb"                   # drawn where the label was
+    assert items[1]["write"] == "blob thing" and items[1]["boxed"] is True and items[3] == {"id": "t", "write": "Bees make honey"}  # rejected: the label stays; other writing untouched
+    pkg = json.load(open(wb.dir / "honeycomb.json"))
+    assert pkg["provenance"]["on_demand"] is True and pkg["provenance"]["scope"] == "library" and "Agilegency" in pkg["provenance"]["owner"] and "v1" not in json.dumps(pkg["provenance"])
+    row = wb.store.get(oo.WOBJ, "honeycomb")
+    assert row["title"] == "Honeycomb" and row["synonyms_es"] == ["celdas de abejas"] and row["v"] and row["scope"] == "library"
+    assert wblib.has("honeycomb") and wblib.by_name("celdas de abejas") == "honeycomb" and wblib.load("honeycomb")["w"] == 300               # the next plan finds it by name, in Spanish too
+    price = 0.04 + 2 * 0.007
+    assert spent(wb.store, "object") == pytest.approx(price) and cs.usd(wb.store.get(cs.ACCT + "u1", cs.month())["spent"]) == pytest.approx(price)
+    (line,) = wb.store.query(cs.ledger_pk(cs.month()))
+    assert line["media"] == "object" and line["made_n"] == 1 and line["rejected_n"] == 1 and outcomes(wb.store, "object") == {"generated": 1}
+    # one call per video; and a later process loads what was made
+    assert oo.fill(_board_plan("violin"), video_id="v1", ctx=od.context("v1"))["reason"] == "cap_video" and len(wb.calls) == 1
+    wblib._index = None
+    assert not wblib.has("honeycomb") and oo.load_dynamic() == 1 and wblib.has("honeycomb")
+
+
+def test_objects_who_may_switches_limits_and_names_that_are_never_drawn(wb, monkeypatch):
+    assert oo.missing(_board_plan("honeycomb", "Coca-Cola logo", "flag of france", "maria", "x", "a very long name of five words"), 6) == [("honeycomb", "honeycomb")]
+    assert oo.fill(_board_plan(), video_id="v1", ctx=od.context("v1")) == {"asked": [], "made": [], "reason": ""}
+    wb.rows["v1"]["plan"] = "pro"
+    assert oo.fill(_board_plan("violin"), video_id="v1", ctx=od.context("v1"))["reason"] == "not_entitled"
+    wb.rows["v1"]["plan"] = "max"
+    cc.set_config({**ON, "object_enabled": False})
+    assert oo.fill(_board_plan("violin"), video_id="v1", ctx=od.context("v1"))["reason"] == "kill_switch"
+    cc.set_config({**ON, "object_enabled": True, "object_account_cap_usd": 0.03})
+    assert oo.fill(_board_plan("violin"), video_id="v1", ctx=od.context("v1"))["reason"] == "cap_account_type" and wb.calls == []
+    cc.set_config({**ON, "object_enabled": True, "object_day_usd": 0.01})
+    assert oo.fill(_board_plan("violin"), video_id="v1", ctx=od.context("v1"))["reason"] == "budget_day"
+    cc.set_config({**ON, "object_enabled": True})
+    assert oo.fill(_board_plan("violin"), video_id="v1", ctx=od.context("v1"), is_edit=True)["reason"] == "edit"
+    oo.set_maker(None)
+    monkeypatch.setenv("WHITEBOARD_PROTO_DIR", "/nonexistent")
+    assert oo.fill(_board_plan("violin"), video_id="v1", ctx=od.context("v1"))["reason"] == "no_tracer" and spent(wb.store, "object") == 0     # the engine's functions today: labels stay, nothing is spent
+    monkeypatch.setenv("CLIPS_ON_DEMAND", "0")
+    assert oo.fill(_board_plan("violin"), video_id="v1", ctx=od.context("v1"))["asked"] == []
+
+
+def test_a_slow_or_failing_object_call_leaves_the_labels_and_never_delays_the_plan_past_the_limit(wb):
+    import time as _t
+    cc.set_config({**ON, "object_enabled": True, "object_timeout_s": 5})
+    oo.set_maker(lambda objs, timeout: (_ for _ in ()).throw(RuntimeError("HTTP 500")))
+    plan = _board_plan("violin")
+    assert oo.fill(plan, video_id="v1", ctx=od.context("v1"))["reason"] == "provider_failed" and plan["beats"][0]["scene"]["props"]["items"][0]["boxed"] is True
+    wb.rows["v2"] = dict(wb.rows["v1"])
+    import engine.object_ondemand as m
+    cc.set_config({**ON, "object_enabled": True, "object_timeout_s": 5})
+    real_join = __import__("threading").Thread.join
+    oo.set_maker(lambda objs, timeout: (_t.sleep(1.0), ([], {}))[1])
+    try:
+        __import__("threading").Thread.join = lambda self, timeout=None: real_join(self, 0.2 if self.name == "objectgen" else timeout)
+        t = _t.time()
+        assert oo.fill(_board_plan("kite"), video_id="v2", ctx=od.context("v2"))["reason"] == "timeout" and _t.time() - t < 0.9
+    finally:
+        __import__("threading").Thread.join = real_join
+    assert outcomes(wb.store, "object") == {"provider_failed": 1, "timeout": 1}
+
+
+def test_an_existing_drawing_is_never_overwritten(wb):
+    oo.fill(_board_plan("honeycomb"), video_id="v1", ctx=od.context("v1"))
+    first = open(wb.dir / "honeycomb.json").read()
+    assert oo.store_object(wb.store, _pkg("honeycomb", "honeycomb"), video_id="v9", cost_usd=0.01) == "honeycomb_2" and open(wb.dir / "honeycomb.json").read() == first
+    assert oo.store_object(wb.store, _pkg(wblib.ids()[0], "x"), video_id="v9", cost_usd=0.01) == wblib.ids()[0] + "_2"          # nor a bundled one
+
+
+def test_a_drawing_matched_only_by_meaning_is_replaced_by_the_real_thing(wb, monkeypatch):
+    from engine.scenes.elements import whiteboard as wbe
+    bundled = wblib.ids()[0]
+    monkeypatch.setattr(wblib, "search", lambda name, k=3, embed=None: [{"id": bundled, "score": 0.36, "title": "x"}])        # the library's closest thing, not the thing
+    props = wbe._sanitize({"items": [{"id": "a", "draw": "honeycomb"}, {"id": "b", "draw": bundled}]})
+    assert props["items"][0]["draw"] == bundled and props["items"][0]["asked"] == "honeycomb" and props["items"][0]["match"] == 0.36 and "asked" not in props["items"][1]
+    plan = {"beats": [{"id": "w", "scene": {"type": "whiteboard", "props": props}}]}
+    assert oo.missing(plan, 6) == [("honeycomb", "honeycomb")] and oo.missing(plan, 6, sure=0.3) == []
+    assert oo.fill(plan, video_id="v1", ctx=od.context("v1"))["made"] == ["honeycomb"]
+    assert props["items"][0]["draw"] == "honeycomb" and "asked" not in props["items"][0] and props["items"][1]["draw"] == bundled
+    monkeypatch.setenv("CLIPS_ON_DEMAND", "0")
+    assert "asked" not in wbe._sanitize({"items": [{"id": "a", "draw": "kite"}]})["items"][0]                                      # without the flag the plan is exactly what it was

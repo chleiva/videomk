@@ -57,7 +57,7 @@ def test_switched_on_it_adds_no_resource_to_the_main_stack(templates):
     off, on = templates["off"]["Resources"], templates["on"]["Resources"]
     assert set(on) == set(off) and len(on) == len(off)
     changed = sorted(k for k in on if on[k] != off[k])
-    assert len(changed) == 2 and {on[k]["Type"] for k in changed} == {"AWS::Lambda::Function", "AWS::IAM::Policy"}     # the beat function's variables and its own policy
+    assert len(changed) == 4 and {on[k]["Type"] for k in changed} == {"AWS::Lambda::Function", "AWS::IAM::Policy"}     # the beat and plan functions' variables and their own policies
 
 
 def test_switched_on_the_beat_function_gets_exactly_the_rights_it_needs(templates):

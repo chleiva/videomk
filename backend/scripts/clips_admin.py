@@ -116,7 +116,28 @@ def report(store: cs.Store, days: int = 30, now: float = None) -> dict:
     misses = [r for r in old if len(r.get("videos") or []) < 2]
     demand = sorted((r for r in store.query(cs.DEMAND)), key=lambda r: -len(r.get("videos") or []))
     have = {str(r.get("brief")) for r in active}
+    by_media: dict = {}
+    for m in ("clip", "image", "object"):   # ONE report for the three media types (docs/LIBRARY_ON_DEMAND.md)
+        rows = [r for r in ledger if r.get("media", "clip") == m and r.get("outcome") != "started"]
+        st: dict = {}
+        for r in store.query(cs.STATS):
+            if (r["sk"][:10] >= cs.day(since)) and ((":" not in r["sk"]) if m == "clip" else r["sk"].endswith(":" + m)):
+                for k, v in r.items():
+                    if k[:2] in ("d_", "o_") or k[:4] in ("cap_", "used"):
+                        st[k] = st.get(k, 0) + int(v or 0)
+        kept_n = sum(int(r.get("made_n") or 0) for r in rows) if m == "object" else len([r for r in rows if r.get("outcome") == "generated"])
+        rej_n = sum(int(r.get("rejected_n") or 0) for r in rows) if m == "object" else len([r for r in rows if r.get("outcome") == "gate_rejected"])
+        lat_m = sorted(float(r["latency_s"]) for r in rows if r.get("latency_s") is not None)
+        by_media[m] = {"calls": len(rows), "kept": kept_n, "rejected": rej_n, "rejection_rate": round(rej_n / max(1, kept_n + rej_n), 3), "spend_usd": round(sum(float(r.get("charged_usd") or 0) for r in rows), 4),
+                       "provider_usd": round(sum(float(r.get("provider_usd") or 0) for r in rows), 4), "latency_p50_s": lat_m[len(lat_m) // 2] if lat_m else None, "latency_max_s": lat_m[-1] if lat_m else None,
+                       "spend_by_day": {k: {r["sk"]: cs.usd(r.get("spent")) for r in store.query(cs.spend_pk(k, "day", m)) if r["sk"] >= cs.day(since)} for k in ("paid", "test")},
+                       "cap_hits": {k[4:]: v for k, v in st.items() if k.startswith("cap_")}, "decisions": {k[2:]: v for k, v in st.items() if k.startswith("d_")},
+                       "used": {k[5:]: v for k, v in st.items() if k.startswith("used_")}}
+    ledger = [r for r in ledger if r.get("media", "clip") == "clip"]   # the figures below are the clips' own, as before
+    made = [r for r in ledger if r.get("outcome") == "generated"]
+    rejected = [r for r in ledger if r.get("outcome") == "gate_rejected"]
     return {
+        "by_media": by_media,
         "days": days, "generations": len([r for r in ledger if r.get("outcome") != "started"]), "unfinished": len([r for r in ledger if r.get("outcome") == "started"]),
         "kept": len(made), "rejected": len(rejected), "rejection_rate": round(len(rejected) / max(1, len(made) + len(rejected)), 3), "not_kept_by_reason": reasons,
         "spend_usd": round(sum(float(r.get("charged_usd") or 0) for r in ledger), 4), "cost_per_kept_clip_usd": round(sum(float(r.get("charged_usd") or 0) for r in ledger) / max(1, len(made)), 3),
@@ -140,7 +161,11 @@ def cmd_report(a) -> None:
     if a.json:
         print(json.dumps(rep, indent=1, ensure_ascii=False))
         return
-    print(f"Library clips on demand, last {rep['days']} days")
+    print(f"Library media on demand, last {rep['days']} days")
+    for m, v in rep["by_media"].items():
+        print(f"  {m:<6} calls {v['calls']:3d}  kept {v['kept']:3d}  rejected {v['rejected']:3d} ({v['rejection_rate']:.0%})  charged ${v['spend_usd']:.2f} (provider ${v['provider_usd']:.2f})  "
+              f"latency p50 {v['latency_p50_s']} s max {v['latency_max_s']} s  cap hits {v['cap_hits'] or 'none'}  used {v['used'] or 'none'}")
+    print("  clips in detail:")
     print(f"  generations {rep['generations']} (kept {rep['kept']}, rejected by the gate {rep['rejected']}, rate {rep['rejection_rate']:.0%}; unfinished {rep['unfinished']})")
     print(f"  spend ${rep['spend_usd']:.2f}   per kept clip ${rep['cost_per_kept_clip_usd']:.2f}   latency p50 {rep['latency_s']['p50']} s, p95 {rep['latency_s']['p95']} s")
     print(f"  not kept: {rep['not_kept_by_reason'] or 'none'}")
