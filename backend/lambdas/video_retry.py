@@ -26,6 +26,7 @@ from botocore.exceptions import ClientError
 
 from common.http import json_response
 from common.identity import extract_cognito_sub
+import plan_gate
 from common import i18n, library, usage, wallet
 from common.photo_ids import upload_key
 from engine import format_options
@@ -349,8 +350,19 @@ def retry_handler(event: Dict[str, Any], context: Any = None) -> Dict[str, Any]:
     minutes = options.get("target_minutes") or float(os.environ.get("DEFAULT_TARGET_MINUTES", "3"))
     resolution = options.get("resolution")
     credits = wallet.credits_for_minutes(minutes, resolution)
+    gate = plan_gate.begin(user, event)   # the same plan limits and free-credit rules as a new video (docs/PLANS.md); None where plans are off
+    refused = plan_gate.check(gate, dict(options), loc, explicit_length=True, default_minutes=minutes)
+    if refused:
+        _revert(video_id, item, retries)
+        return refused
     try:
-        charged = wallet.charge(user, credits, tz=sl.request_timezone(event))
+        if gate is not None:
+            charged, refused = plan_gate.charge(gate, user, credits, loc, tz=sl.request_timezone(event))
+            if refused:
+                _revert(video_id, item, retries)
+                return refused
+        else:
+            charged = wallet.charge(user, credits, tz=sl.request_timezone(event))
         if credits and not charged:   # an unlimited (test/staff) account: the same ceiling as a new video
             usage.consume(f"unlimited:{user}", limit=int(os.environ.get("UNLIMITED_DAILY_VIDEOS", "50")))
     except usage.QuotaExceeded:
@@ -376,6 +388,7 @@ def retry_handler(event: Dict[str, Any], context: Any = None) -> Dict[str, Any]:
         logger.exception("VIDEO_RETRY_START_FAILED video=%s", video_id)
     if started is None:
         wallet.refund(user, charged)
+        plan_gate.give_back(gate)
         _table().update_item(Key={"video_id": video_id}, UpdateExpression="SET #s = :f, failure_code = :fc, retries = :n, refunded = :t", ExpressionAttributeNames={"#s": "status"},
                              ExpressionAttributeValues={":f": "FAILED", ":fc": "START_FAILED", ":n": retries, ":t": True})
         return json_response(500, {"message": i18n.t("create.start_failed", loc)})

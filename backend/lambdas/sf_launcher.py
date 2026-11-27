@@ -18,6 +18,7 @@ from botocore.exceptions import ClientError
 
 from common.http import json_response
 from common.identity import extract_cognito_sub
+import plan_gate
 import video_retry
 from common import deck_limits, i18n, intake, library, safety, usage, wallet, watermark_store
 from engine import format_options, watermark_spec
@@ -164,17 +165,21 @@ def apply_watermark(user_id: str, options: Dict[str, Any], loc: str) -> Optional
         options.pop("watermark", None)
         return None
     try:
-        premium = watermark_store.is_premium(user_id)
+        wr = watermark_store.rights(user_id)   # by plan where plans are on (docs/PLANS.md), else the flags and the stack policy as before
+        premium, forced = wr["premium"], wr["forced"]
         requested = options.get("watermark")
         profile = watermark_store.get_profile(user_id) if requested is None else None
         needs_logo = (requested or profile or {}).get("mode") == "custom"
-        spec = watermark_store.resolve(requested, profile, premium=premium, forced=watermark_store.force_policy() and not premium,
-                                       has_logo=watermark_store.has_logo(user_id) if needs_logo else False)
+        spec = watermark_store.resolve(requested, profile, premium=premium, forced=forced,
+                                       has_logo=watermark_store.has_logo(user_id) if needs_logo else False, modes=wr.get("modes"))
+        if forced and wr.get("by_plan"):
+            spec = watermark_store.forced_spec(spec)
     except watermark_store.WatermarkError as e:
-        return json_response(e.status, {"message": i18n.t(e.key, loc, **e.params), **({"code": e.code} if e.code else {})})
+        return json_response(e.status, {"message": i18n.t(e.key, loc, **e.params), **({"code": e.code} if e.code else {}), **e.extra})
     except Exception:   # noqa: BLE001 - a watermark lookup problem must never stop a video: the policy default decides
         logger.exception("WATERMARK_RESOLVE_FAILED user=%s", user_id)
-        spec = dict(watermark_store.FORCED_SPEC) if watermark_store.force_policy() else {"mode": "none"}
+        from common import plans as _plans
+        spec = watermark_store.forced_spec({}) if _plans.enabled() else (dict(watermark_store.FORCED_SPEC) if watermark_store.force_policy() else {"mode": "none"})
     if spec.get("mode") == "none":
         options.pop("watermark", None)
     else:
@@ -241,7 +246,7 @@ def request_timezone(event: Dict[str, Any]) -> Optional[str]:
 
 
 def _register_intent(user_id: str, prompt: str, video_id: str, usage_day: str, *, idempotent: bool, credits: int = 0, charge: Any = None, resolution: Optional[str] = None,
-                     request: Optional[Dict[str, Any]] = None) -> None:
+                     request: Optional[Dict[str, Any]] = None, extra: Optional[Dict[str, Any]] = None) -> None:
     item = {
         "video_id": video_id,
         "user_id": user_id,
@@ -251,6 +256,7 @@ def _register_intent(user_id: str, prompt: str, video_id: str, usage_day: str, *
         "credits_charged": credits,
         "charge": json.dumps(charge or []),  # exactly which buckets were charged, so a failure refunds exactly those
         "created_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        **(extra or {}),   # plans: which plan made it and how many of its credits were free ones (the free-usage reports read these)
     }
     if format_options.credits_multiplier(resolution) != 1:   # a 4K video: the record says why it cost double (other videos are recorded exactly as before)
         item.update({"resolution": resolution, "credits_multiplier": format_options.credits_multiplier(resolution)})
@@ -333,10 +339,16 @@ def handler(event: Dict[str, Any], context: Any):
     if brief:
         options["brief"] = brief
 
+    explicit_length = options.get("target_minutes") is not None
     if options.get("deck"):
         bad = check_deck(user_id, options, loc)
         if bad:
             return bad
+    # The plan's limits (docs/PLANS.md): length, resolution, photos per video. Before any charge, copy or duplicate claim; nothing happens where plans are off.
+    gate = plan_gate.begin(user_id, event)
+    refused = plan_gate.check(gate, options, loc, explicit_length=explicit_length, default_minutes=float(os.environ.get("DEFAULT_TARGET_MINUTES", "3")))
+    if refused:
+        return refused
     for mid in options.get("media", []):  # every photo must really be uploaded, into this user's own folder
         try:
             _s3.head_object(Bucket=os.environ["ASSETS_BUCKET"], Key=upload_key(user_id, mid))
@@ -369,7 +381,13 @@ def handler(event: Dict[str, Any], context: Any):
     credits = wallet.credits_for_minutes(minutes, resolution)   # 4K costs double; the rule lives in the wallet
     multiplier = format_options.credits_multiplier(resolution)
     try:
-        charged = wallet.charge(user_id, credits, tz=request_timezone(event))
+        if gate is not None:
+            charged, refused = plan_gate.charge(gate, user_id, credits, loc, tz=request_timezone(event))
+            if refused:
+                usage.release_recent(user_id, fingerprint)
+                return refused
+        else:
+            charged = wallet.charge(user_id, credits, tz=request_timezone(event))
         if credits and not charged:  # nothing was taken: an unlimited (test/staff) account. Keep a ceiling and a trail in case its token is ever stolen.
             logger.warning("UNLIMITED_ACCOUNT_USE user=%s credits=%s minutes=%s", user_id, credits, minutes)
             usage.consume(f"unlimited:{user_id}", limit=int(os.environ.get("UNLIMITED_DAILY_VIDEOS", "50")))
@@ -380,11 +398,12 @@ def handler(event: Dict[str, Any], context: Any):
         usage.release_recent(user_id, fingerprint)
         return json_response(402, {"message": i18n.t("create.credits_needed", loc, needed=e.needed, balance=e.balance),
                                    "code": "insufficient_credits", "balance": e.balance, "needed": e.needed,
+                                   **({"plan": gate.plan, "can_upgrade": plan_gate.plans.PURCHASES_LIVE} if gate is not None else {}),
                                    **({"resolution": resolution, "credits_multiplier": multiplier} if multiplier != 1 else {})})
 
     try:
         _register_intent(user_id, prompt, video_id, usage_day, idempotent=idempotent, credits=credits, charge=charged, resolution=resolution,
-                         request={"options": options, "library_media": library_ids})
+                         request={"options": options, "library_media": library_ids}, extra=plan_gate.record(gate, credits))
         resp = _sfn.start_execution(
             stateMachineArn=sm_arn,
             name=video_id,  # one execution per video; duplicate starts fail fast
@@ -394,14 +413,17 @@ def handler(event: Dict[str, Any], context: Any):
         code = e.response.get("Error", {}).get("Code")
         if code in ("ConditionalCheckFailedException", "ExecutionAlreadyExists"):
             wallet.refund(user_id, charged)
+            plan_gate.give_back(gate)
             return json_response(202, {"message": "workflow already started", "video_id": video_id})
         logger.exception("Failed to start workflow")
         wallet.refund(user_id, charged)
+        plan_gate.give_back(gate)
         usage.release_recent(user_id, fingerprint)
         return json_response(500, {"message": i18n.t("create.start_failed", loc)})
     except Exception:
         logger.exception("Failed to start workflow")
         wallet.refund(user_id, charged)
+        plan_gate.give_back(gate)
         usage.release_recent(user_id, fingerprint)
         return json_response(500, {"message": i18n.t("create.start_failed", loc)})
 

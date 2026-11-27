@@ -6,7 +6,8 @@ Standing still it reads as a person half sitting, and a raised sleeve leaves the
   legs      one straight piece per leg (thigh and shin fused once at load: widths matched at the knee, the inner outline removed), feet planted, toes turned out;
             the hips may shift a little over planted feet (weight shift) and a foot may take a small side step. There is no knee and no walk.
   arms      shoulder pivot in the CENTRE of the round sleeve cap (the cap stays on the shoulder at any angle), elbow pivot inside both pieces, a two-bone IK from a wrist
-            target, with the elbow always on the same side of the shoulder-wrist line, so it cannot flip (see arm_ik), and the reach clamped so the arm never locks straight
+            target, with the elbow always on the same side of the shoulder-wrist line, so it cannot flip (see arm_ik), and the reach clamped so the arm never locks straight;
+            at home the arm hangs by its own angles (elbow out, forearm in: solve_arm), blended into the IK as the hand leaves
   hands     the forearm piece is cut at the wrist: the hand is its own piece that turns at the wrist and can be swapped (relaxed, open palm, one, two, three, thumb up)
   tail      optional piece behind the legs (the fox)
 
@@ -87,11 +88,37 @@ class Geom:
         return self.upper + self.fore
 
 
-REST_HAND: Vec = (0.035, -0.982)    # wrist at rest, relative to the shoulder, as a share of the arm length (x outward, y up): hanging, a hair away from the body
+REST_UPPER, REST_FORE = 7.0, -4.0     # home base, degrees from straight down, positive = away from the body: the upper arm hangs a little OUT (the elbow is the widest point),
+#                                       the forearm comes back IN toward the thigh. (The first cut had it the other way round: elbows tucked in, forearms flaring out,
+#                                       which made each arm look like the arm of the other side.)
+REST_ZONE = 0.30                      # within this share of the arm length of home, the arm blends from the home angles to the IK solution
+
+
+def _dir(deg: float, side: int) -> Vec:
+    r = math.radians(deg)
+    return (side * math.sin(r), -math.cos(r))
 
 
 def rest_target(g: Geom) -> Vec:
-    return (REST_HAND[0] * g.arm, REST_HAND[1] * g.arm)
+    """Wrist at home, relative to the shoulder (x away from the body, y up)."""
+    u, f = _dir(REST_UPPER, 1), _dir(REST_FORE, 1)
+    return (g.upper * u[0] + g.fore * f[0], g.upper * u[1] + g.fore * f[1])
+
+
+def solve_arm(g: Geom, shoulder: Vec, hand: Vec, side: int) -> Tuple[Vec, Vec]:
+    """-> (elbow, wrist). Far from home: the IK solution for the wrist target. At home: the home angles (elbow out, forearm in). In between the two bone ANGLES are blended, so the
+    bones keep their length and the arm passes through straight on its way from one bend to the other; nothing flips."""
+    rt = rest_target(g)
+    e, w = arm_ik(shoulder, (shoulder[0] + side * hand[0], shoulder[1] + hand[1]), g.upper, g.fore, side)
+    k = min(1.0, math.hypot(hand[0] - rt[0], hand[1] - rt[1]) / (REST_ZONE * g.arm))
+    home = 1.0 - k * k * (3 - 2 * k)
+    if home <= 0.0:
+        return e, w
+    au = math.degrees(math.atan2(side * (e[0] - shoulder[0]), -(e[1] - shoulder[1])))
+    af = math.degrees(math.atan2(side * (w[0] - e[0]), -(w[1] - e[1])))
+    du, df = _dir(au + (REST_UPPER - au) * home, side), _dir(af + (REST_FORE - af) * home, side)
+    e = (shoulder[0] + g.upper * du[0], shoulder[1] + g.upper * du[1])
+    return e, (e[0] + g.fore * df[0], e[1] + g.fore * df[1])
 
 
 def solve(g: Geom, pose: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
@@ -132,7 +159,7 @@ def solve(g: Geom, pose: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
     for i, side in enumerate((-1, 1)):
         s = torso_pt(side * g.shoulder_x, g.shoulder_y * tsy + shrug)
         hx, hy = hands[i] if hands[i] is not None else rt
-        e, w = arm_ik(s, (s[0] + side * hx, s[1] + hy), g.upper, g.fore, side)
+        e, w = solve_arm(g, s, (hx, hy), side)
         f = ((w[0] - e[0]) / g.fore, (w[1] - e[1]) / g.fore)
         shoulders.append(s)
         elbows.append(e)
@@ -312,8 +339,13 @@ class Presenter:
         hand = Piece(la.crop((0, max(0, wrist_y - tuck), la.width, la.height)), ((w0 + w1) / 2, float(tuck)))
         self.wrist_w = (w1 - w0) / u
         self.pieces["upper_r"], self.pieces["upper_l"] = up, up.flipped()
-        self.pieces["fore_r"], self.pieces["fore_l"] = fore, fore.flipped()
-        self.pieces["hand_relaxed_r"], self.pieces["hand_relaxed_l"] = hand, hand.flipped()
+        # Which way round the forearm+hand drawing goes. At home the thumb is on the BODY side of the hand (it points forward, the fingers curl toward the thigh). The sheets
+        # draw the thumb on either side, so presenter.json says where it is ("relaxed_thumb": +1 = on the right of the drawing) and the drawing is mirrored where needed.
+        t = int(cfg.get("relaxed_thumb", 1))
+        fr, hr = (fore, hand) if t < 0 else (fore.flipped(), hand.flipped())          # right arm of the picture: the body is on its left, so the thumb must be on the left
+        self.pieces["fore_r"], self.pieces["fore_l"] = fr, fr.flipped()
+        self.pieces["hand_relaxed_r"], self.pieces["hand_relaxed_l"] = hr, hr.flipped()
+        self.thumb_x: Dict[Tuple[str, str], int] = {("relaxed", "r"): -1, ("relaxed", "l"): 1}    # where the thumb is on each piece as stored (hanging down): -1 left, +1 right
         # extra hand shapes (drawn fingers UP with a wrist stub at the bottom; turned half a turn here so that, like the relaxed hand, the fingers continue the forearm)
         self.shapes: List[str] = ["relaxed"]
         for name, hp in (cfg.get("hands") or {}).items():
@@ -324,7 +356,13 @@ class Presenter:
             im = _raster(folder, hp["file"], round(hp["w"] * k), round(hp["h"] * k)).transpose(Image.ROTATE_180)
             pv = (im.width - hp["pivot"][0] * k, im.height - hp["pivot"][1] * k)
             pc = Piece(im, pv)
-            self.pieces[f"hand_{name}_l"], self.pieces[f"hand_{name}_r"] = pc, pc.flipped()   # the sheet shows a right hand, palm to the viewer: thumb on the left
+            if cfg.get("sheet_thumb", "left") == "right":                      # a sheet drawn the other way round (the fox's)
+                pc = pc.flipped()
+            # Gesture hands show the PALM. A raised palm has its thumb toward the head, a presenting palm has its thumb on top: both mean the thumb is on the OUTER side of the
+            # piece as stored (hanging down, before the forearm turns it up). Upright on the sheet the thumb is on the left; turned half a turn it is on the right = outer for the
+            # right arm of the picture. (The first cut gave this piece to the left arm: thumbs away from the head, presenting hands thumb down.)
+            self.pieces[f"hand_{name}_r"], self.pieces[f"hand_{name}_l"] = pc, pc.flipped()
+            self.thumb_x[(name, "r")], self.thumb_x[(name, "l")] = 1, -1
             self.shapes.append(name)
         # tail
         tp = cfg.get("tail")

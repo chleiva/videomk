@@ -152,6 +152,13 @@ def limits(user: str, now: Optional[float] = None) -> Dict[str, Any]:
     plan = "pro" if item.get("storage_plan") == "pro" and active else "free"
     extra = int(item.get("storage_extra_gb") or 0) if active else 0
     base = PRO_BYTES if plan == "pro" else FREE_BYTES
+    from common import plans
+    if plans.enabled():   # the account's plan sets the quota (docs/PLANS.md: 2 / 100 / 300 GB); the admin's storage flag and add-on GB still count, whichever is larger
+        from common import entitlements
+        unlimited = item.get("unlimited") is True and os.environ.get("ALLOW_UNLIMITED_ACCOUNTS", "0") == "1"
+        ent = entitlements.effective(user, now=now, unlimited=unlimited)
+        if plans.PLANS[ent["plan"]]["storage_bytes"] >= base:
+            plan, base = ent["plan"], plans.PLANS[ent["plan"]]["storage_bytes"]
     return {"plan": plan, "limit_bytes": base + max(0, extra) * ADDON_BYTES}
 
 

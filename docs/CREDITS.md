@@ -47,3 +47,6 @@ Purpose: staff and test accounts that are never charged. Threats considered and 
 | An unlimited account's token is stolen and used to burn money | Unlimited accounts still have a daily ceiling (`UNLIMITED_DAILY_VIDEOS`, default 50), every use is logged as `UNLIMITED_ACCOUNT_USE` (alarm on it), and the per-video cost cap still applies. |
 | Unlimited use hides failures | Nothing is charged, so nothing is refunded; refunds only ever return what was actually taken. |
 Keep the flag to a handful of staff accounts; review with `wallet_admin.py show`. Before launch also add a CloudWatch alarm on `UNLIMITED_ACCOUNT_USE`.
+
+## With plans on (2026-11-27): see `docs/PLANS.md`
+Where the stack has plans on, the free amounts above are replaced by the owner's knobs (defaults: **2 welcome credits** valid 30 days, **daily credit off**, free videos up to 30 s, a **global budget of 15 free credits a day** for all accounts, about $2.25 a day at $0.15 a credit), a free credit is granted only after the eligibility step (one allowance per person, mobile apps only), and paid plans add a `plan` bucket (Pro 30 a month, Max 120 a month with one month of rollover, capped at 240). The `WALLET_*` env values only apply where plans are off. The global daily budget and the device attestation listed under "To build" above are built there (attestation partly waiting for keys).

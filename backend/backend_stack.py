@@ -34,6 +34,7 @@ from request_intake import RequestIntake
 from request_options import RequestOptions
 from feedback_loop import FeedbackLoop, enabled as feedback_enabled
 from watermark_feature import WatermarkSettings, enabled as watermark_enabled, forced as watermark_forced
+from plans_feature import Plans, enabled as plans_enabled, device_proof as plans_device_proof
 
 from engine_v2 import EngineV2
 
@@ -604,8 +605,9 @@ class BackendStack(Stack):
             )
 
         # The watermark (docs/WATERMARK.md): saved settings and logo, and what the launcher, capabilities and the plan step need. On by default, `-c watermark=0` removes it; `-c forceWatermark=1` is the free-tier policy.
+        watermark = None
         if v2 is not None and watermark_enabled(self.node):
-            WatermarkSettings(
+            watermark = WatermarkSettings(
                 self, "Watermark", make_fn=make_fn, engine_layer=engine_layer, usage_table=usage_table, flags_table=flags_table, assets_bucket_name=ASSETS_BUCKET, user_id_resource=user_id,
                 cognito_auth=cognito_auth, cors_headers=["Content-Type", "Authorization", "X-Region", "X-Timezone", "X-Locale"], launcher_fn=launcher_fn, capabilities_fn=req_options.fn,
                 plan_fn=v2.plan_fn, force=watermark_forced(self.node) if self.node.try_get_context("forceWatermark") is not None else bool(stage_cfg.get("forceWatermark")),   # stages.json "forceWatermark": free accounts always carry the videomk name (docs/WATERMARK.md section 5); -c forceWatermark=0|1 overrides
@@ -649,6 +651,26 @@ class BackendStack(Stack):
             if tombstone:
                 deletion.key_secret.grant_read(fn)
                 fn.add_to_role_policy(iam.PolicyStatement(actions=["cognito-idp:ListUsers"], resources=[user_pool.user_pool_arn]))
+
+        # Plans, phase 1 (docs/PLANS.md): entitlements, plan limits, the free plan's knobs and abuse controls, GET .../plan, GET /gallery, the purchase stubs, the daily metric.
+        # Additive (two new tables, one SSM parameter, new functions and routes); `-c plans=0` removes it; `-c deviceProof=1` adds the device-proof routes (needs the apple_deps layer).
+        if plans_enabled(self.node):
+            device_layer = None
+            if plans_device_proof(self.node):
+                if apple_layer is None:
+                    apple_dir = os.path.join(os.path.dirname(__file__), "layers", "apple_deps")
+                    if not os.path.isdir(os.path.join(apple_dir, "python")) and not os.environ.get("CDK_SKIP_LAYER_CHECK"):
+                        raise ValueError("Apple layer not built (deviceProof needs `cryptography`). Run `backend/layers/build_layer.sh apple_deps` first.")
+                    apple_layer = _lambda.LayerVersion(self, "AppleDepsLayer", code=_lambda.Code.from_asset("layers/apple_deps"), compatible_runtimes=[_lambda.Runtime.PYTHON_3_12],
+                                                       compatible_architectures=[_lambda.Architecture.X86_64], description="cryptography (Sign in with Apple revocation, device proofs)")
+                device_layer = apple_layer
+            self.plans = Plans(
+                self, "Plans", stage=stage, is_prod=is_prod, make_fn=make_fn, api=api, user_id_resource=user_id, cognito_auth=cognito_auth,
+                cors_headers=["Content-Type", "Authorization", "X-Region", "X-Timezone", "X-Locale", "X-Platform"], assets_bucket_name=ASSETS_BUCKET, videos_table=videos_table,
+                usage_table=usage_table, wallet_table=wallet_table, flags_table=flags_table, launcher_fn=launcher_fn, wallet_fn=wallet_fn, capabilities_fn=req_options.fn,
+                watermark_fn=watermark.api_fn if watermark is not None else None, library_fns=[media.api_fn, media.ingest_fn] if media is not None else [], deletion=deletion,
+                tombstone=tombstone, user_pool_arn=user_pool.user_pool_arn, device_layer=device_layer,
+            )
 
         # Reject malformed/oversized prompts at the edge, before any Lambda runs.
         generate_model = api.add_model(

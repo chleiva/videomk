@@ -224,3 +224,25 @@ def test_the_closing_card_counts_towards_the_length_asked():
         assert asked <= without["duration"] <= asked * 1.05 + 0.01 and abs(with_card["duration"] - without["duration"]) < 1.6   # the same length with or without the card
     no_card = {**ALWAYS, "end_card": False}
     assert build_timeline(_plan(6, no_card), [{"duration": 3.0}] * 6, video_id="v", min_seconds=30, fit_seconds=30)["duration"] >= 30
+
+
+def test_with_plans_the_plan_decides_who_may_use_moments(monkeypatch):
+    """Plans (docs/PLANS.md) list "moments" among a plan's watermark rights; in the engine it is the `presence` of the videomk mark. The plan decides the right, the option decides the rendering."""
+    from common import plans
+    free, pro = list(plans.PLANS["free"]["watermark_modes"]), list(plans.PLANS["pro"]["watermark_modes"])
+    assert "moments" not in free and "moments" in pro and "moments" in plans.PLANS["max"]["watermark_modes"]
+    f = dict(premium=False, forced=True, has_logo=False, modes=free)
+    with pytest.raises(store.WatermarkError) as e:
+        store.resolve({"mode": "videomk", "presence": "moments"}, None, **f)
+    assert e.value.status == 403 and e.value.code == "plan_watermark" and e.value.extra["requires_plan"] == "pro"
+    saved = store.forced_spec(store.resolve(None, {"mode": "videomk", "presence": "moments", "position": "tl"}, **f))    # a saved setting from a plan that ended: quietly the forced mark, corner kept
+    assert saved["presence"] == "always" and saved["style"] == "lockup" and saved["end_card"] is True and saved["position"] == "tl"
+    assert store.forced_spec({})["presence"] == "always"
+    p = dict(premium=False, forced=False, has_logo=False, modes=pro)                                                       # Pro: no own logo, but may hide the mark or let it come and go
+    assert store.resolve({"mode": "videomk"}, None, **p)["presence"] == "moments" and store.resolve({"mode": "videomk", "presence": "always"}, None, **p)["presence"] == "always"
+    assert store.resolve({"mode": "none"}, None, **p) == {"mode": "none"}
+    import watermark_api
+    with pytest.raises(store.WatermarkError) as e:
+        watermark_api._clean({"mode": "videomk", "presence": "moments"}, premium=False, forced=True, modes=free)
+    assert e.value.code == "plan_watermark" and e.value.extra["requires_plan"] == "pro"
+    assert watermark_api._clean({"mode": "videomk", "presence": "moments"}, premium=False, forced=False, modes=pro)["presence"] == "moments"
