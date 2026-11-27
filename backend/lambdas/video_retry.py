@@ -42,7 +42,7 @@ MAX_REQUEST_BYTES = 150_000   # what is kept on the item (the item limit is 400 
 CLEAR_MAX_KEYS = 2000
 
 # what the failed attempt left on the item (the retry builds all of it again); `title` stays so the row does not change its name
-STALE_ATTRS = ("failure_code", "plan_key", "rev", "n_beats", "photos_skipped", "assets", "plot", "stage", "reject_reason", "video_uri", "preview_gif_uri", "duration_s",
+STALE_ATTRS = ("failure_code", "plan_key", "rev", "n_beats", "photos_skipped", "assets", "plot", "stage", "reject_reason", "video_uri", "preview_gif_uri", "cover_uri", "cover_og_uri", "duration_s",
                "edit_state", "edit_error", "preview_uri", "preview_rev", "cancel_reason", "cancelled_at")
 COST_ATTRS = ("cost_usd", "c_speech", "c_script", "c_research", "c_photos", "c_stock", "c_deck")
 

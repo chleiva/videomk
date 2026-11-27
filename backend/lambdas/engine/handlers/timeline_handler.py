@@ -73,6 +73,10 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     if tl["duration"] > MAX_DURATION_S:
         raise ValueError(f"video too long ({tl['duration']:.0f}s > {MAX_DURATION_S:.0f}s)")
     tl["frame"] = frame
+    if os.environ.get("COVER_IN_FRAME", "0") == "1" and mode != "preview":   # the designed cover over the first frames of the MP4 (off by default: docs/SHARE_PREVIEWS_2026-11-27.md)
+        from .. import cover
+        if cover.timeline_cover(tl):
+            tl["cover"] = cover.timeline_cover(tl)
     tl["ledger"] = credits_ledger(plan)
     tl["sources"] = plan.get("sources", [])
     tl["description"] = plan.get("description", "")

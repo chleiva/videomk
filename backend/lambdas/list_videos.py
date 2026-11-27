@@ -237,6 +237,17 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                             except ClientError:
                                 pass
 
+                # the designed cover (engine/cover.py, docs/SHARE_PREVIEWS_2026-11-27.md): a JPEG in the video's own shape, the poster in the apps and the web player (absent: older videos)
+                cover_uri = it.get("cover_uri")
+                if isinstance(cover_uri, str) and cover_uri.startswith("s3://"):
+                    cb, ck = _parse_s3_uri(cover_uri)
+                    if cb and ck:
+                        try:
+                            it["cover_url"] = _get_s3_client(_get_bucket_region(cb)).generate_presigned_url(
+                                "get_object", Params={"Bucket": cb, "Key": ck, "ResponseContentType": "image/jpeg"}, ExpiresIn=3600)
+                        except ClientError:
+                            pass
+
                 # Presign video URL for immediate viewing when available
                 video_uri2 = it.get("video_uri")
                 if isinstance(video_uri2, str) and video_uri2.startswith("s3://"):
@@ -273,6 +284,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 out["can_retry"] = int(it.get("retries") or 0) < int(os.environ.get("MAX_VIDEO_RETRIES", "3")) and not (it.get("deck") or str(it.get("stage") or "").startswith("deck"))
             if "preview_gif_url" in it:
                 out["preview_gif_url"] = it["preview_gif_url"]
+            if "cover_url" in it:
+                out["cover_url"] = it["cover_url"]
             mk = making.for_owner(it, user_id, loc)   # a video being made: the scenes done so far, one plain line in the app's language, the sentence being narrated (docs/CREATE_API.md "Making status"); None otherwise
             if mk:
                 out["making"] = mk

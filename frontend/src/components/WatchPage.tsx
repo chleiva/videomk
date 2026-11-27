@@ -25,7 +25,7 @@ import { useLocale } from "../lib/useLocale";
 
 const POLL_MS = 5000;   // while the video is being made this page follows it (same call, same pace as the list)
 
-interface Known { title?: string; editable?: boolean; duration_s?: number | null; preview_gif_url?: string | null; look?: VideoLook | null }
+interface Known { title?: string; editable?: boolean; duration_s?: number | null; preview_gif_url?: string | null; cover_url?: string | null; look?: VideoLook | null }
 const DELETE_HANDOFF = "vmk_delete_handoff";   // read by the Videos page, which deletes with "Deleted · Undo" (one place deletes)
 
 /** "Whiteboard", "Cartoon · Fox, Bear · Hand-drawn board": the look the video got, in the server's own words when capabilities has them. */
@@ -181,7 +181,7 @@ export default function WatchPage() {
         <div className="watch-main">
           <div className="watch-stage" style={{ ["--ar" as any]: String(ar) }} data-aspect={ratio ?? undefined}>
             {view.state === "ready" && url ? (
-              <Player src={url} title={shown} poster={info.preview_gif_url} onMeta={setMeta} newVideoHref={newHref} />
+              <Player src={url} title={shown} poster={info.cover_url || info.preview_gif_url} onMeta={setMeta} newVideoHref={newHref} />
             ) : (
               <div className="watch-state" role={view.state === "loading" || view.state === "making" ? "status" : "alert"}>
                 {view.state === "loading" && <Spinner />}

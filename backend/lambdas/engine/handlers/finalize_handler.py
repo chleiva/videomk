@@ -25,6 +25,25 @@ def _chapters_text(chapters: List[Dict[str, Any]], language: str = "en") -> str:
     return "\n".join(f"{fmt(c['start'])} {c['title']}" for c in ch)
 
 
+def copy_cover(event: Dict[str, Any], base: str, rev: int) -> Dict[str, str]:
+    """The cover pictures the first chunk made (engine/cover.py) -> the video's own folder, next to the MP4: {cover_uri (the video's own shape), cover_og_uri (1200x630)}.
+    Empty when there are none: a video without a cover is still complete, and the apps fall back to the GIF."""
+    try:
+        want = ((sorted(event["render"]["segments"], key=lambda s: int(s["k"]))[0]).get("cover")) or {}
+        pre = awsio.prefix(str(event["video_id"]))
+        out: Dict[str, str] = {}
+        for src_key, name, attr in ((want.get("own_key"), f"r{rev}_cover.jpg", "cover_uri"), (want.get("og_key"), f"r{rev}_og.jpg", "cover_og_uri")):
+            if not isinstance(src_key, str) or not src_key.startswith(pre + "cover_") or ".." in src_key:
+                return {}
+            awsio.put_bytes(base + name, awsio.get_bytes(src_key), "image/jpeg", bkt=OUTPUT_BUCKET)
+            out[attr] = f"s3://{OUTPUT_BUCKET}/{base}{name}"
+        return out
+    except Exception:   # noqa: BLE001 - never worth a failed video
+        import logging
+        logging.exception("COVER_COPY_FAILED video=%s", event.get("video_id"))
+        return {}
+
+
 def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     video_id, user_id = str(event["video_id"]), str(event["user_id"])
     rev, mode = int(event.get("rev", 1)), event.get("mode", "final")
@@ -60,12 +79,14 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         if have_gif:
             awsio.upload(gif, gkey, "image/gif", bkt=OUTPUT_BUCKET)
 
+    covers = copy_cover(event, base, rev)
     description = "\n\n".join(x for x in (tl.get("description", ""), _chapters_text(tl.get("chapters", []), tl.get("language", "en")), assets.credits_block(tl.get("ledger", []), tl.get("sources", []), tl.get("language", "en"))) if x)
     attrs = {
         "video_uri": f"s3://{OUTPUT_BUCKET}/{vkey}", "duration_s": int(got), "final_rev": rev, "edit_state": "READY",
         "aspect": (tl.get("frame") or {}).get("aspect", "16:9"), "resolution": (tl.get("frame") or {}).get("resolution", "1080p"),
         "youtube_description": description[:4800], "title": tl.get("title") or "Untitled", "last_rendered_at": int(time.time()),
         **({"preview_gif_uri": f"s3://{OUTPUT_BUCKET}/{gkey}"} if have_gif else {}),
+        **covers,   # the designed cover (docs/SHARE_PREVIEWS_2026-11-27.md): poster in the apps and the web, og:image of a share page
     }
     update_status(video_id, "COMPLETE", extra_attributes=attrs)  # first render: flips status (no-op once COMPLETE)
     set_attributes(video_id, attrs, remove=["edit_error", *making.ATTRS])   # edits: refresh the playable video on an already-COMPLETE item; the Making status is over

@@ -16,6 +16,7 @@ export interface TaskItem {
   created_at?: string | null;
   download_url?: string | null;
   preview_gif_url?: string | null;
+  cover_url?: string | null;   // the designed cover JPEG in the video's own shape (engine/cover.py): the poster; absent on older videos
   duration_s?: number | null;
   video_url?: string | null;
   aspect?: string | null;   // "9:16", "1:1", "4:5" (absent: 16:9)
@@ -141,6 +142,7 @@ export function normalizeItem(it: any): TaskItem | null {
     download_url: s3ToHttps(it?.video_uri) || it?.download_url || null,
     eta_seconds: typeof it?.eta_seconds === "number" ? it.eta_seconds : null,
     preview_gif_url: (it?.preview_gif_url as string | null) || s3ToHttps(it?.preview_gif_uri) || null,
+    cover_url: typeof it?.cover_url === "string" ? it.cover_url : null,
     created_at: typeof it?.created_at === "string" ? it.created_at : null,
     duration_s: typeof it?.duration_s === "number" ? it.duration_s : null,
     video_url: typeof it?.video_url === "string" ? it.video_url : null,

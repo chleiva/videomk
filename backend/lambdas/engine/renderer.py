@@ -99,6 +99,9 @@ class Renderer:
         self.ctx = SceneCtx(resolve_image=self._load_image, resolve_clip=self._load_clip, captions=bool(timeline.get("captions", True)), frame=self.frame, language=numfmt.norm_lang(timeline.get("language")))
         self._clip_loader = clip_loader
         self._clips: Dict[str, Any] = {}
+        cv = timeline.get("cover")   # docs/SHARE_PREVIEWS_2026-11-27.md: the designed cover held over the first frames, dissolving into the real opening (first chunk of a final render only)
+        self._cover_cfg: Optional[Dict[str, Any]] = cv if isinstance(cv, dict) and not draft and timeline.get("lead") is None else None
+        self._cover_img: Optional[Image.Image] = None
         self._image_loader = image_loader
         self._images: Dict[str, Optional[Image.Image]] = {}
         # the watermark (docs/WATERMARK.md): drawn last on every frame, at the output size; None when the timeline has none
@@ -171,10 +174,24 @@ class Renderer:
     def scene_index(self, t: float) -> int:
         return max(0, min(len(self.scenes) - 1, bisect.bisect_right(self.starts, t) - 1))
 
+    def _cover_frame(self) -> Image.Image:
+        """The cover at the output size (made once per Renderer; the first scene at its settled moment, its title, the mark)."""
+        if self._cover_img is None:
+            from . import cover
+            art = cover.render_art(self.tl, self._image_loader, self._clip_loader)
+            if art.size != (self.out_w, self.out_h):
+                art = art.resize((self.out_w, self.out_h), Image.LANCZOS)
+            cfg = self._cover_cfg or {}
+            self._cover_img = cover.in_frame(art, str(cfg.get("title") or ""), aspect=self.frame.aspect, theme=self.theme.name, layout=cfg.get("layout"))
+        return self._cover_img
+
     def frame_at(self, t: float) -> Image.Image:
         img = self._compose(t)
         if img.size != (self.out_w, self.out_h):   # draft (half size) or 720p: design units -> output pixels
             img = img.resize((self.out_w, self.out_h), Image.BILINEAR if self.draft else Image.LANCZOS)
+        if self._cover_cfg is not None and t < float(self._cover_cfg.get("blend_s", 0.4)):   # frame 0 IS the cover; it dissolves into the opening (no flash, same length, audio untouched)
+            a = max(0.0, t) / float(self._cover_cfg.get("blend_s", 0.4))
+            img = Image.blend(self._cover_frame(), img, a * a * (3 - 2 * a))
         if self.wm is not None:   # last of all, at output pixels: never scaled with the picture, fades in with the video and out with the closing fade
             k = max(0.0, min(1.0, (t - (self.total - OUTRO_FADE_S)) / OUTRO_FADE_S)) if self.outro else 0.0
             img = self.wm.apply(img, t, first=self.lead is None, outro_k=k)
