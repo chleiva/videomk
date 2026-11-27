@@ -35,7 +35,7 @@ struct LibraryView: View {
             .background(Theme.background.ignoresSafeArea())
             .toolbar(.hidden, for: .navigationBar)
             .navigationDestination(for: String.self) { VideoDetailView(videoID: $0) }
-            .safeAreaInset(edge: .bottom, spacing: 0) { TabBarRoom { uploadStrip } }       // an inset, not an overlay: the pill sits above the tab bar and the last row scrolls clear of both
+            .safeAreaInset(edge: .bottom, spacing: 0) { TabBarRoom { if model.selectedTab == 0 { UndoToastHost() }; uploadStrip } }       // an inset, not an overlay: the pill sits above the tab bar and the last row scrolls clear of both
         }
         .onChange(of: path) { _, p in model.tabBarHidden = !p.isEmpty }
         .task { await model.refresh() }
@@ -43,13 +43,13 @@ struct LibraryView: View {
         #if DEBUG
         .task { await debugSetup() }
         #endif
-        .task(id: model.hasRunningVideos) { await model.pollWhileRunning() }
+        .task(id: "\(model.hasRunningVideos)-\(model.foregroundEpoch)") { await model.pollWhileRunning() }
         .sheet(isPresented: $showingSettings) { SettingsView() }
         .sheet(isPresented: $showingWallet) { WalletView() }
         .sheet(isPresented: $showingRating) { RatingPromptView() }
         .task(id: "\(path.isEmpty)-\(scenePhase == .active)") { await considerRatingPrompt() }
         .fullScreenCover(isPresented: $showingCreate) { CreateView(create: model.createModel) }
-        .alert(item: $model.retryNotice) { Alert(title: Text(tr("retry.notice_title")), message: Text($0.message), dismissButton: .default(Text(tr("common.ok")))) }
+        .alert(item: $model.retryNotice) { Alert(title: Text($0.title), message: Text($0.message), dismissButton: .default(Text(tr("common.ok")))) }
         .sheet(item: $model.createProblem) { CreateProblemSheet(problem: $0) { model.createProblem = nil; model.createModel.open(prefill: $0.prompt); showingCreate = true } }
         .sensoryFeedback(.success, trigger: model.completions)                       // one success haptic when a video becomes ready
         .onChange(of: model.completions) { _, _ in if let id = model.revealing, let v = model.video(id) { UIAccessibility.post(notification: .announcement, argument: tr("making.ready_announce", v.displayTitle)) } }
@@ -182,10 +182,10 @@ struct LibraryView: View {
             case .complete: link(v) { VideoRow(video: v) }
             case .failed:
                 // "Try again" starts THIS video again on the server (all its photos and options): no new row. Not offered for a used-up presentation or one out of retries.
-                FailedRow(title: model.brief(for: v.id) ?? v.displayTitle, message: tr("videos.no_credits_were_used"), retry: v.canRetry == false || model.retrying.contains(v.id) ? nil : { model.tryAgain(v) }, onRemove: { model.removeFailed(v) })
+                FailedRow(title: model.brief(for: v.id) ?? v.displayTitle, message: tr("videos.no_credits_were_used"), retry: v.canRetry == false || model.retrying.contains(v.id) ? nil : { model.tryAgain(v) }, onRemove: { model.deleteVideo(v) })
                     .accessibilityIdentifier("failedVideo")
             case .rejected:
-                FailedRow(title: model.brief(for: v.id) ?? v.displayTitle, message: v.rejectReason ?? tr("detail.rejected_body"), onRemove: { model.removeFailed(v) }, rejected: true)
+                FailedRow(title: model.brief(for: v.id) ?? v.displayTitle, message: v.rejectReason ?? tr("detail.rejected_body"), onRemove: { model.deleteVideo(v) }, rejected: true)
             }
         }
     }
@@ -361,26 +361,14 @@ extension LibraryView {
 }
 #endif
 
-/// Generate answered "blocked" or "paused" after Create had closed: the same kind sheet, with Edit request.
+/// Generate answered "blocked" or "paused" after Create had closed: the same kind sheet. Paused: OK. Refused: Edit request.
 struct CreateProblemSheet: View {
     let problem: AppModel.CreateProblem
     let onEdit: (AppModel.CreateProblem) -> Void
     @Environment(\.dismiss) private var dismiss
     var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            HStack(alignment: .top) {
-                Image(systemName: "exclamationmark.triangle").font(.role(.title, weight: .regular)).foregroundStyle(Theme.warning).frame(width: 56, height: 56).background(Theme.warningContainer, in: Circle()).accessibilityHidden(true)
-                Spacer()
-                IconButton(symbol: "xmark", label: tr("common.close"), identifier: "kindClose") { dismiss() }
-            }.padding(.top, 14)
-            Text(problem.paused ? tr("videos.creating_videos_is_paused") : tr("videos.we_cant_make_this_one")).textRole(.title).foregroundStyle(Theme.text).padding(.top, Theme.Space.l).accessibilityAddTraits(.isHeader)
-            Text(problem.message).font(.role(.body)).foregroundStyle(Theme.textSecondary).padding(.top, Theme.Space.s)
-            if problem.paused, let retry = RetryText.make(problem.retryAfter) { Text(retry).font(.role(.headline)).foregroundStyle(Theme.text).padding(.top, 6) }
-            Spacer()
-            Text(tr("create.nothing_was_charged")).font(.role(.subhead)).foregroundStyle(Theme.textSecondary)
-            PrimaryButton(title: tr("create.edit_request"), identifier: "editRequest") { onEdit(problem) }.padding(.top, Theme.Space.s)
+        FittedSheet {
+            KindStep(kind: problem.paused ? .paused : .refused, message: problem.message, suggestion: nil, retryAfter: problem.paused ? problem.retryAfter : nil, onUse: { _ in }, onClose: { dismiss() }, onEdit: { onEdit(problem) })
         }
-        .padding(.horizontal, Theme.gutter).padding(.bottom, 6)
-        .presentationBackground(Theme.surface).presentationDetents([.height(420), .large]).presentationDragIndicator(.visible)
     }
 }

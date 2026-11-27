@@ -530,22 +530,28 @@ final class VideoMKUITests: XCTestCase {
         let app = try launch(signedIn: true)
         XCTAssertTrue(readyRow(app).waitForExistence(timeout: 30), "needs a finished video in the library")
         readyRow(app).tap()
-        let full = app.buttons["Full screen"]
-        if !full.waitForExistence(timeout: 30) { print("TREE:", app.debugDescription) }
+        // one full-screen control: the system player's own (shown on a tap); a wide video turns the screen sideways, leaving turns it back
+        XCTAssertTrue(app.buttons["shareButton"].waitForExistence(timeout: 30))
+        let window = app.windows.firstMatch
+        let full = app.buttons.matching(NSPredicate(format: "label CONTAINS[c] 'full screen' OR identifier CONTAINS[c] 'full screen'")).firstMatch
+        if !full.exists { element(app, "player").tap() }
+        if !full.waitForExistence(timeout: 10) { print("TREE:", app.debugDescription) }
         XCTAssertTrue(full.exists, "the player offers full screen")
         shot(app, "17-inline-player")
         full.tap()
-        XCTAssertTrue(app.buttons["closeFullScreenButton"].waitForExistence(timeout: 10), "full screen opened")
-        let window = app.windows.firstMatch
         let turned = Date().addingTimeInterval(10)
         while window.frame.width <= window.frame.height && Date() < turned { usleep(300_000) }
         sleep(4)   // let the layout settle after the rotation
         shot(app, "18-full-screen")
         if let hold = ProcessInfo.processInfo.environment["VMK_HOLD_FULLSCREEN"], let secs = UInt32(hold) { sleep(secs) }   // lets the host take a real framebuffer screenshot
         XCTAssertGreaterThan(window.frame.width, window.frame.height, "full screen is landscape")
-        app.buttons["closeFullScreenButton"].tap()
-        if !full.waitForExistence(timeout: 15) { print("TREE2:", app.debugDescription) }
-        XCTAssertTrue(full.exists, "back on the video page")
+        let leave = app.buttons.matching(NSPredicate(format: "label CONTAINS[c] 'full screen' OR label CONTAINS[c] 'close' OR identifier CONTAINS[c] 'full screen'")).firstMatch
+        if !leave.exists { app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap() }
+        XCTAssertTrue(leave.waitForExistence(timeout: 10))
+        leave.tap()
+        let back = Date().addingTimeInterval(15)
+        while window.frame.width >= window.frame.height && Date() < back { usleep(300_000) }
+        XCTAssertTrue(app.buttons["shareButton"].waitForExistence(timeout: 15), "back on the video page")
         XCTAssertGreaterThan(window.frame.height, window.frame.width, "back to portrait")
         XCTAssertEqual(app.state, .runningForeground)
     }

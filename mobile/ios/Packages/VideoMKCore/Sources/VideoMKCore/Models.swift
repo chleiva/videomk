@@ -137,7 +137,7 @@ public enum VideoLook: String, CaseIterable, Sendable, Identifiable {
 public struct CreateOptions: Sendable, Equatable {
     /// What the app offers until the server says otherwise (capabilities carry `lengths.presets`, from 15 seconds up).
     public static let lengths: [Double] = [1, 2, 3, 5, 8, 12]
-    public static let defaultMinutes: Double = 3
+    public static let defaultMinutes: Double = 1
     public var minutes: Double
     public var look: VideoLook?  // nil = let the Producer choose
     public var captions: Bool    // subtitles on the video; the creator decides
@@ -151,7 +151,7 @@ public struct CreateOptions: Sendable, Equatable {
     /// A presentation is attached: its price at its own length (the server's number), the usual rule for any other length.
     public var deck: DeckPrice?
 
-    public init(minutes: Double = CreateOptions.defaultMinutes, look: VideoLook? = nil, captions: Bool = true, platform: String = "other", aspect: String = "16:9", resolution: String = "1080p", language: String = "auto", creditsMultiplier: Int = 1, deck: DeckPrice? = nil) {
+    public init(minutes: Double = CreateOptions.defaultMinutes, look: VideoLook? = nil, captions: Bool = true, platform: String = "youtube", aspect: String = "16:9", resolution: String = "1080p", language: String = "auto", creditsMultiplier: Int = 1, deck: DeckPrice? = nil) {
         self.deck = deck; self.creditsMultiplier = max(1, creditsMultiplier); self.minutes = minutes; self.look = look; self.captions = captions; self.platform = platform; self.aspect = aspect; self.resolution = resolution; self.language = language
     }
 }

@@ -51,7 +51,7 @@ final class AppModel {
     var retryNotice: RetryNotice?                          // why "Try again" or Remove could not be done (shown once)
     private(set) var retrying: Set<String> = []            // failed videos whose Try again is on its way
     private var attachments: [String: Int] = [:]           // videos made in this session: how many photos and presentations they were made with (an older server's fallback never drops them)
-    struct RetryNotice: Identifiable, Equatable { let id = UUID(); let message: String }
+    struct RetryNotice: Identifiable, Equatable { let id = UUID(); var title: String = tr("retry.notice_title"); let message: String }
     var composerLibrary: [LibraryPhoto] = []               // library photos chosen for the next video
     var mediaSelection: [LibraryPhoto] = []                // what is ticked on the Media tab right now (the round (+) attaches it to a new video)
     var mediaSelecting = false                             // Select mode is on in Media: the tab bar steps aside so the action bar is never covered
@@ -114,7 +114,11 @@ final class AppModel {
     }
 
     var hasRunningVideos: Bool { videos.contains { $0.status.isRunning } || pending.contains { $0.state == .sending } }
-    var entries: [LibraryEntry] { LibraryMerge.entries(pending: pending, server: videos) }
+    /// Videos that are being deleted (the Undo toast is still up): hidden everywhere, not yet removed on the server.
+    var entries: [LibraryEntry] { LibraryMerge.entries(pending: pending, server: videos.filter { !deleting.contains($0.id) }) }
+    private(set) var deleting: Set<String> = []
+    /// "Deleted · Undo": one pending delete at a time, for videos, photos and collections.
+    let undo = UndoCenter()
 
     func refreshWallet() async {
         guard let api else { return }
@@ -241,10 +245,45 @@ final class AppModel {
 
     // MARK: library
 
+    /// Bumps each time the app comes back to the front: the screens' polling tasks carry it in their id, so SwiftUI cancels the old ones (and with
+    /// them any request left hanging from before the app was suspended) and starts fresh ones.
+    private(set) var foregroundEpoch = 0
+    @ObservationIgnored private var wasInBackground = false
+    @ObservationIgnored private var lastForegroundRefresh = Date.distantPast
+
+    func appWentToBackground() {
+        wasInBackground = true
+        #if DEBUG
+        // `VMK_DEBUG_FINISH_IN_BACKGROUND=1` (fake runs): the fake server finishes every running video while the app is away
+        if media?.isFake == true, ProcessInfo.processInfo.environment["VMK_DEBUG_FINISH_IN_BACKGROUND"] == "1" {
+            fakeServerVideos = videos.map { v in v.status.isRunning ? VideoItem(id: v.id, status: .complete, title: v.title, durationSeconds: 62, createdAt: v.createdAt, videoURL: nil, previewGifURL: URL(string: "fake://landscape/clip_05"), rejectReason: nil, editable: true, aspect: "16:9", resolution: "1080p", deckStage: nil, canRetry: nil) : v }
+        }
+        #endif
+    }
+
+    /// The app is in front again (from another app or from the lock screen): the list is read NOW, not at the next poll, whatever was in flight
+    /// before. A video that finished while the app was away shows as finished at once; polling restarts if anything is still being made; an
+    /// expired token is refreshed inside the call (`APIClient.perform`).
+    func appBecameActive() async {
+        guard case .signedIn = phase else { return }
+        let away = wasInBackground; wasInBackground = false
+        guard away || Date().timeIntervalSince(lastForegroundRefresh) > 10 else { return }       // Control Centre or a banner: not every flicker asks the server
+        lastForegroundRefresh = .now
+        foregroundEpoch += 1
+        await refresh()
+    }
+
+    #if DEBUG
+    @ObservationIgnored private var fakeServerVideos: [VideoItem]?
+    #endif
+
     func refresh() async {
         guard let api else { return }
         #if DEBUG
-        if media?.isFake == true { loadState = .loaded; return }      // fake-library runs never call the real backend (its 401 would sign the demo session out)
+        if media?.isFake == true {          // fake-library runs never call the real backend (its 401 would sign the demo session out)
+            if let fresh = fakeServerVideos { fakeServerVideos = nil; track(old: videos, new: fresh); videos = fresh }
+            loadState = .loaded; return
+        }
         #endif
         if videos.isEmpty { loadState = .loading }
         do {
@@ -408,21 +447,32 @@ final class AppModel {
     }
     #endif
 
-    /// Removes a video that did not finish (failed or refused) from the list and from the server.
-    func removeFailed(_ video: VideoItem) {
-        guard let api else { return }
+    /// Deletes a video (one that did not finish, or a finished one from the player's More menu): it leaves the list at once and "Deleted · Undo" shows
+    /// for six seconds; the server is told when that time is up. If the server says no (today it only removes videos that did not finish), the video
+    /// comes back and one line says why.
+    func deleteVideo(_ video: VideoItem) {
+        let id = video.id
+        deleting.insert(id)
+        Haptics.play(.selection)
+        undo.offer(tr("undo.deleted"), undo: { [weak self] in self?.deleting.remove(id) }, commit: { [weak self] in await self?.commitDelete(id) })
+    }
+
+    private func commitDelete(_ id: String) async {
+        defer { deleting.remove(id) }
         #if DEBUG
-        if media?.isFake == true { videos.removeAll { $0.id == video.id }; return }
-        #endif
-        Task {
-            do {
-                if try await api.deleteVideo(videoID: video.id) { videos.removeAll { $0.id == video.id } }
-                else { retryNotice = RetryNotice(message: tr("retry.remove_unavailable")) }
-            } catch let e as AuthError where e == .signedOut { await signOut()
-            } catch let e as APIError where e == .unauthorized { await signOut()
-            } catch let e as APIError { retryNotice = RetryNotice(message: e.message); await refresh()
-            } catch { retryNotice = RetryNotice(message: APIError.server.message) }
+        if media?.isFake == true {
+            if ProcessInfo.processInfo.environment["VMK_DEBUG_FAKE_DELETE_VIDEO"] == "refused", video(id)?.status == .complete { retryNotice = RetryNotice(title: tr("undo.not_deleted"), message: tr("retry.remove_unavailable")); return }
+            videos.removeAll { $0.id == id }; return
         }
+        #endif
+        guard let api else { return }
+        do {
+            if try await api.deleteVideo(videoID: id) { videos.removeAll { $0.id == id } }
+            else { retryNotice = RetryNotice(title: tr("undo.not_deleted"), message: tr("retry.remove_unavailable")) }
+        } catch let e as AuthError where e == .signedOut { await signOut()
+        } catch let e as APIError where e == .unauthorized { await signOut()
+        } catch let e as APIError { retryNotice = RetryNotice(title: tr("undo.not_deleted"), message: e.message); await refresh()
+        } catch { retryNotice = RetryNotice(title: tr("undo.not_deleted"), message: APIError.server.message) }
     }
 
     func dismissPending(_ id: String) { pending.removeAll { $0.id == id }; deckIDs[id] = nil; deckMinutes[id] = nil; deckPrompts[id] = nil; photoData[id] = nil; photoMeta[id] = nil; uploadedMedia[id] = nil; libraryIDs[id] = nil }
@@ -504,6 +554,9 @@ final class AppModel {
     func playback(for id: String) async throws -> PlaybackInfo {
         #if DEBUG
         if media?.isFake == true, let file = ProcessInfo.processInfo.environment["VMK_DEBUG_PLAYBACK_FILE"] { return PlaybackInfo(url: URL(fileURLWithPath: file), description: "Chapters\n0:00 Intro\n\nPhoto credits: Example Photographer on Unsplash") }
+        #endif
+        #if DEBUG
+        if media?.isFake == true { throw APIError.network }       // fake-library runs never reach the backend (its 401 would sign the demo session out)
         #endif
         guard let api else { throw APIError.server }
         return try await api.playback(videoID: id)

@@ -78,14 +78,14 @@ private let landscapeOnly = CreateCapabilities(aspects: [.init(id: "16:9", label
         let again = CreateDefaults.load(userID: "alice", defaults: suite).form(vertical())
         #expect(again.minutes == 2 && again.look == .paper && !again.captions && again.language == "es" && again.platform == "youtube" && again.text.isEmpty)
         let bob = CreateDefaults.load(userID: "bob", defaults: suite).form(vertical())
-        #expect(bob.minutes == 3 && bob.look == nil && bob.captions && bob.platform == "other")           // first-time defaults
+        #expect(bob.minutes == 1 && bob.look == nil && bob.captions && bob.platform == "youtube")           // first-time defaults
         let data = try #require(suite.data(forKey: CreateDefaults.key("alice")))
         #expect(!String(decoding: data, as: UTF8.self).contains("secret"))
     }
 
     @Test func optionsCarryTheNewFieldsWithTodaysDefaults() {
         let o = CreateOptions()
-        #expect(o.platform == "other" && o.aspect == "16:9" && o.resolution == "1080p" && o.language == "auto" && o.minutes == 3)
+        #expect(o.platform == "youtube" && o.aspect == "16:9" && o.resolution == "1080p" && o.language == "auto" && o.minutes == 1)
     }
 }
 
@@ -221,7 +221,7 @@ extension CoreTests {
         #expect(body["platform"] as? String == "youtube" && body["aspect"] as? String == "9:16" && body["resolution"] as? String == "720p" && body["language"] as? String == "es" && body["captions"] as? Bool == false)
         #expect(body["brief"] as? [String: String] == ["audience": "kids", "summary": "For kids"])
         _ = try await api.startGeneration(prompt: "A day out with the family", clientRequestID: "r")
-        #expect(body["language"] == nil && body["brief"] == nil && body["captions"] == nil && body["platform"] as? String == "other")      // auto language, no brief, captions on: not sent
+        #expect(body["language"] == nil && body["brief"] == nil && body["captions"] == nil && body["platform"] as? String == "youtube")      // auto language, no brief, captions on: not sent
     }
 
     @Test func generateMapsBlockedAndPausedAnswers() async throws {
@@ -388,7 +388,7 @@ extension CoreTests {
         #expect(g.userTouched && g.lengthTouched)
         let short = CreateDefaults({ var x = CreateForm(); x.minutes = 0.25; return x }())
         #expect(short.form(caps).minutes == 0.25)                                                // a short length can be remembered
-        #expect(short.form(.fallback).minutes == 3)                                              // but not if the server no longer lists it
+        #expect(short.form(.fallback).minutes == 1)                                              // but not if the server no longer lists it
     }
 
     @Test func thePlatformNoteSurvivesDecoding() throws {
@@ -460,7 +460,7 @@ extension CoreTests {
         #expect(c.resolutions.allSatisfy { $0.creditsMultiplier == 1 && $0.aspects.isEmpty && $0.note == nil } && c.isSupported(aspect: "16:9", resolution: "1080p"))
         #expect(!c.platforms[0].supports4K && c.platforms[0].note4K == nil)
         var f = CreateForm(); f.normalize(c); f.select(PlatformChips.make(c).first { $0.id == "youtube" }!)
-        #expect(f.options.credits == 3 && f.fourKAdvice(c) == nil && f.resolutionChoices(c).map(\.id) == ["720p", "1080p"])      // nothing changes without 4K
+        #expect(f.options.credits == 1 && f.fourKAdvice(c) == nil && f.resolutionChoices(c).map(\.id) == ["720p", "1080p"])      // nothing changes without 4K
         let odd = try JSONDecoder().decode(CreateCapabilities.Resolution.self, from: Data(#"{"id":"2160p","credits_multiplier":"two","aspects":7}"#.utf8))
         #expect(odd.creditsMultiplier == 1 && odd.aspects.isEmpty)                // wrong types never fail decoding
     }
@@ -488,12 +488,12 @@ extension CoreTests {
         var f = CreateForm(); f.normalize(c); f.setResolution("2160p")
         #expect(f.resolutionChoices(c).map(\.id) == ["720p", "1080p", "2160p"])
         f.aspect = "9:16"; f.normalize(c)
-        #expect(f.resolutionChoices(c).map(\.id) == ["720p", "1080p"] && f.resolution == "1080p" && f.options.credits == 3)
+        #expect(f.resolutionChoices(c).map(\.id) == ["720p", "1080p"] && f.resolution == "1080p" && f.options.credits == 1)
     }
 
     @Test func fourKIsNeverARememberedDefault() {
         var f = form(); f.setResolution("2160p")
         let again = CreateDefaults(f).form(caps)
-        #expect(again.resolution == "1080p" && again.options.credits == 3 && !again.resolutionTouched)
+        #expect(again.resolution == "1080p" && again.options.credits == 1 && !again.resolutionTouched)
     }
 }

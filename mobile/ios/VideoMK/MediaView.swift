@@ -54,6 +54,7 @@ struct MediaView: View {
             .navigationDestination(isPresented: Binding(get: { media.showCollectionsList }, set: { media.showCollectionsList = $0 })) { CollectionsListView(media: media) }
             .safeAreaInset(edge: .bottom, spacing: 0) {
                 TabBarRoom(reserve: !selection.active) {
+                    if model.selectedTab == 1 { UndoToastHost() }
                     if let toast = media.toast { UploadToast(toast: toast, onAction: { media.dismissToast(); if toast.action == tr("org.view") { media.showCollectionsList = true } else { withAnimation(.snappy) { media.barExpanded = true } } }, onDismiss: { media.dismissToast() }) }
                     UploadBar(media: media, onManageStorage: { showStorage = true })
                     if media.bar == nil || media.bar?.kind == .finished { OrganizeBar(media: media) }

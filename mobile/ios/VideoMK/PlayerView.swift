@@ -2,21 +2,83 @@ import AVKit
 import SwiftUI
 import VideoMKCore
 
-/// The system player (scrubbing, captions, AirPlay, Picture in Picture) wrapped directly.
+/// iPhone is a portrait app. The one exception is the system player's own full screen: while it is up, a wide video turns the screen sideways,
+/// and leaving full screen turns it back. iPad keeps every orientation.
+@MainActor enum OrientationLock {
+    static let resting: UIInterfaceOrientationMask = UIDevice.current.userInterfaceIdiom == .pad ? .all : .portrait
+    private(set) static var mask: UIInterfaceOrientationMask = resting
+
+    /// The player went full screen: a wide video is shown sideways (the phone need not be turned), a vertical or square one stays upright.
+    static func enterFullScreen(landscape: Bool) {
+        guard UIDevice.current.userInterfaceIdiom != .pad else { return }
+        apply(landscape ? .landscape : .portrait)
+    }
+
+    static func leaveFullScreen() { apply(resting) }
+
+    static func reapply() { let m = mask; mask = []; apply(m) }
+
+    private static func apply(_ new: UIInterfaceOrientationMask) {
+        guard new != mask else { return }
+        mask = new
+        for scene in UIApplication.shared.connectedScenes.compactMap({ $0 as? UIWindowScene }) {
+            scene.requestGeometryUpdate(.iOS(interfaceOrientations: new)) { _ in }
+            for window in scene.windows {
+                var vc = window.rootViewController
+                while let v = vc { v.setNeedsUpdateOfSupportedInterfaceOrientations(); vc = v.presentedViewController }
+            }
+        }
+    }
+}
+
+final class AppDelegate: NSObject, UIApplicationDelegate {
+    func application(_ application: UIApplication, supportedInterfaceOrientationsFor window: UIWindow?) -> UIInterfaceOrientationMask { OrientationLock.mask }
+}
+
+/// The system player (scrubbing, captions, AirPlay, Picture in Picture, and the ONE full-screen control: the system's own) wrapped directly.
 struct PlayerController: UIViewControllerRepresentable {
     let player: AVPlayer?
+    var landscape = true
+
+    func makeCoordinator() -> Coordinator { Coordinator(landscape: landscape) }
 
     func makeUIViewController(context: Context) -> AVPlayerViewController {
         let vc = AVPlayerViewController()
         vc.allowsPictureInPicturePlayback = true
         vc.showsPlaybackControls = true
         vc.videoGravity = .resizeAspect
+        vc.delegate = context.coordinator
         vc.player = player
         return vc
     }
 
     func updateUIViewController(_ vc: AVPlayerViewController, context: Context) {
+        context.coordinator.landscape = landscape
         if vc.player !== player { vc.player = player }
+    }
+
+    static func dismantleUIViewController(_ vc: AVPlayerViewController, coordinator: Coordinator) { OrientationLock.leaveFullScreen() }
+
+    @MainActor final class Coordinator: NSObject, @preconcurrency AVPlayerViewControllerDelegate {
+        var landscape: Bool
+        init(landscape: Bool) { self.landscape = landscape }
+
+        func playerViewController(_ playerViewController: AVPlayerViewController, willBeginFullScreenPresentationWithAnimationCoordinator coordinator: any UIViewControllerTransitionCoordinator) {
+            let landscape = landscape
+            OrientationLock.enterFullScreen(landscape: landscape)
+            coordinator.animate(alongsideTransition: nil) { context in
+                let cancelled = context.isCancelled
+                Task { @MainActor in if cancelled { OrientationLock.leaveFullScreen() } else { OrientationLock.reapply() } }
+            }
+        }
+
+        func playerViewController(_ playerViewController: AVPlayerViewController, willEndFullScreenPresentationWithAnimationCoordinator coordinator: any UIViewControllerTransitionCoordinator) {
+            let landscape = landscape
+            OrientationLock.leaveFullScreen()          // the page underneath is upright again while the player shrinks back into it
+            coordinator.animate(alongsideTransition: nil) { context in
+                if context.isCancelled { Task { @MainActor in OrientationLock.enterFullScreen(landscape: landscape) } }
+            }
+        }
     }
 }
 
@@ -28,100 +90,14 @@ enum PlaybackAudio {
     }
 }
 
-/// Full screen is a plain UIKit modal presentation that declares itself landscape-only, so UIKit itself rotates the phone and lays the video out
-/// (SwiftUI covers and geometry requests left the content stuck at the portrait size). It keeps playing from the same moment.
-final class LandscapePlayerController: AVPlayerViewController {
-    var onClose: (() -> Void)?
-
-    override var supportedInterfaceOrientations: UIInterfaceOrientationMask { .landscape }
-    override var preferredInterfaceOrientationForPresentation: UIInterfaceOrientation { .landscapeRight }
-    override var prefersStatusBarHidden: Bool { true }
-    override var prefersHomeIndicatorAutoHidden: Bool { true }
-
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        let close = UIButton(type: .system)
-        close.setImage(UIImage(systemName: "xmark", withConfiguration: UIImage.SymbolConfiguration(pointSize: 15, weight: .bold)), for: .normal)
-        close.tintColor = .white
-        close.backgroundColor = UIColor.black.withAlphaComponent(0.55)
-        close.layer.cornerRadius = 20
-        close.accessibilityLabel = tr("player.close_full_screen")
-        close.accessibilityIdentifier = "closeFullScreenButton"
-        close.translatesAutoresizingMaskIntoConstraints = false
-        close.addAction(UIAction { [weak self] _ in self?.dismiss(animated: true) }, for: .touchUpInside)
-        contentOverlayView?.addSubview(close)
-        if let overlay = contentOverlayView {
-            NSLayoutConstraint.activate([
-                close.widthAnchor.constraint(equalToConstant: 40), close.heightAnchor.constraint(equalToConstant: 40),
-                close.topAnchor.constraint(equalTo: overlay.safeAreaLayoutGuide.topAnchor, constant: 12),
-                close.leadingAnchor.constraint(equalTo: overlay.safeAreaLayoutGuide.leadingAnchor, constant: 16),
-            ])
-        }
-    }
-
-    override func viewDidDisappear(_ animated: Bool) {
-        super.viewDidDisappear(animated)
-        if isBeingDismissed { onClose?() }
-    }
-}
-
-/// Vertical and square videos open full screen in portrait (the phone is not turned sideways for them).
-final class PortraitPlayerController: AVPlayerViewController {
-    var onClose: (() -> Void)?
-    override func viewDidDisappear(_ animated: Bool) {
-        super.viewDidDisappear(animated)
-        if isBeingDismissed { onClose?() }
-    }
-}
-
-@MainActor enum FullScreen {
-    static func present(_ player: AVPlayer, landscape: Bool = true, onClose: @escaping () -> Void) {
-        guard let scene = UIApplication.shared.connectedScenes.compactMap({ $0 as? UIWindowScene }).first(where: { $0.activationState == .foregroundActive }) ?? UIApplication.shared.connectedScenes.compactMap({ $0 as? UIWindowScene }).first,
-              var top = scene.keyWindow?.rootViewController else { onClose(); return }
-        while let next = top.presentedViewController { top = next }
-        PlaybackAudio.prepare()
-        if landscape {
-            let vc = LandscapePlayerController()
-            vc.player = player
-            vc.allowsPictureInPicturePlayback = true
-            vc.modalPresentationStyle = .fullScreen
-            vc.onClose = onClose
-            top.present(vc, animated: true) { player.play() }
-        } else {
-            let vc = PortraitPlayerController()
-            vc.player = player
-            vc.videoGravity = .resizeAspect
-            vc.allowsPictureInPicturePlayback = true
-            vc.modalPresentationStyle = .fullScreen
-            vc.onClose = onClose
-            top.present(vc, animated: true) { player.play() }
-        }
-    }
-}
-
-/// An inline player with a full screen button. It fills the frame it is given; the caller sizes it to the video's own shape.
+/// The inline player. It fills the frame it is given; the caller sizes it to the video's own shape. Full screen is the system control's.
 struct InlinePlayer: View {
     let player: AVPlayer
     var landscape = true
-    var playing = false
-    @State private var fullScreen = false
 
     var body: some View {
-        ZStack(alignment: .topTrailing) {
-            PlayerController(player: fullScreen ? nil : player)   // one screen owns the player at a time
-                .accessibilityIdentifier("player")                 // on the player itself: on the container it would rename the buttons laid over it
-            Button {
-                fullScreen = true
-                FullScreen.present(player, landscape: landscape) { fullScreen = false }
-            } label: {
-                IconButtonFace(symbol: "arrow.up.left.and.arrow.down.right", style: .onMedia, size: 40)
-            }
-            .buttonStyle(.plain).padding(6)
-            .opacity(playing ? 0.5 : 1)                                  // quieter while the video plays; always reachable (the system inline controls are not verified to carry their own)
-            .animation(Theme.Motion.fade, value: playing)
-            .accessibilityLabel(tr("player.full_screen"))
-            .accessibilityIdentifier("fullScreenButton")
-        }
-        .onAppear { PlaybackAudio.prepare() }
+        PlayerController(player: player, landscape: landscape)
+            .accessibilityIdentifier("player")
+            .onAppear { PlaybackAudio.prepare() }
     }
 }

@@ -232,6 +232,7 @@ struct Pill<MenuContent: View>: View {
             .background(Theme.surfaceRaised, in: Capsule())
             .frame(minHeight: Theme.minTouch).contentShape(Capsule())
         }
+        .menuOrder(.fixed)          // the menu lists its choices top to bottom in our order, wherever it opens
         .accessibilityLabel(spoken).accessibilityValue(value)
         .accessibilityIdentifier(identifier)
     }
@@ -405,7 +406,7 @@ struct ToastBar: View {
     var onAction: () -> Void = {}
     var body: some View {
         HStack(spacing: Theme.Space.m) {
-            if let symbol { Image(systemName: symbol).font(.role(.headline)).foregroundStyle(Theme.toastSuccess).accessibilityHidden(true) }
+            if let symbol { Image(systemName: symbol).font(.role(.headline)).foregroundStyle(symbol.hasPrefix("checkmark") ? Theme.toastSuccess : Theme.onMedia.opacity(0.8)).accessibilityHidden(true) }
             Text(text).font(.role(.subhead, weight: .medium)).foregroundStyle(Theme.onMedia).fixedSize(horizontal: false, vertical: true)
             Spacer(minLength: Theme.Space.xs)
             if let action {
@@ -438,6 +439,21 @@ struct InfoPopover: View {
             Text(text).font(.role(.subhead)).foregroundStyle(Theme.text).fixedSize(horizontal: false, vertical: true).padding(Theme.Space.l).frame(maxWidth: 300)
                 .presentationCompactAdaptation(.popover)
         }
+    }
+}
+
+/// "Deleted · Undo": shown for six seconds wherever the person is (a tab's floating bars, a pushed page, the photo viewer).
+struct UndoToastHost: View {
+    @Environment(AppModel.self) private var model
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    var body: some View {
+        Group {
+            if let p = model.undo.current {
+                ToastBar(text: p.text, symbol: "trash", action: tr("common.undo"), identifier: "undoToast") { model.undo.undo(); Haptics.play(.selection) }.id(p.id)
+            }
+        }
+        .animation(reduceMotion ? Theme.Motion.fade : Theme.Motion.spring, value: model.undo.current?.id)
+        .onChange(of: model.undo.current?.id) { _, id in if id != nil, let p = model.undo.current { UIAccessibility.post(notification: .announcement, argument: tr("undo.announce", p.text)) } }
     }
 }
 
@@ -488,5 +504,41 @@ struct SectionLabel: View {
     init(_ text: String) { self.text = text }
     var body: some View {
         Text(text).font(.role(.footnote, weight: .semibold)).foregroundStyle(Theme.textSecondary).frame(maxWidth: .infinity, alignment: .leading).accessibilityAddTraits(.isHeader)
+    }
+}
+
+/// A choice among a few (a platform, an answer, a quality): the one chip shape of the app, a pill. Selected: the primary container and a tick
+/// (never colour alone). `dashed` is the "write your own" chip. Long labels wrap and the pill grows with them.
+struct ChoiceChip: View {
+    let title: String
+    var symbol: String?
+    var selected = false
+    var dashed = false
+    var fullWidth = false
+    var trailingSymbol: String?
+    var spoken: String?
+    var identifier = ""
+    let action: () -> Void
+    @Environment(\.isEnabled) private var isEnabled
+
+    var body: some View {
+        let shape = RoundedRectangle(cornerRadius: Theme.minTouch / 2, style: .continuous)
+        Button(action: action) {
+            HStack(spacing: 6) {
+                if selected { Image(systemName: "checkmark").font(.role(.footnote, weight: .bold)).accessibilityHidden(true) }
+                else if let symbol { Image(systemName: symbol).font(.role(.footnote, weight: .semibold)).accessibilityHidden(true) }
+                Text(title).font(.role(.subhead, weight: .semibold)).multilineTextAlignment(.leading).fixedSize(horizontal: false, vertical: true)
+                if let trailingSymbol { Image(systemName: trailingSymbol).font(.role(.footnote)).accessibilityHidden(true) }
+            }
+            .foregroundStyle(selected ? Theme.primary : dashed ? Theme.textSecondary : Theme.text)
+            .padding(.horizontal, Theme.Space.l).padding(.vertical, Theme.Space.s)
+            .frame(maxWidth: fullWidth ? .infinity : nil, minHeight: Theme.minTouch, alignment: fullWidth ? .leading : .center)
+            .background(selected ? Theme.primaryContainer : dashed ? Color.clear : Theme.surfaceRaised, in: shape)
+            .overlay { if dashed { shape.strokeBorder(Theme.outline, style: StrokeStyle(lineWidth: 1.5, dash: [4, 4])) } }
+            .opacity(isEnabled ? 1 : 0.5)
+            .contentShape(shape)
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(spoken ?? title).accessibilityAddTraits(selected ? .isSelected : []).accessibilityIdentifier(identifier)
     }
 }

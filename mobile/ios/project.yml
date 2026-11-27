@@ -34,7 +34,8 @@ targets:
         CFBundleLocalizations: [en, es]    # the app speaks English and Spanish (docs/I18N.md); iOS Settings > videomk > Language lists both
         UILaunchScreen:
           UIColorName: LaunchBackground
-        UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait, UIInterfaceOrientationLandscapeLeft, UIInterfaceOrientationLandscapeRight]
+        # iPhone is portrait. The full-screen player alone turns sideways, through AppDelegate.supportedInterfaceOrientationsFor (OrientationLock).
+        UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
         UISupportedInterfaceOrientations~ipad: [UIInterfaceOrientationPortrait, UIInterfaceOrientationPortraitUpsideDown, UIInterfaceOrientationLandscapeLeft, UIInterfaceOrientationLandscapeRight]
         CFBundleURLTypes:
           - CFBundleURLName: com.videomk.app.auth

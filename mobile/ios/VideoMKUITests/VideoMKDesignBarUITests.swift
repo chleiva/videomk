@@ -165,4 +165,91 @@ final class VideoMKDesignBarUITests: XCTestCase {
         app.buttons["endNewVideo"].tap()
         XCTAssertTrue(el(app, "composerField").waitForExistence(timeout: 10), "New video opens Create")
     }
+
+    // MARK: audit 2026-11-27
+
+    /// One full-screen control: the system's. Ours is gone; a wide video turns the screen sideways and leaving full screen turns it back upright.
+    func testFullScreenIsTheSystemControlAndComesBackUpright() throws {
+        guard let file = ProcessInfo.processInfo.environment["VMK_DEBUG_PLAYBACK_FILE"], !file.isEmpty else { throw XCTSkip("needs TEST_RUNNER_VMK_DEBUG_PLAYBACK_FILE (a local mp4)") }
+        let app = launch(["VMK_DEBUG_FAKE_VIDEOS": "bar", "VMK_DEBUG_OPEN": "v3", "VMK_DEBUG_PLAYBACK_FILE": file])
+        XCTAssertTrue(app.buttons["shareButton"].waitForExistence(timeout: 20))
+        XCTAssertFalse(app.buttons["fullScreenButton"].exists, "no second full-screen button of our own")
+        let window = app.windows.firstMatch
+        XCTAssertGreaterThan(window.frame.height, window.frame.width)
+        let enter = app.buttons.matching(NSPredicate(format: "label CONTAINS[c] 'full screen' OR identifier CONTAINS[c] 'full screen'")).firstMatch
+        if !enter.exists { el(app, "player").tap() }          // the system controls show on a tap
+        if !enter.waitForExistence(timeout: 5) { print("TREE:", app.debugDescription) }
+        XCTAssertTrue(enter.exists, "the system player offers full screen")
+        enter.tap()
+        let turned = Date().addingTimeInterval(10)
+        while window.frame.width <= window.frame.height && Date() < turned { usleep(300_000) }
+        sleep(3)        // let the rotation settle
+        shot(app, "player-fullscreen")
+        if let hold = ProcessInfo.processInfo.environment["VMK_HOLD_FULLSCREEN"], let secs = UInt32(hold) { sleep(secs) }   // lets the host take a real framebuffer screenshot
+        XCTAssertGreaterThan(window.frame.width, window.frame.height, "a wide video is shown sideways in full screen")
+        let exit = app.buttons.matching(NSPredicate(format: "label CONTAINS[c] 'full screen' OR label CONTAINS[c] 'close' OR identifier CONTAINS[c] 'full screen'")).firstMatch
+        if !exit.exists { app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap() }
+        if !exit.waitForExistence(timeout: 5) { print("TREE2:", app.debugDescription) }
+        exit.tap()
+        let back = Date().addingTimeInterval(10)
+        while window.frame.width >= window.frame.height && Date() < back { usleep(300_000) }
+        XCTAssertGreaterThan(window.frame.height, window.frame.width, "back on the page, upright")
+        XCTAssertTrue(app.buttons["shareButton"].waitForExistence(timeout: 10))
+        shot(app, "player-after-fullscreen")
+    }
+
+    /// Delete lives in the player's More menu. The video leaves the list at once, "Deleted · Undo" shows, and Undo brings it back.
+    func testDeleteAVideoFromMoreAndUndo() {
+        let app = launch(["VMK_DEBUG_FAKE_VIDEOS": "bar", "VMK_DEBUG_OPEN": "v3"])
+        XCTAssertTrue(el(app, "moreButton").waitForExistence(timeout: 20))
+        el(app, "moreButton").tap()
+        XCTAssertTrue(app.buttons["deleteVideo"].waitForExistence(timeout: 5), "Delete is in More")
+        app.buttons["deleteVideo"].tap()
+        XCTAssertFalse(app.alerts.firstMatch.waitForExistence(timeout: 1), "no confirm dialog")
+        XCTAssertTrue(el(app, "undoToast").waitForExistence(timeout: 5), "Deleted · Undo")
+        XCTAssertFalse(app.staticTexts["How a forest breathes"].exists, "the video left the list at once")
+        shot(app, "videos-deleted-undo")
+        app.buttons["undoToastAction"].tap()
+        XCTAssertTrue(app.staticTexts["How a forest breathes"].waitForExistence(timeout: 5), "Undo brings it back")
+        XCTAssertTrue(el(app, "undoToast").waitForNonExistence(timeout: 3))
+    }
+
+    /// A video that did not finish says which video it is on its own page, with Try again and Remove; Remove can be undone.
+    func testTheFailedPageNamesTheVideoAndOffersBothActions() {
+        let app = launch(["VMK_DEBUG_FAKE_VIDEOS": "1", "VMK_DEBUG_OPEN": "v2"])
+        XCTAssertTrue(el(app, "failedPage").waitForExistence(timeout: 20))
+        XCTAssertTrue(app.staticTexts["Thailand highlights"].exists, "the title says which video")
+        XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label CONTAINS 'Didn’t finish' AND label CONTAINS 'No credits were used.'")).firstMatch.exists, "the same words as in the list")
+        XCTAssertTrue(app.buttons["tryAgain"].exists && app.buttons["removeVideo"].exists)
+        shot(app, "failed-page")
+        app.buttons["removeVideo"].tap()
+        XCTAssertTrue(el(app, "undoToast").waitForExistence(timeout: 5))
+        XCTAssertFalse(el(app, "failedVideo").exists, "gone from the list")
+        app.buttons["undoToastAction"].tap()
+        XCTAssertTrue(el(app, "failedVideo").waitForExistence(timeout: 5))
+    }
+
+    /// The video finished while the app was in the background (another app, the lock screen). Back in front, the list shows it as finished at once:
+    /// not after the next poll, not after a pull to refresh.
+    func testAVideoThatFinishedInTheBackgroundShowsAsFinishedAtOnce() {
+        let app = launch(["VMK_DEBUG_FAKE_VIDEOS": "bar", "VMK_DEBUG_FINISH_IN_BACKGROUND": "1"])
+        XCTAssertTrue(el(app, "runningRow").waitForExistence(timeout: 20), "one video is being made")
+        XCUIDevice.shared.press(.home)
+        sleep(3)
+        app.activate()
+        XCTAssertTrue(el(app, "runningRow").waitForNonExistence(timeout: 2.5), "read immediately on return (the poll alone would take 4 s)")
+        XCTAssertTrue(app.staticTexts["How honey is made"].waitForExistence(timeout: 3), "it is in the list as a finished video")
+        shot(app, "back-from-background")
+    }
+
+    /// The same while its Making screen is open: it turns into the player without a manual refresh.
+    func testAnOpenMakingScreenBecomesThePlayerAfterTheBackground() {
+        let app = launch(["VMK_DEBUG_FAKE_VIDEOS": "bar", "VMK_DEBUG_OPEN": "v1", "VMK_DEBUG_FINISH_IN_BACKGROUND": "1"])
+        XCTAssertTrue(el(app, "liveLine").waitForExistence(timeout: 20))
+        XCUIDevice.shared.press(.home)
+        sleep(3)
+        app.activate()
+        XCTAssertTrue(el(app, "videoTitle").waitForExistence(timeout: 2.5), "the Making screen became the video page at once")
+        XCTAssertFalse(el(app, "liveLine").exists)
+    }
 }

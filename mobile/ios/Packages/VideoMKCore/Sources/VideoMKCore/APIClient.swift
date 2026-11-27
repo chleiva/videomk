@@ -40,6 +40,13 @@ public enum RetryResult: Equatable, Sendable {
 public protocol AuthorizationProviding: Sendable {
     /// A valid ID token (refreshed if needed) and the user id (the token's `sub`).
     func authorization() async throws -> (idToken: String, userID: String)
+    /// The server refused the token although the phone thought it was still good (the app was suspended for a while, the clock moved): get a new one
+    /// now. Returns false when there is nothing to refresh with.
+    func refreshNow() async throws -> Bool
+}
+
+public extension AuthorizationProviding {
+    func refreshNow() async throws -> Bool { false }
 }
 
 public struct APIClient: Sendable {
@@ -142,6 +149,14 @@ public struct APIClient: Sendable {
 
     /// The authenticated request without any status mapping: only a missing session or a network failure throws. The library client maps statuses itself.
     func perform(_ method: String, _ path: [String], query: [URLQueryItem] = [], body: Data? = nil) async throws -> (Data, HTTPURLResponse) {
+        let first = try await performOnce(method, path, query: query, body: body)
+        // An expired session is handled here, once, for every call: refresh the token, then send the same request again. Only a second 401
+        // (or a refresh token the server no longer accepts) is a real sign-out.
+        guard first.1.statusCode == 401, (try? await auth.refreshNow()) == true else { return first }
+        return try await performOnce(method, path, query: query, body: body)
+    }
+
+    private func performOnce(_ method: String, _ path: [String], query: [URLQueryItem], body: Data?) async throws -> (Data, HTTPURLResponse) {
         let (token, userID) = try await auth.authorization()
         var url = config.apiBase.appendingPathComponent("users").appendingPathComponent(userID)
         for p in path { url.appendPathComponent(p) }

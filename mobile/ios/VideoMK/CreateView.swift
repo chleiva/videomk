@@ -1,3 +1,4 @@
+import PhotosUI
 import SwiftUI
 import VideoMKCore
 
@@ -12,9 +13,12 @@ struct CreateView: View {
     @Environment(\.colorScheme) private var scheme
     @Bindable var create: CreateModel
     @State private var dictation = Dictation()
-    @State private var showingAdd = false
-    @State private var confirmDiscard = false
-    @State private var addOnLibrary = false
+    @State private var showingLibrary = false          // "Media": the person's own library, as a picker
+    @State private var showingPhonePicker = false      // "Photo library": the system picker, directly
+    @State private var phoneItems: [PhotosPickerItem] = []
+    @State private var pendingSource: PhotoSource?     // what to open once a presentation was replaced (after asking)
+    @State private var keyboardUp = false
+    enum PhotoSource { case phone, library }
     @State private var flash = false
     @State private var shake: CGFloat = 0
     @State private var showingImporter = false
@@ -63,19 +67,23 @@ struct CreateView: View {
                 }
                 .safeAreaInset(edge: .top, spacing: 0) {
                     TopBar(leading: { IconButton(symbol: "xmark", label: capsule.canCancel ? tr("common.cancel") : tr("common.close"), identifier: "createCancel") { cancel() }.disabled(capsule.phase == .starting).opacity(locked ? 0.5 : 1) })
+                        // the bar is the page colour up to the status bar, with a short fade under it: the sentence never scrolls under the X or the clock
+                        .background(alignment: .top) {
+                            VStack(spacing: 0) {
+                                Theme.background.ignoresSafeArea(edges: .top)
+                                LinearGradient(colors: [Theme.background, Theme.background.opacity(0)], startPoint: .top, endPoint: .bottom).frame(height: Theme.Space.l).offset(y: Theme.Space.l)
+                            }
+                            .opacity(locked ? 0 : 1).allowsHitTesting(false)
+                        }
                 }
                 .safeAreaInset(edge: .bottom, spacing: 0) { bottomBar(proxy) }
                 .background { ZStack(alignment: .bottom) { Theme.background; if locked { Aura().transition(.opacity) } }.ignoresSafeArea().animation(Theme.Motion.reveal, value: locked) }
             }
             .toolbar(.hidden, for: .navigationBar)
-            .confirmationDialog(tr("create.discard_this_video"), isPresented: $confirmDiscard, titleVisibility: .visible) {
-                Button(tr("create.discard"), role: .destructive) { discard() }
-                Button(tr("create.keep_editing"), role: .cancel) {}
-            }
         }
         .task {
             await create.loadCapabilities(userID: model.userID)
-            if let auto = create.autoOpenPhotos { create.autoOpenPhotos = nil; addOnLibrary = auto.library; try? await Task.sleep(for: .milliseconds(350)); showingAdd = true }
+            if let auto = create.autoOpenPhotos { create.autoOpenPhotos = nil; try? await Task.sleep(for: .milliseconds(350)); open(auto.library ? .library : .phone) }
             else if let text = create.typeIn { create.typeIn = nil; try? await Task.sleep(for: .milliseconds(350)); typeIn(text) }
             else if !create.form.hasContent && !create.form.hasDeck && !create.deck.isActive && create.stage == .form && !locked {      // the caret is there at once on an empty prompt: type, then Create
                 try? await Task.sleep(for: .milliseconds(450)); if !create.form.hasContent, typingTarget == nil { focused = true }
@@ -84,14 +92,22 @@ struct CreateView: View {
         .onAppear { dictation.onText = { create.form.text = $0 }; dictation.onKeyboardFallback = { focused = true } }
         .onDisappear { dictation.stop(); typing?.cancel() }
         .onChange(of: focused) { _, f in if f { finishTyping() } }
-        .sheet(isPresented: $showingAdd, onDismiss: { if pendingDeckPick { pendingDeckPick = false; startDeckPick() } }) {
-            AddPhotosSheet(attached: totalPhotos, minutes: form.minutes, startOnLibrary: addOnLibrary, onDeck: nil) { phone, library in
-                create.photos.add(phone)
+        .sheet(isPresented: $showingLibrary) {
+            LibraryPickerSheet(attached: totalPhotos) { library in
                 let known = Set(model.composerLibrary.map(\.id))
                 model.composerLibrary += library.filter { !known.contains($0.id) }
                 create.photos.libraryCount = model.composerLibrary.count
             }
         }
+        // "Photo library" is the system picker itself: no sheet of ours in between. It only lets through what still fits in one video.
+        .photosPicker(isPresented: $showingPhonePicker, selection: $phoneItems, maxSelectionCount: max(1, create.photos.remaining), selectionBehavior: .ordered, matching: .images, photoLibrary: .shared())
+        .onChange(of: phoneItems) { _, items in
+            guard !items.isEmpty else { return }
+            let picked = items; phoneItems = []
+            create.photos.add(picked); Haptics.play(.selection)
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)) { _ in keyboardUp = true }
+        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)) { _ in keyboardUp = false }
         .fileImporter(isPresented: $showingImporter, allowedContentTypes: deckContentTypes(create.caps.deck), allowsMultipleSelection: false) { result in
             switch result {
             case .success(let urls): if let url = urls.first { create.pickDeck(url); Haptics.play(.selection) }
@@ -103,7 +119,7 @@ struct CreateView: View {
             Button(tr("deck.replace_photos.keep"), role: .cancel) {}
         } message: { Text(tr("deck.replace_photos.message", totalPhotos)) }
         .alert(tr("deck.replace_deck.title"), isPresented: $confirmPhotosReplace) {
-            Button(tr("deck.replace_deck.confirm"), role: .destructive) { create.removeDeck(); showingAdd = true }
+            Button(tr("deck.replace_deck.confirm"), role: .destructive) { create.removeDeck(); if let s = pendingSource { pendingSource = nil; present(s) } }
             Button(tr("deck.replace_deck.keep"), role: .cancel) {}
         } message: { Text(tr("deck.replace_deck.message")) }
         .onChange(of: create.deck.state, initial: true) { _, _ in create.syncDeck() }
@@ -190,29 +206,27 @@ struct CreateView: View {
 
     // photos
 
-    /// One photo icon; a count badge when something is attached. When the account has presentations (and none is attached) it is a small menu:
-    /// Photos, or Add a presentation.
-    @ViewBuilder private var photoButton: some View {
-        if create.deckAvailable && !create.deck.isActive {
-            Menu {
-                Button { focused = false; addOnLibrary = false; startPhotoAdd() } label: { Label(tr("media.add_photos"), systemImage: "photo") }.accessibilityIdentifier("photosMenuItem")
-                Button { startDeckPick() } label: { Label(tr("create.add_presentation"), systemImage: "rectangle.on.rectangle") }.accessibilityIdentifier("deckButton")
-            } label: { photoIcon }
-            .accessibilityLabel(totalPhotos > 0 ? tr("photos.count", totalPhotos) : tr("media.add_photos")).accessibilityIdentifier("photoButton")
-        } else {
-            Button { focused = false; addOnLibrary = false; startPhotoAdd() } label: { photoIcon }
-                .buttonStyle(.plain)
-                .accessibilityLabel(totalPhotos > 0 ? tr("photos.count", totalPhotos) : tr("media.add_photos")).accessibilityHint(tr("create.choose_photos_from_this_phone")).accessibilityIdentifier("photoButton")
-        }
+    /// One photo icon ("Add photos"). It is a two-item menu: "Photo library" opens the system picker at once, "Media" opens the person's own library.
+    /// (A third item, "Add a presentation", only where the server offers it.) No explainer in between: photo icon, pick, Create.
+    private var photoButton: some View {
+        Menu { photoMenuItems } label: { IconButtonFace(symbol: "photo.badge.plus") }
+            .menuOrder(.fixed)
+            .accessibilityLabel(tr("media.add_photos")).accessibilityValue(totalPhotos > 0 ? tr("photos.count", totalPhotos) : "").accessibilityIdentifier("photoButton")
     }
 
-    /// The photo-plus glyph (the words "Add photos" are its spoken label); a count when something is attached.
-    private var photoIcon: some View {
-        IconButtonFace(symbol: "photo.badge.plus")
-            .overlay(alignment: .topTrailing) {
-                if totalPhotos > 0 { Text("\(totalPhotos)").font(.role(.caption, weight: .bold).monospacedDigit()).foregroundStyle(Theme.onPrimary).padding(.horizontal, 6).frame(minWidth: 20, minHeight: 20).background(Theme.primary, in: Capsule()).offset(x: 8, y: -6).accessibilityHidden(true) }
-            }
+    @ViewBuilder private var photoMenuItems: some View {
+        Button { open(.phone) } label: { Label(tr("create.photo_library"), systemImage: "photo.on.rectangle") }.disabled(create.photos.remaining <= 0).accessibilityIdentifier("photosMenuItem")
+        if model.media != nil { Button { open(.library) } label: { Label(tr("media.media"), systemImage: "photo.stack") }.disabled(create.photos.remaining <= 0).accessibilityIdentifier("mediaMenuItem") }
+        if create.deckAvailable && !create.deck.isActive { Button { startDeckPick() } label: { Label(tr("create.add_presentation"), systemImage: "rectangle.on.rectangle") }.accessibilityIdentifier("deckButton") }
     }
+
+    /// Choosing photos while a presentation is attached replaces it (after asking).
+    private func open(_ source: PhotoSource) {
+        focused = false
+        if AttachRule.photos(deckActive: create.deck.isActive) == .confirm { pendingSource = source; confirmPhotosReplace = true } else { present(source) }
+    }
+
+    private func present(_ source: PhotoSource) { switch source { case .phone: showingPhonePicker = true; case .library: showingLibrary = true } }
 
     /// The attached photos: every photo with its own (x), one tile to add more, and the count beneath. Only when something is attached.
     @ViewBuilder private var attachments: some View {
@@ -233,11 +247,11 @@ struct CreateView: View {
                         }
                         if create.photos.loading > 0 { ProgressView().frame(width: 62, height: 62) }
                         if !locked {
-                            Button { focused = false; addOnLibrary = false; startPhotoAdd() } label: {
+                            Menu { photoMenuItems } label: {
                                 Image(systemName: "photo.badge.plus").font(.role(.headline)).foregroundStyle(Theme.primary).frame(width: 62, height: 62)
                                     .background(Theme.primaryContainer, in: RoundedRectangle(cornerRadius: Theme.Radii.thumb, style: .continuous))
                             }
-                            .buttonStyle(.plain).accessibilityLabel(tr("create.add_more_photos")).accessibilityIdentifier("editPhotos")
+                            .menuOrder(.fixed).accessibilityLabel(tr("create.add_more_photos")).accessibilityIdentifier("editPhotos")
                         }
                     }
                     .padding(.top, Theme.Space.m).padding(.trailing, Theme.Space.m)           // room for the (x) that sits over each corner
@@ -250,15 +264,13 @@ struct CreateView: View {
             }
         } else if model.selectedTab == 1, !form.hasDeck, !create.deck.isActive, !locked {
             // Create was opened from the Media tab with nothing ticked: the library is one tap away
-            Button { focused = false; addOnLibrary = true; startPhotoAdd() } label: { Label(tr("create.use_library"), systemImage: "photo.stack") }
+            Button { open(.library) } label: { Label(tr("create.use_library"), systemImage: "photo.stack") }
                 .buttonStyle(TonalButtonStyle(fullWidth: false)).accessibilityIdentifier("useLibrary")
         }
     }
 
     // presentation
 
-    /// Choosing photos while a presentation is attached replaces it (after asking).
-    private func startPhotoAdd() { if AttachRule.photos(deckActive: create.deck.isActive) == .confirm { confirmPhotosReplace = true } else { showingAdd = true } }
 
     /// Choosing a presentation while photos are attached replaces them (after asking).
     private func startDeckPick() {
@@ -295,7 +307,7 @@ struct CreateView: View {
     }
 
     private var forValue: String { form.isCustom(create.caps) ? tr("create.custom") : (form.chip(create.caps).map(shortName) ?? tr("pill.video")) }
-    private var lookValue: String { form.look?.title ?? tr("pill.auto_look") }
+    private var lookValue: String { form.look?.title ?? tr("look.auto") }
 
     private var forPill: some View {
         let current = form.chip(create.caps)
@@ -305,7 +317,9 @@ struct CreateView: View {
                 Button {
                     if chip.supported { create.form.select(chip); Haptics.play(.selection) } else { Haptics.play(.warning) }
                 } label: {
-                    if selected { Label(chip.label, systemImage: "checkmark") } else { Text(chip.supported ? chip.label : tr("create.chip_soon_a11y", chip.label, create.caps.aspectName(chip.aspect))) }
+                    // the same word as on the pill ("Video"), so the menu and the pill never name one thing twice
+                    let name = chip.id == "other" ? shortName(chip) : chip.label
+                    if selected { Label(name, systemImage: "checkmark") } else { Text(chip.supported ? name : tr("create.chip_soon_a11y", name, create.caps.aspectName(chip.aspect))) }
                 }
                 .disabled(!chip.supported)
                 .accessibilityIdentifier("platform-\(chip.id)")
@@ -378,7 +392,7 @@ struct CreateView: View {
                         Spacer(minLength: Theme.Space.s)
                         IconButton(symbol: "slider.horizontal.3", label: tr("create.options"), identifier: "moreOptions") { focused = false; create.showMore = true }
                     }
-                    pills.frame(maxWidth: .infinity, alignment: .leading)
+                    if !(keyboardUp && typeSize.isAccessibilitySize) { pills.frame(maxWidth: .infinity, alignment: .leading) }      // largest text with the keyboard up: the room goes to the sentence
                     createButton(s, proxy).padding(.top, Theme.Space.xs)
                     caption(s)
                 }
@@ -392,20 +406,33 @@ struct CreateView: View {
     }
 
     private func createButton(_ s: ComposerStatus, _ proxy: ScrollViewProxy) -> some View {
-        Button { tapCreate(s, proxy) } label: {
-            PrimaryLabel(title: tr("create.create_video"), spread: true) {
+        // Cannot afford this length but can afford a shorter one: the fix is written on the button ("Create · 1 min · 1") and one tap makes that video.
+        let affordable = affordableFix(s)
+        let credits = affordable?.credits ?? form.options.credits
+        // "Cannot do this yet" is visible: the opaque disabled look. The tap still lands, so the caption can say (and shake) what is missing.
+        // An empty prompt is not a problem state: the button rests in its gradient and the first tap puts the caret in the sentence.
+        let dimmed = !s.canSend && affordable == nil && !(s.kind == .price || s.kind == .ready)
+        return Button { if let affordable { create.form.setMinutes(affordable.minutes); Haptics.play(.selection) }; tapCreate(status, proxy) } label: {
+            PrimaryLabel(title: affordable.map { tr("create.create_length", LengthLabel.chip($0.minutes)) } ?? tr("create.create_video"), spread: true) {
                 if showsPrice {          // not while a presentation is still being read: its price is not known yet
-                    HStack(spacing: 4) { Image(systemName: "bolt.fill").font(.role(.subhead)); Text("\(form.options.credits)").monospacedDigit() }.accessibilityHidden(true)
+                    HStack(spacing: 4) { Image(systemName: "bolt.fill").font(.role(.subhead)); Text("\(credits)").monospacedDigit() }.accessibilityHidden(true)
                 }
             }
             .matchedGeometryEffect(id: "label", in: morph, properties: .position)
         }
-        .buttonStyle(PrimaryButtonStyle())
+        .buttonStyle(PrimaryButtonStyle(looksDisabled: dimmed))
         .matchedGeometryEffect(id: "cta", in: morph)
-        .accessibilityLabel(typeSize.isAccessibilitySize ? tr("create.create_a11y_credits", tr("credits.count", form.options.credits)) : tr("create.create_video"))
-        .accessibilityValue(s.canSend ? tr("create.ready_costs", tr("credits.count", form.options.credits)) : tr("create.not_ready", s.message))
-        .accessibilityHint(s.canSend ? tr("create.starts_video") : tr("create.tells_missing"))
+        .accessibilityLabel(affordable.map { tr("create.create_length", LengthLabel.spoken($0.minutes)) } ?? (typeSize.isAccessibilitySize ? tr("create.create_a11y_credits", tr("credits.count", form.options.credits)) : tr("create.create_video")))
+        .accessibilityValue(s.canSend || affordable != nil ? tr("create.ready_costs", tr("credits.count", credits)) : tr("create.not_ready", s.message))
+        .accessibilityHint(s.canSend || affordable != nil ? tr("create.starts_video") : tr("create.tells_missing"))
+        .accessibilityAddTraits(dimmed ? .isButton : .isButton)
         .accessibilityIdentifier("sendButton")
+    }
+
+    /// The length the balance can pay for, when the chosen one costs too much and the sentence is otherwise ready to send.
+    private func affordableFix(_ s: ComposerStatus) -> (minutes: Double, credits: Int)? {
+        guard s.kind == .notAffordable, case .useMinutes(let m, let c)? = s.fix, Brief.isValid(form.text) || form.hasDeck else { return nil }
+        return (m, c)
     }
 
     /// The live capsule: what is happening in three words, a turning ring, and Cancel as the only control (while cancelling is still honest).
@@ -427,10 +454,13 @@ struct CreateView: View {
             .matchedGeometryEffect(id: "cta", in: morph)
             .elevation(3)
             .accessibilityElement(children: .combine).accessibilityLabel(capsuleTitle).accessibilityValue(capsuleSub).accessibilityAddTraits(.updatesFrequently).accessibilityIdentifier("createCapsule")
-            Button(tr("common.cancel")) { stopChecking() }
-                .font(.role(.headline, weight: .medium)).foregroundStyle(Theme.textSecondary).frame(minWidth: 120, minHeight: Theme.minTouch)
-                .opacity(capsule.canCancel ? 1 : 0).disabled(!capsule.canCancel).accessibilityHidden(!capsule.canCancel)
-                .accessibilityIdentifier("checkingCancel")
+            Button { stopChecking() } label: {       // the text colour on an opaque capsule: readable on the aura in both appearances
+                Text(tr("common.cancel")).font(.role(.headline, weight: .medium)).foregroundStyle(Theme.text).padding(.horizontal, Theme.Space.xxl).frame(minWidth: 120, minHeight: Theme.minTouch)
+                    .background(Theme.surface, in: Capsule()).contentShape(Capsule())
+            }
+            .buttonStyle(.plain)
+            .opacity(capsule.canCancel ? 1 : 0).disabled(!capsule.canCancel).accessibilityHidden(!capsule.canCancel)
+            .accessibilityIdentifier("checkingCancel")
         }
         .padding(.bottom, Theme.Space.s)
     }
@@ -445,7 +475,10 @@ struct CreateView: View {
                 Label(error, systemImage: "exclamationmark.circle").font(.role(.footnote, weight: .medium)).foregroundStyle(Theme.text).multilineTextAlignment(.center).fixedSize(horizontal: false, vertical: true)
                     .labelStyle(DangerMarkLabel()).accessibilityIdentifier("startError")
             } else if s.kind == .ready || s.kind == .price || (s.kind == .tooShort && !form.hasContent) {
-                if let balance, balance - form.options.credits >= 0 { Text(tr("create.credits_left", balance - form.options.credits)).font(.role(.caption)).foregroundStyle(Theme.textSecondary).monospacedDigit().accessibilityIdentifier("costLine") } else { Color.clear.frame(height: 0) }
+                if let balance, balance - form.options.credits >= 0 {
+                    HStack(spacing: 3) { Image(systemName: "bolt.fill").font(.role(.caption)).accessibilityHidden(true); Text(tr("create.left_short", balance - form.options.credits)).font(.role(.caption)).monospacedDigit() }
+                        .foregroundStyle(Theme.textSecondary).accessibilityElement(children: .ignore).accessibilityLabel(tr("create.credits_left", balance - form.options.credits)).accessibilityIdentifier("costLine")
+                } else { Color.clear.frame(height: 0) }
             } else {
                 HStack(spacing: Theme.Space.s) {
                     Image(systemName: s.isProblem && s.kind != .tooShort ? "exclamationmark.circle" : "info.circle").font(.role(.footnote, weight: .semibold)).foregroundStyle(tint(s)).accessibilityHidden(true)
@@ -453,7 +486,7 @@ struct CreateView: View {
                         .modifier(Shake(travel: reduceMotion ? 0 : 4, value: shake))
                         .accessibilityIdentifier(unaffordable ? "notEnoughCredits" : s.kind == .photoHint ? "photoCapacityHint" : "costLine")
                     Spacer(minLength: Theme.Space.xs)
-                    if let fix = s.fix { FixChip(title: fix.title) { applyFix(fix) }.accessibilityIdentifier("fixChip") }
+                    if let fix = s.fix, affordableFix(s) == nil { FixChip(title: fix.title) { applyFix(fix) }.accessibilityIdentifier("fixChip") }       // a shorter length that fits is on the button itself
                 }
                 .padding(.horizontal, flash ? 6 : 0).background(flash ? Theme.warningContainer : .clear, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
             }
@@ -525,14 +558,18 @@ struct CreateView: View {
         if capsule.canCancel { stopChecking(); return }
         if locked { return }
         finishTyping()
-        if create.hasEdits { confirmDiscard = true } else { create.cancelCheck(); model.composerLibrary = []; dismiss() }
+        // Closing never asks: a sentence, photos or a presentation stay as a draft and are there when Create opens again.
+        // Nothing typed (library photos alone do not count: they are still ticked in Media): the next Create starts empty.
+        dictation.cancel(); typing?.cancel(); create.cancelCheck()
+        if !create.hasEdits { model.composerLibrary = [] }
+        dismiss()
     }
     /// Cancel during the request check: the call is dropped (a late answer is ignored, nothing is sent) and the form is back exactly as it was.
     private func stopChecking() {
         create.cancelCheck(); Haptics.play(.selection)
         UIAccessibility.post(notification: .announcement, argument: tr("create.check_cancelled"))
     }
-    private func discard() { dictation.cancel(); typing?.cancel(); create.cancelCheck(); create.photos.clear(); model.composerLibrary = []; create.removeDeck(); create.form.text = ""; dismiss() }
+
 }
 
 /// The soft light behind the live capsule (decoration only).

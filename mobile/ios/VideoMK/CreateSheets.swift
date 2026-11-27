@@ -1,47 +1,27 @@
 import SwiftUI
 import VideoMKCore
 
-/// The sheet that opens over Create after the button: the request check, the questions one at a time, the summary, or a kind "we can't make this".
+/// The sheet that opens over Create after the button: the questions one at a time, the summary, or a kind "we can't make this".
+/// One look for all of them: the opaque surface, as tall as what it holds, the app's chips and the ONE primary button.
 struct CreateStageSheet: View {
     @Bindable var create: CreateModel
     let balance: Int?
     let mediaCount: Int
     let onSubmit: ([String: String]?) -> Void
     let onEdit: () -> Void
-    @Environment(\.dismiss) private var dismiss
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @Environment(\.dynamicTypeSize) private var typeSize
 
     var body: some View {
-        Group {
+        FittedSheet {
             switch create.stage {
             case .questions(let flow): QuestionStep(create: create, flow: flow, mediaCount: mediaCount, onSubmit: onSubmit)
             case .summary(let flow, let brief): SummaryStep(create: create, flow: flow, brief: brief, balance: balance, onSubmit: onSubmit, onEdit: onEdit)
-            case .notSupported(let m, let s): KindStep(title: tr("create.cant_make_title"), message: m ?? tr("create.unsupported_fallback"), suggestion: s, retry: nil, create: create, onEdit: onEdit)
-            case .blocked(let m): KindStep(title: tr("create.cant_make_title"), message: m ?? tr("create.unsupported_fallback"), suggestion: nil, retry: nil, create: create, onEdit: onEdit)
-            case .paused(let m, let t): KindStep(title: tr("create.paused_title"), message: m ?? tr("create.paused_fallback"), suggestion: nil, retry: RetryText.make(t), create: create, onEdit: onEdit)
-            case .form: Color.clear
+            case .notSupported(let m, let s): KindStep(kind: .refused, message: m ?? tr("create.unsupported_fallback"), suggestion: s, retryAfter: nil, onUse: { create.form.text = $0; create.dismissOverlay() }, onClose: { create.dismissOverlay() }, onEdit: onEdit)
+            case .blocked(let m): KindStep(kind: .refused, message: m ?? tr("create.unsupported_fallback"), suggestion: nil, retryAfter: nil, onUse: { _ in }, onClose: { create.dismissOverlay() }, onEdit: onEdit)
+            case .paused(let m, let t): KindStep(kind: .paused, message: m, suggestion: nil, retryAfter: t, onUse: { _ in }, onClose: { create.dismissOverlay() }, onEdit: onEdit)
+            case .form: Color.clear.frame(height: 1)
             }
         }
-        .presentationBackground(Theme.surface)
-        .presentationDetents(typeSize.isAccessibilitySize ? [.large] : [.height(420), .height(560), .large], selection: $detent)
-        .onChange(of: create.stage, initial: true) { _, _ in detent = typeSize.isAccessibilitySize || hasLongLabels ? .large : .height(isSummary ? 560 : 420) }
-        .presentationDragIndicator(.visible)
     }
-
-    @State private var detent: PresentationDetent = .height(420)
-    /// Long answers wrap onto two lines, so the sheet opens at full height instead of hiding the buttons below them.
-    private var hasLongLabels: Bool {
-        let longest: Int
-        switch create.stage {
-        case .questions(let f): longest = f.current?.options.map(\.label.count).max() ?? 0
-        case .summary(let f, let b): longest = f.chips(briefSummary: b?["summary"]).map(\.text.count).max() ?? 0
-        default: longest = 0
-        }
-        return longest > 24
-    }
-
-    private var isSummary: Bool { if case .summary = create.stage { true } else { false } }
 }
 
 private struct QuestionStep: View {
@@ -58,47 +38,47 @@ private struct QuestionStep: View {
     @FocusState private var otherFocused: Bool
 
     var body: some View {
-        guard let q = flow.current else { return AnyView(EmptyView()) }
-        return AnyView(
-            VStack(alignment: .leading, spacing: 0) {
+        if let q = flow.current {
+            VStack(alignment: .leading, spacing: Theme.Space.l) {
                 header
-                ScrollView {
-                    content(q).id(flow.index)
-                        .transition(reduceMotion ? .identity : .asymmetric(insertion: .offset(x: forward ? 24 : -24).combined(with: .opacity), removal: .opacity))
-                }.scrollBounceBehavior(.basedOnSize).scrollIndicators(.hidden)
-                Spacer(minLength: 0)
+                content(q).id(flow.index)
+                    .transition(reduceMotion ? .identity : .asymmetric(insertion: .offset(x: forward ? 24 : -24).combined(with: .opacity), removal: .opacity))
             }
-            .padding(.horizontal, 20).padding(.top, 10).padding(.bottom, 6)
-        )
+            .padding(.top, Theme.Space.m)
+        }
     }
 
+    /// Back (after the first question), where we are, and "Skip all": one tap starts the video with whatever was answered so far.
     private var header: some View {
-        HStack {
-            if flow.canGoBack { Button { forward = false; withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.28)) { var f = flow; f.back(); create.stage = .questions(f) } } label: { Image(systemName: "chevron.left").font(.vmk(17, weight: .semibold)).frame(width: 44, height: 44) }.accessibilityLabel(tr("create.back")) }
-            else { Spacer().frame(width: 44) }
-            Spacer()
-            HStack(spacing: 6) { ForEach(0..<flow.questions.count, id: \.self) { i in Capsule().fill(i == flow.index ? Theme.primary : Theme.surface3).frame(width: i == flow.index ? 22 : 8, height: 8) } }.accessibilityLabel(flow.progressText)
-            Spacer()
-            Button(tr("create.skip")) { advance { $0.skip() } }.font(.vmk(17, weight: .semibold)).frame(minHeight: 44).accessibilityIdentifier("skipQuestion")
+        HStack(spacing: Theme.Space.s) {
+            if flow.canGoBack {
+                IconButton(symbol: "chevron.left", label: tr("create.back"), identifier: "questionBack") { forward = false; withAnimation(reduceMotion ? nil : Theme.Motion.spring) { var f = flow; f.back(); create.stage = .questions(f) } }
+            }
+            HStack(spacing: 6) { ForEach(0..<flow.questions.count, id: \.self) { i in Capsule().fill(i == flow.index ? Theme.primary : Theme.surface3).frame(width: i == flow.index ? 22 : 8, height: 8) } }
+                .frame(minHeight: Theme.minTouch)
+                .accessibilityElement().accessibilityLabel(flow.progressText).accessibilityIdentifier("questionProgress")
+            Spacer(minLength: Theme.Space.s)
+            Button(tr("create.skip_all")) { skipAll() }.buttonStyle(TextButtonStyle()).accessibilityHint(tr("create.skip_all_hint")).accessibilityIdentifier("skipQuestion")
         }
     }
 
     private func content(_ q: IntakeQuestion) -> some View {
-        VStack(alignment: .leading, spacing: 0) {
-            Text(q.title).font(.vmk(27, weight: .bold)).foregroundStyle(Theme.text).fixedSize(horizontal: false, vertical: true).padding(.top, 16).accessibilityAddTraits(.isHeader).accessibilityIdentifier("questionTitle")
+        VStack(alignment: .leading, spacing: Theme.Space.l) {
+            Text(q.title).textRole(.title).foregroundStyle(Theme.text).fixedSize(horizontal: false, vertical: true).accessibilityAddTraits(.isHeader).accessibilityIdentifier("questionTitle")
                 .accessibilityLabel("\(flow.progressText). \(q.title)")
             if other {
-                HStack(spacing: 10) {
-                    TextField(tr("create.type_your_answer"), text: $otherText).focused($otherFocused).padding(.horizontal, 14).frame(height: 50).background(Theme.surfaceRaised, in: RoundedRectangle(cornerRadius: Theme.Radii.card, style: .continuous))
-                        .overlay(RoundedRectangle(cornerRadius: Theme.Radii.card, style: .continuous).stroke(Theme.primary, lineWidth: 2)).submitLabel(.done).onSubmit { submitOther() }.accessibilityIdentifier("otherField")
-                    Button(tr("common.done")) { submitOther() }.font(.vmk(17, weight: .semibold)).frame(minHeight: 44).disabled(otherText.trimmingCharacters(in: .whitespaces).isEmpty)
-                }.padding(.top, 18)
+                HStack(spacing: Theme.Space.m) {
+                    TextField(tr("create.type_your_answer"), text: $otherText).font(.role(.body)).focused($otherFocused).padding(.horizontal, Theme.Space.l).frame(minHeight: 48).background(Theme.surfaceRaised, in: Capsule())
+                        .submitLabel(.done).onSubmit { submitOther() }.accessibilityIdentifier("otherField")
+                    Button(tr("common.done")) { submitOther() }.buttonStyle(TextButtonStyle()).disabled(otherText.trimmingCharacters(in: .whitespaces).isEmpty)
+                }
             } else {
-                let items = q.options.map { opt in Chip(id: opt.id, label: opt.label, symbol: nil, dashed: false) } + (q.allowOther ? [Chip(id: "__other", label: tr("create.other"), symbol: nil, dashed: true)] : []) + [Chip(id: "__decide", label: tr("create.you_decide"), symbol: "sparkles", dashed: false)]
+                let items = q.options.map { opt in Chip(id: opt.id, label: opt.label, symbol: nil, dashed: false) } + (q.allowOther ? [Chip(id: "__other", label: tr("create.other"), symbol: nil, dashed: true)] : []) + [Chip(id: "__decide", label: tr("create.you_decide"), symbol: "sparkle", dashed: false)]
                 Group {
-                    if typeSize >= .accessibility1 { VStack(spacing: 10) { ForEach(items) { chip($0, q) } } }
-                    else { WrapLayout(spacing: 10) { ForEach(items) { chip($0, q) } } }
-                }.padding(.top, 18).accessibilityElement(children: .contain).accessibilityLabel(tr("create.answers"))
+                    if typeSize >= .accessibility1 { VStack(spacing: Theme.Space.s) { ForEach(items) { chip($0, q) } } }
+                    else { WrapLayout(spacing: Theme.Space.s) { ForEach(items) { chip($0, q) } } }
+                }
+                .accessibilityElement(children: .contain).accessibilityLabel(tr("create.answers"))
             }
         }
     }
@@ -106,8 +86,7 @@ private struct QuestionStep: View {
     private struct Chip: Identifiable { let id: String; let label: String; let symbol: String?; let dashed: Bool }
 
     private func chip(_ c: Chip, _ q: IntakeQuestion) -> some View {
-        let selected = picked == c.id
-        return Button {
+        ChoiceChip(title: c.label, symbol: c.symbol, selected: picked == c.id, dashed: c.dashed, fullWidth: typeSize >= .accessibility1, identifier: "answer-\(c.id)") {
             Haptics.play(.selection)
             if c.id == "__other" { other = true; otherFocused = true; return }
             picked = c.id
@@ -115,18 +94,7 @@ private struct QuestionStep: View {
                 try? await Task.sleep(for: .milliseconds(250))
                 advance { f in if c.id == "__decide" { f.youDecide() } else if let o = q.options.first(where: { $0.id == c.id }) { f.choose(o) } }
             }
-        } label: {
-            HStack(spacing: 8) {
-                if let s = c.symbol { Image(systemName: s).font(.vmk(15)) }
-                Text(c.label).font(.vmk(17, weight: .semibold)).multilineTextAlignment(.leading).lineLimit(nil).fixedSize(horizontal: false, vertical: true)
-            }
-            .foregroundStyle(c.dashed ? Theme.textSecondary : selected ? Theme.primary : Theme.text).padding(.horizontal, 20).padding(.vertical, 12)
-            .frame(maxWidth: typeSize >= .accessibility1 ? .infinity : nil, minHeight: 50, alignment: .leading)
-            .background(selected ? Theme.primaryContainer : (c.dashed ? .clear : Theme.surfaceRaised), in: RoundedRectangle(cornerRadius: Theme.Radii.composer, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: Theme.Radii.composer, style: .continuous).stroke(selected ? Theme.primary : Theme.outline, style: StrokeStyle(lineWidth: selected ? 2 : 1.5, dash: c.dashed ? [4, 4] : [])))
         }
-        .buttonStyle(.plain)
-        .accessibilityLabel(c.label).accessibilityAddTraits(selected ? .isSelected : []).accessibilityIdentifier("answer-\(c.id)")
     }
 
     private func submitOther() {
@@ -134,11 +102,17 @@ private struct QuestionStep: View {
         advance { $0.other(t) }
     }
 
+    /// Every question that is still open is skipped at once. Nothing answered: the video starts. Something answered: the summary shows it first.
+    private func skipAll() {
+        Haptics.play(.selection)
+        advance { f in f.skipRest() }
+    }
+
     private func advance(_ change: (inout IntakeFlow) -> Void) {
         var f = flow
         change(&f)
         picked = nil; other = false; otherText = ""; forward = true
-        withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.28)) {
+        withAnimation(reduceMotion ? nil : Theme.Motion.spring) {
             if f.isComplete { create.answer(f, mediaCount: mediaCount, submit: onSubmit) } else { create.stage = .questions(f) }
         }
     }
@@ -151,77 +125,79 @@ private struct SummaryStep: View {
     let balance: Int?
     let onSubmit: ([String: String]?) -> Void
     let onEdit: () -> Void
-    @Environment(\.dismiss) private var dismiss
 
     var body: some View {
         let status = ComposerPlan.status(text: create.form.text, balance: balance, options: create.form.options, photos: 0, lengths: create.caps.lengthPresets)
-        VStack(alignment: .leading, spacing: 0) {
-            HStack {
-                Text(tr("create.ready_when_you_are")).font(.vmk(23, weight: .bold)).foregroundStyle(Theme.text).accessibilityAddTraits(.isHeader)
-                Spacer()
-                IconButton(symbol: "xmark", label: tr("create.edit_request"), identifier: "editRequest") { onEdit() }
-            }.padding(.top, 14)
-            VStack(alignment: .leading, spacing: 4) {
-                Text(create.form.text).font(.vmk(17)).foregroundStyle(Theme.text).lineLimit(4)
-            }
-            .frame(maxWidth: .infinity, alignment: .leading).padding(16).background(Theme.surfaceRaised, in: RoundedRectangle(cornerRadius: Theme.Radii.videoCard, style: .continuous)).padding(.top, 10)
-            WrapLayout(spacing: 10) {
+        VStack(alignment: .leading, spacing: Theme.Space.l) {
+            SheetHeader(title: tr("create.ready_when_you_are"), closeID: "summaryClose", onClose: onEdit)
+            Text(create.form.text).font(.role(.body)).foregroundStyle(Theme.text).lineLimit(4)
+                .frame(maxWidth: .infinity, alignment: .leading).padding(Theme.Space.l).background(Theme.surfaceRaised, in: RoundedRectangle(cornerRadius: Theme.Radii.card, style: .continuous))
+            WrapLayout(spacing: Theme.Space.s) {
                 ForEach(Array(flow.chips(briefSummary: brief?["summary"]).enumerated()), id: \.offset) { _, c in
-                    Button { var f = flow; f.edit(c.questionID); create.stage = .questions(f) } label: {
-                        HStack(spacing: 6) { Text(c.text).font(.vmk(17, weight: .semibold)).multilineTextAlignment(.leading).fixedSize(horizontal: false, vertical: true); Image(systemName: "pencil").font(.vmk(13)) }
-                            .foregroundStyle(Theme.primary).padding(.horizontal, Theme.gutter).padding(.vertical, 10).frame(minHeight: 44).background(Theme.primaryContainer, in: RoundedRectangle(cornerRadius: Theme.Radii.videoCard, style: .continuous))
-                    }.buttonStyle(.plain).accessibilityLabel(tr("create.summary_chip_a11y", c.text)).accessibilityIdentifier("summaryChip")
+                    ChoiceChip(title: c.text, selected: false, trailingSymbol: "pencil", spoken: tr("create.summary_chip_a11y", c.text), identifier: "summaryChip") { var f = flow; f.edit(c.questionID); create.stage = .questions(f) }
                 }
-            }.padding(.top, 14)
-            Spacer(minLength: 16)
-            HStack(spacing: 8) {
-                Image(systemName: "bolt.fill").font(.vmk(14)).foregroundStyle(Theme.primary)
-                Text(status.message).font(.vmk(14, weight: .medium)).foregroundStyle(status.isProblem ? Theme.warning : Theme.textSecondary).fixedSize(horizontal: false, vertical: true)
-                Spacer(minLength: 4)
-                if let fix = status.fix, status.isProblem { FixChip(title: fix.title) { if case .useMinutes(let m, _) = fix { create.form.setMinutes(m) } } }
+            }
+            if status.isProblem {
+                HStack(spacing: Theme.Space.s) {
+                    Image(systemName: "exclamationmark.circle").font(.role(.footnote, weight: .semibold)).foregroundStyle(Theme.warning).accessibilityHidden(true)
+                    Text(status.message).font(.role(.footnote, weight: .medium)).foregroundStyle(Theme.text).fixedSize(horizontal: false, vertical: true)
+                    Spacer(minLength: Theme.Space.xs)
+                    if let fix = status.fix, case .useMinutes(let m, _) = fix { FixChip(title: fix.title) { create.form.setMinutes(m) } }
+                }
             }
             Button { create.dismissOverlay(); onSubmit(brief) } label: {
-                HStack(spacing: 8) { Text(tr("create.create_video") + " ·").font(.vmk(19, weight: .bold)); HStack(spacing: 3) { Image(systemName: "bolt.fill").font(.vmk(15)); Text("\(create.form.options.credits)").font(.vmk(19, weight: .bold).monospacedDigit()) } }
-                    .foregroundStyle(status.canSend ? Color.white : Theme.textTertiary).frame(maxWidth: .infinity, minHeight: 54).background(status.canSend ? AnyShapeStyle(Theme.gradient) : AnyShapeStyle(Theme.surface3), in: Capsule())
-            }.buttonStyle(.plain).disabled(!status.canSend).padding(.top, 10).accessibilityIdentifier("summaryCreate")
+                PrimaryLabel(title: tr("create.create_video"), spread: true) {
+                    HStack(spacing: 4) { Image(systemName: "bolt.fill").font(.role(.subhead)); Text("\(create.form.options.credits)").monospacedDigit() }.accessibilityHidden(true)
+                }
+            }
+            .buttonStyle(PrimaryButtonStyle()).disabled(!status.canSend)
+            .accessibilityLabel(tr("create.create_a11y_credits", tr("credits.count", create.form.options.credits))).accessibilityIdentifier("summaryCreate")
         }
-        .padding(.horizontal, 20).padding(.bottom, 6)
     }
 }
 
-private struct KindStep: View {
-    let title: String
-    let message: String
+/// "We can't make this one" and "Paused": what happened in the title, one honest line, nothing charged, and one action that can actually help.
+/// Paused: OK (editing the request cannot lift a pause; the title says when to come back). Refused: Edit request.
+struct KindStep: View {
+    enum Kind { case refused, paused }
+    let kind: Kind
+    let message: String?
     let suggestion: String?
-    let retry: String?
-    @Bindable var create: CreateModel
+    let retryAfter: Int?
+    let onUse: (String) -> Void
+    let onClose: () -> Void
     let onEdit: () -> Void
 
-    var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            HStack(alignment: .top) {
-                Image(systemName: "exclamationmark.triangle").font(.vmk(34)).foregroundStyle(Theme.warning).frame(width: 56, height: 56).background(Theme.warningContainer, in: Circle()).accessibilityHidden(true)
-                Spacer()
-                IconButton(symbol: "xmark", label: tr("common.close"), identifier: "kindClose") { create.dismissOverlay() }
-            }.padding(.top, 14)
-            Text(title).font(.vmk(30, weight: .bold)).foregroundStyle(Theme.text).padding(.top, 16).accessibilityAddTraits(.isHeader).accessibilityIdentifier("kindTitle")
-            Text(message).font(.vmk(17)).foregroundStyle(Theme.textSecondary).padding(.top, 8).fixedSize(horizontal: false, vertical: true).accessibilityIdentifier("kindMessage")
-            if let retry { Text(retry).font(.vmk(17, weight: .semibold)).foregroundStyle(Theme.text).padding(.top, 6) }
-            if let suggestion, !suggestion.isEmpty {
-                HStack(alignment: .center, spacing: 10) {
-                    VStack(alignment: .leading, spacing: 3) {
-                        Text(tr("create.for_example")).font(.vmk(12, weight: .bold)).tracking(0.3).foregroundStyle(Theme.textSecondary)
-                        Text(suggestion).font(.vmk(16)).foregroundStyle(Theme.text)
-                    }
-                    Spacer(minLength: 4)
-                    Button(tr("create.use_this")) { create.form.text = suggestion; create.dismissOverlay() }.font(.vmk(15, weight: .bold)).foregroundStyle(Theme.primary).padding(.horizontal, 14).frame(minHeight: 44).background(Theme.primaryContainer, in: Capsule()).accessibilityIdentifier("useSuggestion")
-                }.padding(16).background(Theme.surfaceRaised, in: RoundedRectangle(cornerRadius: Theme.Radii.videoCard, style: .continuous)).padding(.top, 16)
-            }
-            Spacer(minLength: 8)
-            Text(tr("create.nothing_was_charged")).font(.vmk(15)).foregroundStyle(Theme.textSecondary).accessibilityIdentifier("nothingCharged")
-            Button { onEdit() } label: { Text(tr("create.edit_request")).font(.vmk(19, weight: .bold)).foregroundStyle(Theme.onPrimary).frame(maxWidth: .infinity, minHeight: 54).background(Theme.gradient, in: Capsule()) }.buttonStyle(.plain).padding(.top, 8).accessibilityIdentifier("editRequest")
+    private var title: String {
+        switch kind {
+        case .refused: tr("create.cant_make_title")
+        case .paused: RetryText.short(retryAfter).map { tr("create.paused_title_retry", $0) } ?? tr("create.paused_title")
         }
-        .padding(.horizontal, 20).padding(.bottom, 6)
+    }
+    /// The server's line, unless it only repeats the title.
+    private var shownMessage: String? { KindCopy.message(message, title: title, alsoNot: [tr("create.paused_title"), tr("create.paused_fallback")].filter { _ in kind == .paused }) }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: Theme.Space.m) {
+            HStack(alignment: .top) {
+                Image(systemName: kind == .paused ? "pause.fill" : "exclamationmark.triangle").font(.role(.title, weight: .regular)).foregroundStyle(Theme.warning).frame(width: 56, height: 56).background(Theme.warningContainer, in: Circle()).accessibilityHidden(true)
+                Spacer()
+                IconButton(symbol: "xmark", label: tr("common.close"), identifier: "kindClose", action: onClose)
+            }
+            .padding(.top, Theme.Space.xl)
+            Text(title).textRole(.title).foregroundStyle(Theme.text).fixedSize(horizontal: false, vertical: true).accessibilityAddTraits(.isHeader).accessibilityIdentifier("kindTitle")
+            if let shownMessage { Text(shownMessage).font(.role(.body)).foregroundStyle(Theme.textSecondary).fixedSize(horizontal: false, vertical: true).accessibilityIdentifier("kindMessage") }
+            if let suggestion, !suggestion.isEmpty {
+                VStack(alignment: .leading, spacing: Theme.Space.s) {
+                    SectionLabel(tr("create.for_example"))
+                    SparkleChip(title: suggestion, identifier: "useSuggestion", hint: tr("create.use_this")) { onUse(suggestion) }
+                }
+                .padding(.top, Theme.Space.xs)
+            }
+            Text(tr("create.nothing_was_charged")).font(.role(.footnote)).foregroundStyle(Theme.textSecondary).padding(.top, Theme.Space.s).accessibilityIdentifier("nothingCharged")
+            if kind == .paused { PrimaryButton(title: tr("common.ok"), identifier: "pausedOK", action: onClose) }
+            else { PrimaryButton(title: tr("create.edit_request"), identifier: "editRequest", action: onEdit) }
+        }
     }
 }
 

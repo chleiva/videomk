@@ -131,8 +131,8 @@ struct FixedAuth: AuthorizationProviding {
         let api = APIClient(config: config, auth: FixedAuth(), session: stubSession())
         _ = try await api.startGeneration(prompt: "A tour of Paris", clientRequestID: "r", options: CreateOptions(minutes: 5, look: .paper))
         #expect(body["target_minutes"] as? Double == 5 && body["theme"] as? String == "paper")
-        _ = try await api.startGeneration(prompt: "A tour of Paris", clientRequestID: "r")  // defaults: 3 minutes, no look
-        #expect(body["target_minutes"] as? Double == 3 && body["theme"] == nil)
+        _ = try await api.startGeneration(prompt: "A tour of Paris", clientRequestID: "r")  // defaults: 1 minute, no look
+        #expect(body["target_minutes"] as? Double == 1 && body["theme"] == nil)
     }
 
     @Test(arguments: [(400, "invalid"), (429, "quota"), (401, "unauthorized"), (403, "unauthorized"), (500, "server")])

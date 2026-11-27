@@ -73,6 +73,9 @@ final class CreateModel {
     /// `platformChip` and `language`: "Make another" on a finished video opens the same sentence with one choice changed (a Short, another language, a shorter cut).
     func open(prefill: String? = nil, minutes: Double? = nil, platformChip: String? = nil, language: String? = nil) {
         stage = .form; showMore = false; capsule.reset(); startError = nil; typeIn = nil; checkRun = nil
+        // A draft (a sentence, photos or a presentation left when Create was closed) is kept: closing never asks and never loses anything.
+        // Anything that opens Create with its own content (an example, "Make another", Try again) starts fresh.
+        if prefill == nil, minutes == nil, platformChip == nil, language == nil, hasEdits { return }
         form = CreateDefaults.load(userID: userID).form(caps)
         if let prefill { form.text = prefill }
         if let platformChip, let chip = PlatformChips.make(caps).first(where: { $0.id == platformChip && $0.supported }) { form.select(chip) }

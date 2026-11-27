@@ -100,6 +100,13 @@ public actor AuthService: AuthorizationProviding {
         return (t.idToken, sub)
     }
 
+    /// The server said 401 to a token this phone still believed in: refresh it now, whatever its expiry says.
+    public func refreshNow() async throws -> Bool {
+        guard let t = store.load(), t.refreshToken != nil else { return false }
+        _ = try await refreshed(t)
+        return true
+    }
+
     private func refreshed(_ old: Tokens) async throws -> Tokens {
         if let refreshTask { return try await refreshTask.value }  // one refresh in flight at a time
         guard let rt = old.refreshToken else { signOut(); throw AuthError.signedOut }

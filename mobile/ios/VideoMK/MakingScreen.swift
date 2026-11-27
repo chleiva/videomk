@@ -99,6 +99,8 @@ struct NotifyCard: View {
             .padding(.horizontal, 18).padding(.vertical, Theme.Space.m).frame(minHeight: 64)
             .background(Theme.surface, in: RoundedRectangle(cornerRadius: Theme.Radii.card, style: .continuous))
             .elevation(2)
+            .contentShape(RoundedRectangle(cornerRadius: Theme.Radii.card, style: .continuous))
+            .onTapGesture { let on = !notifier.enabled; Task { denied = !(await notifier.setEnabled(on)); if on, !denied { Haptics.play(.selection) } } }      // the whole row is the switch
             .accessibilityIdentifier("notifySwitch")
             Text(denied ? tr("making.notify_denied") : tr("making.leave_promise")).font(.role(.caption)).foregroundStyle(Theme.textSecondary).multilineTextAlignment(.center).fixedSize(horizontal: false, vertical: true)
                 .accessibilityIdentifier("leavePromise")

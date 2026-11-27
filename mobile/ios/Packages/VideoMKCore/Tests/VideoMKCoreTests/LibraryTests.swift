@@ -88,7 +88,7 @@ import Testing
 
     @Test func creditsAreStartedMinutes() {
         #expect([0.2, 1, 1.01, 2.5, 3, 12, 40].map { CreateOptions(minutes: $0).credits } == [1, 1, 2, 3, 3, 12, 12])
-        #expect(CreateOptions().credits == 3)
+        #expect(CreateOptions().credits == 1)        // the first-run default is YouTube · 1 min: 1 credit
         #expect(WalletInfo(balance: 2).canAfford(2) && !WalletInfo(balance: 2).canAfford(3))
         #expect(WalletInfo(balance: 0, unlimited: true).canAfford(12))   // test accounts are never blocked
     }

@@ -89,6 +89,7 @@ struct FailedRow: View {
     var retry: (() -> Void)?
     var onRemove: (() -> Void)?
     var rejected = false
+    var onPage = false          // on the video's own page: Remove is a labelled button beside Try again (no menu), and the card has no shadow of its own
 
     private var status: String { rejected ? tr("videos.not_allowed") : tr("videos.didnt_finish") }
 
@@ -102,7 +103,7 @@ struct FailedRow: View {
                     Text(message.map { tr("videos.row_meta", status, $0) } ?? status).font(.role(.footnote)).foregroundStyle(Theme.textSecondary).fixedSize(horizontal: false, vertical: true)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
-                if let onRemove {
+                if let onRemove, !onPage {
                     Menu { Button(tr("videos.remove"), role: .destructive, action: onRemove) } label: { Image(systemName: "ellipsis").font(.role(.headline)).foregroundStyle(Theme.textSecondary).frame(width: Theme.minTouch, height: Theme.minTouch).contentShape(Rectangle()) }
                         .accessibilityLabel(tr("media.more")).accessibilityIdentifier("failedMore").padding(.top, -8).padding(.trailing, -10)
                 }
@@ -110,6 +111,9 @@ struct FailedRow: View {
             if let retry {
                 Button(action: retry) { Label(tr("common.try_again"), systemImage: "arrow.clockwise") }
                     .buttonStyle(TonalButtonStyle()).accessibilityIdentifier("tryAgain")
+            }
+            if onPage, let onRemove {
+                Button(tr("videos.remove"), action: onRemove).buttonStyle(TextButtonStyle(tint: Theme.danger)).frame(maxWidth: .infinity).accessibilityIdentifier("removeVideo")
             }
         }
         .padding(Theme.Space.l).frame(maxWidth: .infinity, alignment: .leading)

@@ -8,62 +8,40 @@ struct CreateOptionsSheet: View {
     @Environment(\.dismiss) private var dismiss
     private var form: CreateForm { create.form }
 
+    @Environment(\.dynamicTypeSize) private var typeSize
+
     var body: some View {
-        NavigationStack {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 0) {
-                    section(tr("create.what_is_it_for")).padding(.bottom, 8)
-                    forChips
-                    section(tr("create.look")).padding(.top, 20).padding(.bottom, 8)
-                    HStack(alignment: .top, spacing: 10) { look(nil, tr("create.look_auto")); ForEach(VideoLook.allCases) { look($0, $0.title) } }
-                    resolutionControl.padding(.top, 20)
-                    VStack(spacing: 0) {
-                        Toggle(isOn: $create.form.captions) { Label(tr("create.subtitles"), systemImage: "captions.bubble").font(.vmk(17)).foregroundStyle(Theme.text) }
-                            .tint(Theme.primary).frame(minHeight: 52).padding(.horizontal, Theme.gutter).accessibilityIdentifier("subtitlesToggle")
-                        Divider().padding(.leading, 16)
-                        languageRow.padding(.horizontal, Theme.gutter)
-                    }
-                    .background(Theme.surface, in: RoundedRectangle(cornerRadius: Theme.Radii.card, style: .continuous)).padding(.top, 20)
-                    if readyFormats.count > 1 {
-                        section(tr("create.format")).padding(.top, 20).padding(.bottom, 8).id("format")
-                        formatTiles
-                    }
+        FittedSheet {
+            VStack(alignment: .leading, spacing: Theme.Space.xl) {
+                SheetHeader(title: tr("create.options"), closeLabel: tr("common.done"), closeID: "optionsDone") { dismiss() }
+                group(tr("create.what_is_it_for")) { forChips }
+                group(tr("create.look")) { looks }
+                resolutionControl
+                VStack(spacing: 0) {
+                    Toggle(isOn: $create.form.captions) { Label(tr("create.subtitles"), systemImage: "captions.bubble").font(.role(.body)).foregroundStyle(Theme.text) }
+                        .tint(Theme.success).frame(minHeight: 52).accessibilityIdentifier("subtitlesToggle")
+                    Divider().overlay(Theme.outline)
+                    languageRow
                 }
-                .padding(.horizontal, 20).padding(.vertical, 12)
+                if readyFormats.count > 1 { group(tr("create.format")) { formatTiles }.id("format") }
             }
-            .background(Theme.background.ignoresSafeArea())
-            .navigationTitle(tr("create.options")).navigationBarTitleDisplayMode(.inline)
-            .toolbar { ToolbarItem(placement: .confirmationAction) { Button(tr("common.done")) { dismiss() }.accessibilityIdentifier("optionsDone") } }
         }
-        .presentationDetents([.medium, .large]).presentationDragIndicator(.visible)
     }
 
-    private func section(_ t: String) -> some View {
-        Text(t.uppercased()).font(.vmk(12, weight: .bold)).tracking(0.8).foregroundStyle(Theme.textTertiary).accessibilityAddTraits(.isHeader)
+    private func group<C: View>(_ title: String, @ViewBuilder content: () -> C) -> some View {
+        VStack(alignment: .leading, spacing: Theme.Space.s) { SectionLabel(title); content() }
     }
 
     // for
 
     private var forChips: some View {
-        WrapLayout(spacing: 8) {
+        WrapLayout(spacing: Theme.Space.s) {
             ForEach(PlatformChips.make(create.caps)) { chip in
                 let selected = form.chip(create.caps)?.id == chip.id && !form.isCustom(create.caps)
-                Button {
-                    if chip.supported { create.form.select(chip); Haptics.play(.selection) } else { Haptics.play(.warning) }
-                } label: {
-                    HStack(spacing: 6) {
-                        if selected { Image(systemName: "checkmark").font(.vmk(13, weight: .bold)) }
-                        Text(chip.label).font(.vmk(15, weight: .semibold)).multilineTextAlignment(.leading).fixedSize(horizontal: false, vertical: true)
-                    }
-                    .foregroundStyle(selected ? Theme.primary : Theme.text).padding(.horizontal, 14).padding(.vertical, 8).frame(minHeight: 44)
-                    .background(selected ? Theme.primaryContainer : Theme.surface, in: RoundedRectangle(cornerRadius: Theme.Radii.videoCard, style: .continuous))
-                    .overlay(RoundedRectangle(cornerRadius: Theme.Radii.videoCard, style: .continuous).stroke(selected ? Theme.primary : Theme.outline, lineWidth: selected ? 1.5 : 1))
-                    .opacity(chip.supported ? 1 : 0.5)
+                ChoiceChip(title: chip.id == "other" ? tr("pill.video") : chip.label, selected: selected, spoken: chip.supported ? chip.label : tr("create.chip_soon_a11y", chip.label, create.caps.aspectName(chip.aspect)), identifier: "optPlatform-\(chip.id)") {
+                    create.form.select(chip); Haptics.play(.selection)
                 }
-                .buttonStyle(.plain).disabled(!chip.supported)
-                .accessibilityLabel(chip.supported ? chip.label : tr("create.chip_soon_a11y", chip.label, create.caps.aspectName(chip.aspect)))
-                .accessibilityAddTraits(selected ? .isSelected : [])
-                .accessibilityIdentifier("optPlatform-\(chip.id)")
+                .disabled(!chip.supported)
             }
         }
         .accessibilityElement(children: .contain)
@@ -71,14 +49,31 @@ struct CreateOptionsSheet: View {
 
     // look
 
-    private func look(_ look: VideoLook?, _ title: String) -> some View {
+    /// Four swatches in a row; at the largest text sizes two rows of two, so every name is whole and the same size.
+    @ViewBuilder private var looks: some View {
+        let all: [VideoLook?] = [nil] + VideoLook.allCases.map { Optional($0) }
+        if typeSize.isAccessibilitySize {
+            VStack(spacing: Theme.Space.m) {
+                HStack(alignment: .top, spacing: Theme.Space.m) { ForEach(all.prefix(2), id: \.self) { look($0) } }
+                HStack(alignment: .top, spacing: Theme.Space.m) { ForEach(all.suffix(2), id: \.self) { look($0) } }
+            }
+        } else {
+            HStack(alignment: .top, spacing: Theme.Space.m) { ForEach(all, id: \.self) { look($0) } }
+        }
+    }
+
+    private func look(_ look: VideoLook?) -> some View {
         let selected = form.look == look
+        let title = look?.title ?? tr("create.look_auto")
         return Button { create.form.look = look; Haptics.play(.selection) } label: {
             VStack(spacing: 6) {
-                LookSwatch(look: look).aspectRatio(3 / 3.6, contentMode: .fit).clipShape(RoundedRectangle(cornerRadius: Theme.Radii.card, style: .continuous))
-                    .overlay(RoundedRectangle(cornerRadius: Theme.Radii.card, style: .continuous).stroke(Theme.primary, lineWidth: selected ? 2 : 0))
-                    .padding(selected ? 3 : 0).background(selected ? Theme.primaryContainer : .clear, in: RoundedRectangle(cornerRadius: Theme.Radii.videoCard, style: .continuous))
-                Text(title).font(.vmk(15, weight: selected ? .semibold : .regular)).foregroundStyle(selected ? Theme.primary : Theme.text).lineLimit(1).minimumScaleFactor(0.7).multilineTextAlignment(.center).fixedSize(horizontal: false, vertical: true)
+                LookSwatch(look: look).aspectRatio(typeSize.isAccessibilitySize ? 2 : 3 / 3.6, contentMode: .fit).clipShape(RoundedRectangle(cornerRadius: Theme.Radii.thumb, style: .continuous))
+                    .padding(3).overlay(RoundedRectangle(cornerRadius: Theme.Radii.thumb + 3, style: .continuous).strokeBorder(Theme.primary, lineWidth: selected ? 2 : 0))
+                HStack(spacing: 3) {
+                    if selected { Image(systemName: "checkmark").font(.role(.caption, weight: .bold)).accessibilityHidden(true) }
+                    Text(title).font(.role(.footnote, weight: selected ? .semibold : .regular)).lineLimit(typeSize.isAccessibilitySize ? 2 : 1).multilineTextAlignment(.center)
+                }
+                .foregroundStyle(selected ? Theme.primary : Theme.text)
             }
         }
         .buttonStyle(.plain).frame(maxWidth: .infinity)
@@ -87,32 +82,20 @@ struct CreateOptionsSheet: View {
 
     // quality
 
-    /// 720p | 1080p | 4K, with a small "2x" tag on 4K; the sentence about the price is behind an (i).
+    /// 720p, 1080p, 4K as chips; 4K says what it costs, and its one sentence sits under the row while it is chosen.
     @ViewBuilder private var resolutionControl: some View {
         let choices = form.resolutionChoices(create.caps)
         if choices.count > 1 {
-            VStack(alignment: .leading, spacing: 8) {
-                HStack(spacing: 0) {
-                    section(tr("create.quality"))
-                    if let note = form.resolutionNote(create.caps), form.creditsMultiplier > 1 { InfoPopover(text: note, spoken: tr("create.cost_why"), identifier: "resolutionNote") }
-                }
-                HStack(spacing: 0) {
+            group(tr("create.quality")) {
+                WrapLayout(spacing: Theme.Space.s) {
                     ForEach(choices, id: \.id) { r in
-                        let selected = form.resolution == r.id
-                        Button { create.form.setResolution(r.id); Haptics.play(.selection) } label: {
-                            HStack(spacing: 4) {
-                                Text(r.label).font(.vmk(17, weight: .semibold)).foregroundStyle(Theme.text)
-                                if r.creditsMultiplier > 1 { Text(tr("create.credits_multiplier", r.creditsMultiplier)).font(.vmk(11, weight: .bold)).foregroundStyle(selected ? Theme.primary : Theme.textSecondary) }
-                            }
-                            .multilineTextAlignment(.center).padding(.vertical, 4).frame(maxWidth: .infinity, minHeight: 44)
-                            .background(selected ? Theme.surface : .clear, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
-                            .shadow(color: .black.opacity(selected ? 0.08 : 0), radius: 3, y: 1)
-                        }
-                        .buttonStyle(.plain)
-                        .accessibilityLabel(r.creditsMultiplier > 1 ? tr("create.credits_multiplier_a11y", r.label, r.creditsMultiplier) : r.label).accessibilityAddTraits(selected ? .isSelected : []).accessibilityIdentifier("resolution-\(r.id)")
+                        ChoiceChip(title: r.creditsMultiplier > 1 ? "\(r.label) · \(tr("create.credits_multiplier", r.creditsMultiplier))" : r.label, selected: form.resolution == r.id,
+                                   spoken: r.creditsMultiplier > 1 ? tr("create.credits_multiplier_a11y", r.label, r.creditsMultiplier) : r.label, identifier: "resolution-\(r.id)") { create.form.setResolution(r.id); Haptics.play(.selection) }
                     }
                 }
-                .padding(3).background(Theme.surfaceRaised, in: RoundedRectangle(cornerRadius: Theme.Radii.field, style: .continuous))
+                if let note = form.resolutionNote(create.caps), form.creditsMultiplier > 1 {
+                    Text(note).font(.role(.footnote)).foregroundStyle(Theme.textSecondary).fixedSize(horizontal: false, vertical: true).accessibilityIdentifier("resolutionNote")
+                }
             }
         }
     }
@@ -125,11 +108,11 @@ struct CreateOptionsSheet: View {
             ForEach(create.caps.languages, id: \.id) { l in Button { create.form.language = l.id } label: { if form.language == l.id { Label(l.label, systemImage: "checkmark") } else { Text(l.label) } } }
         } label: {
             HStack {
-                Label(tr("create.language"), systemImage: "globe").font(.vmk(17)).foregroundStyle(Theme.text)
-                Spacer(minLength: 8)
-                Text(form.language == "auto" ? tr("look.auto") : (create.caps.languages.first { $0.id == form.language }?.label ?? form.language)).font(.vmk(15)).foregroundStyle(Theme.textSecondary).lineLimit(1)
-                Image(systemName: "chevron.up.chevron.down").font(.vmk(12, weight: .semibold)).foregroundStyle(Theme.textTertiary)
-            }.frame(minHeight: 52)
+                Label(tr("create.language"), systemImage: "globe").font(.role(.body)).foregroundStyle(Theme.text)
+                Spacer(minLength: Theme.Space.s)
+                Text(form.language == "auto" ? tr("create.look_auto") : (create.caps.languages.first { $0.id == form.language }?.label ?? form.language)).font(.role(.subhead)).foregroundStyle(Theme.textSecondary).lineLimit(1)
+                Image(systemName: "chevron.up.chevron.down").font(.role(.caption, weight: .semibold)).foregroundStyle(Theme.textSecondary).accessibilityHidden(true)
+            }.frame(minHeight: 52).contentShape(Rectangle())
         }
         .accessibilityIdentifier("languageRow")
     }
@@ -141,24 +124,62 @@ struct CreateOptionsSheet: View {
             .filter { f in create.caps.readyAspects.contains { $0.id == f.0 } }.map { (id: $0.0, name: $0.1, symbol: $0.2) }
     }
 
+    /// Every tile always says its ratio (two upright rectangles look alike without it); a format that is still in beta says "Beta" in words.
     private var formatTiles: some View {
-        HStack(spacing: 10) {
+        HStack(alignment: .top, spacing: Theme.Space.s) {
             ForEach(readyFormats, id: \.id) { f in
                 let selected = form.aspect == f.id
                 let beta = create.caps.aspect(f.id)?.beta == true
                 Button { create.form.aspect = f.id; create.form.normalize(create.caps); Haptics.play(.selection) } label: {
-                    VStack(spacing: 6) {
-                        Image(systemName: f.symbol).font(.vmk(24)).dynamicTypeSize(...DynamicTypeSize.xxxLarge).foregroundStyle(selected ? Theme.primary : Theme.textSecondary)
-                        Text(selected ? f.id : " ").font(.vmk(12, weight: .semibold).monospacedDigit()).foregroundStyle(Theme.primary).lineLimit(1)
+                    VStack(spacing: Theme.Space.xs) {
+                        AspectGlyph(ratio: f.id).foregroundStyle(selected ? Theme.primary : Theme.textSecondary).frame(width: 30, height: 30)
+                        Text(f.id).font(.role(.footnote, weight: .semibold).monospacedDigit()).foregroundStyle(selected ? Theme.primary : Theme.text).lineLimit(1)
+                        Text(beta ? tr("create.beta") : " ").font(.role(.caption)).foregroundStyle(Theme.textSecondary).lineLimit(1)
                     }
-                    .padding(.vertical, 10).frame(maxWidth: .infinity, minHeight: 72)
-                    .background(selected ? Theme.primaryContainer : Theme.surfaceRaised, in: RoundedRectangle(cornerRadius: Theme.Radii.card, style: .continuous))
-                    .overlay(RoundedRectangle(cornerRadius: Theme.Radii.card, style: .continuous).stroke(Theme.primary, lineWidth: selected ? 1.5 : 0))
-                    .overlay(alignment: .topTrailing) { if beta { Circle().fill(Theme.warning).frame(width: 7, height: 7).padding(8).accessibilityHidden(true) } }
+                    .padding(.vertical, Theme.Space.m).frame(maxWidth: .infinity, minHeight: 88)
+                    .background(selected ? Theme.primaryContainer : Theme.surfaceRaised, in: RoundedRectangle(cornerRadius: Theme.Radii.thumb, style: .continuous))
+                    .overlay(alignment: .topTrailing) { if selected { Image(systemName: "checkmark.circle.fill").font(.role(.footnote)).foregroundStyle(Theme.primary).padding(6).accessibilityHidden(true) } }
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel(beta ? tr("create.aspect_a11y_beta", f.name, f.id) : "\(f.name) \(f.id)").accessibilityAddTraits(selected ? .isSelected : []).accessibilityIdentifier("aspect-\(f.id)")
             }
         }
+        .dynamicTypeSize(...DynamicTypeSize.accessibility1)
+    }
+}
+
+/// The frame shape, drawn to its real proportions (16:9, 9:16, 1:1 and 4:5 are told apart at a glance).
+struct AspectGlyph: View {
+    let ratio: String
+    var body: some View {
+        let parts = ratio.split(separator: ":").compactMap { Double($0) }
+        let r = parts.count == 2 && parts[1] > 0 ? parts[0] / parts[1] : 16.0 / 9.0
+        RoundedRectangle(cornerRadius: 4, style: .continuous).strokeBorder(lineWidth: 2).aspectRatio(r, contentMode: .fit).accessibilityHidden(true)
+    }
+}
+
+/// The little preview of a look: abstract, drawn, no assets.
+struct LookSwatch: View {
+    let look: VideoLook?
+    var body: some View {
+        ZStack {
+            switch look {
+            case nil:
+                Theme.primaryContainer
+                Image(systemName: "sparkles").font(.vmk(26)).foregroundStyle(Theme.primary)
+            case .midnight?:
+                LinearGradient(colors: [Color(hex: 0x1C2150), Color(hex: 0x0C0F28)], startPoint: .top, endPoint: .bottom)
+                lines([Theme.toastAccent, Color(hex: 0x7C80FF), Color(hex: 0x5F63F0)])
+            case .paper?:
+                Color(hex: 0xF6EEE2)
+                lines([Color(hex: 0x3B3226), Color(hex: 0x8C7F66), Color(hex: 0xB9AC92)])
+            case .sunrise?:
+                LinearGradient(colors: [Color(hex: 0xFFA763), Color(hex: 0xF0506E)], startPoint: .top, endPoint: .bottom)
+                lines([.white, .white.opacity(0.7), .white.opacity(0.45)])
+            }
+        }
+    }
+    private func lines(_ colors: [Color]) -> some View {
+        VStack(spacing: 6) { ForEach(Array(colors.enumerated()), id: \.offset) { _, c in Capsule().fill(c).frame(height: 3).padding(.horizontal, 18) } }
     }
 }

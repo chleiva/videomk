@@ -3,6 +3,7 @@ import VideoMKCore
 
 @main
 struct VideoMKApp: App {
+    @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     @State private var model = AppModel()
     @Environment(\.scenePhase) private var scenePhase
 
@@ -18,7 +19,8 @@ struct VideoMKApp: App {
         .onChange(of: scenePhase) { _, phase in
             // "Tell me when it's ready": keep checking for a while after the app is left, and ask iOS for a later look
             if phase == .background { ReadyNotifier.shared.appDidEnterBackground(hasRunning: model.hasRunningVideos); if ReadyNotifier.shared.enabled { Task { await model.pollWhileRunning() } } }
-            if phase == .active { ReadyNotifier.shared.appDidBecomeActive() }
+            if phase == .active { ReadyNotifier.shared.appDidBecomeActive(); Task { await model.appBecameActive() } }      // back in front (also from the lock screen): read the list now
+            if phase == .background { model.undo.flush(); model.appWentToBackground() }      // a pending "Deleted · Undo" is sent when the app is left
         }
         .backgroundTask(.appRefresh(ReadyNotifier.refreshTask)) { await model.backgroundCheck() }
     }

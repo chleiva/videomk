@@ -150,13 +150,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Free up storage in the Media tab to add photos."
+            "value" : "Free up storage in Media to add photos."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Libera espacio en la pestaña Biblioteca para agregar fotos."
+            "value" : "Libera espacio en Biblioteca para agregar fotos."
           }
         }
       }
@@ -259,13 +259,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "My media isn't available"
+            "value" : "Media isn't available"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mi biblioteca no está disponible"
+            "value" : "Biblioteca no está disponible"
           }
         }
       }
@@ -701,13 +701,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "My media photo %1$lld of %2$lld"
+            "value" : "Media photo %1$lld of %2$lld"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Foto %1$lld de %2$lld de Mi biblioteca"
+            "value" : "Foto %1$lld de %2$lld de Biblioteca"
           }
         }
       }
@@ -1368,13 +1368,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Photos stay in My media. Only the collection is removed."
+            "value" : "Photos stay in Media. Only the collection is removed."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Las fotos se quedan en Mi biblioteca. Solo se quita la colección."
+            "value" : "Las fotos se quedan en Biblioteca. Solo se quita la colección."
           }
         }
       }
@@ -2112,13 +2112,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Choose photos from this phone or My media. Optional."
+            "value" : "From your photo library or Media. Optional."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Elige fotos de este teléfono o de Mi biblioteca. Opcional."
+            "value" : "De tu fototeca o de Biblioteca. Opcional."
           }
         }
       }
@@ -2350,13 +2350,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "FOR EXAMPLE"
+            "value" : "For example"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "POR EJEMPLO"
+            "value" : "Por ejemplo"
           }
         }
       }
@@ -2469,13 +2469,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "My media photo"
+            "value" : "Media photo"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Foto de Mi biblioteca"
+            "value" : "Foto de Biblioteca"
           }
         }
       }
@@ -2823,23 +2823,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Di qué video quieres en vez de escribirlo"
-          }
-        }
-      }
-    },
-    "create.skip" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Skip"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Omitir"
           }
         }
       }
@@ -3401,13 +3384,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Your photos and My media"
+            "value" : "Your photos and Media"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tus fotos y Mi biblioteca"
+            "value" : "Tus fotos y Biblioteca"
           }
         }
       }
@@ -3956,40 +3939,6 @@
         }
       }
     },
-    "detail.failed_body" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No credits used."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sin créditos usados."
-          }
-        }
-      }
-    },
-    "detail.failed_title" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Didn't finish"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No se completó"
-          }
-        }
-      }
-    },
     "detail.making" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -4020,23 +3969,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Prueba a describir algo distinto."
-          }
-        }
-      }
-    },
-    "detail.rejected_title" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "This request can't be turned into a video"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No podemos convertir esta solicitud en un video"
           }
         }
       }
@@ -5618,7 +5550,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "automático"
+            "value" : "Auto"
           }
         }
       }
@@ -6563,7 +6495,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mi biblioteca"
+            "value" : "Biblioteca"
           }
         }
       }
@@ -8575,13 +8507,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "This video can't be removed right now. Please try again later."
+            "value" : "This video can't be deleted right now."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ahora no se puede quitar este video. Inténtalo más tarde."
+            "value" : "Ahora no se puede eliminar este video."
           }
         }
       }
@@ -11903,13 +11835,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Who is this for? e.g. executives, students"
+            "value" : "Who is it for?"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "¿Para quién es? Por ejemplo: directivos, estudiantes"
+            "value" : "¿Para quién es?"
           }
         }
       }
@@ -13565,13 +13497,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Use photos from My media"
+            "value" : "Choose from Media"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Usar fotos de la biblioteca"
+            "value" : "Elegir de Biblioteca"
           }
         }
       }
@@ -13599,13 +13531,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "All"
+            "value" : "Select all"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Todas"
+            "value" : "Seleccionar todo"
           }
         }
       }
@@ -13729,13 +13661,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "How bees make honey"
+            "value" : "Bees"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Cómo hacen miel las abejas"
+            "value" : "Abejas"
           }
         }
       }
@@ -13761,13 +13693,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "3 focus tips"
+            "value" : "Focus tips"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "3 trucos para concentrarte"
+            "value" : "Concentrarte"
           }
         }
       }
@@ -13793,13 +13725,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Why forests matter"
+            "value" : "Forests"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Por qué importan los bosques"
+            "value" : "Bosques"
           }
         }
       }
@@ -14049,13 +13981,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Make it a Short"
+            "value" : "As a Short"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Hazlo un corto"
+            "value" : "Como corto"
           }
         }
       }
@@ -14065,13 +13997,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Spanish version"
+            "value" : "In Spanish"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Versión en español"
+            "value" : "En español"
           }
         }
       }
@@ -14081,13 +14013,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "English version"
+            "value" : "In English"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Versión en inglés"
+            "value" : "En inglés"
           }
         }
       }
@@ -14097,13 +14029,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "30-second cut"
+            "value" : "30 seconds"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Versión de 30 segundos"
+            "value" : "30 segundos"
           }
         }
       }
@@ -14235,6 +14167,394 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "undo.deleted" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deleted"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eliminado"
+          }
+        }
+      }
+    },
+    "undo.removed" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Removed"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quitado"
+          }
+        }
+      }
+    },
+    "undo.not_deleted" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not deleted"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se eliminó"
+          }
+        }
+      }
+    },
+    "common.undo" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Undo"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deshacer"
+          }
+        }
+      }
+    },
+    "info.about" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "About"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Acerca de"
+          }
+        }
+      }
+    },
+    "info.made_with_ai" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Made with AI"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hecho con IA"
+          }
+        }
+      }
+    },
+    "info.captions_burned" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Captions are part of the picture"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los subtítulos son parte de la imagen"
+          }
+        }
+      }
+    },
+    "undo.announce" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@. Undo is available."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@. Puedes deshacerlo."
+          }
+        }
+      }
+    },
+    "create.skip_all" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skip all"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Omitir todo"
+          }
+        }
+      }
+    },
+    "create.skip_all_hint" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Starts the video without more questions"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inicia el video sin más preguntas"
+          }
+        }
+      }
+    },
+    "create.paused_title_retry" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Paused · %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En pausa · %@"
+          }
+        }
+      }
+    },
+    "retry.short_minute" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "try again in about a minute"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "inténtalo en un minuto"
+          }
+        }
+      }
+    },
+    "retry.short_minutes" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "try again in about %lld minutes"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "inténtalo en unos %lld minutos"
+          }
+        }
+      }
+    },
+    "retry.short_hours" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "try again in about %lld hour"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "try again in about %lld hours"
+                }
+              }
+            }
+          }
+        },
+        "es" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "inténtalo en %lld hora"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "inténtalo en unas %lld horas"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "retry.short_days" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "try again in about %lld day"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "try again in about %lld days"
+                }
+              }
+            }
+          }
+        },
+        "es" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "inténtalo en %lld día"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "inténtalo en unos %lld días"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "create.beta" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beta"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beta"
+          }
+        }
+      }
+    },
+    "create.photo_library" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Photo library"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fototeca"
+          }
+        }
+      }
+    },
+    "create.create_length" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Create · %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Crear · %@"
+          }
+        }
+      }
+    },
+    "create.left_short" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld left"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quedan %lld"
+          }
+        }
+      }
+    },
+    "attach.add_dot_n" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add · %lld"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Agregar · %lld"
           }
         }
       }

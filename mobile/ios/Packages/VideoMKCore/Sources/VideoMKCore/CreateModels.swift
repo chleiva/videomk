@@ -150,7 +150,7 @@ public enum PlatformChips {
 /// The current choices and what they are called in plain words.
 public struct CreateForm: Equatable, Sendable {
     public var text = ""
-    public var platform = "other"
+    public var platform = "youtube"
     public var aspect = "16:9"
     public var resolution = "1080p"
     public var minutes = CreateOptions.defaultMinutes
@@ -281,7 +281,7 @@ public struct CreateForm: Equatable, Sendable {
 
 /// What is remembered per person: the choices, never the prompt or the photos.
 public struct CreateDefaults: Codable, Sendable, Equatable {
-    public var platform = "other", aspect = "16:9", resolution = "1080p", language = "auto"
+    public var platform = "youtube", aspect = "16:9", resolution = "1080p", language = "auto"
     public var minutes = CreateOptions.defaultMinutes
     public var look: String?
     public var captions = true
@@ -460,6 +460,12 @@ public struct IntakeFlow: Sendable, Equatable {
     public mutating func other(_ text: String) { guard let q = current, SuggestedNames.isValid(text) || !text.trimmingCharacters(in: .whitespaces).isEmpty else { return }; record(.other(q.id, String(text.trimmingCharacters(in: .whitespacesAndNewlines).prefix(200)))) }
     public mutating func skip() { guard let q = current else { return }; record(.skipped(q.id)) }
     public mutating func youDecide() { skip() }
+    /// "Skip all": every question that has no answer yet is skipped; answers already given are kept (the summary then shows them).
+    public mutating func skipRest() {
+        editing = nil
+        for q in questions where answers[q.id] == nil { answers[q.id] = .skipped(q.id) }
+        index = questions.count
+    }
     public mutating func back() { if canGoBack { index -= 1 } }
     public mutating func makeItNow() { madeItNow = true; editing = nil }
     /// Reopens one question from the summary; answering returns to the summary.
@@ -487,6 +493,43 @@ public enum RetryText {
         if s < 3600 { return tr("retry.minutes", (s + 30) / 60) }
         if s < 86_400 { return tr("retry.hours", (s + 1800) / 3600) }
         return tr("retry.days", (s + 43_200) / 86_400)
+    }
+
+    /// The same, for a title: "try again in about 1 hour" (no capital, no full stop).
+    public static func short(_ seconds: Int?) -> String? {
+        guard let s = seconds, s > 0 else { return nil }
+        if s < 90 { return tr("retry.short_minute") }
+        if s < 3600 { return tr("retry.short_minutes", (s + 30) / 60) }
+        if s < 86_400 { return tr("retry.short_hours", (s + 1800) / 3600) }
+        return tr("retry.short_days", (s + 43_200) / 86_400)
+    }
+}
+
+/// What a refusal sheet says under its title: the server's line without a repeat of the title. A line that only repeats the title is nothing;
+/// a line that starts with the title keeps only what follows it.
+public enum KindCopy {
+    public static func message(_ message: String?, title: String, alsoNot: [String] = []) -> String? {
+        func key(_ s: String) -> String { s.lowercased().filter { $0.isLetter || $0.isNumber } }
+        guard var m = message?.trimmingCharacters(in: .whitespacesAndNewlines), !m.isEmpty else { return nil }
+        for other in ([title] + alsoNot).sorted(by: { $0.count > $1.count }) {
+            let o = key(other)
+            guard !o.isEmpty else { continue }
+            if key(m) == o { return nil }
+            // drop a leading repeat of the title: walk the message until its letters and digits spell the title
+            var seen = "", end = m.startIndex
+            for i in m.indices {
+                let ch = m[i]
+                if ch.isLetter || ch.isNumber { seen.append(contentsOf: ch.lowercased()) }
+                end = m.index(after: i)
+                if seen.count >= o.count { break }
+            }
+            if seen == o {
+                let rest = String(m[end...].drop(while: { ".:,;·-– \n".contains($0) }))
+                if rest.isEmpty { return nil }
+                m = rest
+            }
+        }
+        return m
     }
 }
 
