@@ -1,0 +1,41 @@
+{
+ "id": "writing_demo", "version": 1, "lang": "en", "voice": "Ruth", "hand": "neat", "tool": "marker",
+ "narration": [
+  "Three habits make money grow.",
+  "Start early.",
+  "Add a little every month.",
+  "And leave it alone.|",
+  "At seven percent a year, your money doubles in about ten years.",
+  "That is compound interest: A equals P, times one plus r, to the power of t."
+ ],
+ "items": [
+  {"id": "title", "write": "Three habits make money grow", "zone": "top-row", "size": "l", "say": [0, "grow"]},
+  {"id": "title_line", "mark": "underline", "on": "title", "color": "red"},
+  {"id": "list", "write": "1. Start early\n2. Add a little every month\n3. Leave it alone", "zone": "left", "size": "m", "tool": "pen",
+   "say_lines": [[1, "early"], [2, "month"], [3, "alone"]]},
+  {"id": "tick", "mark": "tick", "on": "list", "word": "alone", "color": "green", "side": "right"},
+  {"id": "pig", "draw": "piggy_bank", "zone": "centre", "size": "m"},
+  {"id": "number", "write": "7% a year -> x2 in 10 years", "zone": "right", "size": "m", "ink": "blue", "say": [4, "years"]},
+  {"id": "circle", "mark": "circle", "on": "number", "word": "x2", "color": "red"},
+  {"id": "formula", "write": "compound interest:\nA = P(1 + r)^{t}", "zone": "bottom-row", "size": "l", "align": "center",
+   "say_lines": [[5, "interest"], [5, "t"]]},
+  {"id": "hl", "mark": "highlight", "on": "formula", "word": ["compound", "interest:"], "color": "yellow"},
+  {"id": "dbl", "mark": "double_underline", "on": "formula", "word": ["A", "=", "P(1", "+", "r)^{t}"], "color": "red"}
+ ],
+ "i18n": {"es": {
+  "voice": "Lucia",
+  "narration": [
+   "Tres hábitos hacen crecer tu dinero.",
+   "Empieza pronto.",
+   "Aporta un poco cada mes.",
+   "Y no lo toques.|",
+   "Al siete por ciento al año, tu dinero se duplica en unos diez años.",
+   "Eso es el interés compuesto: A es igual a P, por uno más r, elevado a t."
+  ],
+  "text": {"title": "Tres hábitos hacen crecer tu dinero", "list": "1. Empieza pronto\n2. Aporta un poco cada mes\n3. No lo toques",
+           "number": "7% al año -> x2 en 10 años", "formula": "interés compuesto:\nA = P(1 + r)^{t}"},
+  "say": {"title": [0, "dinero"], "number": [4, "años"]},
+  "say_lines": {"list": [[1, "pronto"], [2, "mes"], [3, "toques"]], "formula": [[5, "compuesto"], [5, "t"]]},
+  "word": {"hl": ["interés", "compuesto:"], "tick": "toques"}
+ }}
+}

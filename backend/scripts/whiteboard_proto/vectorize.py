@@ -213,7 +213,7 @@ def raster(pkg: Pkg, scale: float, line_px: Optional[float] = None) -> Dict[str,
                 alpha = np.clip(alpha - svg_alpha(only, pkg["w"], pkg["h"], scale), 0, 1)
     strokes = [s * scale for s in pkg["strokes"]]
     lw = line_px if (line_px is not None and pkg.get("method") == "A") else pkg["width"] * scale
-    T, times, total = tr.time_map(alpha, strokes, lw * 0.55)
+    T, times, total = tr.time_map(alpha, strokes, lw * 0.55, pace=float(pkg.get("pace", 0.0)))
     fills = [svg_alpha(f, pkg["w"], pkg["h"], scale) for f in pkg["fills"]]
     return {"alpha": alpha, "T": T, "fills": fills, "strokes": strokes, "times": times, "pen_len": total / scale}
 

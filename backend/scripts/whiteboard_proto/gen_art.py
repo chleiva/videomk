@@ -17,7 +17,7 @@ sys.path.insert(0, os.path.join(HERE, ".."))
 sys.path.insert(0, os.path.join(HERE, "..", "..", "lambdas"))
 sys.path.insert(0, HERE)
 
-import common  # noqa: E402
+import wbcommon as common  # noqa: E402
 
 # The house style: one paragraph, never changed between sheets. The subject list is the only thing that varies.
 HOUSE = (

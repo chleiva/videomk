@@ -1,0 +1,36 @@
+{
+ "id": "photosynthesis", "version": 1, "lang": "en", "voice": "Ruth", "hand": "neat", "tool": "marker",
+ "narration": [
+  "How does a plant make its own food?",
+  "It starts with sunlight, falling on the leaves.",
+  "The roots drink water from the soil.",
+  "And the leaves breathe in carbon dioxide from the air.|",
+  "Inside the leaf, light turns water and carbon dioxide into sugar.",
+  "And it gives back oxygen, the air we breathe.",
+  "That is photosynthesis."
+ ],
+ "items": [
+  {"id": "title", "write": "How does a plant make food?", "zone": "top", "size": "m", "say": [0, "food"]},
+  {"id": "sun", "draw": "sun", "zone": "top-left", "size": "m", "say": [1, "sunlight"]},
+  {"id": "plant", "draw": "plant_sprout", "zone": "centre", "size": "xl", "say": [1, "leaves"]},
+  {"id": "ray", "connect": "dashed", "from": "sun", "to": "plant", "color": "orange"},
+  {"id": "light", "write": "light", "near": "sun", "side": "below", "size": "s", "tool": "pen", "ink": "orange"},
+  {"id": "roots", "draw": "roots", "zone": "bottom-left", "size": "m", "say": [2, "roots"]},
+  {"id": "drop", "draw": "water_drop", "near": "roots", "side": "right", "size": "xs", "ink": "blue", "say": [2, "water"]},
+  {"id": "up", "connect": "arrow", "from": "drop", "to": "plant", "color": "blue", "say": [2, "soil"]},
+  {"id": "wind", "draw": "wind", "zone": "top-right", "size": "s", "ink": "blue", "say": [3, "breathe"]},
+  {"id": "co2", "write": "CO_{2}", "zone": "right", "size": "l", "say": [3, "dioxide"]},
+  {"id": "in", "connect": "wavy", "from": "co2", "to": "plant", "color": "grey", "say": [3, "air"]},
+  {"id": "ring", "mark": "circle", "on": "plant", "color": "red", "say": [4, "leaf"]},
+  {"id": "e1", "mark": "underline", "on": "light", "color": "orange", "say": [4, "light"]},
+  {"id": "e2", "mark": "circle", "on": "drop", "color": "blue", "say": [4, "water"]},
+  {"id": "e3", "mark": "underline", "on": "co2", "color": "grey", "say": [4, "dioxide"]},
+  {"id": "sugar", "write": "sugar", "zone": "bottom-right", "size": "l", "ink": "orange", "say": [4, "sugar"]},
+  {"id": "out", "connect": "arrow", "from": "plant", "to": "sugar", "color": "orange"},
+  {"id": "o2", "write": "O_{2}", "zone": "left", "size": "l", "ink": "blue", "say": [5, "oxygen"]},
+  {"id": "back", "connect": "wavy", "from": "plant", "to": "o2", "color": "blue", "say": [5, "air"]},
+  {"id": "smile", "draw": "face_happy", "near": "o2", "side": "below", "size": "xs", "say": [5, "breathe"]},
+  {"id": "name", "write": "photosynthesis", "zone": "bottom", "size": "l", "say": [6, "photosynthesis"]},
+  {"id": "name_line", "mark": "double_underline", "on": "name", "color": "green"}
+ ]
+}

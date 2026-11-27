@@ -410,25 +410,34 @@ def order_human(segs: List[Seg], shape: Tuple[int, int]) -> List[Stroke]:
 
 
 # ----------------------------------------------------------------------------- the reveal: when does the pen pass each ink pixel
-def stroke_times(strokes: List[Stroke], travel_speed: float = 3.0) -> Tuple[List[np.ndarray], float]:
-    """-> (per stroke: pen time at each point, in pen-length units), total. Moving between strokes with the pen up is `travel_speed` times faster than drawing."""
+def stroke_times(strokes: List[Stroke], travel_speed: float = 3.0, pace: float = 0.0, ref: float = 20.0) -> Tuple[List[np.ndarray], float]:
+    """-> (per stroke: pen time at each point, in pen-length units), total. Moving between strokes with the pen up is `travel_speed` times faster than drawing.
+    `pace` > 0 slows the pen through bends, as a hand does (handwriting): time per unit length grows with curvature (`ref` is the length scale of a tight bend)."""
     t, out = 0.0, []
     prev = None
     for p in strokes:
         if prev is not None:
             t += float(np.hypot(*(p[0] - prev))) / travel_speed
-        d = np.concatenate([[0.0], np.cumsum(np.hypot(*np.diff(p, axis=0).T))])
+        seg = np.diff(p, axis=0)
+        ds = np.hypot(seg[:, 0], seg[:, 1])
+        if pace > 0 and len(p) > 3:
+            ang = np.unwrap(np.arctan2(seg[:, 1], seg[:, 0]))
+            turn = np.abs(np.diff(ang, prepend=ang[0]))
+            k = np.minimum(turn / np.maximum(ds, 1e-6) * ref, 2.0)
+            k = np.convolve(np.pad(k, 2, mode="edge"), np.ones(5) / 5, "valid")
+            ds = ds * (1.0 + pace * k)
+        d = np.concatenate([[0.0], np.cumsum(ds)])
         out.append(t + d)
         t += float(d[-1])
         prev = p[-1]
     return out, max(t, 1e-6)
 
 
-def time_map(alpha: np.ndarray, strokes: List[Stroke], tip_radius: float) -> Tuple[np.ndarray, List[np.ndarray], float]:
+def time_map(alpha: np.ndarray, strokes: List[Stroke], tip_radius: float, pace: float = 0.0) -> Tuple[np.ndarray, List[np.ndarray], float]:
     """-> (T, per-stroke point times 0..1, pen length). T[y, x] in 0..1 is when the pen uncovers that pixel of the art; 2.0 where there is no ink.
     Each ink pixel takes the time of the nearest centre-line point, moved a little earlier towards the middle of the line so the growing end is round like a marker tip."""
     H, W = alpha.shape
-    times, total = stroke_times(strokes)
+    times, total = stroke_times(strokes, pace=pace, ref=tip_radius * 5.0)
     tgrid = np.full((H, W), np.inf, np.float32)
     for p, tt in zip(strokes, times):
         # dense resample so every centre-line pixel gets a time
@@ -444,9 +453,13 @@ def time_map(alpha: np.ndarray, strokes: List[Stroke], tip_radius: float) -> Tup
         return np.full((H, W), 2.0, np.float32), [], 1.0
     dist, (iy, ix) = ndimage.distance_transform_edt(~src, return_indices=True)
     T = tgrid[iy, ix] - np.sqrt(np.clip(tip_radius ** 2 - dist ** 2, 0, None)).astype(np.float32)
-    # where strokes meet, ink nearest to the LATER stroke would stay white until that stroke comes: the earliest pen pass within a tip's reach wins
+    # Where strokes meet, ink that lies inside the EARLIER line's own body but nearer to the later line's centre would stay white until the later stroke comes
+    # (a notch in the first line). Each pixel also takes the earliest pen pass within half a line width of it; nothing further away, so the later line shows no stub early.
+    r = max(1, int(round(tip_radius)))
+    yy, xx = np.mgrid[-r:r + 1, -r:r + 1]
+    early = ndimage.minimum_filter(tgrid, footprint=(yy * yy + xx * xx) <= r * r, mode="constant", cval=np.inf)
+    T = np.minimum(T, early)
     T = np.where(alpha >= 0.02, T, np.inf)
-    T = ndimage.minimum_filter(T, size=max(3, int(tip_radius * 1.5) | 1))
     T = np.clip(np.where(np.isfinite(T), T, 0.0) / total, 0.0, 1.0).astype(np.float32)
     T[alpha < 0.02] = 2.0
     return T, [tt / total for tt in times], total

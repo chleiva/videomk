@@ -14,7 +14,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(HERE, "..", "..", "lambdas"))
 sys.path.insert(0, HERE)
 
-import common  # noqa: E402
+import wbcommon as common  # noqa: E402
 
 LEAD = 0.9         # the pen starts on the title before the voice does
 BREATH = 0.38      # between sentences
@@ -49,11 +49,27 @@ SCRIPT = {
 }
 
 
+def synth(sentences, voice: str, name: str):
+    """Narration for any board: -> (wav path, words dict). Cached by the text and the voice, so a board re-renders without paying again."""
+    import hashlib
+
+    key = hashlib.sha1((voice + "|" + "|".join(sentences)).encode()).hexdigest()[:10]
+    wav, js = os.path.join(common.AUDIO, f"{name}_{key}.wav"), os.path.join(common.AUDIO, f"{name}_{key}.json")
+    if not (os.path.exists(wav) and os.path.exists(js)):
+        _make(sentences, voice, wav, js, name)
+    return wav, json.load(open(js))
+
+
 def main() -> int:
     lang = sys.argv[1]
+    voice, sentences = SCRIPT[lang]
+    _make(sentences, voice, os.path.join(common.AUDIO, lang + ".wav"), os.path.join(common.AUDIO, lang + ".json"), lang)
+    return 0
+
+
+def _make(sentences, voice, wav_path, json_path, lang) -> None:
     from engine import align, audio, tts
 
-    voice, sentences = SCRIPT[lang]
     region = os.environ.get("POLLY_REGION", "us-east-1")
     provider = tts.PollyTTS(region=region, engine="generative")
     chars = sum(len(s) for s in sentences)
@@ -74,11 +90,10 @@ def main() -> int:
         t += dur + gap
     parts.append(np.zeros(int(TAIL * audio.SR), np.float32))
     wav = np.concatenate(parts)
-    audio.write_wav(os.path.join(common.AUDIO, lang + ".wav"), wav, audio.SR)
-    json.dump({"voice": voice, "engine": "generative", "duration": round(len(wav) / audio.SR, 3), "sentences": out}, open(os.path.join(common.AUDIO, lang + ".json"), "w"), ensure_ascii=False, indent=1)
+    audio.write_wav(wav_path, wav, audio.SR)
+    json.dump({"voice": voice, "engine": "generative", "duration": round(len(wav) / audio.SR, 3), "sentences": out}, open(json_path, "w"), ensure_ascii=False, indent=1)
     common.charge(f"polly generative {voice} {chars} chars", chars * provider.cost_per_char, item="narration " + lang)
     print(lang, "duration", round(len(wav) / audio.SR, 1), "s;", sum(len(s["words"]) for s in out), "words; lowest alignment confidence", min(s["align_confidence"] for s in out))
-    return 0
 
 
 if __name__ == "__main__":

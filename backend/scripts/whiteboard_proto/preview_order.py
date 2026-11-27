@@ -11,7 +11,7 @@ from PIL import Image, ImageDraw
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
-import common  # noqa: E402
+import wbcommon as common  # noqa: E402
 import gen_art  # noqa: E402
 import trace  # noqa: E402
 

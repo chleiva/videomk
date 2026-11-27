@@ -1,0 +1,550 @@
+"""A whiteboard BOARD: the JSON a planner writes, and the standalone step that turns it plus word timings into a board ready to render
+(docs/WHITEBOARD_BOARD_SPEC.md is the schema). The planner gives meaning (what, in which zone, tied to which word); layout, timing and camera are computed here.
+
+  compile_board(spec, words, aspect, out_size, lang) -> (Board, Camera, duration, report)
+
+Layout    The board has the output's aspect and a 3x3 grid of zones (top-left ... bottom-right, centre). A drawing lives inside its zone's safe area.
+Camera    The close view is exactly 2x2 zones (four possible windows), so a zone-sized object is either fully in view or fully out: nothing is cut at a frame
+          edge. The camera changes window only when the next item is outside the current one, and ends on a pull-back framed on everything drawn.
+Timing    Every item ENDS 0.15 s after its narration word starts; one pen; items speed up to 1.6x when squeezed and slow down (to 1.9x) to use idle time.
+          Written text follows the voice word by word. The report gives pen-busy share and the longest idle gap.
+Aspects   16:9, 9:16, 1:1, 4:5: same spec, same zone names; sizes are board units, so 1080p and 4K are the same vectors at another scale.
+"""
+import json
+import math
+import os
+import re
+import unicodedata
+from typing import Any, Dict, List, Optional, Tuple
+
+import numpy as np
+
+import board as bd
+import primitives as pr
+import trace as tr
+import vectorize as vz
+import writing as wr
+
+LINE = 22.0
+PEN_SPEED = 2500.0
+GAP = 0.12                    # pen travel between items, seconds
+BOARDS = {"16:9": (3840, 2160), "9:16": (2160, 3840), "1:1": (2160, 2160), "4:5": (2160, 2700)}
+ZONES = {"top-left": (0, 0), "top": (1, 0), "top-right": (2, 0), "left": (0, 1), "centre": (1, 1), "center": (1, 1), "right": (2, 1),
+         "bottom-left": (0, 2), "bottom": (1, 2), "bottom-right": (2, 2)}
+SPANS = {"top-row": ["top-left", "top-right"], "middle-row": ["left", "right"], "bottom-row": ["bottom-left", "bottom-right"], "left-col": ["top-left", "bottom-left"],
+         "centre-col": ["top", "bottom"], "right-col": ["top-right", "bottom-right"], "full": ["top-left", "bottom-right"],
+         "top-left-wide": ["top-left", "top"], "top-right-wide": ["top", "top-right"], "left-wide": ["left", "centre"], "right-wide": ["centre", "right"],
+         "bottom-left-wide": ["bottom-left", "bottom"], "bottom-right-wide": ["bottom", "bottom-right"],
+         "left-tall": ["top-left", "left"], "right-tall": ["top-right", "right"], "left-low": ["left", "bottom-left"], "right-low": ["right", "bottom-right"],
+         "upper": ["top-left", "right"], "lower": ["left", "bottom-right"], "left-two-cols": ["top-left", "bottom"], "right-two-cols": ["top", "bottom-right"]}
+DRAW_SIZE = {"xs": 0.34, "s": 0.48, "m": 0.64, "l": 0.82, "xl": 0.94}       # share of the zone's smaller side
+TEXT_SIZE = {"xs": 64.0, "s": 84.0, "m": 112.0, "l": 150.0, "xl": 196.0}   # letter size in board units
+INKS = {"black": bd.INK, "blue": bd.BLUE, "red": bd.RED, "orange": bd.ORANGE, "green": bd.GREEN, "purple": (124, 77, 190), "grey": (110, 116, 126)}
+FILLS = {"yellow": (255, 216, 77), "orange": (250, 178, 92), "red": (240, 128, 110), "pink": (247, 178, 200), "purple": (190, 170, 232), "blue": (120, 178, 238),
+         "light_blue": (176, 218, 247), "green": (150, 212, 130), "brown": (214, 178, 140), "grey": (214, 219, 226)}
+CHALK_PAPER = (38, 52, 50)
+MARGIN = 0.07                 # safe margin inside a zone, share of its size
+
+
+def _norm(w: str) -> str:
+    w = unicodedata.normalize("NFD", str(w).lower())
+    return re.sub(r"[^a-z0-9]", "", "".join(c for c in w if unicodedata.category(c) != "Mn"))
+
+
+def word_time(words, key) -> Optional[float]:
+    """key = [sentence index, word, occurrence=0] -> start time of that spoken word, or None when it is not there."""
+    if key is None:
+        return None
+    hits = [w for w in words["sentences"][key[0]]["words"] if _norm(w[0]) == _norm(key[1])]
+    k = key[2] if len(key) > 2 else 0
+    return hits[k][1] if k < len(hits) else None
+
+
+class Layout:
+    def __init__(self, aspect: str):
+        self.W, self.H = BOARDS[aspect]
+        self.cw, self.ch = self.W / 3.0, self.H / 3.0
+
+    def cells(self, zone) -> Tuple[int, int, int, int]:
+        """-> (col0, row0, col1, row1) inclusive."""
+        names = SPANS.get(zone, zone) if isinstance(zone, str) else zone
+        names = [names] if isinstance(names, str) else list(names)
+        cs = [ZONES[n] for n in names]
+        return (min(c[0] for c in cs), min(c[1] for c in cs), max(c[0] for c in cs), max(c[1] for c in cs))
+
+    def rect(self, cells) -> Tuple[float, float, float, float]:
+        c0, r0, c1, r1 = cells
+        x0, y0, x1, y1 = c0 * self.cw, r0 * self.ch, (c1 + 1) * self.cw, (r1 + 1) * self.ch
+        mx, my = MARGIN * self.cw, MARGIN * self.ch
+        return (x0 + mx, y0 + my, x1 - mx, y1 - my)
+
+    def cells_of_box(self, box) -> Tuple[int, int, int, int]:
+        x0, y0, x1, y1 = box
+        f = lambda v, s: int(min(2, max(0, math.floor(v / s))))      # noqa: E731
+        return (f(x0 + 1, self.cw), f(y0 + 1, self.ch), f(x1 - 1, self.cw), f(y1 - 1, self.ch))
+
+    def window(self, c0: int, r0: int) -> Tuple[float, float, float]:
+        return (c0 * self.cw, r0 * self.ch, 2 * self.cw)
+
+
+def _union(a, b):
+    return (min(a[0], b[0]), min(a[1], b[1]), max(a[2], b[2]), max(a[3], b[3]))
+
+
+def _edge_point(box, towards, gap: float):
+    """Where the line from the box's centre towards a point leaves the box (plus a gap)."""
+    cx, cy = (box[0] + box[2]) / 2, (box[1] + box[3]) / 2
+    dx, dy = towards[0] - cx, towards[1] - cy
+    n = math.hypot(dx, dy) or 1.0
+    hx, hy = (box[2] - box[0]) / 2 + gap, (box[3] - box[1]) / 2 + gap
+    t = min(hx / abs(dx) if dx else 1e9, hy / abs(dy) if dy else 1e9, 0.42)       # never past the middle of the way
+    del n
+    return (cx + dx * t, cy + dy * t)
+
+
+def compile_board(spec: Dict[str, Any], words: Dict[str, Any], aspect: str = "16:9", out_size: Tuple[int, int] = (1920, 1080), lang: Optional[str] = None,
+                  library=None) -> Tuple[bd.Board, bd.Camera, float, Dict[str, Any]]:
+    """Deterministic: the same spec, word times, aspect and size give the same board on any machine."""
+    import lib_build
+
+    load = library or lib_build.load
+    L = Layout(aspect)
+    i18n = (spec.get("i18n") or {}).get(lang or "", {})
+    chalk = spec.get("theme") == "chalk"
+    scale = out_size[0] / (2 * L.cw)                         # one raster pixel per output pixel at the close view
+    b = bd.Board(L.W, L.H, scale, paper=CHALK_PAPER if chalk else bd.PAPER)
+    hand_default, tool_default = spec.get("hand", "neat"), spec.get("tool", "marker")
+    warnings: List[str] = []
+
+    def ink(name, default="black"):
+        c = INKS.get(name or default, INKS["black"])
+        if chalk:
+            return (238, 238, 230) if (name or default) == "black" else tuple(int(v + (255 - v) * 0.45) for v in c)
+        return c
+
+    # ------------------------------------------------------------ 1. geometry
+    items = [dict(it) for it in spec["items"]]
+    for it in items:
+        if it["id"] in (i18n.get("text") or {}):
+            it["write"] = i18n["text"][it["id"]]
+        for field in ("say", "say_lines", "word"):
+            if it["id"] in (i18n.get(field) or {}):
+                it[field] = i18n[field][it["id"]]
+    by_id: Dict[str, Dict[str, Any]] = {}
+    zone_draws: Dict[Tuple[int, int, int, int], List[str]] = {}
+    for it in items:
+        if "draw" in it and "zone" in it:
+            zone_draws.setdefault(L.cells(it["zone"]), []).append(it["id"])
+    # an item may point at one that comes later in the list (an arrow drawn before its target): geometry is resolved in dependency order, timing keeps the list order
+    pending = list(items)
+    for _ in range(6):
+        later = []
+        for it in pending:
+            try:
+                if _ == 0 and "near" in it:
+                    raise KeyError(it["near"])           # things placed beside others wait until every zone item is placed, so they can avoid them all
+                g: Dict[str, Any] = {"id": it["id"]}
+                if "draw" in it:
+                    try:
+                        pkg = load(it["draw"])
+                    except Exception:  # noqa: BLE001 - a missing drawing never leaves a hole: the name is written in a box instead
+                        warnings.append(f"{it['id']}: no drawing '{it['draw']}', written as a boxed label")
+                        it = it | {"write": str(it.get("label") or it["draw"]).replace("_", " "), "boxed": True}
+                        it.pop("draw")
+                        pkg = None
+                    if pkg is not None:
+                        if "near" in it:
+                            tb = by_id[it["near"]]["box"]
+                            frac = DRAW_SIZE[it.get("size", "xs")]
+                            hmax = frac * min(L.cw, L.ch)
+                            k = min(hmax / pkg["h"], hmax * 1.3 / pkg["w"])
+                            w, h = pkg["w"] * k, pkg["h"] * k
+                            x, y = _free_side(tb, w, h, it.get("side", "right"), 26.0, by_id, L)
+                            cells = L.cells_of_box(tb)
+                        else:
+                            cells = L.cells(it["zone"])
+                            x0, y0, x1, y1 = L.rect(cells)
+                            peers = zone_draws[cells]
+                            slot_w = (x1 - x0) / len(peers)
+                            x0 = x0 + peers.index(it["id"]) * slot_w
+                            hmax = DRAW_SIZE[it.get("size", "m")] * min(L.cw, L.ch) * (1 - 2 * MARGIN)
+                            k = min(hmax / pkg["h"], slot_w * 0.96 / pkg["w"])
+                            w, h = pkg["w"] * k, pkg["h"] * k
+                            dx, dy = it.get("shift", [0, 0])
+                            x, y = x0 + (slot_w - w) / 2 + dx * slot_w, y0 + (y1 - y0 - h) / 2 + dy * (y1 - y0)
+                        g.update(kind="draw", pkg=pkg, k=k, box=(x, y, x + w, y + h), cells=cells)
+                if "write" in it:
+                    hand, tool = it.get("hand", hand_default), it.get("tool", tool_default)
+                    size = TEXT_SIZE[it["size"]] if isinstance(it.get("size"), str) else float(it.get("size", TEXT_SIZE["m"]))
+                    if "near" in it:
+                        tb = by_id[it["near"]]["box"]
+                        cells = by_id[it["near"]]["cells"]
+                        blk = wr.layout(it["write"], hand, size, max_width=L.cw * 0.95, align="center", seed=_seed(it["id"]))
+                        x, y = _free_side(tb, blk["w"], blk["h"], it.get("side", "below"), 0.12 * blk["size"], by_id, L)
+                    else:
+                        cells = L.cells(it["zone"])
+                        x0, y0, x1, y1 = L.rect(cells)
+                        align = it.get("align") or ("left" if "\n" in it["write"] else "center")
+                        blk = wr.layout(it["write"], hand, size, max_width=x1 - x0, max_height=y1 - y0, align=align, seed=_seed(it["id"]))
+                        x = x0 if align == "left" else x0 + (x1 - x0 - blk["w"]) / 2
+                        va = it.get("valign", "middle")
+                        y = y0 if va == "top" else (y1 - blk["h"] if va == "bottom" else y0 + (y1 - y0 - blk["h"]) / 2)
+                        dx, dy = it.get("shift", [0, 0])
+                        x, y = x + dx * (x1 - x0), y + dy * (y1 - y0)
+                    g.update(kind="write", blk=blk, origin=(x, y), box=(x, y + 0.1 * blk["size"], x + blk["w"], y + blk["h"]), cells=cells, hand=hand, tool=tool)
+                elif "connect" in it:
+                    a, c = by_id[it["from"]], by_id[it["to"]]
+                    ca, cc = _centre(a["box"]), _centre(c["box"])
+                    p0, p1 = _edge_point(a["box"], cc, it.get("gap", 34.0)), _edge_point(c["box"], ca, it.get("gap", 34.0))
+                    g.update(kind="connect", strokes=_connector(it, p0, p1), cells=_cells_union(a["cells"], c["cells"]))
+                    allp = np.concatenate(g["strokes"])
+                    g["box"] = (float(allp[:, 0].min()), float(allp[:, 1].min()), float(allp[:, 0].max()), float(allp[:, 1].max()))
+                elif "mark" in it:
+                    t = by_id[it["on"]]
+                    box = t["box"]
+                    if t["kind"] == "write" and it.get("word") is not None:
+                        ws_ = t["blk"]["words"]
+                        def key(x):
+                            return _norm(re.sub(r"\\frac", "", x)) or x
+                        if isinstance(it["word"], int):
+                            sel = [ws_[it["word"]]]
+                        else:
+                            want = [key(x) for x in ([it["word"]] if isinstance(it["word"], str) else it["word"])]
+                            sel = [w for w in ws_ if key(w["text"]) in want]
+                        if sel:
+                            ox, oy = t["origin"]
+                            box = (min(w["box"][0] for w in sel) + ox, min(w["box"][1] for w in sel) + oy, max(w["box"][2] for w in sel) + ox, max(w["box"][3] for w in sel) + oy)
+                    if it["mark"] == "cross" and it.get("side") == "over":      # a big X across the target
+                        d_ = 0.12 * min(box[2] - box[0], box[3] - box[1])
+                        g.update(kind="mark", strokes=[pr.line((box[0] + d_, box[1] + d_), (box[2] - d_, box[3] - d_), _seed(it["id"]), 3.0),
+                                                       pr.line((box[2] - d_, box[1] + d_), (box[0] + d_, box[3] - d_), _seed(it["id"]) + 1, 3.0)], cells=t["cells"], mark="cross")
+                        allp = np.concatenate(g["strokes"])
+                        g["box"] = (float(allp[:, 0].min()), float(allp[:, 1].min()), float(allp[:, 0].max()), float(allp[:, 1].max()))
+                        g["it"] = it
+                        by_id[it["id"]] = g
+                        continue
+                    if it["mark"] in ("tick", "cross"):          # a tick or a cross goes beside its target, not over it
+                        s = (box[3] - box[1]) * 0.8
+                        side = it.get("side", "left")
+                        bx = box[0] - s * 1.35 if side == "left" else box[2] + s * 0.35
+                        box = (bx, box[1] + 0.1 * s, bx + s, box[1] + 1.1 * s)
+                    g.update(kind="mark", strokes=wr.mark(it["mark"], box, seed=_seed(it["id"])), cells=t["cells"], mark=it["mark"])
+                    allp = np.concatenate(g["strokes"])
+                    g["box"] = (float(allp[:, 0].min()), float(allp[:, 1].min()), float(allp[:, 0].max()), float(allp[:, 1].max()))
+                g["it"] = it
+                by_id[it["id"]] = g
+            except KeyError as e:
+                if str(e).strip("'") not in {x["id"] for x in items}:
+                    raise
+                later.append(it)
+        pending = later
+        if not pending:
+            break
+    if pending:
+        raise ValueError(f"items that depend on each other: {[x['id'] for x in pending]}")
+
+    geo = [by_id[it["id"]] for it in items]
+    solid = [g for g in geo if g["kind"] in ("draw", "write")]
+    for i, a in enumerate(solid):
+        for c in solid[i + 1:]:
+            ox = min(a["box"][2], c["box"][2]) - max(a["box"][0], c["box"][0])
+            oy = min(a["box"][3], c["box"][3]) - max(a["box"][1], c["box"][1])
+            if ox > 12 and oy > 12 and ox * oy > 0.06 * min(_area(a["box"]), _area(c["box"])):
+                warnings.append(f"{a['id']} and {c['id']} overlap")
+        if a["box"][0] < 0 or a["box"][1] < 0 or a["box"][2] > L.W or a["box"][3] > L.H:
+            warnings.append(f"{a['id']} leaves the board")
+
+    # ------------------------------------------------------------ 2. timing
+    ops: List[Dict[str, Any]] = []
+    for g in geo:
+        it = g["it"]
+        anchor = word_time(words, it.get("say")) if it.get("say") else None
+        if it.get("say") and anchor is None:
+            warnings.append(f"{g['id']}: word {it['say']} not found in the narration")
+        if g["kind"] == "draw":
+            pen = sum(tr.length_of(s) for s in g["pkg"]["strokes"]) * g["k"]
+            ops.append({"g": g, "nat": float(np.clip(pen / PEN_SPEED, 0.45, 2.6)), "anchor": anchor, "stretch": True})
+        elif g["kind"] == "write":
+            blk, tool, hand = g["blk"], g["tool"], g["hand"]
+            # which spoken sentence each written LINE follows: `say_lines` (one say per text line) or the item's `say` for every line
+            if it.get("say_lines"):
+                line_say = {i: sl for i, sl in enumerate(it["say_lines"])}
+            else:
+                line_say = {w["para"]: it["say"] for w in blk["words"]} if it.get("say") else {}
+            block_ops, cursor = [], {}
+            for wi, w in enumerate(blk["words"]):
+                sl = line_say.get(w["para"])
+                a_w = None
+                if sl and it.get("follow", True):
+                    spoken = [(_norm(x[0]), x[1]) for x in words["sentences"][sl[0]]["words"]]
+                    key = _norm(re.sub(r"\\frac|[\^_{}]", "", w["text"]))
+                    j0 = cursor.get(w["para"], 0)
+                    for jj in range(j0, len(spoken)):
+                        if key and spoken[jj][0] == key:
+                            a_w, cursor[w["para"]] = spoken[jj][1], jj + 1
+                            break
+                block_ops.append({"g": g, "word": wi, "nat": max(0.12, wr.write_time(w["strokes"], tool, blk["size"], hand)), "anchor": a_w, "stretch": False, "para": w["para"]})
+            # the last word of each line ends on that line's `say` word when it did not match by itself
+            for p_, sl in line_say.items():
+                mine = [o for o in block_ops if o["para"] == p_]
+                if mine and mine[-1]["anchor"] is None and (it.get("say_lines") or mine[-1] is block_ops[-1]):
+                    mine[-1]["anchor"] = word_time(words, sl)
+            # words the voice does not say literally (symbols, numbers, formulas) are spread evenly, by writing time, between their anchored neighbours
+            known = [i for i, o in enumerate(block_ops) if o["anchor"] is not None]
+            for a_i, b_i in zip(known, known[1:]):
+                if b_i - a_i > 1:
+                    seg = block_ops[a_i + 1:b_i + 1]
+                    tot = sum(o["nat"] for o in seg)
+                    acc = 0.0
+                    for o in seg[:-1]:
+                        acc += o["nat"]
+                        o["anchor"] = block_ops[a_i]["anchor"] + (block_ops[b_i]["anchor"] - block_ops[a_i]["anchor"]) * acc / tot
+            if known and known[0] > 0:            # words before the first anchored one: written just before it, back to back
+                t = block_ops[known[0]]["anchor"]
+                for o in reversed(block_ops[:known[0] + 1]):
+                    o["anchor"] = t
+                    t -= o["nat"] * 1.05 + 0.05
+            ops += block_ops
+        else:
+            pen = sum(tr.length_of(s) for s in g["strokes"])
+            ops.append({"g": g, "nat": float(np.clip(pen / PEN_SPEED, 0.3, 1.8)), "anchor": anchor, "stretch": g["kind"] == "connect"})
+    prev_end = 0.3
+    for o in ops:
+        nat = o["nat"]
+        if o["anchor"] is None:
+            start, end = prev_end + GAP, prev_end + GAP + nat
+            o["how"] = "after the previous"
+        else:
+            end = o["anchor"] + 0.15
+            start, o["how"] = end - nat, "on the word"
+            lo = prev_end + (0.05 if "word" in o and o["word"] > 0 else GAP)
+            if start < lo:
+                fast = nat / 1.6
+                if end - fast >= lo:
+                    start, o["how"] = lo, "faster pen"
+                else:
+                    start, end, o["how"] = lo, lo + fast, "late"
+            elif o["stretch"]:                                   # idle time before this item: draw it more slowly instead of waiting
+                start = max(lo, end - min(nat * 2.4, 3.0))
+        o["start"], o["end"] = start, end
+        prev_end = end
+    # unanchored words of a block that also has anchored words: spread them over the gap before the next anchored word instead of bunching
+    last_ink = max(o["end"] for o in ops)
+
+    # ------------------------------------------------------------ 3. rasterise and place
+    fills_after: List[Tuple[float, Dict[str, Any]]] = []
+    for o in ops:
+        g, it = o["g"], o["g"]["it"]
+        t0, t1 = o["start"], o["end"]
+        if g["kind"] == "draw":
+            pkg = g["pkg"]
+            r = vz.raster(pkg, g["k"] * scale, line_px=LINE * scale * (0.82 if (g["box"][3] - g["box"][1]) < 230 else 1.0))
+            b.place(r, g["box"][0], g["box"][1], ink(it.get("ink")), t0, t1)
+            if it.get("fill", True):
+                cols = pkg.get("fill_colours") or []
+                tf = t1 + 0.06
+                for fa, name in zip(r["fills"], cols):
+                    name = (it.get("fill") if isinstance(it.get("fill"), str) else name)
+                    if name in FILLS and (fa > 0.3).sum() > 40:
+                        col = FILLS[name]
+                        if chalk:
+                            col = tuple(int(v * 0.8) for v in col)
+                        area_u = float((fa > 0.3).sum()) / (scale * scale)
+                        d = float(np.clip(area_u / 260000.0, 0.22, 0.6))
+                        b.place_under(fa, g["box"][0], g["box"][1], col, tf, tf + d, opacity=0.6 if chalk else 0.92, tip_colour=tuple(int(v * 0.82) for v in col), tip_size=1.0)
+                        tf += d + 0.05
+                o["fill_end"] = tf
+        elif g["kind"] == "write":
+            blk, tool = g["blk"], g["tool"]
+            w = blk["words"][o["word"]]
+            ox, oy = g["origin"]
+            r = wr.raster_word(w, (ox, oy), g["hand"], tool, blk["size"], scale, seed=_seed(g["id"]) + o["word"])
+            if r is None:
+                continue
+            b.place(r, r["x"], r["y"], ink(it.get("ink")), t0, t1, tip_size=0.78 if tool == "pen" else 1.0)
+            if it.get("boxed") and o["word"] == len(blk["words"]) - 1:
+                bx = pr.package(wr.mark("box", g["box"], seed=_seed(g["id"])), LINE * 0.8)
+                b.place(vz.raster(bx, scale), bx["x"], bx["y"], ink("grey"), t1 + 0.1, t1 + 0.6)
+        elif g["kind"] == "mark" and g["mark"] == "highlight":
+            box_h = g["box"][3] - g["box"][1]
+            q = pr.package(g["strokes"], it.get("width", 70.0), pressure=0.03)
+            a = vz.svg_alpha(q["ink"], q["w"], q["h"], scale)
+            col = FILLS.get(it.get("color", "yellow"), FILLS["yellow"])
+            b.place_under(a, q["x"], q["y"], col, t0, t1, opacity=0.75, strokes=[s * scale for s in q["strokes"]], tip_colour=col, tip_size=1.1)
+            del box_h
+        else:
+            width = LINE * (it.get("width", 0.9))
+            q = pr.package(g["strokes"], width, seed=_seed(g["id"]))
+            b.place(vz.raster(q, scale), q["x"], q["y"], ink(it.get("color"), "blue" if g["kind"] == "connect" else "red"), t0, t1)
+    b.finish()
+
+    # ------------------------------------------------------------ 4. camera: 2x2-zone windows, no cut objects, final pull-back on the content
+    content = None
+    for g in geo:
+        content = g["box"] if content is None else _union(content, g["box"])
+    cam_mode = spec.get("camera", "auto")
+    final_view = _fit_view(content, L, out_size)
+    wins = [(c, r) for r in (0, 1) for c in (0, 1)]
+
+    def inside(cells, win):
+        return win[0] <= cells[0] and cells[2] <= win[0] + 1 and win[1] <= cells[1] and cells[3] <= win[1] + 1
+
+    def clean(win) -> bool:
+        """A close view is only used if it cuts NO drawing or text of the board at its edge (each is wholly in the window or wholly out)."""
+        wx, wy, ww = L.window(*win)
+        wh = 2 * L.ch
+        for g_ in solid:
+            bx = g_["box"]
+            ix, iy = min(bx[2], wx + ww) - max(bx[0], wx), min(bx[3], wy + wh) - max(bx[1], wy)
+            frac = (max(ix, 0.0) * max(iy, 0.0)) / _area(bx)
+            if 0.03 < frac < 0.97:
+                return False
+        return True
+
+    seq = [(o["start"], o["g"]["cells"]) for o in ops]
+    moves: List[Tuple[float, Any]] = []          # (time the view is needed by, window or "all")
+    cur: Any = None
+    if cam_mode == "static":
+        cur = "all"
+    for i, (ts, cells) in enumerate(seq):
+        if cam_mode == "static":
+            break
+        if cur is not None and cur != "all" and inside(cells, cur):
+            continue
+        cands = [w for w in wins if inside(cells, w) and clean(w)]
+        if not cands:
+            nxt: Any = "all"
+        else:
+            look = [c for _, c in seq[i:i + 7]]
+            nxt = max(cands, key=lambda w: (sum(inside(c, w) for c in look), -abs(w[0] - (cur[0] if isinstance(cur, tuple) else w[0])) - abs(w[1] - (cur[1] if isinstance(cur, tuple) else w[1]))))
+            if cur == "all" and sum(inside(c, nxt) for c in look[:3]) < min(3, len(look)):
+                continue                           # stay wide while the next items jump around
+        if nxt != cur:
+            moves.append((ts, nxt))
+            cur = nxt
+
+    def view(v):
+        return final_view if v == "all" else L.window(*v)
+
+    first = view(moves[0][1]) if moves else final_view
+    cam = bd.Camera(first)
+    prev_t = 0.0
+    for k, (ts, v) in enumerate(moves[1:], 1):
+        d = 1.15
+        t0 = max(prev_t + 0.2, ts - 0.85)
+        cam.move(t0, t0 + d, view(v))
+        prev_t = t0 + d
+    end_ink = max([last_ink] + [o.get("fill_end", 0) for o in ops])
+    if cam_mode != "static" and cur != "all":
+        t0 = max(prev_t + 0.3, end_ink + 0.35)
+        cam.move(t0, t0 + 1.7, final_view)
+        end_ink = t0 + 1.7
+    duration = max(words.get("duration", 0.0), end_ink + 1.6)
+
+    # ------------------------------------------------------------ report
+    busy = 0.0
+    spans = sorted([(o["start"], o.get("fill_end", o["end"])) for o in ops])
+    merged: List[List[float]] = []
+    for s, e in spans:
+        if merged and s <= merged[-1][1] + 0.05:
+            merged[-1][1] = max(merged[-1][1], e)
+        else:
+            merged.append([s, e])
+    busy = sum(e - s for s, e in merged)
+    voice_end = max((s["end"] for s in words["sentences"]), default=duration)
+    gaps = [(b_[0] - a_[1], a_[1]) for a_, b_ in zip(merged, merged[1:]) if a_[1] < voice_end]
+    report = {"aspect": aspect, "size": list(out_size), "scale": round(scale, 3), "duration": round(duration, 2), "items": len(geo), "pen_ops": len(ops),
+              "pen_busy_share": round(busy / max(voice_end, 1e-6), 3), "longest_idle_s": round(max([g_[0] for g_ in gaps], default=0.0), 2),
+              "idle_over_1_5s": [[round(t, 1), round(d, 1)] for d, t in gaps if d > 1.5], "late": [[o["g"]["id"], round(o["end"] - (o["anchor"] + 0.15), 2)] for o in ops if o["how"] == "late"],
+              "camera_moves": len(cam.moves), "warnings": warnings,
+              "timeline": [{"id": o["g"]["id"] + (f"#{o['word']}" if "word" in o else ""), "start": round(o["start"], 2), "end": round(o["end"], 2), "how": o["how"]} for o in ops]}
+    return b, cam, duration, report
+
+
+def _seed(s: str) -> int:
+    import zlib
+
+    return zlib.crc32(s.encode()) % 100000
+
+
+def _centre(box):
+    return ((box[0] + box[2]) / 2, (box[1] + box[3]) / 2)
+
+
+def _area(box):
+    return max(1.0, (box[2] - box[0]) * (box[3] - box[1]))
+
+
+def _cells_union(a, c):
+    return (min(a[0], c[0]), min(a[1], c[1]), max(a[2], c[2]), max(a[3], c[3]))
+
+
+def _beside(tb, w, h, side, gap):
+    cx, cy = _centre(tb)
+    if side == "below":
+        return cx - w / 2, tb[3] + gap
+    if side == "above":
+        return cx - w / 2, tb[1] - gap - h
+    if side == "left":
+        return tb[0] - gap - w, cy - h / 2
+    return tb[2] + gap, cy - h / 2
+
+
+def _free_side(tb, w, h, side, gap, by_id, L):
+    """Beside the target on the asked side; if that would cover another drawing or text, or leave the board, the first other side that is free."""
+    others = [g["box"] for g in by_id.values() if g.get("kind") in ("draw", "write") and g["box"] != tb]
+    best = None
+    for sd in [side] + [x for x in ("below", "right", "above", "left") if x != side]:
+        x, y = _beside(tb, w, h, sd, gap)
+        x, y = min(max(x, 20.0), L.W - w - 20.0), min(max(y, 10.0), L.H - h - 10.0)
+        box = (x, y, x + w, y + h)
+        hit = sum(max(0.0, min(box[2], o[2]) - max(box[0], o[0])) * max(0.0, min(box[3], o[3]) - max(box[1], o[1])) for o in others + [tb])
+        if hit < 1.0:
+            return x, y
+        if best is None or hit < best[0]:
+            best = (hit, x, y)
+    return best[1], best[2]
+
+
+def _connector(it, p0, p1) -> List[np.ndarray]:
+    style, n = it.get("connect", "arrow"), int(it.get("count", 1))
+    seed = _seed(it["id"])
+    d = np.array(p1) - np.array(p0)
+    Ln = float(np.hypot(*d)) or 1.0
+    nrm = np.array([-d[1], d[0]]) / Ln
+    out: List[np.ndarray] = []
+    for k in range(n):
+        off = nrm * (k - (n - 1) / 2) * it.get("spread", 120.0)
+        a, c = tuple(np.array(p0) + off), tuple(np.array(p1) + off)
+        if style == "wavy":
+            out += pr.wavy_arrow(a, c, waves=max(1.5, Ln / 190.0), seed=seed + k)
+        elif style == "dashed":
+            ds = pr.dashes(a, c, n=max(3, int(Ln / 120)), seed=seed + k)
+            out += ds + ([pr.head(np.concatenate(ds[-2:]), 44.0, seed=seed)] if it.get("head", True) else [])
+        elif style == "line":
+            out += [pr.line(a, c, seed + k)]
+        else:
+            bend = it.get("bend", 0.14) * Ln
+            mid = (np.array(a) + np.array(c)) / 2 + nrm * bend
+            out += pr.arrow([a, tuple(mid), c], seed=seed + k, size=it.get("head_size", 48.0)) if it.get("head", True) else [pr.path([a, tuple(mid), c], seed + k)]
+    return out
+
+
+def _fit_view(content, L: Layout, out_size) -> Tuple[float, float, float]:
+    """The pull-back: everything drawn, with a margin, in the frame's aspect, inside the board."""
+    if content is None:
+        return (0.0, 0.0, float(L.W))
+    asp = out_size[0] / out_size[1]
+    m = 0.05 * L.W
+    x0, y0, x1, y1 = content[0] - m, content[1] - m, content[2] + m, content[3] + m
+    w = max(x1 - x0, (y1 - y0) * asp)
+    w = min(w, L.W, L.H * asp)
+    h = w / asp
+    cx, cy = (x0 + x1) / 2, (y0 + y1) / 2
+    vx = min(max(cx - w / 2, 0.0), L.W - w)
+    vy = min(max(cy - h / 2, 0.0), L.H - h - 1e-6)
+    return (vx, max(vy, 0.0), w)
+
+
+def load_spec(path: str) -> Dict[str, Any]:
+    return json.load(open(path, encoding="utf-8"))

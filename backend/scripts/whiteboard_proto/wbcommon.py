@@ -13,7 +13,7 @@ WORK = os.path.expanduser(os.environ.get("WB_WORK", os.path.join(OUT, "_work")))
 ART = os.path.join(WORK, "art")
 AUDIO = os.path.join(WORK, "audio")
 SPEND_LOG = os.path.join(WORK, "spend_log.jsonl")
-SPEND_CAP_USD = 3.0
+SPEND_CAP_USD = 40.0     # phase 0 + phase 1a, owner cap
 FONT = os.path.join(HERE, "fonts", "PatrickHand-Regular.ttf")
 
 for d in (OUT, WORK, ART, AUDIO):

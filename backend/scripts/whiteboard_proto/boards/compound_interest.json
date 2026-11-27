@@ -1,0 +1,33 @@
+{
+ "id": "compound_interest", "version": 1, "lang": "en", "voice": "Ruth", "hand": "neat", "tool": "marker",
+ "narration": [
+  "What is compound interest?",
+  "You put money in the bank, and it earns interest.",
+  "Next year, you earn interest on the interest too.",
+  "So your money grows faster every year, like a snowball.|",
+  "Start with one thousand, at seven percent.",
+  "In ten years it is two thousand. In thirty, almost eight thousand.",
+  "Time is the secret."
+ ],
+ "items": [
+  {"id": "title", "write": "What is compound interest?", "zone": "top", "size": "m", "say": [0, "interest"]},
+  {"id": "title_line", "mark": "underline", "on": "title", "word": ["compound", "interest?"], "color": "red"},
+  {"id": "coin", "draw": "coin", "zone": "top-left", "size": "s", "say": [1, "money"]},
+  {"id": "bank", "draw": "bank", "zone": "left", "size": "m", "say": [1, "bank"]},
+  {"id": "put", "connect": "arrow", "from": "coin", "to": "bank", "color": "blue"},
+  {"id": "plus", "write": "+ interest", "near": "bank", "side": "below", "size": "s", "tool": "pen", "ink": "green", "say": [1, "interest"]},
+  {"id": "grow", "connect": "arrow", "from": "bank", "to": "stack", "color": "green", "say": [2, "earn"]},
+  {"id": "stack", "draw": "coin_stack", "zone": "centre", "size": "l", "say": [2, "interest", 1]},
+  {"id": "chart", "draw": "line_chart", "zone": "right", "size": "l", "say": [3, "faster"]},
+  {"id": "to_chart", "connect": "arrow", "from": "stack", "to": "chart", "color": "green", "say": [3, "grows"]},
+  {"id": "fast", "write": "faster every year", "near": "chart", "side": "below", "size": "s", "tool": "pen", "say": [3, "year"]},
+  {"id": "snow", "draw": "growth_plant", "zone": "top-right", "size": "m", "say": [3, "snowball"]},
+  {"id": "start", "write": "$1,000 at 7%", "zone": "bottom-left", "size": "m", "ink": "blue", "say": [4, "percent"]},
+  {"id": "table", "write": "10 years -> $2,000\n30 years -> $7,600", "zone": "bottom", "size": "m", "say_lines": [[5, "two"], [5, "eight"]]},
+  {"id": "ring", "mark": "circle", "on": "table", "word": "$7,600", "color": "red"},
+  {"id": "two", "mark": "underline", "on": "table", "word": "$2,000", "color": "blue"},
+  {"id": "glass", "draw": "hourglass", "zone": "bottom-right", "size": "s", "say": [6, "time"]},
+  {"id": "time", "write": "time", "near": "glass", "side": "left", "size": "l", "ink": "red", "say": [6, "secret"]},
+  {"id": "time_line", "mark": "double_underline", "on": "time", "color": "red"}
+ ]
+}

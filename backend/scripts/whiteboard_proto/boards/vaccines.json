@@ -1,0 +1,31 @@
+{
+ "id": "vaccines", "version": 1, "lang": "en", "voice": "Matthew", "hand": "neat", "tool": "marker",
+ "narration": [
+  "How does a vaccine teach your body to fight?",
+  "A virus is an invader your body has never seen.",
+  "A vaccine shows your body a harmless piece of it.",
+  "Your immune system studies it, and builds antibodies.",
+  "It also keeps a memory.|",
+  "So when the real virus arrives, your defences are ready, and you stay healthy."
+ ],
+ "items": [
+  {"id": "title", "write": "How vaccines teach your body", "zone": "top", "size": "m", "say": [0, "body"]},
+  {"id": "virus", "draw": "virus", "zone": "top-left", "size": "m", "say": [1, "virus"]},
+  {"id": "worry", "draw": "face_worried", "near": "virus", "side": "right", "size": "xs", "say": [1, "never"]},
+  {"id": "syringe", "draw": "syringe", "zone": "left", "size": "m", "say": [2, "vaccine"]},
+  {"id": "person", "draw": "person_standing", "zone": "centre", "size": "xl", "say": [2, "body"]},
+  {"id": "jab", "connect": "arrow", "from": "syringe", "to": "person", "color": "blue"},
+  {"id": "piece", "write": "a harmless piece", "near": "syringe", "side": "below", "size": "s", "tool": "pen", "say": [2, "piece"]},
+  {"id": "study", "draw": "magnifier", "zone": "top-right", "size": "s", "say": [3, "studies"]},
+  {"id": "anti", "draw": "antibody", "zone": "right", "size": "m", "ink": "blue", "say": [3, "antibodies"]},
+  {"id": "make", "connect": "arrow", "from": "person", "to": "anti", "color": "blue"},
+  {"id": "anti_l", "write": "antibodies", "near": "anti", "side": "below", "size": "s", "tool": "pen"},
+  {"id": "brain", "draw": "brain", "zone": "bottom-right", "size": "s", "say": [4, "memory"]},
+  {"id": "mem", "write": "memory", "near": "brain", "side": "left", "size": "s", "tool": "pen"},
+  {"id": "virus2", "draw": "virus", "zone": "bottom-left", "size": "s", "ink": "red", "fill": false, "say": [5, "virus"]},
+  {"id": "shield", "draw": "shield_check", "zone": "bottom", "size": "m", "say": [5, "ready"]},
+  {"id": "block", "connect": "arrow", "from": "virus2", "to": "shield", "color": "red"},
+  {"id": "x", "mark": "cross", "on": "virus2", "side": "over", "color": "red"},
+  {"id": "ok", "draw": "face_happy", "near": "shield", "side": "right", "size": "xs", "say": [5, "healthy"]}
+ ]
+}

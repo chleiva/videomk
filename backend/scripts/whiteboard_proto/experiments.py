@@ -20,7 +20,7 @@ from PIL import Image, ImageDraw, ImageFont
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import board as bd  # noqa: E402
-import common  # noqa: E402
+import wbcommon as common  # noqa: E402
 import trace as tr  # noqa: E402
 import vectorize as vz  # noqa: E402
 

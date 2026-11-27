@@ -20,7 +20,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(HERE, "..", "..", "lambdas"))
 sys.path.insert(0, HERE)
 
-import common  # noqa: E402
+import wbcommon as common  # noqa: E402
 import vectorize as vz  # noqa: E402
 
 OUT = os.path.join(common.WORK, "llm_strokes")

@@ -32,7 +32,7 @@ def ease(u: float) -> float:
 
 
 class Board:
-    def __init__(self, W: int = 3840, H: int = 2160, scale: float = 1.0, seed: int = 7):
+    def __init__(self, W: int = 3840, H: int = 2160, scale: float = 1.0, seed: int = 7, paper: Tuple[int, int, int] = PAPER):
         self.W, self.H, self.s = W, H, scale
         self.RW, self.RH = int(round(W * scale)), int(round(H * scale))
         self.ink_rgb = np.zeros((self.RH, self.RW, 3), np.uint8)
@@ -44,15 +44,17 @@ class Board:
         self.pen: List[Dict[str, Any]] = []      # pen movements, for the marker tip
         self.items: List[Tuple[int, int, int, int, float, float]] = []   # raster box and (start, finish) of everything placed
         self._cache: Tuple[int, Optional[np.ndarray]] = (-1, None)
+        self.tip_k, self._tip_size = 1.0, 1.0
         # paper: warm white with a very faint, static, low-frequency mottling (static = costs no bitrate)
         r = np.random.default_rng(seed)
         low = r.normal(0, 1, (self.RH // 48 + 2, self.RW // 48 + 2)).astype(np.float32)
         tex = np.asarray(Image.fromarray(low).resize((self.RW, self.RH), Image.BICUBIC), np.float32)
-        self.paper = np.clip(np.array(PAPER, np.float32)[None, None, :] + tex[..., None] * 0.8 + 0.5, 0, 255).astype(np.uint8)
+        self.paper = np.clip(np.array(paper, np.float32)[None, None, :] + tex[..., None] * 0.8 + 0.5, 0, 255).astype(np.uint8)
 
     # ------------------------------------------------------------------ placing
     def place(self, r: Dict[str, Any], x: float, y: float, colour: Tuple[int, int, int], t0: float, t1: float,
-              fills: Optional[Sequence[Tuple[int, Tuple[int, int, int]]]] = None, fill_t0: float = 0.0, fill_dur: float = 0.45, tip: bool = True) -> None:
+              fills: Optional[Sequence[Tuple[int, Tuple[int, int, int]]]] = None, fill_t0: float = 0.0, fill_dur: float = 0.45, tip: bool = True,
+              tip_colour: Optional[Tuple[int, int, int]] = None, tip_size: float = 1.0) -> None:
         """Put a rasterised drawing (vectorize.raster at this board's scale) with its top-left corner at board units (x, y); the pen draws it from t0 to t1.
         `fills`: [(index of the enclosed area, colour)], coloured in from fill_t0 over fill_dur each."""
         a, T = r["alpha"], r["T"]
@@ -73,7 +75,7 @@ class Board:
         self.items.append((py + sy0, py + sy1, px + sx0, px + sx1, t0, max(t1, f_end)))
         if tip:
             for s, tt in zip(r["strokes"], r["times"]):
-                self.pen.append({"t": t0 + np.asarray(tt) * (t1 - t0), "p": (np.asarray(s) + np.array([px, py])) / self.s, "colour": colour})
+                self.pen.append({"t": t0 + np.asarray(tt) * (t1 - t0), "p": (np.asarray(s) + np.array([px, py])) / self.s, "colour": tip_colour or colour, "size": tip_size})
         k = 0
         for idx, col in (fills or []):
             if idx >= len(r["fills"]):
@@ -114,6 +116,34 @@ class Board:
             out += (self.ink_rgb[sl].astype(np.float32) - out) * ia[..., None]
         return out
 
+    def place_under(self, alpha: np.ndarray, x: float, y: float, colour: Tuple[int, int, int], t0: float, t1: float, opacity: float = 0.92,
+                    strokes: Optional[Sequence[np.ndarray]] = None, tip_colour: Optional[Tuple[int, int, int]] = None, tip_size: float = 1.0) -> None:
+        """Colour UNDER the ink (a shape's fill, a highlighter pass): `alpha` is the coverage at this board's scale, top-left at board units (x, y).
+        It is coloured in along `strokes` (raster pixels of `alpha`; default: a few confident diagonal passes that follow the shape) with a broad round tip."""
+        import trace as tr
+
+        px, py = int(round(x * self.s)), int(round(y * self.s))
+        h, w = alpha.shape
+        sx0, sy0, sx1, sy1 = max(0, -px), max(0, -py), min(w, self.RW - px), min(h, self.RH - py)
+        if sx1 <= sx0 or sy1 <= sy0 or not (alpha > 0.02).any():
+            return
+        if strokes is None:
+            strokes, radius = brush_path(alpha, self.s)
+        else:
+            radius = 0.0
+        T, times, _ = tr.time_map(alpha, [np.asarray(p, np.float64) for p in strokes], max(radius, 2.0))
+        src = (slice(sy0, sy1), slice(sx0, sx1))
+        dst = (slice(py + sy0, py + sy1), slice(px + sx0, px + sx1))
+        fa8 = np.clip(alpha * opacity * 255 + 0.5, 0, 255).astype(np.uint8)
+        take = fa8[src] > self.fill_a[dst]
+        self.fill_rgb[dst][take] = colour
+        self.fill_t[dst][take] = np.where(T[src] <= 1.0, t0 + T[src] * (t1 - t0), np.inf)[take]
+        self.fill_a[dst][take] = fa8[src][take]
+        self.items.append((py + sy0, py + sy1, px + sx0, px + sx1, t0, t1))
+        if tip_colour is not None:
+            for p, tt in zip(strokes, times):
+                self.pen.append({"t": t0 + np.asarray(tt) * (t1 - t0), "p": (np.asarray(p) + np.array([px, py])) / self.s, "colour": tip_colour, "size": tip_size})
+
     # ------------------------------------------------------------------ a frame
     def frame(self, t: float, cam: Tuple[float, float, float], size: Tuple[int, int] = (1920, 1080), tip: bool = True) -> Image.Image:
         ow, oh = size
@@ -137,13 +167,13 @@ class Board:
                 if yb > ya and xb > xa:
                     crop[ya - iy0:yb - iy0, xa - ix0:xb - ix0] = np.clip(self._compose((slice(ya, yb), slice(xa, xb)), t) + 0.5, 0, 255).astype(np.uint8)
         im = Image.fromarray(crop)
-        im = im.resize((ow, oh), Image.BICUBIC if (fx1 - fx0) < ow * 1.3 else Image.LANCZOS, box=(fx0 - ix0, fy0 - iy0, fx1 - ix0, fy1 - iy0))
+        im = im.resize((ow, oh), Image.BICUBIC if (fx1 - fx0) < ow * 1.3 else Image.LANCZOS, box=(max(0.0, fx0 - ix0), max(0.0, fy0 - iy0), min(float(ix1 - ix0), fx1 - ix0), min(float(iy1 - iy0), fy1 - iy0)))
         if tip:
             pos = self.pen_at(t)
             if pos is not None:
                 (bx, by), colour, alpha = pos
                 k = ow / w
-                draw_marker(im, ((bx - x0) * k, (by - y0) * k), colour, alpha, ow / 1920.0)
+                draw_marker(im, ((bx - x0) * k, (by - y0) * k), colour, alpha, self.tip_k * min(ow, oh) / 1080.0 * self._tip_size)
         return im
 
     # ------------------------------------------------------------------ the marker tip
@@ -164,6 +194,7 @@ class Board:
             u = (float(nxt["t"][0]) - t) / 0.35
             return (tuple(nxt["p"][0] + np.array([60.0, 60.0]) * min(1, u)), nxt["colour"], max(0.0, 1 - u)) if u < 1 else None
         cur = self.pen[i]
+        self._tip_size = float(cur.get("size", 1.0))
         tt, pp = cur["t"], cur["p"]
         if t <= tt[-1]:
             return ((float(np.interp(t, tt, pp[:, 0])), float(np.interp(t, tt, pp[:, 1]))), cur["colour"], 1.0)
@@ -188,6 +219,42 @@ class Board:
         return ((float(mid[0]), float(mid[1] - lift)), nxt["colour"] if u > 0.5 else cur["colour"], 1.0)
 
 
+def brush_path(alpha: np.ndarray, scale: float) -> Tuple[List[np.ndarray], float]:
+    """How a marker colours a shape in: two to five broad diagonal passes, each only as long as the shape is wide THERE, joined into one zigzag.
+    -> ([path in raster pixels], brush radius)."""
+    ys, xs = np.nonzero(alpha > 0.3)
+    if not len(ys):
+        ys, xs = np.nonzero(alpha > 0.02)
+    u, v = (xs + ys) * 0.7071, (xs - ys) * 0.7071
+    umin, umax = float(u.min()), float(u.max())
+    nb = int(np.clip(round((umax - umin) / (95.0 * scale)), 2, 5))
+    bw = (umax - umin + 1e-3) / nb
+    pts = []
+    for k in range(nb):
+        m = (u >= umin + k * bw) & (u <= umin + (k + 1) * bw)
+        if not m.any():
+            continue
+        uc = umin + (k + 0.5) * bw
+        va, vb = float(v[m].min()) + bw * 0.25, float(v[m].max()) - bw * 0.25
+        if vb < va:
+            va = vb = (va + vb) / 2
+        ends = [(uc, va), (uc, vb)] if k % 2 == 0 else [(uc, vb), (uc, va)]
+        for uu, vv in ends:
+            pts.append(((uu + vv) * 0.7071, (uu - vv) * 0.7071))
+    p = np.asarray(pts, np.float64)
+    if len(p) < 2:
+        p = np.array([[xs.min(), ys.min()], [xs.max(), ys.max()]], np.float64)
+    # dense, with rounded turns
+    d = np.concatenate([[0.0], np.cumsum(np.hypot(*np.diff(p, axis=0).T))])
+    uu = np.linspace(0, d[-1], max(8, int(d[-1] / 4)))
+    q = np.stack([np.interp(uu, d, p[:, 0]), np.interp(uu, d, p[:, 1])], 1)
+    k = max(3, int(bw * 0.35 / 4)) | 1
+    if len(q) > k + 2:
+        ker = np.ones(k) / k
+        q = np.stack([np.convolve(np.pad(q[:, i], k // 2, mode="edge"), ker, "valid") for i in (0, 1)], 1)
+    return [q], bw * 0.72
+
+
 _MARKERS: Dict[Tuple[Tuple[int, int, int], int], Tuple[Image.Image, Tuple[int, int]]] = {}
 
 
@@ -203,13 +270,23 @@ def _marker_sprite(colour: Tuple[int, int, int], k: float) -> Tuple[Image.Image,
     d = ImageDraw.Draw(im)
     cy = pad + Wd // 2
     nib, neck = int(26 * k * S), int(52 * k * S)
-    d.polygon([(pad, cy), (pad + nib, cy - Wd * 0.16), (pad + nib, cy + Wd * 0.16)], fill=colour + (255,))                          # nib
-    d.polygon([(pad + nib, cy - Wd * 0.2), (pad + nib + neck, cy - Wd * 0.42), (pad + nib + neck, cy + Wd * 0.42), (pad + nib, cy + Wd * 0.2)], fill=(58, 61, 68, 255))   # collar
+    # bullet nib (rounded), collar, grip ring, barrel, colour band, end cap
+    nib_pts = [(pad + nib, cy - Wd * 0.17)] + [(pad + nib * 0.55 * (1 - math.cos(a)), cy + Wd * 0.17 * math.sin(a)) for a in np.linspace(-math.pi / 2, math.pi / 2, 14)] + [(pad + nib, cy + Wd * 0.17)]
+    d.polygon(nib_pts, fill=tuple(int(c * 0.85) for c in colour) + (255,))
+    d.polygon([(pad + nib, cy - Wd * 0.21), (pad + nib + neck, cy - Wd * 0.44), (pad + nib + neck, cy + Wd * 0.44), (pad + nib, cy + Wd * 0.21)], fill=(70, 74, 82, 255))
     x = pad + nib + neck
-    d.rounded_rectangle([x, cy - Wd // 2, pad + L, cy + Wd // 2], radius=int(Wd * 0.22), fill=(246, 246, 248, 255), outline=(150, 154, 162, 255), width=max(1, int(1.6 * S * k)))   # barrel
-    d.rectangle([x + int(34 * k * S), cy - Wd // 2 + 1, x + int(120 * k * S), cy + Wd // 2 - 1], fill=colour + (255,))               # colour band
-    d.rounded_rectangle([pad + L - int(56 * k * S), cy - Wd // 2, pad + L, cy + Wd // 2], radius=int(Wd * 0.22), fill=colour + (255,))  # end cap
-    d.line([x + 6, cy - Wd * 0.26, pad + L - 8, cy - Wd * 0.26], fill=(255, 255, 255, 150), width=max(1, int(3 * S * k)))            # highlight
+    d.rounded_rectangle([x, cy - Wd // 2, pad + L, cy + Wd // 2], radius=int(Wd * 0.2), fill=(244, 245, 247, 255))
+    d.rectangle([x, cy - Wd // 2, x + int(10 * k * S), cy + Wd // 2], fill=(70, 74, 82, 255))                                     # grip ring
+    d.rectangle([x + int(40 * k * S), cy - Wd // 2, x + int(150 * k * S), cy + Wd // 2], fill=colour + (255,))                    # label band
+    d.rectangle([x + int(60 * k * S), cy - int(Wd * 0.12), x + int(130 * k * S), cy + int(Wd * 0.12)], fill=(255, 255, 255, 235))  # the label's white window
+    d.rounded_rectangle([pad + L - int(64 * k * S), cy - Wd // 2, pad + L, cy + Wd // 2], radius=int(Wd * 0.2), fill=colour + (255,))
+    d.rectangle([pad + L - int(64 * k * S), cy - Wd // 2, pad + L - int(58 * k * S), cy + Wd // 2], fill=tuple(int(c * 0.7) for c in colour) + (255,))
+    # a round barrel: darker towards both edges, a soft highlight a third of the way across
+    arr = np.asarray(im, np.float32)
+    yy = (np.arange(im.height, dtype=np.float32) - cy) / (Wd / 2.0)
+    shade = 1.0 - 0.34 * np.clip(np.abs(yy), 0, 1) ** 2.2 + 0.10 * np.exp(-((yy + 0.38) / 0.16) ** 2)
+    arr[..., :3] = np.clip(arr[..., :3] * shade[:, None, None], 0, 255)
+    im = Image.fromarray(arr.astype(np.uint8), "RGBA")
     rot = im.rotate(-52, resample=Image.BICUBIC, expand=True)
     # where did the nib go: rotate the anchor the same way
     cx0, cy0 = im.width / 2, im.height / 2
