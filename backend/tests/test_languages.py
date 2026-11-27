@@ -229,6 +229,26 @@ def test_research_and_the_closing_card_follow_the_language():
     assert tl["scenes"][-1]["props"]["title"] == "Erstellt mit VideoMK"
 
 
+def test_the_description_labels_are_in_the_language_of_the_video():
+    """"Sources:" stood in English under a French description. Every language a video can be made in has its three fixed words."""
+    from engine import assets
+    from engine.handlers import finalize_handler
+
+    assert set(voices.LANGUAGES) <= set(assets.LABELS) and all(set(v) == {"credits", "sources", "intro"} and all(v.values()) for v in assets.LABELS.values())
+    want = {"en": "Sources:", "es": "Fuentes:", "fr": "Sources :", "de": "Quellen:", "it": "Fonti:", "pt": "Fontes:", "nl": "Bronnen:", "pl": "Źródła:", "fi": "Lähteet:"}
+    assert set(want) == set(voices.READY)
+    ledger = [{"attribution": "Photo by Ana on Unsplash", "landing_url": "https://unsplash.com/x"}]
+    sources = [{"title": "Tide", "publisher": "Wikipedia", "url": "https://en.wikipedia.org/wiki/Tide"}]
+    chapters = [{"start": 4.0, "title": "A"}, {"start": 20.0, "title": "B"}, {"start": 40.0, "title": "C"}]
+    for lang, word in want.items():
+        block = assets.credits_block(ledger, sources, lang).splitlines()
+        assert block[0] == assets.LABELS[lang]["credits"] and block[2] == word and "Photo by Ana on Unsplash" in block[1], lang
+        assert finalize_handler._chapters_text(chapters, lang).splitlines()[0] == "0:00 " + assets.LABELS[lang]["intro"]
+        assert lang == "en" or (assets.LABELS[lang]["sources"] != "Sources:" and assets.LABELS[lang]["credits"] != "Image credits:"), lang
+    assert len({v["sources"] for v in assets.LABELS.values()}) == len(assets.LABELS)              # no language shows another's word
+    assert assets.labels("pt-BR") == assets.LABELS["pt"] and assets.labels(None) == assets.labels("xx") == assets.LABELS["en"]
+
+
 # ================================================================= fonts: every letter of every language, in every bundled font
 def _missing(font, text):
     """The characters this font has no glyph for: they draw as the font's own "missing" box."""

@@ -92,19 +92,33 @@ def credit_line(entry: Dict[str, str]) -> str:
     return f"Photo: {who} ({entry.get('license', '')})".strip()
 
 
+# The fixed words of a video's description, in every language a video can be made in (engine/voices.LANGUAGES; a test walks them).
 LABELS = {"en": {"credits": "Image credits:", "sources": "Sources:", "intro": "Intro"},
-          "es": {"credits": "Créditos de las imágenes:", "sources": "Fuentes:", "intro": "Introducción"}}
+          "es": {"credits": "Créditos de las imágenes:", "sources": "Fuentes:", "intro": "Introducción"},
+          "fr": {"credits": "Crédits des images :", "sources": "Sources :", "intro": "Introduction"},
+          "de": {"credits": "Bildnachweise:", "sources": "Quellen:", "intro": "Einleitung"},
+          "it": {"credits": "Crediti delle immagini:", "sources": "Fonti:", "intro": "Introduzione"},
+          "pt": {"credits": "Créditos das imagens:", "sources": "Fontes:", "intro": "Introdução"},
+          "nl": {"credits": "Beeldverantwoording:", "sources": "Bronnen:", "intro": "Inleiding"},
+          "pl": {"credits": "Autorzy zdjęć:", "sources": "Źródła:", "intro": "Wstęp"},
+          "fi": {"credits": "Kuvien lähteet:", "sources": "Lähteet:", "intro": "Johdanto"},
+          "ko": {"credits": "이미지 출처:", "sources": "출처:", "intro": "소개"}}
+
+
+def labels(language: Optional[str]) -> Dict[str, str]:
+    """The description's fixed words in the video's language ("pt-BR" is "pt"); English for a language without them."""
+    return LABELS.get(str(language or "en").lower()[:2], LABELS["en"])
 
 
 def credits_block(ledger: List[Dict[str, str]], sources: List[Dict[str, str]], language: str = "en") -> str:
     """The Unsplash attribution lines themselves keep Unsplash's recommended wording ("Photo by ... on Unsplash") in every language."""
-    labels = LABELS.get(language, LABELS["en"])
+    lb = labels(language)
     ledger = [e for e in ledger if e.get("source") != "videomk-library"]   # our own images need no credit line (they stay in the ledger itself)
     lines: List[str] = []
     if ledger:
-        lines.append(labels["credits"])
+        lines.append(lb["credits"])
         lines += [f"- {e.get('attribution') or (e.get('title') + ' - ' + e.get('creator') + ' (' + e.get('license') + ')')}  {e.get('landing_url', '')}".rstrip() for e in ledger]
     if sources:
-        lines.append(labels["sources"])
+        lines.append(lb["sources"])
         lines += [f"- {s['title']} ({s.get('publisher', '')}) {s.get('url', '')}".rstrip() for s in sources]
     return "\n".join(lines)

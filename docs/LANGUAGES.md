@@ -37,6 +37,7 @@ A video can be narrated in a language that the apps themselves are not translate
 | Stock photo and clip search | the planner writes the search words | in the video's language or English, as before | **told to write search words in English** | - |
 | Presenter characters | a voice of the language for the character's gender (`presenter_policy.voice_for`) | hand-picked voices | by the resolver; Dutch, Polish and Finnish have no male voice, so David, Mateo and the male animals get a woman's voice there | - |
 | Closing card | "Made with VideoMK" in the language | yes | yes | written, unused |
+| Description: "Image credits:", "Sources:", the "Intro" chapter | `engine/assets.LABELS` | yes | yes since 2026-11-27 (it was English: "Sources:" under a French description) | written |
 | App strings | EN/ES only (`docs/I18N.md`) | yes | the app stays in English or Spanish; server messages too | same |
 
 ### Word timing, measured
@@ -95,6 +96,24 @@ Measured on one explainer passage of 65 to 76 words per language (Polly generati
 4. `timeline.stretch_to`, every language, with the measured audio: what is still missing after every spoken scene is held 1.6 s longer goes to the last scene only if it is 2.5 s or less; more is shared by all spoken scenes. A video is still never shorter than asked (the product's promise, `docs/QUALITY_REVIEW.md` 11); it no longer reaches its length by freezing its last picture.
 
 **Replay on the two QA plans with their real audio** (`tests/fixtures/plans/`): French, script unchanged: narration ends at 40.1 s instead of 34.8, every scene held 3.4 s instead of the last one 8.7 s; with the script lengthened as asked (+35 words): 42.2 s. Portuguese: 40.6 s instead of 37.0; lengthened (+27 words): 42.6 s. **Not measured on a real new video yet.**
+
+## Fixed words that are still English in every language (looked for on 2026-11-27)
+
+None of these is new with the seven languages: Spanish videos have them too. Listed so that nobody is surprised.
+
+| Where the viewer sees it | Text | Code |
+|---|---|---|
+| On-screen credit of a stock photo or clip | "Photo: Ana (Unsplash License)", "Video: Ana / Pexels" | `engine/assets.credit_line`, `engine/stock.credit_line`, `engine/clips.credit_line` |
+| Attribution lines of the description | "Photo by ... on Unsplash", "Video by ... on Pexels" | deliberate: the provider's own wording |
+| Centre of a donut chart that is not percentages | "Total" | `scenes/elements/data.py` |
+| Note on a map of today's borders | "Borders as of today" | `scenes/elements/_mapdraw.py` |
+| Between the two sides of a comparison | "VS" | `scenes/elements/compare_process.py` (understood everywhere; left) |
+| A whiteboard drawing the library does not have | its English name in a box ("prism") unless the director gave a `label` | `whiteboard/spec.py` |
+| Photo videos: a collage or frame without a title, a photo story without chapter titles | "Photos", "Photo", "Part 2" | `scenes/elements/photo_layouts.py`, `engine/curate.py` |
+| A video without a title | "Untitled" | `handlers/finalize_handler.py` |
+| Presenter characters' roles | English and Spanish only ("Teacher", "Profesora") | `presenter_policy.py` (in the app's cast list, which is English or Spanish by design) |
+
+The closing card is in the language for all nine (tested). App and server messages (refusals, the reason a look was chosen, the maintenance notice) are English or Spanish by design (`docs/I18N.md`).
 
 ## Korean: what it needs (not done)
 
