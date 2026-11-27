@@ -240,5 +240,7 @@
  "watch.another_short": "Make it a Short",
  "watch.another_es": "Spanish version",
  "watch.another_en": "English version",
- "watch.another_again": "Same idea, new take"
+ "watch.another_again": "Same idea, new take",
+ "watch.prompt": "The prompt",
+ "watch.prompt_again": "Use this prompt again"
 }

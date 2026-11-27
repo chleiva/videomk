@@ -56,5 +56,6 @@
  "shell.settings": "Idioma y apariencia",
  "shell.credits_n": "{n, plural, one {# crédito} other {# créditos}}",
  "shell.free_soon": "Uno más gratis mañana",
- "shell.new_video": "Nuevo video"
+ "shell.new_video": "Nuevo video",
+ "shell.credits_none": "Sin créditos"
 }

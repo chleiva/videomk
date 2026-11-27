@@ -56,5 +56,6 @@
  "shell.settings": "Language and appearance",
  "shell.credits_n": "{n, plural, one {# credit} other {# credits}}",
  "shell.free_soon": "One more free tomorrow",
- "shell.new_video": "New video"
+ "shell.new_video": "New video",
+ "shell.credits_none": "No credits left"
 }

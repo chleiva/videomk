@@ -48,6 +48,12 @@ export default function Player({ src, title, poster, onMeta, newVideoHref }: Pro
     if (v && !v.paused && !v.ended) hideTimer.current = window.setTimeout(() => { if (!box.current?.contains(document.activeElement) || !(document.activeElement as HTMLElement)?.matches?.(":focus-visible")) setShowBar(false); }, HIDE_AFTER_MS);
   }, []);
   useEffect(() => () => window.clearTimeout(hideTimer.current), []);
+  useEffect(() => {   // React has no props for these two events: without the listeners the button never showed its pressed state
+    const v = video.current; if (!v) return;
+    const on = () => setPipOn(true), off = () => setPipOn(false);
+    v.addEventListener("enterpictureinpicture", on); v.addEventListener("leavepictureinpicture", off);
+    return () => { v.removeEventListener("enterpictureinpicture", on); v.removeEventListener("leavepictureinpicture", off); };
+  }, []);
 
   const toggle = useCallback(() => {
     const v = video.current; if (!v) return;
@@ -136,11 +142,10 @@ export default function Player({ src, title, poster, onMeta, newVideoHref }: Pro
         onWaiting={() => setWaiting(true)} onPlaying={() => setWaiting(false)} onCanPlay={() => setWaiting(false)}
         onVolumeChange={(e) => { setVolume(e.currentTarget.volume); setMuted(e.currentTarget.muted); }}
         onRateChange={(e) => setRate(e.currentTarget.playbackRate)}
-        onEnterPictureInPicture={() => setPipOn(true)} onLeavePictureInPicture={() => setPipOn(false)}
       />
 
       {!started && !ended && (
-        <button type="button" className="player-big" onClick={() => { toggle(); wake(); }} aria-label={t("player.play")}><PIcon name="play" size={34} /></button>
+        <button type="button" className="player-big" onClick={() => { toggle(); wake(); box.current?.focus({ preventScroll: true }); /* this button goes away once playing: keep the keyboard on the player (space, k, arrows) */ }} aria-label={t("player.play")}><PIcon name="play" size={34} /></button>
       )}
       {waiting && playing && <span className="player-wait" role="status" aria-label={t("player.loading")}><Spinner /></span>}
 

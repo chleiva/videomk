@@ -240,5 +240,7 @@
  "watch.another_short": "Hazlo un Short",
  "watch.another_es": "Versión en español",
  "watch.another_en": "Versión en inglés",
- "watch.another_again": "La misma idea, otra versión"
+ "watch.another_again": "La misma idea, otra versión",
+ "watch.prompt": "La idea",
+ "watch.prompt_again": "Usar esta idea otra vez"
 }

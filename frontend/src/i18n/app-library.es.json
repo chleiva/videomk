@@ -92,7 +92,7 @@
  "media.search_error": "La búsqueda no funcionó. Inténtalo de nuevo.",
  "media.more": "Cargar más",
  "media.undated": "Sin fecha",
- "media.selected_n": "{n} seleccionadas",
+ "media.selected_n": "{n} elegidas",
  "media.select_all": "Seleccionar todo",
  "media.clear_selection": "Quitar",
  "media.make_video": "Crear un video",
@@ -170,7 +170,7 @@
  "gen.retry_gone": "Este video ya no está aquí.",
  "gen.retry_unsupported": "Ahora mismo no se puede volver a intentar. Tu video y sus fotos no han cambiado.",
  "gen.retry_error": "No pudimos iniciarlo de nuevo. Prueba en un momento.",
- "media.make_video_n": "Crear un video · {n}",
+ "media.make_video_n": "Crear video · {n}",
  "media.select": "Seleccionar",
  "media.select_done": "Listo",
  "media.photos_n": "{n, plural, one {# foto} other {# fotos}}"

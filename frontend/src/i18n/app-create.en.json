@@ -35,7 +35,6 @@
  "create.same_language": "Same language as description",
  "create.credits": "{n, plural, one {# credit} other {# credits}}",
  "create.left": "{n} left",
- "create.you_have": "you have {n}",
  "create.cost_why": "What does this cost?",
  "create.cost_4k_double": "4K costs double the credits.",
  "create.fourk_slower": "It also takes longer to make, and the file is bigger.",
@@ -156,5 +155,7 @@
  "create.cancel": "Cancel",
  "create.pill_for_k": "For",
  "create.pill_look_k": "Look",
- "create.cta_word": "Create"
+ "create.cta_word": "Create",
+ "create.pill_look_phone": "{look} look",
+ "create.credits_left": "{n, plural, one {# credit left} other {# credits left}}"
 }

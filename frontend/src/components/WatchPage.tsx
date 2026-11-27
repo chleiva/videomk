@@ -5,6 +5,7 @@ import Player from "./Player";
 import type { PlayerMeta } from "./Player";
 import { PIcon } from "./PlayerIcons";
 import { AIcon } from "./app/icons";
+import FilmStrip from "./app/FilmStrip";
 import { Sheet, Spinner, useToast } from "./ui";
 import { IconButton } from "./ui/IconButton";
 import { Button } from "./ui/Button";
@@ -12,10 +13,15 @@ import { getAuthorizationHeader } from "../lib/auth";
 import { apiGateway } from "../lib/config";
 import { currentLocaleHeaders } from "../lib/i18n";
 import { aspectLabel, metaLine, safeFileName } from "../lib/player";
+import { pickPrompt, promptFor } from "../lib/prompts";
+import { parseMaking, sceneCounter, stableSceneThumbs, stripTiles } from "../lib/videos";
+import type { Making } from "../lib/videos";
 import { useLocale } from "../lib/useLocale";
 
+const POLL_MS = 5000;   // while the video is being made this page follows it (same call, same pace as the list)
+
 interface Known { title?: string; editable?: boolean; duration_s?: number | null; preview_gif_url?: string | null }
-type View = { state: "loading" } | { state: "error" } | { state: "making" } | { state: "failed" } | { state: "ready"; url: string };
+type View = { state: "loading" } | { state: "error" } | { state: "making"; making: Making | null } | { state: "failed" } | { state: "ready"; url: string };
 
 /** What the list already told us about this video (title, editable, duration), from the session cache the list writes. */
 function known(id: string): Known {
@@ -29,6 +35,8 @@ export default function WatchPage() {
   const [view, setView] = useState<View>({ state: "loading" });
   const [title, setTitle] = useState(info.title || "");
   const [description, setDescription] = useState("");
+  const [prompt, setPrompt] = useState<string | null>(() => promptFor(id));
+  const [sceneThumbs, setSceneThumbs] = useState<Record<string, string>>({});
   const [meta, setMeta] = useState<PlayerMeta | null>(null);
   const [sheet, setSheet] = useState(false);
   const [menu, setMenu] = useState(false);
@@ -39,27 +47,40 @@ export default function WatchPage() {
 
   useEffect(() => {
     if (!id) { setView({ state: "error" }); return; }
-    let alive = true;
+    let alive = true, timer: number | undefined;
     setView({ state: "loading" });
-    (async () => {
+    const load = async (first: boolean) => {
       try {
         const { Authorization, userId } = await getAuthorizationHeader();
         if (!userId) throw new Error("auth");
         const r = await fetch(apiGateway.getVideo(userId, id), { headers: { Authorization, ...currentLocaleHeaders() } });
         if (!alive) return;
         if (r.status === 409) {
-          let st = ""; try { st = String((await r.json())?.status || "").toUpperCase(); } catch { /* no body */ }
-          setView({ state: st === "ERROR" || st === "FAILED" || st === "REJECTED" ? "failed" : "making" } as View); return;
+          let b: any = null; try { b = await r.json(); } catch { /* no body */ }
+          if (!alive) return;
+          const st = String(b?.status || "").toUpperCase();
+          if (st === "ERROR" || st === "FAILED" || st === "REJECTED" || st === "CANCELLED") { setView({ state: "failed" }); return; }
+          const making = parseMaking(b?.making);   // optional (docs/CREATE_API.md "Making status"): without it the page says "Still being made" as before
+          setSceneThumbs((p) => stableSceneThumbs(p, [{ id, making }]));
+          setView({ state: "making", making });
+          timer = window.setTimeout(() => void load(false), POLL_MS);   // follow it until it is ready: the player then appears by itself
+          return;
         }
         if (!r.ok) throw new Error(String(r.status));
         const j = await r.json();
+        if (!alive) return;
         if (typeof j?.title === "string" && j.title.trim()) setTitle(j.title);
         if (typeof j?.description === "string") setDescription(j.description);
+        setPrompt((p) => pickPrompt(j?.prompt, p));
         if (typeof j?.url === "string") setView({ state: "ready", url: j.url });
         else setView({ state: "error" });
-      } catch { if (alive) setView({ state: "error" }); }
-    })();
-    return () => { alive = false; };
+      } catch {
+        if (!alive) return;
+        if (first) setView({ state: "error" }); else timer = window.setTimeout(() => void load(false), POLL_MS * 2);   // one missed poll is not an error screen
+      }
+    };
+    void load(true);
+    return () => { alive = false; window.clearTimeout(timer); };
   }, [id, tries]);
 
   // the More menu: closes with Escape or a click outside, focus goes back to its button
@@ -113,7 +134,8 @@ export default function WatchPage() {
   const newHref = "/new";
   // "Make another": the same subject, pre-filled in Create with one thing changed (the person still presses Create; nothing is made from here)
   const otherLang = locale === "es" ? "en" : "es";
-  const againHref = (o: { aspect?: string; minutes?: number; language?: string }) => `/new?${new URLSearchParams({ prompt: shown, ...(o.aspect ? { aspect: o.aspect } : {}), ...(o.minutes ? { minutes: String(o.minutes) } : {}), ...(o.language ? { language: o.language } : {}) }).toString()}`;
+  const subject = (prompt || shown).slice(0, 500);
+  const againHref = (o: { aspect?: string; minutes?: number; language?: string }) => `/new?${new URLSearchParams({ prompt: subject, ...(o.aspect ? { aspect: o.aspect } : {}), ...(o.minutes ? { minutes: String(o.minutes) } : {}), ...(o.language ? { language: o.language } : {}) }).toString()}`;
   const feedbackHref = `/feedback?from=after_video&video=${encodeURIComponent(id)}`;
   const reportHref = `/feedback?from=report&kind=problem&video=${encodeURIComponent(id)}`;
 
@@ -128,7 +150,18 @@ export default function WatchPage() {
             ) : (
               <div className="watch-state" role={view.state === "loading" || view.state === "making" ? "status" : "alert"}>
                 {view.state === "loading" && <Spinner />}
-                {view.state === "making" && <><p>{t("watch.making")}</p><a className="btn btn-tonal" href="/generations">{t("watch.back")}</a></>}
+                {view.state === "making" && (() => {
+                  const scene = sceneCounter(view.making);
+                  return (
+                    <div className="watch-making">
+                      <p className="watch-making-line"><AIcon name="sparkle" size={18} /><span>{view.making?.live_line || t("watch.making")}</span></p>
+                      <FilmStrip tiles={stripTiles(view.making, sceneThumbs, id)} className="watch-strip" />
+                      {scene && <p className="watch-making-count">{t("making.scene_counter", scene)}</p>}
+                      {view.making?.narration_line && <p className="watch-making-says">“{view.making.narration_line}”</p>}
+                      <p className="watch-making-leave">{t("making.leave_promise")}</p>
+                    </div>
+                  );
+                })()}
                 {view.state === "error" && <><p>{t("watch.load_error")}</p><Button variant="tonal" onClick={() => setTries((n) => n + 1)}>{t("watch.retry")}</Button></>}
                 {view.state === "failed" && <><p>{t("watch.failed")}</p><a className="btn btn-tonal" href="/generations">{t("watch.back")}</a></>}
               </div>
@@ -157,6 +190,13 @@ export default function WatchPage() {
           </div>
         </div>
         <aside className="watch-side">
+          {prompt && (
+            <div className="watch-prompt">
+              <p className="eyebrow">{t("watch.prompt")}</p>
+              <p className="watch-prompt-text">{prompt}</p>
+              <a className="watch-prompt-again" href={`/new?${new URLSearchParams({ prompt: prompt.slice(0, 500) }).toString()}`}>{t("watch.prompt_again")}</a>
+            </div>
+          )}
           <p className="eyebrow">{t("watch.another")}</p>
           <div className="watch-chips">
             <a className="chip" href={againHref({ aspect: "9:16", minutes: 0.5 })}><AIcon name="sparkle" size={15} />{t("watch.another_short")}</a>

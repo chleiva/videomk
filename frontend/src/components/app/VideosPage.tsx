@@ -7,8 +7,10 @@ import { Menu } from "./Menu";
 import Shortcuts from "./Shortcuts";
 import { useVideos } from "./useVideos";
 import { APP_PATHS, appUrl } from "../../lib/links";
-import { filterVideos, formatDuration, isMaking, makingInfo, minutesLeft } from "../../lib/videos";
+import FilmStrip from "./FilmStrip";
+import { filterVideos, formatDuration, isMaking, makingInfo, minutesLeft, sceneCounter, stripTiles } from "../../lib/videos";
 import type { RetryOutcome, TaskItem } from "../../lib/videos";
+import { promptFor } from "../../lib/prompts";
 import { useLocale } from "../../lib/useLocale";
 
 function ago(iso: string | null | undefined, tr: (k: string, p?: Record<string, number>) => string): string | null {
@@ -27,23 +29,29 @@ function ago(iso: string | null | undefined, tr: (k: string, p?: Record<string, 
 }
 
 const STEPS = ["making.step.script", "making.step.voice", "making.step.pictures", "making.step.final_cut"];
-/** The video being made: one wide banner over the grid (design bar: the wait is a story, not a spinner). Title, one live line, the four steps as tiles, the time left. */
-function MakingBanner({ v }: { v: TaskItem }) {
+/** The video being made: one wide banner over the grid (design bar: the wait is a story, not a spinner). Title, one live line, the scenes filling a film strip, the time left.
+ *  The strip and the live line come from the optional `making` object (docs/CREATE_API.md); a server that does not send it gets the four steps, as before. */
+function MakingBanner({ v, sceneThumbs }: { v: TaskItem; sceneThumbs: Record<string, string> }) {
   const { t } = useLocale();
   const info = makingInfo(v.stage);
   const mins = minutesLeft(v.eta_seconds);
   const eta = mins === null ? null : mins <= 0 ? t("making.eta_under_minute") : t("making.eta_short", { n: mins });
-  const line = t(`making.line.${info.line}`);
-  const title = v.title || t("gen.untitled");
+  const scene = sceneCounter(v.making);
+  const tiles = stripTiles(v.making, sceneThumbs, v.id);
+  const live = v.making?.live_line || t(`making.line.${info.line}`);
+  const line = scene && v.making?.live_line ? `${t("making.scene_counter", scene)} · ${live}` : scene ? `${t("making.scene_counter", scene)} · ${t(`making.line.${info.line}`)}` : live;
+  const title = v.title || promptFor(v.id) || t("gen.untitled");   // before the script names it, the sentence the person typed (when this browser made it)
   return (
     <div className="mkb" role="group" aria-label={t("making.a11y", { title, stage: line })}>
       <div className="mkb-text">
         <p className="mkb-title">{title}</p>
         <p className="mkb-line" role="status"><Icon name="sparkle" size={18} /><span>{line}</span></p>
       </div>
-      <ol className="mkb-steps" aria-hidden="true">
-        {STEPS.map((k, i) => <li key={k} className={i < info.current ? "is-done" : i === info.current ? "is-now" : ""}><span>{t(k)}</span></li>)}
-      </ol>
+      {tiles.length > 0 ? <FilmStrip tiles={tiles} className="mkb-strip" /> : (
+        <ol className="mkb-steps" aria-hidden="true">
+          {STEPS.map((k, i) => <li key={k} className={i < info.current ? "is-done" : i === info.current ? "is-now" : ""}><span>{t(k)}</span></li>)}
+        </ol>
+      )}
       {eta && <p className="mkb-eta">{eta}</p>}
     </div>
   );
@@ -89,7 +97,7 @@ function Card({ v, thumb, onCopied, onRetry, onRemove }: { v: TaskItem; thumb?: 
 
 export default function VideosPage() {
   const { t } = useLocale();
-  const { items, thumbs, state, reload, retry, remove } = useVideos();
+  const { items, thumbs, sceneThumbs, state, reload, retry, remove } = useVideos();
   const [q, setQ] = useState("");
   const input = useRef<HTMLInputElement>(null);
   const toast = useToast();
@@ -124,7 +132,7 @@ export default function VideosPage() {
   } else {
     body = (
       <>
-        {showMaking && making.map((m) => <MakingBanner key={m.id} v={m} />)}
+        {showMaking && making.map((m) => <MakingBanner key={m.id} v={m} sceneThumbs={sceneThumbs} />)}
         <div className="vgrid">
           {rest.map((v) => <Card key={v.id} v={v} thumb={thumbs[v.id]} onCopied={() => toast.show(t("gen.link_copied"))} onRetry={onRetry} onRemove={onRemove} />)}
         </div>

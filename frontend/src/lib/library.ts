@@ -211,3 +211,12 @@ export async function requestLibrarySlots(items: { size: number; sha256: string;
   if (r.status === 429) return { ok: false, kind: "rate", retryAfter: r.retryAfter };
   return { ok: false, kind: "error" };
 }
+
+// ---------------------------------------------------------------- after an upload: the server lists a photo a little after it accepted the file (found against QA: the first list call came back empty)
+/** How long to wait before each new look at the list once an upload has finished (about a minute in all); the page stops as soon as every new photo is listed. */
+export const SETTLE_DELAYS_MS = [0, 1500, 2500, 4000, 6000, 9000, 14000, 22000];
+/** The uploaded photos the list does not show yet. */
+export function pendingIds(uploaded: readonly string[], listed: readonly { id: string }[]): string[] {
+  const have = new Set(listed.map((p) => p.id));
+  return uploaded.filter((id) => !have.has(id));
+}

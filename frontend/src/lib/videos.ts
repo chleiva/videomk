@@ -17,7 +17,88 @@ export interface TaskItem {
   video_url?: string | null;
   aspect?: string | null;   // "9:16", "1:1", "4:5" (absent: 16:9)
   can_retry?: boolean;   // a failed video the server will run again as the SAME item (POST .../retry)
+  making?: Making | null;   // what is known about the video being made (scenes done, one live line); absent on older servers and before the plan exists
 }
+
+// ---------------------------------------------------------------- the optional `making` object (docs/CREATE_API.md "Making status")
+export interface MakingScene { index: number; done: boolean; thumb_url?: string }
+export interface Making { scene_total?: number; scene_done?: number; live_line?: string; narration_line?: string; scenes?: MakingScene[] }
+
+const count = (v: unknown): number | undefined => (typeof v === "number" && Number.isFinite(v) && v >= 0 ? Math.floor(v) : undefined);
+const line = (v: unknown, max: number): string | undefined => { const s = typeof v === "string" ? v.trim() : ""; return s ? s.slice(0, max) : undefined; };
+
+/** Every field is optional and anything malformed is dropped, never thrown: a server that sends less (or nothing) still gets a working screen. null when nothing usable is left. */
+export function parseMaking(raw: unknown): Making | null {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
+  const r = raw as Record<string, unknown>;
+  const seen = new Set<number>();
+  const scenes = (Array.isArray(r.scenes) ? r.scenes : []).flatMap((x): MakingScene[] => {
+    const index = count((x as any)?.index);
+    if (!index || seen.has(index)) return [];
+    seen.add(index);
+    const u = (x as any)?.thumb_url;
+    const done = (x as any)?.done === true;
+    return [{ index, done, ...(done && typeof u === "string" && /^https:\/\//.test(u) ? { thumb_url: u } : {}) }];
+  }).sort((a, b) => a.index - b.index).slice(0, 200);
+  let total = count(r.scene_total), done = count(r.scene_done);
+  if (total === undefined && scenes.length) total = scenes.length;
+  if (done === undefined && scenes.length) done = scenes.filter((x) => x.done).length;
+  if (total !== undefined && done !== undefined) done = Math.min(done, total);
+  const out: Making = {
+    ...(total ? { scene_total: total } : {}), ...(total && done !== undefined ? { scene_done: done } : {}),
+    ...(line(r.live_line, 120) ? { live_line: line(r.live_line, 120) } : {}), ...(line(r.narration_line, 240) ? { narration_line: line(r.narration_line, 240) } : {}),
+    ...(scenes.length ? { scenes } : {}),
+  };
+  return Object.keys(out).length ? out : null;
+}
+
+/** "Scene 5 of 9": the scene in work is the one after the last finished. null when the server did not say, and once every scene is done (the render and the
+ *  finishing touches have no scene in work: seen against QA, "Scene 3 of 3 · Putting the scenes together" read as if the third scene were still being made). */
+export function sceneCounter(m: Making | null | undefined): { index: number; total: number } | null {
+  if (!m?.scene_total) return null;
+  const done = m.scene_done ?? 0;
+  return done >= m.scene_total ? null : { index: done + 1, total: m.scene_total };
+}
+
+export interface StripTile { index: number; state: "done" | "now" | "todo"; thumb?: string }
+/** The film strip: one tile per planned scene in story order. Scenes do not finish in order, so "now" is the first one not done. Without a scene list the counts draw plain tiles. */
+export function stripTiles(m: Making | null | undefined, thumbs: Record<string, string> = {}, videoId = ""): StripTile[] {
+  if (!m) return [];
+  const total = m.scene_total ?? m.scenes?.length ?? 0;
+  if (!total) return [];
+  const by = new Map((m.scenes ?? []).map((x) => [x.index, x] as const));
+  const tiles: StripTile[] = [];
+  let nowSet = false;
+  for (let i = 1; i <= total; i++) {
+    const sc = by.get(i);
+    const done = sc ? sc.done : i <= (m.scene_done ?? 0);
+    const thumb = done ? thumbs[sceneKey(videoId, i)] ?? sc?.thumb_url : undefined;
+    if (done) tiles.push({ index: i, state: "done", ...(thumb ? { thumb } : {}) });
+    else if (!nowSet) { nowSet = true; tiles.push({ index: i, state: "now" }); }
+    else tiles.push({ index: i, state: "todo" });
+  }
+  return tiles;
+}
+
+export const sceneKey = (videoId: string, index: number) => `${videoId}#${index}`;
+/** A scene's picture link is signed for minutes and changes on every poll; the picture does not. Keep the first link per video and scene so a poll never reloads a tile. */
+export function stableSceneThumbs(prev: Record<string, string>, items: { id: string; making?: Making | null }[]): Record<string, string> {
+  let next = prev;
+  for (const it of items) for (const sc of it.making?.scenes ?? []) {
+    const k = sceneKey(it.id, sc.index);
+    if (sc.thumb_url && !next[k]) { if (next === prev) next = { ...prev }; next[k] = sc.thumb_url; }
+  }
+  return next;
+}
+/** For the session cache: the private, short-lived scene links are never stored (docs/CREATE_API.md); the counts and the line are. */
+export function withoutSceneLinks(items: TaskItem[]): TaskItem[] {
+  return items.map((i) => (i.making?.scenes?.some((x) => x.thumb_url) ? { ...i, making: { ...i.making, scenes: i.making.scenes.map(({ thumb_url: _u, ...rest }) => rest) } } : i));
+}
+const sameMaking = (a: Making | null | undefined, b: Making | null | undefined): boolean => {
+  if (!a || !b) return !a && !b;
+  return a.scene_total === b.scene_total && a.scene_done === b.scene_done && a.live_line === b.live_line && a.narration_line === b.narration_line
+    && (a.scenes?.length ?? 0) === (b.scenes?.length ?? 0) && (a.scenes ?? []).every((x, i) => x.done === b.scenes![i].done && x.index === b.scenes![i].index && !!x.thumb_url === !!b.scenes![i].thumb_url);
+};
 
 const STATUS: Record<string, [Status, Stage?]> = {
   STARTED_PROCESSING: ["running", "starting"],
@@ -60,6 +141,7 @@ export function normalizeItem(it: any): TaskItem | null {
     video_url: typeof it?.video_url === "string" ? it.video_url : null,
     can_retry: it?.can_retry === true,
     aspect: typeof it?.aspect === "string" && /^\d+:\d+$/.test(it.aspect) ? it.aspect : null,
+    making: status === "queued" || status === "running" ? parseMaking(it?.making) : null,
   };
 }
 
@@ -142,7 +224,7 @@ export function reuseUnchanged(prev: TaskItem[], next: TaskItem[]): TaskItem[] {
     const p = by.get(n.id);
     if (!p) return n;
     const same = p.status === n.status && p.stage === n.stage && p.title === n.title && p.eta_seconds === n.eta_seconds && p.duration_s === n.duration_s && p.editable === n.editable
-      && p.reject_reason === n.reject_reason && (p.preview_gif_url ? true : !n.preview_gif_url) && p.created_at === n.created_at;
+      && p.reject_reason === n.reject_reason && (p.preview_gif_url ? true : !n.preview_gif_url) && p.created_at === n.created_at && p.can_retry === n.can_retry && sameMaking(p.making, n.making);
     return same ? p : n;
   });
 }

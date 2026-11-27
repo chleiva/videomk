@@ -13,7 +13,7 @@ import Shortcuts from "./Shortcuts";
 import UploadBanner from "./UploadBanner";
 import { useLibrary } from "./useLibrary";
 import { useUploadQueue } from "./useUploadQueue";
-import { addToCollection, createCollection, deleteCollection, deletePhotos, emptySelection, formatBytes, MAX_SELECT, storageTone } from "../../lib/library";
+import { addToCollection, createCollection, deleteCollection, deletePhotos, emptySelection, formatBytes, MAX_SELECT, pendingIds, SETTLE_DELAYS_MS, storageTone } from "../../lib/library";
 import type { Selection } from "../../lib/library";
 import { filesFromDrop } from "../../lib/droppedFiles";
 import { pictureFiles } from "../../lib/upload";
@@ -73,16 +73,47 @@ export default function MediaPage() {
     return () => { window.removeEventListener("dragover", over); window.removeEventListener("dragenter", enter); window.removeEventListener("dragleave", leave); window.removeEventListener("drop", drop); window.removeEventListener("paste", paste); };
   }, [add]);
 
+  // ---- after an upload the server lists a photo a moment after it took the file: look again until every new photo is there (or about a minute has passed)
+  const itemsRef = useRef(lib.items); itemsRef.current = lib.items;
+  const refreshRef = useRef(lib.refresh); refreshRef.current = lib.refresh;
+  const browsing = useRef(true); browsing.current = !lib.query.trim() && lib.filter.kind === "all";   // a search or a filter shows its own list: nothing to wait for there
+  const settleRun = useRef(0);
+  const [settling, setSettling] = useState(0);   // how many new photos are still on their way to the grid
+  useEffect(() => () => { settleRun.current = -1; }, []);
+  const settle = useCallback(async (ids: string[]) => {
+    const my = ++settleRun.current;
+    const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
+    for (const ms of SETTLE_DELAYS_MS) {
+      if (ms) await wait(ms);
+      if (settleRun.current !== my) return;
+      await refreshRef.current();
+      await wait(80);   // let the list state land
+      if (settleRun.current !== my) return;
+      const left = browsing.current ? pendingIds(ids, itemsRef.current).length : 0;
+      setSettling(left);
+      if (!left) return;
+    }
+    setSettling(0);
+  }, []);
+
   // ---- when the queue finishes: refresh, and offer to organise a big batch
   useEffect(() => {
     const s = up.summary;
     if (s.total === 0 || s.finished < s.total || s.active > 0) return;
     if (doneRef.current === s.done + s.duplicates + s.failed + s.total) return;
     doneRef.current = s.done + s.duplicates + s.failed + s.total;
-    void lib.refresh();
+    void settle(up.queue.readyIds());
     if (s.done >= ORGANIZE_FROM && lib.summary?.organize === "ask") setOrganize(batchStart.current);
     else if (s.done >= ORGANIZE_FROM && lib.summary?.organize === "always") setOrganize(batchStart.current);
   }, [up.summary]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // a finished upload with nothing to fix says so for a few seconds, then leaves (it must not sit over the page; anything that needs attention stays)
+  useEffect(() => {
+    const s = up.summary;
+    if (s.total === 0 || s.finished < s.total || s.failed || s.noSpace || s.unsupported) return;
+    const id = window.setTimeout(() => up.queue.clearFinished(), 6000);
+    return () => window.clearTimeout(id);
+  }, [up.summary, up.queue]);
 
   const order = useMemo(() => lib.items.map((p) => p.id), [lib.items]);
   const selecting = sel.ids.length > 0;
@@ -105,7 +136,7 @@ export default function MediaPage() {
     setDeleting(true);
     const ok = await deletePhotos(ids);
     setDeleting(false); setConfirm(null);
-    if (ok) { setSel(emptySelection); setViewer(null); await lib.refresh(); } else toast.show(t("media.delete_error"));
+    if (ok) { setSel(emptySelection); setSelectMode(false); setViewer(null); await lib.refresh(); }   // the selection is gone with its photos: the page is back to browsing else toast.show(t("media.delete_error"));
   }
   async function addTo(cid: string, ids: string[], name: string) {
     const ok = await addToCollection(cid, ids);
@@ -122,6 +153,7 @@ export default function MediaPage() {
 
   let body: React.ReactNode;
   if (lib.error === "load" && lib.items.length === 0) body = <EmptyState title={t("media.load_error")} action={<button type="button" className="btn btn-primary" onClick={() => void lib.refresh()}>{t("gen.retry")}</button>} />;
+  else if (settling > 0 && lib.items.length === 0 && !lib.query && !filterOn) body = <div className="mgrid" role="status" aria-label={t("gen.loading")}>{Array.from({ length: Math.min(settling, 24) }, (_, i) => <div key={i} className="mtile skeleton" />)}</div>;
   else if (lib.loading && lib.items.length === 0) body = <div className="mgrid" role="status" aria-label={t("gen.loading")}>{Array.from({ length: 12 }, (_, i) => <div key={i} className="mtile skeleton" />)}</div>;
   else if (!lib.query && !filterOn && lib.items.length === 0) body = <EmptyState title={t("media.empty_title")} body={t("media.empty_body")} action={<button type="button" className="btn btn-primary" onClick={() => input.current?.click()}>{t("media.add")}</button>} />;
   else if (lib.items.length === 0) body = <EmptyState title={t("media.no_match")} body={t("media.no_match_body")} />;

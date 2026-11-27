@@ -41,9 +41,21 @@
 .mkb-steps li { display: flex; align-items: flex-end; width: 5.75rem; height: 3.5rem; padding: var(--space-2) 0.625rem; border-radius: var(--radius-field); box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.3); font-size: var(--fs-caption); font-weight: 600; line-height: 1.1; color: rgba(255, 255, 255, 0.82); }
 .mkb-steps li.is-done { background: rgba(255, 255, 255, 0.24); box-shadow: none; color: var(--on-making); }
 .mkb-steps li.is-now { background: rgba(255, 255, 255, 0.12); box-shadow: inset 0 0 0 2px var(--live); color: var(--on-making); }
+/* the film strip: finished scenes filled (with their picture), the one in work ringed with the live colour, the rest outlined */
+.strip { display: flex; gap: 0.625rem; list-style: none; margin: 0; padding: 0; min-width: 0; }
+.strip-tile { position: relative; flex: 0 1 6rem; min-width: 0.75rem; height: 3.75rem; border-radius: 0.625rem; overflow: hidden; box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.3); }
+.strip-tile.is-done { background: rgba(255, 255, 255, 0.26); box-shadow: none; animation: vmk-fade var(--dur-insert) var(--ease); }
+.strip-tile.is-now { background: rgba(255, 255, 255, 0.14); box-shadow: inset 0 0 0 2px var(--live), 0 0 0 3px rgba(34, 211, 238, 0.18); animation: vmk-pulse 1.8s ease-in-out infinite; }
+.strip-tile img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; animation: vmk-fade var(--dur-insert) var(--ease); }
+.strip.is-dense { gap: var(--space-1); }
+.strip.is-dense .strip-tile { border-radius: var(--space-1); }
+.mkb-strip { flex: 1 1 24rem; justify-content: flex-end; }
+/* phones (phone_4_making): square tiles of one size; a long strip runs off the edge and scrolls, it never squeezes into slivers */
+@media (max-width: 63.99rem) { .strip { overflow-x: auto; scrollbar-width: none; gap: var(--space-2); } .strip::-webkit-scrollbar { display: none; } .strip .strip-tile { flex: none; width: 3rem; height: 3rem; } .mkb-strip { order: 3; flex-basis: 100%; justify-content: flex-start; padding: 3px; margin: -3px; } .watch-strip { justify-content: safe center; padding: 3px; } }
+@media (prefers-reduced-motion: reduce) { .strip-tile, .strip-tile img { animation: none; } }
 .mkb-eta { font-size: var(--fs-body); font-weight: 500; white-space: nowrap; }
 @media (max-width: 47.99rem) { .mkb-steps { order: 3; width: 100%; gap: var(--space-2); } .mkb-steps li { flex: 1; width: auto; height: 2.75rem; padding: var(--space-2); white-space: nowrap; } }
-@media (min-width: 64rem) { .mkb { flex-wrap: nowrap; padding: var(--space-6) var(--space-10); gap: var(--space-8); margin-bottom: 3.375rem; } .mkb-title { font-size: 1.625rem; line-height: 2rem; } .mkb-line { font-size: 1.0625rem; } }
+@media (min-width: 64rem) { .mkb-text { flex: 0 1 28rem; } .mkb-strip { flex: 1 1 0; } .mkb-strip .strip-tile { flex: 1 1 0; max-width: 6rem; } .mkb { flex-wrap: nowrap; padding: var(--space-6) var(--space-10); gap: var(--space-8); margin-bottom: 3.375rem; } .mkb-title { font-size: 1.625rem; line-height: 2rem; } .mkb-line { font-size: 1.0625rem; } }
 @media (prefers-reduced-motion: reduce) { .mkb::after { animation: none; } }
 
 .app-shell .vpage .vgrid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-6) var(--space-3); }
@@ -95,6 +107,24 @@
   .app-shell .composer-pills { flex-wrap: nowrap; }
 }
 
+.pill-phone, .compose-balance { display: none; }
+/* phones (phone_3_create): the tools with Options at the far end, ONE row of three short pills, a full-width Create with its price at the end, the balance beneath */
+@media (max-width: 47.99rem) {
+  .app-shell .compose-aura { inset: 2rem 0 auto 0; }
+  .app-shell .composer-bar { position: relative; gap: var(--space-3) var(--space-2); }
+  .app-shell .composer-pills { flex-wrap: nowrap; gap: 0.375rem; }
+  .app-shell .composer-pills > .vm-menu { min-width: 0; flex: 0 1 auto; }
+  .app-shell .composer-pills .pill { max-width: 100%; padding: 0 0.75rem; gap: var(--space-1); }
+  .app-shell .composer-pills .pill > span { overflow: hidden; text-overflow: ellipsis; }
+  .app-shell .composer-pills .pill > svg { flex: none; }
+  .app-shell .pill-k, .app-shell .pill-v { display: none; }
+  .app-shell .pill-phone { display: inline; }
+  .app-shell .composer-pills > .vm-pop-root { position: absolute; right: 0; top: var(--space-4); }
+  .app-shell .compose-go { justify-content: space-between; height: 3.5rem; }
+  .app-shell .compose-balance { display: block; text-align: center; font-size: var(--fs-caption); color: var(--text-tertiary); }
+  .app-shell .compose-examples { justify-content: flex-start; }
+}
+
 /* ---- Media: month grid, selection, the floating bar, the upload toast */
 .app-shell .mhead { position: static; display: flex; align-items: baseline; gap: var(--space-3); margin: var(--space-8) 0 var(--space-4); padding: 0; background: none; font-size: var(--fs-title2); font-weight: 600; letter-spacing: -0.02em; color: var(--text); }
 .app-shell .mgrid-wrap > section:first-child .mhead { margin-top: var(--space-2); }
@@ -113,14 +143,37 @@
 .app-shell .selbar .icon-btn:disabled, .app-shell .selbar .btn:disabled { opacity: 0.45; }
 @media (max-width: 47.99rem) { .app-shell .selbar { left: var(--space-3); right: var(--space-3); transform: none; width: auto; max-width: none; justify-content: space-between; gap: 0; padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4); } .app-shell .selbar-go { padding: 0 var(--space-4); } .app-shell .selbar-n { margin-right: 0; } .app-shell .selbar > .icon-btn:last-child { display: none; } /* Done in the header ends the selection on phones */ }
 .app-shell .upload-banner { position: fixed; z-index: var(--z-sticky); left: var(--space-4); right: var(--space-4); bottom: calc(var(--tabbar-height) + var(--space-4) + env(safe-area-inset-bottom)); margin: 0; padding: var(--space-4) var(--space-5); border-radius: var(--radius-video); background: var(--surface); box-shadow: inset 0 0 0 1px var(--outline), var(--elev-3); }
-@media (min-width: 48rem) { .app-shell .upload-banner { left: auto; right: 3rem; bottom: var(--space-6); width: 28rem; } }
+@media (max-width: 47.99rem) {   /* found in Spanish at 390 px: the search was cut to "Buscar fot", Add photos wrapped to two lines and the selection bar ran off the screen */
+  .app-shell .mpage .page-tools { flex-wrap: wrap; }
+  .app-shell .mpage .msearch { flex: 1 1 100%; }
+  .app-shell .mpage .page-tools .btn { flex: 1 1 auto; white-space: nowrap; }
+  .app-shell .selbar-n { flex: 0 1 auto; min-width: 2.5rem; overflow: hidden; text-overflow: ellipsis; }
+  .app-shell .selbar > .icon-btn, .app-shell .selbar-go { flex: none; }
+}
+.app-shell .mpage:has(.selbar) .upload-banner { bottom: calc(var(--tabbar-height) + 6rem + env(safe-area-inset-bottom)); }   /* never under the selection bar */
+@media (min-width: 48rem) { .app-shell .upload-banner { left: auto; right: 3rem; bottom: var(--space-6); width: 28rem; } .app-shell .mpage:has(.selbar) .upload-banner { bottom: 6.5rem; } }
 
 /* ---- Watch: the player, the title with Share, "make another" at the side */
 .app-shell .watch { max-width: none; margin: 0; padding: var(--space-3) var(--screen-margin) var(--space-8); }
 .watch-back { display: inline-flex; align-items: center; gap: var(--space-2); min-height: var(--min-touch); margin-bottom: var(--space-2); color: var(--text-secondary); font-size: var(--fs-body); font-weight: 500; text-decoration: none; }
 .watch-back:hover { color: var(--text); }
 .watch-grid { display: grid; gap: var(--space-8); grid-template-columns: minmax(0, 1fr); }
-.app-shell .watch-stage { justify-content: flex-start; }
+.app-shell .watch-stage { justify-content: flex-start; background: none; }   /* a vertical video is its own shape, never a strip inside a black box */
+.player { container-type: inline-size; }
+@container (max-width: 26rem) { .player-volume { display: none; } .player-bar { padding-inline: var(--space-1); } }
+.watch-making { display: flex; flex-direction: column; align-items: center; gap: var(--space-4); width: 100%; max-width: 40rem; padding: var(--space-6); color: var(--on-making); text-align: center; }
+.watch-making-line { display: flex; align-items: center; gap: 0.625rem; font-size: var(--fs-title3); font-weight: 600; letter-spacing: -0.02em; }
+.watch-making-line svg { flex: none; color: var(--live); }
+.watch-strip { width: 100%; justify-content: center; }
+.watch-strip .strip-tile { flex: 0 1 5rem; }
+.watch-making-count { font-size: var(--fs-subhead); font-weight: 600; font-variant-numeric: tabular-nums; }
+.watch-making-says { font-size: var(--fs-body); line-height: 1.45; color: rgba(255, 255, 255, 0.82); text-wrap: balance; }
+.watch-making-leave { font-size: var(--fs-caption); color: rgba(255, 255, 255, 0.7); }
+.app-shell .watch-state:has(.watch-making) { background: linear-gradient(135deg, var(--making-start), var(--making-end)); }
+.watch-prompt { margin-bottom: var(--space-8); padding-bottom: var(--space-8); border-bottom: 1px solid var(--outline); }
+.watch-prompt-text { font-size: var(--fs-body); line-height: 1.6; color: var(--text); overflow-wrap: anywhere; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 9; line-clamp: 9; overflow: hidden; }
+.watch-prompt-again { display: inline-flex; align-items: center; min-height: var(--min-touch); margin-top: var(--space-2); color: var(--primary); font-size: var(--fs-subhead); font-weight: 600; text-decoration: none; }
+.watch-prompt-again:hover { text-decoration: underline; }
 .watch-under { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: var(--space-4) var(--space-6); margin-top: var(--space-5); }
 .watch-head { min-width: 0; flex: 1 1 14rem; }
 .app-shell .watch-title { text-align: left; white-space: normal; font-size: var(--fs-title); line-height: 1.2; letter-spacing: -0.03em; }

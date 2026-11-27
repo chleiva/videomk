@@ -43,7 +43,7 @@ const tr = (k: string) => translate(k, "en");   // build-time English; the brows
 					const w = await getWallet();
 					const box = document.querySelector<HTMLElement>("[data-credits]");
 					if (!w || !box) return;
-					box.querySelector("[data-credits-n]")!.textContent = w.unlimited ? t("credits.unlimited") : t("shell.credits_n", { n: w.balance });
+					box.querySelector("[data-credits-n]")!.textContent = w.unlimited ? t("credits.unlimited") : w.balance > 0 ? t("shell.credits_n", { n: w.balance }) : t("shell.credits_none");   // never a bare zero
 					box.querySelector("[data-credits-sub]")!.textContent = w.unlimited || !w.next_daily_at ? "" : t("shell.free_soon");
 					box.hidden = false;
 				};

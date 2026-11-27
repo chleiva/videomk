@@ -77,3 +77,19 @@ describe("selection", () => {
     expect(idsBetween(order, "x", "b")).toEqual([]);
   });
 });
+
+import { SETTLE_DELAYS_MS, pendingIds } from "./library";
+describe("after an upload", () => {
+  it("knows which new photos the list does not show yet", () => {
+    expect(pendingIds(["a", "b", "c"], [])).toEqual(["a", "b", "c"]);
+    expect(pendingIds(["a", "b", "c"], [{ id: "b" }, { id: "z" }])).toEqual(["a", "c"]);
+    expect(pendingIds(["a"], [{ id: "a" }])).toEqual([]);
+    expect(pendingIds([], [{ id: "a" }])).toEqual([]);
+  });
+  it("looks again for about a minute, straight away first", () => {
+    expect(SETTLE_DELAYS_MS[0]).toBe(0);
+    const total = SETTLE_DELAYS_MS.reduce((a, b) => a + b, 0);
+    expect(total).toBeGreaterThanOrEqual(45000);
+    expect(total).toBeLessThanOrEqual(90000);
+  });
+});

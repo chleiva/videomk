@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { dayGroupOf, formatDuration, groupByDay, makingInfo, minutesLeft, normalizeItem, placeholderTone } from "./videos";
+import { dayGroupOf, formatDuration, groupByDay, makingInfo, minutesLeft, normalizeItem, parseMaking, placeholderTone, sceneCounter, sceneKey, stableSceneThumbs, stripTiles, withoutSceneLinks } from "./videos";
 
 const now = new Date(2026, 10, 26, 15, 0, 0);
 const at = (d: number, h = 9) => new Date(2026, 10, d, h).toISOString();
@@ -116,5 +116,67 @@ describe("try again reuses the same video", () => {
     expect(next).toHaveLength(2);
     expect(next[1]).toMatchObject({ id: "f", title: "T", status: "running", stage: "starting", can_retry: false });
     expect(next[0]).toBe(list[0]);
+  });
+});
+
+describe("the optional making object (docs/CREATE_API.md Making status)", () => {
+  const full = { scene_total: 9, scene_done: 4, live_line: "Adding footage of sunlit canopies", narration_line: "Sunlight pours through the canopy.",
+    scenes: [{ index: 1, done: true, thumb_url: "https://x/1.jpg?sig=a" }, { index: 2, done: true }, { index: 3, done: false }, { index: 4, done: true, thumb_url: "https://x/4.jpg?sig=a" }, { index: 5, done: true }, { index: 6, done: false }, { index: 7, done: false }, { index: 8, done: false }, { index: 9, done: false }] };
+  it("reads the documented shape", () => {
+    const m = parseMaking(full)!;
+    expect(m.scene_total).toBe(9);
+    expect(m.scene_done).toBe(4);
+    expect(m.live_line).toBe("Adding footage of sunlit canopies");
+    expect(m.scenes).toHaveLength(9);
+    expect(sceneCounter(m)).toEqual({ index: 5, total: 9 });
+  });
+  it("is absent, empty or malformed without breaking anything", () => {
+    for (const bad of [undefined, null, "x", 3, [], {}, { scene_total: "nine" }, { scenes: "no" }, { scenes: [null, 4, {}] }, { live_line: "   " }]) expect(parseMaking(bad)).toBeNull();
+    expect(normalizeItem({ video_id: "1", status: "RENDERING" })?.making).toBeNull();
+    expect(sceneCounter(null)).toBeNull();
+    expect(stripTiles(null)).toEqual([]);
+  });
+  it("draws what is there: every field is optional", () => {
+    expect(parseMaking({ live_line: "Recording the narration" })).toEqual({ live_line: "Recording the narration" });
+    expect(parseMaking({ scene_total: 3 })).toEqual({ scene_total: 3 });
+    expect(stripTiles(parseMaking({ scene_total: 3, scene_done: 1 })).map((t) => t.state)).toEqual(["done", "now", "todo"]);
+    const fromScenes = parseMaking({ scenes: [{ index: 2, done: false }, { index: 1, done: true }] })!;   // counts derived, story order restored
+    expect(fromScenes).toMatchObject({ scene_total: 2, scene_done: 1 });
+    expect(fromScenes.scenes!.map((x) => x.index)).toEqual([1, 2]);
+  });
+  it("never trusts odd values", () => {
+    const m = parseMaking({ scene_total: 4, scene_done: 99, scenes: [{ index: 1, done: true, thumb_url: "javascript:alert(1)" }, { index: 1, done: false }, { index: 2, done: false, thumb_url: "https://x/2.jpg" }, { index: -3, done: true }] })!;
+    expect(m.scene_done).toBe(4);                                    // never past the total
+    expect(m.scenes).toEqual([{ index: 1, done: true }, { index: 2, done: false }]);   // only https pictures, only for done scenes, no duplicate or negative index
+    expect(sceneCounter(m)).toBeNull();                              // every scene done: the render has no scene in work
+    expect(sceneCounter(parseMaking({ scene_total: 4, scene_done: 3 }))).toEqual({ index: 4, total: 4 });
+  });
+  it("only a video being made carries it", () => {
+    expect(normalizeItem({ video_id: "1", status: "ASSETS_CREATION", making: full })?.making?.scene_total).toBe(9);
+    expect(normalizeItem({ video_id: "1", status: "COMPLETE", making: full })?.making).toBeNull();
+    expect(normalizeItem({ video_id: "1", status: "FAILED", making: full })?.making).toBeNull();
+  });
+  it("the strip follows scenes[].done (they finish out of order); the first one not done is in work", () => {
+    const tiles = stripTiles(parseMaking(full), {}, "v");
+    expect(tiles.map((t) => t.state)).toEqual(["done", "done", "now", "done", "done", "todo", "todo", "todo", "todo"]);
+    expect(tiles[0].thumb).toBe("https://x/1.jpg?sig=a");
+    expect(tiles[1].thumb).toBeUndefined();
+  });
+  it("keeps the first picture link per video and scene, so a poll with new signatures reloads nothing", () => {
+    const a = normalizeItem({ video_id: "v", status: "ASSETS_CREATION", making: full })!;
+    const first = stableSceneThumbs({}, [a]);
+    expect(first[sceneKey("v", 1)]).toBe("https://x/1.jpg?sig=a");
+    const b = normalizeItem({ video_id: "v", status: "ASSETS_CREATION", making: { ...full, scenes: full.scenes.map((x) => (x.thumb_url ? { ...x, thumb_url: x.thumb_url.replace("sig=a", "sig=b") } : x)) } })!;
+    expect(stableSceneThumbs(first, [b])).toBe(first);               // same object: nothing to redraw
+    expect(stripTiles(b.making, first, "v")[0].thumb).toBe("https://x/1.jpg?sig=a");
+    expect(reuseUnchanged([a], [b])[0]).toBe(a);                     // new signatures alone do not redraw the banner
+    const c = normalizeItem({ video_id: "v", status: "ASSETS_CREATION", making: { ...full, scene_done: 5 } })!;
+    expect(reuseUnchanged([a], [c])[0]).toBe(c);                     // progress does
+  });
+  it("never stores the private picture links in the session cache", () => {
+    const a = normalizeItem({ video_id: "v", status: "ASSETS_CREATION", making: full })!;
+    const cached = JSON.stringify(withoutSceneLinks([a]));
+    expect(cached).not.toContain("https://x/");
+    expect(cached).toContain("Adding footage");
   });
 });

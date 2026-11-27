@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { getAuthorizationHeader } from "../../lib/auth";
 import { apiGateway } from "../../lib/config";
 import { currentLocaleHeaders } from "../../lib/i18n";
-import { isMaking, markRetrying, nextPollMs, normalizeItem, retryOutcome, reuseUnchanged, stableThumbs } from "../../lib/videos";
+import { isMaking, markRetrying, nextPollMs, normalizeItem, retryOutcome, reuseUnchanged, stableSceneThumbs, stableThumbs, withoutSceneLinks } from "../../lib/videos";
 import type { RetryOutcome, TaskItem } from "../../lib/videos";
 
 const CACHE = "vmk_tasks";
@@ -14,6 +14,7 @@ export function useVideos() {
   const [items, setItems] = useState<TaskItem[]>(() => { try { const c = JSON.parse(sessionStorage.getItem(CACHE) || "null"); return Array.isArray(c) ? c : []; } catch { return []; } });
   const [state, setState] = useState<"loading" | "ready" | "error">(items.length ? "ready" : "loading");
   const [thumbs, setThumbs] = useState<Record<string, string>>({});
+  const [sceneThumbs, setSceneThumbs] = useState<Record<string, string>>({});   // the film strip's pictures, by video and scene (never by link: the link changes on every poll)
   const timer = useRef<number | undefined>(undefined);
   const attempt = useRef(0);
   const alive = useRef(true);
@@ -31,8 +32,9 @@ export function useVideos() {
       next.sort(newestFirst);
       making = next.some(isMaking);
       if (!alive.current) return;
-      setItems((prev) => { const merged = reuseUnchanged(prev, next); try { sessionStorage.setItem(CACHE, JSON.stringify(merged)); } catch { /* full */ } return merged; });
+      setItems((prev) => { const merged = reuseUnchanged(prev, next); try { sessionStorage.setItem(CACHE, JSON.stringify(withoutSceneLinks(merged))); } catch { /* full */ } return merged; });
       setThumbs((p) => stableThumbs(p, next));
+      setSceneThumbs((p) => stableSceneThumbs(p, next));
       setState("ready");
     } catch {
       if (alive.current) setState((s) => (s === "ready" ? "ready" : "error"));   // keep showing what we have; only a first load that fails is an error
@@ -80,5 +82,5 @@ export function useVideos() {
     } catch { return false; }
   }, []);
 
-  return { items, thumbs, state, reload, retry, remove };
+  return { items, thumbs, sceneThumbs, state, reload, retry, remove };
 }

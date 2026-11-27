@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { renderToStaticMarkup as html } from "react-dom/server";
+import FilmStrip from "./FilmStrip";
 import MediaGrid, { photoLabel } from "./MediaGrid";
+import { parseMaking, stripTiles } from "../../lib/videos";
 import { Menu, Segmented } from "./Menu";
 import UploadBanner from "./UploadBanner";
 import { UploadQueue } from "../../lib/upload";
@@ -91,4 +93,28 @@ describe("text budget", () => {
       expect(["gen.nav_label", "gen.search", "gen.new_video"].map(t).reduce((n, s) => n + words(s), 0)).toBeLessThanOrEqual(6);
     });
   }
+});
+
+describe("the film strip of a video being made", () => {
+  const making = parseMaking({ scene_total: 4, scene_done: 2, scenes: [{ index: 1, done: true, thumb_url: "https://t/1.jpg" }, { index: 2, done: false }, { index: 3, done: true }, { index: 4, done: false }] });
+  it("draws one tile per planned scene: done ones filled (with their picture when there is one), the first one not done in work", () => {
+    const m = html(<FilmStrip tiles={stripTiles(making, {}, "v")} />);
+    expect((m.match(/strip-tile/g) ?? []).length).toBe(4);
+    expect((m.match(/is-done/g) ?? []).length).toBe(2);
+    expect((m.match(/is-now/g) ?? []).length).toBe(1);
+    expect((m.match(/<img/g) ?? []).length).toBe(1);
+    expect(m).toContain('aria-hidden="true"');   // decorative: the live line beside it is what a screen reader hears
+  });
+  it("draws nothing when the server sends no making object", () => {
+    expect(html(<FilmStrip tiles={stripTiles(null)} />)).toBe("");
+  });
+  it("the words around it exist in both languages", () => {
+    for (const l of ["en", "es"] as const) {
+      expect(translate("making.scene_counter", l, { index: 5, total: 9 })).toMatch(/5.*9/);
+      expect(translate("watch.prompt", l)).not.toBe("watch.prompt");
+      expect(translate("create.pill_look_phone", l, { look: "Auto" })).toContain("Auto");
+      expect(translate("create.credits_left", l, { n: 1 })).toMatch(/^1 /);
+      expect(translate("shell.credits_none", l)).not.toMatch(/0/);   // never a bare zero in the rail
+    }
+  });
 });

@@ -21,6 +21,7 @@ import { DECK_ASPECT, deckAspectWarning, deckCredits, deckGenerateExtras, deckMi
 import { appendDictation, dictationSupported, speechLang, startDictation } from "../../lib/dictation";
 import type { Dictation } from "../../lib/dictation";
 import { APP_PATHS } from "../../lib/links";
+import { rememberPrompt } from "../../lib/prompts";
 import { pictureFiles } from "../../lib/upload";
 import { directDeps } from "../../lib/uploadDeps";
 import { useLocale } from "../../lib/useLocale";
@@ -169,6 +170,7 @@ export default function Composer() {
         return;
       }
       if (!ready) saveChoices(f);
+      rememberPrompt(r.videoId, text);   // the video page shows the sentence that made it
       try { sessionStorage.removeItem(MEDIA_SELECTION); } catch { /* private mode */ }   // the photos were used: My media starts clean
       location.assign(`${APP_PATHS.videos}?started=1`);
     } catch (e) {
@@ -288,7 +290,7 @@ export default function Composer() {
             {c.platforms.length > 0 && <Menu label={t("create.pill_for")} triggerClass="pill" trigger={<><span className="pill-k">{t("create.pill_for_k")}</span><span>{pv.for}</span><Icon name="chevdown" size={16} /></>} items={forItems} onPick={(id) => setForm(selectPlatform(f, c, id))} />}
             <Menu label={t("create.pill_length")} triggerClass="pill" trigger={<><span>{ready ? lengthLabel(minutes) : pv.length}</span><Icon name="chevdown" size={16} /></>} items={lengthItems}
               onPick={(id) => (ready ? setPicked(id === "suggested" ? null : Number(id)) : set({ minutes: Number(id) }))} />
-            <Menu label={t("create.pill_look")} triggerClass="pill" trigger={<><span className="pill-k">{t("create.pill_look_k")}</span><span>{lookLabel(f.look)}</span><Icon name="chevdown" size={16} /></>} items={lookItems} onPick={(id) => set({ look: id as Form["look"] })} />
+            <Menu label={t("create.pill_look")} triggerClass="pill" trigger={<><span className="pill-k">{t("create.pill_look_k")}</span><span className="pill-v">{lookLabel(f.look)}</span><span className="pill-phone">{t("create.pill_look_phone", { look: lookLabel(f.look) })}</span><Icon name="chevdown" size={16} /></>} items={lookItems} onPick={(id) => set({ look: id as Form["look"] })} />
             {live && (
               <Popover label={t("create.options")} triggerClass="icon-btn tool-btn" trigger={<Icon name="sliders" size={22} />}>
                 {(close) => (
@@ -333,7 +335,8 @@ export default function Composer() {
         {micError && <p className="hint hint-bad" role="status">{t("create.dictate_denied")}</p>}
         {hint && <p id="create-hint" className="hint hint-bad" role="status">{hint.text}{hint.credits && <> <a href={APP_PATHS.credits}>{t("create.see_credits")}</a></>}</p>}
         {!hint && <p id="create-hint" className="sr-only-vmk" />}
-        {!hint && wallet && !wallet.unlimited && !enough && <p className="hint">{t("create.you_have", { n: wallet.balance })}</p>}
+        {!hint && wallet && !wallet.unlimited && !enough && <p className="hint">{t("create.not_enough", { needed: credits, balance: wallet.balance })} <a href={APP_PATHS.credits}>{t("create.see_credits")}</a></p>}
+        {!hint && wallet && !wallet.unlimited && enough && !locked && <p className="compose-balance">{t("create.credits_left", { n: wallet.balance })}</p>}
         {limit != null && platform && <p className="hint">{t("create.max_length", { platform: platform.label, length: lengthLabel(limit) })}</p>}
         {fitHint && <p className="hint">{fitHint}</p>}
         {advice && <p className="hint">{advice}</p>}
