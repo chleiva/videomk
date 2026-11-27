@@ -302,3 +302,27 @@ Order: WP0 -> A and B and C in parallel (A and B/C touch disjoint page and compo
 **What WP-A/B/C can assume:** links inside the app are plain `/generations`, `/wallet`, `/watch?id=`, `/edit?id=`, `/feedback` (no `index.html`); unknown paths fall back to `/index.html`, so a client-side route like `/videos/:id` can be added later with no infra change; the app shell must not link to `/privacy` etc. without expecting the 301 to videomk.com; CSP forbids third-party scripts, frames and hosts outside `backend.videomk.com`, `login.videomk.com` and S3 (change `CSP` in `backend/app_site_stack.py` if a package needs more, through WP0).
 
 **Not done (left to the packages or the owner):** tokens/shell skeleton and the layout split (`MarketingLayout`/`AppLayout`, per-area i18n files) were not part of this foundations pass (the directive was wiring only); the marketing homepage still has no link into the app; Cognito's hosted sign-in page is the default unstyled one (Managed Login branding would be a WP-C item); Google Search Console verification and the consent screen are owner actions; the old `https://videomk.com/auth/callback` entries can be removed from `stages.json` after a few weeks.
+
+## WP0b status (2026-11-27, shell and tokens): done, ready for packages A, B, C
+
+Built in `frontend/` only; nothing deployed (the packages deploy with `site.sh full` / `site.sh app`). Vitest 168 green (142 old + 26 new), both targets build (`site.sh build`, `site.sh app-build`), public pages carry no script, marketing CTA links to `https://app.videomk.com/`. Screenshots of the kit: `docs/web_2026/shell/uikit_{desktop,phone}_{light,dark}.jpg`.
+
+**What exists now**
+- **Tokens**: `src/styles/tokens.css` (existing names kept; added SF Pro first font stack with Inter fallback, marketing display scale `--fs-hero/--fs-h2/--fs-lead`, tracking, `--space-10/12/16/24`, `--section-pad`, `--gutter`, rail/tab bar/header sizes, z-index scale). `tokens.test.ts` keeps the AA contrast checks, the 14 px floor, the 4 px grid and pins the `theme-color` metas to the tokens.
+- **Layouts** (`BaseLayout` is gone): `layouts/Head.astro` (shared head), `layouts/MarketingLayout.astro` (public pages, header CTA "Open the app", footer with language and theme), `layouts/AppLayout.astro` (left rail on desktop, tab bar on phone, no footer; `shell={false}` gives the bare frame used by sign-in). All app pages use `AppLayout`, `LegalDoc` and `Landing` use `MarketingLayout`.
+- **Navigation list**: `src/lib/appNav.ts` (one line per destination, 5 max). Packages add their item there.
+- **Styles by owner**: `styles/shell.css` (shell, WP0), `styles/marketing.css` (package A), `styles/app.css` (packages B and C, sections marked), `styles/ui.css` (kit extras, WP0), `styles/global.css` (WP0).
+- **i18n split**: `src/i18n/<area>.{en,es}.json` for `common`, `marketing`, `auth`, `app-create`, `app-library`, `app-player`; `i18n/areas.json` maps key prefixes to areas (add a prefix there only through WP0); `i18n/catalog.ts` merges them; `catalog.test.ts` enforces EN/ES parity, placeholders and prefix ownership.
+- **Links**: `lib/config.ts` has `SITE_URL`/`APP_URL` (`PUBLIC_SITE_URL`, `PUBLIC_APP_URL`; defaults `https://videomk.com`, `https://app.videomk.com`; use `http://localhost:4321` for both in local dev); `lib/links.ts` has `appUrl`, `siteUrl`, `tryPromptUrl`, `APP_PATHS`, `SITE_PATHS` (tested).
+- **UI kit**: `src/components/ui/` (`Button`, `IconButton`, `Chip`, `Dialog`, `Toast`, `Tabs`, `Skeleton`; `Sheet`, `Spinner`, `EmptyState`, `Icon`, `Thumb`, `MakingCard`, `CostLine`, `useToast` re-exported from `components/ui.tsx`), tests in `ui.test.tsx`, preview page `/ui-kit` (noindex, no auth, not copied by `site.sh` to either site).
+
+**Ownership**
+| Package | Edits | Does not edit |
+|---|---|---|
+| WP0 (shell) | `tokens.css`, `global.css`, `shell.css`, `ui.css`, `layouts/*`, `lib/auth.ts`, `lib/config.ts`, `lib/links.ts`, `lib/appNav.ts` (items), `lib/i18n.ts`, `i18n/catalog.ts`, `i18n/areas.json`, `components/ui/*`, `package.json`, `backend/**` | |
+| A marketing | `styles/marketing.css`, `components/Landing.astro`, `pages/index.astro`, `pages/es/*`, `components/LegalDoc.astro`, `pages/{privacy,terms,support,delete-account}.astro`, `site-pages/*`, `i18n/marketing.*.json` | layouts, tokens, app pages |
+| B app: Create, library, media | `styles/app.css` (section B), `pages/generations.astro`, new `pages/media/*`, `components/{CreateSheet,PromptForm,DeckPicker,GenerationsList,GenerationsPage,QuestionsStepper}.tsx` and new media components, `lib/{create,deck,videos}.ts` and new `lib/media*.ts`, `i18n/app-create.*`, `i18n/app-library.*` | layouts, tokens, package C files |
+| C app: player, edit, credits, settings, feedback, sign-in | `styles/app.css` (section C), `pages/{watch,edit,wallet,feedback,signin,questions}`, new `pages/settings/*`, `components/{WatchPage,Editor,SceneForm,WalletPage,FeedbackPage}.tsx`, `lib/{editor,feedback}.ts`, `i18n/auth.*`, `i18n/app-player.*` | layouts, tokens, package B files |
+Shared files a package needs changed (a new token, a nav item beyond the list, a new i18n prefix, a dependency): ask WP0; do not edit them concurrently.
+
+**Notes for the packages:** the live marketing homepage is still the hand-written `frontend/site-pages/index.html` (not the Astro `Landing.astro`); package A decides which one wins. Dark mode and the language switch work in both layouts through the existing `data-theme-switch` / `data-lang-switch` hooks. The `dots` icon in `ui.tsx` is faint at 20 px (known, cosmetic).

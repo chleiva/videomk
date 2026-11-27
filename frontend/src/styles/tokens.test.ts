@@ -78,8 +78,8 @@ describe("tokens.css", () => {
   });
   it("type scale never goes below 14 px and spacing is a 4 px grid", () => {
     for (const [k, v] of Object.entries(light)) {
-      if (k.startsWith("--fs-")) expect(parseFloat(v) * 16, k).toBeGreaterThanOrEqual(14);
-      if (/^--space-\d$/.test(k)) expect((parseFloat(v) * 16) % 4, k).toBe(0);
+      if (k.startsWith("--fs-")) expect(parseFloat(v.replace(/^clamp\(/, "")) * 16, k).toBeGreaterThanOrEqual(14);
+      if (/^--space-\d+$/.test(k)) expect((parseFloat(v) * 16) % 4, k).toBe(0);
     }
   });
 });
@@ -103,10 +103,15 @@ describe("source rules", () => {
   it("no raw hex colours in components (the signin provider buttons keep the brand colours Google and Apple require)", () => {
     const bad: string[] = [];
     for (const p of sources) {
-      if (p.endsWith("signin.astro")) continue;
+      if (p.endsWith("signin.astro") || p.endsWith("Head.astro")) continue;   // Head.astro: <meta name="theme-color"> cannot read CSS variables; the next test pins its values to the tokens
       const s = readFileSync(p, "utf8");
       if (/#[0-9a-fA-F]{6}\b|#[0-9a-fA-F]{3}\b(?![0-9a-fA-F])/.test(s.replace(/href="#[\w-]+"/g, "").replace(/&#\d+;/g, ""))) bad.push(p.replace(SRC, "src"));
     }
     expect(bad).toEqual([]);
+  });
+  it("the browser theme-color meta values in Head.astro equal the --background tokens", () => {
+    const head = readFileSync(join(SRC, "layouts", "Head.astro"), "utf8");
+    expect(head).toContain(`content="${light["--background"]}" media="(prefers-color-scheme: light)"`);
+    expect(head).toContain(`content="${darkManual["--background"]}" media="(prefers-color-scheme: dark)"`);
   });
 });

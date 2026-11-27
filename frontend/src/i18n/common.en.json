@@ -50,5 +50,8 @@
  "theme.light": "Light",
  "theme.dark": "Dark",
  "api.no_credits": "You don’t have enough credits for this video.",
- "nav.feedback": "Feedback"
+ "nav.feedback": "Feedback",
+ "shell.skip": "Skip to content",
+ "shell.menu": "Main",
+ "shell.settings": "Language and appearance"
 }

@@ -1,0 +1,98 @@
+---
+// Layout of the web app (app.videomk.com): a left rail on desktop, a tab bar on phones, no footer. The navigation list is lib/appNav.ts. Pages are
+// client-rendered React islands that follow the saved language or the browser (lib/i18nDom.ts), so text here carries data-i18n.
+// `shell={false}`: no rail or tab bar (sign-in, OAuth callback): a centred, quiet page. Packages B and C own styles/app.css; this file belongs to the shell (WP0).
+import "../styles/global.css";
+import "../styles/shell.css";
+import "../styles/app.css";
+import Head from "./Head.astro";
+import { APP_NAV } from "../lib/appNav";
+import { translate } from "../lib/i18n";
+import { siteUrl } from "../lib/links";
+const { title = "videomk", description, titleKey, active = "", shell = true } = Astro.props as { title?: string; description?: string; titleKey?: string; active?: string; shell?: boolean };
+const tr = (k: string) => translate(k, "en");   // build-time English; the browser script re-writes every data-i18n element in the person's language
+---
+<html lang="en" data-i18n-title={titleKey} class="app">
+	<head>
+		<Head title={title} description={description} locale="en" noindex={true} />
+		<script>
+			import { bootstrapAuthForPage } from "../lib/auth";
+			import { initLocale } from "../lib/i18nDom";
+			import { initThemeSwitch } from "../lib/themeDom";
+			initLocale();
+			initThemeSwitch();
+			const p = location.pathname;
+			if (!p.startsWith("/auth/callback") && !p.startsWith("/signin") && !p.startsWith("/ui-kit")) {   // /ui-kit: developer preview, never published, needs no account
+				bootstrapAuthForPage().catch((e) => console.error("Auth bootstrap failed", e));
+			}
+		</script>
+	</head>
+	<body class={shell ? "app-shell" : "app-bare"}>
+		<a href="#content" data-i18n="shell.skip" class="skip-link">{tr("shell.skip")}</a>
+		{shell && (
+			<>
+				<header class="app-topbar">
+					<a href="/generations" class="brand" aria-label="videomk">
+						<span class="brand-mark" aria-hidden="true"><img src="/favicon.svg" alt="" width="32" height="32" /></span>
+						<span>videomk</span>
+					</a>
+				</header>
+				<nav class="app-nav" aria-label="videomk" data-i18n-aria="shell.menu">
+					<a href="/generations" class="brand app-nav-brand" aria-label="videomk">
+						<span class="brand-mark" aria-hidden="true"><img src="/favicon.svg" alt="" width="32" height="32" /></span>
+						<span>videomk</span>
+					</a>
+					<ul class="app-nav-list">
+						{APP_NAV.map((n) => (
+							<li>
+								<a href={n.href} aria-current={active === n.id ? "page" : undefined}>
+									<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d={n.icon} /></svg>
+									<span data-i18n={n.key}>{tr(n.key)}</span>
+								</a>
+							</li>
+						))}
+					</ul>
+					<div class="app-nav-foot">
+						<p class="footer-row" data-lang-switch>
+							<span class="sr-only-vmk" data-i18n="footer.language">{tr("footer.language")}</span>
+							<a href="#" lang="en" hreflang="en" data-lang-option="en" aria-current="true">EN</a>
+							<span aria-hidden="true">·</span>
+							<a href="#" lang="es" hreflang="es" data-lang-option="es" aria-current="false">ES</a>
+						</p>
+						<div class="footer-row" data-theme-switch hidden>
+							<div class="theme-switch" role="group" data-i18n-aria="theme.label" aria-label={tr("theme.label")}>
+								<button type="button" data-theme-option="auto" aria-pressed="true" data-i18n="theme.auto">{tr("theme.auto")}</button>
+								<button type="button" data-theme-option="light" aria-pressed="false" data-i18n="theme.light">{tr("theme.light")}</button>
+								<button type="button" data-theme-option="dark" aria-pressed="false" data-i18n="theme.dark">{tr("theme.dark")}</button>
+							</div>
+						</div>
+						<p class="footer-row app-legal">
+							<a href={siteUrl("/privacy")} data-path="/privacy" data-i18n="footer.privacy" rel="noopener">{tr("footer.privacy")}</a>
+							<span aria-hidden="true">·</span>
+							<a href={siteUrl("/terms")} data-path="/terms" data-i18n="footer.terms" rel="noopener">{tr("footer.terms")}</a>
+						</p>
+					</div>
+				</nav>
+			</>
+		)}
+		{!shell && (
+			<div class="app-bare-tools">
+				<p class="footer-row" data-lang-switch>
+					<a href="#" lang="en" hreflang="en" data-lang-option="en" aria-current="true">EN</a>
+					<span aria-hidden="true">·</span>
+					<a href="#" lang="es" hreflang="es" data-lang-option="es" aria-current="false">ES</a>
+				</p>
+				<div class="footer-row" data-theme-switch hidden>
+					<div class="theme-switch" role="group" data-i18n-aria="theme.label" aria-label={tr("theme.label")}>
+						<button type="button" data-theme-option="auto" aria-pressed="true" data-i18n="theme.auto">{tr("theme.auto")}</button>
+						<button type="button" data-theme-option="light" aria-pressed="false" data-i18n="theme.light">{tr("theme.light")}</button>
+						<button type="button" data-theme-option="dark" aria-pressed="false" data-i18n="theme.dark">{tr("theme.dark")}</button>
+					</div>
+				</div>
+			</div>
+		)}
+		<main id="content" class={shell ? "app-main" : "app-main app-main-bare"}>
+			<slot />
+		</main>
+	</body>
+</html>

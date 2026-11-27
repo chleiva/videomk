@@ -5,6 +5,10 @@ const env = (import.meta as any).env ?? {};
 
 export const API_BASE: string = (env.PUBLIC_API_BASE as string) || "https://backend.videomk.com";
 export const AUTH_DOMAIN: string = (env.PUBLIC_AUTH_DOMAIN as string) || "https://login.videomk.com";
+// The two sites (docs/WEB_REDESIGN_2026.md): marketing at videomk.com (static, public pages) and the web app at app.videomk.com. Links between them go through
+// lib/links.ts so a CTA on the marketing site never hard-codes a host.
+export const SITE_URL: string = ((env.PUBLIC_SITE_URL as string) || "https://videomk.com").replace(/\/+$/, "");
+export const APP_URL: string = ((env.PUBLIC_APP_URL as string) || "https://app.videomk.com").replace(/\/+$/, "");
 export const COGNITO_CLIENT_ID: string = (env.PUBLIC_COGNITO_CLIENT_ID as string) || "";
 
 const u = (id: string) => encodeURIComponent(id);

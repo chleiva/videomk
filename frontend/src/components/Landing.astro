@@ -1,6 +1,6 @@
 ---
 // The app's landing page, written once for both languages (/ and /es/).
-import BaseLayout from "../layouts/BaseLayout.astro";
+import MarketingLayout from "../layouts/MarketingLayout.astro";
 import PromptForm from "./PromptForm";
 import ConsentToast from "./ConsentToast";
 import { translate } from "../lib/i18n";
@@ -8,7 +8,7 @@ import type { Locale } from "../lib/i18n";
 const { locale } = Astro.props as { locale: Locale };
 const tr = (k: string) => translate(k, locale);
 ---
-<BaseLayout title="videomk" description={tr("meta.description")} locale={locale} alternates={true}>
+<MarketingLayout title="videomk" description={tr("meta.description")} locale={locale} alternates={true}>
 	<script define:vars={{ here: locale }}>window.__vmkLanding = here;</script>
 	<script>
 		import { getTokensIfAvailable } from "../lib/auth";

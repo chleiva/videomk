@@ -1,10 +1,10 @@
 ---
-import BaseLayout from "../layouts/BaseLayout.astro";
+import AppLayout from "../layouts/AppLayout.astro";
 import { AUTH_APPLE, AUTH_GOOGLE } from "../lib/config";
 import { chooserOptions } from "../lib/authUrl";
 const options = chooserOptions({ google: AUTH_GOOGLE, apple: AUTH_APPLE });
 ---
-<BaseLayout title="Sign in · videomk" description="Sign in to videomk." titleKey="signin.page_title">
+<AppLayout shell={false} title="Sign in · videomk" description="Sign in to videomk." titleKey="signin.page_title">
 	<div class="signin">
 		<div class="card" role="group" aria-labelledby="signin-title">
 			<span class="mark" aria-hidden="true"><svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M13.5 2 5 13.5h5.5L9.5 22 19 9.5h-5.7z"/></svg></span>
@@ -70,7 +70,7 @@ const options = chooserOptions({ google: AUTH_GOOGLE, apple: AUTH_APPLE });
 			});
 		});
 	</script>
-</BaseLayout>
+</AppLayout>
 
 <style is:global>
 	/* The chooser follows the tokens (tokens.css, light and dark). The Google and Apple buttons keep the brand colours their guidelines require. */

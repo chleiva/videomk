@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "./tokens.css";
+@import "./ui.css";
 
 /* Tailwind utilities read the tokens: bg-app, bg-surface, text-fg, text-fg2, text-fg3, border-line, text-primary, bg-primary-c ... */
 @theme inline {

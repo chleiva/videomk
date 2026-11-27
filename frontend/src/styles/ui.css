@@ -1,0 +1,14 @@
+/* UI kit additions (components/ui): tabs, skeleton, dialog actions, toast tones. Buttons, chips, sheets, toasts and empty states are in global.css. Tokens only. */
+.tabs { display: inline-flex; gap: 2px; padding: 2px; border-radius: var(--radius-pill); background: var(--surface-2); max-width: 100%; overflow-x: auto; }
+.tab { min-height: 2.25rem; padding: 0 var(--space-4); border-radius: var(--radius-pill); font-size: var(--fs-subhead); font-weight: 600; color: var(--text-secondary); white-space: nowrap; transition: background-color var(--dur-select) var(--ease), color var(--dur-select) var(--ease); }
+.tab:hover { color: var(--text); }
+.tab[aria-selected="true"] { background: var(--surface); color: var(--text); box-shadow: var(--elev-1); }
+
+.skeleton { display: inline-block; vertical-align: middle; border-radius: var(--radius-field); background: linear-gradient(100deg, var(--surface-2) 30%, var(--surface-3) 50%, var(--surface-2) 70%); background-size: 200% 100%; animation: vmk-skeleton var(--dur-shimmer) linear infinite; }
+@keyframes vmk-skeleton { from { background-position: 100% 0; } to { background-position: -100% 0; } }
+@media (prefers-reduced-motion: reduce) { .skeleton { animation: none; background: var(--surface-2); } }
+
+.dialog-body { margin-top: var(--space-3); color: var(--text-secondary); font-size: var(--fs-body); }
+.dialog-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: var(--space-2); margin-top: var(--space-5); }
+.toast.toast-success { background: var(--success); color: var(--on-primary); }
+.toast.toast-error { background: var(--danger); color: var(--on-primary); }

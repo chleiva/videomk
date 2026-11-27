@@ -1,6 +1,6 @@
 ---
 // One layout for every legal page: a title, a short "at a glance" list, then numbered sections.
-import BaseLayout from "../layouts/BaseLayout.astro";
+import MarketingLayout from "../layouts/MarketingLayout.astro";
 import { COMPANY, CONTACT_EMAIL, COMPANY_ADDRESS, COMPANY_NUMBER, ICO_REFERENCE } from "../data/legal";
 import type { Section } from "../data/legal/types";
 import { pathForLocale, translate } from "../lib/i18n";
@@ -9,7 +9,7 @@ interface Props { locale?: Locale; title: string; intro: string; effective: stri
 const { locale = "en", title, intro, effective, glance, sections } = Astro.props;
 const tr = (key: string, params?: Record<string, string | number>) => translate(key, locale, params);
 ---
-<BaseLayout title={tr("legal.page_title", { title })} description={intro} locale={locale} alternates={true}>
+<MarketingLayout title={tr("legal.page_title", { title })} description={intro} locale={locale} alternates={true}>
 	<article class="page page-narrow legal">
 		<a href={pathForLocale("/", locale)} class="caption underline underline-offset-4">{tr("legal.back")}</a>
 		<h1 class="h1 mt-6">{title}</h1>
@@ -43,4 +43,4 @@ const tr = (key: string, params?: Record<string, string | number>) => translate(
 		))}
 		<p class="mt-12 border-t border-line pt-4 text-sm text-fg2">{tr("legal.english_prevails")}</p>
 	</article>
-</BaseLayout>
+</MarketingLayout>

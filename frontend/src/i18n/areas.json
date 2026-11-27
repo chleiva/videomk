@@ -12,7 +12,8 @@
   "consent",
   "notfound",
   "error",
-  "toast"
+  "toast",
+  "shell"
  ],
  "marketing": [
   "landing",

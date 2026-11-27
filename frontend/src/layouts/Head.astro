@@ -1,0 +1,28 @@
+---
+// <head> shared by both layouts: meta, icons, language alternates, the theme bootstrap (applied before paint so there is no flash).
+import { SITE } from "../data/legal";
+import { pathForLocale, translate } from "../lib/i18n";
+import type { Locale } from "../lib/i18n";
+const { title, description, locale, alternates = false, noindex = false } = Astro.props as { title: string; description?: string; locale: Locale; alternates?: boolean; noindex?: boolean };
+const here = (Astro.url.pathname || "/").replace(/index\.html$/, "");
+const withSlash = (p: string) => (p.endsWith("/") ? p : p + "/");
+const abs = (l: Locale) => `https://${SITE}${withSlash(pathForLocale(here, l))}`;
+const desc = description ?? translate("meta.description", locale);
+---
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="generator" content={Astro.generator} />
+<title>{title}</title>
+<meta name="description" content={desc} />
+{noindex && <meta name="robots" content="noindex" />}
+<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+<link rel="manifest" href="/site.webmanifest" />
+{alternates && <link rel="canonical" href={abs(locale)} />}
+{alternates && <link rel="alternate" hreflang="en" href={abs("en")} />}
+{alternates && <link rel="alternate" hreflang="es" href={abs("es")} />}
+{alternates && <link rel="alternate" hreflang="x-default" href={abs("en")} />}
+<meta name="color-scheme" content="light dark" />
+<meta name="theme-color" content="#f6f7fc" media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content="#0a0d1f" media="(prefers-color-scheme: dark)" />
+<script is:inline>try{var th=localStorage.getItem("vmk_theme");if(th==="light"||th==="dark")document.documentElement.setAttribute("data-theme",th)}catch(e){}</script>

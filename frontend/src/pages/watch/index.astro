@@ -1,7 +1,7 @@
 ---
-import BaseLayout from "../../layouts/BaseLayout.astro";
+import AppLayout from "../../layouts/AppLayout.astro";
 import WatchPage from "../../components/WatchPage";
 ---
-<BaseLayout title="Watch — videomk" titleKey="watch.page_title" app={true} active="videos">
+<AppLayout title="Watch — videomk" titleKey="watch.page_title" active="videos">
 	<WatchPage client:only="react" />
-</BaseLayout>
+</AppLayout>

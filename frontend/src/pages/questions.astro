@@ -1,12 +1,12 @@
 ---
-import BaseLayout from "../layouts/BaseLayout.astro";
+import AppLayout from "../layouts/AppLayout.astro";
 import QuestionsStepper from "../components/QuestionsStepper";
 ---
-<BaseLayout title="Questions — videomk" titleKey="questions.page_title">
+<AppLayout title="Questions — videomk" titleKey="questions.page_title">
 	<section class="page page-narrow">
 		<h1 class="h1" data-i18n="questions.title">Questions</h1>
 		<div class="mt-6">
 			<QuestionsStepper client:only="react" />
 		</div>
 	</section>
-</BaseLayout>
+</AppLayout>

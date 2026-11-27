@@ -1,0 +1,70 @@
+---
+// Layout of the public site (videomk.com): landing page, privacy, terms, support, delete-account. No sign-in code (the build strips every script anyway:
+// backend/scripts/site.sh), a header with one call to action into the app, and the footer with language and theme. Package A (marketing) owns the look
+// through styles/marketing.css; this file and tokens/shell/global CSS belong to the shell (WP0).
+import "../styles/global.css";
+import "../styles/shell.css";
+import "../styles/marketing.css";
+import Head from "./Head.astro";
+import { pathForLocale, translate } from "../lib/i18n";
+import type { Locale } from "../lib/i18n";
+import { appUrl } from "../lib/links";
+// `locale`: marketing pages are written in one language (at / and at /es/). `alternates`: this page exists in both languages (hreflang + canonical).
+const { title = "videomk", description, locale = "en", alternates = true } = Astro.props as { title?: string; description?: string; locale?: Locale; alternates?: boolean };
+const L: Locale = locale;
+const tr = (k: string) => translate(k, L);
+const here = (Astro.url.pathname || "/").replace(/index\.html$/, "");
+const footer = [["/privacy", "footer.privacy"], ["/terms", "footer.terms"], ["/support", "footer.support"], ["/delete-account", "footer.delete"]] as const;
+---
+<html lang={L} class="marketing">
+	<head>
+		<Head title={title} description={description} locale={L} alternates={alternates} />
+		<script define:vars={{ staticLocale: L }}>window.__vmkStaticLocale = staticLocale;</script>
+		<script>
+			import { initLocale } from "../lib/i18nDom";
+			import { initThemeSwitch } from "../lib/themeDom";
+			const w = window as unknown as { __vmkStaticLocale?: "en" | "es" };
+			initLocale(w.__vmkStaticLocale || "en");
+			initThemeSwitch();
+		</script>
+	</head>
+	<body>
+		<a href="#content" class="skip-link">{tr("shell.skip")}</a>
+		<header class="site-header">
+			<div class="site-header-in">
+				<a href={pathForLocale("/", L)} class="brand" aria-label="videomk">
+					<span class="brand-mark" aria-hidden="true"><img src="/favicon.svg" alt="" width="32" height="32" /></span>
+					<span>videomk</span>
+				</a>
+				<a href={appUrl("/")} class="btn btn-primary btn-sm site-cta">{tr("home.open_app")}</a>
+			</div>
+		</header>
+		<main id="content" class="min-h-[70vh]">
+			<slot />
+		</main>
+		<footer class="site-footer">
+			<nav class="footer-row" aria-label="videomk">
+				{footer.map(([path, key], i) => (
+					<>
+						{i > 0 && <span aria-hidden="true">·</span>}
+						<a href={pathForLocale(path, L)} data-path={path}>{tr(key)}</a>
+					</>
+				))}
+			</nav>
+			<p class="footer-row" data-lang-switch>
+				<span class="sr-only-vmk">{tr("footer.language")}</span>
+				<a href={pathForLocale(here, "en")} lang="en" hreflang="en" data-lang-option="en" aria-current={L === "en" ? "true" : "false"}>English</a>
+				<span aria-hidden="true">·</span>
+				<a href={pathForLocale(here, "es")} lang="es" hreflang="es" data-lang-option="es" aria-current={L === "es" ? "true" : "false"}>Español</a>
+			</p>
+			<div class="footer-row" data-theme-switch hidden>
+				<span class="sr-only-vmk">{tr("theme.label")}</span>
+				<div class="theme-switch" role="group" aria-label={tr("theme.label")}>
+					<button type="button" data-theme-option="auto" aria-pressed="true">{tr("theme.auto")}</button>
+					<button type="button" data-theme-option="light" aria-pressed="false">{tr("theme.light")}</button>
+					<button type="button" data-theme-option="dark" aria-pressed="false">{tr("theme.dark")}</button>
+				</div>
+			</div>
+		</footer>
+	</body>
+</html>

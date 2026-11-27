@@ -1,7 +1,7 @@
 ---
-import BaseLayout from "../../layouts/BaseLayout.astro";
+import AppLayout from "../../layouts/AppLayout.astro";
 import WalletPage from "../../components/WalletPage";
 ---
-<BaseLayout title="Credits — videomk" titleKey="wallet.page_title" app={true} active="credits">
+<AppLayout title="Credits — videomk" titleKey="wallet.page_title" active="credits">
 	<WalletPage client:only="react" />
-</BaseLayout>
+</AppLayout>

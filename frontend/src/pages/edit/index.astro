@@ -1,7 +1,7 @@
 ---
-import BaseLayout from "../../layouts/BaseLayout.astro";
+import AppLayout from "../../layouts/AppLayout.astro";
 import Editor from "../../components/Editor";
 ---
-<BaseLayout title="Edit — videomk" titleKey="editor.page_title" app={true} active="videos">
+<AppLayout title="Edit — videomk" titleKey="editor.page_title" active="videos">
 	<Editor client:only="react" />
-</BaseLayout>
+</AppLayout>

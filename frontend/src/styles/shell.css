@@ -1,0 +1,37 @@
+/* The shell: left rail (desktop) and tab bar (phone) of the app, plus the bare (sign-in) frame. Owned by the shell (WP0); packages style their own
+   pages in styles/app.css (B and C) and styles/marketing.css (A). Everything reads tokens.css; no raw colours. */
+.site-cta { margin-left: auto; }
+
+/* ---- app shell */
+.app-shell { min-height: 100dvh; }
+.app-topbar { position: sticky; top: 0; z-index: var(--z-sticky); display: flex; align-items: center; padding: var(--space-1) var(--screen-margin); min-height: var(--header-height); background: var(--glass); backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px); border-bottom: 1px solid var(--outline); padding-top: env(safe-area-inset-top); }
+.app-nav { position: fixed; z-index: var(--z-sticky); left: 0; right: 0; bottom: 0; display: flex; background: var(--glass); backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px); border-top: 1px solid var(--outline); padding-bottom: env(safe-area-inset-bottom); }
+.app-nav-brand, .app-nav-foot { display: none; }
+.app-nav-list { display: flex; flex: 1; list-style: none; margin: 0; padding: 0; }
+.app-nav-list li { flex: 1; }
+.app-nav-list a { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; min-height: var(--tabbar-height); padding: var(--space-1); color: var(--text-secondary); font-size: var(--fs-caption); font-weight: 600; text-decoration: none; }
+.app-nav-list a[aria-current="page"] { color: var(--primary); }
+.app-nav-list a:hover { color: var(--text); }
+.app-main { padding-bottom: calc(var(--tabbar-height) + env(safe-area-inset-bottom)); min-height: 70vh; }
+
+@media (min-width: 48rem) {
+  .app-topbar { display: none; }
+  .app-nav { top: 0; right: auto; bottom: 0; width: var(--rail-width); flex-direction: column; border-top: 0; border-right: 1px solid var(--outline); padding: var(--space-4) var(--space-3); gap: var(--space-4); background: var(--surface); }
+  .app-nav-brand { display: inline-flex; padding-inline: var(--space-2); }
+  .app-nav-list { flex: 0; flex-direction: column; gap: var(--space-1); }
+  .app-nav-list a { flex-direction: row; justify-content: flex-start; gap: var(--space-3); min-height: var(--min-touch); padding: 0 var(--space-3); border-radius: var(--radius-field); font-size: var(--fs-body); }
+  .app-nav-list a:hover { background: var(--surface-2); }
+  .app-nav-list a[aria-current="page"] { background: var(--primary-container); }
+  .app-nav-foot { display: flex; flex-direction: column; gap: var(--space-2); margin-top: auto; align-items: flex-start; }
+  .app-nav-foot .footer-row { justify-content: flex-start; }
+  .app-nav-foot a { color: var(--text-secondary); font-size: var(--fs-footnote); padding: var(--space-1); }
+  .app-nav-foot [aria-current="true"] { color: var(--text); font-weight: 700; }
+  .app-main { margin-left: var(--rail-width); padding-bottom: 0; }
+}
+
+/* ---- bare frame (sign-in, OAuth callback): centred, quiet */
+.app-bare { min-height: 100dvh; display: flex; flex-direction: column; }
+.app-bare-tools { display: flex; justify-content: flex-end; gap: var(--space-3); padding: var(--space-3) var(--screen-margin); }
+.app-bare-tools a { color: var(--text-secondary); font-size: var(--fs-footnote); padding: var(--space-1); }
+.app-bare-tools [aria-current="true"] { color: var(--text); font-weight: 700; }
+.app-main-bare { flex: 1; display: flex; align-items: center; justify-content: center; padding-bottom: 0; margin-left: 0; }
