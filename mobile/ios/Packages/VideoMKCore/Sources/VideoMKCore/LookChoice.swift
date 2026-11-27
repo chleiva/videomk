@@ -272,16 +272,6 @@ public enum LookRules {
         }
     }
 
-    /// The same for a screen reader and for Info, in full: "Cartoon, Fox, Bruno and Mika, Hand-drawn board".
-    public static func spoken(_ choice: LookChoice, caps: LookCapabilities?) -> String {
-        guard let caps, let o = caps.option(choice.look) else { return tr("look.auto") }
-        var parts = [o.label]
-        let names = castNames(choice.cast, caps: caps)
-        if !names.isEmpty { parts.append(Localization.shared.list(names)) }
-        parts += choice.extras.compactMap { id in o.extras.first { $0.id == id }?.label }
-        return parts.joined(separator: ", ")
-    }
-
     /// One line saying why the look went back to Auto ("Look set to Auto. Cartoon can't use your photos.").
     public static func resetLine(_ reason: Reset, was: String) -> String {
         switch reason {

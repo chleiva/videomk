@@ -526,32 +526,26 @@ private struct SheetHeaderHeightKey: PreferenceKey {
 
 /// A sheet as tall as what it holds (never half empty), on the opaque surface, with the 20 pt gutter. Past the screen it scrolls.
 /// `header` stays pinned: only the body scrolls, so the title and the close button are always there and nothing slides under the grabber.
-/// `scrollTo`: the id of a view in the body to bring to the top when the value changes.
 struct FittedSheet<Header: View, Content: View>: View {
-    var scrollTo: String?
     @ViewBuilder var header: Header
     @ViewBuilder var content: Content
     @State private var height: CGFloat = 360
     @State private var headerHeight: CGFloat = 0
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
-    init(scrollTo: String? = nil, @ViewBuilder header: () -> Header, @ViewBuilder content: () -> Content) { self.scrollTo = scrollTo; self.header = header(); self.content = content() }
+    init(@ViewBuilder header: () -> Header, @ViewBuilder content: () -> Content) { self.header = header(); self.content = content() }
 
     var body: some View {
-        ScrollViewReader { proxy in
-            ScrollView {
-                content
-                    .padding(.horizontal, Theme.gutter).padding(.bottom, Theme.Space.l)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(GeometryReader { g in Color.clear.preference(key: SheetHeightKey.self, value: g.size.height) })
-            }
-            .scrollBounceBehavior(.basedOnSize)
-            .safeAreaInset(edge: .top, spacing: 0) {
-                header
-                    .padding(.horizontal, Theme.gutter).frame(maxWidth: .infinity, alignment: .leading).background(Theme.surface)
-                    .background(GeometryReader { g in Color.clear.preference(key: SheetHeaderHeightKey.self, value: g.size.height) })
-            }
-            .onChange(of: scrollTo) { _, id in if let id { withAnimation(reduceMotion ? nil : Theme.Motion.spring) { proxy.scrollTo(id, anchor: .top) } } }
+        ScrollView {
+            content
+                .padding(.horizontal, Theme.gutter).padding(.bottom, Theme.Space.l)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(GeometryReader { g in Color.clear.preference(key: SheetHeightKey.self, value: g.size.height) })
+        }
+        .scrollBounceBehavior(.basedOnSize)
+        .safeAreaInset(edge: .top, spacing: 0) {
+            header
+                .padding(.horizontal, Theme.gutter).frame(maxWidth: .infinity, alignment: .leading).background(Theme.surface)
+                .background(GeometryReader { g in Color.clear.preference(key: SheetHeaderHeightKey.self, value: g.size.height) })
         }
         .onPreferenceChange(SheetHeightKey.self) { h in Task { @MainActor in if h > 0, abs(h - height) > 0.5 { height = h } } }
         .onPreferenceChange(SheetHeaderHeightKey.self) { h in Task { @MainActor in if abs(h - headerHeight) > 0.5 { headerHeight = h } } }

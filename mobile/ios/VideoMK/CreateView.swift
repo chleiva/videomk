@@ -124,7 +124,7 @@ struct CreateView: View {
         } message: { Text(tr("deck.replace_deck.message")) }
         .onChange(of: create.deck.state, initial: true) { _, _ in create.syncDeck() }
         .sheet(isPresented: $create.showMore) { CreateOptionsSheet(create: create) }
-        .sheet(isPresented: $create.showLook) { if CreateModel.singleLookSheet { LookPickerSheet(create: create, attached: attached) } else { LookSheet(create: create, attached: attached) } }
+        .sheet(isPresented: $create.showLook) { LookSheet(create: create, attached: attached) }
         .sheet(isPresented: $create.showCast) { CharactersSheet(create: create) }
         .onChange(of: attached, initial: true) { _, a in create.syncLook(attached: a) }
         .onChange(of: create.caps.looks) { _, _ in create.syncLook(attached: attached) }
@@ -294,7 +294,7 @@ struct CreateView: View {
     /// or Characters under the three, or two and two, or two and two with the Characters pill reduced to its faces (large text, small phones).
     @ViewBuilder private var pills: some View {
         let s = Theme.Space.s
-        if create.lookHasCast, !CreateModel.singleLookSheet {
+        if create.lookHasCast {
             ViewThatFits(in: .horizontal) {
                 HStack(spacing: s) { forPill; lengthPill; lookPill; castPill(compact: false) }
                 VStack(alignment: .leading, spacing: s) { HStack(spacing: s) { forPill; lengthPill; lookPill }; castPill(compact: false) }
@@ -360,13 +360,10 @@ struct CreateView: View {
         }
     }
 
-    /// With the server's look picker: the pill says the look only and shows the chosen characters as faces; it opens the sheet of tiles. Without it (an older server): the menu it always was.
+    /// With the server's look picker: the pill says the look only and opens the sheet of four tiles (the characters have their own pill). Without it (an older server): the menu it always was.
     @ViewBuilder private var lookPill: some View {
-        if let looks = create.caps.looks {
-            PillButton(value: lookValue, spoken: tr("create.look"), spokenValue: CreateModel.singleLookSheet ? LookRules.spoken(form.lookChoice, caps: looks) : lookValue, identifier: "lookPill") { focused = false; create.dismissLookNotice(); create.showLook = true } accessory: {
-                let faces = form.lookChoice.cast.compactMap { looks.cast?.member($0) }
-                if CreateModel.singleLookSheet, !faces.isEmpty { PillFaces(members: faces) }
-            }
+        if create.caps.looks != nil {
+            PillButton(value: lookValue, spoken: tr("create.look"), identifier: "lookPill") { focused = false; create.dismissLookNotice(); create.showLook = true }
         } else {
             Pill(value: lookValue, spoken: tr("create.look"), identifier: "lookPill") {
                 Button { create.form.look = nil; Haptics.play(.selection) } label: { if form.look == nil { Label(tr("look.auto"), systemImage: "checkmark") } else { Text(tr("look.auto")) } }

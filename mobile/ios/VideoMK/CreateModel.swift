@@ -151,13 +151,6 @@ final class CreateModel {
         return o.cast && looks.cast.map { $0.available && !$0.members.isEmpty } == true || o.extras.contains(where: \.available)
     }
 
-    #if DEBUG
-    /// `VMK_DEBUG_LOOK_SINGLE=1`: the one-sheet picker (tiles and cast together), kept for comparison captures.
-    static let singleLookSheet = ProcessInfo.processInfo.environment["VMK_DEBUG_LOOK_SINGLE"] == "1"
-    #else
-    static let singleLookSheet = false
-    #endif
-
     /// Photos or a presentation were attached or removed: a look that is not made from them goes back to Auto, with one line saying so.
     func syncLook(attached: LookRules.Attached) {
         if let line = form.reconcileLook(caps, attached: attached) { lookNotice = line; UIAccessibility.post(notification: .announcement, argument: line) }
@@ -264,7 +257,7 @@ final class CreateModel {
         case "4ksummary": pick("youtube"); form.setResolution("2160p")
         default: break
         }
-        // `VMK_DEBUG_LOOK=whiteboard|cartoon|cartoon:fox+bear|cartoon:fox+bear+cat:board[:sheet]` picks that look the way taps would (needs `VMK_DEBUG_LOOKS`); `sheet` alone opens the picker.
+        // `VMK_DEBUG_LOOK=whiteboard|cartoon|cartoon:fox+bear|cartoon:fox+bear+cat:board[:sheet|:cast]` picks that look the way taps would (needs `VMK_DEBUG_LOOKS`); `sheet` opens the Look sheet, `cast` the Characters sheet.
         guard let spec = ProcessInfo.processInfo.environment["VMK_DEBUG_LOOK"] else { return }
         for (n, part) in spec.split(separator: ":").enumerated() {
             if part == "sheet" { showLook = true }

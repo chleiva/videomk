@@ -250,7 +250,6 @@ extension CoreTests {
         #expect(LookRules.pillLabel(LookChoice(look: "cartoon"), caps: looks) == "Cartoon")
         #expect(LookRules.pillLabel(LookChoice(look: "cartoon", cast: ["fox"]), caps: looks) == "Cartoon", "the cast is faces in the pill, never names")
         #expect(LookRules.pillLabel(LookChoice(look: "cartoon", cast: ["fox", "bear", "cat"]), caps: looks) == "Cartoon")
-        #expect(LookRules.spoken(LookChoice(look: "cartoon", cast: ["fox", "bear", "cat"], extras: ["board"]), caps: looks) == "Cartoon, Fox, Bruno and Mika, Characters explain at a board")
     }
 
     @Test func theLastChoiceIsRememberedAndKeptInsideWhatTheServerLists() throws {

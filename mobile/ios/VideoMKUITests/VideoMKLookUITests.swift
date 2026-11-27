@@ -262,6 +262,7 @@ final class VideoMKLookUITests: XCTestCase {
                 XCTAssertTrue(el(app, "castPill").waitForExistence(timeout: 20)); sleep(1)
                 let rows = pillRows(app), screen = app.windows.firstMatch.frame
                 print("MEASURE pills \(spanish ? "es" : "en") \(mode.isEmpty ? "default" : mode) \(Int(screen.width))x\(Int(screen.height)) \(spec): \(rows) rows; " + ["forPill", "lengthPill", "lookPill", "castPill"].map { "\($0) \(el(app, $0).frame)" }.joined(separator: "; "))
+                shot(app, "pills-\(spanish ? "es" : "en")-\(spec.contains("+") ? "three-faces" : "auto")")
                 XCTAssertLessThanOrEqual(rows, 2, "the pills never take a third row")
                 XCTAssertTrue(el(app, "castPill").isHittable && app.buttons["sendButton"].isHittable)
                 XCTAssertLessThanOrEqual(el(app, "castPill").frame.maxX, screen.width - 19, "the pill is whole")
@@ -342,30 +343,13 @@ final class VideoMKLookUITests: XCTestCase {
     // MARK: captures
 
     /// Every state, in the appearance `TEST_RUNNER_VMK_SHOTS_MODE` asks for (default light; `dark`, `large`, `es`, `small`). Skipped without a folder to write to.
-    /// `TEST_RUNNER_VMK_SHOTS_VARIANT=single` takes the key states of the one-sheet picker instead (debug builds keep it for comparison).
     func testCaptures() throws {
         guard ProcessInfo.processInfo.environment["VMK_SHOTS_DIR"] != nil else { throw XCTSkip("set TEST_RUNNER_VMK_SHOTS_DIR") }
         let es = mode == "es", dark = mode == "dark"
-        let tall = mode == "large" || mode == "small"      // the sheets that scroll there: take the scrolled shots as well
-        let single = ProcessInfo.processInfo.environment["VMK_SHOTS_VARIANT"] == "single"
-        func start(looks: String? = "1", _ env: [String: String] = [:]) -> XCUIApplication { launch(spanish: es, large: mode == "large", dark: dark, looks: looks, env.merging(single ? ["VMK_DEBUG_LOOK_SINGLE": "1"] : [:]) { a, _ in a }) }
+        let tall = mode == "large"      // the Characters sheet scrolls there: take the scrolled shots as well
+        func start(looks: String? = "1", _ env: [String: String] = [:]) -> XCUIApplication { launch(spanish: es, large: mode == "large", dark: dark, looks: looks, env) }
         func settle(_ app: XCUIApplication, _ id: String) { XCTAssertTrue(el(app, id).waitForExistence(timeout: 20), id); sleep(1) }
         var app: XCUIApplication
-
-        if single {
-            app = start(["VMK_DEBUG_LOOK": "sheet"]); settle(app, "lookTile-auto"); shot(app, "single-02-sheet-auto"); app.terminate()
-            app = start(["VMK_DEBUG_LOOK": "cartoon:sheet"]); settle(app, "cast-fox"); shot(app, "single-05-sheet-cartoon-auto")
-            if tall { app.swipeUp(); shot(app, "single-05b-sheet-cartoon-auto-end") }
-            app.terminate()
-            app = start(["VMK_DEBUG_LOOK": "cartoon:fox+bear:board:sheet"]); settle(app, "cast-fox"); shot(app, "single-07-sheet-cartoon-talk"); app.terminate()
-            app = start(["VMK_DEBUG_LOOK": "cartoon:fox+bear:board"]); settle(app, "lookPill"); shot(app, "single-08-create-cartoon-talk"); app.terminate()
-            app = start(["VMK_DEBUG_LOOK": "cartoon:priya+mateo+cat"]); settle(app, "lookPill"); shot(app, "single-10-create-cartoon-three"); app.terminate()
-            app = start(["VMK_DEBUG_DEFAULT_MINUTES": "0.25", "VMK_DEBUG_LOOK": "cartoon:fox:sheet"]); settle(app, "cast-fox")
-            let bear = el(app, "cast-bear"); for _ in 0..<4 where !bear.isHittable { app.swipeUp() }
-            bear.tap(); sleep(1); if tall { app.swipeUp() }
-            shot(app, "single-11-sheet-length-moved"); app.terminate()
-            return
-        }
 
         app = start(); settle(app, "lookPill"); shot(app, "01-create-auto")
         el(app, "lookPill").tap(); settle(app, "lookTile-auto"); shot(app, "02-sheet-auto"); app.terminate()
