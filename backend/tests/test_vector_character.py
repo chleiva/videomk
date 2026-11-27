@@ -152,3 +152,93 @@ def test_character_scales_with_resolution_without_changing_proportions():
         ys = np.nonzero(np.array(fr)[..., 3])[0]
         heights.append(ys.max() - ys.min())
     assert abs(heights[1] / heights[0] - 2.0) < 0.06
+
+
+# ----------------------------------------------------------------------------- secondary motion (2026-11-27, docs/CHARACTER_ANIMATION_PROOF.md)
+def test_spring_step_starts_at_zero_overshoots_and_settles():
+    assert vc.spring_step(0.0) == 0.0 and vc.spring_step(-1.0) == 0.0
+    vals = [vc.spring_step(i / 100, 3.0, 0.4) for i in range(0, 300)]
+    assert max(vals) > 1.05                       # overshoot: it goes past the target ...
+    assert abs(vals[-1] - 1.0) < 0.02             # ... and settles on it
+    assert max(vc.spring_step(i / 100, 3.0, 0.999) for i in range(300)) < 1.02    # critically damped: (almost) no overshoot
+
+
+def test_spring_keys_is_stateless_and_reaches_every_key_value():
+    keys = [(0.0, 0.0), (1.0, 10.0), (3.0, -4.0)]
+    a = [vc.spring_keys(t / 10, keys) for t in range(0, 60)]
+    b = [vc.spring_keys(t / 10, keys) for t in reversed(range(0, 60))][::-1]
+    assert a == b                                 # no hidden state: any evaluation order gives the same numbers
+    assert abs(vc.spring_keys(2.9, keys, 3.2, 0.5) - 10.0) < 0.6 and abs(vc.spring_keys(8.0, keys) - (-4.0)) < 0.05
+    assert vc.spring_keys(0.5, keys) == 0.0       # nothing moves before its key
+    v = vc.spring_keys(8.0, [(0, (1.0, 2.0)), (1.0, (5.0, 6.0))])
+    assert isinstance(v, tuple) and abs(v[0] - 5.0) < 0.05 and abs(v[1] - 6.0) < 0.05
+
+
+def test_ease_keys_never_overshoots():
+    keys = [(0.0, 0.0), (1.0, 10.0), (2.0, 0.0)]
+    assert all(-1e-9 <= vc.ease_keys(t / 20, keys) <= 10.0 + 1e-9 for t in range(0, 50))
+    assert vc.ease_keys(1.0, keys) == 10.0
+
+
+def test_natural_blink_is_irregular_deterministic_and_short():
+    ts = vc._blink_times(0.5)
+    gaps = [b - a for a, b in zip(ts, ts[1:])]
+    assert len(set(round(g, 2) for g in gaps)) > 5                      # not a metronome
+    assert min(g for g in gaps if g > 0.5) >= 2.4 - 0.27 - 1e-9 and max(gaps) <= 5.5      # (a double blink eats 0.27 s of the next gap)
+    assert all(vc.blink_natural(t + 0.05, 0.5) for t in ts[:20])        # closed just after each event
+    assert not any(vc.blink_natural(t + 0.2, 0.5) for t in ts[:5] if all(abs(t + 0.2 - u) > 0.2 for u in ts))
+    assert vc.blink_natural(5.0, 0.5) == vc.blink_natural(5.0, 0.5)
+
+
+def test_mouth_track_leads_the_sound_and_has_no_one_frame_flicker():
+    env = [0.0] * 6 + [0.9] * 6 + [0.0] * 6 + [0.9, 0.0, 0.9, 0.0, 0.9, 0.0] + [0.0] * 4
+    seq = vc.mouth_track(env, lead=1, min_hold=2)
+    assert seq[5] != "closed" and seq[4] == "closed"                    # opens one frame BEFORE the sound
+    runs, cur = [], 1
+    for a, b in zip(seq, seq[1:]):
+        if a == b:
+            cur += 1
+        else:
+            runs.append(cur)
+            cur = 1
+    assert min(runs) >= 2 or runs[0] >= 1
+
+
+def test_stress_events_pick_separated_peaks():
+    env = [0.1] * 30
+    for i in (5, 8, 20):
+        env[i] = 0.9
+    ev = vc.stress_events(env, 30)
+    assert ev == [5 / 30, 20 / 30]                                        # the peak at 8 is within 0.42 s of the one at 5
+
+
+def test_breath_stays_small_and_periodic():
+    for t in (0.0, 1.0, 2.5, 3.8):
+        sy, lift = vc.breath(t)
+        assert 1.0 <= sy <= 1.017 and 0.0 <= lift <= 1.1 + 1e-9
+    assert vc.breath(0.0) == pytest.approx(vc.breath(3.8))
+
+
+def test_new_pose_keys_default_to_the_old_pixels_and_draw_turned_squeezes():
+    from PIL import Image, ImageChops
+    if not vc.character_ids():
+        pytest.skip("no character assets")
+    ch = vc.load(vc.character_ids()[0], 1.2, 1.0)
+    base = Image.new("RGBA", (400, 460), (255, 255, 255, 255))
+    a, b = base.copy(), base.copy()
+    ch.draw(a, 200, 430, {})
+    ch.draw(b, 200, 430, {"torso_sy": 1.0, "head_sx": 1.0, "head_sy": 1.0, "eyes_scale": 1.0})
+    assert ImageChops.difference(a, b).getbbox() is None                  # absent keys == neutral values: old frames are unchanged
+    sq = base.copy()
+    ch.draw(sq, 200, 430, {"torso_sy": 0.9})
+    assert ImageChops.difference(a, sq).getbbox() is not None            # a squash really changes the picture
+    full, half, flip = base.copy(), base.copy(), base.copy()
+    ch.draw_turned(full, 200, 430, {}, 1.0)
+    ch.draw_turned(half, 200, 430, {}, 0.3)
+    ch.draw_turned(flip, 200, 430, {}, -1.0)
+    assert ImageChops.difference(full, a).getbbox() is None
+    def span(im):
+        box = ImageChops.difference(im, base).getbbox()
+        return box[2] - box[0]
+    assert span(half) < 0.5 * span(full)
+    assert abs(span(flip) - span(full)) <= 3                              # a mirrored figure is as wide as the original

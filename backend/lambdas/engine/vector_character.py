@@ -128,6 +128,105 @@ def speech_envelope(samples: np.ndarray, sr: int, fps: int, smooth: float = 0.06
     return np.convolve(env, np.ones(k) / k, mode="same")
 
 
+# ----------------------------------------------------------------------------- secondary motion (pure functions of time: a chunk rendered anywhere is identical)
+def spring_step(t: float, freq: float = 3.2, damp: float = 0.5) -> float:
+    """Step response of a damped spring: 0 for t <= 0, then rises to 1 with a little overshoot and settles. `freq` in Hz, `damp` 0..1 (lower = bouncier)."""
+    if t <= 0.0:
+        return 0.0
+    w = 2.0 * math.pi * freq
+    z = min(0.999, max(0.0, damp))
+    wd = w * math.sqrt(1.0 - z * z)
+    return 1.0 - math.exp(-z * w * t) * (math.cos(wd * t) + (z * w / wd) * math.sin(wd * t))
+
+
+def spring_keys(t: float, keys: Sequence[Tuple[float, Any]], freq: float = 3.2, damp: float = 0.5) -> Any:
+    """Keyframes (time, value) where each key is REACHED through a spring (overshoot, follow-through, settle) instead of an eased line. Values are floats or tuples of floats.
+    It is a sum of step responses, so it needs no state: value(t) is the same whenever and wherever it is evaluated."""
+    v0 = keys[0][1]
+    if isinstance(v0, (tuple, list)):
+        out = list(v0)
+        for (_, a), (tk, b) in zip(keys, keys[1:]):
+            k = spring_step(t - tk, freq, damp)
+            for i in range(len(out)):
+                out[i] += (b[i] - a[i]) * k
+        return tuple(out)
+    out = float(v0)
+    for (_, a), (tk, b) in zip(keys, keys[1:]):
+        out += (b - a) * spring_step(t - tk, freq, damp)
+    return out
+
+
+def ease_keys(t: float, keys: Sequence[Tuple[float, Any]]) -> Any:
+    """The plain alternative to spring_keys: smoothstep between keyframes (no overshoot, no follow-through)."""
+    if t <= keys[0][0]:
+        return keys[0][1]
+    for (t0, a), (t1, b) in zip(keys, keys[1:]):
+        if t <= t1:
+            k = _smooth((t - t0) / max(t1 - t0, 1e-6))
+            if isinstance(a, (tuple, list)):
+                return tuple(a[i] + (b[i] - a[i]) * k for i in range(len(a)))
+            return a + (b - a) * k
+    return keys[-1][1]
+
+
+def _hash01(i: int, seed: float) -> float:
+    return (math.sin(i * 12.9898 + seed * 78.233) * 43758.5453) % 1.0
+
+
+@lru_cache(maxsize=64)
+def _blink_times(seed: float, horizon: float = 900.0) -> Tuple[float, ...]:
+    out, t, i = [], 1.2 + 2.0 * _hash01(0, seed), 1
+    while t < horizon:
+        out.append(t)
+        if _hash01(i, seed + 1.0) < 0.22:       # now and then a quick double blink
+            out.append(t + 0.27)
+        t += 2.4 + 3.0 * _hash01(i, seed + 2.0)    # irregular: 2.4 to 5.4 s
+        i += 1
+    return tuple(out)
+
+
+def blink_natural(t: float, seed: float = 0.0, length: float = 0.12) -> bool:
+    """Irregular blinks (2.4 to 5.4 s apart, sometimes a double blink); a metronome blink every 3.4 s is the clearest 'robot' tell."""
+    import bisect
+    ts = _blink_times(round(seed, 3))
+    i = bisect.bisect_right(ts, t) - 1
+    return i >= 0 and (t - ts[i]) < length
+
+
+def breath(t: float, period: float = 3.8, seed: float = 0.0) -> Tuple[float, float]:
+    """(torso vertical scale, head lift in units): the chest rises a little on the in-breath and the head rides on it."""
+    k = 0.5 - 0.5 * math.cos(2 * math.pi * (t / period + seed))
+    return 1.0 + 0.016 * k, 1.1 * k
+
+
+def stress_events(env: Sequence[float], fps: int, thr: float = 0.62, min_gap: float = 0.42) -> List[float]:
+    """Times (s) of the stressed syllables in a speech-level track (local maxima above `thr`, at least `min_gap` apart): where a head nod or a hand beat belongs."""
+    out: List[float] = []
+    for i in range(1, len(env) - 1):
+        if env[i] >= thr and env[i] >= env[i - 1] and env[i] > env[i + 1]:
+            t = i / fps
+            if not out or t - out[-1] >= min_gap:
+                out.append(t)
+    return out
+
+
+def mouth_track(env: Sequence[float], lead: int = 1, min_hold: int = 2) -> List[str]:
+    """Mouth shape per frame from a speech-level track, computed up front: the mouth LEADS the sound by `lead` frames (animators open the mouth just before the sound) and a shape
+    is held at least `min_hold` frames (no one-frame flicker)."""
+    n = len(env)
+    shifted = [env[min(n - 1, i + lead)] if n else 0.0 for i in range(n)]
+    out: List[str] = []
+    state, held = "closed", 99
+    for lv in shifted:
+        new = mouth_for(lv, state)
+        if new != state and held < min_hold:
+            new = state
+        held = 0 if new != state else held + 1
+        state = new
+        out.append(state)
+    return out
+
+
 # ----------------------------------------------------------------------------- pixels
 def _shade(im: Image.Image, f: float) -> Image.Image:
     a = np.array(im).astype(np.float32)
@@ -143,7 +242,7 @@ class Piece:
 class Character:
     """Rasterised pieces of one character at `ppu` pixels per unit (the head is 100 units tall)."""
 
-    def __init__(self, folder: str, ppu: float, size: float = 1.0):
+    def __init__(self, folder: str, ppu: float, size: float = 1.0, back_tint: float = BACK_TINT):
         import resvg_py
 
         with open(os.path.join(folder, "manifest.json"), encoding="utf-8") as f:
@@ -176,7 +275,7 @@ class Character:
             flipped = pc.img.transpose(Image.FLIP_LEFT_RIGHT) if "arm" in name else pc.img
             pv = (pc.img.width - pc.pivot[0], pc.pivot[1]) if "arm" in name else pc.pivot
             en = ((pc.img.width - pc.end[0], pc.end[1]) if "arm" in name else pc.end) if pc.end else None
-            self.pieces[name + "_back"] = Piece(_shade(flipped, BACK_TINT), pv, en)
+            self.pieces[name + "_back"] = Piece(_shade(flipped, back_tint), pv, en)
         # sizes in units (for the joints)
         self.hw = hw
         self.tw = P["torso"]["w"] * sc["torso"]
@@ -198,8 +297,12 @@ class Character:
         hip_h = pose.get("hip_h", HIP_H0)
         hip_y = ground - hip_h * u                                    # the legs reach the ground by IK, so the bob is just hip_h changing
         wx, wy = x + pose.get("dx", 0.0) * u, hip_y + 8.0 * u        # waist: the torso hem hides the tops of the legs
-        def put(piece: Piece, pos: Tuple[float, float], angle: float) -> None:
-            """Rotate about the piece's pivot, which sits at `pos` (px)."""
+        def put(piece: Piece, pos: Tuple[float, float], angle: float, sx: float = 1.0, sy: float = 1.0) -> None:
+            """Rotate about the piece's pivot, which sits at `pos` (px); optional squash and stretch (sx, sy) about the same pivot."""
+            if sx != 1.0 or sy != 1.0:
+                im0 = piece.img
+                im1 = im0.resize((max(1, round(im0.width * sx)), max(1, round(im0.height * sy))), Image.BILINEAR)
+                piece = Piece(im1, (piece.pivot[0] * im1.width / im0.width, piece.pivot[1] * im1.height / im0.height))
             im = piece.img
             if abs(angle) < 0.05:
                 frame.paste(im, (round(pos[0] - piece.pivot[0]), round(pos[1] - piece.pivot[1])), im)
@@ -218,6 +321,8 @@ class Character:
             legs.append((hip, a1, a2, "_back" if i == 0 else ""))
         # far arm, legs, torso, head, face, near arm
         sh_x, sh_y = self.shoulder()
+        tsy = pose.get("torso_sy", 1.0)             # breathing / squash: the torso is scaled about the waist, the shoulders and neck ride with it
+        sh_y *= tsy
         tilt = pose.get("tilt", 0.0)
 
         def torso_pt(px_u: float, py_u: float) -> Tuple[float, float]:
@@ -240,25 +345,42 @@ class Character:
             knee = _joint(ul, hip, a1)
             put(ll, knee, a2)
             put(ul, hip, a1)
-        put(self.pieces["torso"], (wx, wy), tilt)
-        neck = torso_pt(0.0, -TORSO_U * 0.93)
+        put(self.pieces["torso"], (wx, wy), tilt, 1.0, tsy)
+        neck = torso_pt(0.0, -TORSO_U * 0.93 * tsy)
         head_tilt = tilt + pose.get("head_tilt", 0.0)
         hd = self.pieces["head"]
         hp = (neck[0], neck[1] - pose.get("head_dy", 0.0) * u)
-        put(hd, hp, head_tilt)
+        hsx, hsy = pose.get("head_sx", 1.0), pose.get("head_sy", 1.0)
+        put(hd, hp, head_tilt, hsx, hsy)
         hh, hw_px = hd.img.height, hd.img.width
 
         def face_pt(fx: float, fy: float) -> Tuple[float, float]:
-            v = rot((fx - hd.pivot[0], fy - hd.pivot[1]), head_tilt)
+            v = rot(((fx - hd.pivot[0]) * hsx, (fy - hd.pivot[1]) * hsy), head_tilt)
             return (hp[0] + v[0], hp[1] + v[1])
 
         eyes = self.pieces["eyes_closed" if pose.get("blink") else "eyes_open"]
         ex, ey = face_pt(hw_px * self.eyes_x + pose.get("look", (0.0, 0.0))[0] * u, hh * self.eyes_y + pose.get("look", (0.0, 0.0))[1] * u)
-        put(Piece(eyes.img, (eyes.img.width / 2, eyes.img.height / 2)), (ex, ey), head_tilt)
+        es = pose.get("eyes_scale", 1.0)             # wide eyes for surprise
+        put(Piece(eyes.img, (eyes.img.width / 2, eyes.img.height / 2)), (ex, ey), head_tilt, es, es)
         mouth = self.pieces["mouth_" + pose.get("mouth", "closed")]
         mx, my = face_pt(hw_px * self.eyes_x, hh * self.mouth_y)
         put(Piece(mouth.img, (mouth.img.width / 2, mouth.img.height / 2)), (mx, my), head_tilt)
         arm(1, "")
+
+    def draw_turned(self, frame: Image.Image, x: float, ground: float, pose: Dict[str, Any], turn: float) -> None:
+        """Facing control by a paper-doll flip: the whole figure is drawn, then squeezed sideways by |turn| (1 = full width) and mirrored when turn < 0, so a mid-turn frame is a
+        narrow slab. There is no 3/4 view in this rig (the art is front-facing): this is a flip, not a turn of the body. turn = 1 faces right (the shoes point right), -1 faces left."""
+        if turn >= 0.999:
+            return self.draw(frame, x, ground, pose)
+        u = self.ppu
+        wl, hl = int(400 * u), max(8, int(ground + 12 * u))
+        layer = Image.new("RGBA", (wl, hl), (0, 0, 0, 0))
+        self.draw(layer, wl / 2, ground, pose)
+        nw = max(2, round(wl * abs(turn)))
+        out = layer.resize((nw, hl), Image.BILINEAR)
+        if turn < 0:
+            out = out.transpose(Image.FLIP_LEFT_RIGHT)
+        frame.paste(out, (round(x - nw / 2), 0), out)
 
 
 def _add(a: Tuple[float, float], b: Tuple[float, float]) -> Tuple[float, float]:
@@ -276,7 +398,7 @@ def _joint(p: Piece, pos: Tuple[float, float], angle: float) -> Tuple[float, flo
 
 
 @lru_cache(maxsize=16)
-def load(cid: str, ppu: float, size: float = 1.0) -> Character:
+def load(cid: str, ppu: float, size: float = 1.0, back_tint: float = BACK_TINT) -> Character:
     if cid not in character_ids():
         raise ValueError(f"unknown vector character {cid!r}")
-    return Character(os.path.join(DIR, cid), ppu, size)
+    return Character(os.path.join(DIR, cid), ppu, size, back_tint)
