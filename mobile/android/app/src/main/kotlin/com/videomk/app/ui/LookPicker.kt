@@ -36,7 +36,6 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -74,6 +73,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.videomk.app.R
 import com.videomk.app.core.CastCaps
 import com.videomk.app.core.CastMember
@@ -98,15 +98,19 @@ private val RingGap = 4.dp
 /** The head of a sheet stays; only what is under it scrolls (and only when it has to: large text, a small phone). */
 @OptIn(ExperimentalMaterial3Api::class, androidx.compose.ui.ExperimentalComposeUiApi::class)
 @Composable
-private fun PickerSheet(title: String, tag: String, closeTag: String, onDismiss: () -> Unit, content: @Composable () -> Unit) {
+private fun PickerSheet(title: String, tag: String, closeTag: String, onDismiss: () -> Unit, content: @Composable (close: () -> Unit) -> Unit) {
+    val state = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val scope = rememberCoroutineScope()
+    // closing from inside (a pick, the close icon) slides the sheet away like a swipe does, then tells Create
+    val close: () -> Unit = { scope.launch { runCatching { state.hide() } }.invokeOnCompletion { onDismiss() } }
     ModalBottomSheet(
-        onDismissRequest = onDismiss, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+        onDismissRequest = onDismiss, sheetState = state,
         shape = RoundedCornerShape(topStart = Vmk.radii.sheet, topEnd = Vmk.radii.sheet), containerColor = Vmk.colors.surface,
     ) {
         Column(Modifier.fillMaxWidth().navigationBarsPadding().semantics { if (com.videomk.app.BuildConfig.DEBUG) testTagsAsResourceId = true }.testTag(tag)) {
-            SheetHeader(title, onDismiss, Modifier.padding(horizontal = Vmk.space.sheet), closeTag = closeTag, closeLabel = stringResource(R.string.common_done))
+            SheetHeader(title, close, Modifier.padding(horizontal = Vmk.space.sheet), closeTag = closeTag, closeLabel = stringResource(R.string.common_done))
             // the gutter is inside the scrolling part, so the ring of a chosen picture (drawn outside it) is never cut by the scroll's own edge
-            Column(Modifier.weight(1f, fill = false).verticalScroll(rememberScrollState()).padding(horizontal = Vmk.space.sheet).padding(top = Vmk.space.m, bottom = Vmk.space.xxl)) { content() }
+            Column(Modifier.weight(1f, fill = false).verticalScroll(rememberScrollState()).padding(horizontal = Vmk.space.sheet).padding(top = Vmk.space.m, bottom = Vmk.space.xxl)) { content(close) }
         }
     }
 }
@@ -122,12 +126,12 @@ fun LookSheet(composer: ComposerViewModel, onDismiss: () -> Unit) {
     val view = LocalView.current
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    PickerSheet(stringResource(R.string.create_look), "lookSheet", "lookDone", onDismiss) {
+    PickerSheet(stringResource(R.string.create_look), "lookSheet", "lookDone", onDismiss) { close ->
         LookTiles(LookRules.tiles(looks, composer.attached), composer.options.lookChoice.look) { tile ->
             haptics.play(DesignTokens.Haptic.Selection)
             if (tile.locked) return@LookTiles          // a dimmed tile answers softly and changes nothing
             composer.pickLook(tile.id)?.let { view.announceForAccessibility(it) }      // the look needs a longer video: the length was moved, Create says so above the pills
-            if (!touchExploration(context)) scope.launch { delay(320); onDismiss() }
+            if (!touchExploration(context)) scope.launch { delay(320); close() }
         }
     }
 }
@@ -148,12 +152,17 @@ fun CharactersSheet(composer: ComposerViewModel, onDismiss: () -> Unit) {
             if (cast != null) {
                 val full = LookRules.castIsFull(choice, looks)
                 val scale = androidx.compose.ui.platform.LocalDensity.current.fontScale
-                FaceGrid(cast.grouped, columns = if (scale >= 1.5f) 3 else if (scale >= 1.3f) 4 else 5, gap = if (scale >= 1.5f) Vmk.space.m else Vmk.space.s) { m ->
-                    val selected = m.id in choice.cast
-                    FaceCell(m, selected, inert = full && !selected) {
-                        val (tap, line) = composer.toggleCast(m.id)
-                        if (tap != LookRules.CastTap.Full) haptics.play(DesignTokens.Haptic.Selection)
-                        if (line != null) { lengthLine = line; view.announceForAccessibility(line) }
+                // five across; fewer only where a name at this text size would not fit its face (the largest text: four, three on a small phone)
+                androidx.compose.foundation.layout.BoxWithConstraints(Modifier.fillMaxWidth()) {
+                    val gap = if (scale >= 1.5f) Vmk.space.m else Vmk.space.s
+                    val columns = ((maxWidth + gap) / (40.dp * maxOf(1f, scale) + gap)).toInt().coerceIn(3, 5)
+                    FaceGrid(cast.grouped, columns, gap) { m ->
+                        val selected = m.id in choice.cast
+                        FaceCell(m, selected, inert = full && !selected) {
+                            val (tap, line) = composer.toggleCast(m.id)
+                            if (tap != LookRules.CastTap.Full) haptics.play(DesignTokens.Haptic.Selection)
+                            if (line != null) { lengthLine = line; view.announceForAccessibility(line) }
+                        }
                     }
                 }
                 val line = lengthLine ?: LookRules.castLine(choice, looks)
@@ -192,7 +201,7 @@ private fun LookTile(tile: LookRules.Tile, chosen: Boolean, row: Boolean, modifi
         Column(Modifier.clearAndSetSemantics { }, verticalArrangement = Arrangement.spacedBy(2.dp)) {
             Text(o.label, style = MaterialTheme.typography.titleMedium, color = Vmk.colors.text, maxLines = if (row) 2 else 1, overflow = TextOverflow.Ellipsis)
             if (why != null) Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Vmk.space.xs)) {
-                if (tile.blocked == LookRules.Block.Plan) Icon(Sym.Lock, null, tint = Vmk.colors.text, modifier = Modifier.size(12.dp))
+                if (tile.blocked == LookRules.Block.Plan) Icon(Sym.Lock, null, tint = Vmk.colors.text, modifier = Modifier.size(with(androidx.compose.ui.platform.LocalDensity.current) { 12.sp.toDp() }))
                 // the whole tile is at 40 percent: the reason starts from the text colour so it stays readable
                 Text(why, style = MaterialTheme.typography.bodySmall, color = Vmk.colors.text, maxLines = if (row) 2 else 1, overflow = TextOverflow.Ellipsis)
             } else if (!row && note != null) Text(note, style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
@@ -202,7 +211,7 @@ private fun LookTile(tile: LookRules.Tile, chosen: Boolean, row: Boolean, modifi
     // "You cannot have this" has one look: in place, dimmed, with the reason where the note was. TalkBack says it is not available; a tap changes nothing.
     val behaviour = if (tile.locked) base.alpha(0.4f).clickable(interactionSource = source, indication = null, role = Role.RadioButton) { onPick(tile) }.semantics(mergeDescendants = true) { contentDescription = spoken; disabled() }
         else base.selectable(selected = chosen, interactionSource = source, indication = null, role = Role.RadioButton) { onPick(tile) }.semantics(mergeDescendants = true) { contentDescription = spoken }
-    if (row) Row(behaviour.heightIn(min = Vmk.minTouch), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Vmk.space.l)) { LookPicture(o, chosen, row = true, Modifier.size(96.dp, 60.dp)); words() }
+    if (row) Row(behaviour.heightIn(min = Vmk.minTouch), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Vmk.space.l)) { LookPicture(o, chosen, row = true, Modifier.size(96.dp, 60.dp)); Box(Modifier.weight(1f)) { words() } }
     else Column(behaviour, verticalArrangement = Arrangement.spacedBy(Vmk.space.s)) { LookPicture(o, chosen, row = false, Modifier.fillMaxWidth().aspectRatio(1.6f)); words() }
 }
 
@@ -271,7 +280,9 @@ private fun FaceCell(m: CastMember, selected: Boolean, inert: Boolean, onTap: ()
                 drawCircle(ring, radius = size.minDimension / 2 - w / 2, style = Stroke(w))
             }
         })
-        Text(m.name, style = MaterialTheme.typography.labelMedium, fontWeight = androidx.compose.ui.text.font.FontWeight.Normal, color = Vmk.colors.text, textAlign = TextAlign.Center, modifier = Modifier.clearAndSetSemantics { })
+        // a name is whole on one line at every text size: where it would not fit its column it is drawn a little smaller, never broken in two and never cut
+        Text(m.name, style = MaterialTheme.typography.labelMedium, fontWeight = androidx.compose.ui.text.font.FontWeight.Normal, color = Vmk.colors.text, textAlign = TextAlign.Center, maxLines = 1, softWrap = false,
+            autoSize = androidx.compose.foundation.text.TextAutoSize.StepBased(minFontSize = 8.sp, maxFontSize = MaterialTheme.typography.labelMedium.fontSize, stepSize = 1.sp), modifier = Modifier.fillMaxWidth().clearAndSetSemantics { })
     }
 }
 

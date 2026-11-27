@@ -379,7 +379,7 @@ def test_the_storage_flag_no_longer_gives_the_logo_but_the_admin_override_and_te
     flags = plans_on.ddb.Table("Flags")
     put_logo(plans_on)
     flags.put_item(Item={"user_id": USER, "storage_plan": "pro"})                            # before plans this meant "premium": own logo is Max only now (owner decision 6)
-    assert store.rights(USER) == {"premium": False, "forced": True, "modes": ["videomk"], "by_plan": True, "plan": "free"}
+    assert store.rights(USER) == {"premium": False, "forced": True, "modes": ["videomk"], "by_plan": True, "plan": "free", "test": False}
     flags.put_item(Item={"user_id": USER, "watermark_custom": True})                         # the admin's override stays: own logo, nothing forced, on any plan
     wr = store.rights(USER)
     assert wr["premium"] and not wr["forced"] and {"none", "custom"} <= set(wr["modes"])
