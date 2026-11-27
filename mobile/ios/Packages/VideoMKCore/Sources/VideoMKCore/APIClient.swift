@@ -30,6 +30,13 @@ public enum APIError: Error, Equatable, Sendable {
     }
 }
 
+public enum RetryResult: Equatable, Sendable {
+    case started(photos: Int?, unusable: Int)
+    case alreadyRunning
+    case unsupported
+    case refused(code: String, message: String)
+}
+
 public protocol AuthorizationProviding: Sendable {
     /// A valid ID token (refreshed if needed) and the user id (the token's `sub`).
     func authorization() async throws -> (idToken: String, userID: String)
@@ -94,6 +101,19 @@ public struct APIClient: Sendable {
         let body = try JSONSerialization.data(withJSONObject: fields)
         let (data, _) = try await send("POST", ["videos", "generate"], body: body)
         return try decode(StartResponse.self, data).videoID
+    }
+
+    /// "Try again" on a video that did not finish: the SAME video starts again on the server with everything it was made with (photos, options, language, watermark), no second row.
+    /// Never resends anything from the phone. `.unsupported` is an older server without the route: the caller must not rebuild the request (that would drop the attachments).
+    public func retryVideo(videoID: String) async throws -> RetryResult {
+        let (data, http) = try await perform("POST", ["videos", videoID, "retry"])
+        return try RetryRules.result(status: http.statusCode, body: data)
+    }
+
+    /// Removes a video that did not finish (failed, cancelled or refused). A made video is never deleted here (409). False: the server does not have the route.
+    public func deleteVideo(videoID: String) async throws -> Bool {
+        let (data, http) = try await perform("DELETE", ["videos", videoID])
+        return try RetryRules.removed(status: http.statusCode, body: data)
     }
 
     // MARK: editor
