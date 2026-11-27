@@ -10,7 +10,8 @@ Retry (docs/CREATE_API.md "Retry a video"):
   * at most MAX_RETRIES retries per video (each failed attempt still costs us model calls), then 409 `retry_limit`;
   * the old attempt's leftovers are cleared (S3 generation/v2/<video>/, the plan/title/failure attributes, the per-video cost counter restarts so the cost cap is per attempt);
   * a new Step Functions execution named `<video id>-r<n>` (a name can be used once, and the history of the first run stays readable).
-Delete: only a FAILED, CANCELLED or REJECTED video of the caller (a made video is never deleted here), removes the row and its working files.
+Cancel (POST .../videos/{video_id}/cancel): a video that is being made: stop the workflow, mark it CANCELLED, credits back exactly once, working files cleared, photos kept.
+Delete: a COMPLETE, FAILED, CANCELLED or REJECTED video of the caller: removes the row, its working files and its finished files (a video being made is cancelled first).
 """
 import json
 import logging
@@ -35,7 +36,7 @@ logger.setLevel(logging.INFO)
 MAX_RETRIES = int(os.environ.get("MAX_VIDEO_RETRIES", "3"))
 RETRIABLE = ("FAILED", "CANCELLED")
 FINAL = ("COMPLETE", "REJECTED")
-DELETABLE = ("FAILED", "CANCELLED", "REJECTED")
+DELETABLE = ("COMPLETE", "FAILED", "CANCELLED", "REJECTED")
 MAX_REQUEST_BYTES = 150_000   # what is kept on the item (the item limit is 400 KB); a larger request is read back from the workflow's own history instead
 CLEAR_MAX_KEYS = 2000
 
@@ -384,7 +385,41 @@ def retry_handler(event: Dict[str, Any], context: Any = None) -> Dict[str, Any]:
                                "startDate": start_date.isoformat() if hasattr(start_date, "isoformat") else ""})
 
 
-def delete_handler(event: Dict[str, Any], context: Any = None) -> Dict[str, Any]:
+def _execution_arn(item: Dict[str, Any]) -> Optional[str]:
+    """The workflow run that is making this video now: `<video id>` for the first attempt, `<video id>-r<n>` after n retries."""
+    arn = os.environ.get("STATE_MACHINE_ARN", "")
+    if not arn or ":stateMachine:" not in arn:
+        return None
+    n = int(item.get("retries") or 0)
+    return arn.replace(":stateMachine:", ":execution:") + ":" + str(item["video_id"]) + (f"-r{n}" if n else "")
+
+
+def clear_published(user: str, video_id: str) -> int:
+    """Best effort: the finished files of one video of one person (videos/<user>/<video>/: the MP4s of every revision, previews, the GIF). Nothing else is under that folder."""
+    bucket, n = os.environ.get("ASSETS_BUCKET", ""), 0
+    if not bucket or not user or any(bad in part for part in (user, video_id) for bad in ("/", "..")) or not video_id:
+        return 0
+    prefix = f"videos/{user}/{video_id}/"
+    try:
+        token = None
+        while n < CLEAR_MAX_KEYS:
+            res = _s3.list_objects_v2(Bucket=bucket, Prefix=prefix, **({"ContinuationToken": token} if token else {}))
+            keys = [{"Key": o["Key"]} for o in res.get("Contents", [])]
+            if keys:
+                _s3.delete_objects(Bucket=bucket, Delete={"Objects": keys, "Quiet": True})
+                n += len(keys)
+            token = res.get("NextContinuationToken")
+            if not token:
+                break
+    except Exception:   # noqa: BLE001
+        logger.warning("VIDEO_DELETE_PUBLISHED_FAILED video=%s", video_id)
+    return n
+
+
+def cancel_handler(event: Dict[str, Any], context: Any = None) -> Dict[str, Any]:
+    """POST /users/{user_id}/videos/{video_id}/cancel (docs/CREATE_API.md "Cancel a video"). Only the owner, only a video that is being made.
+    Order: the row is moved to CANCELLED by ONE conditional write (two taps, or a tap racing the workflow's own end: exactly one wins); only the winner stops the
+    workflow, refunds (wallet.refund_video is itself once-only, by the `refunded` flag on the row) and clears the working files. The photos are kept so "Try again" works."""
     loc = i18n.pick_locale(event)
     user, video_id, bad = _auth(event, loc)
     if bad:
@@ -393,18 +428,82 @@ def delete_handler(event: Dict[str, Any], context: Any = None) -> Dict[str, Any]
     if not item:
         return json_response(404, {"code": "not_found", "message": i18n.t("retry.not_found", loc)})
     status = str(item.get("status") or "")
-    if status not in DELETABLE:   # making: it ends by itself; made: deleting a finished video is not offered here
-        return json_response(409, {"code": "not_deletable", "message": i18n.t("retry.not_deletable", loc), **_state(item)})
+    if status == "CANCELLED":   # a second tap: the same answer, nothing is refunded again
+        return json_response(200, {"message": "already cancelled", **_state(item), "refunded": 0})
+    if status in ("COMPLETE", "FAILED", "REJECTED"):
+        return json_response(409, {"code": "not_cancellable", "message": i18n.t("retry.cancel_not_making", loc), **_state(item)})
+    now = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
     try:
-        wallet.refund_video(item)   # exactly once; a failed or rejected video costs nothing
-    except Exception:   # noqa: BLE001
-        logger.exception("VIDEO_DELETE_REFUND_FAILED video=%s", video_id)
-    try:
-        _table().delete_item(Key={"video_id": video_id}, ConditionExpression="user_id = :u AND #s IN (:f, :c, :r)", ExpressionAttributeNames={"#s": "status"},
-                             ExpressionAttributeValues={":u": user, ":f": "FAILED", ":c": "CANCELLED", ":r": "REJECTED"})
+        _table().update_item(
+            Key={"video_id": video_id}, UpdateExpression="SET #s = :c, cancelled_at = :now, cancel_reason = :why",
+            ConditionExpression="user_id = :u AND #s = :was AND (attribute_not_exists(retries) OR retries = :n)", ExpressionAttributeNames={"#s": "status"},
+            ExpressionAttributeValues={":c": "CANCELLED", ":now": now, ":why": "user", ":u": user, ":was": status, ":n": int(item.get("retries") or 0)})
     except ClientError as e:
-        if e.response.get("Error", {}).get("Code") == "ConditionalCheckFailedException":   # it was retried in the meantime
+        if e.response.get("Error", {}).get("Code") != "ConditionalCheckFailedException":
+            raise
+        cur = _own_item(user, video_id)   # it moved on while we looked: finished, failed, cancelled by another tap, or a later step of the making
+        if not cur:
+            return json_response(404, {"code": "not_found", "message": i18n.t("retry.not_found", loc)})
+        if str(cur.get("status") or "") == "CANCELLED":
+            return json_response(200, {"message": "already cancelled", **_state(cur), "refunded": 0})
+        if str(cur.get("status") or "") in ("COMPLETE", "FAILED", "REJECTED"):
+            return json_response(409, {"code": "not_cancellable", "message": i18n.t("retry.cancel_not_making", loc), **_state(cur)})
+        return json_response(409, {"code": "try_again", "message": i18n.t("retry.cancel_try_again", loc), **_state(cur)})   # between two steps: the app sends it once more
+    arn = _execution_arn(item)
+    if arn:
+        try:
+            _sfn.stop_execution(executionArn=arn, error="CANCELLED", cause="cancelled by the owner")
+        except Exception as e:   # noqa: BLE001 - already ended or never started: the row is cancelled either way, and status writes of late steps are refused (generate_video/db.FROZEN_STATUSES)
+            logger.warning("VIDEO_CANCEL_STOP %s video=%s", type(e).__name__, video_id)
+    refunded = 0
+    try:
+        refunded = wallet.refund_video(item)   # exactly once per attempt
+    except Exception:   # noqa: BLE001
+        logger.exception("VIDEO_CANCEL_REFUND_FAILED video=%s", video_id)
+    clear_prefix(video_id)   # the working files; the photos stay for "Try again"
+    try:   # the Making status is over
+        from common import making
+        attrs = [a for a in making.ATTRS if a in item]
+        if attrs:
+            _table().update_item(Key={"video_id": video_id}, UpdateExpression="REMOVE " + ", ".join(f"#a{i}" for i in range(len(attrs))),
+                                 ConditionExpression="#s = :c", ExpressionAttributeNames={"#s": "status", **{f"#a{i}": a for i, a in enumerate(attrs)}}, ExpressionAttributeValues={":c": "CANCELLED"})
+    except Exception:   # noqa: BLE001
+        pass
+    logger.info("VIDEO_CANCELLED video=%s refunded=%s", video_id, refunded)
+    return json_response(200, {"message": "cancelled", "video_id": video_id, "status": "CANCELLED", "retries": int(item.get("retries") or 0), "refunded": refunded})
+
+
+EDIT_BUSY_S = 20 * 60   # an edit that started rendering less than this ago is still writing the video's files
+
+
+def delete_handler(event: Dict[str, Any], context: Any = None) -> Dict[str, Any]:
+    """DELETE /users/{user_id}/videos/{video_id} (docs/CREATE_API.md "Delete a video"). Only the owner. A finished video (COMPLETE) or one that did not finish (FAILED,
+    CANCELLED, REJECTED): the row, its working files and its finished files go. A video that is being made is cancelled first (POST .../cancel). Never touches the
+    person's uploads or their My media library (another bucket; nothing here can write to it)."""
+    loc = i18n.pick_locale(event)
+    user, video_id, bad = _auth(event, loc)
+    if bad:
+        return bad
+    item = _own_item(user, video_id)
+    if not item:   # also the answer to a second DELETE: the video is gone (ids cannot be probed, so "never existed" and "already deleted" look the same)
+        return json_response(404, {"code": "not_found", "message": i18n.t("retry.not_found", loc)})
+    status = str(item.get("status") or "")
+    if status not in DELETABLE:   # being made: cancel it first, then it can be removed
+        return json_response(409, {"code": "not_deletable", "message": i18n.t("retry.not_deletable", loc), **_state(item)})
+    if status == "COMPLETE" and str(item.get("edit_state") or "") == "RENDERING" and int(item.get("edit_started_at") or 0) > time.time() - EDIT_BUSY_S:
+        return json_response(409, {"code": "busy", "message": i18n.t("retry.delete_busy", loc), **_state(item)})   # an edit is rendering: its files are being written right now
+    if status != "COMPLETE":
+        try:
+            wallet.refund_video(item)   # exactly once; a failed, cancelled or rejected video costs nothing. A finished video was delivered: deleting it refunds nothing
+        except Exception:   # noqa: BLE001
+            logger.exception("VIDEO_DELETE_REFUND_FAILED video=%s", video_id)
+    try:
+        _table().delete_item(Key={"video_id": video_id}, ConditionExpression="user_id = :u AND #s = :was", ExpressionAttributeNames={"#s": "status"},
+                             ExpressionAttributeValues={":u": user, ":was": status})
+    except ClientError as e:
+        if e.response.get("Error", {}).get("Code") == "ConditionalCheckFailedException":   # it was retried or edited in the meantime
             return json_response(409, {"code": "not_deletable", "message": i18n.t("retry.not_deletable", loc)})
         raise
-    clear_prefix(video_id, keep_photos=False)   # a removed video keeps nothing, not even its photos
+    clear_prefix(video_id, keep_photos=False)   # a removed video keeps nothing, not even its copies of the photos
+    clear_published(user, video_id)             # the MP4s, previews and GIF (also what a late step of a cancelled video may have left)
     return json_response(200, {"message": "deleted", "video_id": video_id})

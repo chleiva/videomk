@@ -434,6 +434,9 @@ class BackendStack(Stack):
             iam.PolicyStatement(actions=["s3:GetObject", "s3:DeleteObject"], resources=[f"arn:aws:s3:::{ASSETS_BUCKET}/generation/v2/*"]),
             iam.PolicyStatement(actions=["s3:PutObject"], resources=[uploads_objects]),
             iam.PolicyStatement(actions=["states:DescribeExecution"], resources=[f"arn:aws:states:{self.region}:{self.account}:execution:{active_machine.state_machine_name}:*"]),   # older videos: the request they were started with
+            iam.PolicyStatement(actions=["states:StopExecution"], resources=[f"arn:aws:states:{self.region}:{self.account}:execution:{active_machine.state_machine_name}:*"]),       # cancel a video that is being made (POST .../cancel)
+            iam.PolicyStatement(actions=["s3:DeleteObject"], resources=[f"arn:aws:s3:::{ASSETS_BUCKET}/videos/*"]),                                                                   # delete a finished video: its MP4s, previews and GIF
+            iam.PolicyStatement(actions=["s3:ListBucket"], resources=[f"arn:aws:s3:::{ASSETS_BUCKET}"], conditions={"StringLike": {"s3:prefix": ["videos/*"]}}),                      # ... found by listing that one video's folder
         ]))
 
         # ============================
@@ -477,6 +480,7 @@ class BackendStack(Stack):
         videos = user_id.add_resource("videos")
         generate = videos.add_resource("generate")
         video_item = videos.add_resource("{video_id}")
+        cancel_res = video_item.add_resource("cancel")   # POST: stop a video that is being made, credits back (lambdas/video_retry.py cancel_handler, served by the launcher)
         retry_res = video_item.add_resource("retry")   # POST: "Try again" reuses the failed video (lambdas/video_retry.py, served by the launcher)
         wallet_res = user_id.add_resource("wallet")
         uploads_res = user_id.add_resource("uploads")
@@ -542,7 +546,7 @@ class BackendStack(Stack):
         CfnOutput(self, "AssetsBucketName", value=assets_bucket.bucket_name)
         authorizer = apigw.CognitoUserPoolsAuthorizer(self, "ApiAuthorizer", cognito_user_pools=[user_pool])
 
-        for resource, methods in ((users, ["GET", "POST", "OPTIONS"]), (user_id, ["GET", "POST", "OPTIONS"]), (videos, ["GET", "POST", "OPTIONS"]), (generate, ["POST", "OPTIONS"]), (video_item, ["GET", "DELETE", "OPTIONS"]), (retry_res, ["POST", "OPTIONS"]), (wallet_res, ["GET", "OPTIONS"]), (uploads_res, ["POST", "OPTIONS"])):
+        for resource, methods in ((users, ["GET", "POST", "OPTIONS"]), (user_id, ["GET", "POST", "OPTIONS"]), (videos, ["GET", "POST", "OPTIONS"]), (generate, ["POST", "OPTIONS"]), (video_item, ["GET", "DELETE", "OPTIONS"]), (retry_res, ["POST", "OPTIONS"]), (cancel_res, ["POST", "OPTIONS"]), (wallet_res, ["GET", "OPTIONS"]), (uploads_res, ["POST", "OPTIONS"])):
             resource.add_cors_preflight(allow_origins=apigw.Cors.ALL_ORIGINS, allow_methods=methods, allow_headers=["Content-Type", "Authorization", "X-Region", "X-Timezone", "X-Locale"])
 
         cognito_auth = dict(authorization_type=apigw.AuthorizationType.COGNITO, authorizer=authorizer)
@@ -672,6 +676,7 @@ class BackendStack(Stack):
         # "Try again" on a video that did not finish reuses that video (no second row): POST .../videos/{id}/retry; DELETE .../videos/{id} removes a failed one. Both are served by the launcher (lambdas/video_retry.py).
         retry_res.add_method("POST", apigw.LambdaIntegration(launcher_fn, proxy=True), **cognito_auth)
         video_item.add_method("DELETE", apigw.LambdaIntegration(launcher_fn, proxy=True), **cognito_auth)
+        cancel_res.add_method("POST", apigw.LambdaIntegration(launcher_fn, proxy=True), **cognito_auth)   # stop a video that is being made, credits back (lambdas/video_retry.py cancel_handler)
 
         # ----------------------------
         # Editor API (engine v2 only): read the plan, submit validated edits.

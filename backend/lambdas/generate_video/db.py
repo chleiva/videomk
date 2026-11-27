@@ -9,6 +9,9 @@ _dynamodb = boto3.resource("dynamodb")
 
 # Once a video reaches one of these, later (late/duplicate) updates are ignored.
 TERMINAL_STATUSES = ("COMPLETE", "REJECTED")
+# A video the person cancelled (POST .../cancel, lambdas/video_retry.py): its workflow was stopped, but a step that was already running still finishes and would
+# write its status over CANCELLED (and a late failure would mark it FAILED). Only "Try again" moves a cancelled video on, with its own conditional write.
+FROZEN_STATUSES = TERMINAL_STATUSES + ("CANCELLED",)
 
 
 def _get_table(table_name: Optional[str] = None):
@@ -34,7 +37,7 @@ def update_status(
     table_name: Optional[str] = None,
     extra_attributes: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
-    """Set status (+ attributes). No-op (returns {}) if the item is already terminal."""
+    """Set status (+ attributes). No-op (returns {}) if the item is already terminal or was cancelled by its owner."""
     names = {"#s": "status"}
     values: Dict[str, Any] = {":s": status}
     sets = ["#s = :s"]
@@ -43,7 +46,7 @@ def update_status(
         values[f":{key}"] = value
         sets.append(f"#{key} = :{key}")
 
-    terminal_values = {f":t{i}": t for i, t in enumerate(TERMINAL_STATUSES)}
+    terminal_values = {f":t{i}": t for i, t in enumerate(FROZEN_STATUSES)}
     values.update(terminal_values)
     condition = "attribute_not_exists(#s) OR NOT (#s IN ({}))".format(", ".join(terminal_values))
 

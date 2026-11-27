@@ -329,16 +329,16 @@ def test_the_list_says_when_try_again_is_worth_offering(env):
 
 
 # ---------------------------------------------------------------- remove a failed video
-def test_a_failed_video_can_be_removed_and_a_made_one_cannot(env):
+def test_a_failed_video_can_be_removed_and_one_being_made_cannot(env):
     vid, _ = _failed_video(env, n=1)
     env.s3.put_object(Bucket=BUCKET, Key=f"generation/v2/{vid}/assets/user_P1.jpg", Body=b"x")
     ev = _event(vid, method="DELETE", resource="/users/{user_id}/videos/{video_id}")
     assert env.sl.handler(_event(vid, user="u2", method="DELETE", resource="/users/{user_id}/videos/{video_id}"), None)["statusCode"] == 404
     assert env.sl.handler(ev, None)["statusCode"] == 200
     assert _item(env, vid) is None and env.s3.list_objects_v2(Bucket=BUCKET, Prefix=f"generation/v2/{vid}/")["KeyCount"] == 0
-    done, _ = _failed_video(env, status="COMPLETE", n=1)
-    r = env.sl.handler(_event(done, method="DELETE", resource="/users/{user_id}/videos/{video_id}"), None)
-    assert r["statusCode"] == 409 and _body(r)["code"] == "not_deletable" and _item(env, done)
+    making, _ = _failed_video(env, status="ASSETS_CREATION", n=1)   # (a finished video can be deleted since 2026-11-27: tests/test_video_cancel_delete.py)
+    r = env.sl.handler(_event(making, method="DELETE", resource="/users/{user_id}/videos/{video_id}"), None)
+    assert r["statusCode"] == 409 and _body(r)["code"] == "not_deletable" and _item(env, making)
 
 
 # ---------------------------------------------------------------- the crash that failed the owner's 64-photo video

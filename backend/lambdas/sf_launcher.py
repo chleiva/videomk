@@ -285,7 +285,9 @@ def handler(event: Dict[str, Any], context: Any):
     resource, method = str((event or {}).get("resource") or ""), str((event or {}).get("httpMethod") or "").upper()
     if resource.endswith("/{video_id}/retry"):   # POST /users/{user_id}/videos/{video_id}/retry: the same video again (lambdas/video_retry.py)
         return video_retry.retry_handler(event, context)
-    if resource.endswith("/{video_id}") and method == "DELETE":   # DELETE /users/{user_id}/videos/{video_id}: remove a video that did not finish
+    if resource.endswith("/{video_id}/cancel"):   # POST /users/{user_id}/videos/{video_id}/cancel: stop a video that is being made, credits back
+        return video_retry.cancel_handler(event, context)
+    if resource.endswith("/{video_id}") and method == "DELETE":   # DELETE /users/{user_id}/videos/{video_id}: remove a video (finished, failed, cancelled or rejected) and its files
         return video_retry.delete_handler(event, context)
     path_user_id = ((event or {}).get("pathParameters") or {}).get("user_id")
     auth_user_id = extract_cognito_sub(event)

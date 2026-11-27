@@ -165,18 +165,35 @@ def _live_buckets(user_id: str, now: float) -> List[Dict[str, Any]]:
     return [b for b in sorted(res["Items"], key=lambda b: b["sk"]) if int(b["remaining"]) > 0 and int(b["expires_at"]) > now]
 
 
+def _iso(epoch: float) -> str:
+    return datetime.fromtimestamp(int(epoch), timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def next_free_credit(user_id: str, *, now: Optional[float] = None, tz: Optional[str] = None, meta: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    """When the next daily free credit can be claimed, by the same rule ensure_grants applies: the user's local day (X-Timezone) AND the UTC day must both have
+    moved on since the last claim, so it is the later of the next local midnight and the next UTC midnight after the last claim. The credit is added the first
+    time the wallet is read or a video is started after that moment (nothing is pushed). {} when daily credits are switched off.
+    {"next_free_credit_at": ISO 8601 UTC, "next_free_credits": how many, "next_daily_at": the same moment as epoch seconds (the older field)}"""
+    r = rules()
+    if r["daily"] <= 0:
+        return {"next_daily_at": None, "next_free_credit_at": None, "next_free_credits": 0}
+    now = time.time() if now is None else now
+    if meta is None:
+        meta = _table().get_item(Key={"user_id": user_id, "sk": "META"}).get("Item") or {}
+    _, midnight = local_day(now, tz)
+    at = int(max(midnight, (int(meta.get("last_daily_utc_day", 0)) + 1) * 86400.0))
+    return {"next_daily_at": at, "next_free_credit_at": _iso(at), "next_free_credits": r["daily"]}
+
+
 def balance(user_id: str, *, now: Optional[float] = None, tz: Optional[str] = None) -> Dict[str, Any]:
     now = time.time() if now is None else now
     ensure_grants(user_id, now=now, tz=tz)
     live = _live_buckets(user_id, now)
     meta = _table().get_item(Key={"user_id": user_id, "sk": "META"}).get("Item") or {}
     unlimited = is_unlimited(user_id)
-    r = rules()
-    _, midnight = local_day(now, tz)
-    next_daily = max(midnight, (int(meta.get("last_daily_utc_day", 0)) + 1) * 86400.0) if r["daily"] else None
     return {"balance": UNLIMITED_DISPLAY if unlimited else sum(int(b["remaining"]) for b in live), "unlimited": unlimited,
             "buckets": [{"kind": b["kind"], "remaining": int(b["remaining"]), "expires_at": int(b["expires_at"]) if int(b["expires_at"]) < NEVER else None} for b in live],
-            "next_daily_at": int(next_daily) if next_daily else None, "rules": r}
+            **next_free_credit(user_id, now=now, tz=tz, meta=meta), "rules": rules()}
 
 
 def charge(user_id: str, credits: int, *, now: Optional[float] = None, tz: Optional[str] = None) -> List[Dict[str, Any]]:
