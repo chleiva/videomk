@@ -40,6 +40,19 @@ def _bucket_region(bucket: str) -> str:
         return os.environ.get("AWS_REGION") or os.environ.get("AWS_DEFAULT_REGION") or "us-east-1"
 
 
+def _plain(v: Any) -> Any:
+    """A stored value as JSON can carry it (the table returns numbers as Decimal)."""
+    from decimal import Decimal
+
+    if isinstance(v, Decimal):
+        return int(v) if v % 1 == 0 else float(v)
+    if isinstance(v, dict):
+        return {k: _plain(x) for k, x in v.items()}
+    if isinstance(v, (list, tuple, set)):
+        return [_plain(x) for x in v]
+    return v
+
+
 def _json_response(status: int, body: Dict[str, Any]) -> Dict[str, Any]:
     return {
         "statusCode": status,
@@ -182,6 +195,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             "description": item.get("youtube_description"),  # chapters + image credits (linked) + sources, ready to paste
             "url": url,
             "download": download_flag,
+            **({"look": _plain(item["look"])} if isinstance(item.get("look"), dict) else {}),   # which look the video got, who chose it and why (docs/CREATE_API.md "Video look")
         },
     )
 

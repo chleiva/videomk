@@ -123,6 +123,21 @@ def _watermark(event: Dict[str, Any], video_id: str, user_id: str) -> Optional[D
         return {"mode": "videomk"} if os.environ.get("FORCE_WATERMARK", "0") == "1" else None
 
 
+def _look_attribute(plan: Dict[str, Any]) -> Dict[str, Any]:
+    """The video record's `look` (docs/CREATE_API.md "Video look"): which look the video got, who chose it and why, the share of its time in the look."""
+    try:
+        from decimal import Decimal
+
+        from .. import art_direction
+        rec = art_direction.record(plan)
+        if not rec:
+            return {}
+        return {"look": {k: (Decimal(str(v)) if isinstance(v, float) else v) for k, v in rec.items() if v is not None}}
+    except Exception:  # noqa: BLE001 - the record is information, never a reason to fail a plan
+        logger.exception("LOOK_ATTRIBUTE_FAILED")
+        return {}
+
+
 def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     video_id = str(event["video_id"])
     user_id = str(event.get("user_id", ""))
@@ -158,7 +173,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         result = _deck_result(event, video_id, user_id, prompt, minutes, spent, ask_small, ask_big, catalog)
     else:
         result = director.direct(prompt, minutes=minutes, ask_small=ask_small, ask_big=ask_big, language=None if event.get("language") in (None, "auto") else event.get("language"),   # auto: detected from the description
-                                 options={**{k: event.get(k) for k in ("platform", "aspect", "brief", "style", "presenter")}, "end_card": bool(isinstance(event.get("watermark"), dict) and event["watermark"].get("mode") == "videomk" and event["watermark"].get("end_card"))},   # end_card: the closing card is part of the length asked (engine/length.py)
+                                 options={**{k: event.get(k) for k in ("platform", "aspect", "brief", "style", "presenter", "look", "cast", "extras")}, "end_card": bool(isinstance(event.get("watermark"), dict) and event["watermark"].get("mode") == "videomk" and event["watermark"].get("end_card"))},   # end_card: the closing card is part of the length asked (engine/length.py)
                                  region=event.get("region"), theme=event.get("theme"), web_provider=provider, ask_tools=ask_tools, photos=photos, story=story,
                                  max_images_per_minute=event.get("max_images_per_minute", float(os.environ.get("MAX_IMAGES_PER_MINUTE", "10"))),
                                  music_tracks=catalog)
@@ -195,6 +210,6 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         plan["tts"].update({"engine": os.environ.get("POLLY_ENGINE", "generative"), "region": os.environ.get("POLLY_REGION", "us-east-1")})
     key = awsio.prefix(video_id) + "plan_r1.json"
     awsio.put_json(key, plan)
-    update_status(video_id, "ASSETS_CREATION", extra_attributes={"title": plan["title"], "n_beats": len(plan["beats"]), **making_progress.plan_attributes(plan)})   # + the planned scenes for the Making screen
+    update_status(video_id, "ASSETS_CREATION", extra_attributes={"title": plan["title"], "n_beats": len(plan["beats"]), **making_progress.plan_attributes(plan), **_look_attribute(plan)})   # + the planned scenes for the Making screen
     set_attributes(video_id, {"plan_key": key, "rev": 1, **({"photos_skipped": len(skipped)} if skipped else {})})
     return {**base, "plot": {"legit": True}, "plan_key": key, "rev": 1, "mode": "final", "cost_field": "cost_usd", "beat_ids": [b["id"] for b in plan["beats"]]}

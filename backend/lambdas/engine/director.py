@@ -11,7 +11,7 @@ from datetime import date
 
 import logging
 
-from . import background, engagement, language as lang_mod, length as length_mod, plan as plan_mod, quality, research, researcher, skills as skills_mod, staged as staged_mod, presenter_policy, vector_policy, voices, whiteboard_policy
+from . import art_direction, background, engagement, language as lang_mod, length as length_mod, plan as plan_mod, quality, research, researcher, skills as skills_mod, staged as staged_mod, presenter_policy, vector_policy, voices, whiteboard_policy
 from .netsafe import quality_fixes
 
 def fit_to_target() -> bool:
@@ -84,18 +84,16 @@ def direct(prompt: str, *, minutes: float, ask_small: Ask, ask_big: Callable[[st
                 sources = r.sources + [s for s in sources if s["title"] not in have]
     if plan_mod.is_short(minutes):
         notes = notes[:SHORT_NOTES_CHARS]
-    vpolicy = vector_policy.decide(prompt, options=options, skill_ids=skill_ids, photos=photos, research_mode=info["mode"], minutes=minutes,
-                                   expected_beats=plan_mod.expected_beats(minutes, len(photos or [])), search=vector_search,
-                                   ask=(lambda sys_, usr: ask_small(sys_, usr, 160)) if vector_policy.enabled() else None)   # the cartoon scenes: a special style, offered only where the policy allows (docs/VECTOR_SCENE_POLICY.md)
-    # the whiteboard look (docs/WHITEBOARD.md, flag WHITEBOARD): a whole-video style; when it is on for this video the cartoon scenes are not offered
-    wants_presenter = presenter_policy.enabled() and presenter_policy.wish((options or {}).get("presenter"), prompt) not in ("auto", "none")   # asked for a character: the whiteboard look is then never chosen by itself
-    wpolicy = whiteboard_policy.decide(prompt, options=options, skill_ids=skill_ids, photos=photos, research_mode=info["mode"], presenter_asked=wants_presenter,
-                                       ask=(lambda sys_, usr: ask_small(sys_, usr, 120)) if whiteboard_policy.enabled() else None)
-    if wpolicy.allowed:
-        vpolicy = vector_policy.Policy(False, vpolicy.style, "whiteboard_video", aspect=vpolicy.aspect, flag=vpolicy.flag)
-    # a presenter character (docs/PRESENTERS.md, flag PRESENTERS): asked for, or on `auto` where it fits (children's and fun explainers, tutorials); never photos, decks, news, whiteboard
-    ppolicy = presenter_policy.decide(prompt, options=options, skill_ids=skill_ids, photos=photos, research_mode=info["mode"], language=language, whiteboard=wpolicy.allowed)
-    craft += vpolicy.prompt_block(language) + wpolicy.prompt_block(language) + ppolicy.prompt_block(language, plan_mod.expected_beats(minutes, len(photos or [])))
+    # ART DIRECTION (docs/CREATE_API.md "Video look"): ONE look for the whole video, decided before a word is written. A look the person chose (`look`, `cast`,
+    # `extras`, the older `style` / `presenter`, or plain words) is taken as it is; otherwise the director commits to one named recipe with a reason. The three
+    # older policies (cartoon scenes, whiteboard, presenter) are built FROM that decision, so they can no longer each add a little of their own.
+    n_expected = plan_mod.expected_beats(minutes, len(photos or []))
+    direction = art_direction.decide(prompt, options=options, skill_ids=skill_ids, photos=photos, research_mode=info["mode"], minutes=minutes, language=language,
+                                     ask=lambda sys_, usr: ask_small(sys_, usr, 320))
+    vpolicy, wpolicy, ppolicy = art_direction.policies(direction, prompt, options=options, skill_ids=skill_ids, minutes=minutes, expected_beats=n_expected, language=language,
+                                                       vector_search=vector_search, ask=(lambda sys_, usr: ask_small(sys_, usr, 160)) if vector_policy.enabled() else None)
+    info["look"] = direction.summary()
+    craft += vpolicy.prompt_block(language) + wpolicy.prompt_block(language) + art_direction.prompt_block(direction, language, minutes, (options or {}).get("aspect") or "16:9")
     written_from = [notes]   # everything the writer was shown (the grounding check compares the narration with it)
     rate = {"max_images_per_minute": max_images_per_minute} if max_images_per_minute is not None else {}
     with vector_policy.scope(vpolicy), whiteboard_policy.scope(wpolicy), presenter_policy.scope(ppolicy):
@@ -133,10 +131,11 @@ def direct(prompt: str, *, minutes: float, ask_small: Ask, ask_big: Callable[[st
         return {"legit": False, "reason": plan.get("reason", "")}
     warnings += vector_policy.enforce(plan, vpolicy)   # only catalog ids, the share cap, never two in a row; records plan["vector"]
     warnings += whiteboard_policy.enforce(plan, wpolicy)   # look on: text beats the director left become boards; records plan["whiteboard"]
-    if ppolicy.flag:   # character, side and voice on every presenter scene, the cap, an opening and a closing; records plan["presenter"] (nothing at all where the flag is off)
+    if ppolicy.flag:   # records plan["presenter"] (nothing at all where the flag is off)
         warnings += presenter_policy.enforce(plan, ppolicy)
-        if ppolicy.allowed and vpolicy.allowed:
-            presenter_policy.backdrops(plan, vpolicy.ids())
+    if direction.look == "cartoon":   # the character is in every scene by design
+        warnings = [w for w in warnings if "presenter twice in a row" not in w]
+    warnings += art_direction.enforce(plan, direction, backdrops=vpolicy.ids() if vpolicy.allowed else [])   # every scene fits the direction or is converted to it; records plan["look"]
     rejected = plan.pop("_rejected_scenes", None) or []
     if fetch_errors:
         info["fetch_errors"] = fetch_errors[:20]
@@ -153,7 +152,7 @@ def direct(prompt: str, *, minutes: float, ask_small: Ask, ask_big: Callable[[st
         if g["flagged"]:
             warnings.append(f"grounding: {g['flagged']} beats had unsupported specifics, {g['repaired']} rewritten")
 
-    if quality_fixes() and not photos:   # beat 1 is never a title card: a photograph of the subject (photo budget permitting) or the card's line as moving words (plan.enforce_opening)
+    if quality_fixes() and not photos and direction.look == "real":   # beat 1 is never a title card: a photograph of the subject (photo budget permitting) or the card's line as moving words (plan.enforce_opening)
         per_min = plan_mod.DEFAULT_MAX_IMAGES_PER_MINUTE if max_images_per_minute is None else min(plan_mod.MAX_IMAGES_PER_MINUTE, max(0.0, float(max_images_per_minute)))
         opened = plan_mod.enforce_opening(plan["beats"], plan_mod.image_budget(minutes, per_min))
         if opened:
@@ -196,6 +195,10 @@ def direct(prompt: str, *, minutes: float, ask_small: Ask, ask_big: Callable[[st
             plan["photo_story"] = {"story": story.get("story", ""), "voice": story.get("voice"), "tone": story.get("tone", ""), "chapters": [{"title": c.get("title", ""), "summary": c.get("summary", "")} for c in story["chapters"]],
                                    "unused": story.get("unused", [])}
     plan["sources"] = sources
+    if direction.look != "real":   # the steps after the first check (scene repair, grounding, the length fit) cannot take a scene out of the look, but the record is made again on the final plan
+        warnings += [w for w in art_direction.enforce(plan, direction, backdrops=vpolicy.ids() if vpolicy.allowed else []) if w.startswith("look ")]
+    if direction.board:
+        art_direction.settle_boards(plan)
     if wpolicy.allowed:   # the narration is final now: every board is tied to the words really said and gets emphasis marks where its pen would rest
         warnings = [w for w in warnings if "whiteboard twice in a row" not in w] + whiteboard_policy.settle(plan, wpolicy)
         warnings += whiteboard_policy.review(plan, wpolicy, ask_big, language)   # the self-check: boards that fail (sparse, overlapping, pen resting) are written again once, with the complaint

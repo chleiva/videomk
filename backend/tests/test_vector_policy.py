@@ -301,11 +301,18 @@ def test_director_offers_the_menu_only_when_allowed_and_records_the_result(on, m
 
     monkeypatch.setattr(director.research, "gather_notes", lambda *a, **k: ("notes", []))
     monkeypatch.setattr(director.skills_mod, "select", lambda *a, **k: ["kids-family"])
+    # Since the art direction (engine/art_direction.py) a video has ONE look: on `auto` a cartoon scene is no longer dropped into a video of photographs and text ...
     r = director.direct("Explain how plants grow, for kids", minutes=1.0, ask_small=ask_small, ask_big=ask_big, language="en", vector_search=fake_search)
-    assert r["legit"]
-    assert "- vector_scene:" in seen["system"] and "mountain_lake" in seen["system"]
-    assert r["plan"]["vector"]["used"] == [{"beat": 2, "id": "mountain_lake"}]
-    assert r["plan"]["beats"][2]["scene"]["props"]["catalog_id"] == "mountain_lake"
+    assert r["legit"] and "- vector_scene:" not in seen["system"]
+    assert r["plan"]["look"]["recipe"] == "footage" and r["plan"]["vector"]["used"] == [] and all(b["scene"]["type"] != "vector_scene" for b in r["plan"]["beats"])
+    # ... and in a video whose look is cartoon the scenes of the catalog are the world it happens in: the menu is offered, one beat in five may be a bare scene
+    monkeypatch.setenv("PRESENTERS", "1")
+    r = director.direct("Explain how plants grow, for kids", minutes=1.0, ask_small=ask_small, ask_big=ask_big, language="en", vector_search=fake_search, options={"look": "cartoon", "cast": ["turtle"]})
+    assert r["legit"] and "- vector_scene:" in seen["system"] and "mountain_lake" in seen["system"] and "CARTOON VIDEO" in seen["system"]
+    kinds = [b["scene"]["type"] for b in r["plan"]["beats"]]
+    assert set(kinds) <= {"presenter", "vector_scene"} and kinds.count("vector_scene") <= 1 and kinds[0] == kinds[-1] == "presenter"
+    assert len(r["plan"]["vector"]["used"]) == kinds.count("vector_scene") and r["plan"]["vector"]["backdrops"]
+    assert all(b["scene"]["props"].get("backdrop") for b in r["plan"]["beats"] if b["scene"]["type"] == "presenter") and r["plan"]["look"]["share"] >= 0.8
 
 
 def test_director_flag_off_prompt_is_unchanged(monkeypatch):

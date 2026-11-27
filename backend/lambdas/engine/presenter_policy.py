@@ -135,19 +135,24 @@ class Policy:
 
     def __init__(self, allowed: bool, reason: str, *, character: Optional[str] = None, asked: bool = False, flag: bool = True, language: str = "en"):
         self.allowed, self.reason, self.character, self.asked, self.flag, self.language = allowed, reason, character, asked, flag, language
+        # A video whose LOOK is cartoon (engine/art_direction.py): the character(s) are in every scene, not one beat in three; `cast_ids` are the characters of a
+        # conversation, `board` puts a hand-drawn board beside them. The direction then writes the prompt block and settles the plan itself.
+        self.every, self.cast_ids, self.board = False, [character] if character else [], False
 
     def cap(self, n_beats: int) -> int:
         """How many beats of a video of `n_beats` may be presenter scenes."""
         if not self.allowed or n_beats <= 0:
             return 0
+        if self.every:
+            return n_beats
         return min(n_beats, max(MIN_SCENES, int(round(SHARE * n_beats))))
 
     def summary(self) -> Dict[str, Any]:
         return {"decision": "presenter" if self.allowed else "no", "reason": self.reason, "asked": self.asked, **({"character": self.character} if self.allowed else {})}
 
     def prompt_block(self, language: str = "en", expected_beats: int = 0) -> str:
-        """The paragraph added to the director's prompt (empty when this video has no presenter)."""
-        if not self.allowed:
+        """The paragraph added to the director's prompt (empty when this video has no presenter, and when the look is cartoon: art_direction.prompt_block)."""
+        if not self.allowed or self.every:
             return ""
         c = CAST[self.character]
         n = self.cap(expected_beats) if expected_beats else 3
@@ -280,7 +285,7 @@ def enforce(plan: Dict[str, Any], policy: Optional[Policy], sanitize: Optional[A
     if policy is None:
         return warnings
     plan["presenter"] = policy.summary()
-    if not policy.allowed:
+    if not policy.allowed or policy.every:   # a cartoon-look video is settled by its direction (art_direction.enforce): every scene, the cast, the voices
         return warnings
     if sanitize is None:
         from .scenes import ELEMENTS
@@ -369,7 +374,8 @@ def link(scenes: List[Dict[str, Any]]) -> int:
             p = sc["props"]
             p["speech"] = [[str(w[0]), float(w[1]), float(w[2])] for w in sc.get("words") or []][:600]
             pp = (prev or {}).get("props") or {}
-            p["enter"] = not (prev is not None and prev.get("type") == "presenter" and pp.get("character") == p.get("character") and pp.get("side") == p.get("side"))
+            same_group = bool(p.get("cast")) and pp.get("cast") == p.get("cast")     # a conversation: everyone is already standing there
+            p["enter"] = not (prev is not None and prev.get("type") == "presenter" and (same_group or (not p.get("cast") and pp.get("character") == p.get("character") and pp.get("side") == p.get("side"))))
             p["seed"] = (zlib.crc32(str(sc.get("id", n)).encode("utf-8")) % 997) / 997.0
             n += 1
         prev = sc

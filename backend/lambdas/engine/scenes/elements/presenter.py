@@ -36,6 +36,8 @@ DEFAULT_CHARACTER = "ines"
 SIDES = ("left", "right")
 FRAMINGS = ("auto",) + vp.FRAMINGS
 MAX_POINTS, MAX_BARS = 4, 5
+MAX_CAST = 3                 # a conversation shows two or three characters
+BOARD_MAX_ITEMS = 8          # the hand-drawn board beside a character
 MOUTH_FPS = 30
 ID_RE = re.compile(r"^[a-z0-9_]{3,64}$")
 _PERF: "OrderedDict[Any, cg.Performance]" = OrderedDict()   # planned performances, by what they are planned from (bounded)
@@ -86,16 +88,54 @@ def _sanitize(props: Dict[str, Any]) -> Dict[str, Any]:
         out["asset"] = p["asset"][:300]
         if _s(p.get("credit"), 120):
             out["credit"] = _s(p.get("credit"), 120)
-    if not (heading or points or "chart" in out or "image_query" in out):
-        raise ValueError("presenter needs a heading, points, a chart or a picture")
+    # a conversation (docs/CREATE_API.md "Video look"): everyone on screen, in screen order; `character` is the one who speaks this scene
+    cast = [c for c in (p.get("cast") if isinstance(p.get("cast"), list) else []) if isinstance(c, str) and c in CAST]
+    cast = list(dict.fromkeys(cast))[:MAX_CAST]
+    if len(cast) >= 2:
+        if out["character"] not in cast:
+            out["character"] = cast[0]
+        out["cast"] = cast
+    bd_in = p.get("board")
+    if isinstance(bd_in, dict) and isinstance(bd_in.get("items"), list) and "chart" not in out and "image_query" not in out:   # a hand-drawn board as the content (the whiteboard element's own items)
+        from . import whiteboard as wbe
+        try:
+            board = wbe._sanitize({"items": bd_in["items"][:BOARD_MAX_ITEMS * 2]})
+            board["items"] = _trim_board(board["items"])
+            out["board"] = {"items": board["items"]}
+            out.pop("heading", None)
+            out.pop("points", None)
+        except (ValueError, TypeError):
+            pass
+    if p.get("held") is True:   # what the scene before already showed, kept on screen finished (a line of a conversation that shows nothing new)
+        out["held"] = True
+    has = heading or points or "chart" in out or "image_query" in out or "board" in out
+    if p.get("talk") is True and not has:
+        out["talk"] = True
+    elif not has:
+        raise ValueError("presenter needs a heading, points, a chart, a picture or a board")
     return out
 
 
+def _trim_board(items: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """The board beside a character is small: the first BOARD_MAX_ITEMS items, and nothing that points at an item that was cut."""
+    keep = items[:BOARD_MAX_ITEMS]
+    ids = {it["id"] for it in keep}
+    return [it for it in keep if all(it.get(k) is None or it[k] in ids for k in ("from", "to", "on", "near"))]
+
+
 def _anchors(props: Dict[str, Any]) -> List[str]:
+    if props.get("held"):
+        return []
+    if props.get("board"):
+        return [it["say"] for it in props["board"].get("items", []) if it.get("say")]
     return list(props.get("points") or []) if not props.get("chart") else list(props["chart"]["labels"])
 
 
 def _n_reveals(props: Dict[str, Any]) -> int:
+    if props.get("held"):
+        return 0
+    if props.get("board"):
+        return len(_anchors(props))
     return len(props["chart"]["labels"]) if props.get("chart") else len(props.get("points") or [])
 
 
@@ -107,7 +147,7 @@ def _cues(props: Dict[str, Any], dur: float) -> List[float]:
 def _fallback(props: Dict[str, Any]) -> Tuple[str, Dict[str, Any]]:
     """The same scene without what could not be fetched (the picture): the presenter and the card stay."""
     out = {k: v for k, v in props.items() if k not in ("image_query", "alt", "asset", "credit")}
-    if not (out.get("heading") or out.get("points") or out.get("chart")):
+    if not (out.get("heading") or out.get("points") or out.get("chart") or out.get("board") or out.get("talk")):
         out["heading"] = _s(props.get("alt") or props.get("image_query"), 48) or "…"
     return "presenter", out
 
@@ -166,23 +206,35 @@ def _speech(props: Dict[str, Any]) -> List[Tuple[str, float, float]]:
     return out[:600]
 
 
-def performance(props: Dict[str, Any], dur: float, lift: float, side: str) -> cg.Performance:
-    """Everything the character does in this scene, planned once from its words (kept for the frames that follow)."""
+def _stress(words: List[Tuple[str, float, float]]) -> List[float]:
+    """Moments a listener may nod at: the longer words of the speaker's line."""
+    return [a for (w, a, b) in words if len(w.strip(".,;:!?¿¡")) > 5]
+
+
+def performance(props: Dict[str, Any], dur: float, lift: float, side: str, who: Optional[str] = None, slot: int = 0, toward: float = 0.0, content_side: Optional[int] = None) -> cg.Performance:
+    """Everything a character does in this scene, planned once from the words (kept for the frames that follow). `who` is the character (default: the speaker);
+    a character that is not the speaker LISTENS: it looks toward the speaker (`toward`: -1 left, +1 right) and nods now and then, mouth closed."""
     words = _speech(props)
-    key = (props.get("character"), side, round(lift, 3), round(dur, 3), bool(props.get("enter", True)), _seed(props), tuple(words))
+    who = who or props.get("character")
+    speaking = who == props.get("character")
+    key = (who, speaking, side, slot, round(toward, 2), content_side, round(lift, 3), round(dur, 3), bool(props.get("enter", True)), _seed(props), tuple(words))
     perf = _PERF.get(key)
     if perf is not None:
         _PERF.move_to_end(key)
         return perf
-    content_side = 1 if side == "left" else -1
-    perf = cg.Performance(seed=_seed(props), content_side=content_side, tail=bool(CAST.get(props.get("character"), {}).get("tail")), lift=lift)
-    if words:
+    if content_side is None:
+        content_side = 1 if side == "left" else -1
+    seed = _seed(props) if speaking and not props.get("cast") else ((zlib.crc32(str(who).encode("utf-8")) % 991) / 991.0 * 0.6 + 0.4 * _seed(props)) % 1.0
+    perf = cg.Performance(seed=seed, content_side=content_side, tail=bool(CAST.get(who, {}).get("tail")), lift=lift)
+    if speaking and words:
         perf.speak(words, None, words[-1][2])
         perf.mouth(0.0, MOUTH_FPS, mouth_track(words, dur))
+    elif not speaking and words:
+        perf.listen(max(0.0, words[0][1] - 0.25), words[-1][2] + 0.1, toward, _stress(words))
     if props.get("enter", True):
-        perf.enter(0.10, from_side=-content_side, distance=55.0)
+        perf.enter(0.10 + 0.16 * slot, from_side=-content_side, distance=55.0)   # each steps in from its own edge of the picture, one after another
     _PERF[key] = perf
-    while len(_PERF) > 16:
+    while len(_PERF) > 24:
         _PERF.popitem(last=False)
     return perf
 
@@ -194,6 +246,8 @@ def layout(props: Dict[str, Any], ctx: SceneCtx) -> Dict[str, Any]:
     fr = ctx.frame
     side = props.get("side") if props.get("side") in SIDES else "left"
     preset = props.get("framing", "auto")
+    if len(props.get("cast") or []) >= 2:
+        return group_layout(props, ctx)
     if fr.landscape:
         if preset == "auto":
             preset = "waist_up"   # the flat front-facing puppet reads best from the waist up: the largest face and hands, the legs and feet (its weakest parts) out of
@@ -217,6 +271,51 @@ def layout(props: Dict[str, Any], ctx: SceneCtx) -> Dict[str, Any]:
     return {"ppu": ppu, "x": x, "ground": floor, "content": (fr.margin_x * 0.8, ctx.top + 10, fr.W - fr.margin_x * 0.8, floor - figure * 1.05 - 20), "preset": "full", "side": side, "lift": 0.0, "floor": floor}
 
 
+# Where two or three characters stand (shares of the frame width, in screen order) and how large they are against a single presenter.
+GROUP_WIDE = {2: ((0.125, 0.875), 0.88, (0.262, 0.738)), 3: ((0.10, 0.285, 0.90), 0.78, (0.405, 0.785))}     # ..., the content between them (x0, x1 shares)
+GROUP_CUT = {2: 0.27, 3: 0.20}       # the share of a figure below the bottom edge in the wide two-shot and three-shot (a single presenter: 0.31)
+GROUP_ROW = {2: ((0.27, 0.73), 1.0), 3: ((0.18, 0.50, 0.82), 0.86)}
+
+
+def group_layout(props: Dict[str, Any], ctx: SceneCtx) -> Dict[str, Any]:
+    """A two-shot or three-shot: everyone in the picture for the whole conversation, the content where all can gesture at it.
+    16:9: from the waist up, one (or two) at the left and one at the right, the content between them. Square and 4:5: a row from the waist up along the bottom, the
+    content above their heads. 9:16: the whole figures in a row standing over the caption band, the content above. -> the single layout's keys plus `figures`:
+    [{character, x, ppu, ground, lift, content_side, toward, slot}] (toward: where the speaker is, -1 left, +1 right, 0 for the speaker)."""
+    fr = ctx.frame
+    cast = list(props["cast"])[:MAX_CAST]
+    n = len(cast)
+    speaker = props.get("character") if props.get("character") in cast else cast[0]
+    floor = None
+    if fr.landscape:
+        xs, k, (c0, c1) = GROUP_WIDE[n]
+        f = vp.framing("waist_up", "left", fr.W, fr.H)
+        ppu, lift = f["ppu"] * k, f["lift"]
+        ground = fr.H + GROUP_CUT[n] * 290.0 * ppu           # smaller figures are cut a little lower on the body, so the heads stay high in the picture
+        content = (c0 * fr.W, max(f["content"][1], ctx.top + 20), c1 * fr.W, min(f["content"][3], ctx.bottom + 40))
+        sides = [1 if x < (c0 + c1) / 2 else -1 for x in xs]
+    elif fr.W / fr.H >= 0.7:
+        xs, k = GROUP_ROW[n]
+        base = float(ctx.bottom) + 46 if ctx.captions else float(fr.H)      # the row is cut at the caption band, not behind it (a single presenter's waist is: here the row would lose its faces)
+        box_h = (base - ctx.top) * 0.40
+        ppu, lift = box_h / (290.0 * 0.69) * k, 0.14
+        ground = base + 0.31 * 290.0 * ppu
+        content = (fr.margin_x * 0.6, ctx.top + 10, fr.W - fr.margin_x * 0.6, base - box_h * k - 0.02 * fr.H)
+        sides = [1 if x < 0.5 else -1 for x in xs]
+    else:
+        xs, k = GROUP_ROW[n]
+        floor = float(ctx.bottom) - (0 if ctx.captions else 40)
+        figure = (floor - ctx.top) * 0.36 * k
+        ppu, ground, lift = figure / 290.0, floor, 0.0
+        content = (fr.margin_x * 0.8, ctx.top + 10, fr.W - fr.margin_x * 0.8, floor - figure * 1.05 - 20)
+        sides = [1 if x < 0.5 else -1 for x in xs]
+    sx = xs[cast.index(speaker)]
+    figures = [{"character": c, "x": x * fr.W, "ppu": ppu, "ground": ground, "lift": lift, "content_side": sides[i], "slot": i,
+                "toward": 0.0 if c == speaker else (1.0 if sx > x else -1.0)} for i, (c, x) in enumerate(zip(cast, xs))]
+    me = figures[cast.index(speaker)]
+    return {"ppu": ppu, "x": me["x"], "ground": ground, "content": content, "preset": "group", "side": "left" if me["content_side"] > 0 else "right", "lift": lift, "floor": floor, "figures": figures}
+
+
 # ----------------------------------------------------------------------------- drawing
 @lru_cache(maxsize=8)
 def _glow_mask(w: int, h: int, peak: int) -> Image.Image:
@@ -237,16 +336,18 @@ def _glow(cv: Canvas, cx: float, cy: float, rx: float, ry: float, color: Tuple[i
     cv.im.paste(tuple(color[:3]), (int(cx * ss) - w // 2, int(cy * ss) - h // 2), _glow_mask(w, h, int(255 * strength)))
 
 
-def _draw_character(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, lay: Dict[str, Any]) -> None:
-    cid = props.get("character", DEFAULT_CHARACTER)
+def _draw_character(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, lay: Dict[str, Any], fig: Optional[Dict[str, Any]] = None) -> None:
+    cid = fig["character"] if fig else props.get("character", DEFAULT_CHARACTER)
     if cid in _BROKEN:
         return
+    if fig:   # one of the figures of a conversation: its own place, and it speaks or listens
+        lay = {**lay, "x": fig["x"], "ppu": fig["ppu"], "ground": fig["ground"], "lift": fig["lift"], "side": "left" if fig["content_side"] > 0 else "right"}
     # The finished picture is the canvas at half its pixel size (the renderer reduces 2x): the character is drawn at that size on its own layer and pasted doubled
     # with NEAREST, so the 2x reduce gives the very same pixels back (the vector scenes do the same).
     k = cv.im.width / 2.0 / cv.W
     try:
         ch = vp.load_cached(cid, round(lay["ppu"] * k, 4), CAST[cid]["size"])
-        perf = performance(props, dur, lay["lift"], lay["side"])
+        perf = performance(props, dur, lay["lift"], lay["side"], cid, fig["slot"], fig["toward"], fig["content_side"]) if fig else performance(props, dur, lay["lift"], lay["side"])
         pose, ex = perf.pose(lt, ch.g)
         if ex["alpha"] <= 0.003:
             return
@@ -400,9 +501,59 @@ def _draw_picture(cv: Canvas, props: Dict[str, Any], rect: Tuple[float, float, f
     return True
 
 
+_BOARD: Dict[str, Any] = {}      # the one hand-drawn board being shown beside a character: {"key", "board", "cam", "geo"}
+
+
+class _Sub:
+    """What the whiteboard element reads from a scene context, for a board that is only a part of the picture."""
+
+    def __init__(self, w: float, h: float, pad: float):
+        self.frame = type("F", (), {"W": w, "H": h, "aspect": "board", "top_inset": 0})()
+        self.box = (pad, pad, w - pad, h - pad)
+        self.captions = False
+
+
+def _draw_board(cv: Canvas, props: Dict[str, Any], rect: Tuple[float, float, float, float], lt: float, dur: float, th: Theme) -> bool:
+    """The whiteboard renderer's board as the content beside the character: drawn and written by the marker in time with the words (docs/WHITEBOARD.md). False when
+    it cannot be built (the caller then shows a card)."""
+    import hashlib
+    import json
+
+    from . import whiteboard as wbe
+    from ...whiteboard import board as bd
+
+    x0, y0, x1, y1 = rect
+    k = cv.im.width / 2.0 / cv.W                           # the finished picture's pixels per design unit (the canvas is twice that)
+    w, h = max(8, int(round((x1 - x0) * k))), max(8, int(round((y1 - y0) * k)))
+    bprops = {"items": props["board"]["items"], **({"cues": props["cues"]} if isinstance(props.get("cues"), list) and not props.get("held") else {})}
+    key = hashlib.sha1(json.dumps([bprops, round(dur, 3), w, h], sort_keys=True, default=str).encode()).hexdigest()
+    try:
+        if _BOARD.get("key") != key:
+            _BOARD.clear()
+            board, cam, geo, _ = wbe.build(bprops, 1e6 if props.get("held") else dur, _Sub(x1 - x0, y1 - y0, 0.045 * min(x1 - x0, y1 - y0)), w, h)
+            _BOARD.update(key=key, board=board, cam=cam, geo=geo)
+        t = 1e6 - 1.0 if props.get("held") else max(0.0, lt)
+        frame = _BOARD["board"].frame(t, wbe.full_view(_BOARD["cam"].at(t), _BOARD["geo"]), (w, h), tip=not props.get("held"))
+    except Exception as e:  # noqa: BLE001 - never a failed render for a picture
+        print(f"PRESENTER_BOARD_FAILED {type(e).__name__}: {str(e)[:200]}")
+        _BOARD.clear()
+        return False
+    a = 1.0 if props.get("held") else progress(lt, 0.05, 0.4)
+    r = 26.0
+    cv.shadow(x0, y0, x1 - x0, y1 - y0, r, alpha=0.40 * a)
+    cv.rrect(x0 - 7, y0 - 7, x1 - x0 + 14, y1 - y0 + 14, r + 7, fill=(92, 98, 110, int(255 * a)))      # the board's frame
+    big = frame.resize((w * 2, h * 2), Image.NEAREST)
+    from PIL import ImageDraw
+    mask = Image.new("L", big.size, 0)
+    ImageDraw.Draw(mask).rounded_rectangle((0, 0, big.width - 1, big.height - 1), radius=int(r * cv.ss), fill=int(255 * a))
+    cv.im.paste(big, (int(round(x0 * k)) * 2, int(round(y0 * k)) * 2), mask)
+    return True
+
+
 def _draw(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, th: Theme, ctx: SceneCtx) -> None:
     fr = ctx.frame
     lay = layout(props, ctx)
+    figures = lay.get("figures") or [None]
     ts = 1.0 if fr.landscape else min(1.12, fr.type_scale)
     backdrop = False
     if props.get("backdrop"):   # a cartoon scene of the catalog behind the presenter (its own element draws it; no package -> the plain background stays)
@@ -410,29 +561,36 @@ def _draw(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, th: Theme, c
         if vse.package_folder(props["backdrop"]) is not None:
             vse._draw(cv, {"catalog_id": props["backdrop"]}, lt, dur, th, ctx)
             backdrop = True
-    if not backdrop:   # a soft light where the character stands, so the figure is not floating on the gradient
-        figure_h = 290.0 * lay["ppu"]
-        _glow(cv, lay["x"], lay["ground"] - figure_h * 0.52, figure_h * 0.50, figure_h * 0.62, th.accent[:3], 0.30)
-    if lay.get("floor") is not None:   # the whole figure is in the picture: a contact shadow under the feet
-        _glow(cv, lay["x"], lay["floor"] + 4, 64 * lay["ppu"], 10 * lay["ppu"], (0, 0, 0), 0.55)
+    for fig in figures:
+        x, ppu = (fig["x"], fig["ppu"]) if fig else (lay["x"], lay["ppu"])
+        if not backdrop:   # a soft light where the character stands, so the figure is not floating on the gradient
+            figure_h = 290.0 * ppu
+            _glow(cv, x, lay["ground"] - figure_h * 0.52, figure_h * 0.50, figure_h * 0.62, th.accent[:3], 0.30)
+        if lay.get("floor") is not None:   # the whole figure is in the picture: a contact shadow under the feet
+            _glow(cv, x, lay["floor"] + 4, 64 * ppu, 10 * ppu, (0, 0, 0), 0.55)
     rect = lay["content"]
+    lc = 1e3 if props.get("held") else lt                  # what the scene before already showed is there, finished, from the first frame
     drawn = False
-    if props.get("asset"):
-        drawn = _draw_picture(cv, props, rect, lt, th, ctx, ts)
-    if not drawn:
-        _panel(cv, rect, th, progress(lt, 0.05, 0.4), backdrop)
+    if props.get("board"):
+        drawn = _draw_board(cv, props, rect, lt, dur, th)
+    elif props.get("asset"):
+        drawn = _draw_picture(cv, props, rect, lc, th, ctx, ts)
+    if not drawn and not (props.get("talk") and not (props.get("heading") or props.get("points") or props.get("chart"))):
+        _panel(cv, rect, th, progress(lc, 0.05, 0.4), backdrop)
         if props.get("chart"):
-            _draw_chart(cv, props, rect, lt, dur, th, ts)
+            _draw_chart(cv, props, rect, lc, dur, th, ts)
         else:
-            p = props if (props.get("heading") or props.get("points")) else {**props, "heading": props.get("alt") or props.get("image_query") or ""}
-            _draw_points(cv, p, rect, lt, dur, th, ts)
-    _draw_character(cv, props, lt, dur, lay)
+            p = props if (props.get("heading") or props.get("points")) else {**props, "heading": props.get("alt") or props.get("image_query") or next((it["write"].split("\n")[0] for it in (props.get("board") or {}).get("items", []) if it.get("write")), "")}
+            _draw_points(cv, p, rect, lc, dur, th, ts)
+    for fig in sorted(figures, key=lambda f: (f is not None and f["toward"] == 0.0)):   # the speaker last: its gestures are in front of the listeners
+        _draw_character(cv, props, lt, dur, lay, fig)
 
 
 def release() -> None:
     """Drops what is kept between frames (planned performances, rasterised characters and their turned pieces)."""
     _PERF.clear()
     _BROKEN.clear()
+    _BOARD.clear()
     vp.load_cached.cache_clear()
 
 

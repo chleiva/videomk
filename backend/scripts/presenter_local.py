@@ -23,6 +23,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "lambdas"))
 os.environ.setdefault("PRESENTERS", "1")
 os.environ.setdefault("BG_ANIMATED", "1")
 os.environ.setdefault("VECTOR_SCENES", "1")
+os.environ.setdefault("WHITEBOARD", "1")
 os.environ.setdefault("CATALOG_BUCKET", "videomk-qa-catalog-552357225438")
 
 import numpy as np  # noqa: E402
@@ -50,7 +51,8 @@ def plan_stage(a, out):
 
     t0 = time.time()
     r = director.direct(a.prompt, minutes=a.seconds / 60.0, ask_small=small, ask_big=big, region="US",
-                        options={"aspect": a.aspect, "resolution": a.resolution, **({"presenter": a.presenter} if a.presenter != "auto" else {})})
+                        options={"aspect": a.aspect, "resolution": a.resolution, **({"presenter": a.presenter} if a.presenter != "auto" else {}),
+                                 **({"look": a.look} if a.look else {}), **({"cast": a.cast.split(",")} if a.cast else {}), **({"extras": ["board"]} if a.board else {})})
     if not r.get("legit"):
         raise SystemExit(f"refused: {r.get('reason')}")
     plan = r["plan"]
@@ -145,6 +147,9 @@ def main():
     ap.add_argument("--aspect", default="16:9")
     ap.add_argument("--resolution", default="1080p")
     ap.add_argument("--presenter", default="auto")
+    ap.add_argument("--look", default="", help="auto | real | whiteboard | cartoon (docs/CREATE_API.md 'Video look')")
+    ap.add_argument("--cast", default="", help="character ids, comma separated: two or three make a conversation")
+    ap.add_argument("--board", action="store_true", help="the hand-drawn board beside the character(s)")
     ap.add_argument("--chunk-seconds", type=int, default=10)
     ap.add_argument("--stage", default="render", choices=("plan", "audio", "render"))
     ap.add_argument("--draft", action="store_true")
