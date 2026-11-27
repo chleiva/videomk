@@ -171,6 +171,8 @@ class AuthService(
             .addQueryParameter("code_challenge", pkce.challenge)
             .also { b ->
                 idp?.let { b.addQueryParameter("identity_provider", it) }
+                // the hosted pages (and the provider's own page, where it listens) follow the app language, as the iPhone app does: lang=en|es
+                b.addQueryParameter("lang", if (Txt.localeTag.lowercase().startsWith("es")) "es" else "en")
                 // The classic hosted UI ignores both (docs/ACCOUNT_DELETION.md section 2); they make a later move to managed login correct without an app change.
                 if (forceLogin) { b.addQueryParameter("prompt", "login"); b.addQueryParameter("max_age", "0") }
             }

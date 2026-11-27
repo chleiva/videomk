@@ -6,6 +6,7 @@ import com.videomk.app.core.InMemoryTokenStore
 import com.videomk.app.core.Jwt
 import com.videomk.app.core.PKCE
 import com.videomk.app.core.SignInProvider
+import com.videomk.app.core.Txt
 import com.videomk.app.core.SignInResult
 import com.videomk.app.core.SocialSwitches
 import com.videomk.app.core.label
@@ -171,10 +172,22 @@ class AuthTest {
 
     // social providers
 
-    @Test fun `email sign-in has no provider parameter and is exactly today's request`() {
+    @Test fun `email sign-in has no provider parameter, only the usual request and the app language`() {
         val url = service(InMemoryTokenStore()).beginSignIn()
         assertNull(url.queryParameter("identity_provider"))
-        assertEquals(setOf("response_type", "client_id", "redirect_uri", "scope", "state", "code_challenge_method", "code_challenge"), url.queryParameterNames)
+        assertEquals(setOf("response_type", "client_id", "redirect_uri", "scope", "state", "code_challenge_method", "code_challenge", "lang"), url.queryParameterNames)
+        assertEquals("en", url.queryParameter("lang"))
+    }
+
+    @Test fun `the hosted pages get the app language, for every provider`() {
+        val old = Txt.provider
+        try {
+            Txt.provider = JvmStringProvider("es")
+            val auth = service(InMemoryTokenStore())
+            for (p in SignInProvider.entries) assertEquals("es", auth.beginSignIn(p).queryParameter("lang"))
+            assertEquals("SignInWithApple", auth.beginSignIn(SignInProvider.Apple).queryParameter("identity_provider"))
+        } finally { Txt.provider = old }
+        assertEquals("en", service(InMemoryTokenStore()).beginSignIn(SignInProvider.Google).queryParameter("lang"))
     }
 
     @Test fun `Google and Apple add only identity_provider, with the exact Cognito names, and keep PKCE and state`() {
@@ -184,7 +197,7 @@ class AuthTest {
         for (u in listOf(g, a)) {
             assertEquals("code", u.queryParameter("response_type")); assertEquals("S256", u.queryParameter("code_challenge_method"))
             assertEquals("com.videomk.app://auth/callback", u.queryParameter("redirect_uri")); assertTrue(u.queryParameter("state")!!.length >= 43)
-            assertEquals(8, u.queryParameterNames.size)
+            assertEquals(9, u.queryParameterNames.size); assertEquals("en", u.queryParameter("lang"))
         }
         assertTrue(g.queryParameter("state") != a.queryParameter("state") && g.queryParameter("code_challenge") != a.queryParameter("code_challenge"))
     }

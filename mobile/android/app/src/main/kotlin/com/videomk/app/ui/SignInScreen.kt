@@ -102,7 +102,8 @@ fun SignInScreen(state: AppState, social: SocialSwitches = SocialSwitches(), onS
                         Text(it, style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.text, modifier = Modifier.testTag("signInError"))
                     }
                 }
-                for (option in social.options) {
+                // Apple first, as in the mockup (never less prominent than another provider's button), then Google, then email
+                for (option in social.options.sortedBy { it != SignInProvider.Apple }) {
                     val label = option.label(social.anySocial)
                     val spinning = state.isSigningIn && state.signInProvider == option
                     when (option) {
