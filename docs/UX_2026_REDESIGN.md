@@ -318,6 +318,67 @@ First visible result for the owner: the iOS video screen and Create sheet after 
 
 `docs/UX_2026_REDESIGN.md` (this); `docs/ux_2026/board_light.png`, `board_dark.png` (mockups), `gen.py`, `tokens.css`, `board_*.html`; evidence `ev_a_home_create.png`, `ev_b_create_options_questions.png`, `ev_c_detail_media.png`, `ev_d_settings_wallet_feedback_rating.png`, `ev_e_questions_blocked.png`. Nothing under `mobile/`, `backend/` or `frontend/` was changed.
 
+<!-- ANDROID-STATUS-BEGIN (written by the Android implementer, 2026-11-27) -->
+## 13. Android status (2026-11-27)
+
+Everything below is in `mobile/android` (commits `36f4855`, a later one for Settings/Credits, one for sheets and tests, `4825f17`, and the final polish commit). Not pushed, not uploaded to Play. Screenshots are real captures from the Pixel-class API 35 emulator (`pi35`, debug build, canned data through the debug `fake_backend`, one local mp4 for the player) in `docs/ux_2026/android/`.
+
+### What shipped per work package
+
+| WP | Shipped |
+|---|---|
+| A0 foundations | `GlassIconButton` (48 dp target, spoken label is a required parameter, long-press tooltip, optional badge, one filled primary variant), `Pill` (icon + value + chevron, opens a menu), floating pill tab bar with a separate round gradient (+) (`newVideoFab`) that never covers a row, Sparklet mark as the only logo (Library header, sign-in; the old tile is gone), pill primary buttons everywhere |
+| A1 video screen | Back (glass), title once, **no heading under the video**; caption `3:02 · 1080p`; five icons (Share filled, Save, Edit, Info, More) that wrap at large text; Info bottom sheet (description, credits, Copy); More menu (New video, Send feedback); end card (replay, New video) replacing the "Make another" card; controls auto-hide after 3 s, our full-screen icon hides with them; previous/next removed; failed state is icon + "Didn't finish" + "No credits used." |
+| A2 Create | Close icon only; borderless 24 sp prompt ("A video about…"), photo and mic icon buttons (count badge), three pills **For / Length / Look** with menus (Length rows show the credit price and grey out past the platform's limit) and one Options icon; one Options sheet (For, Look, Quality 720p/1080p/4K with a 2x tag and (i), Subtitles, Language, Format icon tiles that are hidden when not ready); Create button `Create · ⚡3` and one caption (`9 left`, or the problem with its one-tap fix); photo strip and deck card appear only when something is attached; question sheet = dots + one Skip + the question + chips; summary sheet and blocked/paused sheets = one close icon, no duplicate exits, small detent for blocked |
+| A3 home, first run, Making | Header = mark, credits chip, account icon; title "Videos"; thin Making card (title, one live line, scene counter, 4 dp bar, no step names, no chip); video rows = 112x63 poster with duration, 2-line title, format as numbers on the poster (`9:16`) instead of a word, day headers instead of "1 day ago"; failed row without the reassurance line; first run = headline + prompt field + three one-or-two-word example chips (the first-video card, the fan illustration and "Try one" are gone); Making detail = the card + one sentence under it |
+| A4 Settings, Credits, Feedback, Rating | Settings = email, Sign out, Language (value + menu), Photos (two switches, Organize row with its value, one (i) for all three explanations), Send feedback, Support, About + version, Privacy, Terms, Delete account as a red row (no footers); Credits = hero number, one line, "How credits work" (i) that holds the one rule sentence and the credit buckets; feedback intro "Tell us anything."; topic label "Topic"; rating prompt unchanged (already minimal) |
+| A5 Media text diet | Search placeholder "Search photos". Not done: storage ring, two-line collection names, upload/organize helper sentences (see deferred) |
+| A6 hardening | Dark mode and 200% font checked on Create (and Options in Spanish at 200%); EN/ES parity gate (`LocalizationTest`) and lint pass; a new `UxBudgetTest` fails the build when Create, first run, the failed state, the credit rules, the Making promise or the feedback intro go over budget |
+
+### Owner priorities added during the work
+
+- **Sign-in (A):** one hierarchy: the mark, the wordmark, the two-line tagline; Google (official outlined button), Apple (official black button) and Continue with email as a quieter tonal pill (it is the single gradient primary only when no provider button is shown). The buttons already open the Cognito authorize URL **directly** with `identity_provider=Google` / `SignInWithApple` in a Custom Tab (existing `AuthService.beginSignIn(provider)`), so the generic hosted page is never shown for social. **Enabling is configuration only:** Google defaults ON when the build is pointed at the production backend (`-PvmkProdApiBase=…`) and OFF against QA; Apple is OFF; override with `-PvmkAuthGoogle=true|false -PvmkAuthApple=true|false` (no value is pinned in `gradle.properties` any more). **What is missing:** QA has no Google client (the QA stack reports `SocialProviders none`), Apple credentials do not exist anywhere, and the Android app is not yet pointed at production (Play builds use `-PvmkReleaseBackend=qa`, owner rule). A native email form was **not** built: the Cognito app clients allow only the hosted-UI code flow (`auth_flows` has `admin_user_password` outside prod, no SRP/USER_PASSWORD/EMAIL_OTP), so InitiateAuth/SignUp/ConfirmSignUp from the app would be rejected; email stays on the (branded) hosted page. Credential Manager "Sign in with Google" was not added: its ID token is not a Cognito token, so it would not keep the Cognito federation working without a backend token-exchange endpoint.
+- **Polish (B), before and after:**
+
+| Area | Before | After |
+|---|---|---|
+| Primary buttons | pill (Create, Share) and 16 dp rounded (PrimaryButton, provider buttons) | pill everywhere |
+| Type | hard-coded `fontSize` copies (prompt 19/24 sp, Making title x1.12) | no `fontSize =` outside `Theme.kt`; roles `VmkType.prompt` (24/32) and `VmkType.makingTitle`; M3 roles elsewhere |
+| Toasts and snackbars | three hand-written dark/light hex pairs | `Vmk.colors.inverseSurface` / `inverseOnSurface` |
+| Poster fallback | hard-coded blue/violet pair | brand gradient tokens |
+| Icon buttons | 40, 44 and 48 dp ad-hoc `IconButton`/`Box` mixes on the touched screens | `GlassIconButton` 48 dp (40 dp only for the (i) inside a row) |
+| Logo | old play tile on sign-in | Sparklet mark (`LogoMark`) |
+| Literal colours left on purpose | | look swatches (content), official Google/Apple button colours, scrims over photos (upload tiles), the green check on the toast |
+
+### Per screen: words and taps, before and after (hand counts of static English text in one state; taps counted on the debug build)
+
+| Screen | Words before | Words after | Budget | Taps from launch to the main task, before | after |
+|---|---|---|---|---|---|
+| Create surface | 82 | 11 (`A video about…`, 3 pills, `Create · 3`, `9 left`) | 14 | New video, type, Create = 3 | (+), type, Create = 3 (smart defaults: the platform sets format, length and quality) |
+| First run | 70 | 14 | 14 | 1 (a pre-written first video) | 2 (an example chip, Create) or 3 (type your own) |
+| Video screen (beside the title) | 22 | 0 (caption is numbers; five icons) | 6 | Share = 2 | Share = 2 |
+| Settings | about 100 | about 28 | 30 | | |
+| Credits | 85 | 12 on the surface (+ rules and buckets behind (i)) | 18 | | |
+| Making detail | 45 | 15 besides the title | 12 | | |
+| Question sheet | 25 | 10 | 12 | answer x3 = 3 | answer x3 = 3, or Skip = 1 |
+| Blocked sheet | 30 | 14 | 12 | | |
+
+### Verification
+
+- Gate: `./gradlew testDebugUnitTest assembleDebug compileReleaseKotlin lintDebug compileDebugAndroidTestKotlin` (unit tests, including the new `UxBudgetTest`; lint 0 errors). The androidTest sources compile; they were **not run** (they need QA tokens): `QuickUiTest`/`E2ETest` now pick the length from the pill's menu and bring the player's controls back with a tap before using the full-screen icon.
+- Visually verified on the emulator: home (light), Create (empty, ready, menus For and Length, Options sheet), Create in dark, Create and Options in Spanish at 200% font, video screen (controls, playing, Info, More, end card), Settings, Credits and its (i), Making detail, first run, question sheet, blocked sheet, sign-in with both providers.
+- **Not visually verified:** Options sheet in dark, the Media tab and upload sheets after the text change, the deck (presentation) flow, tablet/large-screen, Editor, small phone (the emulator is one 1080x2400 screen), TalkBack order (labels are set in code but not walked with a screen reader), real Google/Apple login (no provider exists for QA).
+
+### Deferred, and why
+
+- Tablet/foldable list-detail (spec 4.9: not a priority).
+- Media: storage ring, two-line collection names, shorter upload/organize sheets (spec 4.7 is a lighter pass; the screens already use the shared tokens).
+- Converting the remaining stock `IconButton`s (Media, Editor, viewer) to `GlassIconButton` and unifying their top bars with the new back/title row.
+- Media3 Compose player migration (the `PlayerView` stays; verified Media3 1.11.1 is the pinned version).
+- Scene thumbnails on the Making card and real ETA ranges: need backend support.
+- An instrumented text-budget test per screen (the unit test counts string resources; counting the rendered hierarchy needs an emulator in CI).
+<!-- ANDROID-STATUS-END -->
+
 <!-- IOS-STATUS-BEGIN (written by the iPhone implementer, 2026-11-27; the Android implementer keeps its own block) -->
 ## iPhone implementation status (2026-11-27)
 
@@ -390,64 +451,3 @@ Over budget and why: first run (19 against 14: the headline is the existing bran
 - Live tests against QA (`testLive*`, photo video, edit narration) need QA tokens and were updated by reading only.
 - Screenshots in `docs/ux_2026/ios/` were re-taken on the final build: iPhone 17 Pro (iOS 26.5) in light and dark, an SE-sized simulator on iOS 18.2 (no glass, material fallback), and Spanish for home, first run, Create, Options, the question sheet, the player, settings, credits, feedback and making. The question sheet shows English titles in Spanish because the fake request check serves English questions. The Create captures show no keyboard (the simulator has no software keyboard on).
 <!-- IOS-STATUS-END -->
-
-<!-- ANDROID-STATUS-BEGIN (written by the Android implementer, 2026-11-27) -->
-## 13. Android status (2026-11-27)
-
-Everything below is in `mobile/android` (commits `36f4855`, a later one for Settings/Credits, one for sheets and tests, `4825f17`, and the final polish commit). Not pushed, not uploaded to Play. Screenshots are real captures from the Pixel-class API 35 emulator (`pi35`, debug build, canned data through the debug `fake_backend`, one local mp4 for the player) in `docs/ux_2026/android/`.
-
-### What shipped per work package
-
-| WP | Shipped |
-|---|---|
-| A0 foundations | `GlassIconButton` (48 dp target, spoken label is a required parameter, long-press tooltip, optional badge, one filled primary variant), `Pill` (icon + value + chevron, opens a menu), floating pill tab bar with a separate round gradient (+) (`newVideoFab`) that never covers a row, Sparklet mark as the only logo (Library header, sign-in; the old tile is gone), pill primary buttons everywhere |
-| A1 video screen | Back (glass), title once, **no heading under the video**; caption `3:02 · 1080p`; five icons (Share filled, Save, Edit, Info, More) that wrap at large text; Info bottom sheet (description, credits, Copy); More menu (New video, Send feedback); end card (replay, New video) replacing the "Make another" card; controls auto-hide after 3 s, our full-screen icon hides with them; previous/next removed; failed state is icon + "Didn't finish" + "No credits used." |
-| A2 Create | Close icon only; borderless 24 sp prompt ("A video about…"), photo and mic icon buttons (count badge), three pills **For / Length / Look** with menus (Length rows show the credit price and grey out past the platform's limit) and one Options icon; one Options sheet (For, Look, Quality 720p/1080p/4K with a 2x tag and (i), Subtitles, Language, Format icon tiles that are hidden when not ready); Create button `Create · ⚡3` and one caption (`9 left`, or the problem with its one-tap fix); photo strip and deck card appear only when something is attached; question sheet = dots + one Skip + the question + chips; summary sheet and blocked/paused sheets = one close icon, no duplicate exits, small detent for blocked |
-| A3 home, first run, Making | Header = mark, credits chip, account icon; title "Videos"; thin Making card (title, one live line, scene counter, 4 dp bar, no step names, no chip); video rows = 112x63 poster with duration, 2-line title, format as numbers on the poster (`9:16`) instead of a word, day headers instead of "1 day ago"; failed row without the reassurance line; first run = headline + prompt field + three one-or-two-word example chips (the first-video card, the fan illustration and "Try one" are gone); Making detail = the card + one sentence under it |
-| A4 Settings, Credits, Feedback, Rating | Settings = email, Sign out, Language (value + menu), Photos (two switches, Organize row with its value, one (i) for all three explanations), Send feedback, Support, About + version, Privacy, Terms, Delete account as a red row (no footers); Credits = hero number, one line, "How credits work" (i) that holds the one rule sentence and the credit buckets; feedback intro "Tell us anything."; topic label "Topic"; rating prompt unchanged (already minimal) |
-| A5 Media text diet | Search placeholder "Search photos". Not done: storage ring, two-line collection names, upload/organize helper sentences (see deferred) |
-| A6 hardening | Dark mode and 200% font checked on Create (and Options in Spanish at 200%); EN/ES parity gate (`LocalizationTest`) and lint pass; a new `UxBudgetTest` fails the build when Create, first run, the failed state, the credit rules, the Making promise or the feedback intro go over budget |
-
-### Owner priorities added during the work
-
-- **Sign-in (A):** one hierarchy: the mark, the wordmark, the two-line tagline; Google (official outlined button), Apple (official black button) and Continue with email as a quieter tonal pill (it is the single gradient primary only when no provider button is shown). The buttons already open the Cognito authorize URL **directly** with `identity_provider=Google` / `SignInWithApple` in a Custom Tab (existing `AuthService.beginSignIn(provider)`), so the generic hosted page is never shown for social. **Enabling is configuration only:** Google defaults ON when the build is pointed at the production backend (`-PvmkProdApiBase=…`) and OFF against QA; Apple is OFF; override with `-PvmkAuthGoogle=true|false -PvmkAuthApple=true|false` (no value is pinned in `gradle.properties` any more). **What is missing:** QA has no Google client (the QA stack reports `SocialProviders none`), Apple credentials do not exist anywhere, and the Android app is not yet pointed at production (Play builds use `-PvmkReleaseBackend=qa`, owner rule). A native email form was **not** built: the Cognito app clients allow only the hosted-UI code flow (`auth_flows` has `admin_user_password` outside prod, no SRP/USER_PASSWORD/EMAIL_OTP), so InitiateAuth/SignUp/ConfirmSignUp from the app would be rejected; email stays on the (branded) hosted page. Credential Manager "Sign in with Google" was not added: its ID token is not a Cognito token, so it would not keep the Cognito federation working without a backend token-exchange endpoint.
-- **Polish (B), before and after:**
-
-| Area | Before | After |
-|---|---|---|
-| Primary buttons | pill (Create, Share) and 16 dp rounded (PrimaryButton, provider buttons) | pill everywhere |
-| Type | hard-coded `fontSize` copies (prompt 19/24 sp, Making title x1.12) | no `fontSize =` outside `Theme.kt`; roles `VmkType.prompt` (24/32) and `VmkType.makingTitle`; M3 roles elsewhere |
-| Toasts and snackbars | three hand-written dark/light hex pairs | `Vmk.colors.inverseSurface` / `inverseOnSurface` |
-| Poster fallback | hard-coded blue/violet pair | brand gradient tokens |
-| Icon buttons | 40, 44 and 48 dp ad-hoc `IconButton`/`Box` mixes on the touched screens | `GlassIconButton` 48 dp (40 dp only for the (i) inside a row) |
-| Logo | old play tile on sign-in | Sparklet mark (`LogoMark`) |
-| Literal colours left on purpose | | look swatches (content), official Google/Apple button colours, scrims over photos (upload tiles), the green check on the toast |
-
-### Per screen: words and taps, before and after (hand counts of static English text in one state; taps counted on the debug build)
-
-| Screen | Words before | Words after | Budget | Taps from launch to the main task, before | after |
-|---|---|---|---|---|---|
-| Create surface | 82 | 11 (`A video about…`, 3 pills, `Create · 3`, `9 left`) | 14 | New video, type, Create = 3 | (+), type, Create = 3 (smart defaults: the platform sets format, length and quality) |
-| First run | 70 | 14 | 14 | 1 (a pre-written first video) | 2 (an example chip, Create) or 3 (type your own) |
-| Video screen (beside the title) | 22 | 0 (caption is numbers; five icons) | 6 | Share = 2 | Share = 2 |
-| Settings | about 100 | about 28 | 30 | | |
-| Credits | 85 | 12 on the surface (+ rules and buckets behind (i)) | 18 | | |
-| Making detail | 45 | 15 besides the title | 12 | | |
-| Question sheet | 25 | 10 | 12 | answer x3 = 3 | answer x3 = 3, or Skip = 1 |
-| Blocked sheet | 30 | 14 | 12 | | |
-
-### Verification
-
-- Gate: `./gradlew testDebugUnitTest assembleDebug compileReleaseKotlin lintDebug compileDebugAndroidTestKotlin` (unit tests, including the new `UxBudgetTest`; lint 0 errors). The androidTest sources compile; they were **not run** (they need QA tokens): `QuickUiTest`/`E2ETest` now pick the length from the pill's menu and bring the player's controls back with a tap before using the full-screen icon.
-- Visually verified on the emulator: home (light), Create (empty, ready, menus For and Length, Options sheet), Create in dark, Create and Options in Spanish at 200% font, video screen (controls, playing, Info, More, end card), Settings, Credits and its (i), Making detail, first run, question sheet, blocked sheet, sign-in with both providers.
-- **Not visually verified:** Options sheet in dark, the Media tab and upload sheets after the text change, the deck (presentation) flow, tablet/large-screen, Editor, small phone (the emulator is one 1080x2400 screen), TalkBack order (labels are set in code but not walked with a screen reader), real Google/Apple login (no provider exists for QA).
-
-### Deferred, and why
-
-- Tablet/foldable list-detail (spec 4.9: not a priority).
-- Media: storage ring, two-line collection names, shorter upload/organize sheets (spec 4.7 is a lighter pass; the screens already use the shared tokens).
-- Converting the remaining stock `IconButton`s (Media, Editor, viewer) to `GlassIconButton` and unifying their top bars with the new back/title row.
-- Media3 Compose player migration (the `PlayerView` stays; verified Media3 1.11.1 is the pinned version).
-- Scene thumbnails on the Making card and real ETA ranges: need backend support.
-- An instrumented text-budget test per screen (the unit test counts string resources; counting the rendered hierarchy needs an emulator in CI).
-<!-- ANDROID-STATUS-END -->
