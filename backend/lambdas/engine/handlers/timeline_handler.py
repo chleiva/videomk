@@ -53,8 +53,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     first = rev == 1   # only a first render is fitted to the length asked: an edit that removes scenes must be allowed to be shorter, and keeps the pace of its video
     asked = float(plan.get("target_seconds") or 0)
     tl = build_timeline(plan, infos, video_id=video_id, fps=30, width=frame["width"], height=frame["height"],
-                        min_seconds=asked if first and os.environ.get("STRETCH_TO_TARGET", "1") != "0" else 0.0,
-                        fit_seconds=asked if first and os.environ.get("FIT_TO_TARGET", "1") != "0" else 0.0)
+                        min_seconds=asked if rev == 1 and os.environ.get("STRETCH_TO_TARGET", "1") != "0" else 0.0,
+                        fit_seconds=asked if rev == 1 and os.environ.get("FIT_TO_TARGET", "1") != "0" else 0.0)
     if first and tl.get("pace") != plan.get("pace"):   # the silences were shortened (or no longer are): the plan remembers, so every later render of this video has the same pace
         if tl.get("pace"):
             plan["pace"] = tl["pace"]
