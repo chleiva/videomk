@@ -98,7 +98,7 @@ class Policy:
             "  BOARDS. A board is ONE full picture, like a teacher's finished whiteboard: by the time it is left it holds 8 to 12 drawings and written phrases, joined by arrows, with marks on the key words, "
             "and it stays on screen for about 15 to 20 seconds. One beat cannot fill a board, so TWO consecutive beats share a board (three when they are short): the first has \"board\": \"new\", the next has "
             "\"board\": \"same\" and goes on drawing in the zones the first one left free. Plan each board as a whole BEFORE writing its beats: its title, what the first beat puts where, what the second adds. "
-            "A video of N beats has about N/2 boards; never one sparse board per beat. The camera shows a board whole and still, moves only to go to the next board, and ends the video on all boards together: "
+            "A beat that writes its OWN title (a written text in top-row) starts a new subject: it always gets a new board (the engine enforces this), so give a title only to the first beat of a board. A video of N beats has about N/2 boards; never one sparse board per beat. The camera shows a board whole and still, moves only to go to the next board, and ends the video on all boards together: "
             "every board must read as a finished, composed picture.\n"
             "  Items, in the order they are drawn:\n"
             '    {"id": "<short name>", "draw": "<a drawing id from the list below>", "zone": "<zone>", "say": "<ONE word of this beat\'s narration>", "size": "m|l"}\n'
@@ -483,6 +483,13 @@ def _spoils(props_list: List[Dict[str, Any]], aspect: str, captions: bool) -> bo
     return any(str(a).startswith(mine) or str(c).startswith(mine) for a, c in d["overlaps"]) or any(str(j).startswith(mine) for j in d["off_board"])
 
 
+def _opens_a_topic(props: Dict[str, Any]) -> bool:
+    """True when the beat writes a TITLE: a written text in the full-width top zone, which is where a board's title goes. A title is the start of a new subject, so the
+    beat gets a board of its own. (A video once drew "Three risks" over the board of an unrelated forecast chart because the director marked the beat "same" and the
+    engine kept it: the rule is deterministic, not left to the model.)"""
+    return any(isinstance(it, dict) and it.get("write") and it.get("zone") == "top-row" for it in props.get("items") or [])
+
+
 def compose(beats: List[Dict[str, Any]], aspect: Optional[str] = None, captions: bool = True) -> Dict[str, int]:
     """Which beats share a BOARD, decided when the script is final. The director marks a beat that goes on drawing on the previous beat's board ("board": "same");
     the engine keeps that when the board has room (BOARD_MAX_*), and ALSO keeps a beat on the board when the director started a new one although the board
@@ -491,8 +498,8 @@ def compose(beats: List[Dict[str, Any]], aspect: Optional[str] = None, captions:
     A free ZONE is not yet room: with `aspect` given the board is laid out as the renderer will (engine/whiteboard/score.defects), and a beat whose things
     would overlap what is there, or leave the board, in the zones left for it gets its own board with the zones its author gave it (`split`).
     Deterministic, no model. -> {"boards", "shared": beats that continue a board, "merged": of those, decided by the engine, "rezoned": items moved,
-    "split": beats given their own board because they did not fit the shared one}."""
-    stats = {"boards": 0, "shared": 0, "merged": 0, "rezoned": 0, "split": 0}
+    "split": beats given their own board because they did not fit the shared one, "topic_breaks": beats that write their own title and so start a new board}."""
+    stats = {"boards": 0, "shared": 0, "merged": 0, "rezoned": 0, "split": 0, "topic_breaks": 0}
     cur: List[Dict[str, Any]] = []           # the props of the beats on the current board
     words = solid = 0
     used: Dict[Any, int] = {}
@@ -506,6 +513,9 @@ def compose(beats: List[Dict[str, Any]], aspect: Optional[str] = None, captions:
         n_words = len(str(b.get("narration") or "").split())
         n_solid = sum(1 for it in p.get("items") or [] if _solid(it))
         room = bool(cur) and prev_i == i - 1 and len(cur) < BOARD_MAX_BEATS and solid + n_solid <= BOARD_MAX_SOLID and words + n_words <= BOARD_MAX_WORDS
+        if room and _opens_a_topic(p):                           # a beat that writes its OWN title starts a new subject: it never goes on another beat's board, whatever the director marked
+            room = False
+            stats["topic_breaks"] += 1
         asked = p.get("board") == "same"
         thin = solid < BOARD_FULL_SOLID or words < BOARD_FULL_WORDS
         last = not any((x.get("scene") or {}).get("type") == "whiteboard" for x in beats[i + 1:])
