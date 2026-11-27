@@ -5,9 +5,9 @@ R003,Models,"Use Bedrock GLOBAL inference endpoints for Sonnet/Haiku 5.5, not re
 R004,Infra,Commit and push work; deploy QA and prod through scripts,23/11/2026,DONE,Repo / QA / Prod,,
 R005,iOS,Native iPhone app in Swift,23/11/2026,DONE,TestFlight (QA backend),,
 R006,iOS,"Deliver via TestFlight (not cable install); App Store Connect record 'videomk: AI Video Maker', team 39ANXJNUTL, bundle com.videomk.app",23/11/2026,DONE,App Store Connect,ITMS-90725 SDK warning (needs Xcode 27 by April 2027),Later: upgrade Xcode/SDK
-R007,iOS,Deploy new builds to TestFlight after changes,24/11/2026,PARTIAL,TestFlight has older build,"Builds with feedback, rating, Spanish, UX redesign, deck-to-video not uploaded yet",None (I do it)
+R007,iOS,Deploy new builds to TestFlight after changes,24/11/2026,PARTIAL,TestFlight has older build,"Upload running 2026-11-27 (includes logo, feedback, rating, ES, UX phases 1-3, deck)",None (I do it)
 R008,Android,"Native Android app (Compose), test on emulator first, then Google Play",24/11/2026,DONE,Play internal testing (bundle up to ~11),Newer bundle (feedback/rating/ES/deck) not uploaded; emulator unreliable for screenshots,Android device for screenshots
-R009,Android,"Publish Android to Play internal testing; testers chleiva@gmail.com, juanhlb@gmail.com",24/11/2026,DONE,Play internal testing,,
+R009,Android,"Publish Android to Play internal testing; testers chleiva@gmail.com, juanhlb@gmail.com",24/11/2026,DONE,Play internal testing,"New bundle 475200: R8 minify failure being fixed, then upload via Chrome",
 R010,Android,"Fix: submit button missing, duplicate add-photo buttons, single media dialog, uploads not refreshing",25/11/2026,DONE,QA + Play build,,
 R011,Android,"Fix video list flicker, add select all",25/11/2026,DONE,QA (list shaking at bottom not reproduced; defensive fix only),Root cause unproven,
 R012,iOS+Android,Answer chips must not clip text,25/11/2026,DONE,QA,,
@@ -63,10 +63,10 @@ R061,Media,"More clips than images (competitor comparison); clip retry pass, por
 R062,Media,Request-check stage: validate/clarify user prompt; safety stops with account tracking (strikes),25/11/2026,DONE,QA + Prod,,
 R063,Media,"Own image catalog: reusable AI images, house style, OpenAI GPT Image 2.6 Flare, first 100 at $15 cap",26/11/2026,PARTIAL,"QA only (98 images, flag imageCatalog=1)","Prod not copied/enabled; weak themes (city, animals); not yet seen serving in a real video",Decide prod promotion
 R064,Media,"Demand loop: when agent searches the same thing in 3+ different videos, generate a matching image",26/11/2026,PARTIAL,Read-only opportunities script; demand logging on QA,"Generation step manual; opportunities (honeycomb, castle, cargo ships) held for approval",Approve next image batch
-R065,Media,Own video clip library (best provider/cost for ~100 short reusable clips),26/11/2026,BLOCKED-ON-OWNER,Pilot of 10 clips done ($3.75),Waiting approval of 100-clip batch at $75 cap; Gemini API has no indemnity (Vertex does),Choose Gemini key vs Vertex; confirm key's Google project
+R065,Media,Own video clip library (best provider/cost for ~100 short reusable clips),26/11/2026,BLOCKED-ON-OWNER,Pilot of 10 clips done ($3.75),"Full test video made with 10 pilot clips (needs 8-10 s clips, not 5 s). Provider research done: Gemini Omni 720p still best value/quality; native 4K only Kling ~$0.42/s. Awaiting approval: 100 clips at 720p, 8-10 s, cap ~$90; Gemini API vs Vertex (indemnity)",Approve batch; choose Gemini key vs Vertex
 R066,Avatars,"Presenter avatars: research, self-hosted lip-sync on GPU with strict cost guardrails (Stockholm eu-north-1)",26/11/2026,DONE,Experiments + docs/AVATARS_3D.md,Face looked artificial (no eye/face motion),
 R067,Avatars,MetaHuman / NVIDIA Audio2Face evaluation; Epic licensing,26/11/2026,BLOCKED-ON-OWNER,Research done,MetaHuman test must run on a Mac with Epic login; Hugging Face click-through; Epic licensing form,Decide whether to spike; do Epic items
-R068,Brand,"Permanent logo/app icon: minimalist, tells 'video', AI cue, no letters (Sparklet Trio)",26/11/2026,PARTIAL,Files in docs/brand/store; not applied anywhere,"Apply to iOS, Android adaptive icons, favicon, site; feature graphic 1024x500 for Play",Upload icons in Play Console and Google consent screen
+R068,Brand,"Permanent logo/app icon: minimalist, tells 'video', AI cue, no letters (Sparklet Trio)",26/11/2026,DONE-IN-REPO,"iOS icon, Android adaptive icon, web favicon/header committed (ff97226); site published; TestFlight and Play uploads in progress",Play feature graphic 1024x500 not made; Android icon not seen on a device,Upload icon files in Play Console and Google consent screen (files sent)
 R069,Legal,Privacy Policy and Terms drafted from best-practice sources; publish at videomk.com; legal review not a gate,2026-11-24/26,DONE,Prod site (EN + ES),"Draft, not lawyer-reviewed",
 R070,Legal,"Fill legal blanks: Agilegency Ltd number 16838077, address, ICO ZC137157, minimum age 16",26/11/2026,DONE,Prod site,Other facts in docs/LEGAL_DRAFT_NOTES.md,Answer the remaining 14 facts
 R071,Legal,US DMCA designated agent registration,26/11/2026,PENDING-OWNER,,"dmca.copyright.gov, $6; then I add number to Terms",Register (owner chose to do it)
@@ -74,11 +74,11 @@ R072,Legal,UK trademark for videomk,26/11/2026,PENDING-OWNER,,"Check register, c
 R073,Legal,"Liability insurance (PI/tech E&O, cyber, public liability)",26/11/2026,PENDING-OWNER,,,Buy
 R074,Legal,Store age ratings 16+,26/11/2026,PENDING-OWNER,,,Set in App Store Connect and Play
 R075,Site,videomk.com on CloudFront in prod account; privacy/terms/support/delete pages,24/11/2026,DONE,Prod us-east-1,,
-R076,Site,"Republish site with feedback page, nav and /es pages",26/11/2026,PENDING,"Built, not published",,
+R076,Site,"Republish site with feedback page, nav and /es pages",26/11/2026,DONE,"Prod site published 2026-11-27 (feedback page, nav, /es, new favicon)",,
 R077,Email,hello@videomk.com forwarding to chris@agilegency.com; used in all legal pages and store contacts,26/11/2026,DONE,"Prod (verified, forward tested)",Play/App Store contact set by owner,
 R078,Email,Use hello@videomk.com as Wikimedia User-Agent contact,26/11/2026,DONE,Prod + QA,Prod deploy gate cleared,
 R079,Auth,Own Cognito domain for hosted sign-in (trustworthy host),26/11/2026,DONE,Prod login.videomk.com,auth.videomk.com blocked by an external CloudFront alias conflict in another AWS account,Release the old alias in the other account if you want auth.
-R080,Auth,Google sign-in on in prod; consent screen to pass brand verification,26/11/2026,PARTIAL,Prod enabled,"Search Console domain verification, consent screen branding, publish to In production, upload logo","Verify domain (I add TXT), fill consent screen, publish"
+R080,Auth,Google sign-in on in prod; consent screen to pass brand verification,26/11/2026,PARTIAL,Prod enabled,"Fixed 2026-11-27: prod web client had only localhost callback; now https://videomk.com/auth/callback (prod redeployed). Mobile client redirects to Google correctly. Still: Search Console domain verification, consent screen branding, publish to In production, upload logo","Verify domain (I add TXT), fill consent screen, publish"
 R081,Auth,Delete stuck Cognito user in QA,26/11/2026,DONE,QA,Nothing existed to delete,
 R082,Auth,Store Google client secret safely; delete downloaded client_secret_*.json,26/11/2026,PENDING-OWNER,Secrets stored,,Delete the JSON file in repo root
 R083,Stores,"Play Store listing and app, Data safety form, content rating, store assets",24/11/2026,PARTIAL,Internal testing only,"Data safety, content rating, assets, production release",Complete forms; upload icon
@@ -88,3 +88,11 @@ R086,Abuse,Play Integrity on Android,24/11/2026,PENDING,Not built,,
 R087,Compliance,'Report AI content' path (Play policy); test account for store reviewers,24/11/2026,PENDING,Not built,,Provide reviewer test account details
 R088,Process,Remind owner of pending items at natural pauses; autonomous progress; security first; cost conscious,2026-11-24/26,ONGOING,This file + memory,,
 R089,Process,Record of all requirements for tracking (this file),26/11/2026,DONE,docs/REQUIREMENTS_TRACKER.csv,Keep updated each session,
+R090,Video,4K videos: render natively at 4K; AI clips shown in framed window at native 720p size (no upscaling); generate clip library at 720p only,2026-11-27,PENDING,Not built,Build framed-clip layout for 4K mode + planner awareness; sample 4K render with forest clips,"Approve (asked, awaiting go)"
+R091,Video,Clip provider comparison: better quality/native resolution/price than Gemini,2026-11-27,DONE,docs/VIDEO_PROVIDERS_2026-11-27.md,Result: no clear better; Kling native 4K $0.42/s; pilot ~$55 optional,
+R092,Video,Own-library clip provider in the engine and full test video from own clips,2026-11-27,PARTIAL,"Local demo only; flag off, committed 7386f95",Not hooked into real beat step; needs embedding search for 100 clips,
+R093,Video,"Animated vector explainer scene (layered SVG parallax, resolution independent) prototype",2026-11-27,IN-PROGRESS,Agent building prototype (cap $1),Then decide planner scene type; characters need separate layers,
+R094,UX,"FULL UI/UX redesign iOS+Android: minimalist, 2026 world-class; too much text, player labels cluttered; review then implement everything",2026-11-27,IN-PROGRESS,Design review/spec agent running; spec docs/UX_2026_REDESIGN.md,Then one iOS and one Android implementer; player and Create first; EN+ES strings; nothing removed functionally,
+R095,Social,"Publish videos directly to YouTube, TikTok, Instagram, LinkedIn (MCP vs APIs vs aggregators vs share sheet; easy account linking)",2026-11-27,IN-PROGRESS,Research agent running; docs/SOCIAL_PUBLISHING_RESEARCH.md,Then phased plan; likely needs API verification/audits,Console forms and audit steps (listed in report)
+R096,Auth,Prod web sign-in callback/logout URLs registered for videomk.com,2026-11-27,DONE,Prod (commit 0449abd),,
+R097,Process,Keep recording every new requirement in the tracker; be proactive and follow up; deliver best quality,2026-11-27,ONGOING,This file,Update at the end of every work session; report changes,
