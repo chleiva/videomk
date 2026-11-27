@@ -12,6 +12,7 @@ struct PhotoViewer: View {
     @State private var showInfo = false
     @State private var showCollections = false
     @State private var confirmDelete = false
+    @State private var shareImage: Image?
 
     init(media: MediaModel, photos: [LibraryPhoto], start: Int, onDeleted: @escaping (String) -> Void, onMakeVideo: @escaping (LibraryPhoto) -> Void) {
         self.media = media; _photos = State(initialValue: photos); _index = State(initialValue: min(max(0, start), max(0, photos.count - 1)))
@@ -40,16 +41,32 @@ struct PhotoViewer: View {
         }
         .overlay(alignment: .bottom) {
             if let p = current {
-                HStack(spacing: 28) {
-                    bar("info.circle", tr("viewer.info")) { showInfo = true }
-                    bar("folder.badge.plus", tr("collections.add_to_collection")) { showCollections = true }
-                    bar("sparkles.tv", tr("viewer.make_video")) { onMakeVideo(p) }
-                    bar("trash", tr("common.delete")) { confirmDelete = true }
+                VStack(spacing: 12) {
+                    Button { onMakeVideo(p) } label: {
+                        HStack(spacing: 8) {
+                            Image(systemName: "sparkles").font(.vmk(17, weight: .semibold)).accessibilityHidden(true)
+                            Text(tr("collections.make_a_video")).font(.vmk(17, weight: .semibold))
+                        }
+                        .foregroundStyle(Theme.onPrimary).frame(maxWidth: 320, minHeight: 52).frame(maxWidth: .infinity).background(Theme.gradient, in: Capsule())
+                    }
+                    .buttonStyle(.plain).accessibilityHint(tr("viewer.make_video")).accessibilityIdentifier("viewerMakeVideo")
+                    HStack(spacing: 28) {
+                        bar("info.circle", tr("viewer.info")) { showInfo = true }
+                        bar("folder.badge.plus", tr("collections.add_to_collection")) { showCollections = true }
+                        if let image = shareImage { ShareLink(item: image, preview: SharePreview(tr("viewer.share"), image: image)) { Image(systemName: "square.and.arrow.up").font(.title3).foregroundStyle(.white).frame(minWidth: 44, minHeight: 44) }.accessibilityLabel(tr("viewer.share")).accessibilityIdentifier("viewerShare") }
+                        bar("trash", tr("common.delete")) { confirmDelete = true }
+                    }
+                    .padding(.vertical, 4).padding(.horizontal, 20).background(.ultraThinMaterial, in: Capsule())
                 }
-                .padding(.vertical, 12).padding(.horizontal, 20).background(.ultraThinMaterial, in: Capsule()).padding(.bottom, 16)
+                .padding(.horizontal, 20).padding(.bottom, 16)
             }
         }
         .preferredColorScheme(.dark)
+        .task(id: current?.id) {
+            shareImage = nil
+            guard let p = current, let full = await media.fullImage(for: p) else { return }
+            shareImage = Image(uiImage: full)
+        }
         .sheet(isPresented: $showInfo) { if let p = current { PhotoInfoSheet(media: media, photo: p) } }
         .sheet(isPresented: $showCollections) { if let p = current { AddToCollectionSheet(media: media, photoIDs: [p.id]) {} } }
         .confirmationDialog(tr("viewer.delete_this_photo"), isPresented: $confirmDelete, titleVisibility: .visible) {

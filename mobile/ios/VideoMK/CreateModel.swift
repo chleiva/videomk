@@ -129,6 +129,8 @@ final class CreateModel {
 
     // MARK: Create
 
+    @ObservationIgnored private var checkRun: UUID?               // which request check may still answer
+
     var checker: CreateChecker? { api.map { CreateChecker(api: $0) } }
 
     private func request(answers: [IntakeAnswer], mediaCount: Int) -> BriefRequest { BriefRequest(prompt: form.text, options: form.options, mediaCount: mediaCount, answers: answers) }
@@ -139,9 +141,10 @@ final class CreateModel {
         guard caps.intake, !form.hasDeck, let checker else { submit(nil); return }       // a presentation skips the request check: its prompt is only a tone hint
         stage = .checking(slow: false)
         let req = request(answers: [], mediaCount: mediaCount)
+        let run = UUID(); checkRun = run                                      // a cancelled call's late answer must never start a video
         Task {
-            let outcome = await checker.check(req) { Task { @MainActor in if self.stage == .checking(slow: false) { self.stage = .checking(slow: true) } } }
-            guard case .checking = stage else { return }                      // cancelled or made it now meanwhile
+            let outcome = await checker.check(req) { Task { @MainActor in if self.checkRun == run, self.stage == .checking(slow: false) { self.stage = .checking(slow: true) } } }
+            guard checkRun == run, case .checking = stage else { return }     // cancelled, or made it now meanwhile
             switch outcome {
             case .proceed(let brief): stage = .form; submit(brief)
             case .questions(let q): stage = .questions(IntakeFlow(q))
@@ -153,8 +156,8 @@ final class CreateModel {
     }
 
     /// "Make it now" while the check is still running: stop waiting and go.
-    func skipCheck(submit: ([String: String]?) -> Void) { if case .checking = stage { stage = .form; submit(nil) } }
-    func cancelCheck() { if case .checking = stage { stage = .form } }
+    func skipCheck(submit: ([String: String]?) -> Void) { if case .checking = stage { checkRun = nil; stage = .form; submit(nil) } }
+    func cancelCheck() { checkRun = nil; if case .checking = stage { stage = .form } }
 
     // MARK: questions
 
@@ -177,7 +180,7 @@ final class CreateModel {
         return out
     }
 
-    func dismissOverlay() { stage = .form }
+    func dismissOverlay() { checkRun = nil; stage = .form }       // closing the sheet while it still checks drops the call: a late answer starts nothing
 
     // MARK: after Create
 
@@ -236,6 +239,7 @@ final class CreateModel {
             var f = IntakeFlow(q); f.choose(q[0].options[0]); f.choose(q[1].options[0]); f.choose(q[2].options[0])
             stage = .summary(f, brief: ["summary": "For kids · Calm · Focus: Making honey"])
         case "checking": stage = .checking(slow: true)
+        case "checkingfast": stage = .checking(slow: false)      // the first moments of the check: the form is locked, the button says so
         case "unsupported": stage = .notSupported(message: "This request is outside what videomk can make. Try describing the topic in a different way.", suggestion: "A calm story about a lighthouse keeper")
         case "blocked": stage = .blocked("We can’t make this one. Try describing something different.")
         case "paused": stage = .paused(message: "Creating videos is paused for this account for now.", retryAfter: 3600)

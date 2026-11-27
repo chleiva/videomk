@@ -41,6 +41,8 @@ enum Theme {
     enum Space { static let xs = CGFloat(DesignTokens.Space.xs), s = CGFloat(DesignTokens.Space.s), m = CGFloat(DesignTokens.Space.m), l = CGFloat(DesignTokens.Space.l), xl = CGFloat(DesignTokens.Space.xl), xxl = CGFloat(DesignTokens.Space.xxl), xxxl = CGFloat(DesignTokens.Space.xxxl) }
     enum Radii { static let field = CGFloat(DesignTokens.Radius.field), thumb = CGFloat(DesignTokens.Radius.thumb), card = CGFloat(DesignTokens.Radius.card), videoCard = CGFloat(DesignTokens.Radius.videoCard), composer = CGFloat(DesignTokens.Radius.composer), sheet = CGFloat(DesignTokens.Radius.sheet) }
     static let minTouch = CGFloat(DesignTokens.Size.minTouch)
+    /// The floating tab bar (two tabs and the round New video button) and its margins: the room screens leave at the bottom so nothing hides under it.
+    static let floatingBarHeight = CGFloat(84)
     /// Motion tokens; `Motion.animation(_, reduced:)` gives nil under Reduce Motion for movement, a short fade otherwise.
     enum Motion {
         static let press = Animation.easeOut(duration: DesignTokens.Motion.press)

@@ -39,7 +39,14 @@ final class AppModel {
     var selectedTab = 0                                    // 0 videos, 1 media
     var tabBarHidden = false                               // a video is open: the floating bar steps aside
     var composerDraft: String?                             // text to put in the composer (Try again on a failed video)
+    var retryNotice: RetryNotice?                          // why "Try again" or Remove could not be done (shown once)
+    private(set) var retrying: Set<String> = []            // failed videos whose Try again is on its way
+    private var attachments: [String: Int] = [:]           // videos made in this session: how many photos and presentations they were made with (an older server's fallback never drops them)
+    struct RetryNotice: Identifiable, Equatable { let id = UUID(); let message: String }
     var composerLibrary: [LibraryPhoto] = []               // library photos chosen for the next video
+    var mediaSelection: [LibraryPhoto] = []                // what is ticked on the Media tab right now (the round (+) attaches it to a new video)
+    var mediaSelecting = false                             // Select mode is on in Media: the tab bar steps aside so the action bar is never covered
+    private(set) var submitted = 0                         // counts videos sent from Create: Media clears its selection when it grows
     var signInError: String?
     var isSigningIn = false
     var signingInWith: SignInChoice?                        // which button shows the spinner
@@ -190,7 +197,7 @@ final class AppModel {
         HTTPCookieStorage.shared.removeCookies(since: .distantPast)
         LocalWipe.resetDefaults(.standard, domain: Bundle.main.bundleIdentifier ?? "com.videomk.app", then: [Self.signedOutKey: true])
         createModel = CreateModel(api: api)               // drafts and remembered choices
-        composerDraft = nil; createProblem = nil; requestCredits = false; createRequested = false; selectedTab = 0; userID = nil; signInError = nil
+        composerDraft = nil; createProblem = nil; requestCredits = false; createRequested = false; selectedTab = 0; mediaSelection = []; mediaSelecting = false; userID = nil; signInError = nil
         deletionNotice = DeletionNotice(apple: accepted.apple, assumed: accepted.assumed, revokeToken: accepted.idToken)
     }
 
@@ -263,7 +270,21 @@ final class AppModel {
         if let intake, !intake.isEmpty { intakeBriefs[p.id] = intake }
         if let deckID { deckIDs[p.id] = deckID; deckMinutes[p.id] = sendsMinutes; deckPrompts[p.id] = Brief.normalized(brief) }
         pending.insert(p, at: 0)
+        submitted += 1; selectedTab = 0                    // the new video is on the Videos tab: go and see it making
         Task { await send(p.id) }
+    }
+
+    /// "Make a video" from Media (selection bar, viewer, a collection, the round (+)): Create opens over the tab the person is on, with these photos attached.
+    /// Closing Create brings them back to where they were; a selection in Media stays ticked until the video is sent.
+    func startVideo(with photos: [LibraryPhoto]) {
+        composerLibrary = Array(photos.prefix(PhotoLimits.maxPhotos))
+        createRequested = true
+    }
+
+    /// The round (+): on the Media tab, with photos ticked, the video starts with them (when nothing else is attached yet).
+    func requestCreate() {
+        if selectedTab == 1, composerLibrary.isEmpty, !mediaSelection.isEmpty { composerLibrary = Array(mediaSelection.prefix(PhotoLimits.maxPhotos)) }
+        createRequested = true
     }
 
     func retry(_ id: String) {
@@ -272,12 +293,78 @@ final class AppModel {
         Task { await send(id) }
     }
 
-    /// "Try again" on a video the server could not finish: ask for the same thing again when we remember it, else put its title back in the composer.
+    /// "Try again" on a video the server could not finish: the SAME video starts again on the server with everything it was made with (every photo, option, language, watermark):
+    /// no new row, nothing resent from the phone. An older server without the route: only a video known to have had no attachments is asked for again the old way; any other is
+    /// never rebuilt without its photos (that is how a 60-photo video once came back with none): the person is told instead.
     func tryAgain(_ video: VideoItem) {
-        if deckVideos.contains(video.id) { createRequested = true; return }       // the deck was used up: start again from Create
-        if let brief = briefs[video.id], Brief.isValid(brief) {
-            submit(brief: brief, options: CreateOptions(minutes: minutes[video.id] ?? CreateOptions.defaultMinutes))
-        } else { composerDraft = video.displayTitle }
+        guard let api, !retrying.contains(video.id) else { return }
+        #if DEBUG
+        if media?.isFake == true { fakeTryAgain(video); return }     // fake-library runs never call the real backend
+        #endif
+        retrying.insert(video.id)
+        Task {
+            defer { retrying.remove(video.id) }
+            do {
+                switch try await api.retryVideo(videoID: video.id) {
+                case .started(_, let unusable):
+                    markRunning(video.id)                    // the row turns into the making card at once
+                    await refresh()
+                    if unusable > 0 { retryNotice = RetryNotice(message: tr("retry.photos_unusable", unusable)) }
+                case .alreadyRunning:
+                    markRunning(video.id); await refresh()
+                case .unsupported:
+                    if let brief = briefs[video.id], RetryRules.mayResendFromPrompt(attachments: attachments[video.id], briefIsValid: Brief.isValid(brief), fromPresentation: deckVideos.contains(video.id)) {
+                        submit(brief: brief, options: CreateOptions(minutes: minutes[video.id] ?? CreateOptions.defaultMinutes))
+                    } else { retryNotice = RetryNotice(message: tr("retry.unavailable")) }
+                case .refused(_, let message):
+                    retryNotice = RetryNotice(message: message); await refresh()
+                }
+            } catch let e as AuthError where e == .signedOut { await signOut()
+            } catch let e as APIError where e == .unauthorized { await signOut()
+            } catch let e as APIError {
+                if case .insufficientCredits = e { await refreshWallet() }
+                retryNotice = RetryNotice(message: e.message)
+            } catch { retryNotice = RetryNotice(message: APIError.server.message) }
+        }
+    }
+
+    private func markRunning(_ id: String) {
+        guard let i = videos.firstIndex(where: { $0.id == id }) else { return }
+        let v = videos[i]
+        videos[i] = VideoItem(id: v.id, status: .running(.starting), title: v.title, durationSeconds: nil, createdAt: v.createdAt, videoURL: nil, previewGifURL: nil, rejectReason: nil, editable: false, aspect: v.aspect, resolution: v.resolution, deckStage: nil, canRetry: nil)
+        stageSince[id] = (.starting, .now)
+    }
+
+    #if DEBUG
+    /// Fake-library runs: what the server would answer to Try again. `VMK_DEBUG_FAKE_RETRY=unusable|unsupported|refused` (default: the video starts again).
+    private func fakeTryAgain(_ video: VideoItem) {
+        switch ProcessInfo.processInfo.environment["VMK_DEBUG_FAKE_RETRY"] {
+        case "unsupported":
+            if let brief = briefs[video.id], RetryRules.mayResendFromPrompt(attachments: attachments[video.id], briefIsValid: Brief.isValid(brief), fromPresentation: deckVideos.contains(video.id)) {
+                submit(brief: brief, options: CreateOptions(minutes: minutes[video.id] ?? CreateOptions.defaultMinutes))
+            } else { retryNotice = RetryNotice(message: tr("retry.unavailable")) }
+        case "refused": retryNotice = RetryNotice(message: "These photos are no longer available. Start a new video with them.")
+        case "unusable": markRunning(video.id); retryNotice = RetryNotice(message: tr("retry.photos_unusable", 1))
+        default: markRunning(video.id)
+        }
+    }
+    #endif
+
+    /// Removes a video that did not finish (failed or refused) from the list and from the server.
+    func removeFailed(_ video: VideoItem) {
+        guard let api else { return }
+        #if DEBUG
+        if media?.isFake == true { videos.removeAll { $0.id == video.id }; return }
+        #endif
+        Task {
+            do {
+                if try await api.deleteVideo(videoID: video.id) { videos.removeAll { $0.id == video.id } }
+                else { retryNotice = RetryNotice(message: tr("retry.remove_unavailable")) }
+            } catch let e as AuthError where e == .signedOut { await signOut()
+            } catch let e as APIError where e == .unauthorized { await signOut()
+            } catch let e as APIError { retryNotice = RetryNotice(message: e.message); await refresh()
+            } catch { retryNotice = RetryNotice(message: APIError.server.message) }
+        }
     }
 
     func dismissPending(_ id: String) { pending.removeAll { $0.id == id }; deckIDs[id] = nil; deckMinutes[id] = nil; deckPrompts[id] = nil; photoData[id] = nil; photoMeta[id] = nil; uploadedMedia[id] = nil; libraryIDs[id] = nil }
@@ -302,6 +389,7 @@ final class AppModel {
             #endif
             let videoID = try await create(brief: deckIDs[id] != nil ? (deckPrompts[id] ?? "") : p.brief, requestID: p.id, options: p.options, media: media, mediaMeta: PhotoMetaReader.mediaMeta(ids: media, metas: photoMeta[id] ?? []), libraryMedia: libraryIDs[id] ?? [], intake: intakeBriefs[id], deck: deckIDs[id], sendMinutes: deckMinutes[id] ?? true)
             if deckIDs[id] != nil { deckVideos.insert(videoID) }
+            attachments[videoID] = media.count + (libraryIDs[id] ?? []).count + (deckIDs[id] != nil ? 1 : 0)
             deckIDs[id] = nil; deckMinutes[id] = nil; deckPrompts[id] = nil
             photoData[id] = nil; photoMeta[id] = nil; uploadedMedia[id] = nil; libraryIDs[id] = nil
             briefs[videoID] = p.brief; minutes[videoID] = p.options.minutes

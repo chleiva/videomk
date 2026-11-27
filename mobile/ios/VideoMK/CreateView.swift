@@ -11,7 +11,6 @@ struct CreateView: View {
     @Bindable var create: CreateModel
     @State private var dictation = Dictation()
     @State private var showingAdd = false
-    @State private var showingPhotos = false
     @State private var confirmDiscard = false
     @State private var soonTip = false
     @State private var addOnLibrary = false
@@ -38,12 +37,15 @@ struct CreateView: View {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 16) {
                         HStack { GlassIconButton(symbol: "xmark", label: tr("common.cancel"), identifier: "createCancel") { cancel() }; Spacer() }
-                        promptArea.id("prompt")
-                        if form.hasDeck { Text(tr("deck.prompt_hint")).font(.vmk(13)).foregroundStyle(Theme.textSecondary).fixedSize(horizontal: false, vertical: true).accessibilityIdentifier("deckPromptHint") }
-                        attachments
-                        deckSection
-                        pills
-                        notice
+                        Group {         // locked and dimmed while the request is being checked: nothing can change under the call
+                            promptArea.id("prompt")
+                            if form.hasDeck { Text(tr("deck.prompt_hint")).font(.vmk(13)).foregroundStyle(Theme.textSecondary).fixedSize(horizontal: false, vertical: true).accessibilityIdentifier("deckPromptHint") }
+                            attachments
+                            deckSection
+                            pills
+                            notice
+                        }
+                        .disabled(checking).opacity(checking ? 0.45 : 1).animation(reduceMotion ? nil : .easeOut(duration: 0.2), value: checking)
                     }
                     .padding(.horizontal, 20).padding(.top, 8).padding(.bottom, 24)
                 }
@@ -62,7 +64,7 @@ struct CreateView: View {
             }
         }
         .presentationDetents([.large]).presentationDragIndicator(.visible)
-        .interactiveDismissDisabled(create.hasEdits)
+        .interactiveDismissDisabled(create.hasEdits || checking)
         .task {
             await create.loadCapabilities(userID: model.userID)
             if let auto = create.autoOpenPhotos { create.autoOpenPhotos = nil; addOnLibrary = auto.library; try? await Task.sleep(for: .milliseconds(350)); showingAdd = true }
@@ -96,7 +98,6 @@ struct CreateView: View {
         } message: { Text(tr("deck.replace_deck.message")) }
         .onChange(of: create.deck.state, initial: true) { _, _ in create.syncDeck() }
         .sheet(isPresented: $create.showMore) { CreateOptionsSheet(create: create) }
-        .sheet(isPresented: $showingPhotos) { AttachedPhotosSheet(create: create) { showingPhotos = false; showingAdd = true } }
         .sheet(isPresented: Binding(get: { create.stage != .form && create.stage != .checking(slow: false) }, set: { if !$0 { create.dismissOverlay() } })) {
             CreateStageSheet(create: create, balance: balance, mediaCount: totalPhotos, onSubmit: finish, onEdit: { create.dismissOverlay(); focused = true })
         }
@@ -181,26 +182,44 @@ struct CreateView: View {
             .frame(minWidth: Theme.minTouch, minHeight: Theme.minTouch).contentShape(Circle())
     }
 
-    /// A single thumbnail strip, only when something is attached.
+    /// The attached photos: the count, every photo with its own (x), and one tile to add more. Only when something is attached.
     @ViewBuilder private var attachments: some View {
         if totalPhotos > 0 || create.photos.loading > 0 {
             VStack(alignment: .leading, spacing: 8) {
-                HStack(spacing: 8) {
-                    ForEach(Array(create.thumbs(library: model.composerLibrary).prefix(5).enumerated()), id: \.offset) { _, t in ThumbCell(thumb: t, media: model.media) }
-                    if totalPhotos > 5 {
-                        Button { showingPhotos = true } label: { Text("+\(totalPhotos - 5)").font(.vmk(17, weight: .bold)).foregroundStyle(Theme.primary).frame(width: 56, height: 56).background(Theme.primaryContainer, in: RoundedRectangle(cornerRadius: Theme.Radii.field, style: .continuous)) }
-                            .buttonStyle(.plain).accessibilityLabel(tr("create.more_photos", totalPhotos - 5))
-                    } else if totalPhotos > 0 {
-                        Button { showingPhotos = true } label: { Image(systemName: "pencil").font(.vmk(16, weight: .semibold)).foregroundStyle(Theme.primary).frame(width: 56, height: 56).background(Theme.primaryContainer, in: RoundedRectangle(cornerRadius: Theme.Radii.field, style: .continuous)) }
-                            .buttonStyle(.plain).accessibilityLabel(tr("common.edit")).accessibilityIdentifier("editPhotos")
+                Text(tr("photos.count", totalPhotos)).font(.vmk(13, weight: .semibold).monospacedDigit()).foregroundStyle(Theme.textSecondary)
+                    .accessibilityIdentifier("photosNote")
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 10) {
+                        ForEach(Array(create.photos.items.enumerated()), id: \.element.id) { index, p in
+                            Image(uiImage: p.thumbnail).resizable().scaledToFill().frame(width: 56, height: 56)
+                                .clipShape(RoundedRectangle(cornerRadius: Theme.Radii.field, style: .continuous))
+                                .overlay(alignment: .topTrailing) { RemoveX(label: tr("attach.remove_photo", index + 1)) { withAnimation(reduceMotion ? nil : .snappy) { create.photos.remove(p.id) } } }
+                                .accessibilityElement(children: .contain).accessibilityLabel(tr("attach.photo_n_of", index + 1, create.photos.items.count)).accessibilityIdentifier("attachedPhoto")
+                        }
+                        ForEach(Array(model.composerLibrary.enumerated()), id: \.element.id) { index, photo in
+                            LibraryStripTile(photo: photo, media: model.media, label: tr("attach.library_photo_n_of", index + 1, model.composerLibrary.count)) {
+                                withAnimation(reduceMotion ? nil : .snappy) { model.composerLibrary.removeAll { $0.id == photo.id } }
+                            }
+                        }
+                        if create.photos.loading > 0 { ProgressView().frame(width: 56, height: 56) }
+                        Button { focused = false; addOnLibrary = false; startPhotoAdd() } label: {
+                            Image(systemName: "photo.badge.plus").font(.vmk(18, weight: .semibold)).foregroundStyle(Theme.primary).frame(width: 56, height: 56)
+                                .background(Theme.primaryContainer, in: RoundedRectangle(cornerRadius: Theme.Radii.field, style: .continuous))
+                        }
+                        .buttonStyle(.plain).accessibilityLabel(tr("create.add_more_photos")).accessibilityIdentifier("editPhotos")
                     }
-                    if create.photos.loading > 0 { ProgressView().frame(width: 56, height: 56) }
-                    Spacer(minLength: 0)
+                    .padding(.top, 12).padding(.trailing, 12)           // room for the (x) that sits over each corner
                 }
-                .accessibilityElement(children: .contain).accessibilityLabel(tr("photos.count", totalPhotos)).accessibilityIdentifier("photosNote")
                 if let n = create.photos.notice { Text(n).font(.caption).foregroundStyle(Theme.danger).accessibilityIdentifier("photosNotice") }
                 if let p = create.photos.preparingText { Text(p).font(.caption.weight(.semibold)).foregroundStyle(Theme.primary).accessibilityIdentifier("photosPreparing") }
             }
+        } else if model.selectedTab == 1, !form.hasDeck, !create.deck.isActive {
+            // Create was opened from the Media tab with nothing ticked: the library is one tap away
+            Button { focused = false; addOnLibrary = true; startPhotoAdd() } label: {
+                Label(tr("create.use_library"), systemImage: "photo.stack").font(.vmk(15, weight: .semibold)).foregroundStyle(Theme.primary)
+                    .padding(.horizontal, 16).frame(minHeight: 44).background(Theme.primaryContainer, in: Capsule())
+            }
+            .buttonStyle(.plain).accessibilityIdentifier("useLibrary")
         }
     }
 
@@ -312,8 +331,8 @@ struct CreateView: View {
             Button { tapCreate(s, proxy) } label: {
                 HStack(spacing: 8) {
                     if checking { ProgressView().tint(Theme.onPrimary) }
-                    Text(tr("create.create_video")).font(.vmk(19, weight: .bold))
-                    if showsPrice {          // not while a presentation is still being read: its price is not known yet
+                    Text(checking ? checkingLine : tr("create.create_video")).font(.vmk(19, weight: .bold))
+                    if showsPrice, !checking {          // not while a presentation is still being read: its price is not known yet
                         Text(verbatim: "·").font(.vmk(19, weight: .bold))
                         HStack(spacing: 3) { Image(systemName: "bolt.fill").font(.vmk(15)); Text("\(form.options.credits)").font(.vmk(19, weight: .bold).monospacedDigit()) }
                     }
@@ -322,7 +341,7 @@ struct CreateView: View {
                 .background { Capsule().fill(Theme.surface3).opacity(ready || checking ? 0 : 1); Capsule().fill(Theme.gradient).opacity(ready || checking ? 1 : 0) }
                 .shadow(color: Theme.gradientStart.opacity(ready ? 0.3 : 0), radius: 10, y: 4)
             }
-            .buttonStyle(.plain)
+            .buttonStyle(.plain).disabled(checking)
             .accessibilityLabel(typeSize.isAccessibilitySize ? tr("create.create_a11y_credits", tr("credits.count", form.options.credits)) : tr("create.create_video"))
             .accessibilityValue(ready ? tr("create.ready_costs", tr("credits.count", form.options.credits)) : checking ? tr("create.checking_a11y") : tr("create.not_ready", s.message))
             .accessibilityHint(ready ? tr("create.starts_video") : tr("create.tells_missing"))
@@ -338,7 +357,7 @@ struct CreateView: View {
     @ViewBuilder private func caption(_ s: ComposerStatus) -> some View {
         Group {
             if checking {
-                HStack(spacing: 8) { ProgressView().controlSize(.small); Text(tr("create.checking_your_request")).font(.vmk(14, weight: .medium)).foregroundStyle(Theme.textSecondary) }
+                Button(tr("common.cancel")) { stopChecking() }.font(.vmk(15, weight: .semibold)).foregroundStyle(Theme.primary).frame(minHeight: 44).accessibilityIdentifier("checkingCancel")
             } else if s.kind == .ready {
                 if let balance { Text(tr("create.credits_left", balance - form.options.credits)).font(.vmk(14)).foregroundStyle(Theme.textSecondary).accessibilityIdentifier("costLine") } else { Color.clear.frame(height: 0) }
             } else if s.kind == .price || (s.kind == .tooShort && !form.hasContent) {
@@ -358,6 +377,9 @@ struct CreateView: View {
         .frame(minHeight: 22)
         .accessibilityElement(children: .contain).accessibilityIdentifier("statusLine")
     }
+
+    /// What the button says while the request is checked: one short honest line.
+    private var checkingLine: String { if case .checking(let slow) = create.stage, slow { tr("create.checking_slow") } else { tr("create.checking_your_request") } }
 
     private var showsPrice: Bool { create.deckComposer == .none || create.deckComposer == .ready }
 
@@ -384,6 +406,7 @@ struct CreateView: View {
         dictation.cancel(); focused = false
         Haptics.play(.send)
         create.create(mediaCount: totalPhotos, submit: finish)
+        if checking { UIAccessibility.post(notification: .announcement, argument: tr("create.checking_your_request")) }
     }
 
     /// The request is cleared (or confirmed): the video starts, the screen closes onto the library.
@@ -398,8 +421,15 @@ struct CreateView: View {
         dismiss()
     }
 
+    /// The X: nothing typed (library photos do not count: they are still ticked in Media) closes at once and the next Create starts empty.
     private func cancel() {
-        if create.hasEdits { confirmDiscard = true } else { create.cancelCheck(); dismiss() }
+        if checking { stopChecking(); return }
+        if create.hasEdits { confirmDiscard = true } else { create.cancelCheck(); model.composerLibrary = []; dismiss() }
+    }
+    /// Cancel during the request check: the call is dropped (a late answer is ignored, nothing is sent) and the form is back exactly as it was.
+    private func stopChecking() {
+        create.cancelCheck(); Haptics.play(.selection)
+        UIAccessibility.post(notification: .announcement, argument: tr("create.check_cancelled"))
     }
     private func discard() { dictation.cancel(); create.cancelCheck(); create.photos.clear(); model.composerLibrary = []; create.removeDeck(); create.form.text = ""; dismiss() }
 }
@@ -419,28 +449,6 @@ struct ThumbCell: View {
         case .phone(let p): Image(uiImage: p.thumbnail).resizable().scaledToFill().frame(width: 56, height: 56).clipShape(RoundedRectangle(cornerRadius: Theme.Radii.field, style: .continuous)).accessibilityIdentifier("attachedPhoto")
         case .library(let l): LibraryStripTile(photo: l, media: media, label: tr("create.library_photo_a11y"), showRemove: false) {}
         }
-    }
-}
-
-/// Everything attached, with a remove button on each (the Create screen shows only the first four).
-struct AttachedPhotosSheet: View {
-    @Environment(AppModel.self) private var model
-    @Environment(\.dismiss) private var dismiss
-    let create: CreateModel
-    let onAdd: () -> Void
-    var body: some View {
-        NavigationStack {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 16) {
-                    AttachedPhotosStrip(photos: create.photos, library: model.composerLibrary, media: model.media) { id in model.composerLibrary.removeAll { $0.id == id } }
-                    Button { onAdd() } label: { Label(tr("create.add_more_photos"), systemImage: "photo.badge.plus").font(.headline).frame(maxWidth: .infinity, minHeight: 48) }.buttonStyle(.borderedProminent).tint(Theme.primary)
-                }
-                .padding(20)
-            }
-            .navigationTitle(tr("create.photos")).navigationBarTitleDisplayMode(.inline)
-            .toolbar { ToolbarItem(placement: .confirmationAction) { Button(tr("common.done")) { dismiss() } } }
-        }
-        .presentationDetents([.medium, .large])
     }
 }
 

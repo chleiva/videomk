@@ -11,22 +11,16 @@ struct CollectionsStrip: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
         if !media.collections.isEmpty {
-            HStack {
+            HStack(spacing: 4) {
                 Text(tr("viewer.collections")).font(.vmk(17, weight: .bold)).foregroundStyle(Theme.text).accessibilityAddTraits(.isHeader)
                 Spacer()
+                Button(action: onNew) { Image(systemName: "folder.badge.plus").font(.vmk(17, weight: .semibold)).frame(width: 44, height: 44) }
+                    .accessibilityLabel(tr("media.new_collection")).accessibilityIdentifier("newCollection")
                 Button(tr("collections.see_all")) { media.showCollectionsList = true }.font(.vmk(15, weight: .semibold)).frame(minHeight: 44).accessibilityIdentifier("seeAllCollections")
             }.padding(.horizontal, 16)
         }
         ScrollView(.horizontal, showsIndicators: false) {
             LazyHStack(spacing: 10) {
-                Button(action: onNew) {
-                    VStack(spacing: 6) {
-                        RoundedRectangle(cornerRadius: Theme.Radii.videoCard, style: .continuous).fill(Theme.surface).frame(width: 104, height: 104)
-                            .overlay { Image(systemName: "plus").font(.title2).foregroundStyle(Theme.primary) }
-                        Text(tr("collections.new")).font(.caption).foregroundStyle(Theme.textSecondary)
-                    }
-                }
-                .accessibilityLabel(tr("media.new_collection")).accessibilityIdentifier("newCollection")
                 ForEach(media.collections) { c in
                     NavigationLink(value: c) { CollectionCard(media: media, collection: c) }
                         .buttonStyle(.plain)
@@ -108,44 +102,44 @@ struct CollectionDetailView: View {
             }
         }
         .background(Theme.background.ignoresSafeArea())
-        .navigationTitle("\(current.emoji.map { $0 + " " } ?? "")\(current.name)")   // i18n-ok
+        .navigationTitle(selection.active ? (selection.count == 0 ? tr("media.select_photos") : tr("attach.selected", selection.count)) : "\(current.emoji.map { $0 + " " } ?? "")\(current.name)")   // i18n-ok
         .navigationBarTitleDisplayMode(.inline)
+        .onChange(of: selection.active) { _, on in model.mediaSelecting = on }
+        .onChange(of: model.submitted) { _, _ in selection.clear() }
+        .onDisappear { model.mediaSelecting = false }
         .toolbar {
+            if selection.active {
+                ToolbarItem(placement: .topBarTrailing) {
+                    if !feed.photos.isEmpty {
+                        let all = SelectAll.allSelected(view: feed.photos.map(\.id), selected: selection.ordered)
+                        Button(all ? tr("select_all.clear") : tr("media.all_short")) {
+                            Haptics.play(.selection)
+                            Task { await SelectionActions.toggleAll(feed: feed, selection: selection, limit: PhotoLimits.maxPhotos) }
+                        }
+                        .accessibilityLabel(SelectAll.label(viewCount: feed.photos.count, hasMore: feed.canLoadMore, allSelected: all)).accessibilityIdentifier("selectAll")
+                    }
+                }
+            } else {
             ToolbarItemGroup(placement: .topBarTrailing) {
-                if !feed.photos.isEmpty { Button(selection.active ? tr("common.done") : tr("media.select")) { if selection.active { selection.clear() } else { selection.active = true } } }
+                if !feed.photos.isEmpty { Button(tr("media.select")) { selection.active = true }.accessibilityIdentifier("selectButton") }
                 Menu {
                     Button { name = current.name; renaming = true } label: { Label(tr("collections.rename"), systemImage: "pencil") }
                     Button(role: .destructive) { confirmDelete = true } label: { Label(tr("collections.delete_collection"), systemImage: "trash") }
                 } label: { Image(systemName: "ellipsis.circle") }.accessibilityLabel(tr("collections.collection_actions"))
             }
+            }
         }
         .safeAreaInset(edge: .bottom, spacing: 0) {
             if selection.active {
-                VStack(spacing: 0) {
-                    HStack {
-                        Text(selection.count == 0 ? tr("media.select_photos") : tr("attach.selected", selection.count)).font(.subheadline.weight(.semibold)).foregroundStyle(Theme.text)
-                        Spacer()
-                        if !feed.photos.isEmpty {
-                            Button(SelectAll.label(viewCount: feed.photos.count, hasMore: feed.canLoadMore, allSelected: SelectAll.allSelected(view: feed.photos.map(\.id), selected: selection.ordered))) {
-                                Haptics.play(.selection)
-                                Task { await SelectionActions.toggleAll(feed: feed, selection: selection, limit: PhotoLimits.maxPhotos) }
-                            }.font(.vmk(15, weight: .semibold)).frame(minHeight: 44).accessibilityIdentifier("selectAll")
-                        }
-                    }.padding(.horizontal, 16).padding(.top, 6)
-                HStack {
-                    Button { model.composerLibrary = Array(feed.photos.filter { selection.contains($0.id) }.prefix(100)); model.selectedTab = 0; model.createRequested = true; selection.clear() } label: { Label(tr("collections.make_a_video"), systemImage: "sparkles.tv") }
-                    Spacer()
-                    Button(role: .destructive) { let ids = selection.ids; Task { if await media.edit(current, remove: Array(ids)) { feed.remove(ids); selection.clear() } } } label: { Label(tr("collections.remove_from_collection"), systemImage: "minus.circle") }
-                }
-                .disabled(selection.count == 0).padding(.horizontal, 16).padding(.vertical, 12)
-                }
-                .background(.bar)
+                SelectionBar(selection: selection, onVideo: { model.startVideo(with: selection.ordered.compactMap { id in feed.photos.first { $0.id == id } }) },
+                             icons: [.init(id: "removeFromCollection", symbol: "minus.circle", label: tr("collections.remove_from_collection"), danger: true) {
+                                 let ids = selection.ids; Task { if await media.edit(current, remove: Array(ids)) { feed.remove(ids); selection.clear() } } }])
             }
         }
         .task(id: media.version) { await feed.refreshIfNeeded() }
         .refreshable { await feed.reload() }
         .fullScreenCover(item: $viewing) { ctx in
-            PhotoViewer(media: media, photos: ctx.photos, start: ctx.index, onDeleted: { feed.remove([$0]) }, onMakeVideo: { p in viewing = nil; model.composerLibrary = [p]; model.selectedTab = 0; model.createRequested = true })
+            PhotoViewer(media: media, photos: ctx.photos, start: ctx.index, onDeleted: { feed.remove([$0]) }, onMakeVideo: { p in viewing = nil; model.startVideo(with: [p]) })
         }
         .alert(tr("collections.rename_collection"), isPresented: $renaming) {
             TextField(tr("media.name"), text: $name)

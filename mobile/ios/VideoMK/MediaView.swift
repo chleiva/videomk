@@ -19,6 +19,7 @@ struct MediaView: View {
     @State private var tabVisible = false
     @State private var newName = ""
     @AppStorage("mediaPrivacyNoteSeen") private var privacySeen = false
+    @AppStorage("mediaCoachSeen") private var coachSeen = false
 
     init(media: MediaModel) { self.media = media; _feed = State(initialValue: PhotoFeed(kind: .timeline, media: media)) }
 
@@ -28,6 +29,7 @@ struct MediaView: View {
                 VStack(spacing: 12) {
                     if !privacySeen { PrivacyNote { withAnimation(reduceMotion ? nil : .snappy) { privacySeen = true } } }
                     MediaHeader(media: media) { showStorage = true }
+                    if media.summary?.readOnly != true, !selection.active, !(feed.photos.isEmpty && !showBatch) { AddPhotosButton(pickerItems: $pickerItems) }
                     if media.summary?.readOnly == true {
                         Label(tr("media.read_only_until_you_are"), systemImage: "lock.fill")
                             .font(.footnote).foregroundStyle(Theme.warning).padding(.horizontal, 16).frame(maxWidth: .infinity, alignment: .leading)
@@ -35,15 +37,17 @@ struct MediaView: View {
                     }
                     SearchBar(feed: feed)
                     ChipsRow(feed: feed)
-                    if !feed.isSearching { CollectionsStrip(media: media, onNew: { newCollection = true }) }
+                    if showCoach { CoachMark(text: tr("media.coach")) { withAnimation(reduceMotion ? nil : .snappy) { coachSeen = true } }.transition(.opacity) }
+                    if !feed.isSearching, !selection.active, !media.collections.isEmpty { CollectionsStrip(media: media, onNew: { newCollection = true }) }       // while selecting, the photos sit right under the search field
                     content
                 }
                 .padding(.top, 4)
+                .padding(.bottom, tabBarRoom)
             }
             .scrollDismissesKeyboard(.interactively)
             .background(Theme.background.ignoresSafeArea())
-            .navigationTitle(tr("media.media"))
-            .navigationBarTitleDisplayMode(.large)
+            .navigationTitle(selection.active ? (selection.count == 0 ? tr("media.select_photos") : tr("attach.selected", selection.count)) : tr("media.media"))
+            .navigationBarTitleDisplayMode(selection.active ? .inline : .large)
             .navigationDestination(for: LibraryCollection.self) { CollectionDetailView(media: media, collection: $0) }
             .navigationDestination(isPresented: Binding(get: { media.showCollectionsList }, set: { media.showCollectionsList = $0 })) { CollectionsListView(media: media) }
             .toolbar { toolbar }
@@ -52,7 +56,9 @@ struct MediaView: View {
                     if let toast = media.toast { UploadToast(toast: toast, onAction: { media.dismissToast(); if toast.action == tr("org.view") { media.showCollectionsList = true } else { withAnimation(.snappy) { media.barExpanded = true } } }, onDismiss: { media.dismissToast() }) }
                     UploadBar(media: media, onManageStorage: { showStorage = true })
                     if media.bar == nil || media.bar?.kind == .finished { OrganizeBar(media: media) }
-                    if selection.active { SelectionBar(selection: selection, feed: feed, onCollection: { showAddToCollection = true }, onVideo: makeVideo, onDelete: { confirmDelete = true }) }
+                    if showNextStep { NextStepBar(count: justAdded.count, onMake: { model.startVideo(with: justAdded) }, onDismiss: { withAnimation(reduceMotion ? nil : .snappy) { media.clearLastBatch() } }) }
+                    if selection.active { SelectionBar(selection: selection, onVideo: makeVideo, icons: [.init(id: "addToCollection", symbol: "folder.badge.plus", label: tr("collections.add_to_collection")) { showAddToCollection = true }, .init(id: "deleteSelection", symbol: "trash", label: tr("common.delete"), danger: true) { confirmDelete = true }]) }
+                    else { Color.clear.frame(height: tabBarRoom) }       // the floating tab bar sits over this area: the bars above it stay clear of it
                 }
                 .animation(reduceMotion ? nil : .snappy, value: media.toast)
                 .animation(reduceMotion ? nil : .snappy, value: media.bar?.kind)
@@ -62,6 +68,10 @@ struct MediaView: View {
         }
         .overlay { expandedPanel }
         .task { await media.start() }
+        .onChange(of: selection.ordered) { _, ids in model.mediaSelection = ids.compactMap { id in feed.photos.first { $0.id == id } } }
+        .onChange(of: selection.active) { _, on in model.mediaSelecting = on; if on { coachSeen = true } }
+        .onChange(of: model.submitted) { _, _ in withAnimation(.snappy) { selection.clear() }; media.clearLastBatch() }
+        .onDisappear { model.mediaSelecting = false }
         .onChange(of: settleKey) { _, _ in settleBatchIfDone() }
         .onAppear { tabVisible = true; media.setWatching("tab", true); Task { await media.refreshNow() } }      // the tab is shown again: look at the server now
         .onDisappear { tabVisible = false; media.setWatching("tab", false) }
@@ -117,26 +127,48 @@ struct MediaView: View {
         }
     }
 
+    /// At most: Select and one overflow (Add photos is the labelled button under the title). While selecting: Cancel and Select all, the title says how many.
     @ToolbarContentBuilder private var toolbar: some ToolbarContent {
-        ToolbarItem(placement: .topBarLeading) {
-            if selection.active { Button(tr("common.cancel")) { withAnimation(.snappy) { selection.clear() } } }
-        }
-        ToolbarItemGroup(placement: .topBarTrailing) {
-            if !feed.photos.isEmpty {
-                Button(selection.active ? tr("common.done") : tr("media.select")) { withAnimation(.snappy) { if selection.active { selection.clear() } else { selection.active = true } } }
-                    .accessibilityIdentifier("selectButton")
+        if selection.active {
+            ToolbarItem(placement: .topBarLeading) {
+                Button(tr("common.cancel")) { withAnimation(.snappy) { selection.clear() } }.accessibilityIdentifier("selectCancel")
             }
-            if media.summary?.readOnly != true {
-                PhotosPicker(selection: $pickerItems, maxSelectionCount: nil, matching: .images) { Image(systemName: "plus") }
-                    .accessibilityLabel(tr("media.add_photos_to_your_library")).accessibilityIdentifier("addToLibraryButton")
+            ToolbarItem(placement: .topBarTrailing) {
+                if !feed.photos.isEmpty {
+                    let all = SelectAll.allSelected(view: feed.photos.map(\.id), selected: selection.ordered)
+                    Button(all ? tr("select_all.clear") : tr("media.all_short")) {
+                        Haptics.play(.selection)
+                        Task { await SelectionActions.toggleAll(feed: feed, selection: selection, limit: PhotoLimits.maxPhotos) }
+                    }
+                    .accessibilityLabel(SelectAll.label(viewCount: feed.photos.count, hasMore: feed.canLoadMore, allSelected: all)).accessibilityIdentifier("selectAll")
+                }
             }
-            Menu {
-                Button { media.organizeLibrary() } label: { Label(tr("media.organize_my_library"), systemImage: "sparkles") }.accessibilityIdentifier("organizeLibrary")
-                Button { showStorage = true } label: { Label(tr("media.storage"), systemImage: "externaldrive") }
-            } label: { Image(systemName: "ellipsis") }
-                .accessibilityLabel(tr("media.more")).accessibilityIdentifier("mediaMore")
+        } else {
+            ToolbarItemGroup(placement: .topBarTrailing) {
+                if !feed.photos.isEmpty {
+                    Button(tr("media.select")) { withAnimation(.snappy) { selection.active = true } }.accessibilityIdentifier("selectButton")
+                }
+                Menu {
+                    Button { newCollection = true } label: { Label(tr("media.new_collection"), systemImage: "folder.badge.plus") }.accessibilityIdentifier("newCollectionMenu")
+                    Button { media.organizeLibrary() } label: { Label(tr("media.organize_my_library"), systemImage: "sparkles") }.accessibilityIdentifier("organizeLibrary")
+                    Button { showStorage = true } label: { Label(tr("media.storage"), systemImage: "externaldrive") }
+                } label: { Image(systemName: "ellipsis") }
+                    .accessibilityLabel(tr("media.more")).accessibilityIdentifier("mediaMore")
+            }
         }
     }
+
+    // MARK: next step, coach mark, room for the tab bar
+
+    /// The photos of the last upload batch that the server already lists: "Make a video from these" is offered until it is used or dismissed.
+    private var justAdded: [LibraryPhoto] {
+        let ids = Set(media.lastBatchIDs)
+        return ids.isEmpty ? [] : feed.photos.filter { ids.contains($0.id) }
+    }
+    private var showNextStep: Bool { !selection.active && !justAdded.isEmpty && !feed.isSearching && (media.bar == nil || media.bar?.kind == .finished) }
+    private var showCoach: Bool { !coachSeen && !selection.active && !feed.photos.isEmpty && !feed.isSearching && !showNextStep }
+    /// The floating tab bar is drawn over the Media screen: this is its height, so bars and the last row of the grid stay clear of it.
+    private var tabBarRoom: CGFloat { selection.active ? 0 : Theme.floatingBarHeight }
 
     // MARK: the upload batch in the grid
 
@@ -178,17 +210,14 @@ struct MediaView: View {
         viewing = ViewerContext(photos: list, index: list.firstIndex(of: photo) ?? 0)
     }
 
+    /// Create opens over Media with the ticked photos attached. The selection stays ticked: closing Create brings the person back to it,
+    /// and it clears itself once the video is sent.
     private func makeVideo() {
-        let chosen = feed.photos.filter { selection.contains($0.id) }
-        send(chosen)
-        selection.clear()
+        let chosen = selection.ordered.compactMap { id in feed.photos.first { $0.id == id } }
+        model.startVideo(with: chosen)
     }
 
-    private func send(_ photos: [LibraryPhoto]) {
-        model.composerLibrary = Array(photos.prefix(PhotoLimits.maxPhotos))
-        model.selectedTab = 0
-        model.createRequested = true
-    }
+    private func send(_ photos: [LibraryPhoto]) { model.startVideo(with: photos) }
 }
 
 struct ViewerContext: Identifiable { let id = UUID(); let photos: [LibraryPhoto]; let index: Int }
@@ -199,7 +228,7 @@ struct MediaHeader: View {
     let media: MediaModel
     let onTap: () -> Void
     var body: some View {
-        if let meter = media.meter {
+        if let meter = media.meter, meter.state != .ok || meter.fraction >= 0.5 {      // a thin line at 5% tells nobody anything: it shows from half full (Storage is always in the More menu)
             Button(action: onTap) {
                 VStack(alignment: .leading, spacing: 6) {
                     HStack {
@@ -314,7 +343,7 @@ struct EmptyLibrary: View {
             Text(tr("media.add_photos_once_find_them"))
                 .font(.subheadline).multilineTextAlignment(.center).foregroundStyle(Theme.textSecondary)
             if !readOnly {
-                PhotosPicker(selection: $pickerItems, maxSelectionCount: nil, matching: .images) { Text(tr("create.add_photos")).font(.headline).frame(maxWidth: 240, minHeight: 48) }
+                PhotosPicker(selection: $pickerItems, maxSelectionCount: nil, matching: .images) { Label(tr("media.add_photos"), systemImage: "photo.badge.plus").font(.headline).frame(maxWidth: 240, minHeight: 48) }
                     .buttonStyle(.borderedProminent).accessibilityIdentifier("emptyAddPhotos")
             }
         }
@@ -322,41 +351,104 @@ struct EmptyLibrary: View {
     }
 }
 
-// MARK: selection bar
-
-struct SelectionBar: View {
-    @Bindable var selection: PhotoSelection
-    let feed: PhotoFeed
-    let onCollection: () -> Void, onVideo: () -> Void, onDelete: () -> Void
+/// The one upload action: a labelled button right under the title (an icon alone in the bar was not found).
+struct AddPhotosButton: View {
+    @Binding var pickerItems: [PhotosPickerItem]
     var body: some View {
-        VStack(spacing: 8) {
-            HStack {
-                Text(selection.count == 0 ? tr("media.select_photos") : tr("attach.selected", selection.count)).font(.subheadline.weight(.semibold)).foregroundStyle(Theme.text)
-                Spacer()
-                if !feed.photos.isEmpty {
-                    let all = SelectAll.allSelected(view: feed.photos.map(\.id), selected: selection.ordered)
-                    Button(SelectAll.label(viewCount: feed.photos.count, hasMore: feed.canLoadMore, allSelected: all)) {
-                        Haptics.play(.selection)
-                        Task { await SelectionActions.toggleAll(feed: feed, selection: selection, limit: PhotoLimits.maxPhotos) }
-                    }.font(.vmk(15, weight: .semibold)).frame(minHeight: 44)
-                        .accessibilityIdentifier("selectAll")
+        HStack {
+            PhotosPicker(selection: $pickerItems, maxSelectionCount: nil, matching: .images) {
+                Label(tr("media.add_photos"), systemImage: "photo.badge.plus").font(.vmk(16, weight: .semibold)).foregroundStyle(Theme.onPrimary)
+                    .padding(.horizontal, 18).frame(minHeight: 44).background(Theme.gradient, in: Capsule())
+            }
+            .accessibilityHint(tr("media.add_photos_to_your_library")).accessibilityIdentifier("addToLibraryButton")
+            Spacer()
+        }
+        .padding(.horizontal, 16)
+    }
+}
+
+// MARK: selection bar, next step, coach mark
+
+/// While selecting: ONE primary button (Make a video with the count) and two quiet icons. "Select all" and Cancel live in the navigation bar.
+struct SelectionBar: View {
+    struct Icon: Identifiable { let id: String; let symbol: String; let label: String; var danger = false; let run: () -> Void }
+    @Bindable var selection: PhotoSelection
+    let onVideo: () -> Void
+    let icons: [Icon]
+    var body: some View {
+        HStack(spacing: 10) {
+            Button(action: onVideo) {
+                HStack(spacing: 8) {
+                    Image(systemName: "sparkles").font(.vmk(17, weight: .semibold)).accessibilityHidden(true)
+                    Text(selection.count == 0 ? tr("collections.make_a_video") : tr("media.make_video_n", selection.count)).font(.vmk(17, weight: .semibold)).lineLimit(1).minimumScaleFactor(0.8)
                 }
+                .foregroundStyle(Theme.onPrimary).frame(maxWidth: .infinity, minHeight: 52)
+                .background(Theme.gradient, in: Capsule()).opacity(selection.count == 0 ? 0.45 : 1)
             }
-            HStack {
-                action("folder.badge.plus", tr("collections.add_to_collection"), onCollection)
-                action("sparkles.tv", tr("collections.make_a_video"), onVideo)
-                action("trash", tr("common.delete"), onDelete, role: .destructive)
-            }
-            .disabled(selection.count == 0)
+            .buttonStyle(.plain).disabled(selection.count == 0)
+            .accessibilityLabel(selection.count == 0 ? tr("media.select_first") : tr("media.make_video_n", selection.count)).accessibilityIdentifier("makeVideoFromSelection")
+            ForEach(icons) { i in icon(i.symbol, i.label, i.id, i.run, danger: i.danger) }
         }
         .padding(.horizontal, 16).padding(.vertical, 10).background(.bar)
         .transition(.move(edge: .bottom).combined(with: .opacity))
     }
-    private func action(_ symbol: String, _ title: String, _ run: @escaping () -> Void, role: ButtonRole? = nil) -> some View {
-        Button(role: role, action: run) {
-            VStack(spacing: 2) { Image(systemName: symbol).font(.title3); Text(title).font(.caption2) }.frame(maxWidth: .infinity, minHeight: 44)
+    private func icon(_ symbol: String, _ label: String, _ id: String, _ run: @escaping () -> Void, danger: Bool = false) -> some View {
+        Button(action: run) {
+            Image(systemName: symbol).font(.vmk(19, weight: .semibold)).foregroundStyle(danger ? Theme.danger : Theme.text).frame(width: 52, height: 52).vmkGlass(in: Circle())
         }
-        .accessibilityLabel(title)
+        .buttonStyle(.plain).disabled(selection.count == 0).opacity(selection.count == 0 ? 0.45 : 1)
+        .accessibilityLabel(label).accessibilityIdentifier(id)
+    }
+}
+
+/// After an upload finishes: the obvious next step, one tap from the photos just added (stays until used or dismissed).
+struct NextStepBar: View {
+    let count: Int
+    let onMake: () -> Void
+    let onDismiss: () -> Void
+    var body: some View {
+        VStack(spacing: 8) {
+            HStack(spacing: 8) {
+                Image(systemName: "checkmark.circle.fill").foregroundStyle(Theme.success).accessibilityHidden(true)
+                Text(tr("upload.summary_added", count)).font(.vmk(15, weight: .semibold)).foregroundStyle(Theme.text)
+                Spacer(minLength: 4)
+                Button(action: onDismiss) { Image(systemName: "xmark").font(.vmk(13, weight: .bold)).foregroundStyle(Theme.textSecondary).frame(width: 44, height: 44) }
+                    .accessibilityLabel(tr("common.close")).accessibilityIdentifier("nextStepDismiss")
+            }
+            Button(action: onMake) {
+                HStack(spacing: 8) {
+                    Image(systemName: "sparkles").font(.vmk(17, weight: .semibold)).accessibilityHidden(true)
+                    Text(tr("media.make_video_n", count)).font(.vmk(17, weight: .semibold))
+                }
+                .foregroundStyle(Theme.onPrimary).frame(maxWidth: .infinity, minHeight: 52).background(Theme.gradient, in: Capsule())
+            }
+            .buttonStyle(.plain).accessibilityIdentifier("makeVideoFromNew")
+        }
+        .padding(.horizontal, 16).padding(.top, 6).padding(.bottom, 10)
+        .background(Theme.surface, in: RoundedRectangle(cornerRadius: Theme.Radii.videoCard, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: Theme.Radii.videoCard, style: .continuous).stroke(Theme.outline, lineWidth: 1))
+        .elevation(3)
+        .padding(.horizontal, 12).padding(.bottom, 8)
+        .transition(.move(edge: .bottom).combined(with: .opacity))
+        .accessibilityElement(children: .contain).accessibilityIdentifier("nextStepBar")
+    }
+}
+
+/// One line, shown once: how to get from photos to a video.
+struct CoachMark: View {
+    let text: String
+    let onDismiss: () -> Void
+    var body: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "lightbulb").font(.vmk(14, weight: .semibold)).foregroundStyle(Theme.primary).accessibilityHidden(true)
+            Text(text).font(.vmk(14)).foregroundStyle(Theme.text).fixedSize(horizontal: false, vertical: true)
+            Spacer(minLength: 4)
+            Button(action: onDismiss) { Image(systemName: "xmark").font(.vmk(12, weight: .bold)).foregroundStyle(Theme.textSecondary).frame(width: 44, height: 44) }
+                .accessibilityLabel(tr("common.close")).accessibilityIdentifier("coachDismiss")
+        }
+        .padding(.leading, 12).padding(.vertical, 2)
+        .background(Theme.primaryContainer, in: RoundedRectangle(cornerRadius: Theme.Radii.card, style: .continuous))
+        .padding(.horizontal, 16).accessibilityIdentifier("mediaCoach")
     }
 }
 

@@ -102,7 +102,7 @@ struct FloatingTabBar: View {
             }
             .padding(5).vmkGlass(in: Capsule())
             Button(action: onCreate) {
-                Image(systemName: "plus").font(.vmk(24, weight: .semibold)).foregroundStyle(Theme.onPrimary).dynamicTypeSize(...DynamicTypeSize.xxxLarge)
+                Image(systemName: "video.badge.plus").font(.vmk(23, weight: .semibold)).foregroundStyle(Theme.onPrimary).dynamicTypeSize(...DynamicTypeSize.xxxLarge)
                     .frame(width: 60, height: 60).background(Theme.gradient, in: Circle())
                     .shadow(color: Theme.gradientStart.opacity(0.4), radius: 12, y: 6)
             }

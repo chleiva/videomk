@@ -66,7 +66,7 @@ final class VideoMKDynamicTypeUITests: XCTestCase {
     }
 
     func testCreditsInfoOpensFromTheCreditsSheet() {
-        let app = launch(spanish: false, signedIn: true, env: ["VMK_DEBUG_SHEET": "wallet"], largeText: false)
+        let app = launch(spanish: false, signedIn: true, env: ["VMK_DEBUG_SHEET": "wallet", "VMK_DEBUG_BALANCE": "9"], largeText: false)   // the fake wallet only exists with a balance
         XCTAssertTrue(el(app, "walletInfo").waitForExistence(timeout: 15))
         el(app, "walletInfo").tap()
         XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label CONTAINS '1 min = 1 credit'")).firstMatch.waitForExistence(timeout: 5))

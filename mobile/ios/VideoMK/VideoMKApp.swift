@@ -51,9 +51,10 @@ struct MainTabs: View {
             .opacity(model.selectedTab == 1 ? 1 : 0).allowsHitTesting(model.selectedTab == 1).accessibilityHidden(model.selectedTab != 1)
         }
         .safeAreaInset(edge: .bottom, spacing: 0) {
-            if !model.tabBarHidden { FloatingTabBar(selection: $model.selectedTab) { model.createRequested = true }.transition(.move(edge: .bottom).combined(with: .opacity)) }
+            if !model.tabBarHidden, !(model.mediaSelecting && model.selectedTab == 1) { FloatingTabBar(selection: $model.selectedTab) { model.requestCreate() }.transition(.move(edge: .bottom).combined(with: .opacity)) }
         }
         .animation(.easeOut(duration: 0.22), value: model.tabBarHidden)
+        .animation(.easeOut(duration: 0.22), value: model.mediaSelecting)
         .background(Theme.background.ignoresSafeArea())
     }
 }

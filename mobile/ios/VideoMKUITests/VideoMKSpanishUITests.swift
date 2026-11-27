@@ -69,9 +69,9 @@ final class VideoMKSpanishUITests: XCTestCase {
         app.buttons["createCancel"].tap()
         app.buttons["settingsButton"].tap()
         XCTAssertTrue(app.navigationBars["Ajustes"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["signOutButton"].waitForExistence(timeout: 5), "Sign out is at the top of Settings")
         for _ in 0..<5 where !app.buttons["deleteAccountButton"].exists { app.swipeUp() }
         XCTAssertEqual(app.buttons["deleteAccountButton"].label, "Eliminar cuenta")
-        XCTAssertTrue(app.buttons["signOutButton"].exists)
         app.buttons["deleteAccountButton"].tap()
         XCTAssertTrue(app.navigationBars["Eliminar cuenta"].waitForExistence(timeout: 5))
         for _ in 0..<6 where !app.textFields["deleteConfirmField"].exists { app.swipeUp() }

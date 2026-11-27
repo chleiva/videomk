@@ -213,8 +213,8 @@ final class VideoMKUITests: XCTestCase {
         XCTAssertTrue(app.buttons["newVideo"].waitForExistence(timeout: 10), "Create closed onto the library")
         sleep(1)
         app.buttons["tabMedia"].tap()
-        XCTAssertTrue(element(app, "storageMeter").waitForExistence(timeout: 10), "the storage meter shows")
-        XCTAssertTrue(element(app, "mediaSearch").exists)
+        XCTAssertTrue(element(app, "mediaSearch").waitForExistence(timeout: 10))
+        XCTAssertFalse(element(app, "storageMeter").exists, "the storage line shows from half full; Storage is always in More")
         XCTAssertTrue(element(app, "mediaTile").waitForExistence(timeout: 10), "photos show in the grid")
         app.buttons["mediaMore"].tap()
         app.buttons["organizeLibrary"].tap()
@@ -446,7 +446,7 @@ final class VideoMKUITests: XCTestCase {
     func testSignedOutUserSeesSignIn() throws {
         let app = try launch(signedIn: false)
         XCTAssertTrue(app.buttons["signInButton"].waitForExistence(timeout: 10))
-        XCTAssertTrue(app.staticTexts["videomk"].exists)
+        XCTAssertTrue(app.images["videomk"].exists || app.staticTexts["videomk"].exists, "the logo lockup names the app")
     }
 
     /// The whole create flow happens on the home screen: a live row appears in the list, the composer is free again at once,

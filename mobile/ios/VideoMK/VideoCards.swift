@@ -112,7 +112,7 @@ struct FailedRow: View {
             VStack(alignment: .leading, spacing: 4) {
                 HStack(alignment: .top) {
                     Text(title).font(.vmk(16, weight: .semibold)).foregroundStyle(Theme.text).lineLimit(stacked ? 4 : 2).frame(maxWidth: .infinity, alignment: .leading)
-                    if let onRemove { Menu { Button(tr("videos.remove"), role: .destructive, action: onRemove) } label: { Image(systemName: "ellipsis").font(.vmk(16, weight: .bold)).foregroundStyle(Theme.textSecondary).frame(width: Theme.minTouch, height: Theme.minTouch) }.accessibilityLabel(tr("media.more")).padding(.top, -10).padding(.trailing, -10) }
+                    if let onRemove { Menu { Button(tr("videos.remove"), role: .destructive, action: onRemove) } label: { Image(systemName: "ellipsis").font(.vmk(16, weight: .bold)).foregroundStyle(Theme.textSecondary).frame(width: Theme.minTouch, height: Theme.minTouch) }.accessibilityLabel(tr("media.more")).accessibilityIdentifier("failedMore").padding(.top, -10).padding(.trailing, -10) }
                 }
                 Text(message.map { tr("videos.row_meta", status, $0) } ?? status).font(.vmk(13, weight: .medium)).foregroundStyle(tint).fixedSize(horizontal: false, vertical: true)
                 if let retry {

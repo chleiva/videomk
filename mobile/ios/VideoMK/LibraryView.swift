@@ -48,6 +48,7 @@ struct LibraryView: View {
         .sheet(isPresented: $showingRating) { RatingPromptView() }
         .task(id: "\(path.isEmpty)-\(scenePhase == .active)") { await considerRatingPrompt() }
         .sheet(isPresented: $showingCreate) { CreateView(create: model.createModel) }
+        .alert(item: $model.retryNotice) { Alert(title: Text(tr("retry.notice_title")), message: Text($0.message), dismissButton: .default(Text(tr("common.ok")))) }
         .sheet(item: $model.createProblem) { CreateProblemSheet(problem: $0) { model.createProblem = nil; model.createModel.open(prefill: $0.prompt); showingCreate = true } }
         .sensoryFeedback(.success, trigger: model.completions)
         .onChange(of: model.createRequested) { _, v in if v { model.createRequested = false; openCreate() } }
@@ -153,10 +154,11 @@ struct LibraryView: View {
             case .running: NavigationLink(value: v.id) { RunningCard(video: v) }.buttonStyle(.plain)
             case .complete: NavigationLink(value: v.id) { VideoRow(video: v) }.buttonStyle(.plain)
             case .failed:
-                FailedRow(title: model.brief(for: v.id) ?? v.displayTitle, message: nil, retry: { model.tryAgain(v) })
+                // "Try again" starts THIS video again on the server (all its photos and options): no new row. Not offered for a used-up presentation or one out of retries.
+                FailedRow(title: model.brief(for: v.id) ?? v.displayTitle, message: nil, retry: v.canRetry == false || model.retrying.contains(v.id) ? nil : { model.tryAgain(v) }, onRemove: { model.removeFailed(v) })
                     .accessibilityIdentifier("failedVideo")
             case .rejected:
-                FailedRow(title: model.brief(for: v.id) ?? v.displayTitle, message: v.rejectReason ?? tr("detail.rejected_body"), rejected: true)
+                FailedRow(title: model.brief(for: v.id) ?? v.displayTitle, message: v.rejectReason ?? tr("detail.rejected_body"), onRemove: { model.removeFailed(v) }, rejected: true)
             }
         }
     }
@@ -249,7 +251,7 @@ struct RoundRectangle: Shape {
 
 #if DEBUG
 extension LibraryView {
-    /// Screenshots: `VMK_DEBUG_CREATE=empty|filled|photos|options|notaffordable|q1|q2|summary|checking|unsupported|blocked|paused` opens Create in that state.
+    /// Screenshots: `VMK_DEBUG_CREATE=empty|filled|photos|options|notaffordable|q1|q2|summary|checking|checkingfast|unsupported|blocked|paused` opens Create in that state.
     @MainActor func debugSetup() async {
         let env = ProcessInfo.processInfo.environment
         await model.createModel.photos.loadDebugFiles()      // VMK_DEBUG_PHOTO_FILES / VMK_DEBUG_FAKE_PHOTOS attach to the Create screen

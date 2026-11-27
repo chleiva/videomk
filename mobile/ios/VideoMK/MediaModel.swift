@@ -23,6 +23,7 @@ final class MediaModel {
     // The upload journey (docs/UI_DESIGN.md m)
     private(set) var queueItems: [QueueItem] = []
     private(set) var toast: ToastMessage?
+    private(set) var lastBatchIDs: [String] = []         // photos of the last finished upload: Media offers "Make a video" from them until it is used or dismissed
     var barExpanded = false
     private(set) var uploadStartedAt: Date?
     private(set) var hiddenTiles: Set<String> = []        // "Already there" tiles after their 4 seconds
@@ -117,6 +118,7 @@ final class MediaModel {
             if !toastedBatch, p.noSpace == 0, let msg = UploadSummary.message(p) {
                 toastedBatch = true
                 toast = ToastMessage(text: msg.text, action: msg.action)
+                Task { let ids = await queue.snapshot().filter { $0.state == .done }.compactMap(\.libraryID); if !ids.isEmpty { lastBatchIDs = ids } }
                 UINotificationFeedbackGenerator().notificationOccurred(.success)
                 UIAccessibility.post(notification: .announcement, argument: msg.text)
                 let shown = toast
@@ -144,6 +146,7 @@ final class MediaModel {
     }
 
     func dismissToast() { toast = nil }
+    func clearLastBatch() { lastBatchIDs = [] }
     func retryItem(_ id: String) { Task { await queue.retry(id) } }
     func hideTile(_ id: String) { hiddenTiles.insert(id) }
 
@@ -442,6 +445,8 @@ final class MediaModel {
             queueItems = items
             p.total = 100; p.done = 38; p.noSpace = 62; p.totalBytes = 1_000_000_000; p.doneBytes = 380_000_000
             upload = p
+        case "added":                      // a screenshot scene: an upload just finished, the photos are listed, "Make a video" is offered
+            upload = QueueProgress(); queueItems = []; lastBatchIDs = (0..<6).map { String(format: "p%05d", $0) }
         case "done":
             upload = QueueProgress(); queueItems = []
             toast = ToastMessage(text: "120 photos added. 12 were already there.", action: "Got it")

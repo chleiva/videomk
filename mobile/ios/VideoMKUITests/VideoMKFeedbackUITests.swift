@@ -26,8 +26,9 @@ final class VideoMKFeedbackUITests: XCTestCase {
             let app = launch(spanish: spanish, sheet: "feedback")
             XCTAssertTrue(el(app, "feedbackField").waitForExistence(timeout: 15), app.debugDescription)
             XCTAssertFalse(app.buttons["feedbackSend"].isEnabled, "too short to send")
+            el(app, "feedbackKind_idea").tap()       // the topic first: at this text size the keyboard leaves room for the field and Send only (the chips scroll under the pinned bar)
             el(app, "feedbackField").tap(); el(app, "feedbackField").typeText("More music, please")
-            el(app, "feedbackKind_idea").tap()
+            if let dir = ProcessInfo.processInfo.environment["VMK_SHOTS_DIR"] { try? app.screenshot().pngRepresentation.write(to: URL(fileURLWithPath: dir).appendingPathComponent("feedback-typed-\(spanish ? "es" : "en").png")) }
             XCTAssertTrue(app.buttons["feedbackSend"].isEnabled && app.buttons["feedbackSend"].isHittable, "Send stays reachable above the keyboard")
             app.buttons["feedbackSend"].tap()
             XCTAssertTrue(el(app, "feedbackThanks").waitForExistence(timeout: 10))
