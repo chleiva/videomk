@@ -58,10 +58,16 @@ def wish(option: Any, prompt: str) -> str:
 # have drawings made (the flag, the switches, an entitled account, a tracer), it allows a few new names here; object_ondemand.fill makes them and
 # object_ondemand.settle writes the name of any that could not be made. 0 (the default, and always without the flag): the prompt is byte for byte what it was.
 _new_drawings = 0
-_NEW_LINE = ("  * Use drawing ids from the list whenever one really shows the thing. When a KEY OBJECT of the topic is not in the list, do NOT use a different drawing as a "
-             "stand-in (never a house for a beehive): give `draw` the object's own plain name instead, one or two lowercase English words (\"honeycomb\", \"beehive\"). "
-             "At most {n} such new names in the whole video, each a simple physical everyday object; it is drawn when it can be made, otherwise its name is written. Never a new "
-             "name for a person, a brand, a flag, a map, a symbol, a weapon, anything medical, or text; for an idea that is not an object, WRITE the word instead.\n")
+_NEW_LINE = ("  * KEY OBJECTS FIRST. Before you write the items, decide what this video is ABOUT: the one or two objects a viewer must SEE for it to make sense (a sundial video: the "
+             "sundial itself, then its upright pointer; a windmill video: the windmill, then its sails; a compass video: the compass, then its needle). The list below is for everything "
+             "else. A list drawing may stand for an object ONLY when it really IS that object (a sun, a water drop, a plant); never a similar one: a clock is not a sundial, a house is "
+             "not a windmill, a lighthouse is not an iron lattice tower, a cheese is not a honeycomb, a cup is not a compass. Ask yourself for EACH key object: would a viewer who sees the list drawing recognise the object itself? When a key object is not in the list, `draw` is the object's own plain name, one or two lowercase "
+             "English words (\"sundial\", \"windmill\", \"compass\"), and give the item `describe`: 6 to 14 plain English words of what it LOOKS like, so a drawer who has never seen it can "
+             "draw it (\"a flat round plate with numbers around the edge and a thin pointer standing up that throws a shadow\"). At most {n} such new names in the whole video, in order of "
+             "importance: the thing the video is about FIRST, then its most distinctive parts; never spend them on small extras (a stick, an arrow, a number: write the word or use the "
+             "list). Each is a simple physical everyday object; it is drawn when it can be made, otherwise its name is written. A famous named place or building (the Eiffel Tower, Big Ben) "
+             "is never drawn by name: give its generic kind instead (\"iron lattice tower\") with `describe`, and WRITE the name beside it. Never a new name for a person, a brand, a flag, "
+             "a map, a symbol, a weapon, anything medical, or text; for an idea that is not an object, WRITE the word instead.\n")
 
 
 def allow_new_drawings(n: int) -> None:

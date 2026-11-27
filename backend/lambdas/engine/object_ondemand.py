@@ -91,13 +91,25 @@ def missing(plan: Dict[str, Any], limit: int, sure: float = 0.55, refused: Optio
     return out
 
 
+def descriptions(plan: Dict[str, Any], sure: float = 0.55) -> Dict[str, str]:
+    """object id -> what the director said the object LOOKS like (`describe` on the item, 3 to 24 plain English words), for the drawings that are asked for. Only a
+    description that the policy's word lists and the plain-English check let through is kept; a refused one is dropped and the drawing is made from its name alone."""
+    out: Dict[str, str] = {}
+    for it in _items(plan):
+        name = _wanted(it, sure)
+        d = " ".join(str(it.get("describe") or "").split()) if isinstance(it, dict) and name else ""
+        if name and d and 3 <= len(d.split()) <= 24 and len(d) <= 160 and re.fullmatch(r"[A-Za-z ,\-]+", d) and not media_policy.text_reason(d) and media_policy.english_only(d):
+            out.setdefault(object_id(name), d.lower())
+    return out
+
+
 def apply(plan: Dict[str, Any], made: Dict[str, str], sure: float = 0.55) -> int:
     """Put the new drawings where their written labels (or their approximate stand-ins) were. `made`: object id -> library id. -> how many items changed."""
     n = 0
     for it in _items(plan):
         name = _wanted(it, sure)
         if name and object_id(name) in made:
-            for k in ("write", "boxed", "hand", "tool", "align", "asked", "match"):
+            for k in ("write", "boxed", "hand", "tool", "align", "asked", "match", "describe"):
                 it.pop(k, None)
             it["draw"] = made[object_id(name)]
             n += 1
@@ -176,9 +188,12 @@ def tracer_maker(name: str) -> Maker:
     failing raises here and the boards keep what they had. Only plain English names go in; packages and their thumbnails come back."""
     import base64
 
-    def make(objs: List[Tuple[str, str]], timeout: float) -> Tuple[List[Dict[str, Any]], Dict[str, Any]]:
+    def make(objs: List[Tuple[str, str]], timeout: float, describe: Optional[Dict[str, str]] = None) -> Tuple[List[Dict[str, Any]], Dict[str, Any]]:
         try:
-            raw = (_invoke or _lambda_invoke)(name, json.dumps({"action": "make", "objects": [[o, n] for o, n in objs], "timeout": timeout}).encode(), timeout + 2.0)
+            body: Dict[str, Any] = {"action": "make", "objects": [[o, n] for o, n in objs], "timeout": timeout}
+            if describe:
+                body["describe"] = dict(describe)      # optional: a tracer that does not know the key ignores it
+            raw = (_invoke or _lambda_invoke)(name, json.dumps(body).encode(), timeout + 2.0)
         except Exception as e:   # noqa: BLE001 - not there, not allowed, throttled, or no answer in time
             code = str(getattr(e, "response", {}).get("Error", {}).get("Code") or type(e).__name__)
             late = "timeout" in code.lower() or "timed out" in str(e).lower()
@@ -206,9 +221,9 @@ def default_maker() -> Optional[Maker]:
         if not object_maker.available():
             return None
 
-        def make(objs: List[Tuple[str, str]], timeout: float) -> Tuple[List[Dict[str, Any]], Dict[str, Any]]:
+        def make(objs: List[Tuple[str, str]], timeout: float, describe: Optional[Dict[str, str]] = None) -> Tuple[List[Dict[str, Any]], Dict[str, Any]]:
             try:
-                return object_maker.make(objs, timeout)
+                return object_maker.make(objs, timeout, describe=describe)
             except object_maker.Refused as e:
                 raise Refused(e.kind, billed=e.billed) from None
         return make
@@ -406,10 +421,13 @@ def fill(plan: Dict[str, Any], *, video_id: str, ctx: Optional[Dict[str, Any]], 
         store.put(ledger[0], ledger[1], {"at": int(t), "media": MEDIA, "outcome": "started", "brief": ", ".join(n for _, n in asks)[:200], "kind": kind, "reserved_usd": price, "charged_usd": price,
                                          "account": lib.account_ref(str(ctx["user_id"])), "video": lib.video_ref(video_id), "allowance_usd": allowance, "asked_n": len(asks), "ttl": int(t) + 500 * 86400})
         box: Dict[str, Any] = {}
+        wrote = descriptions(plan, float(cfg["object_sure_score"]))
+        described = {en_id: wrote[origin[en_id]] for en_id, _ in asks if origin.get(en_id) in wrote}      # id of the English name -> what it looks like (the generator is sent it with the name)
+        out["described"] = sorted(described)
 
         def run() -> None:
             try:
-                pkgs, stats = maker(asks, float(cfg["object_timeout_s"]))
+                pkgs, stats = maker(asks, float(cfg["object_timeout_s"]), **({"describe": described} if described else {}))
                 box["pkgs"], box["stats"], box["policy"] = _policy_gate(pkgs, stats or {})   # the same after-generation check as clips and images, on every drawing
             except Refused as e:
                 box["error"], box["billed"] = e.kind, e.billed
