@@ -1,13 +1,30 @@
 package com.videomk.app.ui
 
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.ui.res.stringResource
 import com.videomk.app.R
 import android.app.Application
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Movie
 import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material3.Icon
@@ -89,9 +106,19 @@ private fun SignedInNav(app: AppViewModel, composer: ComposerViewModel, containe
     Scaffold(
         containerColor = Vmk.colors.background, contentWindowInsets = WindowInsets(0),
         bottomBar = {
-            if (showTabs && container.mediaApi != null) NavigationBar(containerColor = Vmk.colors.surface) {
-                NavigationBarItem(selected = route == "library", onClick = { navigateTab(nav, "library") }, icon = { Icon(Icons.Filled.Movie, null) }, label = { Text(stringResource(R.string.nav_tab_videos)) }, colors = tabColors(), modifier = Modifier.testTag("tabVideos"))
-                NavigationBarItem(selected = route == "media", onClick = { navigateTab(nav, "media") }, icon = { Icon(Icons.Filled.PhotoLibrary, null) }, label = { Text(stringResource(R.string.nav_tab_media)) }, colors = tabColors(), modifier = Modifier.testTag("tabMedia"))
+            // the tab bar floats as a rounded pill; Create is a separate round (+) beside it, so it never covers a row (docs/UX_2026_REDESIGN.md section 3)
+            if (showTabs) Row(Modifier.fillMaxWidth().background(Vmk.colors.background).padding(horizontal = Vmk.space.screen).padding(top = 6.dp, bottom = 8.dp).navigationBarsPadding(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                if (container.mediaApi != null) NavigationBar(Modifier.weight(1f).clip(RoundedCornerShape(32.dp)), containerColor = Vmk.colors.surface, windowInsets = WindowInsets(0)) {
+                    NavigationBarItem(selected = route == "library", onClick = { navigateTab(nav, "library") }, icon = { Icon(Icons.Filled.Movie, null) }, label = { Text(stringResource(R.string.nav_tab_videos)) }, colors = tabColors(), modifier = Modifier.testTag("tabVideos"))
+                    NavigationBarItem(selected = route == "media", onClick = { navigateTab(nav, "media") }, icon = { Icon(Icons.Filled.PhotoLibrary, null) }, label = { Text(stringResource(R.string.nav_tab_media)) }, colors = tabColors(), modifier = Modifier.testTag("tabMedia"))
+                } else Spacer(Modifier.weight(1f))
+                val newVideo = stringResource(R.string.lib_new_video)
+                Box(
+                    Modifier.size(56.dp).vmkShadow(2, CircleShape, Vmk.colors.dark).clip(CircleShape).background(Vmk.gradientNow)
+                        .clickable(role = Role.Button, onClickLabel = newVideo) { composer.openCreate(container.createPrefs?.load(email)); nav.navigate("create") }
+                        .semantics { contentDescription = newVideo }.testTag("newVideoFab"),
+                    contentAlignment = Alignment.Center,
+                ) { Icon(Icons.Filled.Add, null, tint = Vmk.colors.onPrimary, modifier = Modifier.size(28.dp)) }
             }
         },
     ) { inner ->

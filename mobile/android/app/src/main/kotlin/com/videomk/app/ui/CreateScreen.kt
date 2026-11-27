@@ -1,5 +1,10 @@
 package com.videomk.app.ui
 
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Timer
+import androidx.compose.material.icons.filled.Tune
+import androidx.compose.material.icons.filled.Add
+import com.videomk.app.core.AddPhotosLogic
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Build
@@ -240,110 +245,103 @@ fun CreateScreen(app: AppViewModel, composer: ComposerViewModel, onClose: () -> 
     fun close() { if (composer.submitting) return; if (composer.hasDraft) discard = true else { composer.discardDraft(); onClose() } }
     BackHandler { close() }
 
+    var forOpen by remember { mutableStateOf(false) }
+    var lengthOpen by remember { mutableStateOf(false) }
+    var lookOpen by remember { mutableStateOf(false) }
+    var optionsOpen by rememberSaveable { mutableStateOf(false) }
+
     Column(Modifier.fillMaxWidth().background(Vmk.colors.background).statusBarsPadding().windowInsetsPadding(WindowInsets.ime.union(WindowInsets.navigationBars)).testTag("createScreen")) {
-        // header
-        val bigHeader = androidx.compose.ui.platform.LocalDensity.current.fontScale >= 1.5f   // large text: Cancel and the title stack instead of overlapping
-        val cancelBtn: @Composable (Modifier) -> Unit = { m ->
-            TextButton(onClick = ::close, modifier = m.heightIn(min = 48.dp).testTag("createCancel")) { Text(stringResource(R.string.common_cancel), style = MaterialTheme.typography.titleMedium, color = Vmk.colors.primary) }
-        }
-        val titleTxt: @Composable (Modifier) -> Unit = { m ->
-            Text(stringResource(R.string.create_title), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold, color = Vmk.colors.text, modifier = m.semantics { heading() })
-        }
-        if (bigHeader) Column(Modifier.fillMaxWidth().padding(horizontal = 4.dp)) { cancelBtn(Modifier); Box(Modifier.padding(start = 12.dp, bottom = 8.dp)) { titleTxt(Modifier) } }
-        else Box(Modifier.fillMaxWidth().heightIn(min = 52.dp).padding(horizontal = 4.dp)) {
-            cancelBtn(Modifier.align(Alignment.CenterStart))
-            titleTxt(Modifier.align(Alignment.Center))
+        // the sheet is the title: only a close button (docs/UX_2026_REDESIGN.md 4.2)
+        Row(Modifier.fillMaxWidth().heightIn(min = 56.dp).padding(horizontal = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+            GlassIconButton(Icons.Filled.Close, stringResource(R.string.common_close), ::close, Modifier.testTag("createCancel"))
         }
         Box(Modifier.fillMaxWidth().size(1.dp).background(if (scroll.value > 0) Vmk.colors.outline else Color.Transparent))
 
-        Column(Modifier.weight(1f).verticalScroll(scroll).padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-            PromptCard(composer, listening, focus, ::onMic, deck = deckState.attached)
+        Column(Modifier.weight(1f).verticalScroll(scroll).padding(horizontal = 20.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+            PromptField(composer, listening, focus, deck = deckState.attached)
+            // photo and mic: two icons under the prompt; the count is a badge, "Tap the mic to speak" is gone (the mic icon is universal)
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                if (!deckState.attached) GlassIconButton(Icons.Filled.AddPhotoAlternate, stringResource(R.string.create_add_photos), { composer.openAddPhotos(null) }, Modifier.testTag("photoButton"), badge = AddPhotosLogic.badge(photoTotal))
+                GlassIconButton(if (listening) Icons.Filled.Stop else Icons.Filled.Mic, stringResource(if (listening) R.string.create_stop_dictation else R.string.create_dictate_desc), ::onMic, Modifier.testTag("micButton"), filled = listening)
+                if (listening) Text(stringResource(R.string.composer_listening), style = MaterialTheme.typography.bodySmall, color = Vmk.colors.danger)
+            }
             dictationHint(dictationState)
             if (deckState.attached) DeckCard(
                 deckState, caps.deck, onRemove = { composer.removeDeck() }, onPickAgain = { composer.removeDeck(); launchDeckPicker() }, onRetry = { composer.deck.retry() }, onKeepWaiting = { composer.deck.keepWaiting() },
-            ) else PhotosRow(composer) { composer.openAddPhotos(null) }
+            ) else if (photoTotal > 0) PhotoStrip(composer) { composer.openAddPhotos(null) }
 
-            // what is it for
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Overline(stringResource(R.string.create_what_for), Modifier.semantics { heading() })
-                // a wrapping grid, never a row that scrolls or crops: Spanish and large text just make a second line
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth().testTag("platformChips")) {
-                    for (c in CreatePlatforms.chips(caps)) {
-                        PlatformChipView(c, selected = c.enabled && c.id == options.platform && !CreatePlatforms.isCustom(options, caps)) {
-                            if (c.enabled) composer.selectPlatform(c) else { tip = comingSoonText; haptic(false) }
-                        }
-                    }
-                }
-                tip?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary, modifier = Modifier.semantics { contentDescription = it }) }
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    val rec = CreatePlatforms.recommendation(options, caps, withNote = !deckState.attached)   // a presentation brings its own length: no "about 3 min" advice beside it
-                    Text(rec, style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.textSecondary, modifier = Modifier.weight(1f).testTag("recommendation"))
-                    if (CreatePlatforms.canChangeFormat(caps)) TextButton(onClick = { moreOpen = true }, modifier = Modifier.heightIn(min = 44.dp).testTag("changeFormat")) { Text(stringResource(R.string.create_change), fontWeight = FontWeight.Bold) }
-                }
-                // slides are wide: a gentle word when a vertical or portrait picture is chosen, with the one-tap fix
-                if (composer.deckVerticalWarning) Column(Modifier.fillMaxWidth().testTag("deckVerticalWarning")) {
-                    Row(verticalAlignment = Alignment.Top, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Icon(Icons.Filled.Warning, null, tint = Vmk.colors.warning, modifier = Modifier.size(18.dp).padding(top = 2.dp))
-                        Text(stringResource(R.string.deck_vertical_warning), style = MaterialTheme.typography.bodySmall, color = Vmk.colors.text)
-                    }
-                    FixChip(stringResource(R.string.deck_use_landscape), stringResource(R.string.deck_use_landscape_desc), Modifier.testTag("deckUseLandscape")) { composer.useLandscape() }
-                }
-                // other formats this platform also accepts: small secondary choices that switch only the format
-                val also = CreatePlatforms.alsoWorks(options, caps)
-                if (also.isNotEmpty()) FlowRow(Modifier.testTag("alsoWorks"), verticalArrangement = Arrangement.Center, horizontalArrangement = Arrangement.spacedBy(6.dp), itemVerticalAlignment = Alignment.CenterVertically) {
-                    Text(stringResource(R.string.create_also_works), style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary)
-                    for (a in also) Text(
-                        a.label, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold, color = Vmk.colors.primary,
-                        modifier = Modifier.heightIn(min = 44.dp).clip(RoundedCornerShape(10.dp)).clickable(role = Role.Button, onClickLabel = stringResource(R.string.create_use_format, a.label)) { composer.updateOptions(options.copy(aspect = a.id)) }
-                            .padding(horizontal = 8.dp).wrapContentHeight(Alignment.CenterVertically).testTag("alsoWorks-${a.id}"),
+            // three pills (For, Length, Look) and one icon for Options; each pill shows its value, so the state is the label
+            val chips = remember(caps) { CreatePlatforms.chips(caps).filter { it.enabled } }
+            val forDesc = stringResource(R.string.create_what_for)
+            val lengthDesc = stringResource(R.string.create_length)
+            val lookDesc = stringResource(R.string.create_look)
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.Center, itemVerticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().testTag("pills")) {
+                Pill(platformPillValue(options, caps), forDesc, Modifier.testTag("pillFor"), expanded = forOpen, onExpandedChange = { forOpen = it }) {
+                    for (c in chips) androidx.compose.material3.DropdownMenuItem(
+                        text = { Text(c.label, fontWeight = if (c.id == options.platform && !CreatePlatforms.isCustom(options, caps)) FontWeight.Bold else FontWeight.Normal) },
+                        trailingIcon = { if (c.id == options.platform && !CreatePlatforms.isCustom(options, caps)) Icon(Icons.Filled.Check, null, tint = Vmk.colors.primary) },
+                        onClick = { forOpen = false; composer.selectPlatform(c) }, modifier = Modifier.testTag("platform-${c.id}"),
                     )
                 }
-            }
-
-            // length
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Overline(stringResource(R.string.create_length), Modifier.semantics { heading() })
-                // the presets the server offers, scrolling sideways when there are more than fit
-                androidx.compose.foundation.lazy.LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth().testTag("lengthChips")) {
-                    // a ready presentation: its own suggested length first (the server's price), then the usual lengths
+                val maxMinutes = CreatePlatforms.chip(caps, options.platform)?.takeIf { it.enabled }?.maxMinutes
+                Pill(if (options.useSuggestedLength && deckState is DeckState.Ready) stringResource(R.string.deck_suggested) else Lengths.short(options.minutes), lengthDesc, Modifier.testTag("pillLength"), Icons.Filled.Timer, expanded = lengthOpen, onExpandedChange = { lengthOpen = it }) {
                     (deckState as? DeckState.Ready)?.let { ready ->
-                        item(key = "suggested") {
-                            LengthChip(ready.info.suggestedMinutes, ready.info.suggestedCredits, options.useSuggestedLength, balance != null && ready.info.suggestedCredits > balance, Modifier.widthIn(min = 78.dp), caption = stringResource(R.string.deck_suggested), tag = "length-suggested") { composer.useSuggestedLength() }
-                        }
+                        LengthMenuRow(stringResource(R.string.deck_suggested) + " · " + Lengths.short(ready.info.suggestedMinutes), ready.info.suggestedCredits, options.useSuggestedLength, balance != null && ready.info.suggestedCredits > balance, true, "length-suggested") { lengthOpen = false; composer.useSuggestedLength() }
                     }
-                    items(caps.presets) { mi ->
-                        LengthChip(mi, Lengths.credits(mi), !options.useSuggestedLength && Math.abs(options.minutes - mi) < 1e-9, balance != null && Lengths.credits(mi) > balance, Modifier.widthIn(min = 78.dp)) { composer.setLength(mi) }
+                    var anyOver = false
+                    for (mi in caps.presets) {
+                        val over = maxMinutes != null && mi > maxMinutes + 1e-9
+                        if (over) anyOver = true
+                        LengthMenuRow(Lengths.short(mi), Lengths.credits(mi), !options.useSuggestedLength && Math.abs(options.minutes - mi) < 1e-9, balance != null && Lengths.credits(mi) > balance, !over, "length-${if (mi == Math.floor(mi)) mi.toInt().toString() else mi.toString()}") { lengthOpen = false; composer.setLength(mi) }
                     }
+                    if (anyOver && maxMinutes != null) Text(stringResource(R.string.create_over_max, CreatePlatforms.chip(caps, options.platform)!!.label, Lengths.clock(maxMinutes)), style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary, modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp).widthIn(max = 240.dp))
                 }
-                CreatePlatforms.overMax(options, caps)?.let { om ->
-                    FlowRow(Modifier.fillMaxWidth().testTag("overMaxHint"), itemVerticalAlignment = Alignment.CenterVertically) {
-                        Text(om.text + (om.useMinutes?.let { " · " } ?: ""), style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary)
-                        om.useMinutes?.let { u -> FixChip(stringResource(R.string.create_over_max_use, Lengths.short(u)), stringResource(R.string.create_over_max_use_desc, Lengths.long(u)), Modifier.testTag("overMaxChip")) { composer.setLength(u) } }
-                    }
+                Pill(options.look?.displayName() ?: stringResource(R.string.create_look_auto), lookDesc, Modifier.testTag("pillLook"), Icons.Filled.AutoAwesome, expanded = lookOpen, onExpandedChange = { lookOpen = it }) {
+                    for (l in listOf<VideoLook?>(null) + VideoLook.entries) androidx.compose.material3.DropdownMenuItem(
+                        text = { Text(l?.displayName() ?: stringResource(R.string.create_look_auto), fontWeight = if (options.look == l) FontWeight.Bold else FontWeight.Normal) },
+                        trailingIcon = { if (options.look == l) Icon(Icons.Filled.Check, null, tint = Vmk.colors.primary) },
+                        onClick = { lookOpen = false; composer.updateOptions(options.copy(look = l)) }, modifier = Modifier.testTag("look-${l?.wire ?: "auto"}"),
+                    )
                 }
-                if (photoHint != null) PhotoHintBlock(photoHint, hintFix, composer, options)
-                CostLine(null, options.isFourK, onWhy = { costInfo = true })
+                GlassIconButton(Icons.Filled.Tune, stringResource(R.string.create_options), { optionsOpen = true }, Modifier.testTag("optionsMenu"))
             }
-
-            // more options
-            MoreOptions(composer, options, caps, moreOpen, { moreOpen = it }, onLanguage = { languageOpen = true })
+            tip?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary, modifier = Modifier.semantics { contentDescription = it }) }
+            // only when there is something to say: slides are wide, a platform's limit, what the photos can fill
+            if (composer.deckVerticalWarning) Column(Modifier.fillMaxWidth().testTag("deckVerticalWarning")) {
+                Row(verticalAlignment = Alignment.Top, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Icon(Icons.Filled.Warning, null, tint = Vmk.colors.warning, modifier = Modifier.size(18.dp).padding(top = 2.dp))
+                    Text(stringResource(R.string.deck_vertical_warning), style = MaterialTheme.typography.bodySmall, color = Vmk.colors.text)
+                }
+                FixChip(stringResource(R.string.deck_use_landscape), stringResource(R.string.deck_use_landscape_desc), Modifier.testTag("deckUseLandscape")) { composer.useLandscape() }
+            }
+            CreatePlatforms.overMax(options, caps)?.let { om ->
+                FlowRow(Modifier.fillMaxWidth().testTag("overMaxHint"), itemVerticalAlignment = Alignment.CenterVertically) {
+                    Text(om.text + (om.useMinutes?.let { " · " } ?: ""), style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary)
+                    om.useMinutes?.let { u -> FixChip(stringResource(R.string.create_over_max_use, Lengths.short(u)), stringResource(R.string.create_over_max_use_desc, Lengths.long(u)), Modifier.testTag("overMaxChip")) { composer.setLength(u) } }
+                }
+            }
+            if (photoHint != null) PhotoHintBlock(photoHint, hintFix, composer, options)
             Box(Modifier.size(8.dp))
         }
 
-        // the bar that never goes away
-        Surface(color = Vmk.colors.surface, shadowElevation = 6.dp, modifier = Modifier.fillMaxWidth()) {
-            Column(Modifier.padding(horizontal = 16.dp).padding(top = 6.dp, bottom = 12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        // the bar that never goes away: Create (one primary action) and one caption, only when it says something
+        Surface(color = Vmk.colors.background, modifier = Modifier.fillMaxWidth()) {
+            Column(Modifier.padding(horizontal = 20.dp).padding(top = 6.dp, bottom = 12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 composer.inlineError?.let { m ->
                     Row(Modifier.fillMaxWidth().testTag("createError").semantics { liveRegion = androidx.compose.ui.semantics.LiveRegionMode.Assertive }, verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         Icon(Icons.Filled.Warning, null, tint = Vmk.colors.danger, modifier = Modifier.size(18.dp))
                         Text(stringResource(R.string.create_error_retry, m), style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.danger)
                     }
                 }
-                StatusLine(status, flash.value, shake.value, ::applyFix)
                 CreateButton(status.sendReady, composer.checking || composer.submitting, options.credits, status.text, status.fix != null, ::tapCreate)
+                if (status.kind == StatusKind.Ready || status.kind == StatusKind.PhotoHint) {
+                    if (balance != null) Text(pluralStringResource(R.plurals.create_credits_left, balance, balance), style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary, textAlign = androidx.compose.ui.text.style.TextAlign.Center, modifier = Modifier.fillMaxWidth().testTag("costLine"))
+                } else StatusLine(status, flash.value, shake.value, ::applyFix)
             }
         }
     }
+
+    if (optionsOpen) CreateOptionsSheet(composer, caps, options, onLanguage = { languageOpen = true }, onCostInfo = { costInfo = true }, onDismiss = { optionsOpen = false })
 
     if (composer.addPhotosRequest != null) AddPhotosSheet(
         composer, container?.mediaApi, container?.mediaUploads?.arrivals, startOnMyMedia = composer.addPhotosRequest?.tab == 1, onDismiss = { composer.closeAddPhotos() },
@@ -365,72 +363,7 @@ fun CreateScreen(app: AppViewModel, composer: ComposerViewModel, onClose: () -> 
 }
 
 @Composable
-private fun PromptCard(composer: ComposerViewModel, listening: Boolean, focus: FocusRequester, onMic: () -> Unit, deck: Boolean = false) {
-    val shape = RoundedCornerShape(22.dp)
-    val micDescription = if (listening) stringResource(R.string.create_stop_dictation) else stringResource(R.string.create_dictate_desc)
-    // text on top, the mic row under it: the height follows the text (large text and Spanish just make the card taller, nothing overlaps)
-    Column(Modifier.fillMaxWidth().heightIn(min = 112.dp).clip(shape).background(Vmk.colors.surface).border(1.dp, Vmk.colors.outline, shape)) {
-        BasicTextField(
-            value = composer.text, onValueChange = { composer.text = it }, readOnly = listening,
-            textStyle = VmkType.prompt.copy(color = if (listening) Vmk.colors.textSecondary else Vmk.colors.text),
-            cursorBrush = SolidColor(Vmk.colors.primary), keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
-            modifier = Modifier.fillMaxWidth().focusRequester(focus).padding(start = 18.dp, end = 18.dp, top = 16.dp, bottom = 4.dp).testTag("composerField"),
-            decorationBox = { inner ->
-                Box { if (composer.text.isEmpty()) Text(stringResource(if (deck) R.string.deck_prompt_hint else R.string.create_prompt_hint), style = VmkType.prompt, color = Vmk.colors.textTertiary); inner() }
-            },
-        )
-        Row(Modifier.fillMaxWidth().padding(start = 18.dp, end = 10.dp, bottom = 8.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            Spacer(Modifier.weight(1f).heightIn(min = 1.dp))
-            if (composer.text.isEmpty() && !listening) Text(stringResource(R.string.create_tap_mic), style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textTertiary, textAlign = androidx.compose.ui.text.style.TextAlign.End, modifier = Modifier.weight(2f, fill = false))
-            if (listening) Text(stringResource(R.string.composer_listening), style = MaterialTheme.typography.bodySmall, color = Vmk.colors.danger, modifier = Modifier.weight(2f, fill = false))
-            Box(
-                Modifier.size(48.dp).clip(CircleShape).background(if (listening) Vmk.colors.danger else Vmk.colors.surfaceRaised)
-                    .clickable(role = Role.Button, onClickLabel = if (listening) stringResource(R.string.create_stop_dictation) else stringResource(R.string.create_dictate), onClick = onMic)
-                    .semantics { contentDescription = micDescription }.testTag("micButton"),
-                contentAlignment = Alignment.Center,
-            ) { Icon(if (listening) Icons.Filled.Stop else Icons.Filled.Mic, null, tint = if (listening) Vmk.colors.onPrimary else Vmk.colors.text, modifier = Modifier.size(22.dp)) }
-        }
-    }
-}
-
-/** One row for photos: "Add photos" with the optional line, or, once chosen, the count with Edit and a strip of four thumbnails. */
-@Composable
-private fun PhotosRow(composer: ComposerViewModel, onOpen: () -> Unit) {
-    val shape = RoundedCornerShape(20.dp)
-    val total = composer.totalPhotos
-    val rowDescription = if (total > 0) pluralStringResource(R.plurals.create_add_photos_selected_desc, total, total) else stringResource(R.string.create_add_photos_desc_empty)
-    Row(
-        Modifier.fillMaxWidth().heightIn(min = 64.dp).clip(shape).background(Vmk.colors.surface).border(1.dp, Vmk.colors.outline, shape)
-            .clickable(role = Role.Button, onClickLabel = stringResource(R.string.create_add_photos), onClick = onOpen).padding(horizontal = 12.dp, vertical = 8.dp)
-            .semantics(mergeDescendants = true) { contentDescription = rowDescription }.testTag("photoButton"),
-        verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp),
-    ) {
-        if (total == 0) {
-            Box(Modifier.size(44.dp).clip(RoundedCornerShape(14.dp)).background(Vmk.colors.primaryContainer), contentAlignment = Alignment.Center) { Icon(Icons.Filled.AddPhotoAlternate, null, tint = Vmk.colors.primary) }
-            Column(Modifier.weight(1f)) {
-                Text(stringResource(R.string.create_add_photos), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = Vmk.colors.text)
-                Text(stringResource(R.string.create_add_photos_optional), style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary)
-            }
-            Icon(Icons.Filled.ChevronRight, null, tint = Vmk.colors.textSecondary)
-        } else {
-            Column(Modifier.weight(1f)) {
-                Text(pluralStringResource(R.plurals.create_photos_count, total, total), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = Vmk.colors.text, modifier = Modifier.testTag("photosNote"))
-                if (composer.loading > 0) Text(composer.preparingText, style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary, modifier = Modifier.testTag("photosPreparing"))
-                composer.notice?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = Vmk.colors.warning, modifier = Modifier.testTag("photosNotice")) }
-            }
-            Row(horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.CenterVertically) {
-                val thumbs = composer.photos.take(4).map { it.thumbnail } + composer.library.take(4).map { null }
-                composer.photos.take(4).forEach { p -> p.thumbnail?.let { androidx.compose.foundation.Image(it.asImageBitmap(), null, contentScale = ContentScale.Crop, modifier = Modifier.size(36.dp).clip(RoundedCornerShape(8.dp)).testTag("attachedPhoto")) } }
-                if (composer.photos.size < 4) composer.library.take(4 - composer.photos.size).forEach { PhotoThumb(it, Modifier.size(36.dp).clip(RoundedCornerShape(8.dp)).testTag("attachedLibraryPhoto")) }
-                if (total > 4) Text("+${total - 4}", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold, color = Vmk.colors.textSecondary, modifier = Modifier.padding(horizontal = 4.dp))
-            }
-            Text(stringResource(R.string.create_edit), style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold, color = Vmk.colors.primary)
-        }
-    }
-}
-
-@Composable
-private fun PlatformChipView(c: PlatformChip, selected: Boolean, onClick: () -> Unit) {
+internal fun PlatformChipView(c: PlatformChip, selected: Boolean, onClick: () -> Unit) {
     val shape = CircleShape
     val chipDescription = if (c.enabled) c.label else stringResource(R.string.create_chip_soon_desc, c.label)
     Row(
@@ -449,129 +382,12 @@ private fun PlatformChipView(c: PlatformChip, selected: Boolean, onClick: () -> 
 }
 
 @Composable
-private fun LengthChip(minutes: Double, credits: Int, selected: Boolean, overBalance: Boolean, modifier: Modifier, caption: String? = null, tag: String? = null, onClick: () -> Unit) {
-    val shape = RoundedCornerShape(16.dp)
-    val tint = if (overBalance) Vmk.colors.warning else if (selected) Vmk.colors.primary else Vmk.colors.textSecondary
-    val lengthDescription = if (caption != null) pluralStringResource(R.plurals.deck_suggested_desc, credits, credits, Lengths.long(minutes)) else pluralStringResource(if (selected) R.plurals.create_length_desc_selected else R.plurals.create_length_desc, credits, credits, Lengths.long(minutes))
-    Column(
-        modifier.heightIn(min = 58.dp).clip(shape).background(if (selected) Vmk.colors.primaryContainer else Vmk.colors.surfaceRaised)
-            .then(if (selected) Modifier.border(1.5.dp, Vmk.colors.primary, shape) else Modifier)
-            .clickable(role = Role.RadioButton, onClick = onClick)
-            .semantics { this.selected = selected; contentDescription = lengthDescription }
-            .testTag(tag ?: "length-${if (minutes == Math.floor(minutes)) minutes.toInt().toString() else minutes.toString()}").padding(horizontal = 12.dp, vertical = 8.dp),
-        horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center,
-    ) {
-        if (caption != null) Text(caption, style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = if (selected) Vmk.colors.primary else Vmk.colors.textSecondary, maxLines = 1)
-        Text(Lengths.short(minutes), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = if (selected) Vmk.colors.primary else Vmk.colors.text, maxLines = 1)
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(Icons.Filled.Bolt, null, tint = tint, modifier = Modifier.size(13.dp))
-            Text("$credits", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold, color = tint)
-        }
-    }
-}
-
-@Composable
 private fun PhotoHintBlock(hint: String, fix: Double?, composer: ComposerViewModel, options: CreateOptions) {
     Column(Modifier.fillMaxWidth().padding(top = 2.dp)) {
         Text(hint, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Medium, color = Vmk.colors.text, modifier = Modifier.testTag("photoCapacityHint"))
         if (fix != null) {
             val f = com.videomk.app.core.StatusFix(fix)
             FixChip(f.label(), f.description(), Modifier.testTag("photoFixChip")) { composer.setLength(fix) }
-        }
-    }
-}
-
-@Composable
-private fun MoreOptions(composer: ComposerViewModel, o: CreateOptions, caps: com.videomk.app.core.Capabilities, open: Boolean, onOpen: (Boolean) -> Unit, onLanguage: () -> Unit) {
-    val shape = RoundedCornerShape(22.dp)
-    val openState = stringResource(if (open) R.string.create_state_expanded else R.string.create_state_collapsed)
-    val captionsState = stringResource(if (o.captions) R.string.create_state_on else R.string.create_state_off)
-    Column(Modifier.fillMaxWidth().clip(shape).background(Vmk.colors.surface).border(1.dp, Vmk.colors.outline, shape)) {
-        Row(
-            Modifier.fillMaxWidth().heightIn(min = 56.dp).clickable(role = Role.Button, onClickLabel = stringResource(if (open) R.string.create_collapse_more else R.string.create_expand_more)) { onOpen(!open) }
-                .padding(horizontal = 16.dp, vertical = 8.dp).semantics(mergeDescendants = true) { stateDescription = openState }.testTag("optionsMenu"),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Column(Modifier.weight(1f)) {
-                Text(stringResource(R.string.create_more_options), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = Vmk.colors.text)
-                if (!open) Text(CreatePlatforms.moreSummary(o, caps), style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
-            }
-            Icon(if (open) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore, null, tint = Vmk.colors.text)
-        }
-        if (open) Column(Modifier.fillMaxWidth()) {
-            Box(Modifier.fillMaxWidth().size(1.dp).background(Vmk.colors.outline))
-            Column(Modifier.padding(horizontal = 16.dp, vertical = 14.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-                Overline(stringResource(R.string.create_look))
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    LookSwatch(stringResource(R.string.create_look_auto), stringResource(R.string.create_look_auto_desc), null, o.look == null, Modifier.weight(1f).testTag("look-auto")) { composer.updateOptions(o.copy(look = null)) }
-                    for (l in VideoLook.entries) LookSwatch(l.displayName(), l.displayName(), l, o.look == l, Modifier.weight(1f).testTag("look-${l.wire}")) { composer.updateOptions(o.copy(look = l)) }
-                }
-            }
-            Box(Modifier.fillMaxWidth().size(1.dp).background(Vmk.colors.outline))
-            Row(
-                Modifier.fillMaxWidth().heightIn(min = 56.dp).clickable(role = Role.Switch, onClickLabel = stringResource(R.string.create_subtitles)) { composer.updateOptions(o.copy(captions = !o.captions)) }.padding(horizontal = 16.dp)
-                    .semantics(mergeDescendants = true) { stateDescription = captionsState }.testTag("subtitlesRow"),
-                verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp),
-            ) {
-                Icon(Icons.Filled.ClosedCaption, null, tint = Vmk.colors.text)
-                Text(stringResource(R.string.create_subtitles), style = MaterialTheme.typography.bodyLarge, color = Vmk.colors.text, modifier = Modifier.weight(1f))
-                Switch(checked = o.captions, onCheckedChange = null, colors = SwitchDefaults.colors(checkedTrackColor = Vmk.colors.gradientStart, checkedThumbColor = Vmk.colors.onPrimary, uncheckedTrackColor = Vmk.colors.surface3, uncheckedBorderColor = Vmk.colors.outline))
-            }
-            Box(Modifier.fillMaxWidth().padding(horizontal = 16.dp).size(1.dp).background(Vmk.colors.outline))
-            Row(
-                Modifier.fillMaxWidth().heightIn(min = 56.dp).clickable(role = Role.Button, onClickLabel = stringResource(R.string.create_language_desc), onClick = onLanguage).padding(horizontal = 16.dp).testTag("languageRow"),
-                verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp),
-            ) {
-                Icon(Icons.Filled.Language, null, tint = Vmk.colors.text)
-                Text(stringResource(R.string.create_language), style = MaterialTheme.typography.bodyLarge, color = Vmk.colors.text)
-                Text(CreatePlatforms.languageLabel(o, caps), style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.textSecondary, modifier = Modifier.weight(1f), maxLines = 1, textAlign = androidx.compose.ui.text.style.TextAlign.End, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
-                Icon(Icons.Filled.ChevronRight, null, tint = Vmk.colors.textSecondary)
-            }
-            Column(Modifier.padding(horizontal = 16.dp, vertical = 14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                Overline(stringResource(R.string.create_format))
-                val bigText = LocalDensity.current.fontScale >= 1.3f
-                FlowRow(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp), maxItemsInEachRow = if (bigText) 2 else 4) {
-                    for (id in listOf("16:9", "9:16", "1:1", "4:5")) {
-                        val a = caps.aspect(id)
-                        FormatTile(id, CreatePlatforms.aspectName(id, caps), ready = a?.ready == true, beta = a?.beta == true, selected = o.aspect == id, Modifier.weight(1f), tall = bigText) {
-                            composer.updateOptions(o.copy(aspect = id))
-                        }
-                    }
-                }
-                Segmented(listOf("720p", "1080p"), o.resolution, enabled = { id -> caps.resolutions.any { it.id == id } }) { composer.updateOptions(o.copy(resolution = it)) }
-            }
-        }
-    }
-}
-
-@Composable
-private fun FormatTile(id: String, label: String, ready: Boolean, beta: Boolean, selected: Boolean, modifier: Modifier, tall: Boolean = false, onClick: () -> Unit) {
-    val shape = RoundedCornerShape(16.dp)
-    val tileDescription = stringResource(if (!ready) R.string.create_format_desc_soon else if (beta) R.string.create_format_desc_beta else R.string.create_format_desc, label, id)
-    Box(
-        modifier.then(if (tall) Modifier.heightIn(min = 110.dp) else Modifier.aspectRatio(1f)).alpha(if (ready) 1f else 0.6f).clip(shape).background(if (selected) Vmk.colors.primaryContainer else Vmk.colors.surfaceRaised)
-            .then(if (selected) Modifier.border(1.5.dp, Vmk.colors.primary, shape) else Modifier)
-            .clickable(enabled = ready, role = Role.RadioButton, onClick = onClick)
-            .semantics { this.selected = selected; contentDescription = tileDescription }.testTag("format-$id"),
-    ) {
-        if (!ready || beta) Text(stringResource(if (ready) R.string.create_beta else R.string.create_soon), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = Vmk.colors.textSecondary, modifier = Modifier.align(Alignment.TopEnd).padding(6.dp))
-        Column(Modifier.align(Alignment.Center).padding(horizontal = 6.dp, vertical = 8.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Icon(if (id == "16:9") Icons.Filled.CropLandscape else if (id == "1:1") Icons.Filled.CropSquare else Icons.Filled.CropPortrait, null, tint = if (selected) Vmk.colors.primary else Vmk.colors.textSecondary, modifier = Modifier.size(26.dp))
-            Text("$label\n$id", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold, color = if (selected) Vmk.colors.primary else Vmk.colors.textSecondary, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
-        }
-    }
-}
-
-@Composable
-private fun Segmented(ids: List<String>, selected: String, enabled: (String) -> Boolean, onSelect: (String) -> Unit) {
-    Row(Modifier.fillMaxWidth().heightIn(min = 44.dp).clip(RoundedCornerShape(12.dp)).background(Vmk.colors.surfaceRaised).padding(3.dp)) {
-        for (id in ids) {
-            val sel = id == selected; val on = enabled(id)
-            Box(
-                Modifier.weight(1f).heightIn(min = 38.dp).alpha(if (on) 1f else 0.5f).clip(RoundedCornerShape(10.dp)).then(if (sel) Modifier.background(if (Vmk.colors.dark) Vmk.colors.surface3 else Vmk.colors.surface) else Modifier)
-                    .clickable(enabled = on, role = Role.RadioButton) { onSelect(id) }.semantics { this.selected = sel }.testTag("resolution-$id"),
-                contentAlignment = Alignment.Center,
-            ) { Text(id, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold, color = if (sel) Vmk.colors.text else Vmk.colors.textSecondary) }
         }
     }
 }
@@ -624,4 +440,71 @@ private fun LanguageDialog(composer: ComposerViewModel, o: CreateOptions, caps: 
         },
         confirmButton = {}, dismissButton = { TextButton(onClick = onDismiss, modifier = Modifier.heightIn(min = 48.dp)) { Text(stringResource(R.string.common_cancel)) } },
     )
+}
+
+
+/** The prompt: large borderless text on the page (no card, no outline); the short hint is the only words around it. */
+@Composable
+private fun PromptField(composer: ComposerViewModel, listening: Boolean, focus: FocusRequester, deck: Boolean = false) {
+    BasicTextField(
+        value = composer.text, onValueChange = { composer.text = it }, readOnly = listening,
+        textStyle = VmkType.prompt.copy(fontSize = 24.sp, lineHeight = 32.sp, color = if (listening) Vmk.colors.textSecondary else Vmk.colors.text),
+        cursorBrush = SolidColor(Vmk.colors.primary), keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
+        modifier = Modifier.fillMaxWidth().heightIn(min = 120.dp).focusRequester(focus).padding(top = 8.dp).testTag("composerField"),
+        decorationBox = { inner ->
+            Box { if (composer.text.isEmpty()) Text(stringResource(if (deck) R.string.deck_prompt_hint else R.string.create_prompt_hint), style = VmkType.prompt.copy(fontSize = 24.sp, lineHeight = 32.sp), color = Vmk.colors.textTertiary); inner() }
+        },
+    )
+}
+
+/** What is attached: one row of 56 dp thumbnails, "+" at the end (it opens the photo sheet again). */
+@Composable
+private fun PhotoStrip(composer: ComposerViewModel, onAdd: () -> Unit) {
+    val total = composer.totalPhotos
+    Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        androidx.compose.foundation.lazy.LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().testTag("photoStrip")) {
+            items(composer.photos.size.coerceAtMost(12)) { i ->
+                composer.photos[i].thumbnail?.let { androidx.compose.foundation.Image(it.asImageBitmap(), null, contentScale = ContentScale.Crop, modifier = Modifier.size(56.dp).clip(RoundedCornerShape(12.dp)).testTag("attachedPhoto")) }
+            }
+            items(composer.library.take(12 - composer.photos.size.coerceAtMost(12)).size) { i -> PhotoThumb(composer.library[i], Modifier.size(56.dp).clip(RoundedCornerShape(12.dp)).testTag("attachedLibraryPhoto")) }
+            item {
+                val add = stringResource(R.string.create_add_photos)
+                Box(Modifier.size(56.dp).clip(RoundedCornerShape(12.dp)).background(Vmk.colors.surfaceRaised).clickable(role = Role.Button, onClickLabel = add, onClick = onAdd).semantics { contentDescription = add }, contentAlignment = Alignment.Center) {
+                    Icon(Icons.Filled.Add, null, tint = Vmk.colors.primary)
+                }
+            }
+        }
+        // only when something needs saying: still preparing, or a notice
+        if (composer.loading > 0) Text(composer.preparingText, style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary, modifier = Modifier.testTag("photosPreparing"))
+        composer.notice?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = Vmk.colors.warning, modifier = Modifier.testTag("photosNotice")) }
+        Text(pluralStringResource(R.plurals.create_photos_count, total, total), style = MaterialTheme.typography.labelMedium, color = Vmk.colors.textTertiary, modifier = Modifier.testTag("photosNote"))
+    }
+}
+
+/** One row of the Length menu: "2 min" and its price; greyed when over the platform's limit; the warning tint when the balance is short. */
+@Composable
+private fun LengthMenuRow(label: String, credits: Int, selected: Boolean, overBalance: Boolean, enabled: Boolean, tag: String, onClick: () -> Unit) {
+    val tint = if (overBalance) Vmk.colors.warning else Vmk.colors.textSecondary
+    val desc = pluralStringResource(if (selected) R.plurals.create_length_desc_selected else R.plurals.create_length_desc, credits, credits, label)
+    androidx.compose.material3.DropdownMenuItem(
+        text = {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                Text(label, fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal, modifier = Modifier.widthIn(min = 72.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Filled.Bolt, null, tint = tint, modifier = Modifier.size(14.dp))
+                    Text("$credits", style = MaterialTheme.typography.labelMedium, color = tint)
+                }
+            }
+        },
+        trailingIcon = { if (selected) Icon(Icons.Filled.Check, null, tint = Vmk.colors.primary) },
+        enabled = enabled, onClick = onClick, modifier = Modifier.semantics { this.selected = selected; contentDescription = desc }.testTag(tag),
+    )
+}
+
+/** The pill value is one short word: "Shorts" for the vertical-video group, "Video" for no platform in particular (the menu rows carry the long names). */
+@Composable
+private fun platformPillValue(o: CreateOptions, caps: com.videomk.app.core.Capabilities): String {
+    if (CreatePlatforms.isCustom(o, caps)) return stringResource(R.string.create_custom)
+    val c = CreatePlatforms.chip(caps, o.platform) ?: return stringResource(R.string.create_pill_video)
+    return when (c.id) { "shorts" -> "Shorts"; "other" -> stringResource(R.string.create_pill_video); else -> c.label }
 }

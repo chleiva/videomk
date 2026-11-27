@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- library (home list) -->
-    <string name="lib_title">Mis videos</string>
+    <string name="lib_title">Videos</string>
     <string name="lib_new_video">Nuevo video</string>
     <string name="lib_show_credits">Ver tus créditos</string>
     <string name="lib_settings">Ajustes</string>
@@ -85,8 +85,8 @@
     <!-- video detail -->
     <string name="video_title_fallback">Video</string>
     <string name="video_edit">Editar</string>
-    <string name="video_failed_title">Algo salió mal</string>
-    <string name="video_failed_body">No pudimos terminar este video. No se te ha cobrado por él.</string>
+    <string name="video_failed_title">No se completó</string>
+    <string name="video_failed_body">Sin créditos usados.</string>
     <string name="video_rejected_title">No podemos convertir esta idea en un video</string>
     <string name="video_rejected_body">Prueba a describir algo distinto.</string>
     <string name="video_hide_description">Ocultar descripción</string>

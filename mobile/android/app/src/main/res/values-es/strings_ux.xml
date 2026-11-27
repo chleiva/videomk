@@ -7,7 +7,7 @@
     <string name="lib_row_meta">%1$s · %2$s</string>
     <string name="lib_row_desc">%1$s. %2$s</string>
     <string name="lib_more">Más opciones</string>
-    <string name="making_leave_promise">Puedes salir. Sigue en marcha y estará aquí cuando esté listo.</string>
+    <string name="making_leave_promise">Puedes salir. Te avisamos cuando esté listo.</string>
     <string name="making_scene_counter">Escena %1$d de %2$d</string>
     <string name="making_ready_announce">%1$s está listo.</string>
     <string name="making_stage_desc">%1$s, %2$s</string>
@@ -21,7 +21,7 @@
     <string name="lib_first_edit">Cambiar la idea</string>
     <string name="video_save">Guardar en la galería</string>
     <string name="video_saving">Guardando</string>
-    <string name="video_saved">Guardado en la galería</string>
+    <string name="video_saved">Guardado</string>
     <string name="video_save_failed">No se pudo guardar el video. Inténtalo de nuevo.</string>
     <string name="video_make_another">Hacer otro video</string>
     <string name="video_make_another_sub">Describe tu próxima idea.</string>

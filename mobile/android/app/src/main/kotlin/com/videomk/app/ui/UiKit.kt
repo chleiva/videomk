@@ -15,12 +15,30 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bolt
+import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.Text
+import androidx.compose.material3.TooltipBox
+import androidx.compose.material3.TooltipDefaults
+import androidx.compose.material3.rememberTooltipState
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
@@ -103,3 +121,72 @@ fun Modifier.hairline(shape: Shape, color: Color): Modifier = this.border(1.dp, 
 
 @Composable
 fun hairlineColor(): Color = Vmk.colors.outline
+
+
+/**
+ * The one icon button (docs/UX_2026_REDESIGN.md section 5): a 48 dp target around a 40 dp tonal circle ("glass" on Android is a tonal surface, no blur).
+ * The spoken label is a required parameter and doubles as the long-press tooltip. [filled] is the one primary icon action (the brand gradient).
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun GlassIconButton(
+    icon: ImageVector, description: String, onClick: () -> Unit, modifier: Modifier = Modifier,
+    filled: Boolean = false, enabled: Boolean = true, badge: String? = null, size: Dp = 48.dp, onDark: Boolean = false,
+) {
+    val container = when {
+        filled -> null
+        onDark -> Color.Black.copy(alpha = 0.55f)
+        else -> Vmk.colors.surfaceRaised
+    }
+    val tint = if (filled || onDark) Color.White.let { if (filled) Vmk.colors.onPrimary else it } else Vmk.colors.text
+    TooltipBox(
+        positionProvider = TooltipDefaults.rememberPlainTooltipPositionProvider(),
+        tooltip = { PlainTooltip { Text(description) } },
+        state = rememberTooltipState(),
+    ) {
+        Box(
+            modifier.size(size).alpha(if (enabled) 1f else 0.4f).clip(CircleShape)
+                .clickable(enabled = enabled, role = Role.Button, onClickLabel = null, onClick = onClick)
+                .semantics { contentDescription = description },
+            contentAlignment = Alignment.Center,
+        ) {
+            Box(
+                Modifier.size(size - 8.dp).clip(CircleShape).then(if (filled) Modifier.background(Vmk.gradientNow) else Modifier.background(container!!)),
+                contentAlignment = Alignment.Center,
+            ) { Icon(icon, null, tint = tint, modifier = Modifier.size(22.dp)) }
+            if (badge != null) Text(
+                badge, style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = Vmk.colors.onPrimary, maxLines = 1,
+                modifier = Modifier.align(Alignment.TopEnd).clip(CircleShape).background(Vmk.colors.primary).padding(horizontal = 5.dp, vertical = 1.dp).clearAndSetSemantics { },
+            )
+        }
+    }
+}
+
+/**
+ * A pill that opens a menu (docs/UX_2026_REDESIGN.md section 5): icon, the current value, a chevron. The value is the label, so the state is always visible.
+ * 40 dp tall visually, 48 dp to hit; values are one short word (the menu rows carry the long names).
+ */
+@Composable
+fun Pill(
+    value: String, description: String, modifier: Modifier = Modifier, icon: ImageVector? = null, expanded: Boolean, onExpandedChange: (Boolean) -> Unit,
+    menu: @Composable () -> Unit,
+) {
+    Box(modifier) {
+        Row(
+            Modifier.heightIn(min = 48.dp).wrapContentSize(Alignment.CenterStart).clip(CircleShape)
+                .clickable(role = Role.DropdownList, onClickLabel = description) { onExpandedChange(true) }
+                .semantics(mergeDescendants = true) { contentDescription = "$description: $value"; stateDescription = value },
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Row(
+                Modifier.heightIn(min = 40.dp).clip(CircleShape).background(Vmk.colors.surfaceRaised).padding(start = 12.dp, end = 8.dp),
+                verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
+                if (icon != null) Icon(icon, null, tint = Vmk.colors.primary, modifier = Modifier.size(18.dp))
+                Text(value, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold, color = Vmk.colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false))
+                Icon(Icons.Filled.ExpandMore, null, tint = Vmk.colors.textSecondary, modifier = Modifier.size(18.dp))
+            }
+        }
+        androidx.compose.material3.DropdownMenu(expanded = expanded, onDismissRequest = { onExpandedChange(false) }, containerColor = Vmk.colors.surface) { menu() }
+    }
+}

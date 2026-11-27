@@ -1,5 +1,6 @@
 package com.videomk.app.ui
 
+import androidx.compose.foundation.layout.FlowRow
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.Network
@@ -17,6 +18,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.animation.animateContentSize
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -170,8 +172,6 @@ fun LibraryScreen(app: AppViewModel, composer: ComposerViewModel, onOpenVideo: (
         topBar = { MainTopBar(state.wallet, onOpenWallet, onOpenSettings) },
         bottomBar = {
             Column {
-                // Create is docked above the tab bar, not floating: the list ends above it, so it can never cover a row
-                if (state.entries.isNotEmpty() && !com.videomk.app.DebugHooks.emptyHome(context)) NewVideoBar { newVideo(null) }
                 val progress = container?.mediaUploads?.queue?.progress?.collectAsState()?.value
                 val imeVisible = WindowInsets.ime.getBottom(androidx.compose.ui.platform.LocalDensity.current) > 0
                 val org = container?.organize?.bar?.collectAsState()?.value
@@ -218,7 +218,7 @@ fun LibraryScreen(app: AppViewModel, composer: ComposerViewModel, onOpenVideo: (
                                             SettleCrossfade(kind, Modifier.animateItem()) { k ->
                                                 when (k) {
                                                     0 -> MakingCard(rememberMakingSnapshot(v, state), Modifier.testTag("runningRow"), onClick = { onOpenVideo(v.id) })
-                                                    1 -> VideoRow(v, v.createdAt?.let { RelativeTime.text(it.toEpochMilli(), now) }, remember(v.id, onOpenVideo) { { onOpenVideo(v.id) } })
+                                                    1 -> VideoRow(v, null, remember(v.id, onOpenVideo) { { onOpenVideo(v.id) } })
                                                     else -> FailedRow(
                                                         title = state.briefs[v.id] ?: v.displayTitle, rejected = v.status == VideoStatus.Rejected, detail = v.rejectReason,
                                                         thumb = v.previewGifUrl, tag = "videoRow",
@@ -239,25 +239,11 @@ fun LibraryScreen(app: AppViewModel, composer: ComposerViewModel, onOpenVideo: (
     }
 }
 
-/** The one entry to Create on a list that has videos: one full-width primary button docked above the tab bar (never over a row), text-driven height, 48 dp at least. */
-@Composable
-private fun NewVideoBar(onClick: () -> Unit) {
-    val label = stringResource(R.string.lib_new_video)
-    Box(Modifier.fillMaxWidth().background(Vmk.colors.background).padding(horizontal = Vmk.space.screen, vertical = Vmk.space.s)) {
-        PrimaryButton(label, onClick, Modifier.testTag("newVideoFab").semantics { contentDescription = label }) {
-            Icon(Icons.Filled.Add, null, tint = Vmk.colors.onPrimary, modifier = Modifier.size(24.dp)); Spacer(Modifier.width(8.dp))
-            Text(label, style = MaterialTheme.typography.titleMedium, color = Vmk.colors.onPrimary, textAlign = TextAlign.Center)
-        }
-    }
-}
-
 @Composable
 private fun MainTopBar(wallet: com.videomk.app.core.WalletInfo?, onOpenWallet: () -> Unit, onOpenSettings: () -> Unit) {
     Row(Modifier.fillMaxWidth().statusBarsPadding().heightIn(min = 52.dp).padding(horizontal = 16.dp), verticalAlignment = Alignment.CenterVertically) {
-        Row(Modifier.weight(1f).semantics(mergeDescendants = true) {}, verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            LogoMark()
-            Text("videomk", style = MaterialTheme.typography.titleLarge, color = Vmk.colors.text, maxLines = 1)
-        }
+        // the mark is the name: the app is called videomk on the icon and in the store, so no wordmark here
+        Row(Modifier.weight(1f).semantics(mergeDescendants = true) { contentDescription = "videomk" }, verticalAlignment = Alignment.CenterVertically) { LogoMark(size = 32.dp) }
         wallet?.let { w ->
             val shape = CircleShape
             val unlimitedDesc = stringResource(R.string.lib_unlimited_credits)
@@ -274,7 +260,7 @@ private fun MainTopBar(wallet: com.videomk.app.core.WalletInfo?, onOpenWallet: (
             }
         }
         IconButton(onClick = onOpenSettings, modifier = Modifier.size(48.dp).testTag("settingsButton")) {
-            Icon(Icons.Filled.Settings, stringResource(R.string.lib_settings), tint = Vmk.colors.textSecondary)
+            Icon(Icons.Filled.AccountCircle, stringResource(R.string.lib_settings), tint = Vmk.colors.textSecondary, modifier = Modifier.size(28.dp))
         }
     }
 }
@@ -310,66 +296,34 @@ private fun SkeletonFeed() {
     }
 }
 
-/** First launch: one promise, a first video that is already written (30 s, 1 credit), and three worked examples. Examples fill Create; none of them sends. */
+/** First launch (docs/UX_2026_REDESIGN.md 4.3): the headline, a prompt field that opens Create with the keyboard up, and three example chips (they fill Create, none sends). */
+@OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
 @Composable
 private fun EmptyState(onExample: (Example) -> Unit, onFirst: () -> Unit, onChange: () -> Unit) {
-    Column(
-        Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 16.dp).padding(bottom = 16.dp).testTag("emptyState"),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        Box(Modifier.padding(top = 12.dp).height(96.dp).fillMaxWidth().clearAndSetSemantics { }, contentAlignment = Alignment.Center) {
-            Frame(-7f, (-34).dp, listOf(Color(0xFFF2B27A), Color(0xFF8E4B63)))
-            Frame(7f, 34.dp, listOf(Color(0xFF2A2A66), Color(0xFF6C4BC1)))
-            Frame(0f, 0.dp, listOf(Color(0xFFFFC27A), Color(0xFFB9556F)), front = true)
+    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 16.dp).padding(top = 24.dp, bottom = 16.dp).testTag("emptyState"), verticalArrangement = Arrangement.spacedBy(20.dp)) {
+        Text(stringResource(R.string.lib_empty_title), style = MaterialTheme.typography.headlineLarge, color = Vmk.colors.text, modifier = Modifier.semantics { heading() })
+        val shape = RoundedCornerShape(Vmk.radii.composer)
+        val hint = stringResource(R.string.create_prompt_hint)
+        Row(
+            Modifier.fillMaxWidth().heightIn(min = 64.dp).clip(shape).background(Vmk.colors.surface).border(1.dp, Vmk.colors.outline, shape)
+                .clickable(role = Role.Button, onClickLabel = stringResource(R.string.lib_new_video), onClick = onChange).padding(horizontal = 20.dp, vertical = 12.dp).semantics(mergeDescendants = true) { contentDescription = hint }.testTag("newVideoButton"),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(hint, style = VmkType.prompt, color = Vmk.colors.textTertiary, modifier = Modifier.weight(1f))
+            Icon(Icons.Filled.Add, null, tint = Vmk.colors.primary)
         }
-        Text(stringResource(R.string.lib_empty_title), style = MaterialTheme.typography.headlineMedium, textAlign = TextAlign.Center, color = Vmk.colors.text, modifier = Modifier.padding(top = 8.dp).semantics { heading() })
-        Text(stringResource(R.string.lib_empty_body), style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Center, color = Vmk.colors.textSecondary, modifier = Modifier.padding(top = 8.dp, bottom = 16.dp))
-        FirstVideoCard(onFirst, onChange)
-        Overline(stringResource(R.string.lib_try_one), Modifier.fillMaxWidth().padding(top = 20.dp, bottom = 8.dp))
-        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             for (e in Examples) {
-                val shape = RoundedCornerShape(18.dp)
                 Row(
-                    Modifier.fillMaxWidth().heightIn(min = 64.dp).clip(shape).background(Vmk.colors.surface).border(1.dp, Vmk.colors.outline, shape)
-                        .clickable(role = Role.Button, onClickLabel = stringResource(R.string.lib_use_idea)) { onExample(e) }.padding(horizontal = 12.dp, vertical = 8.dp).testTag("exampleCard"),
-                    verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    Modifier.heightIn(min = 48.dp).clip(CircleShape).background(Vmk.colors.primaryContainer).clickable(role = Role.Button, onClickLabel = stringResource(R.string.lib_use_idea)) { onExample(e) }.padding(horizontal = 14.dp, vertical = 8.dp).testTag("exampleCard"),
+                    verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    Box(Modifier.size(40.dp).clip(RoundedCornerShape(12.dp)).background(Vmk.colors.primaryContainer), contentAlignment = Alignment.Center) { Icon(e.icon, null, tint = Vmk.colors.primary, modifier = Modifier.size(22.dp)) }
-                    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                        Text(stringResource(e.text), style = MaterialTheme.typography.titleSmall, color = Vmk.colors.text)
-                        Text(stringResource(e.tag), style = MaterialTheme.typography.labelMedium, color = Vmk.colors.primary, modifier = Modifier.clip(CircleShape).background(Vmk.colors.primaryContainer).padding(horizontal = 10.dp, vertical = 3.dp))
-                    }
+                    Icon(e.icon, null, tint = Vmk.colors.primary, modifier = Modifier.size(18.dp))
+                    Text(stringResource(e.text), style = MaterialTheme.typography.labelLarge, color = Vmk.colors.text)
                 }
             }
         }
     }
-}
-
-/** "Make your first video": the prompt is already there, 30 s and 1 credit. The button makes it as it is (no question sheet); "Change the idea" opens Create with it filled in. */
-@Composable
-private fun FirstVideoCard(onMake: () -> Unit, onChange: () -> Unit) {
-    val shape = RoundedCornerShape(Vmk.radii.videoCard)
-    Column(
-        Modifier.fillMaxWidth().clip(shape).background(Vmk.colors.surface).border(1.dp, Vmk.colors.outline, shape).padding(Vmk.space.l).testTag("firstVideoCard"),
-        verticalArrangement = Arrangement.spacedBy(Vmk.space.m),
-    ) {
-        Text(stringResource(R.string.lib_first_title), style = MaterialTheme.typography.titleMedium, color = Vmk.colors.text, modifier = Modifier.semantics { heading() })
-        Text(stringResource(R.string.quoted, stringResource(R.string.lib_first_prompt)), style = MaterialTheme.typography.bodyLarge, color = Vmk.colors.text,
-            modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(Vmk.radii.field)).background(Vmk.colors.primaryContainer).padding(Vmk.space.m))
-        Text(stringResource(R.string.lib_first_sub), style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.textSecondary)
-        PrimaryButton(stringResource(R.string.lib_first_cta), onMake, Modifier.testTag("firstVideoMake"))
-        TextButton(onClick = onChange, modifier = Modifier.fillMaxWidth().heightIn(min = Vmk.minTouch).testTag("newVideoButton")) {   // opens Create with the idea filled in (UI tests use it as "New video")
-            Text(stringResource(R.string.lib_first_edit), style = MaterialTheme.typography.titleSmall, color = Vmk.colors.primary)
-        }
-    }
-}
-
-@Composable
-private fun Frame(rotate: Float, dx: androidx.compose.ui.unit.Dp, colors: List<Color>, front: Boolean = false) {
-    Box(
-        Modifier.offset(x = dx, y = if (front) (-6).dp else 4.dp).rotate(rotate).size(width = 104.dp, height = 66.dp).clip(RoundedCornerShape(14.dp))
-            .background(Brush.linearGradient(colors)),
-    )
 }
 
 // rows and cards: the shared components live in Components.kt

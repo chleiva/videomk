@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="create_title">New video</string>
-    <string name="create_what_for">What is it for?</string>
+    <string name="create_what_for">For</string>
     <string name="create_coming_soon">Coming soon</string>
     <string name="create_change">Change</string>
     <string name="create_also_works">Also works:</string>
@@ -15,7 +15,7 @@
     <string name="create_discard_text">What you entered will be lost.</string>
     <string name="create_discard">Discard</string>
     <string name="create_keep_editing">Keep editing</string>
-    <string name="create_prompt_hint">Describe your video. For example: how bees make honey, explained for kids.</string>
+    <string name="create_prompt_hint">A video about…</string>
     <string name="create_tap_mic">Tap the mic to speak</string>
     <string name="create_stop_dictation">Stop dictation</string>
     <string name="create_dictate">Dictate</string>
@@ -55,7 +55,7 @@
     <string name="create_format_desc">%1$s %2$s</string>
     <string name="create_format_desc_soon">%1$s %2$s, coming soon</string>
     <string name="create_format_desc_beta">%1$s %2$s, beta</string>
-    <string name="create_create_video">Create video</string>
+    <string name="create_create_video">Create</string>
     <string name="create_explain_not_ready">Explain why this can\'t be created yet</string>
     <string name="create_state_checking">Checking your request</string>
     <string name="create_state_not_ready">Not ready. %1$s</string>
@@ -102,7 +102,7 @@
     <string name="composer_starting">Starting your video…</string>
     <string name="composer_too_long">%1$,d of %2$,d. Please shorten it.</string>
     <string name="composer_no_credits">You have no credits</string>
-    <string name="composer_describe">Describe your video to continue</string>
+    <string name="composer_describe">Describe your video</string>
     <string name="composer_add_words">Add a few more words (%1$d to go)</string>
     <string name="composer_limit_message">You can add up to %1$d photos. Remove one to choose another.</string>
     <string name="composer_choose_photos">Choose photos</string>

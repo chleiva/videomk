@@ -1,5 +1,7 @@
 package com.videomk.app.ui
 
+import androidx.compose.material.icons.filled.CropSquare
+import androidx.compose.material.icons.filled.CropPortrait
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.LinearEasing
@@ -112,10 +114,10 @@ fun VideoRow(video: VideoItem, meta: String?, onClick: () -> Unit, modifier: Mod
             .semantics(mergeDescendants = true) { contentDescription = desc }.testTag("videoRow"),
     ) {
         if (large) Column(Modifier.padding(Vmk.space.m), verticalArrangement = Arrangement.spacedBy(Vmk.space.s)) {
-            Poster(video, Modifier.width(128.dp).height(72.dp))
+            Poster(video, Modifier.width(112.dp).height(63.dp))
             RowText(video, meta)
         } else Row(Modifier.padding(Vmk.space.m), horizontalArrangement = Arrangement.spacedBy(Vmk.space.m), verticalAlignment = Alignment.CenterVertically) {
-            Poster(video, Modifier.width(128.dp).height(72.dp))
+            Poster(video, Modifier.width(112.dp).height(63.dp))
             Column(Modifier.weight(1f)) { RowText(video, meta) }
         }
     }
@@ -123,7 +125,12 @@ fun VideoRow(video: VideoItem, meta: String?, onClick: () -> Unit, modifier: Mod
 
 @Composable
 private fun RowText(video: VideoItem, meta: String?) {
-    Text(video.displayTitle, style = MaterialTheme.typography.titleMedium, color = Vmk.colors.text, maxLines = 3, overflow = TextOverflow.Ellipsis)
+    Text(video.displayTitle, style = MaterialTheme.typography.titleMedium, color = Vmk.colors.text, maxLines = 2, overflow = TextOverflow.Ellipsis)
+    // one word of metadata only when it is not the default: a shape icon for vertical, square and 4:5 videos (the duration is on the picture, the day is the group header)
+    if (video.aspect != null && video.aspect != "16:9") Icon(
+        if (video.aspect == "1:1") Icons.Filled.CropSquare else Icons.Filled.CropPortrait, stringResource(R.string.lib_format_badge, video.aspect!!), tint = Vmk.colors.textSecondary,
+        modifier = Modifier.padding(top = 4.dp).size(18.dp),
+    )
     meta?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary, modifier = Modifier.padding(top = 2.dp)) }
 }
 
@@ -175,7 +182,6 @@ fun FailedRow(
                 }
                 Text(title, style = MaterialTheme.typography.titleMedium, color = Vmk.colors.text, maxLines = 3, overflow = TextOverflow.Ellipsis)
                 detail?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary) }
-                if (!rejected) Text(stringResource(R.string.lib_no_credits_used), style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary)
             }
         }
         if (onRetry != null || onDismiss != null) FlowRow(horizontalArrangement = Arrangement.spacedBy(Vmk.space.s), verticalArrangement = Arrangement.spacedBy(0.dp)) {
@@ -204,8 +210,9 @@ fun MakingCard(snapshot: MakingSnapshot, modifier: Modifier = Modifier, layout: 
     val shape = RoundedCornerShape(Vmk.radii.videoCard)
     val detail = layout == MakingLayout.Detail
     val spoken = snapshot.spoken()
+    Column(Modifier.fillMaxWidth()) {
     Box(
-        modifier.fillMaxWidth().heightIn(min = if (detail) 240.dp else 168.dp).vmkShadow(2, shape, Vmk.colors.dark).clip(shape)
+        modifier.fillMaxWidth().heightIn(min = if (detail) 168.dp else 104.dp).vmkShadow(2, shape, Vmk.colors.dark).clip(shape)
             .then(if (onClick != null) Modifier.clickable(role = Role.Button, onClick = onClick) else Modifier)
             // the list card is one TalkBack stop; the detail card keeps its parts separate (the stage line is a polite live region, the promise is read in order)
             .then(if (detail) Modifier else Modifier.semantics(mergeDescendants = true) { contentDescription = spoken }),
@@ -213,17 +220,14 @@ fun MakingCard(snapshot: MakingSnapshot, modifier: Modifier = Modifier, layout: 
         Box(Modifier.matchParentSize().background(Vmk.makingGradient))
         MakingShimmer(Modifier.matchParentSize())
         Column(Modifier.fillMaxWidth().padding(if (detail) Vmk.space.xl else 16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                GlassChip(stringResource(R.string.lib_status_making), dot = Vmk.colors.live)
-                Spacer(Modifier.weight(1f))
-                if (!isLargeText()) snapshot.eta?.let { Text(it, style = MaterialTheme.typography.labelMedium, color = Color.White.copy(alpha = 0.88f), textAlign = TextAlign.End) }
-            }
-            if (isLargeText()) snapshot.eta?.let { Text(it, style = MaterialTheme.typography.labelMedium, color = Color.White.copy(alpha = 0.88f)) }
             Text(snapshot.title, style = MaterialTheme.typography.titleMedium.copy(fontSize = MaterialTheme.typography.titleMedium.fontSize * 1.12f, lineHeight = MaterialTheme.typography.titleMedium.lineHeight * 1.1f),
-                color = Color.White, maxLines = if (isLargeText() || detail) 4 else 2, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(top = 6.dp))
-            Text(snapshot.stageLine, style = if (detail) MaterialTheme.typography.titleMedium else MaterialTheme.typography.bodyMedium, color = Color.White.copy(alpha = if (detail) 1f else 0.88f),
-                modifier = Modifier.padding(top = if (detail) 16.dp else 0.dp).then(if (detail) Modifier.semantics { liveRegion = LiveRegionMode.Polite } else Modifier))
-            snapshot.scene?.let { Text(stringResource(R.string.making_scene_counter, it.index, it.total), style = MaterialTheme.typography.labelLarge, color = Color.White.copy(alpha = 0.88f)) }
+                color = Color.White, maxLines = if (isLargeText() || detail) 4 else 2, overflow = TextOverflow.Ellipsis)
+            // one live line: the stage as a verb, then the scene counter (and the time left in the roomier layout)
+            val scene = snapshot.scene?.let { stringResource(R.string.making_scene_counter, it.index, it.total) }
+            val second = listOfNotNull(scene, snapshot.eta.takeIf { detail }).joinToString(" · ")
+            Text(snapshot.stageLine, style = if (detail) MaterialTheme.typography.titleMedium else MaterialTheme.typography.bodyMedium, color = Color.White.copy(alpha = if (detail) 1f else 0.92f),
+                modifier = Modifier.padding(top = if (detail) 12.dp else 0.dp).then(if (detail) Modifier.semantics { liveRegion = LiveRegionMode.Polite } else Modifier))
+            if (second.isNotEmpty()) Text(second, style = MaterialTheme.typography.labelLarge, color = Color.White.copy(alpha = 0.88f))
             if (snapshot.thumbnails.isNotEmpty()) Row(Modifier.padding(top = 6.dp).clearAndSetSemantics { }, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 snapshot.thumbnails.takeLast(5).forEachIndexed { i, url ->
                     Box(Modifier.weight(1f).aspectRatio(16f / 10f).clip(RoundedCornerShape(8.dp)).then(if (i == snapshot.thumbnails.takeLast(5).lastIndex) Modifier.border(2.dp, Vmk.colors.live, RoundedCornerShape(8.dp)) else Modifier)) {
@@ -232,28 +236,12 @@ fun MakingCard(snapshot: MakingSnapshot, modifier: Modifier = Modifier, layout: 
                 }
             }
             snapshot.narrationLine?.let { Text(stringResource(R.string.quoted, it), style = MaterialTheme.typography.bodySmall, color = Color.White.copy(alpha = 0.88f), maxLines = 3, overflow = TextOverflow.Ellipsis) }
-            if (detail) StepList(snapshot, Modifier.padding(top = 12.dp))
-            Spacer(Modifier.height(if (detail) 12.dp else 8.dp))
-            SegmentBar(snapshot, showNames = !detail)
-            if (detail) Text(stringResource(R.string.making_leave_promise), style = MaterialTheme.typography.bodyMedium, color = Color.White.copy(alpha = 0.92f), modifier = Modifier.padding(top = 8.dp).testTag("leavePromise"))
+            Spacer(Modifier.height(if (detail) 12.dp else 6.dp))
+            SegmentBar(snapshot, showNames = false)
         }
     }
-}
-
-@Composable
-private fun StepList(s: MakingSnapshot, modifier: Modifier = Modifier) {
-    val names = MakingSteps.names
-    Column(modifier, verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        names.forEachIndexed { i, name ->
-            val done = s.fills.getOrElse(i) { 0f } >= 1f
-            val active = i == s.current && !done
-            val state = stringResource(if (done) R.string.making_step_done else if (active) R.string.making_step_active else R.string.making_step_waiting, name)
-            Row(Modifier.clearAndSetSemantics { }, verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                Icon(if (done) Icons.Filled.CheckCircle else if (active) Icons.Filled.HourglassTop else Icons.Filled.RadioButtonUnchecked, null,
-                    tint = if (active) Vmk.colors.live else Color.White.copy(alpha = if (done) 1f else 0.6f), modifier = Modifier.size(20.dp))
-                Text(name, style = MaterialTheme.typography.bodyLarge, fontWeight = if (active) FontWeight.SemiBold else FontWeight.Normal, color = Color.White.copy(alpha = if (i <= s.current) 1f else 0.72f))
-            }
-        }
+    // the promise sits under the card, on the page background, in plain words
+    if (detail) Text(stringResource(R.string.making_leave_promise), style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.textSecondary, modifier = Modifier.padding(top = 12.dp).testTag("leavePromise"))
     }
 }
 
@@ -265,7 +253,7 @@ private fun SegmentBar(s: MakingSnapshot, showNames: Boolean) {
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             s.fills.forEachIndexed { i, target ->
                 val f by animateFloatAsState(target, tween(if (reduceMotion(LocalContext.current)) 0 else 1000, easing = LinearEasing), label = "seg$i")
-                Box(Modifier.weight(1f).height(5.dp).clip(CircleShape).background(Color.White.copy(alpha = 0.24f))) {
+                Box(Modifier.weight(1f).height(4.dp).clip(CircleShape).background(Color.White.copy(alpha = 0.24f))) {
                     Box(Modifier.fillMaxWidth(f).fillMaxHeight().background(Color.White, CircleShape))
                 }
             }

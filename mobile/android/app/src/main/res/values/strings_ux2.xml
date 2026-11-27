@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="action_info">Info</string>
+    <string name="action_more">More</string>
+    <string name="video_info_title">Info</string>
+    <string name="video_copy">Copy</string>
+    <string name="video_replay">Replay</string>
+    <string name="lib_format_badge">Format %1$s</string>
+    <string name="create_options">Options</string>
+    <string name="create_pill_video">Video</string>
+    <string name="create_quality">Quality</string>
+    <string name="create_quality_info">About quality and credits</string>
+    <plurals name="create_credits_left">
+        <item quantity="one">%1$d left</item>
+        <item quantity="other">%1$d left</item>
+    </plurals>
+</resources>

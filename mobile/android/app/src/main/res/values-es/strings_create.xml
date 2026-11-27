@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="create_title">Nuevo video</string>
-    <string name="create_what_for">¿Para qué es?</string>
+    <string name="create_what_for">Para</string>
     <string name="create_coming_soon">Próximamente</string>
     <string name="create_change">Cambiar</string>
     <string name="create_also_works">También funciona:</string>
@@ -15,7 +15,7 @@
     <string name="create_discard_text">Se perderá lo que escribiste.</string>
     <string name="create_discard">Descartar</string>
     <string name="create_keep_editing">Seguir editando</string>
-    <string name="create_prompt_hint">Describe tu video. Por ejemplo: cómo hacen miel las abejas, explicado para niños.</string>
+    <string name="create_prompt_hint">Un video sobre…</string>
     <string name="create_tap_mic">Toca el micrófono para hablar</string>
     <string name="create_stop_dictation">Detener dictado</string>
     <string name="create_dictate">Dictar</string>
@@ -55,7 +55,7 @@
     <string name="create_format_desc">%1$s %2$s</string>
     <string name="create_format_desc_soon">%1$s %2$s, próximamente</string>
     <string name="create_format_desc_beta">%1$s %2$s, beta</string>
-    <string name="create_create_video">Crear video</string>
+    <string name="create_create_video">Crear</string>
     <string name="create_explain_not_ready">Explicar por qué aún no se puede crear</string>
     <string name="create_state_checking">Revisando tu idea</string>
     <string name="create_state_not_ready">No está listo. %1$s</string>
@@ -102,7 +102,7 @@
     <string name="composer_starting">Iniciando tu video…</string>
     <string name="composer_too_long">%1$,d de %2$,d. Acórtalo, por favor.</string>
     <string name="composer_no_credits">No tienes créditos</string>
-    <string name="composer_describe">Describe tu video para continuar</string>
+    <string name="composer_describe">Describe tu video</string>
     <string name="composer_add_words">Agrega unas palabras más (faltan %1$d)</string>
     <string name="composer_limit_message">Puedes agregar hasta %1$d fotos. Quita una para elegir otra.</string>
     <string name="composer_choose_photos">Elegir fotos</string>

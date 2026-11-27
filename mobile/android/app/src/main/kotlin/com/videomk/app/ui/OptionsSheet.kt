@@ -1,5 +1,16 @@
 package com.videomk.app.ui
 
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.ui.semantics.heading
+import androidx.compose.foundation.layout.FlowRow
+import com.videomk.app.core.CreatePlatforms
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Language
+import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.filled.CropLandscape
+import androidx.compose.material.icons.filled.CropSquare
+import androidx.compose.material.icons.filled.CropPortrait
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -51,93 +62,112 @@ import com.videomk.app.core.displayName
 import com.videomk.app.core.CreateOptions
 import com.videomk.app.core.VideoLook
 
-/** The options sheet (docs/UI_DESIGN.md section e): length cards with credits, look swatches, subtitles, and a Done button that shows the price. */
-@OptIn(ExperimentalMaterial3Api::class, androidx.compose.ui.ExperimentalComposeUiApi::class)
+/**
+ * The one Options sheet (docs/UX_2026_REDESIGN.md 4.2): everything the three pills do not carry. For (all platforms in one place), Look swatches, Quality, Subtitles, Language
+ * and Format as icon tiles (formats that are not ready for this account are hidden, not dimmed). Medium height by default, scrolls when it needs to.
+ */
+@OptIn(ExperimentalMaterial3Api::class, androidx.compose.ui.ExperimentalComposeUiApi::class, androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
 @Composable
-fun OptionsSheet(composer: ComposerViewModel, balance: Int?, onDismiss: () -> Unit) {
-    val options = composer.options
-    val shape = RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp)
-    val affordable = balance == null || options.credits <= balance
-    val captionsState = stringResource(if (options.captions) R.string.create_state_on else R.string.create_state_off)
-    ModalBottomSheet(onDismissRequest = onDismiss, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true), shape = shape, containerColor = Vmk.colors.surface) {
-        Column(Modifier.padding(horizontal = 20.dp).verticalScroll(rememberScrollState()).semantics { if (com.videomk.app.BuildConfig.DEBUG) testTagsAsResourceId = true }.testTag("optionsSheet"), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Row(Modifier.fillMaxWidth().heightIn(min = 52.dp), verticalAlignment = Alignment.CenterVertically) {
-                Text(stringResource(R.string.options_title), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = Vmk.colors.text, modifier = Modifier.weight(1f))
-                TextButton(onClick = onDismiss, modifier = Modifier.heightIn(min = 44.dp)) { Text(stringResource(R.string.common_done), fontWeight = FontWeight.SemiBold) }
+fun CreateOptionsSheet(composer: ComposerViewModel, caps: com.videomk.app.core.Capabilities, o: CreateOptions, onLanguage: () -> Unit, onCostInfo: () -> Unit, onDismiss: () -> Unit) {
+    val captionsState = stringResource(if (o.captions) R.string.create_state_on else R.string.create_state_off)
+    ModalBottomSheet(onDismissRequest = onDismiss, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false), shape = RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp), containerColor = Vmk.colors.surface) {
+        Column(Modifier.padding(horizontal = 20.dp).verticalScroll(rememberScrollState()).navigationBarsPadding().semantics { if (com.videomk.app.BuildConfig.DEBUG) testTagsAsResourceId = true }.testTag("optionsSheet"), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            Row(Modifier.fillMaxWidth().heightIn(min = 48.dp), verticalAlignment = Alignment.CenterVertically) {
+                Text(stringResource(R.string.create_options), style = MaterialTheme.typography.titleLarge, color = Vmk.colors.text, modifier = Modifier.weight(1f).semantics { heading() })
+                TextButton(onClick = onDismiss, modifier = Modifier.heightIn(min = 48.dp).testTag("optionsDone")) { Text(stringResource(R.string.common_done), fontWeight = FontWeight.SemiBold) }
             }
-            Overline(stringResource(R.string.create_length))
-            val cols = if (LocalDensity.current.fontScale >= 1.5f) 1 else 3
-            for (row in CreateOptions.LENGTHS.chunked(cols)) {
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    for (m in row) {
-                        val credits = CreateOptions(m).credits
-                        val sel = options.minutes == m
-                        val over = balance != null && credits > balance
-                        LengthCard(m.toInt(), credits, sel, over, Modifier.weight(1f)) { composer.options = options.copy(minutes = m) }
-                    }
-                    repeat(cols - row.size) { Box(Modifier.weight(1f)) }
+            // FOR: the same list as the pill, so every choice is in one place
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Overline(stringResource(R.string.create_what_for), Modifier.semantics { heading() })
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth().testTag("platformChips")) {
+                    for (c in CreatePlatforms.chips(caps).filter { it.enabled }) PlatformChipView(c, selected = c.id == o.platform && !CreatePlatforms.isCustom(o, caps)) { composer.selectPlatform(c) }
                 }
             }
-            Text(
-                if (balance != null) stringResource(R.string.options_cost_note_balance, balance) else stringResource(R.string.options_cost_note), style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary,
-                modifier = Modifier.padding(bottom = 8.dp),
-            )
-            Overline(stringResource(R.string.create_look))
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                LookSwatch(stringResource(R.string.create_look_auto), stringResource(R.string.create_look_auto_desc), null, options.look == null, Modifier.weight(1f).testTag("look-auto")) { composer.options = options.copy(look = null) }
-                for (l in VideoLook.entries) LookSwatch(l.displayName(), l.displayName(), l, options.look == l, Modifier.weight(1f).testTag("look-${l.wire}")) { composer.options = options.copy(look = l) }
-            }
-            Box(Modifier.fillMaxWidth().padding(top = 8.dp).size(1.dp).background(Vmk.colors.outline))
-            Row(
-                Modifier.fillMaxWidth().heightIn(min = 56.dp).clickable(role = Role.Switch, onClickLabel = stringResource(R.string.create_subtitles)) { composer.options = options.copy(captions = !options.captions) }
-                    .semantics(mergeDescendants = true) { stateDescription = captionsState }.testTag("subtitlesRow"),
-                verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp),
-            ) {
-                Icon(Icons.Filled.ClosedCaption, null, tint = Vmk.colors.text)
-                Text(stringResource(R.string.create_subtitles), style = MaterialTheme.typography.bodyLarge, color = Vmk.colors.text, modifier = Modifier.weight(1f))
-                Switch(
-                    checked = options.captions, onCheckedChange = null,
-                    colors = SwitchDefaults.colors(checkedTrackColor = Vmk.colors.gradientStart, checkedThumbColor = Color.White, uncheckedTrackColor = Vmk.colors.surface3, uncheckedBorderColor = Vmk.colors.outline),
-                )
-            }
-            Box(Modifier.fillMaxWidth().size(1.dp).background(Vmk.colors.outline))
-            Box(Modifier.size(8.dp))
-            val warn = !affordable
-            Box(
-                Modifier.fillMaxWidth().heightIn(min = 52.dp).clip(RoundedCornerShape(26.dp))
-                    .background(if (warn) Brush.linearGradient(listOf(Vmk.colors.warning, Vmk.colors.warning)) else Vmk.gradientNow)
-                    .clickable(role = Role.Button, onClick = onDismiss).testTag("optionsDone"),
-                contentAlignment = Alignment.Center,
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    val c = if (warn) Vmk.colors.surface else Color.White
-                    Text(stringResource(R.string.options_done_dot), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold, color = c)
-                    Icon(Icons.Filled.Bolt, null, tint = c, modifier = Modifier.size(18.dp))
-                    Text(pluralStringResource(R.plurals.options_credits, options.credits, options.credits), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold, color = c)
+            // LOOK
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Overline(stringResource(R.string.create_look), Modifier.semantics { heading() })
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    LookSwatch(stringResource(R.string.create_look_auto), stringResource(R.string.create_look_auto_desc), null, o.look == null, Modifier.weight(1f).testTag("look-auto")) { composer.updateOptions(o.copy(look = null)) }
+                    for (l in VideoLook.entries) LookSwatch(l.displayName(), l.displayName(), l, o.look == l, Modifier.weight(1f).testTag("look-${l.wire}")) { composer.updateOptions(o.copy(look = l)) }
                 }
             }
-            Box(Modifier.size(24.dp))
+            // QUALITY: only the qualities this account has; 4K carries a small 2x tag, the explanation is behind the (i)
+            val qualities = caps.resolutions.map { it.id }.filter { it.isNotBlank() }
+            if (qualities.size > 1) Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Overline(stringResource(R.string.create_quality), Modifier.weight(1f).semantics { heading() })
+                    GlassIconButton(Icons.Filled.Info, stringResource(R.string.create_quality_info), onCostInfo, Modifier.testTag("costWhy"), size = 40.dp)
+                }
+                Segmented(qualities, o.resolution) { composer.updateOptions(o.copy(resolution = it)) }
+            }
+            // SUBTITLES and LANGUAGE: two plain rows
+            Column {
+                Row(
+                    Modifier.fillMaxWidth().heightIn(min = 56.dp).clickable(role = Role.Switch, onClickLabel = stringResource(R.string.create_subtitles)) { composer.updateOptions(o.copy(captions = !o.captions)) }
+                        .semantics(mergeDescendants = true) { stateDescription = captionsState }.testTag("subtitlesRow"),
+                    verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp),
+                ) {
+                    Icon(Icons.Filled.ClosedCaption, null, tint = Vmk.colors.text)
+                    Text(stringResource(R.string.create_subtitles), style = MaterialTheme.typography.bodyLarge, color = Vmk.colors.text, modifier = Modifier.weight(1f))
+                    Switch(checked = o.captions, onCheckedChange = null, colors = SwitchDefaults.colors(checkedTrackColor = Vmk.colors.gradientStart, checkedThumbColor = Vmk.colors.onPrimary, uncheckedTrackColor = Vmk.colors.surface3, uncheckedBorderColor = Vmk.colors.outline))
+                }
+                Row(
+                    Modifier.fillMaxWidth().heightIn(min = 56.dp).clickable(role = Role.Button, onClickLabel = stringResource(R.string.create_language_desc), onClick = onLanguage).testTag("languageRow"),
+                    verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp),
+                ) {
+                    Icon(Icons.Filled.Language, null, tint = Vmk.colors.text)
+                    Text(stringResource(R.string.create_language), style = MaterialTheme.typography.bodyLarge, color = Vmk.colors.text)
+                    Text(CreatePlatforms.languageLabel(o, caps), style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.textSecondary, modifier = Modifier.weight(1f), maxLines = 1, textAlign = androidx.compose.ui.text.style.TextAlign.End, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
+                    Icon(Icons.Filled.ChevronRight, null, tint = Vmk.colors.textSecondary)
+                }
+            }
+            // FORMAT: the shape is the label; the name only under the chosen one; formats that are not ready for this account are not shown
+            val formats = listOf("16:9", "9:16", "1:1", "4:5").filter { caps.aspect(it)?.ready == true }
+            if (formats.size > 1) Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Overline(stringResource(R.string.create_format), Modifier.semantics { heading() })
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    for (id in formats) FormatTile(id, CreatePlatforms.aspectName(id, caps), beta = caps.aspect(id)?.beta == true, selected = o.aspect == id, Modifier.weight(1f)) { composer.updateOptions(o.copy(aspect = id)) }
+                }
+            }
+            Box(Modifier.size(16.dp))
         }
     }
 }
 
+/** A format as an icon tile; its name is only shown when it is the chosen one. A small dot marks a beta format (the dot has a spoken label). */
 @Composable
-private fun LengthCard(minutes: Int, credits: Int, selected: Boolean, overBalance: Boolean, modifier: Modifier, onClick: () -> Unit) {
+private fun FormatTile(id: String, label: String, beta: Boolean, selected: Boolean, modifier: Modifier, onClick: () -> Unit) {
     val shape = RoundedCornerShape(16.dp)
-    val lengthDescription = pluralStringResource(R.plurals.options_length_desc, credits, credits, pluralStringResource(R.plurals.options_minutes, minutes, minutes))
-    val bg = when { selected -> Vmk.colors.primaryContainer; overBalance -> Vmk.colors.warningContainer.copy(alpha = 0.55f); else -> Vmk.colors.surfaceRaised }
-    val tint = if (selected) Vmk.colors.primary else if (overBalance) Vmk.colors.warning else Vmk.colors.textSecondary
-    Column(
-        modifier.heightIn(min = 62.dp).clip(shape).background(bg).then(if (selected) Modifier.border(1.5.dp, Vmk.colors.primary, shape) else Modifier)
-            .clickable(role = Role.RadioButton, onClick = onClick)
-            .semantics { this.selected = selected; contentDescription = lengthDescription }
-            .testTag("length-$minutes").padding(vertical = 10.dp),
-        horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center,
+    val desc = stringResource(if (beta) R.string.create_format_desc_beta else R.string.create_format_desc, label, id)
+    Box(
+        modifier.heightIn(min = 76.dp).clip(shape).background(if (selected) Vmk.colors.primaryContainer else Vmk.colors.surfaceRaised).then(if (selected) Modifier.border(1.5.dp, Vmk.colors.primary, shape) else Modifier)
+            .clickable(role = Role.RadioButton, onClick = onClick).semantics { this.selected = selected; contentDescription = desc }.testTag("format-$id"),
     ) {
-        Text(stringResource(R.string.options_minutes_short, minutes), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold, color = if (selected) Vmk.colors.primary else Vmk.colors.text)
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(Icons.Filled.Bolt, null, tint = tint, modifier = Modifier.size(13.dp))
-            Text("$credits", style = MaterialTheme.typography.labelMedium, color = tint)
+        if (beta) Box(Modifier.align(Alignment.TopEnd).padding(8.dp).size(7.dp).clip(CircleShape).background(Vmk.colors.warning))
+        Column(Modifier.align(Alignment.Center).padding(horizontal = 6.dp, vertical = 8.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Icon(when (id) { "16:9" -> Icons.Filled.CropLandscape; "1:1" -> Icons.Filled.CropSquare; else -> Icons.Filled.CropPortrait }, null, tint = if (selected) Vmk.colors.primary else Vmk.colors.textSecondary, modifier = Modifier.size(28.dp))
+            if (selected) Text(label, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold, color = Vmk.colors.primary, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+        }
+    }
+}
+
+/** 720p | 1080p | 4K: one dimension, three choices at most. The 4K id (2160p) is written "4K" with a 2x tag. */
+@Composable
+private fun Segmented(ids: List<String>, selected: String, onSelect: (String) -> Unit) {
+    Row(Modifier.fillMaxWidth().heightIn(min = 44.dp).clip(RoundedCornerShape(12.dp)).background(Vmk.colors.surfaceRaised).padding(3.dp)) {
+        for (id in ids) {
+            val sel = id == selected
+            val four = id.lowercase() == "2160p" || id.lowercase() == "4k"
+            Box(
+                Modifier.weight(1f).heightIn(min = 38.dp).clip(RoundedCornerShape(10.dp)).then(if (sel) Modifier.background(if (Vmk.colors.dark) Vmk.colors.surface3 else Vmk.colors.surface) else Modifier)
+                    .clickable(role = Role.RadioButton) { onSelect(id) }.semantics { this.selected = sel }.testTag("resolution-$id"),
+                contentAlignment = Alignment.Center,
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Text(if (four) "4K" else id, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold, color = if (sel) Vmk.colors.text else Vmk.colors.textSecondary)
+                    if (four) Text("2x", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = Vmk.colors.primary, modifier = Modifier.clip(CircleShape).background(Vmk.colors.primaryContainer).padding(horizontal = 5.dp, vertical = 1.dp))
+                }
+            }
         }
     }
 }

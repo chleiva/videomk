@@ -104,7 +104,7 @@ class CreateTest {
 
     @Test fun `create screen status lines`() {
         fun st(text: String, balance: Int? = 5, photos: Int = 0, minutes: Double = 3.0, checking: Boolean = false) = ComposerLogic.status(text, CreateOptions(minutes), balance, photos, false, false, createScreen = true, checking = checking)
-        assertEquals("Describe your video to continue", st("").text); assertEquals("Describe your video to continue", st("trip").text); assertFalse(st("").sendReady)
+        assertEquals("Describe your video", st("").text); assertEquals("Describe your video", st("trip").text); assertFalse(st("").sendReady)
         assertEquals("3 credits · you'll have 2 left", st("How bees make honey, explained for kids").text)
         assertEquals("Needs 3 credits, you have 1", st("How bees make honey, explained for kids", balance = 1).text); assertEquals(1.0, st("How bees make honey, explained for kids", balance = 1).fix!!.minutes!!, 0.0)
         assertEquals("You have no credits", st("How bees make honey, explained for kids", balance = 0).text)
