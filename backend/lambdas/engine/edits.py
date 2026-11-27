@@ -152,6 +152,11 @@ def apply_ops(plan: Dict[str, Any], ops: Any, *, max_beats: int = plan_mod.MAX_B
                 if op["theme"] not in THEMES:
                     raise EditError("unknown theme")
                 new["theme"] = op["theme"]
+                if isinstance(new.get("background"), dict):   # the animated background follows the new theme (its palette and light/dark mode must suit the theme's text colours)
+                    from . import background as background_mod
+
+                    st, pal = background_mod.settle(new["background"].get("style"), None, new.get("mood", "calm"), op["theme"])
+                    new["background"] = {**new["background"], "style": st, "palette": pal, "mode": background_mod.mode_of(op["theme"])}
             if "mood" in op:
                 if op["mood"] not in ("calm", "bright", "tense"):
                     raise EditError("unknown mood")

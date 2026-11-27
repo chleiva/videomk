@@ -10,7 +10,7 @@ from datetime import date
 
 import logging
 
-from . import engagement, language as lang_mod, plan as plan_mod, quality, research, researcher, skills as skills_mod, staged as staged_mod, vector_policy, voices
+from . import background, engagement, language as lang_mod, plan as plan_mod, quality, research, researcher, skills as skills_mod, staged as staged_mod, vector_policy, voices
 from .netsafe import quality_fixes
 
 SHORT_PHOTO_INTRO_S, SHORT_PHOTO_OUTRO_S = 1.0, 1.5   # the same under a minute (15, 30, 45 s): the music-only frame is 2.5 s, not 6 (plan.SHORT_PHOTO_FRAME_S)
@@ -141,6 +141,9 @@ def direct(prompt: str, *, minutes: float, ask_small: Ask, ask_big: Callable[[st
     if used is not None:  # cite only the pages the script actually drew on, not everything the research happened to fetch
         sources = [s for s in sources if s["title"] in set(used)]
     plan["skills"] = skill_ids   # which craft guides shaped this video (for review)
+    if background.enabled() and not photos:   # the moving background, chosen by the topic's mood (BG_ANIMATED, QA only; docs/BACKGROUNDS_ANIMATED.md): one small call, never a failure
+        plan["background"] = background.choose(prompt, plan, lambda s, u: ask_small(s, u, 60))
+        info["background"] = {k: plan["background"][k] for k in ("style", "palette", "by")}
     if photos:   # the music has the first seconds and the last seconds to itself: the pictures arrive before the voice does, and the ending is held
         plan["intro_s"], plan["outro_s"] = (SHORT_PHOTO_INTRO_S, SHORT_PHOTO_OUTRO_S) if plan_mod.is_short(minutes) else (PHOTO_INTRO_S, PHOTO_OUTRO_S)
     if region:

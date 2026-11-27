@@ -3,7 +3,8 @@
     "account": "552357225438",
     "region": "eu-west-1",
     "profile": "qa",
-    "domain": null
+    "domain": null,
+    "bgAnimated": true
   },
   "prod": {
     "account": "464863885161",
