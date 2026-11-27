@@ -1,0 +1,45 @@
+{
+ "name": "Paco",
+ "role": "language and travel guide",
+ "species": "parrot, scarlet macaw (bipedal mascot)",
+ "age_group": "ageless",
+ "tags": [
+  "mascot",
+  "animal",
+  "bright",
+  "cheerful",
+  "languages",
+  "travel",
+  "fun facts",
+  "spanish",
+  "kids"
+ ],
+ "voice_hint": {
+  "en": [
+   "Nate",
+   "Matthew"
+  ],
+  "es": [
+   "Pedro",
+   "Sergio"
+  ]
+ },
+ "personality": "bright, cheerful, talkative",
+ "suitable_topics": [
+  "languages",
+  "travel",
+  "fun facts",
+  "kids (Spanish)"
+ ],
+ "outfit": "yellow neckerchief, grey boots",
+ "skin": "scarlet feathers, blue feathered hands",
+ "hair": "n/a",
+ "id": "parrot",
+ "rig": "biped front-facing cut-out (head, torso, upper/lower arm, upper/lower leg, 2 eye sets, 3 mouths)",
+ "provenance": {
+  "model": "gpt-image-2.6-flare",
+  "sheet": "1536x1024 medium rig parts sheet",
+  "generated": "2026-11-27",
+  "script": "backend/scripts/vector_character_sheet5.py --animals"
+ }
+}

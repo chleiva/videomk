@@ -1,0 +1,138 @@
+{
+ "id": "parrot",
+ "parts": {
+  "head": {
+   "file": "head.svg",
+   "w": 307,
+   "h": 359,
+   "svg_bytes": 87469,
+   "pivot": [
+    153.5,
+    359
+   ]
+  },
+  "torso": {
+   "file": "torso.svg",
+   "w": 248,
+   "h": 330,
+   "svg_bytes": 101518,
+   "pivot": [
+    124.0,
+    330
+   ]
+  },
+  "upper_arm": {
+   "file": "upper_arm.svg",
+   "w": 127,
+   "h": 335,
+   "svg_bytes": 28514,
+   "pivot": [
+    59.5,
+    0.0
+   ],
+   "end": [
+    74.0,
+    335.0
+   ]
+  },
+  "lower_arm": {
+   "file": "lower_arm.svg",
+   "w": 169,
+   "h": 370,
+   "svg_bytes": 47030,
+   "pivot": [
+    82.0,
+    0.0
+   ],
+   "end": [
+    84.0,
+    370.0
+   ]
+  },
+  "upper_leg": {
+   "file": "upper_leg.svg",
+   "w": 134,
+   "h": 279,
+   "svg_bytes": 24698,
+   "pivot": [
+    67.5,
+    0.0
+   ],
+   "end": [
+    64.0,
+    279.0
+   ]
+  },
+  "lower_leg": {
+   "file": "lower_leg.svg",
+   "w": 211,
+   "h": 287,
+   "svg_bytes": 42893,
+   "pivot": [
+    58.5,
+    0.0
+   ],
+   "end": [
+    98.0,
+    287.0
+   ]
+  },
+  "eyes_open": {
+   "file": "eyes_open.svg",
+   "w": 229,
+   "h": 153,
+   "svg_bytes": 52851,
+   "pivot": [
+    114.5,
+    76.5
+   ]
+  },
+  "eyes_closed": {
+   "file": "eyes_closed.svg",
+   "w": 234,
+   "h": 94,
+   "svg_bytes": 15285,
+   "pivot": [
+    117.0,
+    47.0
+   ]
+  },
+  "mouth_closed": {
+   "file": "mouth_closed.svg",
+   "w": 157,
+   "h": 202,
+   "svg_bytes": 47896,
+   "pivot": [
+    78.5,
+    101.0
+   ]
+  },
+  "mouth_half": {
+   "file": "mouth_half.svg",
+   "w": 159,
+   "h": 209,
+   "svg_bytes": 59997,
+   "pivot": [
+    79.5,
+    104.5
+   ]
+  },
+  "mouth_wide": {
+   "file": "mouth_wide.svg",
+   "w": 164,
+   "h": 255,
+   "svg_bytes": 63667,
+   "pivot": [
+    82.0,
+    127.5
+   ]
+  }
+ },
+ "face": {
+  "eyes_y": 0.5,
+  "eyes_w": 0.44,
+  "mouth_y": 0.6,
+  "mouth_w": 0.3,
+  "mouth_anchor": "top"
+ }
+}

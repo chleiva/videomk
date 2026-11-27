@@ -1,6 +1,6 @@
 # Presenters: cartoon characters in real videos (2026-11-27)
 
-Status: built behind the server switch `PRESENTERS` (QA on in `stages.json`, production off). Not deployed. Five characters: Inés (teacher), David (engineer), Priya (doctor), Mateo (chef), Fox (guide for children). The rig and the gestures are the ones the owner reviewed (`docs/CHARACTER_ANIMATION_PROOF.md`, `docs/CHARACTER_LIBRARY.md`); this note is how they get into a video.
+Status: built behind the server switch `PRESENTERS` (QA on in `stages.json`, production off). Not deployed. Ten characters: four people, Inés (teacher), David (engineer), Priya (doctor), Mateo (chef), and six animals, Fox (guide for children), Hugo (owl professor), Bruno (bear), Mika (cat), Paco (parrot), Tula (turtle): see "Animal presenters" below. The rig and the gestures are the ones the owner reviewed (`docs/CHARACTER_ANIMATION_PROOF.md`, `docs/CHARACTER_LIBRARY.md`); this note is how they get into a video.
 
 ## What a person gets
 A video with a presenter is an ordinary video in which a few scenes show the character: it opens the video beside the question, comes back for the key points, and closes with the takeaway. It speaks the narration in its own voice with automatic gestures (wave on "hello", fingers on "first, second, third", the open hand toward the card on "look" and "this", a shrug or two hands on a contrast). The other scenes stay photographs, clips, diagrams and cartoon scenes while the same voice goes on.
@@ -8,8 +8,8 @@ A video with a presenter is an ordinary video in which a few scenes show the cha
 ## Asking for one
 | How | What happens |
 |---|---|
-| Words in the request: "with a presenter", "with a character", "animated characters", "explained by a fox", "con un presentador", "con personajes", "explicado por un zorro", "con una doctora como presentadora" | A presenter; a named kind of character (fox, teacher, engineer, doctor, chef, and the Spanish words) is that character |
-| `"presenter": "<id>"` in `POST .../videos/generate` (`ines`, `david`, `priya`, `mateo`, `fox`) | That character. The option wins over the words |
+| Words in the request: "with a presenter", "with a character", "animated characters", "explained by a fox", "explained by an owl", "by a cat", "con un presentador", "con personajes", "explicado por un zorro", "explicado por un oso", "con un búho", "con un loro", "con una tortuga", "con una doctora como presentadora" | A presenter; a named kind of character (fox, owl, bear, cat, parrot, turtle, teacher, engineer, doctor, chef, and the Spanish words: zorro, búho or lechuza, oso, gato, loro, tortuga) is that character. An animal of the cast named at the END of the request ("Why the sky is blue, with an owl", "Los planetas, con un búho") is the presenter; in the middle of a sentence ("a story with a bear who loses his hat") it is the subject of the video |
+| `"presenter": "<id>"` in `POST .../videos/generate` (`ines`, `david`, `priya`, `mateo`, `fox`, `owl`, `bear`, `cat`, `parrot`, `turtle`) | That character. The option wins over the words |
 | `"presenter": "none"`, or "no presenter" / "sin presentador" | Never |
 | nothing, or `"presenter": "auto"` | Only where it fits: the director's kind of video is a children's or fun explainer or a tutorial (`kids-family`, `funny-light`, `tutorial-howto`, `coding-tutorial`). Everything else gets none by itself |
 
@@ -21,15 +21,17 @@ Never, not even when asked: a video of the person's own photos, a deck, a whiteb
   "options": [{"id": "auto", "label": "Auto", "note": "A presenter only where it fits: children's and fun explainers, tutorials."},
               {"id": "none", "label": "No presenter", "note": "Never a character on screen."}],
   "cast": [{"id": "ines", "name": "Inés", "role": "Teacher", "thumbnail": "data:image/png;base64,..."}, {"id": "david", "name": "David", "role": "Engineer", ...},
-           {"id": "priya", "name": "Priya", "role": "Doctor", ...}, {"id": "mateo", "name": "Mateo", "role": "Chef", ...}, {"id": "fox", "name": "Fox", "role": "Guide for children", ...}],
+           {"id": "priya", "name": "Priya", "role": "Doctor", ...}, {"id": "mateo", "name": "Mateo", "role": "Chef", ...}, {"id": "fox", "name": "Fox", "role": "Guide for children", ...},
+           {"id": "owl", "name": "Hugo", "role": "Owl professor", ...}, {"id": "bear", "name": "Bruno", "role": "Caring bear", ...}, {"id": "cat", "name": "Mika", "role": "Curious cat", ...},
+           {"id": "parrot", "name": "Paco", "role": "Travelling parrot", ...}, {"id": "turtle", "name": "Tula", "role": "Wise turtle", ...}],
   "say": "with a presenter", "note": "A cartoon presenter opens the video, explains the key points and says goodbye. ..."}
 ```
-`available` follows the switch; where it is off the cast is still listed and `note` is "Presenter characters are coming soon." (hide or disable the choice). `thumbnail` is a 112 px PNG as a data URI (2.7 to 4.3 KB each; made by `backend/scripts/presenter_thumbs.py`, stored in `lambdas/common/presenter_thumbs.json`: no bucket). Spanish: `Automático`, `Sin presentador`, `Profesora`, `Ingeniero`, `Doctora`, `Chef`, `Guía para niños`, "con un presentador". The picker is `options` plus one entry per cast member (send its `id`).
+`available` follows the switch; where it is off the cast is still listed and `note` is "Presenter characters are coming soon." (hide or disable the choice). `thumbnail` is a 112 px PNG as a data URI (2.6 to 4.3 KB each, 43 KB for the ten; made by `backend/scripts/presenter_thumbs.py`, stored in `lambdas/common/presenter_thumbs.json`: no bucket). Spanish: `Automático`, `Sin presentador`, `Profesora`, `Ingeniero`, `Doctora`, `Chef`, `Guía para niños`, `Búho profesor`, `Oso cariñoso`, `Gata curiosa`, `Loro viajero`, `Tortuga sabia`, "con un presentador". The picker is `options` plus one entry per cast member (send its `id`).
 
 ## Casting and frequency (`engine/presenter_policy.py`; no model call)
-* **Who**: the character asked for; else the Fox for children's and fun videos; else by the topic's words (food: Mateo; health and the body: Priya; software and technology: David); else by the kind of video; else Inés.
-* **Voice**: the narrator's voice becomes the character's (EN: Inés Ruth, David Matthew, Priya Kajal, Mateo Stephen, Fox Joanna; ES: Lupe, Pedro, Mia, Andres, Lucia).
-* **Dialogues**: with two or three speaking characters the first two speakers each get a presenter (the cast one, and another), one on the left and one on the right, each with their own voice. One figure is on screen at a time (whoever speaks); there is no two-shot yet.
+* **Who**: the character asked for. Else a children's or fun video (`kids-family`, `funny-light`, or words like "for kids", "para niños") gets an ANIMAL by the topic's words, first match in this order: Bruno the bear (health, feelings, worries, bedtime, sleep, teeth), Mika the cat (technology, robots, computers, machines, "how ... works", "cómo funciona"), Paco the parrot (languages, travel, countries, fun facts, "datos curiosos"), Tula the turtle (nature, the sea, rivers, forests, plants, recycling, step by step, "how to"), Hugo the owl (learning, school, science, history, numbers, planets, dinosaurs); when no topic decides, Paco in a Spanish children's video and the Fox everywhere else. Every OTHER video keeps a person exactly as before the animals: by the topic's words (food: Mateo; health and the body: Priya; software and technology: David); else by the kind of video; else Inés. An animal presents an adult topic only when asked for by name.
+* **Voice**: the narrator's voice becomes the character's (EN: Inés Ruth, David Matthew, Priya Kajal, Mateo Stephen, Fox Joanna, Hugo Brian (calm, British), Bruno Stephen (soft), Mika Olivia, Paco Nate, Tula Amy; ES: Lupe, Pedro, Mia, Andres, Lucia, Hugo Sergio, Bruno Andres, Mika Mia, Paco Pedro (second choice Sergio), Tula Lupe).
+* **Dialogues**: with two or three speaking characters the first two speakers each get a presenter (the cast one, and another of the same kind: an animal talks with an animal, a person with a person), one on the left and one on the right, each with their own voice. One figure is on screen at a time (whoever speaks); there is no two-shot yet.
 * **How often**: about one beat in three, at least two (the opening and the closing), never two in a row. The director is told so in its prompt; `enforce` then holds it: a presenter scene beyond the cap becomes the plain scene that shows the same thing (list, chart, photograph), and a text card the director wrote as the first or last beat becomes a presenter scene.
 * **Cartoon scene behind**: in a video where the cartoon-scene policy offered scenes (children's topics), the opening and the closing stand in front of one of them (`backdrop`).
 * Recorded in the plan: `plan.presenter` = `{decision, reason, asked, character, scenes, of, cast, voices}`.
@@ -60,8 +62,28 @@ Props from the director: `{heading (<=48), points: 0-4 (<=60)}`, or `{heading, c
 
 **Art that would lift the quality** (in order of effect): 5 to 6 mouth shapes and eyebrow pieces (expression); a three-quarter head and torso (turning toward the content); sleeves built into a round-shouldered torso (clean raised arms); a second relaxed hand per side; a seated or desk variant for 9:16. About 3 sheets per character (about $0.11 to $0.17).
 
-## More animal presenters (proposal: NOT generated; needs the owner's yes)
-The owner asked for animals that explain things; only the Fox exists. Proposed, same style and rig: **owl professor** (learning, science, history), **bear** (health, feelings, bedtime), **cat** (technology, how things work), **parrot** (languages, travel, fun facts), **turtle** (nature, the sea, step by step). Cost through the existing pipeline: one parts sheet (about $0.036) and one hands sheet (about $0.035) per character, about $0.36 for five; with one retry each at most about $0.75. Wings must be drawn as arms with feathered hands, the turtle's shell as part of the torso; each needs the rest-pose check of `docs/CHARACTER_LIBRARY.md`. Suggested order: owl and bear first, look, then the rest. Adding one is: its folder under `engine/assets/vector_characters/`, one entry in `presenter_policy.CAST` and in the element's `CAST`, the id in `sf_launcher`'s list, `presenter_thumbs.py`.
+## Animal presenters (built 2026-11-27 on branch `animal-cast`; the owner approved the list and the cost)
+Same house style and rig as the Fox, made with the same pipeline (`backend/scripts/vector_character_sheet5.py --animals`, `vector_character_build5.py --only <id>`, `vector_character_hands.py generate|build --only <id>`): one parts sheet and one hands sheet each, no retries, USD 0.3618 for the five (ledger `docs/vector_character_spend.jsonl`, runs `vector-character-animals` and `vector-character-hands`).
+
+| id | Name | Role EN / ES | Look | Topics (children's and fun videos) | Voice EN / ES | Tail | Size |
+|---|---|---|---|---|---|---|---|
+| `owl` | Hugo | Owl professor / Búho profesor | chestnut feathers, cream face, round gold glasses, olive tweed waistcoat, bow tie | learning, science, history | Brian / Sergio | small fan behind one hip | 0.92 MB |
+| `bear` | Bruno | Caring bear / Oso cariñoso | honey-brown, teal knitted jumper with a cream zigzag | health, feelings, bedtime | Stephen / Andres | none | 0.70 MB |
+| `cat` | Mika | Curious cat / Gata curiosa | grey tabby, orange hoodie, sneakers | technology, how things work | Olivia / Mia | striped, sways | 0.77 MB |
+| `parrot` | Paco | Travelling parrot / Loro viajero | scarlet macaw, yellow neckerchief, blue feathered hands | languages, travel, fun facts; the default in a Spanish children's video | Nate / Pedro | long red feathers | 0.87 MB |
+| `turtle` | Tula | Wise turtle / Tortuga sabia | green, cream belly plate, shell behind, backpack straps | nature, the sea, step by step | Amy / Lupe | small point | 0.71 MB |
+
+How an animal differs from a person on the rig (all recorded in the build scripts, so a rebuild from the sheets gives the same character):
+* **Wings are arms** ending in hands that form the six shapes. **A beak is the mouth piece** (the head is drawn blank): `manifest.json` `"face": {"mouth_anchor": "top"}` hangs it from its top edge so it opens downward. `"face"` also sets where the eyes and mouth sit and how wide they are (`eyes_y`, `eyes_w`, `mouth_y`, `mouth_w`); without it the old defaults apply (the people and the Fox are unchanged).
+* **The turtle's shell is part of the torso piece**; `presenter.json` `shoulder_x` hangs the arms from the body in front of it. The owl and the bear also set `shoulder_x` (their torso is much wider at the ribs than at the shoulders).
+* **Fixes the builder applies** (`vector_character_build5.py`): the owl's waistcoat notch filled with the trouser colour (the backdrop showed between the legs), the parrot's upper arm made plain red (the sheet repeated the colour bands on both arm pieces), the turtle's nostrils painted over (they sat where the mouth goes); the cat's gesture hands are drawn 1.3 times larger (`vector_character_hands.py` `HAND_K`).
+* **Thumb sides** were read by eye from each forearm drawing (`RELAXED_THUMB`: parrot +1, the others -1) and are pinned by `tests/test_vector_presenter.py`.
+
+Adding another: its prompt in `sheet5.ANIMALS` and `hands.ANIMAL_WHO` (and `TAILS`), its face and meta in `build5`, one entry in `presenter_policy.CAST` / `ORDER` / `ANIMALS` (and `KIDS_TOPICS` if it has topics), in the element's `CAST`, in `looks.PRESENTER_WORDS` and `_ANIMAL_CAST`, the test casts, then `presenter_thumbs.py`. The launcher reads its ids from the policy.
+
+Review files: `~/Downloads/videomk-looks/web/animal_<name>_talk.mp4`, `animal_<name>_poses.jpg`, `animal_cast_all.jpg`, `captions_animals.json` (`vector_character_presenter_demo.py --talk --only <id>`, `--animals` for the group still).
+
+Honest rating against the Fox: Bruno and Mika are as good; Hugo and Paco are close (Hugo's hands are glove-like rather than feathered and his tail fan is busy when small; Paco's legs are plain red tubes); Tula is the weakest (a plain dome head, thin arms, the arms cover the shell's rim at rest, and her 112 px face thumbnail is a green head with no shell in it). None was seen in a real pipeline video yet, only in the demo clips; the voices were chosen from the catalog's descriptions and not listened to.
 
 ## Running one locally
 ```
@@ -70,7 +92,7 @@ AWS_PROFILE=qa AWS_REGION=eu-west-1 python backend/scripts/presenter_local.py "E
 Same code as the Lambdas (director, Polly, alignment, timeline, chunk render); clip beats show a still, no music. The two review videos: `~/Downloads/videomk-looks/web/pres_local_sky.mp4`, `pres_local_fox.mp4` (`captions_pres.json`).
 
 ## Infra
-One environment variable, `PRESENTERS=1`, on the engine functions, capabilities, the request check and the launcher (`stages.json` `"presenters": true`, or `-c presenters=1`). No new function, route, table, bucket or policy statement: the characters ship inside the engine code (about 3.6 MB of SVG for the five). A test asserts the resource count is unchanged.
+One environment variable, `PRESENTERS=1`, on the engine functions, capabilities, the request check and the launcher (`stages.json` `"presenters": true`, or `-c presenters=1`). No new function, route, table, bucket or policy statement: the characters ship inside the engine code (about 7.6 MB of SVG for the ten). A test asserts the resource count is unchanged.
 
 ## Not done
 * Not deployed, not run on Lambda (render time there is an estimate), not tried at 4K.

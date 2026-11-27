@@ -1,6 +1,6 @@
 # The whiteboard look (phase 1b, 2026-11-27)
 
-A whole video drawn and written by a marker on a whiteboard, in time with the narration. Library, handwriting and the standalone prototype are in `docs/WHITEBOARD_PHASE_1A_2026-11-27.md`; this page is how the look lives in the product engine. **Measured** = run on the owner's Mac on 2026-11-27. Nothing here has run on Lambda yet (not deployed).
+A whole video drawn and written by a marker on a whiteboard, in time with the narration. Library, handwriting and the standalone prototype are in `docs/WHITEBOARD_PHASE_1A_2026-11-27.md`; this page is how the look lives in the product engine. **Measured** = run on 2026-11-27, on QA Lambda where it says so, else on the owner's Mac. QA: on (commit 4beeb09). Production: off.
 
 ## How to ask for it
 | Way | What happens |
@@ -39,31 +39,47 @@ Capabilities lists it under `looks.style.options`: `{"id": "whiteboard", "label"
 ## Self-check (`engine/whiteboard/score.py`, `whiteboard_policy.review`)
 After `settle` every board is laid out and timed exactly as the renderer will, without drawing a pixel and without the drawing packages (shape and drawing time of each object come from the bundled index; word times from the measured speaking rate). Per board: things per 10 s (at least 4, never under 4 on a board of 10 s or more), coverage of the framed picture by the boxes of drawings and writing (at least 30 %), smallest letter size (at least 4.4 % of the shorter side), overlaps, things off the board, arrows that cross something, pen-busy share (at least 45 %), longest rest (at most 2.2 s with estimated times), items finished more than 0.8 s after their word. A board that fails is sent back to the director ONCE with its complaints in plain words ("only 4 drawings and written phrases for about 19 s: it needs at least 6 ... in the free zones (left, bottom)"); the narration is never changed; the new boards are kept only if the video then scores at least as well. Logged as `WHITEBOARD_SCORE {...}` (pass 1 and pass 2) by the plan function and kept in `plan.whiteboard.score` (`first`, `second`, `kept`, `boards_detail`). Cost: one more call of the script model when a board fails (about USD 0.05 to 0.08 and 25 to 40 s of planning).
 
-## Measured (16:9, this Mac, x264 included)
-| | 1080p | 4K |
+## Measured on QA Lambda (2026-11-27, ten real videos; `v2_render_chunk` 10 GB, 600 s)
+| | First build (8c77b12) | Final build (4beeb09) |
 |---|---|---|
-| Board preparation, once per scene per container | 0.2 s | **0.7 s** (was 194 s in phase 1a: the reveal map is now painted along the pen path with Pillow instead of a distance transform per item) |
-| Per frame in the pipeline | 52 to 64 ms (10 s chunks: 15 to 27 s each) | 176 to 193 ms (two 90-frame pieces of the last scene) |
-| Peak memory of the render process | 0.77 GB (three chunks in one process) | 3.1 GB |
-| Planner | 23 s and USD 0.10 for a 40 s video (director, all calls) | same |
+| Render per frame, 1080p | 0.19 to 0.20 s | 0.24 to 0.28 s (fuller boards) |
+| Slowest chunk | 152 s (795 frames) | 159 s (665 frames): about a quarter of the time limit |
+| Peak memory of a render | 1,265 MB | 1,519 MB |
+| Plan function | 22 to 34 s | 30 to 72 s (the longer ones had boards written again) |
+| Whole video, 45 to 60 s | 107 to 178 s | 134 to 210 s |
+| Errors, timeouts, `WHITEBOARD_*_FAILED` | none | none |
 
-4K therefore fits the render function (10 GB, 10 minutes, pieces of 180 frames) by these numbers and is **not capped**; it has not been run on Lambda, where a core is two to three times slower.
+Same three prompts before and after (compound interest 16:9, vacuna 9:16 in Spanish, water cycle on `auto`):
+| | Before | After |
+|---|---|---|
+| Boards (panels) | 5 / 5 / 8 | 3 / 4 / 4 |
+| Items per board | 5.2 / 5.0 / 5.2 | 8.7 / 8.2 / 12.2 |
+| Board covered by drawings and writing (boxes) | 11.5 / 15.0 / 8.9 % | 37 / 31 / 26 % |
+| Smallest writing while its board is shown, share of frame height | 6.9 / 3.3 / 9.1 % (in close views) | 6.9 / 3.7 / 6.9 % (the whole board) |
+| Smallest writing in the final overview | 2.3 / 1.1 / 3.0 % | 3.5 / 1.8 / 3.5 % |
+| Pen busy, measured on the picture (camera time left out) | 60 / 56 / 60 % | 77 / 79 / 77 % (63 / 66 / 63 % counting only tenths of a second in which ink appears) |
+| Longest rest of the pen, measured | 1.9 / 2.0 / 2.4 s | 1.5 / 2.0 / 1.7 s |
+| Camera moves a minute, measured | 19 / 16 / 14 | 4 / 5.5 / 4 |
+| Items finished over 0.3 s late | 2 / 0 / 1 | 0 / 0 / 2 |
+Defects of the first build that are gone: writing drawn under the caption (a close view let the next row into the caption band), a jump cut where a pull-back had not finished at a scene end, the final overview fading before it was seen.
+
+Local figures (this Mac, x264 included): 55 to 85 ms a frame at 1080p, 0.7 GB peak; a plan costs USD 0.12 to 0.20 (two calls of the script model when a board is written again). 4K was not run again after this work.
 
 ## Costs
-Per video: the director's usual calls plus about 9,000 characters of prompt (the id menu); at most one small call for `auto`; one Cohere embedding only for a drawing name not found by name. Rendering is cheaper than a photo video (no downloads, about 50 ms a frame). The library cost USD 4.90 once.
+Per video: the director's usual calls plus about 14,000 characters of prompt (rules and the id menu); at most one small call for `auto`; one more call of the script model when the self-check fails a board; one Cohere embedding only for a drawing name not found by name. The library cost USD 4.90 once.
 
-## Limits and known weak points (looked at the first local video)
-* Wide views are sparse: drawings are small when the camera shows the whole board. The board was already made a quarter smaller than the demos (`BOARD_K` 1.5) to help.
-* The camera still zooms in and out often; connectors run straight and can cross a third item (phase 1a notes).
-* A list of several lines is small; the director is told to keep lists to four short lines with the marker.
-* The pacing rule adds marks only for gaps of 8 words; pen-busy share was 66 % on the one board measured, not measured over many videos.
-* Only Latin handwriting (EN, ES). Chalk theme exists in the compiler but is not offered.
-* Ties are one word; a tie to a word the narrator says twice lands on the first saying after the previous tie.
-* The editor apps have no board editor: a board's props are read-only there; editing the narration re-ties the board.
-* Not done: a large continuous canvas with free camera paths (panels in a grid stand in for it); whole-board overlap check before render (overlaps are avoided per item and reported by `compile_board`, not repaired); QA run on Lambda; 9:16, 1:1, 4:5 were tested by unit tests only, not watched as full videos.
+## Limits and known weak points (looked at the QA videos of the final build)
+* **How full a board is still depends on the director.** When it plans boards in pairs (most 16:9 runs) a board has 12 to 18 items like the demos; when it writes each beat as its own full-zone board, the nine zones leave no room to merge and boards have 8 items. The self-check only catches boards under its bar.
+* **Tall videos (9:16, 4:5)** are the weakest: the grid is 3x3 in every aspect, so a tall board has wide gaps between its rows and the final overview is small. A 2-column, 4-row grid for tall frames is the next step.
+* Emphasis marks added for the pen's rests land on the latest unmarked thing, not on the most important word; in narrow formats a circle can touch its neighbour.
+* A re-zoned title can end up in the middle of a board. Charts are small in a single zone (they take a second zone only when it is free).
+* The library has 354 objects: a topic outside it gets stand-ins (cheese for wax cells) or written words.
+* Pen busy measured 77 to 79 % with pen travel counted, above the 50 to 70 % aimed at; counting only tenths with new ink it is 63 to 66 %.
+* The whiteboard look is never chosen by itself when the person asked for a presenter character (and a presenter never appears on a whiteboard video).
+* Only Latin handwriting (EN, ES). Ties are one word. The editor apps have no board editor (editing the narration re-ties the board). 4K not re-measured. 1:1 and 4:5 were looked at as local renders only.
 
 ## Files
-`engine/whiteboard/` (core, board, hand, spec, primitives, library), `engine/scenes/elements/whiteboard.py`, `engine/whiteboard_policy.py`, `engine/assets/whiteboard/` (two OFL fonts with licences, glyph tables, library index), `scripts/whiteboard_local.py` (a whole video on a laptop), tests `test_el_whiteboard.py`, `test_whiteboard_policy.py`, `test_looks.py`.
+`engine/whiteboard/` (core, board, hand, spec, primitives, library), `engine/scenes/elements/whiteboard.py`, `engine/whiteboard_policy.py`, `engine/assets/whiteboard/` (two OFL fonts with licences, glyph tables, library index), `engine/whiteboard/score.py` (the self-check), `scripts/whiteboard_local.py` (a whole video on a laptop), tests `test_el_whiteboard.py`, `test_whiteboard_policy.py`, `test_whiteboard_score.py`, `test_looks.py`.
 
 ## Try it locally
 ```

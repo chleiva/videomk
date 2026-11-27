@@ -30,7 +30,7 @@ ASSETS = os.path.join(HERE, "..", "lambdas", "engine", "assets", "vector_charact
 NAMES = ["open", "one", "two", "three", "thumb"]
 # Where the thumb is on each character's ORIGINAL forearm+hand drawing (lower_arm.svg, hanging down): +1 on the right of the drawing, -1 on the left. Read by eye from the
 # pieces (the relaxed hands are too small and too symmetric to measure reliably); the rig mirrors the drawing so that the thumb ends up on the body side of each arm.
-RELAXED_THUMB = {"ines": -1, "david": 1, "priya": 1, "mateo": -1, "fox": -1}
+RELAXED_THUMB = {"ines": -1, "david": 1, "priya": 1, "mateo": -1, "fox": -1, "owl": -1, "bear": -1, "cat": -1, "parrot": 1, "turtle": -1}
 SHRINK = 0.42
 
 WHO = {
@@ -52,6 +52,29 @@ LAYOUT = (
     "(5) THUMBS UP: a closed fist with the thumb pointing straight up{tail}."
 )
 TAIL = "; (6) a big bushy FOX TAIL on its own: orange-red fur with a cream tip, a gentle S curve, the root (where it joins the body) at the bottom, the tip at the top"
+# The animal cast (vector_character_sheet5.py --animals). Made only when named in --only. Wings end in feathered hands: the same six shapes must read.
+_FEATHER = "hands made of soft feathers, shaped like a mitten glove with a feather thumb and three broad rounded feather fingers that can fold like fingers, no claws"
+ANIMAL_WHO = {
+    "owl": f"a cartoon owl mascot whose wings end in hands: cream-coloured {_FEATHER}; each wrist stub is chestnut-brown feathers",
+    "bear": "a cartoon bear mascot: honey-brown paw-hands with a thumb and three rounded fingers, no claws; each wrist stub ends in the ribbed cuff of a teal knitted jumper",
+    "cat": "a cartoon cat mascot: white paw-hands with a thumb and three rounded fingers, no claws; each wrist stub ends in the cuff of a bright orange hoodie",
+    "parrot": f"a cartoon parrot mascot (a scarlet macaw) whose wings end in hands: bright blue {_FEATHER}; each wrist stub is blue feathers",
+    "turtle": "a cartoon turtle mascot: soft green hands with a thumb and three rounded fingers, no claws; bare green wrists",
+}
+# id -> the sixth piece of its sheet. Where it hangs on the body (height_u, x, y, angle) is set by eye in presenter.json after the first build and kept by later builds.
+TAILS = {
+    "fox": TAIL,
+    "owl": "; (6) a short wide fan of chestnut-brown owl TAIL FEATHERS on its own, five rounded feathers with darker bars, the root (where it joins the body) at the bottom, the feather tips at the top",
+    "cat": "; (6) a long slim CAT TAIL on its own: grey fur with darker grey tabby rings, a gentle S curve, the root (where it joins the body) at the bottom, the rounded tip at the top",
+    "parrot": "; (6) a long bundle of parrot TAIL FEATHERS on its own: three long narrow feathers, scarlet red with blue tips, the root (where it joins the body) at the bottom, the tips at the top",
+    "turtle": "; (6) a small short pointed TURTLE TAIL on its own: soft green, a simple cone, the root (where it joins the body) at the bottom, the tip at the top",
+}
+# height_u, x, y, angle: the owl's fan and the parrot's long feathers hang down behind one hip, the cat's tail curls up like the fox's, the turtle's is a small point
+TAIL_DEFAULT = {"fox": (78.0, 10.0, 8.0, -52.0), "owl": (50.0, 6.0, 6.0, -122.0), "cat": (78.0, 10.0, 8.0, -52.0), "parrot": (72.0, 6.0, 8.0, -148.0), "turtle": (26.0, 15.0, -3.0, -105.0)}
+# Rig settings a sheet cannot give, set by eye (presenter.json; kept by later builds): shoulder_x where the torso art is much wider at the ribs than at the shoulders
+# (the turtle's torso includes the shell: the arms hang from the body in front of it, not from the shell's rim).
+RIG = {"owl": {"shoulder_x": 38.0}, "bear": {"shoulder_x": 40.0}, "turtle": {"shoulder_x": 34.0}}
+HAND_K = {"cat": 1.3}       # gesture hands drawn larger than the wrist says (a thin sleeve cuff): they must read at video size
 
 
 def spent(run: str = RUN) -> float:
@@ -79,13 +102,13 @@ def generate(a) -> int:
 
     api = cg.openai_api("qa")
     os.makedirs(a.out, exist_ok=True)
-    for cid, who in WHO.items():
+    for cid, who in {**WHO, **{k: v for k, v in ANIMAL_WHO.items() if k in (a.only or [])}}.items():
         if a.only and cid not in a.only:
             continue
         if spent() + 0.06 > a.cap:
             print("cap reached, stopping")
             return 1
-        prompt = LAYOUT.format(who=who, skin=skin_hex(cid), n="SIX" if cid == "fox" else "FIVE", tail=TAIL if cid == "fox" else "")
+        prompt = LAYOUT.format(who=who, skin=skin_hex(cid), n="SIX" if cid in TAILS else "FIVE", tail=TAILS.get(cid, ""))
         res = api({"model": cg.OPENAI_MODEL, "prompt": prompt, "size": "1536x1024", "quality": "medium", "output_format": "png", "n": 1})
         cost = cg.real_cost(res.get("usage") or {})
         path = os.path.join(a.out, f"hands_{cid}{a.tag}.png")
@@ -149,7 +172,13 @@ def cut_cuff(im: Image.Image, skin) -> Image.Image:
     fill = (arr[..., 3] > 0) & (rgb.sum(axis=-1) > 200)
     near = fill & (np.abs(rgb - np.array(skin)).sum(axis=-1) < 60)
     run = 0
-    for y in range(im.height - 1, im.height // 2, -1):
+    bottom = im.height - 1
+    skin_row = [bool(fill[y].sum()) and near[y].sum() / fill[y].sum() > 0.8 for y in range(im.height)]
+    if all(skin_row[bottom - 6:bottom - 1]):                      # a stub of bare wrist drawn BELOW the cuff (the bear's sheet): start above it, at the cuff
+        cuff = next((y for y in range(bottom, im.height // 2, -1) if fill[y].sum() and not skin_row[y] and not any(skin_row[y - 4:y])), None)
+        if cuff is not None:
+            bottom = cuff
+    for y in range(bottom, im.height // 2, -1):
         n = fill[y].sum()
         run = run + 1 if n and near[y].sum() / n > 0.8 else 0
         if run >= 4:
@@ -175,7 +204,7 @@ def build(a) -> int:
     import vector_character_build as vb
     from engine import vector_presenter as vp
 
-    for cid in WHO:
+    for cid in list(WHO) + [k for k in ANIMAL_WHO if k in (a.only or [])]:
         if a.only and cid not in a.only:
             continue
         sheet = os.path.join(a.sheets, f"hands_{cid}{a.tag}.png")
@@ -183,7 +212,7 @@ def build(a) -> int:
             print(cid, "no sheet")
             continue
         ps = pieces(to_rgba(Image.open(sheet)))
-        want = len(NAMES) + (1 if cid == "fox" else 0)
+        want = len(NAMES) + (1 if cid in TAILS else 0)
         if len(ps) != want:
             print(f"{cid}: found {len(ps)} pieces, expected {want}: regenerate the sheet")
             continue
@@ -200,25 +229,28 @@ def build(a) -> int:
             al = np.array(im)[..., 3] > 0
             xs = np.nonzero(al[-max(3, im.height // 30):].any(axis=0))[0]
             hands[name] = {"file": f"hand_{name}.svg", "w": im.width, "h": im.height, "svg_bytes": size, "pivot": [float((xs.min() + xs.max()) / 2), float(im.height - im.height * 0.06)],
-                           "wrist_w": float(xs.max() - xs.min() + 1), "scale": (cfg.get("hands", {}).get(name, {}) or {}).get("scale", 1.0)}
+                           "wrist_w": float(xs.max() - xs.min() + 1), "scale": (cfg.get("hands", {}).get(name, {}) or {}).get("scale", HAND_K.get(cid, 1.0))}
         cfg["hands"] = hands
+        for k, v in RIG.get(cid, {}).items():
+            cfg.setdefault(k, v)
         cfg["relaxed_thumb"] = RELAXED_THUMB[cid]
         cfg["sheet_thumb"] = thumb_side(os.path.join(folder, "hand_open.svg"), hands["open"])      # "left" for a right hand seen from the palm, upright
-        if cid == "fox":
+        if cid in TAILS:
             im = ps[-1]
             im = im.resize((round(im.width * SHRINK), round(im.height * SHRINK)), Image.LANCZOS)
             size = vb.trace(im, os.path.join(folder, "tail.svg"), os.path.join(folder, "_tmp.png"))
             al = np.array(im)[..., 3] > 0
             xs = np.nonzero(al[-max(3, im.height // 25):].any(axis=0))[0]
             old = cfg.get("tail", {})
+            hu, tx, ty, ta = TAIL_DEFAULT.get(cid, TAIL_DEFAULT["fox"])
             cfg["tail"] = {"file": "tail.svg", "w": im.width, "h": im.height, "svg_bytes": size, "pivot": [float((xs.min() + xs.max()) / 2), float(im.height * 0.96)],
-                           "height_u": old.get("height_u", 78.0), "x": old.get("x", 10.0), "y": old.get("y", 8.0), "angle": old.get("angle", -52.0)}
+                           "height_u": old.get("height_u", hu), "x": old.get("x", tx), "y": old.get("y", ty), "angle": old.get("angle", ta)}
         tmp = os.path.join(folder, "_tmp.png")
         if os.path.exists(tmp):
             os.remove(tmp)
         with open(pj, "w", encoding="utf-8") as f:
             json.dump(cfg, f, indent=1)
-        print(cid, "hands", {k: (v["w"], v["h"]) for k, v in hands.items()}, "tail" if cid == "fox" else "")
+        print(cid, "hands", {k: (v["w"], v["h"]) for k, v in hands.items()}, "tail" if cid in TAILS else "")
     return 0
 
 
