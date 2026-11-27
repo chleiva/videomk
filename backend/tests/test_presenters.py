@@ -180,7 +180,7 @@ def test_auto_only_where_it_fits_and_never_on_photos_decks_news_or_whiteboard(mo
     # a Spanish children's video with no topic of another animal gets the parrot; fun videos and English ones keep the fox
     assert pp.decide("El ciclo del agua para niños", skill_ids=["kids-family"], language="es").character == "parrot"
     assert pp.decide("Algo divertido sobre calcetines", skill_ids=["funny-light"], language="es").character == "fox"
-    assert pp.voice_for("parrot", "es") == "Pedro" and pp.voice_for("owl", "en") == "Brian" and pp.voice_for("bear", "en") == "Stephen"
+    assert pp.voice_for("parrot", "es") == "Carlos" and pp.voice_for("owl", "en") == "Brian" and pp.voice_for("bear", "en") == "Stephen"   # Spanish: the lively man (it was Pedro)
     monkeypatch.setenv("PRESENTERS", "0")
     off = pp.decide("The water cycle for kids, explained by a fox", skill_ids=["kids-family"])
     assert not off.allowed and off.reason == "flag_off" and off.prompt_block() == ""
@@ -230,7 +230,7 @@ def test_enforce_sets_character_voice_cap_and_opens_and_closes_with_the_presente
         if b["scene"]["type"] == "presenter":
             b["scene"]["props"] = E.sanitize(b["scene"]["props"])
     pp.enforce(es, pp.decide("El ciclo del agua, con una doctora como presentadora", skill_ids=["kids-family"], language="es"))
-    assert es["voices"] == {"narrator": "Mia"} and es["presenter"]["character"] == "priya"
+    assert es["voices"] == {"narrator": "Lupe"} and es["presenter"]["character"] == "priya"
     assert pp.backdrops(plan, ["autumn_forest_path", "lake"]) == 2 and plan["beats"][0]["scene"]["props"]["backdrop"] == "autumn_forest_path"
     off = {"beats": beats(pres)}
     assert pp.enforce(off, pp.Policy(False, "kind_of_video")) == [] and off["presenter"]["decision"] == "no" and "voices" not in off
