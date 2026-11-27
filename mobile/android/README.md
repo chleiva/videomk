@@ -43,10 +43,11 @@ after its expert review (`LookPickerSheet.swift`), the split structure: two pill
 - **After Create**: the 202's `note` (the look was adapted) is one line on the Making screen as sent (`AppState.lookNotes`, `MakingSnapshot.note`); Info shows "Look: Whiteboard · chosen for you" and the
   reason from the video record (`VideoItem.look`), or from the start answer until the record has it.
 - **Accessibility**: tiles are radio buttons that say "<label>, <note or reason>" and their selected state, dimmed ones say they are not available; faces are checkboxes named with role and topic; the
-  switch row is one 52 dp target; at font scale 1.5 and over the tiles become rows (a small picture and the name) and the faces go three across; the sheet's header stays while its body scrolls.
+  switch row is one 52 dp target; at font scale 1.5 and over the tiles become rows (a small picture and the name); the faces go four or three across only where a name would not fit its face (the largest text), and a name is always one line; the sheet's header stays while its body scrolls.
 - **Try it without the server** (debug build): `files/fake_looks` next to `fake_backend` and `fake_intake` serves the backend's own capabilities answer (`src/debug/assets/looks_en.json`, `looks_es.json`,
   made by `mobile/ios/scripts/gen_look_fixtures.py`); its content picks a variant (`plan`, `hidden`, `minlen`). `LookUiTest` (instrumented, no account) drives the flows; `scripts/look-shots.sh <dir>` takes the
   captures of every state in light, dark, Spanish, the largest text and on a small phone.
+  `LookQaTest` makes ONE real request on QA (Cartoon with Fox and Bruno; needs the QA tokens of `scripts/run-ui-tests.sh` and costs a credit) and checks the `look` the server answers.
 
 ## Presentations to video (PowerPoint or PDF; docs/CREATE_API.md, docs/DECK_TO_VIDEO.md)
 Only where the server lists it: `capabilities.deck {max_mb, max_slides, formats}` is absent while the feature is off, and then nothing about it is drawn.

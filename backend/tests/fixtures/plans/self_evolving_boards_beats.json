@@ -1,0 +1,562 @@
+{
+ "note": "beats 20-30 of QA video 379216f6 (27 Nov 2026): 'Three risks' (beat 25) was drawn on the board of an unrelated forecast chart",
+ "beats": [
+  {
+   "id": "0b8c5dbb",
+   "narration": "Here is the loop that worries and excites researchers: AI that helps build better AI, which then helps build the next one.",
+   "scene": {
+    "type": "whiteboard",
+    "props": {
+     "items": [
+      {
+       "id": "t",
+       "write": "Recursive improvement",
+       "zone": "top-row",
+       "size": "l",
+       "say": "loop"
+      },
+      {
+       "id": "m1",
+       "mark": "underline",
+       "on": "t",
+       "color": "red",
+       "say": "excit"
+      },
+      {
+       "id": "c1",
+       "draw": "chip",
+       "zone": "left",
+       "size": "l",
+       "say": "build"
+      },
+      {
+       "id": "l1",
+       "write": "AI v1",
+       "tool": "pen",
+       "near": "c1",
+       "side": "below",
+       "size": "s",
+       "say": "better"
+      },
+      {
+       "id": "em0_l1",
+       "mark": "underline",
+       "on": "l1",
+       "color": "red",
+       "say": "help"
+      },
+      {
+       "id": "c2",
+       "draw": "robot",
+       "zone": "centre",
+       "size": "l",
+       "say": "next"
+      },
+      {
+       "id": "a1",
+       "connect": "arrow",
+       "from": "c1",
+       "to": "c2",
+       "color": "blue"
+      }
+     ],
+     "board": "same"
+    }
+   },
+   "chapter": "Recursive improvement, risk and 2027",
+   "media": {
+    "tts_hash": "984204fa8e11326e",
+    "audio_key": "generation/v2/379216f6-3000-588d-af58-bf42a6c7de1b/audio/984204fa8e11326e.wav",
+    "duration": 7.205,
+    "voice": "Amy",
+    "words_key": "generation/v2/379216f6-3000-588d-af58-bf42a6c7de1b/audio/984204fa8e11326e.words.json"
+   }
+  },
+  {
+   "id": "5eb5eaee",
+   "narration": "As of October 2026, labs report three of five rungs: AI-assisted coding, AI writing most merged code, and an automated research intern.",
+   "scene": {
+    "type": "whiteboard",
+    "props": {
+     "items": [
+      {
+       "id": "ld",
+       "draw": "stairs",
+       "zone": "centre",
+       "size": "l",
+       "say": "rungs"
+      },
+      {
+       "id": "em0_ld",
+       "mark": "circle",
+       "on": "ld",
+       "color": "red",
+       "say": "writ"
+      },
+      {
+       "id": "w1",
+       "write": "1. Coding help\n2. Most code\n3. Research intern",
+       "tool": "marker",
+       "zone": "bottom-row",
+       "size": "m",
+       "say": "intern"
+      },
+      {
+       "id": "k1",
+       "mark": "tick",
+       "on": "w1",
+       "color": "green"
+      }
+     ]
+    }
+   },
+   "media": {
+    "tts_hash": "32f843aaf45f42b1",
+    "audio_key": "generation/v2/379216f6-3000-588d-af58-bf42a6c7de1b/audio/32f843aaf45f42b1.wav",
+    "duration": 11.044,
+    "voice": "Amy",
+    "words_key": "generation/v2/379216f6-3000-588d-af58-bf42a6c7de1b/audio/32f843aaf45f42b1.words.json"
+   }
+  },
+  {
+   "id": "f0fea8cb",
+   "narration": "The fourth rung, an automated AI researcher, is an OpenAI target for March 2028. The fifth, open-ended self-improvement, is still hypothetical.",
+   "scene": {
+    "type": "whiteboard",
+    "props": {
+     "items": [
+      {
+       "id": "t2",
+       "write": "Reported vs forecast",
+       "zone": "top-row",
+       "size": "l",
+       "say": "target"
+      },
+      {
+       "id": "cal",
+       "draw": "calendar",
+       "zone": "left",
+       "size": "l",
+       "say": "March"
+      },
+      {
+       "id": "y",
+       "write": "2028",
+       "near": "cal",
+       "side": "below",
+       "size": "l",
+       "say": "2028"
+      },
+      {
+       "id": "em0_y",
+       "mark": "underline",
+       "on": "y",
+       "color": "red",
+       "say": "openend"
+      },
+      {
+       "id": "q",
+       "draw": "question_mark",
+       "zone": "right",
+       "size": "l",
+       "say": "hypothetical"
+      },
+      {
+       "id": "a2",
+       "connect": "dashed",
+       "from": "cal",
+       "to": "q",
+       "color": "grey"
+      }
+     ],
+     "board": "same"
+    }
+   },
+   "media": {
+    "tts_hash": "99f0ca6059ad1681",
+    "audio_key": "generation/v2/379216f6-3000-588d-af58-bf42a6c7de1b/audio/99f0ca6059ad1681.wav",
+    "duration": 10.958,
+    "voice": "Amy",
+    "words_key": "generation/v2/379216f6-3000-588d-af58-bf42a6c7de1b/audio/99f0ca6059ad1681.words.json"
+   }
+  },
+  {
+   "id": "e336590a",
+   "narration": "Humans still choose the problems and judge the results. Forecasts for fully automated AI research range from 2027 to 2052.",
+   "scene": {
+    "type": "whiteboard",
+    "props": {
+     "items": [
+      {
+       "id": "p",
+       "draw": "person_thinking",
+       "zone": "bottom-left",
+       "size": "l",
+       "say": "judge"
+      },
+      {
+       "id": "em0_p",
+       "mark": "circle",
+       "on": "p",
+       "color": "red",
+       "say": "fully"
+      },
+      {
+       "id": "ch",
+       "chart": "bars",
+       "values": [
+        2027.0,
+        2052.0
+       ],
+       "labels": [
+        "2027",
+        "2052"
+       ],
+       "zone": "bottom-right",
+       "say": "range"
+      },
+      {
+       "id": "m2",
+       "mark": "circle",
+       "on": "ch",
+       "color": "red",
+       "say": "2052"
+      }
+     ]
+    }
+   },
+   "media": {
+    "tts_hash": "2ccd0a5e4540e974",
+    "audio_key": "generation/v2/379216f6-3000-588d-af58-bf42a6c7de1b/audio/2ccd0a5e4540e974.wav",
+    "duration": 9.423,
+    "voice": "Amy",
+    "words_key": "generation/v2/379216f6-3000-588d-af58-bf42a6c7de1b/audio/2ccd0a5e4540e974.words.json"
+   }
+  },
+  {
+   "id": "342adf43",
+   "narration": "So treat any single date as a guess, not a finding. Nobody knows when, or whether, the loop closes.",
+   "scene": {
+    "type": "whiteboard",
+    "props": {
+     "items": [
+      {
+       "id": "g",
+       "write": "A guess",
+       "zone": "centre",
+       "size": "xl",
+       "say": "guess"
+      },
+      {
+       "id": "m3",
+       "mark": "double_underline",
+       "on": "g",
+       "color": "red",
+       "say": "finding"
+      }
+     ],
+     "board": "same"
+    }
+   },
+   "media": {
+    "tts_hash": "d99bbb441a25a1f2",
+    "audio_key": "generation/v2/379216f6-3000-588d-af58-bf42a6c7de1b/audio/d99bbb441a25a1f2.wav",
+    "duration": 6.68,
+    "voice": "Amy",
+    "words_key": "generation/v2/379216f6-3000-588d-af58-bf42a6c7de1b/audio/d99bbb441a25a1f2.words.json"
+   }
+  },
+  {
+   "id": "1192f4b0",
+   "narration": "The risks are practical. Agents can be unreliable, they can drift from their original purpose, and people can lose oversight.",
+   "scene": {
+    "type": "whiteboard",
+    "props": {
+     "items": [
+      {
+       "id": "t3",
+       "write": "Three risks",
+       "zone": "top-row",
+       "size": "l",
+       "say": "risks"
+      },
+      {
+       "id": "em0_t3",
+       "mark": "underline",
+       "on": "t3",
+       "color": "red",
+       "say": "agent"
+      },
+      {
+       "id": "w",
+       "draw": "warning",
+       "zone": "left",
+       "size": "l",
+       "say": "unreliable"
+      },
+      {
+       "id": "l2",
+       "write": "Reliability",
+       "tool": "pen",
+       "near": "w",
+       "side": "below",
+       "size": "s"
+      },
+      {
+       "id": "cp",
+       "draw": "compass",
+       "zone": "right",
+       "size": "l",
+       "say": "drift"
+      },
+      {
+       "id": "em1_cp",
+       "mark": "circle",
+       "on": "cp",
+       "color": "blue",
+       "say": "purpose"
+      },
+      {
+       "id": "ey",
+       "draw": "eye",
+       "zone": "right",
+       "size": "l",
+       "say": "oversight"
+      }
+     ],
+     "board": "same"
+    }
+   },
+   "media": {
+    "tts_hash": "948e81c5004dd53c",
+    "audio_key": "generation/v2/379216f6-3000-588d-af58-bf42a6c7de1b/audio/948e81c5004dd53c.wav",
+    "duration": 7.733,
+    "voice": "Amy",
+    "words_key": "generation/v2/379216f6-3000-588d-af58-bf42a6c7de1b/audio/948e81c5004dd53c.words.json"
+   }
+  },
+  {
+   "id": "c0d3ea7e",
+   "narration": "Two US bills target self-improving AI: the Human Control Over AI Act and the Ban Artificial Superintelligence Act. Neither has passed.",
+   "scene": {
+    "type": "whiteboard",
+    "props": {
+     "items": [
+      {
+       "id": "d",
+       "draw": "document",
+       "zone": "bottom-left",
+       "size": "l",
+       "say": "bills"
+      },
+      {
+       "id": "em0_d",
+       "mark": "circle",
+       "on": "d",
+       "color": "red",
+       "say": "human"
+      },
+      {
+       "id": "d2",
+       "draw": "contract",
+       "zone": "bottom-right",
+       "size": "l",
+       "say": "Act"
+      },
+      {
+       "id": "x",
+       "mark": "cross",
+       "on": "d2",
+       "color": "red",
+       "say": "passed"
+      }
+     ]
+    }
+   },
+   "media": {
+    "tts_hash": "1adfc3746612958c",
+    "audio_key": "generation/v2/379216f6-3000-588d-af58-bf42a6c7de1b/audio/1adfc3746612958c.wav",
+    "duration": 10.347,
+    "voice": "Amy",
+    "words_key": "generation/v2/379216f6-3000-588d-af58-bf42a6c7de1b/audio/1adfc3746612958c.words.json"
+   }
+  },
+  {
+   "id": "eace2c2b",
+   "narration": "For a business, the response is practical. Plan in short cycles, because next year's tools will differ.",
+   "scene": {
+    "type": "whiteboard",
+    "props": {
+     "items": [
+      {
+       "id": "t4",
+       "write": "Enterprise response",
+       "zone": "top-row",
+       "size": "l",
+       "say": "business"
+      },
+      {
+       "id": "em0_t4",
+       "mark": "underline",
+       "on": "t4",
+       "color": "red",
+       "say": "practical"
+      },
+      {
+       "id": "cl",
+       "draw": "calendar_day",
+       "zone": "left",
+       "size": "l",
+       "say": "short"
+      },
+      {
+       "id": "w2",
+       "write": "Short cycles",
+       "tool": "pen",
+       "near": "cl",
+       "side": "below",
+       "size": "s",
+       "say": "cycles"
+      },
+      {
+       "id": "em1_w2",
+       "mark": "circle",
+       "on": "w2",
+       "color": "blue",
+       "say": "year"
+      }
+     ],
+     "board": "same"
+    }
+   },
+   "media": {
+    "tts_hash": "2d9f9222c54ea209",
+    "audio_key": "generation/v2/379216f6-3000-588d-af58-bf42a6c7de1b/audio/2d9f9222c54ea209.wav",
+    "duration": 6.274,
+    "voice": "Amy",
+    "words_key": "generation/v2/379216f6-3000-588d-af58-bf42a6c7de1b/audio/2d9f9222c54ea209.words.json"
+   }
+  },
+  {
+   "id": "65ae4351",
+   "narration": "Keep models swappable in minutes, and own your workflows rather than rent them.",
+   "scene": {
+    "type": "whiteboard",
+    "props": {
+     "items": [
+      {
+       "id": "sw",
+       "draw": "switch",
+       "zone": "right",
+       "size": "l",
+       "say": "swappable"
+      },
+      {
+       "id": "em0_sw",
+       "mark": "circle",
+       "on": "sw",
+       "color": "red",
+       "say": "minut"
+      },
+      {
+       "id": "f",
+       "draw": "folder",
+       "zone": "bottom",
+       "size": "l",
+       "say": "workflows"
+      },
+      {
+       "id": "a3",
+       "connect": "arrow",
+       "from": "sw",
+       "to": "f",
+       "color": "blue",
+       "say": "rent"
+      }
+     ],
+     "board": "same"
+    }
+   },
+   "media": {
+    "tts_hash": "10450a5b3215d9f2",
+    "audio_key": "generation/v2/379216f6-3000-588d-af58-bf42a6c7de1b/audio/10450a5b3215d9f2.wav",
+    "duration": 4.581,
+    "voice": "Amy",
+    "words_key": "generation/v2/379216f6-3000-588d-af58-bf42a6c7de1b/audio/10450a5b3215d9f2.words.json"
+   }
+  },
+  {
+   "id": "3dcc1831",
+   "narration": "That is why 2027 may change the job. We stop deploying static agents and start managing systems that keep changing.",
+   "scene": {
+    "type": "whiteboard",
+    "props": {
+     "items": [
+      {
+       "id": "s",
+       "draw": "gear",
+       "zone": "centre",
+       "size": "l",
+       "say": "static"
+      },
+      {
+       "id": "gr",
+       "draw": "growth_plant",
+       "zone": "bottom-left",
+       "size": "l",
+       "say": "managing"
+      },
+      {
+       "id": "a4",
+       "connect": "arrow",
+       "from": "s",
+       "to": "gr",
+       "color": "green",
+       "say": "keep"
+      }
+     ]
+    }
+   },
+   "media": {
+    "tts_hash": "50ae4d02cfbf0174",
+    "audio_key": "generation/v2/379216f6-3000-588d-af58-bf42a6c7de1b/audio/50ae4d02cfbf0174.wav",
+    "duration": 7.354,
+    "voice": "Amy",
+    "words_key": "generation/v2/379216f6-3000-588d-af58-bf42a6c7de1b/audio/50ae4d02cfbf0174.words.json"
+   }
+  },
+  {
+   "id": "e5506d18",
+   "narration": "Manage it with monitoring, clear limits, and humans who stay in charge. Agents will learn through their work, so we must keep watching.",
+   "scene": {
+    "type": "whiteboard",
+    "props": {
+     "items": [
+      {
+       "id": "fin",
+       "write": "Manage what evolves",
+       "zone": "top-row",
+       "size": "xl",
+       "say": "charge"
+      },
+      {
+       "id": "m4",
+       "mark": "double_underline",
+       "on": "fin",
+       "color": "red",
+       "say": "watching"
+      }
+     ],
+     "board": "same"
+    }
+   },
+   "media": {
+    "tts_hash": "724fcea3cc87c7fa",
+    "audio_key": "generation/v2/379216f6-3000-588d-af58-bf42a6c7de1b/audio/724fcea3cc87c7fa.wav",
+    "duration": 8.078,
+    "voice": "Amy",
+    "words_key": "generation/v2/379216f6-3000-588d-af58-bf42a6c7de1b/audio/724fcea3cc87c7fa.words.json"
+   }
+  }
+ ]
+}
