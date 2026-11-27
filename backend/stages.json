@@ -11,7 +11,8 @@
     "forceWatermark": true,
     "whiteboard": true,
     "presenters": true,
-    "videoLanguages": "en,es,fr,de,it,pt,nl,pl,fi"
+    "videoLanguages": "en,es,fr,de,it,pt,nl,pl,fi",
+    "polyglot": true
   },
   "prod": {
     "account": "464863885161",

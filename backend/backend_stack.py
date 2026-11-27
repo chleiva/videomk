@@ -445,6 +445,9 @@ class BackendStack(Stack):
             # the languages a video may be made in (docs/LANGUAGES.md): stages.json "videoLanguages" or -c videoLanguages=en,es,fr; English and Spanish where nothing is set
             if video_languages:
                 engine_env["VIDEO_LANGUAGES"] = video_languages
+            # characters that speak different languages in one video (docs/MULTILINGUAL_CONVERSATIONS_DESIGN_2026-11-27.md): stages.json "polyglot" or -c polyglot=1; off where nothing is set
+            if str(self.node.try_get_context("polyglot") or ("1" if stage_cfg.get("polyglot") else "")).lower() in ("1", "true"):
+                engine_env["POLYGLOT"] = "1"
             for ctx_key, env_key in (("editDailyLimit", "EDIT_DAILY_LIMIT"), ("planModelId", "PLAN_MODEL_ID"), ("reviewModelId", "REVIEW_MODEL_ID"), ("unsplashAppName", "UNSPLASH_APP_NAME"), ("httpUserAgent", "HTTP_USER_AGENT"), ("ttsVoice", "TTS_VOICE"), ("pollyEngine", "POLLY_ENGINE"), ("pollyRegion", "POLLY_REGION")):
                 if self.node.try_get_context(ctx_key):
                     engine_env[env_key] = str(self.node.try_get_context(ctx_key))
