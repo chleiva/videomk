@@ -29,7 +29,7 @@ struct MediaPickerSheet: View {
                         Button { fromPrompt() } label: {
                             Label(tr("picker.photos_from_your_prompt"), systemImage: "wand.and.stars").font(.subheadline.weight(.semibold)).frame(maxWidth: .infinity, minHeight: 40)
                         }
-                        .buttonStyle(.bordered).padding(.horizontal, 16).accessibilityIdentifier("photosFromPrompt")
+                        .buttonStyle(.bordered).padding(.horizontal, Theme.gutter).accessibilityIdentifier("photosFromPrompt")
                         .accessibilityHint(tr("picker.searches_your_library_with_what"))
                     }
                     ChipsRow(feed: feed)
@@ -56,7 +56,7 @@ struct MediaPickerSheet: View {
                     if feed.isSearching, !feed.photos.isEmpty { Button(feed.canLoadMore ? tr("select_all.up_to", room) : tr("select_all.count", min(feed.photos.count, room))) { Task { await feed.loadAll(upTo: room); selection.select(all: feed.photos.map(\.id)) } }.font(.footnote.weight(.semibold)) }
                     if selection.count > 0 { Button(tr("picker.clear")) { selection.set([]) }.font(.footnote) }
                 }
-                .padding(.horizontal, 16).padding(.vertical, 12).background(.bar)
+                .padding(.horizontal, Theme.gutter).padding(.vertical, 12).background(.bar)
                 .accessibilityElement(children: .combine)
             }
         }

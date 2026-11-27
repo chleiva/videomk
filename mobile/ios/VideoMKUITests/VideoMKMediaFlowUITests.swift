@@ -44,7 +44,7 @@ final class VideoMKMediaFlowUITests: XCTestCase {
         XCTAssertEqual(app.buttons["addToLibraryButton"].label, "Add photos")
         XCTAssertTrue(app.buttons["selectButton"].exists && app.buttons["mediaMore"].exists)
         XCTAssertFalse(el(app, "storageMeter").exists, "a thin storage line at 10% used tells nobody anything")
-        XCTAssertEqual(app.buttons["newCollection"].label, "New collection", "the small folder-plus in the Collections row")
+        XCTAssertFalse(app.buttons["newCollection"].exists, "no second plus on the screen: New collection lives in the More menu")
         XCTAssertTrue(app.buttons["newVideo"].exists, "the round tab-bar button creates a video")
     }
 
@@ -125,28 +125,32 @@ final class VideoMKMediaFlowUITests: XCTestCase {
     /// one small Cancel gives the form back exactly as it was, and nothing can be sent twice.
     func testCreateIsLockedWhileTheRequestIsChecked() {
         let app = launch(env: ["VMK_DEBUG_TAB": "0", "VMK_DEBUG_CREATE": "checkingfast"])
-        XCTAssertTrue(el(app, "checkingCancel").waitForExistence(timeout: 20), "one small Cancel while checking")
+        XCTAssertTrue(el(app, "checkingCancel").waitForExistence(timeout: 20), "Cancel is the only control while checking")
         XCTAssertFalse(el(app, "composerField").isEnabled, "the prompt is locked")
-        XCTAssertFalse(app.buttons["sendButton"].isEnabled, "no second tap can send it again")
-        XCTAssertFalse(app.buttons["moreOptions"].isEnabled, "options are locked")
-        XCTAssertFalse(el(app, "micButton").isEnabled, "the mic is locked")
-        XCTAssertFalse(el(app, "photoButton").isEnabled, "the photos are locked")
-        XCTAssertTrue(app.staticTexts["Checking your request…"].exists, "one short honest line")
+        XCTAssertEqual(el(app, "createCapsule").label, "Checking your request", "the button became the live capsule: three honest words")
+        for id in ["sendButton", "moreOptions", "micButton", "photoButton", "forPill", "lengthPill", "lookPill"] { XCTAssertFalse(el(app, id).exists, "\(id) is gone while the request is checked: nothing can be sent or changed twice") }
+        XCTAssertTrue(el(app, "chosenPills").exists, "what was chosen stays readable")
         shot(app, "20-create-locked-while-checking")
         app.buttons["checkingCancel"].tap()
-        XCTAssertTrue(el(app, "composerField").waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["sendButton"].waitForExistence(timeout: 5), "the Create button is back")
         XCTAssertTrue(el(app, "composerField").isEnabled, "the form is back")
-        XCTAssertFalse(el(app, "checkingCancel").exists)
+        XCTAssertEqual(el(app, "composerField").value as? String, "How bees make honey, explained for kids", "with the sentence intact")
+        XCTAssertFalse(el(app, "createCapsule").exists)
         XCTAssertTrue(app.buttons["sendButton"].isEnabled, "and it can be sent again")
         shot(app, "21-create-unlocked-after-cancel")
     }
 
-    /// A check that takes longer shows where the questions will appear, with one Skip; the form behind stays locked.
-    func testASlowCheckShowsTheQuestionsPlaceholderWithSkip() {
+    /// A check that takes longer keeps the capsule, says so in a few words, and Cancel still gives the form back.
+    func testASlowCheckSaysSoAndCanStillBeCancelled() {
         let app = launch(env: ["VMK_DEBUG_TAB": "0", "VMK_DEBUG_CREATE": "checking"])
-        XCTAssertTrue(el(app, "checkingText").waitForExistence(timeout: 20))
-        XCTAssertTrue(app.buttons["Skip"].exists, "one way to stop waiting")
+        let capsule = el(app, "createCapsule")
+        XCTAssertTrue(capsule.waitForExistence(timeout: 20))
+        let slow = NSPredicate(format: "value == %@", "Taking a little longer")
+        wait(for: [XCTNSPredicateExpectation(predicate: slow, object: capsule)], timeout: 20)
+        XCTAssertTrue(app.buttons["checkingCancel"].isEnabled, "one way to stop waiting")
         shot(app, "22-create-slow-check")
+        app.buttons["checkingCancel"].tap()
+        XCTAssertTrue(app.buttons["sendButton"].waitForExistence(timeout: 5))
     }
 
     /// Try again on a video that did not finish: the SAME card turns into the making card; no new row appears.

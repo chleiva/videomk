@@ -117,6 +117,16 @@ struct TonalButtonStyle: ButtonStyle {
     }
 }
 
+/// A text button in the bar ("Select", "Cancel", "Use email"): primary colour, headline weight, a 44 pt target.
+struct TextButtonStyle: ButtonStyle {
+    @Environment(\.isEnabled) private var isEnabled
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label.font(.role(.body, weight: .medium)).foregroundStyle(Theme.primary).lineLimit(1)
+            .frame(minHeight: Theme.minTouch).contentShape(Rectangle())
+            .opacity(isEnabled ? (configuration.isPressed ? 0.6 : 1) : 0.4)
+    }
+}
+
 // MARK: the icon button (secondary actions only, always with a spoken label)
 
 /// An icon-only control: a 44 pt circle with a spoken label the initializer requires and a tooltip on pointer devices.

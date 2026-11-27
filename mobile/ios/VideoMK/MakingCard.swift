@@ -14,7 +14,7 @@ struct MakingSnapshot: Equatable {
     var info: MakingInfo?
 
     var sceneLine: String? {
-        guard let info, let total = info.sceneTotal, let current = info.currentScene else { return nil }
+        guard let info, let total = info.sceneTotal, let current = info.counterScene else { return nil }
         return tr("making.scene_counter", current, total)
     }
     var narration: String? { info?.narrationLine }

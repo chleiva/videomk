@@ -12,12 +12,10 @@ struct CollectionsStrip: View {
         VStack(alignment: .leading, spacing: 4) {
         if !media.collections.isEmpty {
             HStack(spacing: 4) {
-                Text(tr("viewer.collections")).font(.vmk(17, weight: .bold)).foregroundStyle(Theme.text).accessibilityAddTraits(.isHeader)
+                Text(tr("viewer.collections")).font(.role(.headline)).foregroundStyle(Theme.text).accessibilityAddTraits(.isHeader)
                 Spacer()
-                Button(action: onNew) { Image(systemName: "folder.badge.plus").font(.vmk(17, weight: .semibold)).frame(width: 44, height: 44) }
-                    .accessibilityLabel(tr("media.new_collection")).accessibilityIdentifier("newCollection")
-                Button(tr("collections.see_all")) { media.showCollectionsList = true }.font(.vmk(15, weight: .semibold)).frame(minHeight: 44).accessibilityIdentifier("seeAllCollections")
-            }.padding(.horizontal, 16)
+                Button(tr("collections.see_all")) { media.showCollectionsList = true }.buttonStyle(TextButtonStyle()).accessibilityIdentifier("seeAllCollections")
+            }.padding(.horizontal, Theme.gutter)
         }
         ScrollView(.horizontal, showsIndicators: false) {
             LazyHStack(spacing: 10) {
@@ -34,7 +32,7 @@ struct CollectionsStrip: View {
                         .accessibilityAction(named: tr("collections.delete_collection")) { deleting = c }
                 }
             }
-            .padding(.horizontal, 16).padding(.bottom, 6)
+            .padding(.horizontal, Theme.gutter).padding(.bottom, 6)
         }
         .frame(minHeight: 148)
         }
@@ -206,7 +204,7 @@ struct CollectionsListView: View {
                 accentText(tr("collections.auto_note"), accent: Theme.primary, base: Theme.textSecondary)
                 ForEach(media.collections) { c in row(c) }
             }
-            .font(.vmk(15)).padding(.horizontal, 16).padding(.bottom, 24)
+            .font(.vmk(15)).padding(.horizontal, Theme.gutter).padding(.bottom, 24)
         }
         .background(Theme.background.ignoresSafeArea())
         .navigationTitle(tr("viewer.collections")).navigationBarTitleDisplayMode(.large)

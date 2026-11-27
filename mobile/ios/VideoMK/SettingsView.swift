@@ -14,6 +14,7 @@ struct SettingsView: View {
     var body: some View {
         NavigationStack {
             List {
+                Group {
                 Section {
                     if case .signedIn(let email) = model.phase, let email {
                         Label { Text(email).font(.vmk(17)).foregroundStyle(Theme.text).lineLimit(1).truncationMode(.middle) } icon: { Image(systemName: "person.crop.circle").foregroundStyle(Theme.textSecondary) }
@@ -59,7 +60,10 @@ struct SettingsView: View {
                     Button(role: .destructive) { showDelete = true } label: { Text(tr("settings.delete_account")).frame(minHeight: Theme.minTouch, alignment: .leading) }
                         .accessibilityIdentifier("deleteAccountButton")
                 }
+                }
+                .listRowBackground(Theme.surface)
             }
+            .scrollContentBackground(.hidden).background(Theme.background.ignoresSafeArea()).tint(Theme.primary)
             .sheet(isPresented: $showDelete) { DeleteAccountView() }
             .sheet(isPresented: $showFeedback) { FeedbackSheet(composer: model.makeFeedback(.settings)) }
             #if DEBUG

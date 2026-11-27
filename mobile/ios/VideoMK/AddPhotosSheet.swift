@@ -196,10 +196,10 @@ struct AddPhotosSheet: View {
 
     @ViewBuilder private var toastView: some View {
         if let toast {
-            Text(toast).font(.vmk(15)).foregroundStyle(.white).padding(.horizontal, 16).padding(.vertical, 14)
+            Text(toast).font(.vmk(15)).foregroundStyle(.white).padding(.horizontal, Theme.gutter).padding(.vertical, 14)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .background(Theme.toastSurface, in: RoundedRectangle(cornerRadius: Theme.Radii.card, style: .continuous))
-                .padding(.horizontal, 16).padding(.bottom, 130).transition(.move(edge: .bottom).combined(with: .opacity))
+                .padding(.horizontal, Theme.gutter).padding(.bottom, 130).transition(.move(edge: .bottom).combined(with: .opacity))
                 .accessibilityIdentifier("limitToast")
         }
     }

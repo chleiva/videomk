@@ -52,7 +52,7 @@ final class VideoMKSpanishUITests: XCTestCase {
         _ = app.buttons["signInButton"].waitForExistence(timeout: 15)
         XCTAssertTrue(app.buttons["Continuar con Google"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.buttons["Continuar con Apple"].exists)
-        XCTAssertEqual(app.buttons["signInButton"].label, "Continuar con correo")
+        XCTAssertEqual(app.buttons["signInButton"].label, "Usar correo", "next to Apple and Google, email is the quiet text button")
         XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label CONTAINS %@", "Nosotros creamos el video")).firstMatch.exists, "the sign-in tagline is the home headline")
     }
 

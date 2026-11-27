@@ -426,7 +426,7 @@ struct CreateView: View {
             .overlay(LiveRing(shape: Capsule(), lineWidth: 2))
             .matchedGeometryEffect(id: "cta", in: morph)
             .elevation(3)
-            .accessibilityElement(children: .combine).accessibilityLabel(capsuleTitle).accessibilityAddTraits(.updatesFrequently).accessibilityIdentifier("createCapsule")
+            .accessibilityElement(children: .combine).accessibilityLabel(capsuleTitle).accessibilityValue(capsuleSub).accessibilityAddTraits(.updatesFrequently).accessibilityIdentifier("createCapsule")
             Button(tr("common.cancel")) { stopChecking() }
                 .font(.role(.headline, weight: .medium)).foregroundStyle(Theme.textSecondary).frame(minWidth: 120, minHeight: Theme.minTouch)
                 .opacity(capsule.canCancel ? 1 : 0).disabled(!capsule.canCancel).accessibilityHidden(!capsule.canCancel)

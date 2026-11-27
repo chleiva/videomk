@@ -169,7 +169,7 @@ private struct SummaryStep: View {
                 ForEach(Array(flow.chips(briefSummary: brief?["summary"]).enumerated()), id: \.offset) { _, c in
                     Button { var f = flow; f.edit(c.questionID); create.stage = .questions(f) } label: {
                         HStack(spacing: 6) { Text(c.text).font(.vmk(17, weight: .semibold)).multilineTextAlignment(.leading).fixedSize(horizontal: false, vertical: true); Image(systemName: "pencil").font(.vmk(13)) }
-                            .foregroundStyle(Theme.primary).padding(.horizontal, 16).padding(.vertical, 10).frame(minHeight: 44).background(Theme.primaryContainer, in: RoundedRectangle(cornerRadius: Theme.Radii.videoCard, style: .continuous))
+                            .foregroundStyle(Theme.primary).padding(.horizontal, Theme.gutter).padding(.vertical, 10).frame(minHeight: 44).background(Theme.primaryContainer, in: RoundedRectangle(cornerRadius: Theme.Radii.videoCard, style: .continuous))
                     }.buttonStyle(.plain).accessibilityLabel(tr("create.summary_chip_a11y", c.text)).accessibilityIdentifier("summaryChip")
                 }
             }.padding(.top, 14)

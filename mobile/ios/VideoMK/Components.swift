@@ -41,7 +41,7 @@ struct WalletHero: View {
             Text(unlimited ? Self.unlimitedLabel : tr("wallet.unit", balance)).font(.vmk(17, weight: .semibold)).foregroundStyle(.white.opacity(0.9))
             if let nextFree { Text(nextFree).font(.vmk(13, weight: .medium)).foregroundStyle(.white.opacity(0.85)).multilineTextAlignment(.center).padding(.top, 4) }
         }
-        .frame(maxWidth: .infinity).padding(.vertical, 28).padding(.horizontal, 16)
+        .frame(maxWidth: .infinity).padding(.vertical, 28).padding(.horizontal, Theme.gutter)
         .background(Theme.makingGradient, in: RoundedRectangle(cornerRadius: Theme.Radii.videoCard, style: .continuous))
         .elevation(2)
         .accessibilityElement(children: .combine)

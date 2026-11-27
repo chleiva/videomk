@@ -25,17 +25,19 @@ struct MediaView: View {
 
     var body: some View {
         NavigationStack {
+            VStack(spacing: 0) {
+            topBar
             ScrollView {
-                VStack(spacing: 12) {
+                VStack(spacing: Theme.Space.m) {
                     if !privacySeen { PrivacyNote { withAnimation(reduceMotion ? nil : .snappy) { privacySeen = true } } }
                     MediaHeader(media: media) { showStorage = true }
-                    if media.summary?.readOnly != true, !selection.active, !(feed.photos.isEmpty && !showBatch) { AddPhotosButton(pickerItems: $pickerItems) }
                     if media.summary?.readOnly == true {
                         Label(tr("media.read_only_until_you_are"), systemImage: "lock.fill")
-                            .font(.footnote).foregroundStyle(Theme.warning).padding(.horizontal, 16).frame(maxWidth: .infinity, alignment: .leading)
+                            .font(.role(.footnote)).foregroundStyle(Theme.warning).padding(.horizontal, Theme.gutter).frame(maxWidth: .infinity, alignment: .leading)
                             .accessibilityIdentifier("readOnlyNote")
                     }
                     SearchBar(feed: feed)
+                    if media.summary?.readOnly != true, !selection.active, !feed.isSearching, !(feed.photos.isEmpty && !showBatch) { AddPhotosButton(pickerItems: $pickerItems) }
                     ChipsRow(feed: feed)
                     if showCoach { CoachMark(text: tr("media.coach")) { withAnimation(reduceMotion ? nil : .snappy) { coachSeen = true } }.transition(.opacity) }
                     if !feed.isSearching, !selection.active, !media.collections.isEmpty { CollectionsStrip(media: media, onNew: { newCollection = true }) }       // while selecting, the photos sit right under the search field
@@ -45,12 +47,11 @@ struct MediaView: View {
                 .padding(.bottom, tabBarRoom)
             }
             .scrollDismissesKeyboard(.interactively)
+            }
             .background(Theme.background.ignoresSafeArea())
-            .navigationTitle(selection.active ? (selection.count == 0 ? tr("media.select_photos") : tr("attach.selected", selection.count)) : tr("media.media"))
-            .navigationBarTitleDisplayMode(selection.active ? .inline : .large)
+            .toolbar(.hidden, for: .navigationBar)
             .navigationDestination(for: LibraryCollection.self) { CollectionDetailView(media: media, collection: $0) }
             .navigationDestination(isPresented: Binding(get: { media.showCollectionsList }, set: { media.showCollectionsList = $0 })) { CollectionsListView(media: media) }
-            .toolbar { toolbar }
             .safeAreaInset(edge: .bottom, spacing: 0) {
                 VStack(spacing: 0) {
                     if let toast = media.toast { UploadToast(toast: toast, onAction: { media.dismissToast(); if toast.action == tr("org.view") { media.showCollectionsList = true } else { withAnimation(.snappy) { media.barExpanded = true } } }, onDismiss: { media.dismissToast() }) }
@@ -121,38 +122,44 @@ struct MediaView: View {
                     EmptyLibrary(pickerItems: $pickerItems, readOnly: media.summary?.readOnly == true)
                 }
             } else {
-                if feed.offline { Label(tr("media.offline_showing_whats_saved_on"), systemImage: "icloud.slash").font(.caption).foregroundStyle(Theme.textSecondary) }
+                if feed.offline { Label(tr("media.offline_showing_whats_saved_on"), systemImage: "icloud.slash").font(.role(.caption)).foregroundStyle(Theme.textSecondary) }
                 PhotoGrid(feed: feed, media: media, selection: selection, onOpen: { open($0) }, hidden: batchIDs)
             }
         }
     }
 
-    /// At most: Select and one overflow (Add photos is the labelled button under the title). While selecting: Cancel and Select all, the title says how many.
-    @ToolbarContentBuilder private var toolbar: some ToolbarContent {
+    /// The one top bar: the large title with Select and one overflow (Add photos is the labelled button under the search field).
+    /// While selecting: Cancel, how many are selected, Select all.
+    @ViewBuilder private var topBar: some View {
         if selection.active {
-            ToolbarItem(placement: .topBarLeading) {
-                Button(tr("common.cancel")) { withAnimation(.snappy) { selection.clear() } }.accessibilityIdentifier("selectCancel")
-            }
-            ToolbarItem(placement: .topBarTrailing) {
-                if !feed.photos.isEmpty {
-                    let all = SelectAll.allSelected(view: feed.photos.map(\.id), selected: selection.ordered)
-                    Button(all ? tr("select_all.clear") : tr("media.all_short")) {
-                        Haptics.play(.selection)
-                        Task { await SelectionActions.toggleAll(feed: feed, selection: selection, limit: PhotoLimits.maxPhotos) }
+            ZStack {
+                Text(selection.count == 0 ? tr("media.select_photos") : tr("attach.selected", selection.count)).font(.role(.headline)).monospacedDigit().foregroundStyle(Theme.text).lineLimit(1).minimumScaleFactor(0.7)
+                    .padding(.horizontal, 96).accessibilityAddTraits(.isHeader).accessibilityIdentifier("selectionTitle")
+                HStack {
+                    Button(tr("common.cancel")) { withAnimation(.snappy) { selection.clear() } }.buttonStyle(TextButtonStyle()).accessibilityIdentifier("selectCancel")
+                    Spacer(minLength: Theme.Space.s)
+                    if !feed.photos.isEmpty {
+                        let all = SelectAll.allSelected(view: feed.photos.map(\.id), selected: selection.ordered)
+                        Button(all ? tr("select_all.clear") : tr("media.all_short")) {
+                            Haptics.play(.selection)
+                            Task { await SelectionActions.toggleAll(feed: feed, selection: selection, limit: PhotoLimits.maxPhotos) }
+                        }
+                        .buttonStyle(TextButtonStyle())
+                        .accessibilityLabel(SelectAll.label(viewCount: feed.photos.count, hasMore: feed.canLoadMore, allSelected: all)).accessibilityIdentifier("selectAll")
                     }
-                    .accessibilityLabel(SelectAll.label(viewCount: feed.photos.count, hasMore: feed.canLoadMore, allSelected: all)).accessibilityIdentifier("selectAll")
                 }
             }
+            .padding(.horizontal, Theme.gutter).frame(minHeight: 56).vmkOneLineCap()
         } else {
-            ToolbarItemGroup(placement: .topBarTrailing) {
+            TopBar(title: tr("media.media")) {
                 if !feed.photos.isEmpty {
-                    Button(tr("media.select")) { withAnimation(.snappy) { selection.active = true } }.accessibilityIdentifier("selectButton")
+                    Button(tr("media.select")) { withAnimation(.snappy) { selection.active = true } }.buttonStyle(TextButtonStyle()).accessibilityIdentifier("selectButton")
                 }
                 Menu {
                     Button { newCollection = true } label: { Label(tr("media.new_collection"), systemImage: "folder.badge.plus") }.accessibilityIdentifier("newCollectionMenu")
                     Button { media.organizeLibrary() } label: { Label(tr("media.organize_my_library"), systemImage: "sparkles") }.accessibilityIdentifier("organizeLibrary")
                     Button { showStorage = true } label: { Label(tr("media.storage"), systemImage: "externaldrive") }
-                } label: { Image(systemName: "ellipsis") }
+                } label: { IconButtonFace(symbol: "ellipsis") }
                     .accessibilityLabel(tr("media.more")).accessibilityIdentifier("mediaMore")
             }
         }
@@ -193,7 +200,7 @@ struct MediaView: View {
     @ViewBuilder private var expandedPanel: some View {
         if media.barExpanded, media.bar != nil {
             ZStack(alignment: .bottom) {
-                Color.black.opacity(0.18).ignoresSafeArea().onTapGesture { withAnimation(.snappy) { media.barExpanded = false } }.accessibilityHidden(true)
+                Theme.mediaInk.opacity(0.18).ignoresSafeArea().onTapGesture { withAnimation(.snappy) { media.barExpanded = false } }.accessibilityHidden(true)
                 UploadPanel(media: media, onClose: { withAnimation(.snappy) { media.barExpanded = false } }, cancel: { confirmCancelUploads = true })
                     .padding(.bottom, 70)
             }
@@ -232,16 +239,16 @@ struct MediaHeader: View {
             Button(action: onTap) {
                 VStack(alignment: .leading, spacing: 6) {
                     HStack {
-                        Text(meter.label).font(.footnote.weight(.medium)).foregroundStyle(meter.state == .ok ? Theme.textSecondary : tint(meter))
-                        if meter.state != .ok { Text(meter.state == .full ? tr("media.full") : tr("media.almost_full")).font(.footnote.weight(.semibold)).foregroundStyle(tint(meter)) }
+                        Text(meter.label).font(.role(.footnote, weight: .medium)).foregroundStyle(meter.state == .ok ? Theme.textSecondary : tint(meter))
+                        if meter.state != .ok { Text(meter.state == .full ? tr("media.full") : tr("media.almost_full")).font(.role(.footnote, weight: .semibold)).foregroundStyle(tint(meter)) }
                         Spacer()
-                        Image(systemName: "chevron.right").font(.caption2).foregroundStyle(Theme.textSecondary)
+                        Image(systemName: "chevron.right").font(.role(.caption)).foregroundStyle(Theme.textSecondary)
                     }
                     ProgressView(value: meter.fraction).tint(tint(meter)).scaleEffect(x: 1, y: 0.7)
                 }
             }
             .buttonStyle(.plain)
-            .padding(.horizontal, 16)
+            .padding(.horizontal, Theme.gutter)
             .accessibilityElement(children: .ignore)
             .accessibilityLabel(tr(meter.state == .full ? "media.storage_a11y_full" : meter.state == .warning ? "media.storage_a11y_warning" : "media.storage_a11y", meter.label))
             .accessibilityHint(tr("media.shows_your_storage"))
@@ -259,15 +266,15 @@ struct SearchBar: View {
     var body: some View {
         HStack(spacing: 8) {
             Image(systemName: "magnifyingglass").foregroundStyle(Theme.textSecondary).accessibilityHidden(true)
-            TextField(tr("media.search_your_photos_try_beach"), text: $feed.text).font(.vmk(15))
+            TextField(tr("media.search_your_photos_try_beach"), text: $feed.text).font(.role(.body))
                 .focused($focused).submitLabel(.search).textInputAutocapitalization(.never).autocorrectionDisabled()
                 .accessibilityIdentifier("mediaSearch")
             if feed.searching { ProgressView().controlSize(.small) }
             else if !feed.text.isEmpty { Button { feed.text = "" } label: { Image(systemName: "xmark.circle.fill").foregroundStyle(Theme.textSecondary) }.accessibilityLabel(tr("media.clear_search")) }
         }
-        .padding(.horizontal, 12).frame(minHeight: 40)
-        .background(Theme.surfaceRaised, in: RoundedRectangle(cornerRadius: Theme.Radii.field, style: .continuous))
-        .padding(.horizontal, 16)
+        .padding(.horizontal, Theme.Space.l).frame(minHeight: 48)
+        .background(Theme.surfaceRaised, in: Capsule())
+        .padding(.horizontal, Theme.gutter)
     }
 }
 
@@ -280,8 +287,8 @@ struct ChipsRow: View {
                     ForEach(feed.chips, id: \.self) { chip in
                         Button { Task { await feed.drop(chip) } } label: {
                             HStack(spacing: 4) {
-                                Image(systemName: chip.kind == "place" ? "mappin.and.ellipse" : chip.kind == "date" ? "calendar" : "tag").font(.caption2)
-                                Text(chip.label).font(.footnote.weight(.medium)).multilineTextAlignment(.leading).fixedSize(horizontal: false, vertical: true)
+                                Image(systemName: chip.kind == "place" ? "mappin.and.ellipse" : chip.kind == "date" ? "calendar" : "tag").font(.role(.caption))
+                                Text(chip.label).font(.role(.footnote, weight: .medium)).multilineTextAlignment(.leading).fixedSize(horizontal: false, vertical: true)
                                 Image(systemName: "xmark").font(.vmk(9, weight: .bold))
                             }
                             .padding(.horizontal, 10).padding(.vertical, 6)
@@ -292,7 +299,7 @@ struct ChipsRow: View {
                         .accessibilityIdentifier("searchChip")
                     }
                 }
-                .padding(.horizontal, 16)
+                .padding(.horizontal, Theme.gutter)
             }
         }
     }
@@ -305,11 +312,11 @@ struct PrivacyNote: View {
     var body: some View {
         HStack(alignment: .top, spacing: 10) {
             Image(systemName: "lock.shield.fill").foregroundStyle(Theme.primary).accessibilityHidden(true)
-            Text(MediaCopy.privacy).font(.footnote).foregroundStyle(Theme.text)
-            Button(action: onDismiss) { Image(systemName: "xmark").font(.footnote.weight(.semibold)) }.accessibilityLabel(tr("media.dismiss_privacy_note")).foregroundStyle(Theme.textSecondary)
+            Text(MediaCopy.privacy).font(.role(.footnote)).foregroundStyle(Theme.text)
+            Button(action: onDismiss) { Image(systemName: "xmark").font(.role(.footnote, weight: .semibold)) }.accessibilityLabel(tr("media.dismiss_privacy_note")).foregroundStyle(Theme.textSecondary)
         }
         .padding(12).background(Theme.surface, in: RoundedRectangle(cornerRadius: Theme.radius, style: .continuous))
-        .padding(.horizontal, 16).accessibilityIdentifier("mediaPrivacyNote")
+        .padding(.horizontal, Theme.gutter).accessibilityIdentifier("mediaPrivacyNote")
     }
 }
 
@@ -325,9 +332,9 @@ struct MediaMessage: View {
     var body: some View {
         VStack(spacing: 12) {
             Image(systemName: symbol).font(.vmk(40)).foregroundStyle(Theme.textSecondary).accessibilityHidden(true)
-            Text(title).font(.headline).foregroundStyle(Theme.text)
-            Text(text).font(.subheadline).multilineTextAlignment(.center).foregroundStyle(Theme.textSecondary)
-            if let button { Button(button, action: action).buttonStyle(.borderedProminent) }
+            Text(title).font(.role(.headline)).foregroundStyle(Theme.text)
+            Text(text).font(.role(.subhead)).multilineTextAlignment(.center).foregroundStyle(Theme.textSecondary)
+            if let button { Button(button, action: action).buttonStyle(TonalButtonStyle(fullWidth: false)) }
         }
         .padding(32).frame(maxWidth: .infinity)
     }
@@ -339,12 +346,12 @@ struct EmptyLibrary: View {
     var body: some View {
         VStack(spacing: 14) {
             Image(systemName: "photo.stack").font(.vmk(48)).foregroundStyle(Theme.gradient).accessibilityHidden(true)
-            Text(tr("media.your_photos_in_one_private")).font(.title3.bold()).foregroundStyle(Theme.text).multilineTextAlignment(.center)
+            Text(tr("media.your_photos_in_one_private")).font(.role(.title)).foregroundStyle(Theme.text).multilineTextAlignment(.center)
             Text(tr("media.add_photos_once_find_them"))
-                .font(.subheadline).multilineTextAlignment(.center).foregroundStyle(Theme.textSecondary)
+                .font(.role(.subhead)).multilineTextAlignment(.center).foregroundStyle(Theme.textSecondary)
             if !readOnly {
-                PhotosPicker(selection: $pickerItems, maxSelectionCount: nil, matching: .images) { Label(tr("media.add_photos"), systemImage: "photo.badge.plus").font(.headline).frame(maxWidth: 240, minHeight: 48) }
-                    .buttonStyle(.borderedProminent).accessibilityIdentifier("emptyAddPhotos")
+                PhotosPicker(selection: $pickerItems, maxSelectionCount: nil, matching: .images) { Label(tr("media.add_photos"), systemImage: "photo.badge.plus") }
+                    .buttonStyle(PrimaryButtonStyle(fullWidth: false)).accessibilityIdentifier("emptyAddPhotos")
             }
         }
         .padding(32).frame(maxWidth: .infinity)
@@ -355,15 +362,10 @@ struct EmptyLibrary: View {
 struct AddPhotosButton: View {
     @Binding var pickerItems: [PhotosPickerItem]
     var body: some View {
-        HStack {
-            PhotosPicker(selection: $pickerItems, maxSelectionCount: nil, matching: .images) {
-                Label(tr("media.add_photos"), systemImage: "photo.badge.plus").font(.vmk(16, weight: .semibold)).foregroundStyle(Theme.onPrimary)
-                    .padding(.horizontal, 18).frame(minHeight: 44).background(Theme.gradient, in: Capsule())
-            }
+        PhotosPicker(selection: $pickerItems, maxSelectionCount: nil, matching: .images) { Label(tr("media.add_photos"), systemImage: "photo.badge.plus") }
+            .buttonStyle(TonalButtonStyle())
             .accessibilityHint(tr("media.add_photos_to_your_library")).accessibilityIdentifier("addToLibraryButton")
-            Spacer()
-        }
-        .padding(.horizontal, 16)
+            .padding(.horizontal, Theme.gutter)
     }
 }
 
@@ -378,23 +380,23 @@ struct SelectionBar: View {
     var body: some View {
         HStack(spacing: 10) {
             Button(action: onVideo) {
-                HStack(spacing: 8) {
-                    Image(systemName: "sparkles").font(.vmk(17, weight: .semibold)).accessibilityHidden(true)
-                    Text(selection.count == 0 ? tr("collections.make_a_video") : tr("media.make_video_n", selection.count)).font(.vmk(17, weight: .semibold)).lineLimit(1).minimumScaleFactor(0.8)
+                HStack(spacing: Theme.Space.s) {
+                    PlaySparkle(scale: 0.7)
+                    Text(selection.count == 0 ? tr("collections.make_a_video") : tr("media.make_video_n", selection.count)).monospacedDigit().lineLimit(1).minimumScaleFactor(0.8)
                 }
-                .foregroundStyle(Theme.onPrimary).frame(maxWidth: .infinity, minHeight: 52)
-                .background(Theme.gradient, in: Capsule()).opacity(selection.count == 0 ? 0.45 : 1)
             }
-            .buttonStyle(.plain).disabled(selection.count == 0)
+            .buttonStyle(PrimaryButtonStyle()).disabled(selection.count == 0)
             .accessibilityLabel(selection.count == 0 ? tr("media.select_first") : tr("media.make_video_n", selection.count)).accessibilityIdentifier("makeVideoFromSelection")
             ForEach(icons) { i in icon(i.symbol, i.label, i.id, i.run, danger: i.danger) }
         }
-        .padding(.horizontal, 16).padding(.vertical, 10).background(.bar)
+        .padding(.horizontal, Theme.gutter).padding(.top, Theme.Space.xl).padding(.bottom, Theme.Space.s)
+        .background { LinearGradient(colors: [Theme.background.opacity(0), Theme.background.opacity(0.92)], startPoint: .top, endPoint: .bottom).ignoresSafeArea(edges: .bottom).allowsHitTesting(false) }
+        .vmkOneLineCap()
         .transition(.move(edge: .bottom).combined(with: .opacity))
     }
     private func icon(_ symbol: String, _ label: String, _ id: String, _ run: @escaping () -> Void, danger: Bool = false) -> some View {
         Button(action: run) {
-            Image(systemName: symbol).font(.vmk(19, weight: .semibold)).foregroundStyle(danger ? Theme.danger : Theme.text).frame(width: 52, height: 52).vmkGlass(in: Circle())
+            IconButtonFace(symbol: symbol, style: .glass, size: Theme.primaryHeight, tint: danger ? Theme.danger : nil)
         }
         .buttonStyle(.plain).disabled(selection.count == 0).opacity(selection.count == 0 ? 0.45 : 1)
         .accessibilityLabel(label).accessibilityIdentifier(id)
@@ -416,19 +418,14 @@ struct NextStepBar: View {
                     .accessibilityLabel(tr("common.close")).accessibilityIdentifier("nextStepDismiss")
             }
             Button(action: onMake) {
-                HStack(spacing: 8) {
-                    Image(systemName: "sparkles").font(.vmk(17, weight: .semibold)).accessibilityHidden(true)
-                    Text(tr("media.make_video_n", count)).font(.vmk(17, weight: .semibold))
-                }
-                .foregroundStyle(Theme.onPrimary).frame(maxWidth: .infinity, minHeight: 52).background(Theme.gradient, in: Capsule())
+                HStack(spacing: Theme.Space.s) { PlaySparkle(scale: 0.7); Text(tr("media.make_video_n", count)).monospacedDigit() }
             }
-            .buttonStyle(.plain).accessibilityIdentifier("makeVideoFromNew")
+            .buttonStyle(PrimaryButtonStyle()).accessibilityIdentifier("makeVideoFromNew")
         }
-        .padding(.horizontal, 16).padding(.top, 6).padding(.bottom, 10)
+        .padding(.horizontal, Theme.gutter).padding(.top, 6).padding(.bottom, 10)
         .background(Theme.surface, in: RoundedRectangle(cornerRadius: Theme.Radii.videoCard, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: Theme.Radii.videoCard, style: .continuous).stroke(Theme.outline, lineWidth: 1))
         .elevation(3)
-        .padding(.horizontal, 12).padding(.bottom, 8)
+        .padding(.horizontal, Theme.gutter).padding(.bottom, Theme.Space.s)
         .transition(.move(edge: .bottom).combined(with: .opacity))
         .accessibilityElement(children: .contain).accessibilityIdentifier("nextStepBar")
     }
@@ -448,7 +445,7 @@ struct CoachMark: View {
         }
         .padding(.leading, 12).padding(.vertical, 2)
         .background(Theme.primaryContainer, in: RoundedRectangle(cornerRadius: Theme.Radii.card, style: .continuous))
-        .padding(.horizontal, 16).accessibilityIdentifier("mediaCoach")
+        .padding(.horizontal, Theme.gutter).accessibilityIdentifier("mediaCoach")
     }
 }
 
@@ -465,7 +462,7 @@ struct StorageSheet: View {
                     let meter = StorageMeter(used: s.usedBytes, limit: s.limitBytes)
                     Section {
                         VStack(alignment: .leading, spacing: 8) {
-                            Text(meter.label).font(.title3.weight(.semibold)).foregroundStyle(meter.state == .full ? Theme.danger : meter.state == .warning ? Theme.warning : Theme.text)
+                            Text(meter.label).font(.role(.title)).foregroundStyle(meter.state == .full ? Theme.danger : meter.state == .warning ? Theme.warning : Theme.text)
                             ProgressView(value: meter.fraction).tint(meter.state == .full ? Theme.danger : meter.state == .warning ? Theme.warning : Theme.primary)
                         }
                         LabeledContent(tr("media.plan"), value: s.plan == "pro" ? tr("media.pro") : tr("media.free"))
@@ -474,13 +471,13 @@ struct StorageSheet: View {
                     }
                     Section(tr("media.when_it_is_full")) {
                         Text(tr("media.photos_that_fit_are_still"))
-                            .font(.subheadline)
+                            .font(.role(.subhead))
                     }
                     if s.canUpgrade, let url = MediaCopy.upgradeURL {
                         Section { Button(tr("media.get_more_storage")) { openURL(url) }.accessibilityIdentifier("upgradeStorage") }
                     }
                 } else { ProgressView().frame(maxWidth: .infinity) }
-                Section(tr("media.privacy")) { Text(MediaCopy.privacy).font(.subheadline) }
+                Section(tr("media.privacy")) { Text(MediaCopy.privacy).font(.role(.subhead)) }
             }
             .navigationTitle(tr("media.storage")).navigationBarTitleDisplayMode(.inline)
             .toolbar { ToolbarItem(placement: .confirmationAction) { Button(tr("common.done")) { dismiss() } } }

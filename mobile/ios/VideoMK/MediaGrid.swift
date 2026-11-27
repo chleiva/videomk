@@ -91,12 +91,12 @@ private struct SectionHeader: View {
     let title: String, count: Int
     var body: some View {
         HStack {
-            Text(title).font(.vmk(17, weight: .bold)).foregroundStyle(Theme.text)
+            Text(title).font(.role(.headline)).foregroundStyle(Theme.text)
             Spacer()
-            Text("\(count)").font(.vmk(13).monospacedDigit()).foregroundStyle(Theme.textSecondary)
+            Text("\(count)").font(.role(.footnote).monospacedDigit()).foregroundStyle(Theme.textSecondary)
         }
-        .padding(.horizontal, 12).padding(.vertical, 8)
-        .background(.bar)
+        .padding(.horizontal, Theme.gutter).padding(.vertical, Theme.Space.s)
+        .background(Theme.background)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(tr("media.section_a11y", title, tr("photos.count", count)))
         .accessibilityAddTraits(.isHeader)

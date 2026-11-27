@@ -100,7 +100,7 @@ struct FeedbackSheet: View {
         return Button { composer.choose(k); Haptics.play(.selection) } label: {
             Text(label(k)).font(.vmk(15, weight: .semibold)).multilineTextAlignment(.center)
                 .foregroundStyle(on ? Theme.primary : Theme.text)
-                .padding(.horizontal, 16).frame(maxWidth: typeSize.isAccessibilitySize ? .infinity : nil, minHeight: Theme.minTouch)
+                .padding(.horizontal, Theme.gutter).frame(maxWidth: typeSize.isAccessibilitySize ? .infinity : nil, minHeight: Theme.minTouch)
                 .background(on ? Theme.primaryContainer : Theme.surface, in: Capsule())
                 .overlay(Capsule().stroke(on ? Theme.primary : Theme.outline, lineWidth: on ? 2 : 1))
         }

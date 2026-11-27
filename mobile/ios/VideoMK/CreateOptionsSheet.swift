@@ -19,9 +19,9 @@ struct CreateOptionsSheet: View {
                     resolutionControl.padding(.top, 20)
                     VStack(spacing: 0) {
                         Toggle(isOn: $create.form.captions) { Label(tr("create.subtitles"), systemImage: "captions.bubble").font(.vmk(17)).foregroundStyle(Theme.text) }
-                            .tint(Theme.primary).frame(minHeight: 52).padding(.horizontal, 16).accessibilityIdentifier("subtitlesToggle")
+                            .tint(Theme.primary).frame(minHeight: 52).padding(.horizontal, Theme.gutter).accessibilityIdentifier("subtitlesToggle")
                         Divider().padding(.leading, 16)
-                        languageRow.padding(.horizontal, 16)
+                        languageRow.padding(.horizontal, Theme.gutter)
                     }
                     .background(Theme.surface, in: RoundedRectangle(cornerRadius: Theme.Radii.card, style: .continuous)).padding(.top, 20)
                     if readyFormats.count > 1 {

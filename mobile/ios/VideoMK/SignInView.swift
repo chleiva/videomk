@@ -18,6 +18,7 @@ struct SignInView: View {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 0) {
                         BrandMark(size: 56).shadow(color: Theme.gradientStart.opacity(0.4), radius: 14, y: 8)
+                            .accessibilityElement().accessibilityLabel(tr("videos.videomk")).accessibilityAddTraits(.isImage)        // the mark names the app for VoiceOver
                         Text(tr("signin.tagline")).textRole(.largeTitle).foregroundStyle(Theme.text).fixedSize(horizontal: false, vertical: true).padding(.top, Theme.Space.xl)
                             .accessibilityAddTraits(.isHeader)
                         VStack(spacing: Theme.Space.m) {

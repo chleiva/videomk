@@ -29,7 +29,7 @@ struct UploadBatchSection: View {
                     Spacer()
                     Text(tr("upload.newest_first")).font(.vmk(13)).foregroundStyle(Theme.textSecondary)
                 }
-                .padding(.horizontal, 16).padding(.vertical, 10)
+                .padding(.horizontal, Theme.gutter).padding(.vertical, 10)
                 .accessibilityElement(children: .ignore)
                 .accessibilityLabel(tr("upload.adding_a11y", tr("photos.count", all.count), doneCount))
                 .accessibilityAddTraits(.isHeader)
@@ -328,7 +328,7 @@ struct UploadPanel: View {
                 Text(item.reason ?? tr("upload.connection_dropped")).font(.vmk(13)).foregroundStyle(Theme.danger).fixedSize(horizontal: false, vertical: true)
             }
             Spacer(minLength: 4)
-            Button { media.retryItem(item.id) } label: { Text(tr("upload.retry")).font(.vmk(15, weight: .semibold)).foregroundStyle(Theme.primary).padding(.horizontal, 16).frame(minHeight: 44).background(Theme.primaryContainer, in: Capsule()) }
+            Button { media.retryItem(item.id) } label: { Text(tr("upload.retry")).font(.vmk(15, weight: .semibold)).foregroundStyle(Theme.primary).padding(.horizontal, Theme.gutter).frame(minHeight: 44).background(Theme.primaryContainer, in: Capsule()) }
                 .buttonStyle(.plain).accessibilityIdentifier("retryItem")
         }
     }

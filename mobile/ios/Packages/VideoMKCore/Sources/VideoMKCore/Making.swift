@@ -113,13 +113,20 @@ public struct MakingInfo: Sendable, Equatable {
         guard let total = sceneTotal, total > 0 else { return [] }
         let byIndex = Dictionary(scenes.map { ($0.index, $0) }, uniquingKeysWith: { a, _ in a })
         let doneCount = sceneDone ?? 0
-        func isDone(_ i: Int) -> Bool { i <= doneCount || byIndex[i]?.done == true }
+        // scenes are made several at a time and do not finish in story order: a listed scene is done when the server says so; the count alone
+        // (no list) fills the strip from the left
+        func isDone(_ i: Int) -> Bool { byIndex.isEmpty ? i <= doneCount : byIndex[i]?.done == true }
         let current = (1...total).first { !isDone($0) }
         return (1...total).map { i in Tile(index: i, state: isDone(i) ? .done : i == current ? .current : .upcoming, thumbURL: byIndex[i]?.thumbURL) }
     }
 
     /// The scene being made now (1-based); nil when every scene is done or the count is unknown.
     public var currentScene: Int? { tiles.first { $0.state == .current }?.index }
+    /// The number for "Scene 5 of 9": one more than the scenes finished, never more than the total (the server's `scene_done + 1`, capped).
+    public var counterScene: Int? {
+        guard let total = sceneTotal, total > 0 else { return nil }
+        return min((sceneDone ?? doneScenes) + 1, total)
+    }
     /// How many scenes are finished (never more than the total).
     public var doneScenes: Int { tiles.filter { $0.state == .done }.count }
     public var hasThumbnails: Bool { scenes.contains { $0.thumbURL != nil } }
