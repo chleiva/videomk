@@ -2,6 +2,7 @@
 import io
 import hashlib
 import logging
+import time
 import wave
 from typing import Any, Dict, Optional
 
@@ -11,7 +12,9 @@ from common.secrets import get_secret_param
 
 from ..scenes import ELEMENTS
 from ..scenes.registry import PrepareCtx
-from .. import align, assets, audio, awsio, catalog_pick, clips, costs, format_options, making_progress, plan as plan_mod, stock, timeline as timeline_mod, tts, voices
+from common import clip_config
+
+from .. import align, assets, audio, awsio, catalog_pick, clip_ondemand, clips, costs, format_options, making_progress, plan as plan_mod, stock, timeline as timeline_mod, tts, voices
 
 
 def _provider(cfg: Dict[str, Any]):
@@ -166,7 +169,7 @@ def make_gallery(plan: Dict[str, Any], beat: Dict[str, Any], video_id: str, cost
     return out
 
 
-def make_clip(plan: Dict[str, Any], beat: Dict[str, Any], video_id: str, cost_field: str, speech: float) -> Dict[str, Any]:
+def make_clip(plan: Dict[str, Any], beat: Dict[str, Any], video_id: str, cost_field: str, speech: float, started: Optional[float] = None) -> Dict[str, Any]:
     """A short licensed stock clip (or a montage of 2-4 short clips in sequence, `clip_queries`) for the beat. If none is found or usable, a still photo of the same subject, so the video never has a hole."""
     pfx = awsio.prefix(video_id)
     props = beat["scene"]["props"]
@@ -178,10 +181,29 @@ def make_clip(plan: Dict[str, Any], beat: Dict[str, Any], video_id: str, cost_fi
     fr = plan.get("frame") or {}   # vertical and square videos ask the stock libraries for portrait or square footage; landscape calls are exactly as before
     orient = "portrait" if fr.get("aspect") in ("9:16", "4:5") else "square" if fr.get("aspect") == "1:1" else str(fr.get("orientation") or "landscape")
     keys = {**keys, **({"orientation": orient} if orient in ("portrait", "square") else {}), **({"hd": True} if format_options.is_4k(fr.get("resolution")) else {})}   # 4K: 1080p footage instead of 720p
+    # VideoMK's own clip library and clips made on demand (docs/CLIPS_ON_DEMAND.md): only with the deploy flag; without it nothing below differs from before
+    ctx = clip_ondemand.context(video_id) if clip_config.flag() else None
+    ours = clip_config.flag() and clip_ondemand.lib.usable(clip_ondemand.plan_of(ctx))
+    job, narration, alt = None, _context(beat), props.get("alt", "")
+    ask = dict(video_id=video_id, beat_id=str(beat["id"]), query=query, alt=alt, narration=narration, need_seconds=need, orientation=orient if orient in ("portrait", "square") else "landscape",
+               plan=plan, ctx=ctx, is_edit=cost_field != "cost_usd", beat_started=started)
+    own = {"own_library": True} if ours else {}
     if len(queries) > 1:   # a montage: every clip found, reviewed and verified on its own; failed ones dropped, fewer than half left -> the photo
-        result = clips.scout_montage(queries, _context(beat), props.get("alt", ""), need_seconds=need, **keys)
+        result = clips.scout_montage(queries, narration, alt, need_seconds=need, **keys, **own)
+        if ctx is not None and not (result and result.get("mp4")):   # the whole montage would become a photo: one general clip may be made instead
+            job = clip_ondemand.begin(**ask)
     else:
-        result = clips.scout_with_retry(query, _context(beat), props.get("alt", ""), need_seconds=need, **keys)   # one retry with a stock-staple wording when nothing passes; searches the clip_query, the alt wording and shortened forms in one pool
+        result = clips.scout_own(query, narration, alt, need_seconds=need, **{k: v for k, v in keys.items() if k in ("orientation", "hd")}) if ours else None   # ours first
+        if not result:
+            job = clip_ondemand.begin(**ask) if ctx is not None else None   # not in the library: decide, and generate in the background while the stock search runs
+            result = clips.scout_with_retry(query, narration, alt, need_seconds=need, **keys)   # one retry with a stock-staple wording when nothing passes; searches the clip_query, the alt wording and shortened forms in one pool
+    made = None
+    if job is not None:   # a library clip may come (made now, or found by its brief): it is read back FROM THE LIBRARY and checked against the narration like any other
+        made = job.wait()
+        mine = clips.scout_own(query, narration, alt, need_seconds=need, ids=[made], **{k: v for k, v in keys.items() if k in ("orientation", "hd")}) if made else None
+        if mine:
+            mine["review"]["cost_usd"] = float(mine["review"].get("cost_usd", 0.0)) + float((result or {}).get("review", {}).get("cost_usd", 0.0))   # the stock search that ran meanwhile was paid too
+            result = mine
     if result:
         costs.add_cost(video_id, float(result.get("review", {}).get("cost_usd", 0.0)), field=cost_field, part="stock")
     if result and result.get("mp4"):
@@ -191,6 +213,8 @@ def make_clip(plan: Dict[str, Any], beat: Dict[str, Any], video_id: str, cost_fi
             out.update({"clip_asset": key, "credit": result["credit"], "ledger": result["entry"], "chosen": result["chosen"]})
             if result.get("entries"):   # a montage: one ledger line per clip (the first stays in `ledger` for readers that know one)
                 out.update({"ledgers": result["entries"], "segments": result["segments"], "segments_requested": result["requested"]})
+            if ours:
+                clip_ondemand.used(video_id, result.get("chosen_all") or result["chosen"], generated_id=made if job is not None and job.generated else None)
             return out
         except Exception:  # storing the clip failed: a still photo keeps the beat visual, the video is not lost
             logging.exception("could not store clip %s", key)
@@ -202,6 +226,7 @@ def make_clip(plan: Dict[str, Any], beat: Dict[str, Any], video_id: str, cost_fi
 
 def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     video_id, beat_id = str(event["video_id"]), str(event["beat_id"])
+    began = time.time()
     cost_field = str(event.get("cost_field") or "cost_usd")
     plan = awsio.get_json(event["plan_key"])
     beat = next((b for b in plan["beats"] if b["id"] == beat_id), None)
@@ -213,7 +238,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     elif beat["scene"]["type"] == "gallery":
         media.update(make_gallery(plan, beat, video_id, cost_field))
     elif beat["scene"]["type"] == "clip":
-        media.update(make_clip(plan, beat, video_id, cost_field, float(media["duration"])))
+        media.update(make_clip(plan, beat, video_id, cost_field, float(media["duration"]), began))
     else:
         el = ELEMENTS.get(beat["scene"]["type"])
         if el is not None and el.prepare is not None:   # an element that needs outside data (a map's places, ...): a failure falls back, it never fails the video

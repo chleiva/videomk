@@ -109,4 +109,5 @@ def record(gate: Optional[Gate], credits: int) -> Dict[str, Any]:
         free_grants.emit("FreeCreditsSpent", gate.free_credits)
     if credits - gate.free_credits > 0 and kind != "test":
         free_grants.emit("PaidCreditsSpent", credits - gate.free_credits)
-    return {"plan": kind, "free_credits": gate.free_credits, **({"priority": 1} if gate.rights["priority_queue"] else {})}
+    paid = {k: gate.ent[e] for k, e in (("plan_interval", "interval"), ("plan_source", "source"), ("plan_state", "state")) if gate.ent.get(e)} if gate.plan != "free" and not gate.ent["unlimited"] else {}
+    return {"plan": kind, "free_credits": gate.free_credits, **({"priority": 1} if gate.rights["priority_queue"] else {}), **paid}   # interval, source and state: what clips on demand needs to know which budget pays (docs/CLIPS_ON_DEMAND.md)
