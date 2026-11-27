@@ -29,6 +29,7 @@ APP_FUNCTION = (
     "function handler(e){var r=e.request;var u=r.uri;"
     "var m=/^(\\/es)?\\/(privacy|terms|support)(\\/(index\\.html)?)?$/.exec(u);"
     "if(m){return {statusCode:301,statusDescription:'Moved Permanently',headers:{location:{value:'https://" + MARKETING_HOST + "'+(m[1]||'')+'/'+m[2]+'/'}}};}"
+    "if(/^\\/es\\/?$/.test(u)){return {statusCode:301,statusDescription:'Moved Permanently',headers:{location:{value:'https://" + MARKETING_HOST + "/es/'}}};}"   # the Spanish home is the marketing site's
     "if(u.endsWith('/')){r.uri=u+'index.html';}else if(u.indexOf('.')<0){r.uri=u+'/index.html';}return r;}"
 )
 

@@ -17,7 +17,7 @@ from constructs import Construct
 
 
 APP_HOST = "app.videomk.com"
-APP_PATHS = "signin|generations|wallet|feedback|watch|edit|questions|auth\\/callback"   # the app screens that used to live on videomk.com
+APP_PATHS = "signin|generations|new|media|settings|wallet|feedback|watch|edit|questions|auth\\/callback"   # the app screens that used to live on videomk.com
 # CloudFront Functions run ES5.1: no template strings, no arrow functions. The query values in the event are the raw (still percent-encoded) text of the request: copied as they are (encoding them again would turn %20 into %2520).
 MARKETING_FUNCTION = (
     "function handler(e){var r=e.request;var u=r.uri;"

@@ -13,7 +13,7 @@ from constructs import Construct
 class MediaLibrary(Construct):
     def __init__(
         self, scope: Construct, construct_id: str, *, stage: str, account: str, region: str, is_prod: bool, make_fn: Callable[..., _lambda.Function], engine_layer: _lambda.ILayerVersion,
-        flags_table: dynamodb.ITable, usage_table: dynamodb.ITable, extra_env: Dict[str, str], user_id_resource: apigw.IResource, cognito_auth: Dict, launcher_fn: _lambda.Function, assets_bucket_name: str,
+        flags_table: dynamodb.ITable, usage_table: dynamodb.ITable, extra_env: Dict[str, str], user_id_resource: apigw.IResource, cognito_auth: Dict, launcher_fn: _lambda.Function, assets_bucket_name: str, web_origins: list = (),
     ) -> None:
         super().__init__(scope, construct_id)
         keep = RemovalPolicy.RETAIN if is_prod else RemovalPolicy.DESTROY
@@ -24,6 +24,8 @@ class MediaLibrary(Construct):
             self, "MediaBucket", bucket_name=media_bucket_name, block_public_access=s3.BlockPublicAccess.BLOCK_ALL, encryption=s3.BucketEncryption.S3_MANAGED, enforce_ssl=True,
             removal_policy=keep, auto_delete_objects=not is_prod, object_ownership=s3.ObjectOwnership.BUCKET_OWNER_ENFORCED,
             lifecycle_rules=[s3.LifecycleRule(abort_incomplete_multipart_upload_after=Duration.days(2))],   # originals are uploaded straight into Intelligent-Tiering (the presigned POST sets it)
+            # The web app uploads photos straight from the browser (presigned POST) and reads thumbnails/originals it was given a link for: only the web origins, never `*`.
+            cors=([s3.CorsRule(allowed_methods=[s3.HttpMethods.POST, s3.HttpMethods.GET, s3.HttpMethods.HEAD], allowed_origins=list(web_origins), allowed_headers=["*"], exposed_headers=["ETag"], max_age=3600)] if web_origins else None),
         )
         table = dynamodb.Table(
             self, "MediaTable", partition_key=dynamodb.Attribute(name="user_id", type=dynamodb.AttributeType.STRING), sort_key=dynamodb.Attribute(name="sk", type=dynamodb.AttributeType.STRING),

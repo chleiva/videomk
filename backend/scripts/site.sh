@@ -49,7 +49,8 @@ app_build() {
      PUBLIC_COGNITO_CLIENT_ID="${PUBLIC_COGNITO_CLIENT_ID:-55borf73gh37uka0t3vj965dkc}" PUBLIC_AUTH_GOOGLE="${PUBLIC_AUTH_GOOGLE:-1}" \
      npx --yes astro build --outDir "$APP_ASTRO_OUT" >/dev/null)
   rm -rf "$APP_OUT" && mkdir -p "$APP_OUT/auth"
-  for p in signin generations wallet watch edit feedback questions delete-account; do mkdir -p "$APP_OUT/$p"; cp "$APP_ASTRO_OUT/$p/index.html" "$APP_OUT/$p/"; done
+  for p in signin generations new media settings wallet watch edit feedback questions delete-account; do mkdir -p "$APP_OUT/$p"; cp "$APP_ASTRO_OUT/$p/index.html" "$APP_OUT/$p/"; done
+  mkdir -p "$APP_OUT/es/delete-account"; cp "$APP_ASTRO_OUT/es/delete-account/index.html" "$APP_OUT/es/delete-account/"   # Apple's revoke page returns to /delete-account: its language switch needs the Spanish page too
   mkdir -p "$APP_OUT/auth/callback"; cp "$APP_ASTRO_OUT/auth/callback/index.html" "$APP_OUT/auth/callback/"
   cp -R "$APP_ASTRO_OUT/_astro" "$APP_OUT/_astro"
   for f in favicon.svg apple-touch-icon.png icon-192.png icon-512.png site.webmanifest; do [ -f "$APP_ASTRO_OUT/$f" ] && cp "$APP_ASTRO_OUT/$f" "$APP_OUT/$f"; done

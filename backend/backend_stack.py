@@ -221,7 +221,10 @@ class BackendStack(Stack):
         videos_table.grant_read_write_data(launcher_fn)
         usage_table.grant_read_write_data(launcher_fn)
         launcher_fn.add_to_role_policy(iam.PolicyStatement(actions=["s3:GetObject"], resources=[uploads_objects]))  # HeadObject: are the photos really there?
-        launcher_fn.add_to_role_policy(iam.PolicyStatement(actions=["s3:ListBucket"], resources=[f"arn:aws:s3:::{ASSETS_BUCKET}"], conditions={"StringLike": {"s3:prefix": ["uploads/*"] + (["watermark/*"] if watermark_enabled(self.node) else [])}}))   # watermark/*: has the person a logo? (a missing one must answer 404, not 403)
+        # "Try again" (lambdas/video_retry.py): give the video's photos back (read the kept originals and cleaned copies of THIS video's prefix, write the uploads), clear the failed attempt's working files, read the first run's input
+        launcher_fn.add_to_role_policy(iam.PolicyStatement(actions=["s3:GetObject", "s3:DeleteObject"], resources=[f"arn:aws:s3:::{ASSETS_BUCKET}/generation/v2/*"]))
+        launcher_fn.add_to_role_policy(iam.PolicyStatement(actions=["s3:PutObject"], resources=[uploads_objects]))
+        launcher_fn.add_to_role_policy(iam.PolicyStatement(actions=["s3:ListBucket"], resources=[f"arn:aws:s3:::{ASSETS_BUCKET}"], conditions={"StringLike": {"s3:prefix": ["uploads/*", "generation/v2/*"] + (["watermark/*"] if watermark_enabled(self.node) else [])}}))   # watermark/*: has the person a logo? (a missing one must answer 404, not 403)
         for fn in (launcher_fn, wallet_fn):
             wallet_table.grant_read_write_data(fn)
             flags_table.grant_read_data(fn)  # read only: nothing at runtime can grant itself unlimited credits
@@ -283,6 +286,8 @@ class BackendStack(Stack):
         for fn in (mark_failed_fn, mark_rejected_fn):
             usage_table.grant_read_write_data(fn)
             wallet_table.grant_read_write_data(fn)
+        mark_failed_fn.add_to_role_policy(iam.PolicyStatement(actions=["s3:GetObject"], resources=[uploads_objects]))   # a failed video keeps its uploads for "Try again": copied under its own prefix (handlers/mark_failed_handler.keep_uploads)
+        mark_failed_fn.add_to_role_policy(iam.PolicyStatement(actions=["s3:PutObject"], resources=[f"arn:aws:s3:::{ASSETS_BUCKET}/generation/v2/*"]))
 
         intent_plot_fn.add_to_role_policy(bedrock_policy)
         for fn in (asset_scene_fn, storyboard_render_fn):
@@ -416,6 +421,7 @@ class BackendStack(Stack):
 
         active_machine.grant_start_execution(launcher_fn)
         launcher_fn.add_environment("STATE_MACHINE_ARN", active_machine.state_machine_arn)
+        launcher_fn.add_to_role_policy(iam.PolicyStatement(actions=["states:DescribeExecution"], resources=[f"arn:aws:states:{self.region}:{self.account}:execution:{active_machine.state_machine_name}:*"]))   # older videos: the request they were started with
 
         # ============================
         # API Gateway + custom domain
@@ -458,6 +464,7 @@ class BackendStack(Stack):
         videos = user_id.add_resource("videos")
         generate = videos.add_resource("generate")
         video_item = videos.add_resource("{video_id}")
+        retry_res = video_item.add_resource("retry")   # POST: "Try again" reuses the failed video (lambdas/video_retry.py, served by the launcher)
         wallet_res = user_id.add_resource("wallet")
         uploads_res = user_id.add_resource("uploads")
 
@@ -522,7 +529,7 @@ class BackendStack(Stack):
         CfnOutput(self, "AssetsBucketName", value=assets_bucket.bucket_name)
         authorizer = apigw.CognitoUserPoolsAuthorizer(self, "ApiAuthorizer", cognito_user_pools=[user_pool])
 
-        for resource, methods in ((users, ["GET", "POST", "OPTIONS"]), (user_id, ["GET", "POST", "OPTIONS"]), (videos, ["GET", "POST", "OPTIONS"]), (generate, ["POST", "OPTIONS"]), (video_item, ["GET", "OPTIONS"]), (wallet_res, ["GET", "OPTIONS"]), (uploads_res, ["POST", "OPTIONS"])):
+        for resource, methods in ((users, ["GET", "POST", "OPTIONS"]), (user_id, ["GET", "POST", "OPTIONS"]), (videos, ["GET", "POST", "OPTIONS"]), (generate, ["POST", "OPTIONS"]), (video_item, ["GET", "DELETE", "OPTIONS"]), (retry_res, ["POST", "OPTIONS"]), (wallet_res, ["GET", "OPTIONS"]), (uploads_res, ["POST", "OPTIONS"])):
             resource.add_cors_preflight(allow_origins=apigw.Cors.ALL_ORIGINS, allow_methods=methods, allow_headers=["Content-Type", "Authorization", "X-Region", "X-Timezone", "X-Locale"])
 
         cognito_auth = dict(authorization_type=apigw.AuthorizationType.COGNITO, authorizer=authorizer)
@@ -560,6 +567,8 @@ class BackendStack(Stack):
             media = MediaLibrary(
                 self, "MediaLibrary", extra_env=model_env, stage=stage, account=self.account, region=self.region, is_prod=is_prod, make_fn=make_fn, engine_layer=engine_layer, flags_table=flags_table,
                 usage_table=usage_table, user_id_resource=user_id, cognito_auth=cognito_auth, launcher_fn=launcher_fn, assets_bucket_name=ASSETS_BUCKET,
+                # the web app's origins (no local dev server in prod): browser upload of library photos
+                web_origins=[o for o in _web_origins(stage_cfg) if not (is_prod and "localhost" in o)],
             )
 
         # The watermark (docs/WATERMARK.md): saved settings and logo, and what the launcher, capabilities and the plan step need. On by default, `-c watermark=0` removes it; `-c forceWatermark=1` is the free-tier policy.
@@ -647,6 +656,9 @@ class BackendStack(Stack):
             request_models={"application/json": generate_model},
             **cognito_auth,
         )
+        # "Try again" on a video that did not finish reuses that video (no second row): POST .../videos/{id}/retry; DELETE .../videos/{id} removes a failed one. Both are served by the launcher (lambdas/video_retry.py).
+        retry_res.add_method("POST", apigw.LambdaIntegration(launcher_fn, proxy=True), **cognito_auth)
+        video_item.add_method("DELETE", apigw.LambdaIntegration(launcher_fn, proxy=True), **cognito_auth)
 
         # ----------------------------
         # Editor API (engine v2 only): read the plan, submit validated edits.
