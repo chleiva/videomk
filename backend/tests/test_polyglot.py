@@ -138,9 +138,9 @@ def test_the_owner_s_five_languages_become_the_three_the_characters_speak():
     got = pg.bind(p, conv(["fox", "owl", "bear"]), minutes=2.0)
     assert got.speakers == {"fox": "en", "owl": "it", "bear": "es"} and got.dropped == ["de", "fr"]
     texts = pg.note_texts(got)
-    assert len(texts) == 1 and "máximo 3 idiomas" in texts[0] and "alemán, francés" in texts[0] and "Zorro" not in texts[0] and "inglés" in texts[0]
+    assert len(texts) == 1 and "máximo 3 idiomas" in texts[0] and "alemán y francés" in texts[0] and "Zorro" not in texts[0] and "inglés" in texts[0]
     en = pg.bind(pg.extract(fx.OWNER_REQUEST, {}, main="en"), conv(["fox", "owl", "bear"]), minutes=2.0)
-    assert "at most 3 languages" in pg.note_texts(en)[0] and "German, French" in pg.note_texts(en)[0]
+    assert "at most 3 languages" in pg.note_texts(en)[0] and "German and French" in pg.note_texts(en)[0]
 
 
 def test_a_language_the_stage_does_not_have_is_left_out_with_a_note(monkeypatch):

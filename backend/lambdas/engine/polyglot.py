@@ -299,7 +299,8 @@ def note_texts(poly: Polyglot) -> List[str]:
         if n["code"] == "app_chose":
             params["pairs"] = ", ".join(f"{_char_name(c)}: {lang_names.name_of(l, loc=loc)}" for c, l in poly.speakers.items())
         if "dropped" in params:
-            params["dropped"] = ", ".join(lang_names.name_of(l, loc=loc) for l in params["dropped"])
+            names = [lang_names.name_of(l, loc=loc) for l in params["dropped"]]
+            params["dropped"] = names[0] if len(names) == 1 else ", ".join(names[:-1]) + (" y " if loc == "es" else " and ") + names[-1]
         if "language" in params:
             params["language"] = lang_names.name_of(params["language"], loc=loc)
         if "character" in params:
