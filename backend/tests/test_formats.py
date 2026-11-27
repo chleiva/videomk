@@ -74,7 +74,7 @@ def test_director_hint_and_validation(monkeypatch):
     assert fm.format_scene_hint(land) == ""
     sf = fm.scenes_for(tall)
     assert "title" in sf["native"] and "bullets" in sf["native"] and "kinetic_text" in sf["native"] and "map" in sf["native"] and "table" in sf["native"]
-    assert sf["framed"] == [] and fm.check_scene_formats(tall, ["title", {"scene": {"type": "map"}}, {"type": "table"}]) == []     # every scene type is native in vertical now
+    assert sf["framed"] == ["vector_scene"] and fm.check_scene_formats(tall, ["title", {"scene": {"type": "map"}}, {"type": "table"}]) == []     # every scene type is native in vertical now except the hidden vector_scene prototype (framed card until its vertical layout is built)
     real = fm.formats_of                                                                                                        # the framed path, with a scene pretending to be landscape only
     monkeypatch.setattr(fm, "formats_of", lambda s: ("16:9",) if s in ("map", "table") else real(s))
     sf = fm.scenes_for(tall)
