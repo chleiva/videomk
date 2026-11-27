@@ -45,6 +45,14 @@ GOOD_BRIEF = {"reusable": True, "reason": "general", "brief": "busy outdoor frui
 GOOD_GATE = {"score": 9, "artefacts": False, "text": False, "brand": False, "person": False, "unsafe": False, "cut": False, "center_safe": True, "reason": "clean"}
 
 
+class Different(clip_gen.Mock):
+    """A provider whose every generation is its own file."""
+
+    def generate(self, prompt, **kw):
+        out = super().generate(prompt, **kw)
+        return {**out, "mp4": out["mp4"] + prompt.encode()}
+
+
 class Models:
     """Stands in for llm.complete: the brief model and the gate model, told apart by their system prompt."""
 
@@ -506,10 +514,6 @@ def test_no_double_spend_when_many_beats_race_for_the_last_dollars(env, monkeypa
                 return json.dumps({**GOOD_BRIEF, "brief": f"calm general scene of {word} drifting slowly in soft light", "people": "none"}), {"cost_usd": 0.0}
             return json.dumps(GOOD_GATE), {"cost_usd": 0.0}
     monkeypatch.setattr(llm, "complete", PerQuery())
-    class Different(clip_gen.Mock):   # every generation is its own file
-        def generate(self, prompt, **kw):
-            out = super().generate(prompt, **kw)
-            return {**out, "mp4": out["mp4"] + prompt.encode()}
     clip_gen.set_provider(Different(MP4, delay=0.05))
     jobs, gate = [None] * 12, threading.Barrier(12)
 
@@ -811,3 +815,31 @@ def test_the_plan_record_carries_what_the_budget_choice_needs():
     assert rec["plan"] == "max" and rec["plan_interval"] == "year" and rec["plan_source"] == "apple" and rec["plan_state"] == "active"
     G.ent = {"unlimited": True, "interval": None, "source": None, "state": "active"}
     assert "plan_source" not in plan_gate.record(G(), 3) and plan_gate.record(G(), 3)["plan"] == "test"
+
+
+# ================================================================= the report
+def test_the_report_shows_spend_rejections_cap_hits_and_which_clips_are_misses(env):
+    import importlib.util
+    import os
+    spec = importlib.util.spec_from_file_location("clips_admin", os.path.join(os.path.dirname(__file__), "..", "scripts", "clips_admin.py"))
+    admin = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(admin)
+    clip_gen.set_provider(Different(MP4))
+    a = ask(env, query=_different_scene(env, 0)).wait()
+    b = ask(env, beat="b2", query=_different_scene(env, 1)).wait()
+    assert ask(env, beat="b3", query=_different_scene(env, 2)) is None                 # the video's cap
+    env.models.gate = {**GOOD_GATE, "text": True}
+    env.rows["v2"] = {**env.rows["v1"], "user_id": "u2"}
+    assert ask(env, video="v2", query=_different_scene(env, 3)).wait() is None           # rejected by the gate
+    for v in ("x1", "x2", "x3"):
+        od.used(v, f"videomk-library:{a}")
+    od.used("x1", f"videomk-library:{b}", generated_id=b)
+    rep = admin.report(env.store, 30)
+    assert rep["generations"] == 3 and rep["kept"] == 2 and rep["rejected"] == 1 and rep["rejection_rate"] == pytest.approx(0.333, abs=0.001)
+    assert rep["spend_usd"] == pytest.approx(3 * 0.568) and rep["cost_per_kept_clip_usd"] == pytest.approx(0.852) and rep["not_kept_by_reason"] == {"gate_rejected:text": 1}
+    assert rep["cap_hits"] == {"video": 1} and rep["budget_stops"] == 0 and rep["decisions"]["generated"] == 2 and rep["used"] == {"library": 3, "generated": 1}
+    assert rep["spend_by_day"]["paid"] == {cs.day(): pytest.approx(1.704)} and len(rep["spend_by_account"]) == 2 and "u1" not in json.dumps(rep)
+    assert rep["library"]["clips"] == 2 and rep["reuse"]["miss_rate"] is None            # nothing is 30 days old yet
+    later = admin.report(env.store, 30, now=time.time() + 31 * 86400)
+    assert later["reuse"]["older_than_30_days"] == 2 and later["reuse"]["misses"] == 1 and later["reuse"]["miss_rate"] == 0.5
+    assert later["reuse"]["miss_list"][0]["id"] == b[:12] and later["top_clips"][0]["id"] == a[:12] and later["top_clips"][0]["videos"] == 3
