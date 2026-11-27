@@ -75,7 +75,7 @@ def test_home_page_meets_the_google_brand_checks_and_the_budget(site):
     """docs/WEB_REDESIGN_2026.md section 10: the app name, the logo, what it does, and visible links to the Privacy Policy and Terms, in the HTML itself."""
     for prefix, lang in (("", "en"), ("es/", "es")):
         html = read(site, f"{prefix}index.html")
-        assert html.count("<h1") == 1 and "videomk" in html and 'alt="' in html
+        assert html.count("<h1") == 1 and "VideoMK" in html and 'alt="' in html
         assert 'rel="icon"' in html and "icon-192.png" in html          # the logo is on the page
         assert re.search(rf'href="/{prefix}privacy/?"', html) and re.search(rf'href="/{prefix}terms/?"', html)   # visible links to the policy and the terms
         assert 'property="og:image" content="https://videomk.com/og.jpg"' in html and "application/ld+json" in html and '"SoftwareApplication"' in html

@@ -105,7 +105,7 @@ def rewrite(raw: bytes, *, forward_from: str, forward_to: str, original_to: str,
     for h in DROP_HEADERS:
         del msg[h]
     local, _, domain = forward_from.partition("@")
-    msg["From"] = Address(display_name=f"{shown} via videomk", username=local, domain=domain)
+    msg["From"] = Address(display_name=f"{shown} via VideoMK", username=local, domain=domain)
     if reply:
         msg["Reply-To"] = reply
     msg["To"] = forward_to
@@ -119,7 +119,7 @@ def rewrite(raw: bytes, *, forward_from: str, forward_to: str, original_to: str,
 
 def _notice(raw_msg: EmailMessage, *, forward_from: str, forward_to: str, size: int, bucket: str, key: str) -> EmailMessage:
     note = EmailMessage(policy=policy.default)
-    note["From"] = Address(display_name="videomk mail", username=forward_from.split("@")[0], domain=forward_from.split("@")[1])
+    note["From"] = Address(display_name="VideoMK mail", username=forward_from.split("@")[0], domain=forward_from.split("@")[1])
     note["To"] = forward_to
     note[MARKER_HEADER] = MARKER_VALUE
     note["Subject"] = "A message to hello@ was too large to forward"

@@ -199,7 +199,7 @@ def store_image(store, jpeg: bytes, item: Dict[str, Any], plan: Dict[str, Any], 
         "id": cid, "title": item.get("title", ""), "category": item.get("category", ""), "tags": [catalog_style.STYLE_VERSION, item.get("category", "")], "serves": list(item.get("serves") or [])[:12],
         "prompt": catalog_style.full_prompt(item["subject"], bool(item.get("people"))), "negative_prompt": catalog_style.NEGATIVE, "subject": item["subject"],
         "model": extra["model"], "created": datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None).isoformat() + "Z",
-        "cost_usd": round(cost, 4), "licence": "videomk-owned: output assigned to videomk by the provider's terms; see docs/IMAGE_CATALOG.md", "provenance": {"provider": "OpenAI Images API", "plan": plan["plan_id"], "plan_item": item["id"]},
+        "cost_usd": round(cost, 4), "licence": "videomk-owned: output assigned to VideoMK by the provider's terms; see docs/IMAGE_CATALOG.md", "provenance": {"provider": "OpenAI Images API", "plan": plan["plan_id"], "plan_item": item["id"]},
         "review_status": "approved", "review": {k: v for k, v in verdict.items()}, "width": extra["size"][0], "height": extra["size"][1], "style_version": catalog_style.STYLE_VERSION,
         "promoted_from": "", "sha256": cid,
     })

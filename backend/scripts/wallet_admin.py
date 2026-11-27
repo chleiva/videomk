@@ -6,7 +6,7 @@
   AWS_PROFILE=qa python backend/scripts/wallet_admin.py give you@example.com 20          # add 20 paid credits
   AWS_PROFILE=qa python backend/scripts/wallet_admin.py show you@example.com
   AWS_PROFILE=qa python backend/scripts/wallet_admin.py watermark you@example.com [--off]   # premium watermark: the person's own logo as the watermark (works in production too; docs/WATERMARK.md)
-  AWS_PROFILE=qa python backend/scripts/wallet_admin.py watermark you@example.com --default moments   # premium watermark AND a saved default: videomk lockup that comes and goes + the closing card (--off undoes both)
+  AWS_PROFILE=qa python backend/scripts/wallet_admin.py watermark you@example.com --default moments   # premium watermark AND a saved default: VideoMK lockup that comes and goes + the closing card (--off undoes both)
   AWS_PROFILE=qa python backend/scripts/wallet_admin.py storage you@example.com --plan pro [--extra-gb 100] [--until 2027-01-31]   # photo library size (free = 2 GB, pro = 100 GB, plus extra GB)
   AWS_PROFILE=qa python backend/scripts/wallet_admin.py plan you@example.com --plan max [--until 2027-01-31] [--yearly]            # the account's PLAN (docs/PLANS.md): free | pro | max. Monthly credits start now;
                                                                                                                                     # --until = the plan ends at the end of that day (none: no end); --plan free ends it at once
@@ -33,7 +33,7 @@ def main() -> None:
     ap.add_argument("who", help="email or user id (sub)")
     ap.add_argument("amount", nargs="?", type=int)
     ap.add_argument("--off", action="store_true", help="with `watermark`: take premium watermark away again")
-    ap.add_argument("--default", choices=["moments", "always"], help="with `watermark`: also save this account's default watermark (videomk lockup + closing card, with this presence); with --off it is removed")
+    ap.add_argument("--default", choices=["moments", "always"], help="with `watermark`: also save this account's default watermark (VideoMK lockup + closing card, with this presence); with --off it is removed")
     ap.add_argument("--stage", default="qa")
     ap.add_argument("--plan", choices=["free", "pro", "max"], default=None, help="`plan`: the account's plan; `storage`: free or pro (the older storage-only flag)")
     ap.add_argument("--yearly", action="store_true", help="with `plan`: a yearly plan (credits still arrive monthly)")

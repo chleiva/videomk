@@ -88,7 +88,7 @@ def _when(created: str) -> str:
 
 def build(items: List[Dict[str, Any]], part: int = 1, parts: int = 1, total: int = 0) -> Dict[str, str]:
     n = total or len(items)
-    subject = f"videomk feedback: {n} new" + (f" (part {part}/{parts})" if parts > 1 else "")
+    subject = f"VideoMK feedback: {n} new" + (f" (part {part}/{parts})" if parts > 1 else "")
     by_kind: Dict[str, List[Dict[str, Any]]] = {}
     for it in items:
         k = it.get("kind") if it.get("kind") in feedback.KINDS else "other"
@@ -105,7 +105,7 @@ def build(items: List[Dict[str, Any]], part: int = 1, parts: int = 1, total: int
             lines.append(f"[{_when(str(it.get('createdAt', '')))}] {who}")
             lines.append("    " + str(it.get("text", "")).replace("\n", "\n    "))
             lines.append("")
-    lines.append("-- videomk feedback digest. Items are in the feedback table; this email lists only what was not mailed before.")
+    lines.append("-- VideoMK feedback digest. Items are in the feedback table; this email lists only what was not mailed before.")
     return {"subject": subject, "body": "\n".join(lines)}
 
 

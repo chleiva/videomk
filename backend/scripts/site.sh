@@ -56,9 +56,9 @@ app_build() {
   for f in favicon.svg apple-touch-icon.png icon-192.png icon-512.png site.webmanifest; do [ -f "$APP_ASTRO_OUT/$f" ] && cp "$APP_ASTRO_OUT/$f" "$APP_OUT/$f"; done
   # The root and any unknown address (CloudFront answers /index.html for them): signed-in people go to their videos, the sign-in page handles the rest.
   cat > "$APP_OUT/index.html" <<'HTML'
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex"><title>videomk</title>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex"><title>VideoMK</title>
 <meta http-equiv="refresh" content="1;url=/generations"><link rel="icon" type="image/svg+xml" href="/favicon.svg"></head>
-<body><script>location.replace("/generations")</script><noscript><a href="/generations">videomk</a></noscript></body></html>
+<body><script>location.replace("/generations")</script><noscript><a href="/generations">VideoMK</a></noscript></body></html>
 HTML
   echo "built $APP_OUT"
 }

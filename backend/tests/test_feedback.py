@@ -163,7 +163,7 @@ def test_sends_one_email_grouped_with_count_and_marks_after(world):
     assert dg.handler() == {"sent": 3, "emails": 1}
     (m,) = world.ses.sent
     assert m["Destination"] == {"ToAddresses": ["owner@example.com"]} and m["Source"] == "hello@videomk.com"
-    assert m["Message"]["Subject"]["Data"] == "videomk feedback: 3 new"
+    assert m["Message"]["Subject"]["Data"] == "VideoMK feedback: 3 new"
     body = m["Message"]["Body"]["Text"]["Data"]
     assert "Html" not in m["Message"]["Body"]
     assert body.index("=== problem (1)") < body.index("=== idea (2)")
@@ -202,7 +202,7 @@ def test_large_batches_are_split_and_marked_part_by_part(world, monkeypatch):
     with pytest.raises(ClientError):
         dg.handler()
     assert sorted(i.get("emailedAt") is not None for i in world.table.scan()["Items"]).count(True) == 8
-    assert [m["Message"]["Subject"]["Data"] for m in world.ses.sent] == ["videomk feedback: 10 new (part 1/3)", "videomk feedback: 10 new (part 2/3)"]
+    assert [m["Message"]["Subject"]["Data"] for m in world.ses.sent] == ["VideoMK feedback: 10 new (part 1/3)", "VideoMK feedback: 10 new (part 2/3)"]
     world.ses.fail_on = None
     assert dg.handler() == {"sent": 2, "emails": 1}
 
