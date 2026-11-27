@@ -126,7 +126,10 @@ def cast(prompt: str, skill_ids: Optional[List[str]] = None, asked: Optional[str
 
 
 def voice_for(cid: str, language: str, taken: Optional[List[str]] = None) -> str:
-    names = CAST[cid]["voices"].get(language) or CAST[cid]["voices"]["en"]
+    names = CAST[cid]["voices"].get(language)
+    if not names:   # a language the cast has no hand-picked voices for: the closest voice of that language to the character's own (same gender), by the resolver
+        from . import voices
+        return voices.resolve({"gender": voices.CATALOG[CAST[cid]["voices"]["en"][0]][2]}, language, None, taken)[0]
     return next((n for n in names if n not in (taken or [])), names[0])
 
 

@@ -130,6 +130,13 @@ def no_notes_text() -> str:
     return ("(none) No sources were found for this topic. Stay general and well known: no specific numbers, dates, names, quantities, studies or quotes except those in the request itself; "
             "do not invent examples presented as facts.")
 
+def search_language_rule(language: str) -> str:
+    """Stock photo and clip libraries are searched in English. English and Spanish videos keep the prompt they always had."""
+    if language in ("en", "es"):
+        return ""
+    return " The search words that nobody sees (image_query, image_queries, clip queries) are the exception: write those in English."
+
+
 def system_prompt(language: str = "en", region: Optional[str] = None, max_images_per_minute: float = DEFAULT_MAX_IMAGES_PER_MINUTE, allow_clips: bool = True,
                   music_tracks: Optional[List[Dict[str, Any]]] = None) -> str:
     default_voice = voice_mod.default_voice(language, region)
@@ -144,7 +151,7 @@ First decide if the request is legitimate and safe to make into an educational/e
 Otherwise return ONLY JSON (no markdown, no code fences):
 {{"legit": true, "title": "<<=60 chars>", "description": "<2 sentences for the video description>",
  "mood": "calm"|"bright"|"tense", "theme": "midnight"|"paper"|"sunrise",
- "voices": {{"narrator": "<voice name from the list>"}},
+ "voices": {{"narrator": {{<what you want, see Voices>}}}},
  "sources_used": ["<title of each grounding-note page you actually used, exactly as written after ##; [] if none>"],
  "beats": [{{"chapter": "<optional chapter title, only on the first beat of a chapter>",
             "speaker": "<speaker id from \"voices\"; omit for the narrator>",
@@ -154,18 +161,18 @@ Otherwise return ONLY JSON (no markdown, no code fences):
 
 {scene_docs(images=max_images_per_minute > 0, clips=allow_clips)}
 
-Language: write EVERYTHING viewers read or hear (title, description, narration, scene text) in {voice_mod.LANGUAGES.get(language, "English")}, and cast only voices from the list below.
-Voices you may cast (name, accent, gender): {voice_mod.prompt_list(language)}.
-- {where}Their default voice is {default_voice} ({default_accent}): use it for most narration. The brief always wins: if it asks for an accent, a
-  gender or a named voice ("with a British voice", "una voz mexicana"), cast that instead, whatever the viewer's region. Otherwise choose another
-  voice only when the topic clearly calls for it (an accent that fits the subject, a child-friendly tone) or when casting several speakers.
+Language: write EVERYTHING viewers read or hear (title, description, narration, scene text) in {voice_mod.LANGUAGES.get(language, "English")}.{search_language_rule(language)}
+Voices: never a voice name of your own choosing. For each speaker say what you WANT and the studio casts the closest voice it has:
+  {{"accent": "{" | ".join(voice_mod.accents(language))}", "gender": "female"|"male", "pace": "slow"|"fast"}}, every field optional.
+- {where}{{"narrator": {{}}}} is the viewer's default voice ({default_accent}): use it for most narration. The brief always wins: if it asks for an accent, a gender
+  or a named voice ("with a British voice", "una voz mexicana", "use Brian"), say that ({{"accent": "British"}}, {{"name": "Brian"}}), whatever the viewer's
+  region; an accent outside the list gets the nearest one. Otherwise ask for another accent only when the topic clearly calls for it.
 - Use ONE voice unless the user asks for a conversation, interview, debate or dialogue between people.
-- Each voice can be used only once. The cast is small (there are {voice_mod.gender_counts(language)} to choose from), so for a dialogue between
-  several people of the same gender skip the narrator rather than run out of voices.
-- For a dialogue use 2 or 3 speaking characters, never more, plus an optional "narrator" (so at most 4 entries in "voices"). Give each an id (lowercase, short, like "maya") in "voices" with DIFFERENT voices (mix genders and
-  accents so listeners can tell them apart) and tag each beat's "speaker". Each beat is one speaker's spoken line in the first person: no
-  "Maya says", no stage directions; let the speakers answer each other and keep every line at least {MIN_BEAT_WORDS} words. A short "narrator"
-  introduction is fine.
+- For a dialogue use 2 or 3 speaking characters, never more, plus an optional "narrator" (at most 4 entries in "voices"). Give each an id (lowercase, short,
+  like "maya") with its gender (the voice must fit the character) and, to tell them apart, different accents; tag each beat's "speaker". No voice is used
+  twice and there are {voice_mod.gender_counts(language)}, so with several people of the same gender skip the narrator. Each beat is one
+  speaker's spoken line in the first person: no "Maya says", no stage directions; let the speakers answer each other and keep every line at least
+  {MIN_BEAT_WORDS} words. A short "narrator" introduction is fine.
 
 Rules:
 - Open with a hook in the first beat (a surprising fact or question), not "Welcome to...". End with a takeaway.
@@ -853,10 +860,11 @@ def _validate_plan(plan: Dict[str, Any], *, max_beats: int = MAX_BEATS, language
     if max_images is not None:
         warnings += enforce_image_budget(beats, max_images)
 
-    cast = voice_mod.clean_cast(plan.get("voices"), language, region)
+    cast, voice_notes = voice_mod.cast_voices(plan.get("voices"), language, region)   # what the director wanted for each speaker -> the closest voice there is
     asked = plan.get("voices") if isinstance(plan.get("voices"), dict) else {}
-    if asked and cast != {voice_mod.speaker_id(k): voice_mod.canonical(v, language) for k, v in asked.items() if voice_mod.speaker_id(k)}:
-        warnings.append("voices adjusted (unknown or duplicate voice, or more than 3 speakers)")
+    if len({voice_mod.speaker_id(k) for k in asked if voice_mod.speaker_id(k)}) > len(cast):
+        warnings.append("voices adjusted (more than 3 speakers)")
+    warnings += [f"voice: {n}" for n in voice_notes]
     for b in beats:  # a speaker with no voice speaks as the narrator
         if b.get("speaker") not in cast:
             b.pop("speaker", None)
@@ -872,6 +880,7 @@ def _validate_plan(plan: Dict[str, Any], *, max_beats: int = MAX_BEATS, language
             **({"sources_used": [_s(x, 120) for x in plan["sources_used"][:12] if isinstance(x, str)]} if isinstance(plan.get("sources_used"), list) else {}),
             "language": language,
             "voices": cast,
+            **({"voice_notes": voice_notes} if voice_notes else {}),   # what was substituted, in plain words (a wish the catalogue could not meet exactly)
             "beats": beats,
             **({"music": sanitize_music(plan.get("music"), len(beats))} if sanitize_music(plan.get("music"), len(beats)) else {}),
         },
