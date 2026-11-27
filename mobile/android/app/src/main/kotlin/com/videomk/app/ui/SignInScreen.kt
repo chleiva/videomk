@@ -1,5 +1,10 @@
 package com.videomk.app.ui
 
+import androidx.compose.foundation.layout.height
+import androidx.compose.material3.Icon
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.liveRegion
+
 import androidx.compose.foundation.shape.CircleShape
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
@@ -60,60 +65,69 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
+/**
+ * Sign-in (docs/DESIGN_BAR_2026.md, `phone_1_signin`): a sample of what the app makes fills the top of the screen (a still; a muted looping clip when
+ * `res/raw/sample_intro.mp4` exists), with the sentence that made it; below, the mark, the promise and the ways in. Provider buttons are drawn only when this build
+ * has them switched on; with them, email steps back to a text button ("Use email"); alone, it is the one primary button.
+ */
 @Composable
 fun SignInScreen(state: AppState, social: SocialSwitches = SocialSwitches(), onSignIn: (SignInProvider) -> Unit) {
     val signingInText = stringResource(R.string.auth_signing_in)
     val busy = state.isSigningIn || state.phase == Phase.NotConfigured
-    BoxWithConstraints(Modifier.fillMaxSize().background(Vmk.colors.background).statusBarsPadding().navigationBarsPadding()) {
-    // at least the screen high so the buttons sit at the bottom, and taller (scrolling) when large text needs it: nothing overlaps or clips
-    Column(
-        Modifier.fillMaxWidth().heightIn(min = maxHeight).verticalScroll(rememberScrollState()),
-        horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.SpaceBetween,
-    ) {
-        Column(
-            Modifier.padding(horizontal = 32.dp, vertical = 32.dp),
-            verticalArrangement = Arrangement.spacedBy(20.dp), horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            LogoMark(Modifier.clearAndSetSemantics { }, size = 96.dp)   // the Sparklet Trio mark, the same layers as the app icon
-            Text("videomk", style = VmkType.wordmark, color = Vmk.colors.text, maxLines = 1)
-            // seam for the sample video (docs/UX_REVIEW.md section 5): drop an MP4 at res/raw/sample_intro.mp4 and it plays muted and looped here (a still frame with Reduce Motion)
-            sampleVideoRes(androidx.compose.ui.platform.LocalContext.current)?.let { SignInSample(it) }
-            Text(
-                stringResource(R.string.auth_tagline), style = MaterialTheme.typography.headlineSmall, textAlign = TextAlign.Center,
-                color = Vmk.colors.text,
-            )
+    val bg = Vmk.colors.background
+    BoxWithConstraints(Modifier.fillMaxSize().background(bg)) {
+        val full = maxHeight
+        // the sample: decoration for the eye, silent for TalkBack (the promise below says the same in words)
+        Box(Modifier.fillMaxWidth().height(full * 0.64f).clearAndSetSemantics { }) {
+            val clip = sampleVideoRes(androidx.compose.ui.platform.LocalContext.current)
+            if (clip != null) SignInSample(clip, Modifier.fillMaxSize(), fill = true)
+            else Image(painterResource(R.drawable.signin_sample), null, Modifier.fillMaxSize(), contentScale = androidx.compose.ui.layout.ContentScale.Crop)
+            Box(Modifier.fillMaxSize().background(androidx.compose.ui.graphics.Brush.verticalGradient(0f to Color.Black.copy(alpha = 0.18f), 0.35f to Color.Transparent, 0.62f to Color.Transparent, 1f to bg)))
+            GlassChip(stringResource(R.string.quoted, stringResource(R.string.auth_sample_prompt)), Modifier.align(Alignment.TopCenter).statusBarsPadding().padding(top = Vmk.space.xxxl), leading = { Sparkle(tint = Vmk.colors.live, size = 14.dp) })
         }
-        Column(Modifier.widthIn(max = 480.dp).padding(horizontal = 24.dp).padding(bottom = 24.dp), verticalArrangement = Arrangement.spacedBy(12.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-            if (state.phase == Phase.NotConfigured) {
-                Text(stringResource(R.string.auth_not_configured), color = Vmk.colors.warning, textAlign = TextAlign.Center, modifier = Modifier.testTag("notConfigured"))
-            }
-            state.signInError?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = Vmk.colors.danger, textAlign = TextAlign.Center, modifier = Modifier.testTag("signInError")) }
-            for (option in social.options) {
-                val label = option.label(social.anySocial)
-                val spinning = state.isSigningIn && state.signInProvider == option
-                when (option) {
-                    SignInProvider.Google -> SocialButton(label, R.drawable.ic_google_g, SocialStyle.google(Vmk.colors.dark), !busy, spinning, "googleButton") { onSignIn(option) }
-                    SignInProvider.Apple -> SocialButton(label, R.drawable.ic_apple_logo, SocialStyle.apple(Vmk.colors.dark), !busy, spinning, "appleButton") { onSignIn(option) }
-                    // alone it is the one primary button; beside the provider buttons it steps back to a tonal pill so there is one clear hierarchy
-                    SignInProvider.Email -> if (social.anySocial) Box(
-                        Modifier.fillMaxWidth().heightIn(min = 52.dp).alpha(if (busy && !spinning) 0.4f else 1f).clip(CircleShape).background(Vmk.colors.surfaceRaised)
-                            .clickable(enabled = !busy, role = Role.Button) { onSignIn(option) }.padding(horizontal = 16.dp, vertical = 12.dp).testTag("signInButton"),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        if (spinning || (state.isSigningIn && state.signInProvider == null)) CircularProgressIndicator(Modifier.size(24.dp).semantics { contentDescription = signingInText }, strokeWidth = 2.dp)
-                        else Text(label, style = MaterialTheme.typography.titleMedium, color = Vmk.colors.text, textAlign = TextAlign.Center)
-                    } else PrimaryButton(
-                        label, onClick = { onSignIn(option) }, enabled = !busy,
-                        modifier = Modifier.fillMaxWidth().testTag("signInButton"),
-                    ) {
-                        if (spinning || (state.isSigningIn && state.signInProvider == null)) CircularProgressIndicator(Modifier.size(24.dp).semantics { contentDescription = signingInText }, color = Vmk.colors.onPrimary, strokeWidth = 2.dp)
-                        else Text(label, style = MaterialTheme.typography.titleMedium, color = Vmk.colors.onPrimary, textAlign = TextAlign.Center)
+        // at least the screen high so the buttons sit at the bottom, and taller (scrolling over the picture) when large text needs it: nothing overlaps or clips
+        Column(Modifier.fillMaxWidth().heightIn(min = full).verticalScroll(rememberScrollState()).statusBarsPadding().navigationBarsPadding(), verticalArrangement = Arrangement.Bottom, horizontalAlignment = Alignment.CenterHorizontally) {
+            Spacer(Modifier.height(full * 0.22f))
+            Column(
+                Modifier.fillMaxWidth().background(androidx.compose.ui.graphics.Brush.verticalGradient(0f to bg.copy(alpha = 0f), 0.22f to bg.copy(alpha = 0.94f), 0.4f to bg, 1f to bg)).widthIn(max = 520.dp)
+                    .padding(horizontal = Vmk.space.xxl).padding(top = Vmk.space.xxxl, bottom = Vmk.space.l),
+                verticalArrangement = Arrangement.spacedBy(Vmk.space.m),
+            ) {
+                LogoMark(Modifier.clearAndSetSemantics { }, size = 56.dp)
+                Text(stringResource(R.string.auth_tagline), style = MaterialTheme.typography.headlineLarge, color = Vmk.colors.text, modifier = Modifier.padding(top = Vmk.space.s, bottom = Vmk.space.m).semantics { heading() }.testTag("tagline"))
+                if (state.phase == Phase.NotConfigured) Text(stringResource(R.string.auth_not_configured), style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.warning, modifier = Modifier.testTag("notConfigured"))
+                state.signInError?.let {
+                    Row(Modifier.semantics { liveRegion = androidx.compose.ui.semantics.LiveRegionMode.Assertive }, verticalAlignment = Alignment.Top, horizontalArrangement = Arrangement.spacedBy(Vmk.space.s)) {
+                        Icon(Sym.Warning, null, tint = Vmk.colors.danger, modifier = Modifier.size(18.dp))
+                        Text(it, style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.text, modifier = Modifier.testTag("signInError"))
                     }
                 }
+                for (option in social.options) {
+                    val label = option.label(social.anySocial)
+                    val spinning = state.isSigningIn && state.signInProvider == option
+                    when (option) {
+                        SignInProvider.Google -> SocialButton(label, R.drawable.ic_google_g, SocialStyle.google(Vmk.colors.dark), !busy, spinning, "googleButton") { onSignIn(option) }
+                        SignInProvider.Apple -> SocialButton(label, R.drawable.ic_apple_logo, SocialStyle.apple(Vmk.colors.dark), !busy, spinning, "appleButton") { onSignIn(option) }
+                        // alone it is the one primary button; beside the provider buttons it steps back to a text button so there is one clear hierarchy
+                        SignInProvider.Email -> {
+                            val emailSpinning = spinning || (state.isSigningIn && state.signInProvider == null)
+                            if (social.anySocial) Box(
+                                Modifier.fillMaxWidth().heightIn(min = Vmk.minTouch).alpha(if (busy && !emailSpinning) 0.4f else 1f).clip(CircleShape)
+                                    .clickable(enabled = !busy, role = Role.Button) { onSignIn(option) }.padding(horizontal = Vmk.space.l, vertical = Vmk.space.m).testTag("signInButton"),
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                if (emailSpinning) LiveRing(Modifier.semantics { contentDescription = signingInText })
+                                else Text(label, style = MaterialTheme.typography.titleMedium, color = Vmk.colors.primary, textAlign = TextAlign.Center)
+                            } else PrimaryButton(label, onClick = { onSignIn(option) }, enabled = !busy || emailSpinning, modifier = Modifier.fillMaxWidth().testTag("signInButton")) {
+                                if (emailSpinning) LiveRing(Modifier.semantics { contentDescription = signingInText }, track = Color.White.copy(alpha = 0.3f), color = Color.White)
+                                else Text(label, style = VmkType.cta, color = Vmk.colors.onPrimary, textAlign = TextAlign.Center)
+                            }
+                        }
+                    }
+                }
+                Box(Modifier.fillMaxWidth().padding(top = Vmk.space.xs), contentAlignment = Alignment.Center) { LegalLine() }
             }
-            LegalLine()
         }
-    }
     }
 }
 
@@ -131,7 +145,7 @@ fun SocialButton(label: String, @DrawableRes logo: Int, style: SocialStyle, enab
     val signingInText = stringResource(R.string.auth_signing_in)
     val shape = CircleShape
     Row(
-        Modifier.fillMaxWidth().heightIn(min = 52.dp).alpha(if (enabled || spinning) 1f else 0.4f)
+        Modifier.fillMaxWidth().heightIn(min = Vmk.primaryButton).alpha(if (enabled || spinning) 1f else 0.4f)
             .clip(shape).background(style.fill, shape).let { m -> style.outline?.let { m.border(1.dp, it, shape) } ?: m }
             .clickable(enabled = enabled, role = Role.Button, onClick = onClick)
             .padding(horizontal = 16.dp, vertical = 12.dp)
@@ -174,7 +188,7 @@ fun sampleVideoRes(context: android.content.Context): Int? =
 /** A muted, looped sample clip above the sign-in buttons. It never makes a sound and stands still when animations are off. */
 @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
 @Composable
-fun SignInSample(res: Int, modifier: Modifier = Modifier) {
+fun SignInSample(res: Int, modifier: Modifier = Modifier, fill: Boolean = false) {
     val context = androidx.compose.ui.platform.LocalContext.current
     val still = reduceMotion(context)
     val player = remember {
@@ -186,6 +200,6 @@ fun SignInSample(res: Int, modifier: Modifier = Modifier) {
     androidx.compose.runtime.DisposableEffect(player) { onDispose { player.release() } }
     androidx.compose.ui.viewinterop.AndroidView(
         factory = { c -> androidx.media3.ui.PlayerView(c).apply { useController = false; resizeMode = androidx.media3.ui.AspectRatioFrameLayout.RESIZE_MODE_ZOOM; this.player = player } },
-        modifier = modifier.fillMaxWidth().aspectRatio(16f / 9f).clip(RoundedCornerShape(Vmk.radii.videoCard)).clearAndSetSemantics { },
+        modifier = (if (fill) modifier else modifier.fillMaxWidth().aspectRatio(16f / 9f).clip(RoundedCornerShape(Vmk.radii.videoCard))).clearAndSetSemantics { },
     )
 }

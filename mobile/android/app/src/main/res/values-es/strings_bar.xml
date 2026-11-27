@@ -24,4 +24,7 @@
     <string name="remix_spanish">Versión en español</string>
     <string name="remix_english">Versión en inglés</string>
     <string name="remix_cut30">Corte de 30 segundos</string>
+    <!-- Sign-in -->
+    <string name="auth_sample_prompt">Cómo respira un bosque</string>
+    <string name="auth_use_email">Usar correo</string>
 </resources>

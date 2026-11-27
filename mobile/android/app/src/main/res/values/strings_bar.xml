@@ -24,4 +24,7 @@
     <string name="remix_spanish">Spanish version</string>
     <string name="remix_english">English version</string>
     <string name="remix_cut30">30-second cut</string>
+    <!-- Sign-in -->
+    <string name="auth_sample_prompt">How a forest breathes</string>
+    <string name="auth_use_email">Use email</string>
 </resources>

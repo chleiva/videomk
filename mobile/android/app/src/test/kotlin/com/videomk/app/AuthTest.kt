@@ -221,7 +221,7 @@ class AuthTest {
         assertEquals(listOf(SignInProvider.Apple, SignInProvider.Email), SocialSwitches(apple = true).options)
         assertEquals(listOf(SignInProvider.Google, SignInProvider.Apple, SignInProvider.Email), SocialSwitches(true, true).options)
         assertEquals("Sign in or create account", SignInProvider.Email.label(SocialSwitches().anySocial))   // off: today's wording
-        assertEquals("Continue with email", SignInProvider.Email.label(SocialSwitches(google = true).anySocial))
+        assertEquals("Use email", SignInProvider.Email.label(SocialSwitches(google = true).anySocial))
         assertEquals("Continue with Google", SignInProvider.Google.label(true)); assertEquals("Continue with Apple", SignInProvider.Apple.label(true))
     }
 }
