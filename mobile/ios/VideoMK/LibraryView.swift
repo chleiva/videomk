@@ -2,18 +2,19 @@ import PhotosUI
 import SwiftUI
 import VideoMKCore
 
-/// The home screen (docs/UI_DESIGN.md d, o): top bar, the "Your videos" feed (or the empty hero with examples) and one clear entry: "New video".
-/// There is no text input on this screen; making a video happens on the Create sheet.
+/// Videos, the home screen (docs/DESIGN_BAR_2026.md, `phone_2_videos`): the large title with the credits and the account, the Making card on top while
+/// something is being made, then the posters (the newest one large). One way to make a video: the round New video button of the tab bar.
 struct LibraryView: View {
     @Environment(AppModel.self) private var model
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.dynamicTypeSize) private var typeSize
     @State private var path: [String] = []
     @State private var showingSettings = false
     @State private var showingWallet = false
     @State private var showingCreate = false
     @State private var showingRating = false
     @Environment(\.scenePhase) private var scenePhase
-    @Environment(\.horizontalSizeClass) private var sizeClass
+    @Namespace private var reveal
 
     private var balance: Int? { model.wallet.flatMap { $0.unlimited ? nil : $0.balance } }
 
@@ -38,7 +39,7 @@ struct LibraryView: View {
         }
         .onChange(of: path) { _, p in model.tabBarHidden = !p.isEmpty }
         .task { await model.refresh() }
-        .task { await model.createModel.loadCapabilities(userID: model.userID) }       // ready before the sheet opens
+        .task { await model.createModel.loadCapabilities(userID: model.userID) }       // ready before the screen opens
         #if DEBUG
         .task { await debugSetup() }
         #endif
@@ -47,12 +48,19 @@ struct LibraryView: View {
         .sheet(isPresented: $showingWallet) { WalletView() }
         .sheet(isPresented: $showingRating) { RatingPromptView() }
         .task(id: "\(path.isEmpty)-\(scenePhase == .active)") { await considerRatingPrompt() }
-        .sheet(isPresented: $showingCreate) { CreateView(create: model.createModel) }
+        .fullScreenCover(isPresented: $showingCreate) { CreateView(create: model.createModel) }
         .alert(item: $model.retryNotice) { Alert(title: Text(tr("retry.notice_title")), message: Text($0.message), dismissButton: .default(Text(tr("common.ok")))) }
         .sheet(item: $model.createProblem) { CreateProblemSheet(problem: $0) { model.createProblem = nil; model.createModel.open(prefill: $0.prompt); showingCreate = true } }
-        .sensoryFeedback(.success, trigger: model.completions)
+        .sensoryFeedback(.success, trigger: model.completions)                       // one success haptic when a video becomes ready
+        .onChange(of: model.completions) { _, _ in if let id = model.revealing, let v = model.video(id) { UIAccessibility.post(notification: .announcement, argument: tr("making.ready_announce", v.displayTitle)) } }
         .onChange(of: model.createRequested) { _, v in if v { model.createRequested = false; openCreate() } }
         .onChange(of: model.composerDraft) { _, draft in if let draft { model.composerDraft = nil; openCreate(prefill: draft) } }
+        .onChange(of: model.createPrefill) { _, p in
+            guard let p else { return }
+            model.createPrefill = nil
+            model.createModel.open(prefill: p.text, minutes: p.minutes, platformChip: p.platformChip, language: p.language)
+            showingCreate = true
+        }
         .onChange(of: model.requestCredits) { _, v in if v { model.requestCredits = false; showingCreate = false; Task { try? await Task.sleep(for: .milliseconds(400)); showingWallet = true } } }
     }
 
@@ -68,7 +76,7 @@ struct LibraryView: View {
         if model.rating.shouldPrompt(context) { model.rating.didShow(); showingRating = true }
     }
 
-    private func openCreate(prefill: String? = nil, minutes: Double? = nil, photos: Bool = false) {
+    private func openCreate(prefill: String? = nil, minutes: Double? = nil) {
         model.createModel.open(prefill: prefill, minutes: minutes)
         showingCreate = true
     }
@@ -77,72 +85,91 @@ struct LibraryView: View {
 
     @ViewBuilder private var uploadStrip: some View {
         if let media = model.media {
-            UploadPill(media: media) { model.selectedTab = 1 }.frame(maxWidth: .infinity, alignment: .trailing).padding(.horizontal, 16).padding(.top, 4).vmkOneLineCap()
+            UploadPill(media: media) { model.selectedTab = 1 }.frame(maxWidth: .infinity, alignment: .trailing).padding(.horizontal, Theme.gutter).padding(.top, Theme.Space.xs).vmkOneLineCap()
         }
     }
 
     // MARK: top bar
 
     private var topBar: some View {
-        HStack(spacing: 8) {
-            BrandMark(size: 32)
-            Spacer()
+        TopBar(title: tr("videos.your_videos")) {
             if let wallet = model.wallet {
                 Button { showingWallet = true } label: {
-                    HStack(spacing: 4) {
-                        Image(systemName: "bolt.fill").font(.vmk(13)).foregroundStyle(Theme.primary)
-                        Text(wallet.unlimited ? "∞" : "\(wallet.balance)").font(.vmk(17, weight: .semibold).monospacedDigit()).foregroundStyle(Theme.text)
+                    HStack(spacing: 5) {
+                        Image(systemName: "bolt.fill").font(.role(.footnote)).foregroundStyle(Theme.primary)
+                        Text(wallet.unlimited ? "∞" : "\(wallet.balance)").font(.role(.subhead, weight: .semibold).monospacedDigit()).foregroundStyle(Theme.text)
                     }
-                    .padding(.horizontal, 14).frame(height: 38).vmkGlass(in: Capsule()).frame(minHeight: 44)
+                    .padding(.horizontal, Theme.Space.m).frame(height: 36).background(Theme.surfaceRaised, in: Capsule()).frame(minHeight: Theme.minTouch).contentShape(Capsule())
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel(wallet.unlimited ? tr("videos.unlimited_credits") : tr("credits.count", wallet.balance))
                 .accessibilityHint(tr("videos.shows_your_credits"))
                 .accessibilityIdentifier("balanceChip")
             }
-            GlassIconButton(symbol: "person", label: tr("videos.settings"), identifier: "settingsButton") { showingSettings = true }
+            Button { showingSettings = true } label: {
+                Group {
+                    if let initial { Text(initial).font(.role(.subhead, weight: .semibold)) } else { Image(systemName: "person.fill").font(.role(.subhead)) }
+                }
+                .foregroundStyle(Theme.textSecondary).frame(width: 36, height: 36).background(Theme.surface3, in: Circle())
+                .frame(minWidth: Theme.minTouch, minHeight: Theme.minTouch).contentShape(Circle())
+            }
+            .buttonStyle(.plain).accessibilityLabel(tr("videos.settings")).accessibilityIdentifier("settingsButton")
         }
-        .padding(.leading, 20).padding(.trailing, 12).frame(minHeight: 52).vmkOneLineCap()      // mark, credits and account stay on one row; the page below scrolls and wraps
+    }
+
+    /// The first letter of the account, for the round account button.
+    private var initial: String? {
+        if case .signedIn(let email?) = model.phase, let first = email.first, first.isLetter || first.isNumber { return String(first).uppercased() }
+        return nil
     }
 
     // MARK: feed
 
-    /// In progress or still being sent: always on top, under no heading.
+    /// In progress or still being sent: always on top.
     private var activeEntries: [LibraryEntry] {
         model.entries.filter { e in
             switch e { case .pending: true; case .video(let v): v.status.isRunning }
         }
     }
 
-    private var finishedGroups: [(group: DayGroup, items: [VideoItem])] {
-        let finished = model.entries.compactMap { e -> VideoItem? in if case .video(let v) = e, !v.status.isRunning { v } else { nil } }
-        return DayGroup.grouped(finished, date: \.createdAt)
-    }
+    private var finished: [VideoItem] { model.entries.compactMap { e in if case .video(let v) = e, !v.status.isRunning { v } else { nil } } }
 
     private var statusKeys: [String] { model.entries.map { e in if case .video(let v) = e { "\(v.id)-\(v.status.isRunning)-\(v.status == .complete)" } else { e.id } } }
 
     private var feed: some View {
-        let columns = Array(repeating: GridItem(.flexible(), spacing: 14, alignment: .top), count: sizeClass == .regular ? 2 : 1)
+        let blocks = VideoFeed.blocks(finished, singleColumn: typeSize.isAccessibilitySize)
         return ScrollView {
-            LazyVStack(alignment: .leading, spacing: 14) {
-                Text(tr("videos.your_videos")).font(.vmk(30, weight: .bold)).tracking(-0.6).foregroundStyle(Theme.text).padding(.top, 2).accessibilityAddTraits(.isHeader)
-                LazyVGrid(columns: columns, spacing: 14) { ForEach(activeEntries) { entry in card(entry).transition(.opacity) } }
-                ForEach(finishedGroups, id: \.group) { section in
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(Self.title(section.group).uppercased()).font(.vmk(12, weight: .bold)).tracking(0.8).foregroundStyle(Theme.textTertiary).padding(.top, 8).accessibilityAddTraits(.isHeader)
-                        LazyVGrid(columns: columns, spacing: 6) { ForEach(section.items) { v in card(.video(v)).transition(.opacity) } }
+            LazyVStack(alignment: .leading, spacing: Theme.Space.xl) {
+                ForEach(activeEntries) { entry in card(entry).transition(.opacity) }
+                ForEach(blocks) { block in
+                    switch block {
+                    case .hero(let v): link(v) { VideoRow(video: v, meta: Self.when(v.createdAt), note: firstVideoNote(v)) }.matchedGeometryEffect(id: v.id, in: reveal, properties: .position, isSource: false)
+                    case .pair(let a, let b): PairRow(a: a, b: b) { v in link(v) { VideoRow(video: v, posterHeight: VideoFeed.pairHeight(a, b)) } }
+                    case .problem(let v): card(.video(v))
                     }
                 }
             }
-            .padding(.horizontal, Theme.Space.l).padding(.bottom, Theme.Space.l)
-            .animation(reduceMotion ? Theme.Motion.fade : Theme.Motion.insert, value: statusKeys)
+            .padding(.horizontal, Theme.gutter).padding(.top, Theme.Space.s).padding(.bottom, Theme.Space.xxl)
+            .frame(maxWidth: 640).frame(maxWidth: .infinity)
+            .animation(reduceMotion ? Theme.Motion.fade : Theme.Motion.spring, value: statusKeys)
         }
         .scrollDismissesKeyboard(.interactively)
         .refreshable { await model.refresh() }
     }
 
-    static func title(_ g: DayGroup) -> String {
-        switch g { case .today: tr("videos.group_today"); case .yesterday: tr("videos.group_yesterday"); case .earlier: tr("videos.group_earlier") }
+    private func link<Label: View>(_ v: VideoItem, @ViewBuilder label: () -> Label) -> some View {
+        NavigationLink(value: v.id) { label() }.buttonStyle(PressScale())
+    }
+
+    /// "Your first video.": one line, on the first video only, while it is being revealed.
+    private func firstVideoNote(_ v: VideoItem) -> String? {
+        model.revealing == v.id && model.videos.filter { $0.status == .complete }.count == 1 ? tr("videos.first_video") : nil
+    }
+
+    /// "Today", "Yesterday", or the date.
+    static func when(_ date: Date?) -> String? {
+        guard let date else { return nil }
+        switch DayGroup.of(date) { case .today: return tr("videos.group_today"); case .yesterday: return tr("videos.group_yesterday"); case .earlier: return Localization.shared.abbreviatedDate(date) }
     }
 
     @ViewBuilder private func card(_ entry: LibraryEntry) -> some View {
@@ -151,11 +178,11 @@ struct LibraryView: View {
             PendingCard(pending: p, onRetry: { model.retry(p.id) }, onDismiss: { model.dismissPending(p.id) })
         case .video(let v):
             switch v.status {
-            case .running: NavigationLink(value: v.id) { RunningCard(video: v) }.buttonStyle(.plain)
-            case .complete: NavigationLink(value: v.id) { VideoRow(video: v) }.buttonStyle(.plain)
+            case .running: NavigationLink(value: v.id) { RunningCard(video: v) }.buttonStyle(PressScale()).matchedGeometryEffect(id: v.id, in: reveal, properties: .position)
+            case .complete: link(v) { VideoRow(video: v) }
             case .failed:
                 // "Try again" starts THIS video again on the server (all its photos and options): no new row. Not offered for a used-up presentation or one out of retries.
-                FailedRow(title: model.brief(for: v.id) ?? v.displayTitle, message: nil, retry: v.canRetry == false || model.retrying.contains(v.id) ? nil : { model.tryAgain(v) }, onRemove: { model.removeFailed(v) })
+                FailedRow(title: model.brief(for: v.id) ?? v.displayTitle, message: tr("videos.no_credits_were_used"), retry: v.canRetry == false || model.retrying.contains(v.id) ? nil : { model.tryAgain(v) }, onRemove: { model.removeFailed(v) })
                     .accessibilityIdentifier("failedVideo")
             case .rejected:
                 FailedRow(title: model.brief(for: v.id) ?? v.displayTitle, message: v.rejectReason ?? tr("detail.rejected_body"), onRemove: { model.removeFailed(v) }, rejected: true)
@@ -164,63 +191,50 @@ struct LibraryView: View {
     }
 
     private var loadingState: some View {
-        ScrollView { VStack(spacing: 18) { SkeletonCard(); SkeletonCard(); SkeletonCard() }.padding(.horizontal, 16).padding(.top, 40) }
+        ScrollView { VideosSkeleton().padding(.horizontal, Theme.gutter).padding(.top, Theme.Space.s) }
+            .scrollDisabled(true)
             .accessibilityElement(children: .ignore).accessibilityLabel(tr("videos.loading_your_videos"))
     }
 
     // MARK: empty
 
-    /// First run: the headline, a real prompt field (a tap opens Create with the keyboard up) and three example chips. Nothing else.
+    /// First run: one line, a prompt that opens Create with the caret ready, and the three examples. Nothing else.
     private var emptyState: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
-                Text(tr("videos.describe_itnwell_make_the_video")).font(.vmk(34, weight: .bold)).tracking(-1).foregroundStyle(Theme.text).fixedSize(horizontal: false, vertical: true).padding(.top, 36).accessibilityAddTraits(.isHeader)
-                Button { openCreate(prefill: nil, minutes: 0.5) } label: {
-                    VStack(alignment: .leading, spacing: 0) {
-                        Text(tr("create.describe_your_video_for_example")).font(.vmk(19)).foregroundStyle(Theme.textTertiary)
+                Text(tr("videos.describe_itnwell_make_the_video")).textRole(.largeTitle).foregroundStyle(Theme.text).fixedSize(horizontal: false, vertical: true).padding(.top, Theme.Space.xxl).accessibilityAddTraits(.isHeader)
+                Button { openCreate() } label: {
+                    HStack(spacing: Theme.Space.s) {
+                        Text(tr("create.describe_your_video_for_example")).textRole(.title, weight: .semibold).foregroundStyle(Theme.textSecondary)
                         Spacer(minLength: 0)
-                        HStack { Spacer(); Image(systemName: "mic").font(.vmk(18)).foregroundStyle(Theme.textSecondary).frame(width: 44, height: 44).background(Theme.surfaceRaised, in: Circle()).accessibilityHidden(true) }
+                        PlaySparkle(scale: 0.8).foregroundStyle(Theme.primary)
                     }
-                    .padding(16).frame(maxWidth: .infinity, minHeight: 132, alignment: .topLeading)
-                    .background(Theme.surface, in: RoundedRectangle(cornerRadius: Theme.Radii.videoCard, style: .continuous))
-                    .overlay(RoundedRectangle(cornerRadius: Theme.Radii.videoCard, style: .continuous).stroke(Theme.outline, lineWidth: 1))
+                    .padding(.horizontal, Theme.Space.xl).frame(maxWidth: .infinity, minHeight: 72, alignment: .leading)
+                    .background(Theme.surface, in: RoundedRectangle(cornerRadius: Theme.Radii.card, style: .continuous)).elevation(2)
                 }
-                .buttonStyle(.plain).padding(.top, 24).accessibilityLabel(tr("create.describe_your_video_for_example")).accessibilityIdentifier("firstVideoButton")
-                WrapLayout(spacing: 8) { ForEach(ExamplePrompt.all) { example in exampleChip(example) } }.padding(.top, 14)
+                .buttonStyle(PressScale()).padding(.top, Theme.Space.xxl).accessibilityLabel(tr("create.new_video")).accessibilityHint(tr("videos.opens_the_screen_where_you")).accessibilityIdentifier("firstVideoButton")
+                WrapLayout(spacing: Theme.Space.s) {
+                    ForEach(ExamplePrompt.all) { e in
+                        SparkleChip(title: e.label, identifier: "example", hint: tr("videos.fills_in_the_description_it")) { Haptics.play(.selection); openCreate(); model.createModel.typeIn = e.text }
+                    }
+                }
+                .padding(.top, Theme.Space.l)
             }
-            .padding(.horizontal, Theme.Space.l).padding(.bottom, Theme.Space.l)
+            .padding(.horizontal, Theme.gutter).padding(.bottom, Theme.Space.xxl)
+            .frame(maxWidth: 640).frame(maxWidth: .infinity)
         }
-        .scrollDismissesKeyboard(.interactively)
         .refreshable { await model.refresh() }
     }
 
-    private func exampleChip(_ e: ExamplePrompt) -> some View {
-        Button { use(e) } label: {
-            HStack(spacing: 6) {
-                if e.usesPhotos { Image(systemName: "photo").font(.vmk(13)).accessibilityHidden(true) }
-                Text(e.label).font(.vmk(15, weight: .semibold)).multilineTextAlignment(.leading).fixedSize(horizontal: false, vertical: true)
-            }
-            .foregroundStyle(Theme.text).padding(.horizontal, 14).padding(.vertical, 8).frame(minHeight: 44)
-            .background(Theme.surface, in: RoundedRectangle(cornerRadius: Theme.Radii.videoCard, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: Theme.Radii.videoCard, style: .continuous).stroke(Theme.outline, lineWidth: 1))
-        }
-        .buttonStyle(.plain)
-        .accessibilityHint(tr("videos.fills_in_the_description_it"))
-        .accessibilityIdentifier("example")
-    }
-
-    /// Tapping an example fills the composer, sets its length and does not send. The photo example also opens Add photos.
-    private func use(_ e: ExamplePrompt) {
-        openCreate(prefill: e.text, minutes: e.minutes)
-        if e.usesPhotos { model.createModel.autoOpenPhotos = .init(library: (model.media?.summary?.count ?? 0) > 0) }
-    }
-
+    /// The list could not be loaded: what happened in one line, and one action.
     private func errorState(_ message: String) -> some View {
-        ContentUnavailableView {
-            Label(tr("videos.couldnt_load_your_videos"), systemImage: "wifi.exclamationmark")
-        } description: { Text(message) } actions: {
-            Button(tr("common.try_again")) { Task { await model.refresh() } }.buttonStyle(.borderedProminent)
+        VStack(spacing: Theme.Space.l) {
+            Image(systemName: "wifi.exclamationmark").font(.role(.largeTitle, weight: .regular)).foregroundStyle(Theme.textSecondary).accessibilityHidden(true)
+            Text(tr("videos.couldnt_load_your_videos")).textRole(.title).foregroundStyle(Theme.text).multilineTextAlignment(.center)
+            Text(message).font(.role(.subhead)).foregroundStyle(Theme.textSecondary).multilineTextAlignment(.center)
+            Button(tr("common.try_again")) { Task { await model.refresh() } }.buttonStyle(TonalButtonStyle(fullWidth: false)).accessibilityIdentifier("reloadVideos")
         }
+        .padding(.horizontal, Theme.gutter).frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     /// Debug builds can shorten the default video (UI tests); release builds always start at the product default.
@@ -232,16 +246,87 @@ struct LibraryView: View {
     }
 }
 
+/// The three examples of Create (and of the first run): a few words on the chip, a whole sentence in the prompt.
 struct ExamplePrompt: Identifiable {
-    let text: String, label: String, tag: String, symbol: String
-    var minutes: Double?
-    var usesPhotos = false
-    var id: String { text }
-    static let all = [
-        ExamplePrompt(text: tr("videos.a_calm_oneminute_story_about"), label: tr("videos.chip_story"), tag: LengthLabel.chip(1), symbol: "film", minutes: 1),
-        ExamplePrompt(text: tr("videos.how_bees_make_honey_explained"), label: tr("videos.chip_bees"), tag: LengthLabel.chip(3), symbol: "sparkles", minutes: 3),
-        ExamplePrompt(text: tr("videos.my_holiday_in_thailand_told"), label: tr("videos.chip_holiday"), tag: tr("videos.tag_photos"), symbol: "photo", minutes: nil, usesPhotos: true),
-    ]
+    let text: String, label: String
+    var id: String { label }
+    static var all: [ExamplePrompt] {
+        [ExamplePrompt(text: tr("create.example1_text"), label: tr("create.example1_label")),
+         ExamplePrompt(text: tr("create.example2_text"), label: tr("create.example2_label")),
+         ExamplePrompt(text: tr("create.example3_text"), label: tr("create.example3_label"))]
+    }
+}
+
+/// A pressed card gives a little (a spring; Reduce Motion: it only dims).
+struct PressScale: ButtonStyle {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label.scaleEffect(configuration.isPressed && !reduceMotion ? 0.98 : 1).opacity(configuration.isPressed ? 0.9 : 1)
+            .animation(Theme.Motion.spring, value: configuration.isPressed)
+    }
+}
+
+/// How the finished videos are laid out: the newest one large, then two side by side (a vertical one keeps a narrow column), and a video that did not
+/// finish as a full-width card where it belongs in time. Pure layout rules, no views.
+enum VideoFeed {
+    enum Block: Identifiable {
+        case hero(VideoItem), pair(VideoItem, VideoItem), problem(VideoItem)
+        var id: String { switch self { case .hero(let v): "h-\(v.id)"; case .pair(let a, let b): "p-\(a.id)-\(b.id)"; case .problem(let v): "x-\(v.id)" } }
+    }
+
+    static func blocks(_ videos: [VideoItem], singleColumn: Bool) -> [Block] {
+        var out: [Block] = [], run: [VideoItem] = [], heroDone = false
+        func flush() {
+            var rest = run[...]
+            if !heroDone, let first = rest.first { out.append(.hero(first)); rest = rest.dropFirst(); heroDone = true }
+            while let a = rest.first {
+                rest = rest.dropFirst()
+                if !singleColumn, let b = rest.first { out.append(.pair(a, b)); rest = rest.dropFirst() } else { out.append(.hero(a)) }
+            }
+            run = []
+        }
+        for v in videos {
+            if v.status == .complete { run.append(v) } else { flush(); out.append(.problem(v)) }
+        }
+        flush()
+        return out
+    }
+
+    /// The share of the row's width the first of a pair takes: a vertical video beside a wide one keeps a narrow column.
+    static func share(_ a: VideoItem, _ b: VideoItem) -> Double { a.isPortrait == b.isPortrait ? 0.5 : (a.isPortrait ? 0.35 : 0.65) }
+    /// Both posters of a pair have the same height: taller when one of them is vertical.
+    static func pairHeight(_ a: VideoItem, _ b: VideoItem) -> CGFloat { a.isPortrait || b.isPortrait ? 172 : 127 }
+}
+
+/// Two posters side by side, sharing the row's width by `VideoFeed.share`.
+struct PairRow<Cell: View>: View {
+    let a: VideoItem, b: VideoItem
+    @ViewBuilder var cell: (VideoItem) -> Cell
+    var body: some View {
+        PairLayout(share: VideoFeed.share(a, b), spacing: Theme.Space.m) { cell(a); cell(b) }
+    }
+}
+
+/// A two-column row: the first column takes `share` of the width (after the spacing), the second the rest; both start at the top.
+struct PairLayout: Layout {
+    var share: Double
+    var spacing: CGFloat
+    private func widths(_ total: CGFloat) -> (CGFloat, CGFloat) { let w = max(0, total - spacing); let first = (w * share).rounded(); return (first, w - first) }
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        let total: CGFloat = proposal.width ?? 320
+        let (w1, w2) = widths(total)
+        var h: CGFloat = 0
+        for (view, w) in zip(subviews, [w1, w2]) { h = max(h, view.sizeThatFits(ProposedViewSize(width: w, height: nil)).height) }
+        return CGSize(width: total, height: h)
+    }
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+        let (w1, w2) = widths(bounds.width)
+        var x = bounds.minX
+        for (view, w) in zip(subviews, [w1, w2]) {
+            view.place(at: CGPoint(x: x, y: bounds.minY), anchor: .topLeading, proposal: ProposedViewSize(width: w, height: nil))
+            x += w + spacing
+        }
+    }
 }
 
 struct RoundRectangle: Shape {
@@ -284,18 +369,18 @@ struct CreateProblemSheet: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             HStack(alignment: .top) {
-                Image(systemName: "exclamationmark.triangle").font(.vmk(34)).foregroundStyle(Theme.warning).frame(width: 56, height: 56).background(Theme.warningContainer, in: Circle()).accessibilityHidden(true)
+                Image(systemName: "exclamationmark.triangle").font(.role(.title, weight: .regular)).foregroundStyle(Theme.warning).frame(width: 56, height: 56).background(Theme.warningContainer, in: Circle()).accessibilityHidden(true)
                 Spacer()
-                GlassIconButton(symbol: "xmark", label: tr("common.close"), identifier: "kindClose") { dismiss() }
+                IconButton(symbol: "xmark", label: tr("common.close"), identifier: "kindClose") { dismiss() }
             }.padding(.top, 14)
-            Text(problem.paused ? tr("videos.creating_videos_is_paused") : tr("videos.we_cant_make_this_one")).font(.vmk(30, weight: .bold)).foregroundStyle(Theme.text).padding(.top, 16).accessibilityAddTraits(.isHeader)
-            Text(problem.message).font(.vmk(17)).foregroundStyle(Theme.textSecondary).padding(.top, 8)
-            if problem.paused, let retry = RetryText.make(problem.retryAfter) { Text(retry).font(.vmk(17, weight: .semibold)).foregroundStyle(Theme.text).padding(.top, 6) }
+            Text(problem.paused ? tr("videos.creating_videos_is_paused") : tr("videos.we_cant_make_this_one")).textRole(.title).foregroundStyle(Theme.text).padding(.top, Theme.Space.l).accessibilityAddTraits(.isHeader)
+            Text(problem.message).font(.role(.body)).foregroundStyle(Theme.textSecondary).padding(.top, Theme.Space.s)
+            if problem.paused, let retry = RetryText.make(problem.retryAfter) { Text(retry).font(.role(.headline)).foregroundStyle(Theme.text).padding(.top, 6) }
             Spacer()
-            Text(tr("create.nothing_was_charged")).font(.vmk(15)).foregroundStyle(Theme.textSecondary)
-            Button { onEdit(problem) } label: { Text(tr("create.edit_request")).font(.vmk(19, weight: .bold)).foregroundStyle(Theme.onPrimary).frame(maxWidth: .infinity, minHeight: 54).background(Theme.gradient, in: Capsule()) }.buttonStyle(.plain).padding(.top, 8).accessibilityIdentifier("editRequest")
+            Text(tr("create.nothing_was_charged")).font(.role(.subhead)).foregroundStyle(Theme.textSecondary)
+            PrimaryButton(title: tr("create.edit_request"), identifier: "editRequest") { onEdit(problem) }.padding(.top, Theme.Space.s)
         }
-        .padding(.horizontal, 20).padding(.bottom, 6)
+        .padding(.horizontal, Theme.gutter).padding(.bottom, 6)
         .presentationBackground(Theme.surface).presentationDetents([.height(420), .large]).presentationDragIndicator(.visible)
     }
 }

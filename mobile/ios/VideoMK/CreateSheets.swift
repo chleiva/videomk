@@ -15,7 +15,6 @@ struct CreateStageSheet: View {
     var body: some View {
         Group {
             switch create.stage {
-            case .checking: skeleton
             case .questions(let flow): QuestionStep(create: create, flow: flow, mediaCount: mediaCount, onSubmit: onSubmit)
             case .summary(let flow, let brief): SummaryStep(create: create, flow: flow, brief: brief, balance: balance, onSubmit: onSubmit, onEdit: onEdit)
             case .notSupported(let m, let s): KindStep(title: tr("create.cant_make_title"), message: m ?? tr("create.unsupported_fallback"), suggestion: s, retry: nil, create: create, onEdit: onEdit)
@@ -28,7 +27,6 @@ struct CreateStageSheet: View {
         .presentationDetents(typeSize.isAccessibilitySize ? [.large] : [.height(420), .height(560), .large], selection: $detent)
         .onChange(of: create.stage, initial: true) { _, _ in detent = typeSize.isAccessibilitySize || hasLongLabels ? .large : .height(isSummary ? 560 : 420) }
         .presentationDragIndicator(.visible)
-        .interactiveDismissDisabled(isChecking)
     }
 
     @State private var detent: PresentationDetent = .height(420)
@@ -44,19 +42,6 @@ struct CreateStageSheet: View {
     }
 
     private var isSummary: Bool { if case .summary = create.stage { true } else { false } }
-    private var isChecking: Bool { if case .checking = create.stage { true } else { false } }
-
-    private var skeleton: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            HStack { Spacer(); Button(tr("create.skip")) { create.skipCheck(submit: onSubmit) }.font(.vmk(17, weight: .semibold)).frame(minHeight: 44).accessibilityIdentifier("makeItNow") }
-            RoundedRectangle(cornerRadius: 8).fill(Theme.surfaceRaised).frame(width: 220, height: 28)
-            RoundedRectangle(cornerRadius: 8).fill(Theme.surfaceRaised).frame(width: 150, height: 16)
-            HStack(spacing: 10) { ForEach(0..<3, id: \.self) { _ in Capsule().fill(Theme.surfaceRaised).frame(height: 50) } }
-            Text(tr("create.checking_your_request")).font(.vmk(15)).foregroundStyle(Theme.textSecondary).accessibilityIdentifier("checkingText")
-            Spacer()
-        }
-        .padding(.horizontal, 20).padding(.top, 12)
-    }
 }
 
 private struct QuestionStep: View {
@@ -174,7 +159,7 @@ private struct SummaryStep: View {
             HStack {
                 Text(tr("create.ready_when_you_are")).font(.vmk(23, weight: .bold)).foregroundStyle(Theme.text).accessibilityAddTraits(.isHeader)
                 Spacer()
-                GlassIconButton(symbol: "xmark", label: tr("create.edit_request"), identifier: "editRequest") { onEdit() }
+                IconButton(symbol: "xmark", label: tr("create.edit_request"), identifier: "editRequest") { onEdit() }
             }.padding(.top, 14)
             VStack(alignment: .leading, spacing: 4) {
                 Text(create.form.text).font(.vmk(17)).foregroundStyle(Theme.text).lineLimit(4)
@@ -217,7 +202,7 @@ private struct KindStep: View {
             HStack(alignment: .top) {
                 Image(systemName: "exclamationmark.triangle").font(.vmk(34)).foregroundStyle(Theme.warning).frame(width: 56, height: 56).background(Theme.warningContainer, in: Circle()).accessibilityHidden(true)
                 Spacer()
-                GlassIconButton(symbol: "xmark", label: tr("common.close"), identifier: "kindClose") { create.dismissOverlay() }
+                IconButton(symbol: "xmark", label: tr("common.close"), identifier: "kindClose") { create.dismissOverlay() }
             }.padding(.top, 14)
             Text(title).font(.vmk(30, weight: .bold)).foregroundStyle(Theme.text).padding(.top, 16).accessibilityAddTraits(.isHeader).accessibilityIdentifier("kindTitle")
             Text(message).font(.vmk(17)).foregroundStyle(Theme.textSecondary).padding(.top, 8).fixedSize(horizontal: false, vertical: true).accessibilityIdentifier("kindMessage")

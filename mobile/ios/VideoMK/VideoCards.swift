@@ -1,85 +1,76 @@
 import SwiftUI
 import VideoMKCore
 
-/// The rows of the video list (docs/UX_REVIEW.md, mockup 01): thumbnail rows for ready videos, the one MakingCard for videos in progress,
-/// a calm danger-container row for ones that did not finish. Layouts switch to a stacked form at accessibility text sizes.
+/// The cards of the Videos list (docs/DESIGN_BAR_2026.md, `phone_2_videos`): the Making card (MakingCard.swift), posters for finished videos (the first
+/// one large), and one calm card for a video that did not finish. Content is the colour; the cards themselves are neutral.
 
+/// A small dark chip on a picture (the duration, the frame shape).
 struct GlassChip: View {
     let text: String
-    var dot: Color?
     var symbol: String?
-    var fill: Color = .black.opacity(0.38)
     var body: some View {
-        HStack(spacing: 6) {
-            if let dot { Circle().fill(dot).frame(width: 8, height: 8) }
-            if let symbol { Image(systemName: symbol).font(.vmk(12, weight: .bold)) }
-            Text(text).font(.vmk(14, weight: .semibold)).lineLimit(2)
+        HStack(spacing: 4) {
+            if let symbol { Image(systemName: symbol).font(.role(.caption, weight: .bold)).accessibilityHidden(true) }
+            Text(text).font(.role(.caption, weight: .semibold)).monospacedDigit().lineLimit(1)
         }
-        .foregroundStyle(.white).padding(.horizontal, 11).frame(minHeight: 28)
-        .background(fill, in: Capsule())
+        .foregroundStyle(Theme.onMedia).padding(.horizontal, 8).frame(minHeight: 24)
+        .background(Theme.mediaInk.opacity(0.6), in: Capsule())
     }
 }
 
-/// A video's picture at 16:9: a vertical or square picture is shown whole over a soft copy of itself, never stretched or cropped to a strip.
-struct VideoThumb: View {
+/// A video's picture, filling the frame it is given (the caller decides the shape). A vertical or square picture in a wide frame is shown whole over a
+/// soft copy of itself, never stretched. The duration sits on the picture.
+struct Poster: View {
     let video: VideoItem
-    var showsDuration = true
+    var radius: CGFloat = Theme.Radii.videoCard
+    /// The frame is close to the video's own shape, or a crop is fine (grid tiles): fill it.
+    var fill = true
+
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
-            Theme.makingGradient.opacity(0.55)
+            Theme.surfaceRaised
             if let url = video.previewGifURL {
                 CachedImage(url: url) { image in
-                    if abs(video.aspectRatio - 16.0 / 9.0) < 0.15 { image.resizable().scaledToFill() }
+                    if fill { image.resizable().scaledToFill() }
                     else { ZStack { image.resizable().scaledToFill().blur(radius: 18).opacity(0.7); image.resizable().scaledToFit() } }
                 }
             } else {
-                Image(systemName: "play.fill").font(.vmk(20)).foregroundStyle(.white.opacity(0.9)).frame(maxWidth: .infinity, maxHeight: .infinity)
+                Theme.makingGradient.opacity(0.9)
+                Image(systemName: "play.fill").font(.role(.title)).foregroundStyle(Theme.onPrimary.opacity(0.92)).frame(maxWidth: .infinity, maxHeight: .infinity).accessibilityHidden(true)
             }
-            if showsDuration, let d = video.durationSeconds {
-                HStack(spacing: 4) {
-                    if video.aspect != nil, abs(video.aspectRatio - 16.0 / 9.0) >= 0.15 { Image(systemName: video.isPortrait ? "rectangle.portrait" : "square").font(.vmk(10, weight: .bold)).accessibilityHidden(true) }
-                    Text(VideoRow.duration(d)).font(.vmk(12, weight: .semibold).monospacedDigit())
-                }
-                .foregroundStyle(.white).padding(.horizontal, 7).frame(height: 20).background(.black.opacity(0.55), in: Capsule()).padding(6)
-            }
+            if let d = video.durationSeconds { GlassChip(text: VideoRow.duration(d)).padding(10) }
         }
-        .aspectRatio(16.0 / 9.0, contentMode: .fit)
-        .clipShape(RoundedRectangle(cornerRadius: Theme.Radii.thumb, style: .continuous))
+        .overlay(alignment: .topLeading) { if video.aspect != nil, video.isPortrait { GlassChip(text: video.aspect ?? "").padding(10) } }
+        .clipShape(RoundedRectangle(cornerRadius: radius, style: .continuous))
+        .contentShape(RoundedRectangle(cornerRadius: radius, style: .continuous))
     }
 }
 
-/// A finished video: 128 x 72 thumbnail with the duration on the picture, a two-line title and a quiet meta line.
+/// A finished video: its poster with the title beneath (two lines) and, on the large first one, when it was made.
 struct VideoRow: View {
     let video: VideoItem
-    @Environment(\.dynamicTypeSize) private var typeSize
+    /// The poster's height; nil keeps the video's own shape at full width (the large first poster).
+    var posterHeight: CGFloat?
+    var meta: String?
+    var note: String?           // "Your first video."
 
     var body: some View {
-        let stacked = typeSize.isAccessibilitySize
-        let layout = stacked ? AnyLayout(VStackLayout(alignment: .leading, spacing: 10)) : AnyLayout(HStackLayout(alignment: .center, spacing: 12))
-        layout {
-            VideoThumb(video: video).frame(maxWidth: stacked ? .infinity : CGFloat(DesignTokens.Size.thumbWidth))
-            VStack(alignment: .leading, spacing: 3) {
-                Text(video.displayTitle).font(.vmk(16, weight: .semibold)).foregroundStyle(Theme.text).lineLimit(stacked ? 4 : 3).multilineTextAlignment(.leading)
+        VStack(alignment: .leading, spacing: 0) {
+            Group {
+                if let posterHeight { Poster(video: video, radius: Theme.Radii.card).frame(height: posterHeight) }
+                else { Poster(video: video, fill: abs(video.aspectRatio - 16.0 / 9.0) < 0.15).aspectRatio(16.0 / 9.0, contentMode: .fit) }
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
+            .frame(maxWidth: .infinity)
+            Text(video.displayTitle).font(.role(.headline)).foregroundStyle(Theme.text).lineLimit(2).multilineTextAlignment(.leading).fixedSize(horizontal: false, vertical: true).padding(.top, posterHeight == nil ? 12 : 10)
+            if let note { Text(note).font(.role(.footnote, weight: .semibold)).foregroundStyle(Theme.primary).padding(.top, 2).accessibilityIdentifier("firstVideoNote") }
+            else if let meta { Text(meta).font(.role(.footnote)).foregroundStyle(Theme.textSecondary).padding(.top, 1) }
         }
-        .padding(.vertical, 6).frame(minHeight: Theme.minTouch).contentShape(Rectangle())
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .contentShape(Rectangle())
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel([tr("videos.ready_a11y", video.displayTitle), video.isPortrait ? tr("videos.vertical_a11y") : nil, video.durationSeconds.map { tr("videos.duration_a11y", Self.duration($0)) }].compactMap { $0 }.joined(separator: " "))
+        .accessibilityLabel([tr("videos.ready_a11y", video.displayTitle), video.isPortrait ? tr("videos.vertical_a11y") : nil, video.durationSeconds.map { tr("videos.duration_a11y", Self.duration($0)) }, meta].compactMap { $0 }.joined(separator: " "))
         .accessibilityAddTraits(.isButton)
         .accessibilityIdentifier("videoRow")
-    }
-
-    /// "Landscape · 2 hr. ago", one localized format string (never a sentence glued from parts).
-    private var meta: String {
-        let format = video.aspect == nil ? nil : Self.formatName(video.aspect)
-        let when = video.createdAt.map { Localization.shared.relativeShort($0) }
-        switch (format, when) {
-        case let (f?, w?): return tr("videos.row_meta", f, w)
-        case let (f?, nil): return f
-        case let (nil, w?): return w
-        default: return ""
-        }
     }
 
     static func formatName(_ aspect: String?) -> String {
@@ -89,65 +80,68 @@ struct VideoRow: View {
     static func duration(_ s: Double) -> String { Localization.shared.clock(seconds: s) }
 }
 
-/// Did not finish (or was not allowed): the same row shape, in the danger (or warning) container, with the one action and the reassurance.
+/// Did not finish (or was not allowed): one calm card. The mark carries the colour; the words stay in the text colours. One action (Try again) and
+/// Remove in the menu. Nothing was lost: Try again restarts the same video with everything it was made with.
 struct FailedRow: View {
     let title: String
     var message: String?
     var retry: (() -> Void)?
     var onRemove: (() -> Void)?
     var rejected = false
-    @Environment(\.dynamicTypeSize) private var typeSize
 
-    private var tint: Color { rejected ? Theme.warning : Theme.danger }
-    private var container: Color { rejected ? Theme.warningContainer : Theme.dangerContainer }
     private var status: String { rejected ? tr("videos.not_allowed") : tr("videos.didnt_finish") }
 
     var body: some View {
-        let stacked = typeSize.isAccessibilitySize
-        let layout = stacked ? AnyLayout(VStackLayout(alignment: .leading, spacing: 10)) : AnyLayout(HStackLayout(alignment: .top, spacing: 12))
-        layout {
-            Image(systemName: rejected ? "hand.raised" : "exclamationmark").font(.vmk(24, weight: .semibold)).foregroundStyle(tint)
-                .frame(maxWidth: stacked ? .infinity : CGFloat(DesignTokens.Size.thumbWidth), minHeight: CGFloat(DesignTokens.Size.thumbHeight), maxHeight: stacked ? 72 : CGFloat(DesignTokens.Size.thumbHeight))
-                .background(tint.opacity(0.14), in: RoundedRectangle(cornerRadius: Theme.Radii.thumb, style: .continuous)).accessibilityHidden(true)
-            VStack(alignment: .leading, spacing: 4) {
-                HStack(alignment: .top) {
-                    Text(title).font(.vmk(16, weight: .semibold)).foregroundStyle(Theme.text).lineLimit(stacked ? 4 : 2).frame(maxWidth: .infinity, alignment: .leading)
-                    if let onRemove { Menu { Button(tr("videos.remove"), role: .destructive, action: onRemove) } label: { Image(systemName: "ellipsis").font(.vmk(16, weight: .bold)).foregroundStyle(Theme.textSecondary).frame(width: Theme.minTouch, height: Theme.minTouch) }.accessibilityLabel(tr("media.more")).accessibilityIdentifier("failedMore").padding(.top, -10).padding(.trailing, -10) }
+        VStack(alignment: .leading, spacing: Theme.Space.m) {
+            HStack(alignment: .top, spacing: Theme.Space.m) {
+                Image(systemName: rejected ? "hand.raised" : "exclamationmark").font(.role(.headline)).foregroundStyle(rejected ? Theme.warning : Theme.danger)
+                    .frame(width: Theme.iconButton, height: Theme.iconButton).background(rejected ? Theme.warningContainer : Theme.dangerContainer, in: Circle()).accessibilityHidden(true)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(title).font(.role(.headline)).foregroundStyle(Theme.text).lineLimit(3).multilineTextAlignment(.leading).fixedSize(horizontal: false, vertical: true)
+                    Text(message.map { tr("videos.row_meta", status, $0) } ?? status).font(.role(.footnote)).foregroundStyle(Theme.textSecondary).fixedSize(horizontal: false, vertical: true)
                 }
-                Text(message.map { tr("videos.row_meta", status, $0) } ?? status).font(.vmk(13, weight: .medium)).foregroundStyle(tint).fixedSize(horizontal: false, vertical: true)
-                if let retry {
-                    Button(action: retry) {
-                        Label(tr("common.try_again"), systemImage: "arrow.clockwise").font(.vmk(15, weight: .semibold)).foregroundStyle(Theme.primary).frame(minHeight: Theme.minTouch)
-                    }.buttonStyle(.plain).accessibilityIdentifier("tryAgain")
+                .frame(maxWidth: .infinity, alignment: .leading)
+                if let onRemove {
+                    Menu { Button(tr("videos.remove"), role: .destructive, action: onRemove) } label: { Image(systemName: "ellipsis").font(.role(.headline)).foregroundStyle(Theme.textSecondary).frame(width: Theme.minTouch, height: Theme.minTouch).contentShape(Rectangle()) }
+                        .accessibilityLabel(tr("media.more")).accessibilityIdentifier("failedMore").padding(.top, -8).padding(.trailing, -10)
                 }
             }
+            if let retry {
+                Button(action: retry) { Label(tr("common.try_again"), systemImage: "arrow.clockwise") }
+                    .buttonStyle(TonalButtonStyle()).accessibilityIdentifier("tryAgain")
+            }
         }
-        .padding(12).frame(maxWidth: .infinity, alignment: .leading)
-        .background(container, in: RoundedRectangle(cornerRadius: Theme.Radii.card, style: .continuous))
+        .padding(Theme.Space.l).frame(maxWidth: .infinity, alignment: .leading)
+        .background(Theme.surface, in: RoundedRectangle(cornerRadius: Theme.Radii.card, style: .continuous))
+        .elevation(2)
         .accessibilityElement(children: .contain)
         .accessibilityLabel(tr("videos.failed_row_a11y", title, status, message ?? tr("videos.no_credits_were_used")))
     }
 }
 
-/// Placeholder row with the final size while the list loads.
-struct SkeletonCard: View {
+/// The list while it loads: the shapes of what is coming (a large poster, then two side by side), softly breathing. Reduce Motion: still.
+struct VideosSkeleton: View {
     @State private var pulse = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     var body: some View {
-        HStack(spacing: 12) {
-            RoundedRectangle(cornerRadius: Theme.Radii.thumb, style: .continuous).fill(Theme.surfaceRaised).frame(width: CGFloat(DesignTokens.Size.thumbWidth), height: CGFloat(DesignTokens.Size.thumbHeight))
-            VStack(alignment: .leading, spacing: 8) {
-                RoundedRectangle(cornerRadius: 6).fill(Theme.surfaceRaised).frame(height: 16)
-                RoundedRectangle(cornerRadius: 6).fill(Theme.surfaceRaised).frame(width: 90, height: 12)
+        VStack(alignment: .leading, spacing: Theme.Space.xl) {
+            VStack(alignment: .leading, spacing: Theme.Space.m) {
+                block(Theme.Radii.videoCard).aspectRatio(16.0 / 9.0, contentMode: .fit)
+                block(6).frame(width: 190, height: 16)
+                block(6).frame(width: 70, height: 12)
+            }
+            HStack(alignment: .top, spacing: Theme.Space.m) {
+                ForEach(0..<2, id: \.self) { _ in VStack(alignment: .leading, spacing: 10) { block(Theme.Radii.card).frame(height: 127); block(6).frame(width: 110, height: 16) } }
             }
         }
         .opacity(pulse && !reduceMotion ? 0.55 : 1)
         .onAppear { if !reduceMotion { withAnimation(.easeInOut(duration: 0.9).repeatForever(autoreverses: true)) { pulse = true } } }
         .accessibilityHidden(true)
     }
+    private func block(_ radius: CGFloat) -> some View { RoundedRectangle(cornerRadius: radius, style: .continuous).fill(Theme.surfaceRaised) }
 }
 
-/// A video the server is making (live stage) or that has not been listed yet: the shared MakingCard in its list form.
+/// A video the server is making: the Making card, ticking once a second.
 struct RunningCard: View {
     @Environment(AppModel.self) private var model
     let video: VideoItem
@@ -160,6 +154,7 @@ struct RunningCard: View {
     }
 }
 
+/// A video that has just been asked for (the server has not listed it yet), or whose photos are still going up.
 struct PendingCard: View {
     let pending: PendingVideo
     let onRetry: () -> Void
@@ -171,14 +166,14 @@ struct PendingCard: View {
                 FailedRow(title: pending.brief, message: message.isEmpty ? tr("videos.no_credits_were_used") : tr("videos.message_no_credits", message), retry: onRetry, onRemove: onDismiss)
                     .accessibilityIdentifier("failedRow")
             } else {
-                MakingCard(snapshot: MakingSnapshot(title: pending.brief, stageLine: line, eta: nil))
+                MakingCard(snapshot: MakingSnapshot(title: pending.brief, line: line, timed: false))
                     .accessibilityIdentifier("pendingRow")
             }
         }
     }
 
     private var line: String {
-        if case .uploading(let done, let total) = pending.state { return tr("videos.uploading_photos", done, total) }
-        return tr("composer.sending")
+        if case .uploading(let done, let total) = pending.state { return tr("videos.uploading_photos", max(1, done), total) }      // no number starts at zero
+        return tr("create.starting_your_video")
     }
 }

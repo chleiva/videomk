@@ -1,23 +1,24 @@
 import SwiftUI
 import VideoMKCore
 
-/// Design tokens, exactly the numbers of docs/UI_DESIGN.md section (g). Semantic names only; views never use raw colours.
+/// The app's colours, spacing, radii and motion: `DesignTokens` (docs/DESIGN_BAR_2026.md section 4) turned into SwiftUI values. Semantic names only;
+/// a view never writes a hex value, a point size or a margin of its own.
 enum Theme {
     static func dyn(_ light: UInt32, _ dark: UInt32) -> Color { Color(light: .init(hex: light), dark: .init(hex: dark)) }
 
     private static func role(_ r: DesignTokens.Role) -> Color { dyn(r.light, r.dark) }
     static let background = role(DesignTokens.background)
-    static let surface = role(DesignTokens.surface)                 // surface1: cards, composer, sheets
-    static let surfaceRaised = role(DesignTokens.surface2)          // surface2: fields, pills, tonal controls
-    static let surface3 = role(DesignTokens.surface3)               // disabled send, tracks, pressed
+    static let surface = role(DesignTokens.surface)                 // cards, sheets
+    static let surfaceRaised = role(DesignTokens.surface2)          // surface2: fields, pills, quiet icon buttons
+    static let surface3 = role(DesignTokens.surface3)               // tracks, pressed
     static let outline = role(DesignTokens.outline)
     static let text = role(DesignTokens.text)
     static let textSecondary = role(DesignTokens.textSecondary)
-    static let textTertiary = role(DesignTokens.textTertiary)       // v2: AA on background and surface2
+    static let textTertiary = role(DesignTokens.textTertiary)       // placeholders and decoration only, never essential text
     static let primary = role(DesignTokens.primary)
     static let onPrimary = role(DesignTokens.onPrimary)
     static let primaryContainer = role(DesignTokens.primaryContainer)
-    /// The one "it is alive" accent: live progress only.
+    /// The one "it is alive" accent: the sparkle and the live ring, on the gradient or on dark only.
     static let live = Color(hex: DesignTokens.live)
     static let secondary = live
     static let success = role(DesignTokens.success)
@@ -29,34 +30,51 @@ enum Theme {
     static let gradientStart = role(DesignTokens.gradientStart)
     static let gradientEnd = role(DesignTokens.gradientEnd)
     /// Toasts and the "soon" tip: always dark, so the same in both appearances.
-    static let toastSurface = Color(hex: 0x23263F)
-    static let toastAccent = Color(hex: 0xB9BBFF)
-    static let toastSuccess = Color(hex: 0x4ADE80)
-    /// The solid red of the one destructive confirm button (white text, 6.5:1).
-    static let dangerSolid = Color(hex: 0xB91C1C)
+    static let toastSurface = Color(hex: DesignTokens.surface2.dark)
+    static let toastAccent = Color(hex: DesignTokens.primary.dark)
+    static let toastSuccess = Color(hex: DesignTokens.success.dark)
+    /// The solid red of the one destructive confirm button (white text).
+    static let dangerSolid = Color(hex: DesignTokens.danger.light)
     static let makingStart = Color(hex: DesignTokens.makingStart)
     static let makingEnd = Color(hex: DesignTokens.makingEnd)
+    /// Scrims and chips that sit on pictures and video: always dark, whatever the appearance.
+    static let mediaInk = Color(hex: DesignTokens.background.dark)
+    static let onMedia = Color.white
 
     // Spacing, radii, sizes (one place: DesignTokens).
     enum Space { static let xs = CGFloat(DesignTokens.Space.xs), s = CGFloat(DesignTokens.Space.s), m = CGFloat(DesignTokens.Space.m), l = CGFloat(DesignTokens.Space.l), xl = CGFloat(DesignTokens.Space.xl), xxl = CGFloat(DesignTokens.Space.xxl), xxxl = CGFloat(DesignTokens.Space.xxxl) }
-    enum Radii { static let field = CGFloat(DesignTokens.Radius.field), thumb = CGFloat(DesignTokens.Radius.thumb), card = CGFloat(DesignTokens.Radius.card), videoCard = CGFloat(DesignTokens.Radius.videoCard), composer = CGFloat(DesignTokens.Radius.composer), sheet = CGFloat(DesignTokens.Radius.sheet) }
+    /// The screen gutter: 20 pt, one value, everywhere.
+    static let gutter = CGFloat(DesignTokens.Space.gutter)
+    enum Radii { static let field = CGFloat(DesignTokens.Radius.field), thumb = CGFloat(DesignTokens.Radius.thumb), card = CGFloat(DesignTokens.Radius.card), videoCard = CGFloat(DesignTokens.Radius.videoCard), hero = CGFloat(DesignTokens.Radius.hero), composer = CGFloat(DesignTokens.Radius.composer), sheet = CGFloat(DesignTokens.Radius.sheet) }
     static let minTouch = CGFloat(DesignTokens.Size.minTouch)
+    static let primaryHeight = CGFloat(DesignTokens.Size.primaryHeight)
+    static let iconButton = CGFloat(DesignTokens.Size.iconButton)
+    static let fab = CGFloat(DesignTokens.Size.fab)
+    static let sceneTile = CGFloat(DesignTokens.Size.sceneTile)
     /// The floating tab bar (two tabs and the round New video button) and its margins: the room screens leave at the bottom so nothing hides under it.
     static let floatingBarHeight = CGFloat(84)
-    /// Motion tokens; `Motion.animation(_, reduced:)` gives nil under Reduce Motion for movement, a short fade otherwise.
+    /// Motion tokens; `Motion.animation(_, reduced:)` gives a short fade under Reduce Motion.
     enum Motion {
         static let press = Animation.easeOut(duration: DesignTokens.Motion.press)
         static let select = Animation.easeOut(duration: DesignTokens.Motion.select)
         static let insert = Animation.easeOut(duration: DesignTokens.Motion.insert)
         static let fade = Animation.easeOut(duration: DesignTokens.Motion.reducedFade)
+        /// The one spring of the app (response 0.35, damping 0.86): things that move or change shape.
+        static let spring = Animation.spring(response: DesignTokens.Motion.springResponse, dampingFraction: DesignTokens.Motion.springDamping)
+        static let tile = Animation.easeOut(duration: DesignTokens.Motion.tileFill)
+        static let reveal = Animation.easeOut(duration: DesignTokens.Motion.reveal)
         static func animation(_ a: Animation, reduced: Bool) -> Animation { reduced ? fade : a }
     }
 
     static let radius: CGFloat = Radii.card
+    /// The action gradient: the ONE primary button of a screen.
     static let gradient = LinearGradient(colors: [gradientStart, gradientEnd], startPoint: .topLeading, endPoint: .bottomTrailing)
+    /// The brand gradient: the logo tile and the Making card.
     static let makingGradient = LinearGradient(colors: [makingStart, makingEnd], startPoint: .topLeading, endPoint: .bottomTrailing)
+    /// The colours of the live ring, in the order they turn.
+    static let ringColors = [live, gradientEnd, gradientStart, live]
     /// Always dark, under white text on pictures.
-    static let mediaScrim = LinearGradient(stops: [.init(color: .clear, location: 0.46), .init(color: Color(red: 8/255, green: 10/255, blue: 28/255).opacity(0.78), location: 1)], startPoint: .top, endPoint: .bottom)
+    static let mediaScrim = LinearGradient(stops: [.init(color: .clear, location: 0.46), .init(color: mediaInk.opacity(0.78), location: 1)], startPoint: .top, endPoint: .bottom)
 }
 
 extension Color {
@@ -65,19 +83,6 @@ extension Color {
     }
     init(light: Color, dark: Color) {
         self.init(UIColor { $0.userInterfaceStyle == .dark ? UIColor(dark) : UIColor(light) })
-    }
-}
-
-struct PrimaryButtonStyle: ButtonStyle {
-    @Environment(\.isEnabled) private var isEnabled
-    func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .font(.headline)
-            .foregroundStyle(Theme.onPrimary)
-            .frame(maxWidth: .infinity, minHeight: 50)
-            .background(Theme.gradient.opacity(isEnabled ? 1 : 0.4), in: RoundedRectangle(cornerRadius: Theme.radius, style: .continuous))
-            .opacity(configuration.isPressed ? 0.85 : 1)
-            .scaleEffect(configuration.isPressed ? 0.99 : 1)
     }
 }
 
@@ -92,13 +97,13 @@ struct Card<Content: View>: View {
 }
 
 
-/// Shadow levels 2 and 3 of the spec (light: tinted and soft; dark: darker, with a hairline ring instead).
+/// Shadow levels 2 and 3 (one soft shadow per card; never a border and a shadow together).
 struct Elevation: ViewModifier {
     let level: Int
     @Environment(\.colorScheme) private var scheme
     func body(content: Content) -> some View {
-        content
-            .shadow(color: scheme == .dark ? .black.opacity(level == 3 ? 0.6 : 0.45) : Color(red: 40/255, green: 44/255, blue: 110/255).opacity(level == 3 ? 0.18 : 0.10), radius: level == 3 ? 24 : 12, y: level == 3 ? 10 : 6)
+        let s = level == 3 ? DesignTokens.elevation3 : DesignTokens.elevation2
+        content.shadow(color: scheme == .dark ? .black.opacity(s.alphaDark) : Theme.gradientStart.opacity(s.alphaLight), radius: s.radius, y: s.y)
     }
 }
 extension View {
@@ -113,7 +118,7 @@ struct FixChip: View {
     var body: some View {
         Button(action: action) {
             chipLabel.font(.vmk(13, weight: .bold)).foregroundStyle(tint).multilineTextAlignment(.leading).fixedSize(horizontal: false, vertical: true).padding(.horizontal, 12).padding(.vertical, 7)
-                .frame(minHeight: 32).background(Theme.primaryContainer, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                .frame(minHeight: 32).background(Theme.primaryContainer, in: Capsule())
                 .frame(minHeight: 44).contentShape(Rectangle())
         }
         .buttonStyle(.plain).layoutPriority(1).accessibilityLabel(title.replacingOccurrences(of: " · ⚡", with: ", ").replacingOccurrences(of: "⚡", with: tr("a11y.credits_word")))
@@ -141,14 +146,14 @@ struct Shake: GeometryEffect {
     }
 }
 
-/// The only moments that vibrate (DesignTokens.Haptic): send, selection, warning, video ready, upload done.
-enum Haptics {
+/// The only moments that vibrate (DesignTokens.Haptic, section 4 of the design bar). System patterns only, so the system setting silences all of them.
+@MainActor enum Haptics {
     static func play(_ h: DesignTokens.Haptic) {
-        switch h {
-        case .send: UIImpactFeedbackGenerator(style: .medium).impactOccurred()
-        case .selection: UISelectionFeedbackGenerator().selectionChanged()
+        switch h.kind {
+        case .light: UIImpactFeedbackGenerator(style: .light).impactOccurred()
+        case .medium: UIImpactFeedbackGenerator(style: .medium).impactOccurred()
         case .warning: UINotificationFeedbackGenerator().notificationOccurred(.warning)
-        case .videoReady, .uploadDone: UINotificationFeedbackGenerator().notificationOccurred(.success)
+        case .success: UINotificationFeedbackGenerator().notificationOccurred(.success)
         }
     }
 }

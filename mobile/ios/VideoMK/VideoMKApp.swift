@@ -4,6 +4,7 @@ import VideoMKCore
 @main
 struct VideoMKApp: App {
     @State private var model = AppModel()
+    @Environment(\.scenePhase) private var scenePhase
 
     var body: some Scene {
         WindowGroup {
@@ -14,6 +15,12 @@ struct VideoMKApp: App {
                 .dynamicTypeSize(...DynamicTypeSize.appMax)
                 .task { await model.start() }
         }
+        .onChange(of: scenePhase) { _, phase in
+            // "Tell me when it's ready": keep checking for a while after the app is left, and ask iOS for a later look
+            if phase == .background { ReadyNotifier.shared.appDidEnterBackground(hasRunning: model.hasRunningVideos); if ReadyNotifier.shared.enabled { Task { await model.pollWhileRunning() } } }
+            if phase == .active { ReadyNotifier.shared.appDidBecomeActive() }
+        }
+        .backgroundTask(.appRefresh(ReadyNotifier.refreshTask)) { await model.backgroundCheck() }
     }
 }
 
@@ -40,6 +47,8 @@ struct RootView: View {
 /// sheet survives a switch. The bar hides while a video is open (the video screen is a full page).
 struct MainTabs: View {
     @Environment(AppModel.self) private var model
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    private var barShown: Bool { !model.tabBarHidden && !(model.mediaSelecting && model.selectedTab == 1) }
 
     var body: some View {
         @Bindable var model = model
@@ -50,11 +59,21 @@ struct MainTabs: View {
             }
             .opacity(model.selectedTab == 1 ? 1 : 0).allowsHitTesting(model.selectedTab == 1).accessibilityHidden(model.selectedTab != 1)
         }
+        .overlay(alignment: .bottom) { if barShown { TabBarFade().ignoresSafeArea(edges: .bottom).transition(.opacity) } }       // the page fades out under the floating bar
         .safeAreaInset(edge: .bottom, spacing: 0) {
-            if !model.tabBarHidden, !(model.mediaSelecting && model.selectedTab == 1) { FloatingTabBar(selection: $model.selectedTab) { model.requestCreate() }.transition(.move(edge: .bottom).combined(with: .opacity)) }
+            if barShown { FloatingTabBar(selection: $model.selectedTab) { model.requestCreate() }.transition(reduceMotion ? .opacity : .move(edge: .bottom).combined(with: .opacity)) }
         }
-        .animation(.easeOut(duration: 0.22), value: model.tabBarHidden)
-        .animation(.easeOut(duration: 0.22), value: model.mediaSelecting)
+        .animation(reduceMotion ? Theme.Motion.fade : Theme.Motion.spring, value: model.tabBarHidden)
+        .animation(reduceMotion ? Theme.Motion.fade : Theme.Motion.spring, value: model.mediaSelecting)
         .background(Theme.background.ignoresSafeArea())
     }
+}
+
+/// The top bar is ours on every screen (`TopBar`), so the system navigation bar is hidden; this keeps the swipe from the left edge that goes back.
+extension UINavigationController: @retroactive UIGestureRecognizerDelegate {
+    override open func viewDidLoad() {
+        super.viewDidLoad()
+        interactivePopGestureRecognizer?.delegate = self
+    }
+    public func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool { viewControllers.count > 1 }
 }

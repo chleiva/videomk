@@ -63,17 +63,19 @@ public struct VideoItem: Sendable, Equatable, Identifiable, Decodable {
     public let deckStage: DeckStage?
     /// The server's answer to "is Try again worth offering" (retries left, not a presentation); nil from a server that does not say (older ones).
     public let canRetry: Bool?
+    /// While it is being made: scenes, the live line, the narration line, scene pictures. nil from a server that does not send it (and once it is finished).
+    public let making: MakingInfo?
 
     public enum DeckStage: String, Sendable, Equatable { case reading = "deck_reading", writing = "deck_writing" }
 
     enum CodingKeys: String, CodingKey {
         case videoID = "video_id", status, title, durationS = "duration_s", createdAt = "created_at"
-        case videoURL = "video_url", previewGifURL = "preview_gif_url", rejectReason = "reject_reason", editable, aspect, resolution, stage, canRetry = "can_retry"
+        case videoURL = "video_url", previewGifURL = "preview_gif_url", rejectReason = "reject_reason", editable, aspect, resolution, stage, canRetry = "can_retry", making
     }
 
     public init(id: String, status: VideoStatus, title: String? = nil, durationSeconds: Double? = nil, createdAt: Date? = nil,
-                videoURL: URL? = nil, previewGifURL: URL? = nil, rejectReason: String? = nil, editable: Bool = false, aspect: String? = nil, resolution: String? = nil, deckStage: DeckStage? = nil, canRetry: Bool? = nil) {
-        self.deckStage = deckStage; self.canRetry = canRetry
+                videoURL: URL? = nil, previewGifURL: URL? = nil, rejectReason: String? = nil, editable: Bool = false, aspect: String? = nil, resolution: String? = nil, deckStage: DeckStage? = nil, canRetry: Bool? = nil, making: MakingInfo? = nil) {
+        self.deckStage = deckStage; self.canRetry = canRetry; self.making = making
         self.id = id; self.status = status; self.title = title; self.durationSeconds = durationSeconds; self.createdAt = createdAt
         self.videoURL = videoURL; self.previewGifURL = previewGifURL; self.rejectReason = rejectReason; self.editable = editable; self.aspect = aspect; self.resolution = resolution
     }
@@ -93,6 +95,7 @@ public struct VideoItem: Sendable, Equatable, Identifiable, Decodable {
         resolution = try? c.decode(String.self, forKey: .resolution)
         deckStage = (try? c.decode(String.self, forKey: .stage)).flatMap(DeckStage.init(rawValue:))
         canRetry = try? c.decode(Bool.self, forKey: .canRetry)
+        making = MakingInfo(json: try? c.decode(AnyJSON.self, forKey: .making))       // lenient: a malformed "making" never fails the video
     }
 
     static func parseDate(_ s: String) -> Date? {

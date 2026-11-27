@@ -72,6 +72,13 @@ public struct APIClient: Sendable {
         return try decode(VideoListResponse.self, data).items
     }
 
+    /// What the server says about a video while it is being made, from the video's own status answer (the body of the 200 or of the 409 "not ready yet").
+    /// nil when the server does not send `making` (older servers) or the answer cannot be read: the screen then keeps its calm fallback.
+    public func makingInfo(videoID: String) async throws -> MakingInfo? {
+        let (data, _) = try await perform("GET", ["videos", videoID])
+        return MakingInfo.fromStatusBody(data)
+    }
+
     /// A presigned MP4 URL. Throws `.notReady` (with the current status) while the video is still being made.
     public func playbackURL(videoID: String) async throws -> URL { try await playback(videoID: videoID).url }
 

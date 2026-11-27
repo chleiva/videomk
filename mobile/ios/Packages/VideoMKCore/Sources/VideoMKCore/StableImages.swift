@@ -14,6 +14,13 @@ public extension VideoItem {
         id == o.id && status == o.status && title == o.title && durationSeconds == o.durationSeconds && createdAt == o.createdAt
             && rejectReason == o.rejectReason && editable == o.editable && aspect == o.aspect && resolution == o.resolution && deckStage == o.deckStage
             && ImageKey.stable(previewGifURL) == ImageKey.stable(o.previewGifURL) && ImageKey.stable(videoURL) == ImageKey.stable(o.videoURL)
+            && canRetry == o.canRetry && Self.sameMaking(making, o.making)
+    }
+}
+
+extension VideoItem {
+    static func sameMaking(_ a: MakingInfo?, _ b: MakingInfo?) -> Bool {
+        switch (a, b) { case (nil, nil): true; case let (x?, y?): x.visiblyEqual(y); default: false }
     }
 }
 

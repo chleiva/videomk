@@ -7,7 +7,6 @@ import VideoMKCore
 final class CreateModel {
     enum Stage: Equatable {
         case form
-        case checking(slow: Bool)
         case questions(IntakeFlow)
         case summary(IntakeFlow, brief: [String: String]?)
         case notSupported(message: String?, suggestion: String?)
@@ -18,6 +17,12 @@ final class CreateModel {
     var form = CreateForm()
     private(set) var caps = CreateCapabilities.fallback
     var stage: Stage = .form
+    /// After the Create tap: the button becomes a live capsule ("Checking your request", then "Starting your video") and the form is locked.
+    private(set) var capsule = CreateCapsule()
+    /// One line under the button when the video could not be started: the form is back exactly as it was.
+    var startError: String?
+    /// An example chosen on the home screen: Create types it into the prompt when it opens.
+    var typeIn: String?
     var showMore = false
     /// "My holiday in Thailand" opens Add photos straight away, on My media when the library has photos.
     var autoOpenPhotos: AutoOpen?
@@ -65,10 +70,13 @@ final class CreateModel {
     }
 
     /// A fresh Create screen with the last used choices (the prompt and the photos are never remembered).
-    func open(prefill: String? = nil, minutes: Double? = nil) {
-        stage = .form; showMore = false
+    /// `platformChip` and `language`: "Make another" on a finished video opens the same sentence with one choice changed (a Short, another language, a shorter cut).
+    func open(prefill: String? = nil, minutes: Double? = nil, platformChip: String? = nil, language: String? = nil) {
+        stage = .form; showMore = false; capsule.reset(); startError = nil; typeIn = nil; checkRun = nil
         form = CreateDefaults.load(userID: userID).form(caps)
         if let prefill { form.text = prefill }
+        if let platformChip, let chip = PlatformChips.make(caps).first(where: { $0.id == platformChip && $0.supported }) { form.select(chip) }
+        if let language, caps.languages.contains(where: { $0.id == language }) { form.language = language }
         openedMinutes = minutes
         if let minutes { form.setMinutes(minutes) }          // an example's length counts as chosen
         #if DEBUG
@@ -123,8 +131,8 @@ final class CreateModel {
     func totalPhotos(library: Int) -> Int { ComposerPlan.photosTotal(phone: photos.items.count + photos.loading, library: library) }
 
     /// The bottom status line: price, reason and fix (the photo hint has its own place under the lengths).
-    func status(balance: Int?, dictating: Bool, checking: Bool = false) -> ComposerStatus {
-        ComposerPlan.status(text: form.text, balance: balance, options: form.options, photos: 0, dictating: dictating, sending: checking, lengths: caps.lengthPresets, deck: deckComposer)
+    func status(balance: Int?, dictating: Bool) -> ComposerStatus {
+        ComposerPlan.status(text: form.text, balance: balance, options: form.options, photos: 0, dictating: dictating, sending: capsule.isLocked, lengths: caps.lengthPresets, deck: deckComposer)
     }
 
     // MARK: Create
@@ -135,29 +143,44 @@ final class CreateModel {
 
     private func request(answers: [IntakeAnswer], mediaCount: Int) -> BriefRequest { BriefRequest(prompt: form.text, options: form.options, mediaCount: mediaCount, answers: answers) }
 
-    /// Taps Create: the request check (skipped when the server has none), then questions, then the video.
+    /// Taps Create: the form locks at once and the button becomes the capsule. The request check runs (skipped when the server has none), then it ends in
+    /// exactly one of: questions, a kind refusal, the start of the video (`submit`), or, on Cancel, the form as it was.
     func create(mediaCount: Int, submit: @escaping ([String: String]?) -> Void) {
-        guard stage == .form else { return }
-        guard caps.intake, !form.hasDeck, let checker else { submit(nil); return }       // a presentation skips the request check: its prompt is only a tone hint
-        stage = .checking(slow: false)
+        guard stage == .form, !capsule.isLocked else { return }
+        startError = nil
+        let needsCheck = caps.intake && !form.hasDeck && checker != nil       // a presentation skips the request check: its prompt is only a tone hint
+        capsule.handle(.tapCreate(needsCheck: needsCheck))
+        guard needsCheck, let checker else { submit(nil); return }
         let req = request(answers: [], mediaCount: mediaCount)
         let run = UUID(); checkRun = run                                      // a cancelled call's late answer must never start a video
         Task {
-            let outcome = await checker.check(req) { Task { @MainActor in if self.checkRun == run, self.stage == .checking(slow: false) { self.stage = .checking(slow: true) } } }
-            guard checkRun == run, case .checking = stage else { return }     // cancelled, or made it now meanwhile
+            let outcome = await checker.check(req) { Task { @MainActor in if self.checkRun == run { self.capsule.handle(.slow) } } }
+            guard checkRun == run, capsule.canCancel else { return }          // cancelled meanwhile
+            checkRun = nil
             switch outcome {
-            case .proceed(let brief): stage = .form; submit(brief)
-            case .questions(let q): stage = .questions(IntakeFlow(q))
-            case .notSupported(let m, let s): stage = .notSupported(message: m, suggestion: s)
-            case .blocked(let m): stage = .blocked(m)
-            case .paused(let m, let t): stage = .paused(message: m, retryAfter: t)
+            case .proceed(let brief): capsule.handle(.checkPassed); submit(brief)
+            case .questions(let q): capsule.handle(.needsQuestions); stage = .questions(IntakeFlow(q))
+            case .notSupported(let m, let s): capsule.handle(.refused); stage = .notSupported(message: m, suggestion: s)
+            case .blocked(let m): capsule.handle(.refused); stage = .blocked(m)
+            case .paused(let m, let t): capsule.handle(.refused); stage = .paused(message: m, retryAfter: t)
             }
         }
     }
 
-    /// "Make it now" while the check is still running: stop waiting and go.
-    func skipCheck(submit: ([String: String]?) -> Void) { if case .checking = stage { checkRun = nil; stage = .form; submit(nil) } }
-    func cancelCheck() { checkRun = nil; if case .checking = stage { stage = .form } }
+    /// Cancel while the request is checked: the call is dropped (a late answer starts nothing) and the form is back exactly as it was.
+    func cancelCheck() { checkRun = nil; capsule.handle(.cancel) }
+
+    /// The questions were answered or skipped (or there was nothing to check): the capsule says "Starting your video". False when it is already starting.
+    func beginStart() -> Bool { capsule.handle(.confirmed); return capsule.phase == .starting && capsule.ending == nil }
+    /// The server took the video (or the list took over while photos upload): the screen closes onto the Making card.
+    func started() { capsule.handle(.started) }
+    /// The start did not work: everything is given back, with one line saying what happened.
+    func startFailed(_ message: String) { capsule.handle(.failed); startError = message }
+    /// The start was refused (the safety check, or a pause): the kind sheet explains; the form stays as it was underneath.
+    func startRefused(message: String?, paused: Bool, retryAfter: Int?) {
+        capsule.handle(.refused)
+        stage = paused ? .paused(message: message, retryAfter: retryAfter) : .blocked(message)
+    }
 
     // MARK: questions
 
@@ -180,7 +203,7 @@ final class CreateModel {
         return out
     }
 
-    func dismissOverlay() { checkRun = nil; stage = .form }       // closing the sheet while it still checks drops the call: a late answer starts nothing
+    func dismissOverlay() { stage = .form }
 
     // MARK: after Create
 
@@ -238,8 +261,10 @@ final class CreateModel {
         case "summary", "4ksummary":
             var f = IntakeFlow(q); f.choose(q[0].options[0]); f.choose(q[1].options[0]); f.choose(q[2].options[0])
             stage = .summary(f, brief: ["summary": "For kids · Calm · Focus: Making honey"])
-        case "checking": stage = .checking(slow: true)
-        case "checkingfast": stage = .checking(slow: false)      // the first moments of the check: the form is locked, the button says so
+        case "checking": capsule.handle(.tapCreate(needsCheck: true)); capsule.handle(.slow)      // a check that takes longer: the capsule says so
+        case "checkingfast": capsule.handle(.tapCreate(needsCheck: true))                         // the first moments: the form is locked, the capsule says what happens
+        case "starting": capsule.handle(.tapCreate(needsCheck: false))
+        case "startfailed": startError = APIError.network.message
         case "unsupported": stage = .notSupported(message: "This request is outside what videomk can make. Try describing the topic in a different way.", suggestion: "A calm story about a lighthouse keeper")
         case "blocked": stage = .blocked("We can’t make this one. Try describing something different.")
         case "paused": stage = .paused(message: "Creating videos is paused for this account for now.", retryAfter: 3600)

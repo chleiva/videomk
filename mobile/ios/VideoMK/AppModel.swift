@@ -34,6 +34,15 @@ final class AppModel {
     private var deckPrompts: [String: String] = [:]       // what the person typed (who it is for); the row's title may be the file name instead
     private var deckMinutes: [String: Bool] = [:]          // whether the person chose a length (only then `target_minutes` is sent)
     private var deckVideos: Set<String> = []               // videos made from a presentation: "Try again" cannot reuse the (deleted) deck
+    private var heldStarts: Set<String> = []               // requests the Create screen is still waiting on ("Starting your video"): their outcome goes back to it
+    private var heldProblems: [String: CreateProblem] = [:]
+    private var liveMaking: [String: MakingInfo] = [:]     // the freshest "making" of a video whose screen is open (the list answer may lag behind)
+    private(set) var revealing: String?                    // the video that has just become ready while its Making screen or card was showing
+    var createPrefill: CreatePrefill?                      // "Make another" on a finished video: Create opens with the same sentence and one choice changed
+    struct CreatePrefill: Equatable { var text: String; var platformChip: String?; var minutes: Double?; var language: String? }
+
+    /// How a held start ended (see `startOutcome`).
+    enum StartOutcome: Equatable { case accepted, handedOff, failed(String), refused(CreateProblem) }
 
     struct CreateProblem: Identifiable, Equatable { let id = UUID(); let message: String; let retryAfter: Int?; let paused: Bool; let prompt: String }
     var selectedTab = 0                                    // 0 videos, 1 media
@@ -113,6 +122,19 @@ final class AppModel {
         if media?.isFake == true { return }
         #endif
         if let w = try? await api.wallet(), w != wallet { wallet = w }
+    }
+
+    /// What the server says about a video being made: the screen's own fresher answer when there is one, else what came with the list.
+    func making(for video: VideoItem) -> MakingInfo? { liveMaking[video.id] ?? video.making }
+
+    /// The Making screen asks for the video's own status while it is open (every few seconds): scenes and lines arrive sooner than with the list.
+    /// Any failure, and a server that does not send "making" yet, leaves what is on screen.
+    func refreshMaking(_ id: String) async {
+        guard let api else { return }
+        #if DEBUG
+        if media?.isFake == true { return }
+        #endif
+        if let info = try? await api.makingInfo(videoID: id), liveMaking[id].map({ !$0.visiblyEqual(info) }) ?? true { liveMaking[id] = info }
     }
 
     func brief(for id: String) -> String? { briefs[id] }
@@ -253,16 +275,30 @@ final class AppModel {
             if case .running(let s) = v.status {
                 if stageSince[v.id]?.stage != s { stageSince[v.id] = (s, .now) }
             } else {
-                stageSince[v.id] = nil
-                if let b = before[v.id], b.isRunning, v.status == .complete { completions += 1 }
+                stageSince[v.id] = nil; liveMaking[v.id] = nil
+                if let b = before[v.id], b.isRunning, v.status == .complete { completions += 1; reveal(v.id, title: v.displayTitle) }
             }
         }
+    }
+
+    /// iOS gave the app a moment in the background ("Tell me when it's ready"): look once; if something is still being made, ask for another look.
+    func backgroundCheck() async {
+        await refresh()
+        ReadyNotifier.shared.appDidEnterBackground(hasRunning: hasRunningVideos)
+    }
+
+    /// A video has just become ready: its poster takes the place of the Making card (the reveal), and the first play fades in.
+    private func reveal(_ id: String, title: String) {
+        ReadyNotifier.shared.videoReady(title: title)
+        revealing = id
+        Task { try? await Task.sleep(for: .seconds(4)); if revealing == id { revealing = nil } }
     }
 
     // MARK: ask for a video without leaving the home screen
 
     /// Adds a placeholder row immediately and sends the request in the background; the user can keep browsing or ask for more.
-    func submit(brief: String, options: CreateOptions, photos: [Data] = [], meta: [PhotoMeta?] = [], libraryMedia: [String] = [], intake: [String: String]? = nil, deckID: String? = nil, deckName: String? = nil, sendsMinutes: Bool = true) {
+    /// `held`: the Create screen stays open on "Starting your video" until the outcome is known (`startOutcome`), then calls `releaseStart` or `abandonStart`.
+    @discardableResult func submit(brief: String, options: CreateOptions, photos: [Data] = [], meta: [PhotoMeta?] = [], libraryMedia: [String] = [], intake: [String: String]? = nil, deckID: String? = nil, deckName: String? = nil, sendsMinutes: Bool = true, held: Bool = false) -> String {
         let title = Brief.normalized(brief).isEmpty && deckID != nil ? tr("deck.video_title", deckName ?? "") : Brief.normalized(brief)
         let p = PendingVideo(brief: title, options: options, photoCount: photos.count, state: photos.isEmpty ? .sending : .uploading(done: 0, total: photos.count))
         if !photos.isEmpty { photoData[p.id] = photos; photoMeta[p.id] = meta }
@@ -270,9 +306,31 @@ final class AppModel {
         if let intake, !intake.isEmpty { intakeBriefs[p.id] = intake }
         if let deckID { deckIDs[p.id] = deckID; deckMinutes[p.id] = sendsMinutes; deckPrompts[p.id] = Brief.normalized(brief) }
         pending.insert(p, at: 0)
-        submitted += 1; selectedTab = 0                    // the new video is on the Videos tab: go and see it making
+        if held { heldStarts.insert(p.id) } else { submitted += 1; selectedTab = 0 }      // the new video is on the Videos tab: go and see it making
         Task { await send(p.id) }
+        return p.id
     }
+
+    /// Waits for a held start to be accepted or to fail, at most `wait` (then the list takes over: `.handedOff`) and at least `minimum` (so the words can be read).
+    func startOutcome(_ id: String, wait: Duration, minimum: Duration) async -> StartOutcome {
+        let clock = ContinuousClock(), began = clock.now
+        var result = StartOutcome.handedOff
+        while clock.now - began < wait {
+            guard let p = pending.first(where: { $0.id == id }) else { result = .accepted; break }       // the server's own row has already replaced it
+            if case .accepted = p.state { result = .accepted; break }
+            if case .failed(let m) = p.state { result = heldProblems[id].map(StartOutcome.refused) ?? .failed(m); break }
+            try? await Task.sleep(for: .milliseconds(80))
+        }
+        let spent = clock.now - began
+        if spent < minimum { try? await Task.sleep(for: minimum - spent) }
+        return result
+    }
+
+    /// The held start went through (or is left to the list): Media clears its selection and the Videos tab shows the Making card.
+    func releaseStart(_ id: String) { heldStarts.remove(id); heldProblems[id] = nil; submitted += 1; selectedTab = 0 }
+
+    /// The held start failed while Create was still open: its placeholder goes; Create still has everything (sentence, photos, options).
+    func abandonStart(_ id: String) { heldStarts.remove(id); heldProblems[id] = nil; dismissPending(id) }
 
     /// "Make a video" from Media (selection bar, viewer, a collection, the round (+)): Create opens over the tab the person is on, with these photos attached.
     /// Closing Create brings them back to where they were; a selection in Media stays ticked until the video is sent.
@@ -386,6 +444,7 @@ final class AppModel {
             }
             #if DEBUG
             if self.media?.isFake == true, deckIDs[id] != nil { acceptFakeDeck(p); return }        // fake runs never reach the backend
+            if self.media?.isFake == true { try await acceptFake(p); return }
             #endif
             let videoID = try await create(brief: deckIDs[id] != nil ? (deckPrompts[id] ?? "") : p.brief, requestID: p.id, options: p.options, media: media, mediaMeta: PhotoMetaReader.mediaMeta(ids: media, metas: photoMeta[id] ?? []), libraryMedia: libraryIDs[id] ?? [], intake: intakeBriefs[id], deck: deckIDs[id], sendMinutes: deckMinutes[id] ?? true)
             if deckIDs[id] != nil { deckVideos.insert(videoID) }
@@ -403,7 +462,8 @@ final class AppModel {
             if let i = pending.firstIndex(where: { $0.id == id }) { pending[i].state = .failed(e.message) }
             var retry: Int? = nil; var isPaused = false
             if case .paused(_, let t) = e { retry = t; isPaused = true }
-            createProblem = CreateProblem(message: e.message, retryAfter: retry, paused: isPaused, prompt: p.brief)
+            let problem = CreateProblem(message: e.message, retryAfter: retry, paused: isPaused, prompt: p.brief)
+            if heldStarts.contains(id) { heldProblems[id] = problem } else { createProblem = problem }      // Create is still open: it shows the kind sheet itself
         } catch let e as APIError {
             if case .insufficientCredits = e { await refreshWallet() }
             if let i = pending.firstIndex(where: { $0.id == id }) { pending[i].state = .failed(e.message) }
@@ -473,6 +533,52 @@ final class AppModel {
         }
     }
 
+    /// Fake-library runs: what the server would do with a new video. `VMK_DEBUG_FAKE_START=fail|blocked|paused|slow` (default: accepted after a moment);
+    /// the fake video then finishes its scenes one by one (`VMK_DEBUG_MAKING` picks what the fake server reports) and becomes ready.
+    private func acceptFake(_ p: PendingVideo) async throws {
+        let script = ProcessInfo.processInfo.environment["VMK_DEBUG_FAKE_START"] ?? ""
+        try? await Task.sleep(for: script == "slow" ? .seconds(12) : .milliseconds(1200))
+        switch script {
+        case "fail": throw APIError.network
+        case "blocked": throw APIError.blocked("We can’t make this one. Try describing something different.")
+        case "paused": throw APIError.paused("Creating videos is paused for this account for now.", retryAfter: 3600)
+        default: break
+        }
+        let videoID = "fakevideo-\(p.id.prefix(6))"
+        briefs[videoID] = p.brief; minutes[videoID] = p.options.minutes
+        videos.insert(VideoItem(id: videoID, status: .running(.starting), title: p.brief, createdAt: .now, aspect: p.options.aspect, resolution: p.options.resolution), at: 0)
+        stageSince[videoID] = (.starting, .now)
+        if let i = pending.firstIndex(where: { $0.id == p.id }) { pending[i].state = .accepted(videoID: videoID) }
+        photoData[p.id] = nil; photoMeta[p.id] = nil; libraryIDs[p.id] = nil
+        Task { @MainActor in await runFakeMaking(videoID, title: p.brief, aspect: p.options.aspect, resolution: p.options.resolution) }
+    }
+
+    /// The fake server's "making": scenes finish one by one, then the video is ready (so the film strip, the live lines and the reveal can be seen and tested).
+    private func runFakeMaking(_ id: String, title: String, aspect: String, resolution: String) async {
+        let mode = ProcessInfo.processInfo.environment["VMK_DEBUG_MAKING"] ?? "thumbs"
+        let total = 6
+        func set(_ status: VideoStatus, _ making: MakingInfo?, done: Bool = false) {
+            guard let i = videos.firstIndex(where: { $0.id == id }) else { return }
+            videos[i] = VideoItem(id: id, status: status, title: title, durationSeconds: done ? 62 : nil, createdAt: videos[i].createdAt, previewGifURL: done ? URL(string: "fake://\(aspect == "9:16" ? "portrait" : "landscape")/clip_01") : nil, aspect: aspect, resolution: resolution, making: making)
+        }
+        try? await Task.sleep(for: .seconds(2))
+        stageSince[id] = (.voiceAndVisuals, .now)
+        for done in 0...total {
+            set(.running(done == total ? .rendering : .voiceAndVisuals), mode == "none" ? nil : Self.fakeMaking(done: done, total: total, thumbs: mode == "thumbs"))
+            try? await Task.sleep(for: .milliseconds(2200))
+        }
+        set(.complete, nil, done: true)
+        stageSince[id] = nil; completions += 1; reveal(id, title: title)
+    }
+
+    static func fakeMaking(done: Int, total: Int, thumbs: Bool) -> MakingInfo {
+        let lines = ["Finding the right footage", "Adding footage of sunlit canopies", "Recording the narration", "Choosing the music", "Timing the captions", "Adding the last scene"]
+        let narration = ["Sunlight pours through the canopy, and the forest breathes.", "Every leaf is a small green lung.", "Roots trade water for sugar, underground.", "At night the whole forest exhales.", "One tree can cool a street.", "That is why forests matter."]
+        let clips = ["clip_01", "clip_03", "clip_08", "clip_10", "clip_05", "clip_07", "s_forest", "p08", "p09"]
+        let scenes = (1...total).map { i in MakingInfo.Scene(index: i, thumbURL: thumbs && i <= done + 1 ? URL(string: "fake://landscape/\(clips[(i - 1) % clips.count])") : nil, done: i <= done) }
+        return MakingInfo(sceneTotal: total, sceneDone: done, liveLine: done >= total ? "Putting it all together" : lines[done % lines.count], narrationLine: done >= total ? nil : narration[done % narration.count], scenes: scenes)
+    }
+
     /// Screenshots with `VMK_DEBUG_FAKE_LIBRARY=1`: a wallet (`VMK_DEBUG_BALANCE`), a few videos (`VMK_DEBUG_FAKE_VIDEOS=1`) and an upload moment.
     private func seedDebugScreens() {
         guard media?.isFake == true else { return }
@@ -493,6 +599,24 @@ final class AppModel {
             videos = [VideoItem(id: "d1", status: .running(.writing), title: "Presentation: Quarterly review", createdAt: .now, deckStage: .reading),
                       VideoItem(id: "d2", status: .running(.writing), title: "Presentation: Onboarding for new teachers", createdAt: .now.addingTimeInterval(-60), deckStage: .writing)]
             for id in ["d1", "d2"] { briefs[id] = videos.first { $0.id == id }?.title; minutes[id] = 4; deckVideos.insert(id); stageSince[id] = (.writing, Date().addingTimeInterval(-20)) }
+        }
+        if env["VMK_DEBUG_FAKE_VIDEOS"] == "bar" {
+            // the videos of the design-bar mockups: one being made (what the fake server reports about it: `VMK_DEBUG_MAKING=thumbs|tiles|none`), a large first poster, then a
+            // landscape and a vertical one side by side, one that did not finish
+            let mode = env["VMK_DEBUG_MAKING"] ?? "thumbs"
+            let making = mode == "none" ? nil : Self.fakeMaking(done: 4, total: 9, thumbs: mode == "thumbs")
+            func pic(_ kind: String, _ name: String) -> URL? { URL(string: "fake://\(kind)/\(name)") }
+            videos = [
+                VideoItem(id: "v1", status: .running(.voiceAndVisuals), title: "How honey is made", createdAt: .now, making: making),
+                VideoItem(id: "v3", status: .complete, title: "How a forest breathes", durationSeconds: 91, createdAt: .now.addingTimeInterval(-1800), previewGifURL: pic("landscape", "clip_01"), editable: true, aspect: "16:9", resolution: "1080p"),
+                VideoItem(id: "v4", status: .complete, title: "How bees make honey", durationSeconds: 124, createdAt: .now.addingTimeInterval(-7200), previewGifURL: pic("landscape", "s_bees"), aspect: "16:9", resolution: "1080p"),
+                VideoItem(id: "v5", status: .complete, title: "3 focus tips", durationSeconds: 30, createdAt: .now.addingTimeInterval(-86400), previewGifURL: pic("portrait", "s_focus"), aspect: "9:16", resolution: "1080p"),
+                VideoItem(id: "v2", status: .failed, title: "Thailand highlights", createdAt: .now.addingTimeInterval(-90000)),
+                VideoItem(id: "v6", status: .complete, title: "Why octopuses are so clever", durationSeconds: 75, createdAt: .now.addingTimeInterval(-172800), previewGifURL: pic("landscape", "s_pulpo"), aspect: "16:9", resolution: "1080p"),
+                VideoItem(id: "v7", status: .complete, title: "The jobs of tomorrow", durationSeconds: 58, createdAt: .now.addingTimeInterval(-272800), previewGifURL: pic("landscape", "s_jobs"), aspect: "16:9", resolution: "1080p"),
+            ]
+            briefs["v1"] = "How honey is made"; minutes["v1"] = 2
+            stageSince["v1"] = (.voiceAndVisuals, Date().addingTimeInterval(-40))
         }
         if env["VMK_DEBUG_FAKE_VIDEOS"] == "1" {
             videos = [

@@ -185,8 +185,8 @@ struct LibraryStripTile: View {
     @State private var image: UIImage?
     var body: some View {
         Group { if let image { Image(uiImage: image).resizable().scaledToFill() } else { Theme.surfaceRaised } }
-            .frame(width: 56, height: 56)
-            .clipShape(RoundedRectangle(cornerRadius: Theme.Radii.field, style: .continuous))
+            .frame(width: 62, height: 62)
+            .clipShape(RoundedRectangle(cornerRadius: Theme.Radii.thumb, style: .continuous))
             .overlay(alignment: .bottomLeading) { Image(systemName: "photo.stack.fill").font(.vmk(10)).padding(3).foregroundStyle(.white).background(Theme.primary, in: Circle()).padding(2).accessibilityHidden(true) }
             .overlay(alignment: .topTrailing) { if showRemove { RemoveX(label: tr("attach.remove_label", label), action: onRemove) } }
             .accessibilityElement(children: .contain)

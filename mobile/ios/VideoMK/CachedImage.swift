@@ -29,6 +29,8 @@ final class StableImageStore {
         #if DEBUG
         if url.scheme == "fake" {      // screenshots and jitter checks: drawn pictures, portrait or landscape
             let size = url.host == "portrait" ? CGSize(width: 270, height: 480) : CGSize(width: 480, height: 270)
+            // `VMK_DEBUG_IMAGE_DIR=/path` (simulator only): fake://landscape/clip_01 shows /path/clip_01.jpg when it exists, so screenshots can use real pictures
+            if let dir = ProcessInfo.processInfo.environment["VMK_DEBUG_IMAGE_DIR"], let real = UIImage(contentsOfFile: "\(dir)/\(url.lastPathComponent).jpg") { memory.setObject(real, forKey: key as NSString); return real }
             let img = MediaModel.fakeImage(seed: url.lastPathComponent, size: size)
             memory.setObject(img, forKey: key as NSString); return img
         }
