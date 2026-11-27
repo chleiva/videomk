@@ -326,3 +326,38 @@ Built in `frontend/` only; nothing deployed (the packages deploy with `site.sh f
 Shared files a package needs changed (a new token, a nav item beyond the list, a new i18n prefix, a dependency): ask WP0; do not edit them concurrently.
 
 **Notes for the packages:** the live marketing homepage is still the hand-written `frontend/site-pages/index.html` (not the Astro `Landing.astro`); package A decides which one wins. Dark mode and the language switch work in both layouts through the existing `data-theme-switch` / `data-lang-switch` hooks. The `dots` icon in `ui.tsx` is faint at 20 px (known, cosmetic).
+
+## WP-C status (2026-11-27, player, editor, credits, settings, feedback, sign-in): built, not deployed
+
+Vitest 268 green (the 168 of WP0b plus package B's and C's new tests); `astro build` works for both targets. Screenshots (390 / 820 / 1440, light and dark, EN and ES where text changes): `docs/web_2026/app_c/` (78 JPEGs); generator `docs/web_2026/src/shoot_c.mjs` (fake API in the browser, serves the build), word counter `docs/web_2026/src/count_c.mjs`.
+
+**Shipped**
+- **Watch page** (`WatchPage.tsx`, `Player.tsx`, `lib/player.ts`): our own controls over a plain `<video>`, icons only: play, scrubber with buffered range and spoken value, time, volume (hover devices), speed cycle, picture in picture, full screen (iPhone Safari falls back to the video's own), captions only when the file carries a track (ours are burned in, so no button). YouTube-style shortcuts (space/k, arrows, j/l, m, f, p, c, 0-9, < >). Controls rest after 3 s of playback, never while paused, never while a control has keyboard focus. Poster = the list's cached preview when there is one, with a big glass play button. **End card**: replay and "New video". **One row of icons** under a single caption line ("1:20 · 720p"): Share (the one gradient button; Web Share API, else copy link), Save (asks `?download=1` so the server names the file and the page stays), Edit (only when editable), Details (sheet with the description and photo credits, Copy), More (Make another video, Send feedback, Report this video). States: loading, still being made (409), failed (409 ERROR/FAILED/REJECTED: "No credits used"), error with Try again. Vertical, square and 4:5 videos keep their own shape (size from the file's pixels).
+- **Credits** (`WalletPage.tsx`): the number and one word on the gradient card, one line about the next free credit, New video (primary) and Get more (disabled, "Coming soon"), a small "How credits work" table, the buckets as history. Unlimited accounts see the infinity sign and "Unlimited", nothing about test accounts.
+- **Settings** (new `pages/settings`, `SettingsPage.tsx`, `lib/settings.ts`, `lib/account.ts`): account row (email, Sign out), Language (EN/ES), Appearance (Auto/Light/Dark), Subtitles, Photo dates, Photo locations (one (i)), Watermark default when the server has the feature (None / videomk / Your logo (Pro), position, logo upload and removal for premium; checked on the file's size and type, the server checks the bytes again), Send feedback, Support, Privacy, Terms, **Delete account**: type DELETE, a sign-in no older than 10 minutes (`auth_time`; otherwise "Sign in again": sign out locally, hosted `/logout`, the sign-in page puts the person back on `/settings?delete=1`, one last confirmation without typing), the request (idempotent), Sign in with Apple's step when the answer says `revoke_available` (the page opens Apple's link, local data already wiped), local wipe (tokens, caches, drafts, preferences; language and theme stay) and the closing message with the manual Apple steps when needed.
+- **Feedback** (`FeedbackPage.tsx`): "Tell us anything.", Topic chips, one box; opened from Report this video it carries the video id in the context (`report:<id>`, `after_video:<id>`) and starts on "Problem".
+- **Editor** (`Editor.tsx`): same flow and logic, restyled with tokens, back icon, status badge, the player for previews, **Undo** (50 steps, one per pause in typing; Cmd/Ctrl+Z outside text fields), icon tools on the selected scene.
+- **Sign-in** (`signin.astro`, `auth/callback.astro`): the new mark (the Sparklet tile), the two-line promise, **Continue with Apple / Google / email** in that order (Apple's black or white button, Google's white or dark button, each only when its switch is on; email goes to the hosted page with `lang`), the legal line, "Opening..." while the browser leaves, no box on phones and a soft card from tablet up. The callback page has a working state and an error state with Try again. Google is on in the prod build (`PUBLIC_AUTH_GOOGLE=1` in `site.sh app-build`); Apple needs `PUBLIC_AUTH_APPLE=1` once the credentials exist.
+- **Navigation**: Settings replaces Feedback in `appNav.ts` (Feedback lives in Settings, the video's More menu and after a video).
+
+**Visible words in the main area (English, `count_c.mjs`, counted from the DOM)**
+| Screen | Words (main) | Budget (UX doc) |
+|---|---|---|
+| Watch (title, time, quality) | 8 | 8 |
+| Credits (with the history list) | 22 | 18 |
+| Settings | 23 | 30 |
+| Feedback | 12 | 14 |
+| Sign-in (promise, three buttons, legal line) | 26 | 12 + buttons |
+Taps: watch to share 1; sign in 1 (provider) ; delete account 3 + typing.
+
+**Needs WP0 / other owners (not changed by WP-C)**
+- `backend/scripts/site.sh` `app_build`: add `settings` to the page list (`for p in signin generations wallet watch edit feedback questions settings delete-account`), or the settings page is not published. Same for `media` and `new` of package B.
+- Package B: the Create sheet should open when the URL has `?create=1` (the end card, credits and More menu link to `/generations?create=1`; `/new` may replace it). The Create sheet should read `readPref("subtitles")` from `lib/settings.ts`; the media upload should read `readPref("photoDates")` and `readPref("photoLocations")`.
+- Package A: the public `/delete-account` page is where Apple returns after revoking (`?status=ok|cancelled|mismatch|failed|invalid`, docs/ACCOUNT_DELETION.md section 4); it could show one line per status.
+- Backend/Cognito: if the pool moves to Managed Login, `prompt=login&max_age=0` works and `signInAgain()` can skip the hosted `/logout`.
+
+**Not done / limits**
+- Save has no resolution choice: the API returns one rendition per video (the one it was made in); the caption states its quality.
+- Publish (social) is not on the watch page: phase 0 of docs/SOCIAL_PUBLISHING_RESEARCH.md is the existing Share button; direct publishing waits for its own work.
+- The questions page (`questions.astro`) still shows package B's stepper unchanged.
+- Verified with a fake API in the browser (Chrome, Playwright), never against the real server; delete and Apple steps were exercised only up to the request (the fake answered 202).

@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Icon, Spinner } from "./ui";
 import { useLocale } from "../lib/useLocale";
-import { KINDS, TEXT_MAX, TEXT_MIN, contextFrom, sendFeedback, textProblem } from "../lib/feedback";
+import { KINDS, TEXT_MAX, TEXT_MIN, contextFrom, kindFrom, sendFeedback, textProblem } from "../lib/feedback";
 import type { FeedbackFailure, Kind } from "../lib/feedback";
 
 const ERROR_KEY: Record<FeedbackFailure, string> = { network: "feedback.error_network", error: "feedback.error_generic", rate: "feedback.error_rate", invalid: "feedback.error_invalid", auth: "api.session_expired" };
@@ -10,7 +10,7 @@ const ERROR_KEY: Record<FeedbackFailure, string> = { network: "feedback.error_ne
 export default function FeedbackPage() {
   const { t } = useLocale();
   const [text, setText] = useState("");
-  const [kind, setKind] = useState<Kind | null>(null);
+  const [kind, setKind] = useState<Kind | null>(() => (typeof location === "undefined" ? null : kindFrom(location.search)));
   const [state, setState] = useState<"edit" | "sending" | "done">("edit");
   const [failure, setFailure] = useState<FeedbackFailure | null>(null);
   const [touched, setTouched] = useState(false);
@@ -53,14 +53,14 @@ export default function FeedbackPage() {
       <p className="muted mt-2">{t("feedback.intro")}</p>
       <form className="mt-6" onSubmit={submit} noValidate>
         <fieldset className="border-0 p-0">
-          <legend className="caption mb-2">{t("feedback.kind_label")}</legend>
+          <legend className="eyebrow mb-2">{t("feedback.kind_label")}</legend>
           <div className="chips" role="group">
             {KINDS.map((k) => <button key={k} type="button" className="chip" aria-pressed={kind === k} onClick={() => setKind(kind === k ? null : k)}>{t(`feedback.kind.${k}`)}</button>)}
           </div>
         </fieldset>
-        <label htmlFor="feedback-text" className="mt-5 block font-semibold">{t("feedback.text_label")}</label>
+        <label htmlFor="feedback-text" className="sr-only-vmk">{t("feedback.text_label")}</label>
         <textarea
-          id="feedback-text" ref={area} className="field mt-2" rows={6} maxLength={TEXT_MAX} value={text} placeholder={t("feedback.placeholder")} enterKeyHint="enter" autoComplete="off"
+          id="feedback-text" ref={area} className="field mt-5" rows={6} maxLength={TEXT_MAX} value={text} placeholder={t("feedback.placeholder")} enterKeyHint="enter" autoComplete="off"
           aria-describedby="feedback-hint feedback-count" aria-invalid={short || undefined} disabled={state === "sending"}
           onChange={(e) => { setText(e.target.value); if (failure === "invalid") setFailure(null); }} onBlur={() => text && setTouched(true)}
         />
@@ -78,7 +78,6 @@ export default function FeedbackPage() {
             {state === "sending" ? <><Spinner />{t("feedback.sending")}</> : failure && failure !== "auth" ? t("feedback.retry") : t("feedback.send")}
           </button>
         </div>
-        <p className="caption mt-6">{t("feedback.privacy")}</p>
       </form>
     </section>
   );

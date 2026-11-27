@@ -1,15 +1,13 @@
 {
  "signin.page_title": "Sign in · videomk",
  "signin.description": "Sign in to videomk.",
- "signin.title": "Sign in to video",
- "signin.sub": "Choose how you want to continue.",
  "signin.google": "Continue with Google",
  "signin.apple": "Continue with Apple",
  "signin.email": "Continue with email",
  "signin.error": "Could not start sign-in. Please try again.",
  "signin.terms_link": "Terms",
  "signin.privacy_link": "Privacy Policy",
- "signin.fine": "See our {terms} and {privacy}.",
+ "signin.fine": "By continuing you agree to the {terms} and {privacy}.",
  "callback.page_title": "Signing you in…",
  "callback.signing_in": "Signing you in…",
  "callback.failed": "Sign-in failed.",
@@ -18,5 +16,7 @@
  "authErr.link": "We could not finish linking your accounts. Please try signing in again.",
  "authErr.failed_with": "Sign-in failed: {detail}",
  "authErr.failed": "Sign-in failed. Please try again.",
- "signin.tagline": "Describe it. We’ll make the video."
+ "signin.tagline": "Describe it. We’ll make the video.",
+ "signin.working": "Opening…",
+ "callback.error_title": "Sign-in didn’t finish"
 }

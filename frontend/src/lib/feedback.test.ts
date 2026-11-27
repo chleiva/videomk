@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildFeedbackRequest, cleanText, contextFrom, failureFor, textProblem, TEXT_MAX } from "./feedback";
+import { buildFeedbackRequest, cleanText, contextFrom, kindFrom, failureFor, textProblem, TEXT_MAX } from "./feedback";
 import { EN as en, ES as es } from "../i18n/catalog";
 
 describe("feedback request", () => {
@@ -27,6 +27,19 @@ describe("feedback request", () => {
     expect(contextFrom("?from=after_video")).toBe("after_video");
     expect(contextFrom("?from=<script>")).toBe("settings");
     expect(contextFrom("")).toBe("settings");
+  });
+  it("carries the video id for after_video and report, and only a plain one", () => {
+    expect(contextFrom("?from=after_video&video=abc-123")).toBe("after_video:abc-123");
+    expect(contextFrom("?from=report&video=abc-123")).toBe("report:abc-123");
+    expect(contextFrom("?from=report&video=" + "x".repeat(41))).toBe("report");
+    expect(contextFrom("?from=report&video=a/b")).toBe("report");
+    expect(contextFrom("?from=settings&video=abc")).toBe("settings");
+    expect(contextFrom("?from=report&video=abc-123").length).toBeLessThanOrEqual(64);
+  });
+  it("opens with the topic the link names", () => {
+    expect(kindFrom("?kind=problem")).toBe("problem");
+    expect(kindFrom("?kind=<b>")).toBeNull();
+    expect(kindFrom("")).toBeNull();
   });
   it("maps the answers to what the screen says", () => {
     expect([400, 429, 401, 403, 500, 502].map(failureFor)).toEqual(["invalid", "rate", "auth", "auth", "error", "error"]);

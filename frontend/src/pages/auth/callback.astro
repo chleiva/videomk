@@ -1,36 +1,45 @@
 ---
+import AppLayout from "../../layouts/AppLayout.astro";
 ---
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <meta name="robots" content="noindex" />
-    <title>Signing you in…</title>
-  </head>
-  <body>
-    <p id="msg">Signing you in…</p>
-    <script>
-      import { AuthDisplayError, SIGNIN_PATH, completeLogin } from "../../lib/auth";
-      import { getLocale, translate } from "../../lib/i18n";
+<AppLayout shell={false} title="Signing you in… · videomk" titleKey="callback.page_title">
+	<div class="callback" aria-live="polite">
+		<div id="state-working" class="callback-box" role="status">
+			<span class="spinner callback-spin" aria-hidden="true"></span>
+			<p id="msg" data-i18n="callback.signing_in">Signing you in…</p>
+		</div>
+		<div id="state-error" class="callback-box" role="alert" hidden>
+			<h1 id="err-title" class="callback-title" data-i18n="callback.error_title">Sign-in didn’t finish</h1>
+			<p id="err-msg" class="callback-msg"></p>
+			<a id="again" class="btn btn-primary" href="/signin" data-i18n="callback.try_again">Try again</a>
+		</div>
+	</div>
+	<script>
+		import { AuthDisplayError, SIGNIN_PATH, completeLogin } from "../../lib/auth";
+		import { getLocale, translate } from "../../lib/i18n";
 
-      const locale = getLocale();
-      document.documentElement.lang = locale;
-      document.title = translate("callback.page_title", locale);
-      const first = document.getElementById("msg");
-      if (first) first.textContent = translate("callback.signing_in", locale);
+		const locale = getLocale();
+		const working = document.getElementById("state-working")!;
+		const failed = document.getElementById("state-error")!;
+		document.getElementById("again")!.setAttribute("href", SIGNIN_PATH);
 
-      completeLogin()
-        .then((next) => location.replace(next))
-        .catch((e) => {
-          console.error("[auth] login failed", e);
-          const msg = document.getElementById("msg");
-          if (!msg) return;
-          // textContent only: the text can derive from provider-supplied error_description.
-          msg.textContent = (e instanceof AuthDisplayError ? e.message : translate("callback.failed", locale)) + " ";
-          const a = document.createElement("a");
-          a.href = SIGNIN_PATH;
-          a.textContent = translate("callback.try_again", locale);
-          msg.appendChild(a);
-        });
-    </script>
-  </body>
-</html>
+		completeLogin()
+			.then((next) => location.replace(next))
+			.catch((e) => {
+				console.error("[auth] login failed", e);
+				// textContent only: the text can derive from provider-supplied error_description.
+				document.getElementById("err-msg")!.textContent = e instanceof AuthDisplayError ? e.message : translate("callback.failed", locale);
+				working.hidden = true;
+				failed.hidden = false;
+				(document.getElementById("again") as HTMLElement).focus();
+			});
+	</script>
+</AppLayout>
+
+<style is:global>
+	.callback { width: 100%; display: flex; justify-content: center; padding: var(--space-8) var(--screen-margin); }
+	.callback-box { display: flex; flex-direction: column; align-items: center; gap: var(--space-4); text-align: center; max-width: 24rem; color: var(--text-secondary); font-size: var(--fs-body); }
+	.callback-box[hidden] { display: none; }
+	.callback-spin { width: 2rem; height: 2rem; border-width: 3px; color: var(--primary); }
+	.callback-title { font-size: var(--fs-title2); line-height: var(--lh-snug); font-weight: 700; letter-spacing: var(--track-title); color: var(--text); }
+	.callback-msg { color: var(--text-secondary); }
+</style>

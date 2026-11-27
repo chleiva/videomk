@@ -2,14 +2,14 @@
 import AppLayout from "../layouts/AppLayout.astro";
 import { AUTH_APPLE, AUTH_GOOGLE } from "../lib/config";
 import { chooserOptions } from "../lib/authUrl";
-const options = chooserOptions({ google: AUTH_GOOGLE, apple: AUTH_APPLE });
+// Apple first when it is on (Apple asks for equal prominence), then Google, then email.
+const options = chooserOptions({ google: AUTH_GOOGLE, apple: AUTH_APPLE }).sort((a, b) => ["apple", "google", "email"].indexOf(a.id) - ["apple", "google", "email"].indexOf(b.id));
 ---
 <AppLayout shell={false} title="Sign in · videomk" description="Sign in to videomk." titleKey="signin.page_title">
 	<div class="signin">
 		<div class="card" role="group" aria-labelledby="signin-title">
-			<span class="mark" aria-hidden="true"><svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M13.5 2 5 13.5h5.5L9.5 22 19 9.5h-5.7z"/></svg></span>
+			<img class="mark" src="/favicon.svg" width="72" height="72" alt="" aria-hidden="true" />
 			<h1 id="signin-title" data-i18n="signin.tagline">Describe it. We’ll make the video.</h1>
-			<p class="sub" data-i18n="signin.sub">Choose how you want to continue.</p>
 			<div class="buttons">
 				{options.map((o) => (
 					<button type="button" class={`pbtn pbtn-${o.id}`} data-provider={o.id} aria-label={o.label} data-i18n-aria={`signin.${o.id}`}>
@@ -36,13 +36,14 @@ const options = chooserOptions({ google: AUTH_GOOGLE, apple: AUTH_APPLE });
 				))}
 			</div>
 			<p id="signin-error" class="err" role="alert" hidden></p>
-			<p class="fine" id="signin-fine">See our <a href="/terms" data-path="/terms">Terms</a> and <a href="/privacy" data-path="/privacy">Privacy Policy</a>.</p>
+			<p class="fine" id="signin-fine">By continuing you agree to the <a href="/terms" data-path="/terms">Terms</a> and <a href="/privacy" data-path="/privacy">Privacy Policy</a>.</p>
 		</div>
 	</div>
 	<script>
 		import { beginAuthorize, getTokensIfAvailable, pendingReturnPath } from "../lib/auth";
 		import { COGNITO_PROVIDER } from "../lib/authUrl";
 		import { LOCALE_EVENT, getLocale, pathForLocale, translate } from "../lib/i18n";
+		import { RESUME_KEY, readResume } from "../lib/account";
 
 		// the sentence with its two links, rebuilt in the person's language (catalog text and our own paths only)
 		function drawFine() {
@@ -55,16 +56,21 @@ const options = chooserOptions({ google: AUTH_GOOGLE, apple: AUTH_APPLE });
 		drawFine();
 		window.addEventListener(LOCALE_EVENT, drawFine);
 
+		// Signing in again for "Delete account": the person comes back to the settings page, not to the videos (lib/account.ts)
+		try { const back = readResume(localStorage.getItem(RESUME_KEY)); if (back) localStorage.setItem("vmk_post_login_redirect", back); } catch {}
+
 		getTokensIfAvailable().then((t) => { if (t) location.replace(pendingReturnPath()); }).catch(() => {});
 		const err = document.getElementById("signin-error")!;
 		document.querySelectorAll<HTMLButtonElement>("button[data-provider]").forEach((b) => {
 			b.addEventListener("click", () => {
 				const id = b.dataset.provider as "google" | "apple" | "email";
 				document.querySelectorAll<HTMLButtonElement>("button[data-provider]").forEach((x) => (x.disabled = true));
+				const label = b.querySelector("span[data-i18n]"); if (label) label.textContent = translate("signin.working", getLocale());
 				try { sessionStorage.removeItem("vmk_auth_retried"); } catch {}
 				beginAuthorize(undefined, id === "email" ? undefined : COGNITO_PROVIDER[id]).catch(() => {
 					err.textContent = translate("signin.error", getLocale());
 					err.hidden = false;
+					if (label) label.textContent = translate(`signin.${id}`, getLocale());
 					document.querySelectorAll<HTMLButtonElement>("button[data-provider]").forEach((x) => (x.disabled = false));
 				});
 			});
@@ -73,17 +79,18 @@ const options = chooserOptions({ google: AUTH_GOOGLE, apple: AUTH_APPLE });
 </AppLayout>
 
 <style is:global>
-	/* The chooser follows the tokens (tokens.css, light and dark). The Google and Apple buttons keep the brand colours their guidelines require. */
+	/* The sign-in page: the mark, one line of promise, the buttons. On phones there is no box at all (Apple style); from tablet up a soft card.
+	   The Google and Apple buttons keep the colours their brand guidelines require; everything else is tokens. */
 	.signin { --g-bg: #fff; --g-line: #747775; --g-fg: #1f1f1f; --g-hover: rgba(48,48,48,.08); --a-bg: #000; --a-fg: #fff; --a-line: #000; --a-hover: #262626;
-		display: flex; justify-content: center; align-items: flex-start; padding: 8vh var(--screen-margin) var(--space-8); }
+		width: 100%; display: flex; justify-content: center; align-items: center; padding: var(--space-6) var(--screen-margin) var(--space-8); }
 	:root[data-theme="dark"] .signin { --g-bg: #131314; --g-line: #8e918f; --g-fg: #e3e3e3; --g-hover: rgba(232,234,237,.1); --a-bg: #fff; --a-fg: #000; --a-line: #fff; --a-hover: #e5e5e5; }
 	@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .signin { --g-bg: #131314; --g-line: #8e918f; --g-fg: #e3e3e3; --g-hover: rgba(232,234,237,.1); --a-bg: #fff; --a-fg: #000; --a-line: #fff; --a-hover: #e5e5e5; } }
-	.signin .card { width: 100%; max-width: 26rem; padding: var(--space-8) var(--sheet-margin) var(--space-6); border-radius: var(--radius-video); text-align: center; }
-	.signin .mark { width: 4rem; height: 4rem; border-radius: 1.25rem; display: inline-flex; align-items: center; justify-content: center; color: var(--on-primary); background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end)); box-shadow: var(--elev-2); }
-	.signin h1 { margin: var(--space-5) 0 0; font-size: var(--fs-title); line-height: var(--lh-tight); font-weight: 700; letter-spacing: -0.03em; color: var(--text); text-wrap: balance; }
-	.signin .sub { margin: var(--space-2) 0 var(--space-6); color: var(--text-secondary); font-size: var(--fs-body); }
+	.signin .card { width: 100%; max-width: 24rem; padding: 0; background: transparent; box-shadow: none; text-align: center; }
+	@media (min-width: 40rem) { .signin .card { padding: var(--space-10) var(--space-8) var(--space-8); background: var(--surface); box-shadow: var(--elev-2); border-radius: var(--radius-sheet); } }
+	.signin .mark { width: 4.5rem; height: 4.5rem; border-radius: 1.4rem; display: block; margin: 0 auto; box-shadow: var(--elev-2); }
+	.signin h1 { margin: var(--space-6) auto var(--space-8); max-width: 14ch; font-size: var(--fs-large); line-height: var(--lh-tight); font-weight: 700; letter-spacing: var(--track-title); color: var(--text); text-wrap: balance; }
 	.signin .buttons { display: flex; flex-direction: column; gap: var(--space-3); }
-	.signin .pbtn { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; min-height: 3.25rem; padding: var(--space-2) var(--space-4); border-radius: var(--radius-pill); border: 1px solid; font-size: var(--fs-body); font-weight: 600; line-height: 1.2; cursor: pointer; transition: background-color var(--dur-select) var(--ease), transform var(--dur-press) var(--ease); }
+	.signin .pbtn { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; min-height: 3.5rem; padding: var(--space-2) var(--space-4); border-radius: var(--radius-pill); border: 1px solid; font-size: var(--fs-body); font-weight: 600; line-height: 1.2; cursor: pointer; transition: background-color var(--dur-select) var(--ease), transform var(--dur-press) var(--ease), filter var(--dur-select) var(--ease); }
 	.signin .pbtn:active:not(:disabled) { transform: scale(.98); }
 	.signin .pbtn:disabled { opacity: .6; cursor: default; }
 	.signin .pbtn-google { background: var(--g-bg); border-color: var(--g-line); color: var(--g-fg); font-family: Roboto, "Helvetica Neue", Arial, sans-serif; }
@@ -94,6 +101,6 @@ const options = chooserOptions({ google: AUTH_GOOGLE, apple: AUTH_APPLE });
 	.signin .pbtn-email:hover:not(:disabled) { filter: brightness(1.06); }
 	.signin .ico { flex: none; }
 	.signin .err { margin: var(--space-4) 0 0; color: var(--danger); font-size: var(--fs-subhead); }
-	.signin .fine { margin: var(--space-5) 0 0; color: var(--text-secondary); font-size: var(--fs-footnote); }
+	.signin .fine { margin: var(--space-6) auto 0; max-width: 28ch; color: var(--text-secondary); font-size: var(--fs-footnote); }
 	.signin .fine a { color: var(--text); text-decoration: underline; text-underline-offset: 3px; }
 </style>

@@ -1,0 +1,7 @@
+---
+import AppLayout from "../../layouts/AppLayout.astro";
+import SettingsPage from "../../components/SettingsPage";
+---
+<AppLayout title="Settings — videomk" titleKey="settings.page_title" active="settings">
+	<SettingsPage client:only="react" />
+</AppLayout>

@@ -8,7 +8,7 @@ export const TEXT_MIN = 3;
 export const TEXT_MAX = 2000;
 export const KINDS = ["idea", "problem", "other"] as const;
 export type Kind = (typeof KINDS)[number];
-export const CONTEXTS = ["settings", "after_video", "rating_prompt"] as const;
+export const CONTEXTS = ["settings", "after_video", "rating_prompt", "report"] as const;
 
 export interface FeedbackBody { text: string; kind?: Kind; app: "web"; locale?: Locale; context?: string }
 
@@ -24,8 +24,18 @@ export function textProblem(raw: string): "short" | "long" | null {
 
 /** The context we may send: only the known ones (it comes from a query string). */
 export function contextFrom(search: string): string {
-  const v = new URLSearchParams(search).get("from") ?? "";
-  return (CONTEXTS as readonly string[]).includes(v) ? v : "settings";
+  const q = new URLSearchParams(search);
+  const v = q.get("from") ?? "";
+  const from = (CONTEXTS as readonly string[]).includes(v) ? v : "settings";
+  const video = q.get("video") ?? "";
+  // a video id (letters, digits, dashes) rides along for "after_video" and "report", so the message can be read next to the video it is about
+  return (from === "after_video" || from === "report") && /^[\w-]{1,40}$/.test(video) ? `${from}:${video}` : from;
+}
+
+/** The topic the page opens with (`?kind=problem` from "Report this video"); anything else leaves it unchosen. */
+export function kindFrom(search: string): Kind | null {
+  const v = new URLSearchParams(search).get("kind") ?? "";
+  return (KINDS as readonly string[]).includes(v) ? (v as Kind) : null;
 }
 
 /** The request body, or null when the text is not sendable. */
