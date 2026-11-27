@@ -3,7 +3,7 @@
 <resources>
     <string name="feedback_title">Send feedback</string>
     <string name="feedback_subtitle">We read every message</string>
-    <string name="feedback_open">Write a message to the videomk team</string>
+    <string name="feedback_open">Write a message to the VideoMK team</string>
     <string name="feedback_intro">Tell us anything.</string>
     <string name="feedback_intro_unhappy">Sorry about that. What would make it better?</string>
     <string name="feedback_field_label">Your message</string>
@@ -26,12 +26,12 @@
     <string name="feedback_err_invalid">That message could not be sent. Please check the text and try again.</string>
     <string name="feedback_after_video">Anything we could do better? Tell us</string>
 
-    <string name="rating_ask_title">Enjoying videomk?</string>
+    <string name="rating_ask_title">Enjoying VideoMK?</string>
     <string name="rating_yes">Yes</string>
     <string name="rating_not_really">Not really</string>
     <string name="rating_love_title">That is great to hear</string>
-    <string name="rating_love_body">A quick rating helps other people find videomk. It only takes a moment.</string>
-    <string name="rating_rate">Rate videomk</string>
+    <string name="rating_love_body">A quick rating helps other people find VideoMK. It only takes a moment.</string>
+    <string name="rating_rate">Rate VideoMK</string>
     <string name="rating_later">Maybe later</string>
     <string name="rating_already">I already rated it</string>
 </resources>

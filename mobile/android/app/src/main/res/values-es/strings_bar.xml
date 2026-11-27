@@ -12,7 +12,7 @@
     <!-- Making -->
     <string name="making_keeps_going">Puedes salir. Sigue en marcha.</string>
     <string name="making_notify">Avísame cuando esté listo</string>
-    <string name="making_notify_off">Las notificaciones de videomk están desactivadas en los ajustes del teléfono.</string>
+    <string name="making_notify_off">Las notificaciones de VideoMK están desactivadas en los ajustes del teléfono.</string>
     <string name="notify_channel">Video listo</string>
     <string name="notify_ready_title">Tu video está listo</string>
     <string name="notify_failed_title">Tu video no se terminó</string>
@@ -20,10 +20,10 @@
     <string name="lib_play">Reproducir</string>
     <!-- Player -->
     <string name="remix_title">Crear otro</string>
-    <string name="remix_short">Hazlo un Short</string>
-    <string name="remix_spanish">Versión en español</string>
-    <string name="remix_english">Versión en inglés</string>
-    <string name="remix_cut30">Corte de 30 segundos</string>
+    <string name="remix_short">Como Short</string>
+    <string name="remix_spanish">En español</string>
+    <string name="remix_english">En inglés</string>
+    <string name="remix_cut30">30 segundos</string>
     <!-- Sign-in -->
     <string name="auth_sample_prompt">Cómo respira un bosque</string>
     <string name="auth_use_email">Usar correo</string>

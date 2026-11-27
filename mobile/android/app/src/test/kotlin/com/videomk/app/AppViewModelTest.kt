@@ -45,6 +45,8 @@ class AppViewModelTest {
     private lateinit var store: InMemoryTokenStore
     private val signedOut = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
     private var now = 1_000_000L
+    private var undoMillis = 60L
+    private lateinit var undo: com.videomk.app.core.UndoCenter
 
     @Before fun setUp() {
         Dispatchers.setMain(UnconfinedTestDispatcher())
@@ -55,7 +57,8 @@ class AppViewModelTest {
     private fun vm(signedIn: Boolean = true): AppViewModel {
         if (signedIn) store.save(Tokens(fakeJwt(email = "me@example.com"), "a", "r", Instant.now().plusSeconds(3000)))
         val auth = AuthService(configFor(server), store, OkHttpClient())
-        return AppViewModel(backend, auth, configFor(server), signedOut, clock = { now }, pollMillis = 40)
+        undo = com.videomk.app.core.UndoCenter(kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.SupervisorJob() + Dispatchers.Default), windowMillis = undoMillis)
+        return AppViewModel(backend, auth, configFor(server), signedOut, clock = { now }, pollMillis = 40, undoCenter = undo)
     }
 
     private fun AppViewModel.await(pred: (AppState) -> Boolean) = runBlocking { withTimeout(5000) { state.first(pred) } }
@@ -394,5 +397,49 @@ class AppViewModelTest {
         assertEquals(VideoStatus.Failed, VideoStatus.fromServer("FAILED"))
         assertEquals(VideoStatus.Complete, VideoStatus.fromServer("COMPLETE"))
         assertTrue(VideoStatus.fromServer("SOMETHING_NEW").isRunning)
+    }
+
+    // ---- undo over confirm, cancel while making (audit P1-6, P1-7)
+
+    @Test fun `delete hides the video at once, asks the server only after the undo time, and undo puts it back unsent`() = runBlocking {
+        undoMillis = 5_000
+        backend.videos = listOf(VideoItem("a", VideoStatus.Complete), VideoItem("b", VideoStatus.Complete)); val a = vm(); a.start(); a.refresh()
+        a.delete(a.state.value.video("a")!!)
+        assertEquals(listOf("b"), a.state.value.entries.map { it.id }); assertTrue(backend.deleteCalls.isEmpty()); assertEquals("Deleted", undo.current.value!!.text)
+        undo.undo()
+        assertEquals(listOf("a", "b"), a.state.value.entries.map { it.id }); kotlinx.coroutines.delay(100); assertTrue(backend.deleteCalls.isEmpty())
+        // leaving the screen makes a waiting removal final at once
+        a.delete(a.state.value.video("b")!!); a.onBackground(watch = false)
+        a.await { it.videos.none { v -> v.id == "b" } }
+        assertEquals(listOf("b"), backend.deleteCalls); assertTrue(a.state.value.hidden.isEmpty())
+    }
+
+    @Test fun `a removal the server refuses puts the card back and says why`() = runBlocking {
+        backend.videos = listOf(VideoItem("a", VideoStatus.Complete)); backend.deleteResult = false; val a = vm(); a.start(); a.refresh()
+        a.delete(a.state.value.video("a")!!)
+        a.await { it.retryNotice != null }
+        assertEquals(listOf("a"), a.state.value.entries.map { it.id })
+    }
+
+    @Test fun `cancel turns the making card into the cancelled one and says how many credits came back`() = runBlocking {
+        backend.videos = listOf(running("m")); backend.cancelResult = com.videomk.app.core.CancelResult.Cancelled(2); val a = vm(); a.start(); a.refresh()
+        a.cancel(a.state.value.video("m")!!)
+        a.await { it.video("m")?.status == VideoStatus.Cancelled && it.cancelling.isEmpty() }
+        assertEquals(listOf("m"), backend.cancelCalls); assertEquals("Cancelled · 2 credits back", undo.current.value!!.text); assertFalse(undo.current.value!!.undoable)
+        assertFalse(a.state.value.hasRunningVideos)
+        // it finished while the request was on its way: no message of success, the list says what it is now
+        backend.videos = listOf(running("n")); a.refresh()
+        backend.cancelResult = com.videomk.app.core.CancelResult.NotCancellable("This video is already finished."); backend.videos = listOf(VideoItem("n", VideoStatus.Complete))
+        a.cancel(a.state.value.video("n")!!)
+        a.await { it.retryNotice == "This video is already finished." }
+        assertEquals(VideoStatus.Complete, a.state.value.video("n")!!.status)
+    }
+
+    @Test fun `a plan refusal at create leaves no card, keeps the draft and is not a sign-out`() = runBlocking {
+        val a = vm(); a.start(); a.await { it.phase is Phase.SignedIn }
+        backend.startError = ApiError.Plan("plan_length", "Videos on your plan can be up to 0:30 long.", "pro", null, 30)
+        val r = a.submitAwait("Explain rainbows please", CreateOptions(minutes = 1.0)) as com.videomk.app.core.SubmitOutcome.Stopped
+        assertTrue(a.state.value.pending.isEmpty()); assertTrue(a.state.value.phase is Phase.SignedIn)
+        assertEquals("plan_length", (com.videomk.app.core.CreateErrors.fromGenerate(r.error) as com.videomk.app.core.CreateStop.Plan).code)
     }
 }

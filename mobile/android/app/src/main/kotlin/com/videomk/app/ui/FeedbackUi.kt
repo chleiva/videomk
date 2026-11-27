@@ -121,25 +121,17 @@ fun FeedbackSheet(api: FeedbackApi?, draft: FeedbackDraft, context: FeedbackCont
                 }
                 return@Column
             }
-            Text(stringResource(R.string.feedback_title), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = Vmk.colors.text, modifier = Modifier.semantics { heading() })
+            SheetHeader(stringResource(R.string.feedback_title), { if (!sending) onClose() }, closeTag = "feedbackClose")
             Text(stringResource(if (unhappy) R.string.feedback_intro_unhappy else R.string.feedback_intro), style = MaterialTheme.typography.bodyLarge, color = Vmk.colors.textSecondary)
             val label = stringResource(R.string.feedback_field_label)
             val trimmedLength = FeedbackRules.clean(text).length
             val counter = stringResource(R.string.feedback_counter, text.length, FeedbackRules.MAX)
             val counterA11y = stringResource(R.string.feedback_counter_a11y, text.length, FeedbackRules.MAX)
-            OutlinedTextField(
-                value = text, onValueChange = { text = FeedbackRules.clamp(it); flow.edit(text) }, enabled = !sending,
-                label = { Text(label) }, placeholder = { Text(stringResource(R.string.feedback_field_hint)) },
-                minLines = 4, maxLines = 8,
-                keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
-                supportingText = {
-                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        Text(if (trimmedLength in 1 until FeedbackRules.MIN) stringResource(R.string.feedback_min_hint, FeedbackRules.MIN) else "", Modifier.weight(1f))
-                        Text(counter, Modifier.semantics { contentDescription = counterA11y }.testTag("feedbackCounter"))
-                    }
-                },
-                modifier = Modifier.fillMaxWidth().testTag("feedbackField"),
-            )
+            VmkField(text, { text = FeedbackRules.clamp(it); flow.edit(text) }, Modifier.semantics { contentDescription = label }.testTag("feedbackField"), placeholder = stringResource(R.string.feedback_field_hint), singleLine = false, minHeight = 132.dp, enabled = !sending, keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences))
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Text(if (trimmedLength in 1 until FeedbackRules.MIN) stringResource(R.string.feedback_min_hint, FeedbackRules.MIN) else "", style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary, modifier = Modifier.weight(1f))
+                Text(counter, style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary, modifier = Modifier.semantics { contentDescription = counterA11y }.testTag("feedbackCounter"))
+            }
             Text(stringResource(R.string.feedback_kind_label), style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.textSecondary)
             FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 for ((k, res) in listOf(FeedbackKind.Idea to R.string.feedback_kind_idea, FeedbackKind.Problem to R.string.feedback_kind_problem, FeedbackKind.Other to R.string.feedback_kind_other)) {
@@ -171,7 +163,6 @@ fun FeedbackSheet(api: FeedbackApi?, draft: FeedbackDraft, context: FeedbackCont
                 if (sending) { CircularProgressIndicator(Modifier.size(20.dp), color = androidx.compose.material3.LocalContentColor.current, strokeWidth = 2.dp); androidx.compose.foundation.layout.Spacer(Modifier.padding(4.dp)) }
                 Text(stringResource(if (sending) R.string.feedback_sending else if (failed) R.string.common_try_again else R.string.feedback_send), style = MaterialTheme.typography.titleMedium, color = androidx.compose.material3.LocalContentColor.current, textAlign = TextAlign.Center)
             }
-            TextButton(onClick = onClose, enabled = !sending, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag("feedbackClose")) { Text(stringResource(R.string.common_close), color = Vmk.colors.textSecondary, fontWeight = FontWeight.SemiBold) }
         }
     }
 }

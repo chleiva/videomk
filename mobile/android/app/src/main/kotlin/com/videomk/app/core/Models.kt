@@ -128,13 +128,14 @@ data class CreateOptions(
 }
 
 data class WalletBucket(val kindName: String, val remaining: Int, val expiresAt: Instant? = null) {
-    enum class Kind { Daily, Signup, Paid, Refund, Other }
+    enum class Kind { Daily, Signup, Paid, Refund, Plan, Other }
 
     val kind: Kind get() = when (kindName) {
         "daily" -> Kind.Daily
         "signup" -> Kind.Signup
         "paid" -> Kind.Paid
         "refund" -> Kind.Refund
+        "plan" -> Kind.Plan
         else -> Kind.Other
     }
 

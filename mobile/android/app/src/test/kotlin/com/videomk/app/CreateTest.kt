@@ -51,7 +51,7 @@ class CreateTest {
         assertEquals(listOf("youtube", "linkedin", "x", "other", "shorts", "instagram_feed"), chips.map { it.id })
         assertEquals(listOf(true, true, true, true, false, false), chips.map { it.enabled })
         assertTrue(chips.take(4).all { it.aspect == "16:9" && it.resolution == "1080p" })
-        assertEquals(listOf("YouTube", "LinkedIn", "X", "Just a video", "Shorts · Reels · TikTok", "Instagram"), chips.map { it.label })
+        assertEquals(listOf("YouTube", "LinkedIn", "X", "Video", "Shorts · Reels · TikTok", "Instagram"), chips.map { it.label })
         assertTrue(CreatePlatforms.chips(FULL).all { it.enabled }); assertEquals("9:16", CreatePlatforms.chip(FULL, "shorts")!!.aspect); assertEquals("4:5", CreatePlatforms.chip(FULL, "instagram_feed")!!.aspect)
     }
 
@@ -62,7 +62,7 @@ class CreateTest {
 
     @Test fun `the recommendation line, custom format and whether Change is offered`() {
         val o = CreateOptions()
-        assertEquals("Just a video · Landscape 16:9 · 1080p", CreatePlatforms.recommendation(o, Capabilities.FALLBACK))
+        assertEquals("Video · Landscape 16:9 · 1080p", CreatePlatforms.recommendation(o, Capabilities.FALLBACK))
         val yt = CreatePlatforms.select(o, CreatePlatforms.chip(Capabilities.FALLBACK, "youtube")!!)
         assertEquals("YouTube · Landscape 16:9 · 1080p", CreatePlatforms.recommendation(yt, Capabilities.FALLBACK)); assertFalse(CreatePlatforms.isCustom(yt, Capabilities.FALLBACK))
         val vertical = yt.copy(aspect = "9:16", resolution = "720p")
@@ -83,7 +83,7 @@ class CreateTest {
     @Test fun `first launch defaults and what is remembered`() {
         val d = CreateDefaults.resolve(null, Capabilities.FALLBACK)
         assertEquals(CreateOptions(minutes = 1.0, look = null, captions = true, platform = "other", aspect = "16:9", resolution = "1080p", language = "auto"), d)   // the old six lengths have no 30 s: 1 min, 1 credit
-        // audit ruling 1: the first run is YouTube · 1 min (1 credit) wherever the server knows YouTube; an older server without platforms stays on "Just a video"
+        // audit ruling 1: the first run is YouTube · 1 min (1 credit) wherever the server knows YouTube; an older server without platforms stays on "Video"
         val first = CreateDefaults.resolve(null, FULL.copy(presets = listOf(0.25, 0.5, 1.0, 3.0)))
         assertEquals(1.0, first.minutes, 0.0); assertEquals(if (FULL.platforms.any { it.id == "youtube" }) "youtube" else "other", first.platform); assertEquals(1, first.credits)
         // a plan whose longest video is 30 s (Free): the first run offers the longest length that plan makes, never one the server would refuse

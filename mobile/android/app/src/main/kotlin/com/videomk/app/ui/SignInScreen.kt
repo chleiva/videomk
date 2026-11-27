@@ -80,10 +80,11 @@ fun SignInScreen(state: AppState, social: SocialSwitches = SocialSwitches(), onS
         // the sample: decoration for the eye, silent for TalkBack (the promise below says the same in words)
         Box(Modifier.fillMaxWidth().height(full * 0.64f).clearAndSetSemantics { }) {
             val clip = sampleVideoRes(androidx.compose.ui.platform.LocalContext.current)
-            if (clip != null) SignInSample(clip, Modifier.fillMaxSize(), fill = true)
-            else Image(painterResource(R.drawable.signin_sample), null, Modifier.fillMaxSize(), contentScale = androidx.compose.ui.layout.ContentScale.Crop)
+            // our own footage: a still from the sample video, and over it the same video as a silent loop (the still alone when animations are off)
+            Image(painterResource(R.drawable.signin_sample), null, Modifier.fillMaxSize(), contentScale = androidx.compose.ui.layout.ContentScale.Crop)
+            if (clip != null && !reduceMotion(androidx.compose.ui.platform.LocalContext.current)) SignInSample(clip, Modifier.fillMaxSize(), fill = true)
             Box(Modifier.fillMaxSize().background(androidx.compose.ui.graphics.Brush.verticalGradient(0f to Color.Black.copy(alpha = 0.18f), 0.35f to Color.Transparent, 0.62f to Color.Transparent, 1f to bg)))
-            GlassChip(stringResource(R.string.quoted, stringResource(R.string.auth_sample_prompt)), Modifier.align(Alignment.TopCenter).statusBarsPadding().padding(top = Vmk.space.xxxl), leading = { Sparkle(tint = Vmk.colors.live, size = 14.dp) })
+            // no words on the footage: it speaks for itself (the screen's budget is 12 words plus the buttons)
         }
         // at least the screen high so the buttons sit at the bottom, and taller (scrolling over the picture) when large text needs it: nothing overlaps or clips
         Column(Modifier.fillMaxWidth().heightIn(min = full).verticalScroll(rememberScrollState()).statusBarsPadding().navigationBarsPadding(), verticalArrangement = Arrangement.Bottom, horizontalAlignment = Alignment.CenterHorizontally) {
@@ -179,7 +180,7 @@ fun LegalLine() {
             rest = rest.substring(i + 1)
         }
     }
-    Text(text, style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary, textAlign = TextAlign.Center)
+    Box(Modifier.heightIn(min = Vmk.minTouch), contentAlignment = Alignment.Center) { Text(text, style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.textSecondary, textAlign = TextAlign.Center) }
 }
 
 /** The id of `res/raw/sample_intro`, or null while that asset does not exist (none ships today: the owner has not supplied one). */

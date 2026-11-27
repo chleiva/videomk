@@ -242,19 +242,40 @@ class MediaViewModel(
 
     // actions
 
+    /** "Deleted · Undo" for photos and collections (set by the screen; without it a removal is sent at once, as in tests). */
+    var undo: com.videomk.app.core.UndoCenter? = null
+
     fun deleteSelected() { deleteIds(selection.toList()); clearSelection() }
 
+    /**
+     * The photos leave the grid at once and "Deleted · Undo" shows; the server is asked only when the undo time is over. Undo reads the grid again from the server,
+     * where nothing was removed.
+     */
     fun deleteIds(ids: List<String>) {
         val a = api ?: return
         if (ids.isEmpty()) return
-        viewModelScope.launch {
-            try {
-                for (chunk in ids.chunked(100)) a.delete(chunk)
-                listing.remove(ids); photos = photos.filter { it.id !in ids }
-                searchResult = searchResult?.let { r -> SearchResult(r.understood, r.items.filter { it.id !in ids }, r.mode) }
-                notice = Txt.n(R.plurals.media_deleted, ids.size)
+        val u = undo
+        if (u == null) { viewModelScope.launch { deleteNow(a, ids, alreadyHidden = false) }; return }
+        hide(ids)
+        u.offer(Txt.s(R.string.common_deleted), commit = { deleteNow(a, ids, alreadyHidden = true) }, undo = { refresh() })
+    }
+
+    private fun hide(ids: List<String>) {
+        listing.remove(ids); photos = photos.filter { it.id !in ids }
+        searchResult = searchResult?.let { r -> SearchResult(r.understood, r.items.filter { it.id !in ids }, r.mode) }
+        viewerIndex?.let { i -> if (photos.isEmpty()) viewerIndex = null else if (i >= photos.size) viewerIndex = photos.size - 1 }
+    }
+
+    private suspend fun deleteNow(a: com.videomk.app.core.MediaApi, ids: List<String>, alreadyHidden: Boolean) {
+        try {
+            for (chunk in ids.chunked(100)) a.delete(chunk)
+            kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main.immediate) {
+                if (!alreadyHidden) { hide(ids); notice = Txt.n(R.plurals.media_deleted, ids.size) }
                 runCatching { summary = a.summary(); collections = a.collections() }
-            } catch (e: CancellationException) { throw e } catch (e: ApiError) { notice = e.message } catch (e: Exception) { notice = ApiError.Server.message }
+            }
+        } catch (e: CancellationException) { throw e } catch (e: Exception) {
+            // it could not be removed: say why and show what the server still has
+            kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main.immediate) { notice = (e as? ApiError)?.message ?: ApiError.Server.message; if (alreadyHidden) refresh() }
         }
     }
 
@@ -300,11 +321,18 @@ class MediaViewModel(
         }
     }
 
+    /** The collection leaves the list at once (its photos stay in Media); the server is asked when the undo time is over. */
     fun deleteCollection(id: String, done: () -> Unit = {}) {
         val a = api ?: return
-        viewModelScope.launch {
-            try { a.deleteCollection(id); collections = collections.filter { it.id != id }; done() } catch (e: CancellationException) { throw e } catch (e: ApiError) { notice = e.message } catch (e: Exception) { notice = ApiError.Server.message }
+        val before = collections
+        val u = undo
+        suspend fun now() {
+            try { a.deleteCollection(id); kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main.immediate) { collections = collections.filter { it.id != id } } }
+            catch (e: CancellationException) { throw e } catch (e: Exception) { kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main.immediate) { notice = (e as? ApiError)?.message ?: ApiError.Server.message; collections = before } }
         }
+        if (u == null) { viewModelScope.launch { now(); done() }; return }
+        collections = collections.filter { it.id != id }; done()
+        u.offer(Txt.s(R.string.common_deleted), commit = { now() }, undo = { collections = before })
     }
 
     /** The photo's own read (with the full-size link, valid 10 minutes) for the viewer. */

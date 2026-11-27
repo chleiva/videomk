@@ -60,22 +60,22 @@
     <string name="auth_sign_in_or_create">Sign in or create account</string>
     <string name="auth_sign_in_failed">We couldn\'t sign you in. Please try again.</string>
     <string name="auth_account_link_failed">We linked your accounts but couldn\'t finish signing you in. Please tap the button once more.</string>
-    <string name="auth_legal_line">By continuing you agree to the %1$s and %2$s.</string>
+    <string name="auth_legal_line">%1$s and %2$s apply.</string>
     <string name="auth_terms">Terms</string>
-    <string name="auth_privacy_policy">Privacy Policy</string>
+    <string name="auth_privacy_policy">Privacy</string>
 
     <!-- settings -->
     <string name="settings_title">Settings</string>
     <string name="settings_account">Account</string>
     <string name="settings_signed_in_as">Signed in as</string>
     <string name="settings_sign_out">Sign out</string>
-    <string name="settings_sign_out_confirm">Sign out of videomk?</string>
+    <string name="settings_sign_out_confirm">Sign out of VideoMK?</string>
     <string name="settings_photos">Photos</string>
     <string name="settings_photo_dates">Use photo dates</string>
     <string name="settings_photo_dates_hint">Puts your photos in the order they were taken and groups them by day</string>
     <string name="settings_photo_locations">Use photo locations</string>
     <string name="settings_photo_locations_hint">Names the places in your story. An approximate location (about 1 km) is sent, never the exact spot, and it is not kept after your video is planned. Location is always removed from the photo files themselves.</string>
-    <string name="settings_media_privacy">Your photos are private to you. Only you can see them. Nobody at videomk browses them. They are used to find your photos and to make the videos you ask for. Delete any photo or everything, any time.</string>
+    <string name="settings_media_privacy">Your photos are private to you. Only you can see them. Nobody at VideoMK browses them. They are used to find your photos and to make the videos you ask for. Delete any photo or everything, any time.</string>
     <string name="settings_organize_title">Organize new uploads</string>
     <string name="settings_organize_hint">Ask offers after a big upload. Always groups photos by place and month, and adds later uploads to matching collections. Never leaves everything as it is.</string>
     <string name="settings_about">About</string>
@@ -86,11 +86,11 @@
     <!-- account deletion -->
     <string name="deletion_card_title">Delete account</string>
     <string name="deletion_card_button">Delete my account…</string>
-    <string name="deletion_settings_body">Permanently deletes your account, your videos, your photos and My media, your credits and your sign-in. This can\'t be undone.</string>
+    <string name="deletion_settings_body">Permanently deletes your account, your videos, your photos and Media, your credits and your sign-in. This can\'t be undone.</string>
     <string name="deletion_header">Delete your account?</string>
     <string name="deletion_deletes_title">This permanently deletes:</string>
     <string name="deletion_item_videos">Your videos</string>
-    <string name="deletion_item_photos">Your photos and everything in My media</string>
+    <string name="deletion_item_photos">Your photos and everything in Media</string>
     <string name="deletion_item_credits">Your credits, including any you have left</string>
     <string name="deletion_item_signin">Your sign-in</string>
     <string name="deletion_irreversible">This can\'t be undone.</string>
@@ -105,12 +105,12 @@
     <string name="deletion_reauth_opening">Opening the sign-in page in your browser. Sign in again there to confirm. Nothing is deleted until you do.</string>
     <string name="deletion_reauth_body">Sign in again in your browser to confirm it\'s you. Nothing is deleted until you do.</string>
     <string name="deletion_done_title">Your account is being deleted</string>
-    <string name="deletion_apple_available">You signed in with Apple. To finish, confirm with Apple so videomk stops being connected to your Apple ID. This is optional and your account is deleted either way.</string>
-    <string name="deletion_apple_manual">To finish, go to appleid.apple.com, sign in, open Sign-In and Security, then Sign in with Apple, choose videomk and select Stop using Apple ID.</string>
-    <string name="deletion_apple_done">Done: videomk no longer has access through your Apple ID.</string>
+    <string name="deletion_apple_available">You signed in with Apple. To finish, confirm with Apple so VideoMK stops being connected to your Apple ID. This is optional and your account is deleted either way.</string>
+    <string name="deletion_apple_manual">To finish, go to appleid.apple.com, sign in, open Sign-In and Security, then Sign in with Apple, choose VideoMK and select Stop using Apple ID.</string>
+    <string name="deletion_apple_done">Done: VideoMK no longer has access through your Apple ID.</string>
     <string name="deletion_apple_button">Finish with Apple</string>
     <string name="deletion_skip_close">Skip and close</string>
-    <string name="deletion_fail_offline">We couldn\'t reach videomk, so we can\'t tell if the deletion started. Check your connection and try again. Trying again is safe.</string>
+    <string name="deletion_fail_offline">We couldn\'t reach VideoMK, so we can\'t tell if the deletion started. Check your connection and try again. Trying again is safe.</string>
     <string name="deletion_fail_server">Something went wrong on our side and nothing was deleted. Please try again.</string>
     <string name="deletion_fail_forbidden">This request doesn\'t match the account you are signed in to, so nothing was deleted. Sign out, sign in again and retry.</string>
     <string name="deletion_fail_rejected">The confirmation wasn\'t accepted, so nothing was deleted. Check the word and try again.</string>

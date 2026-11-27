@@ -86,7 +86,7 @@ fun InlinePlayer(player: Player?, onFullScreen: () -> Unit, modifier: Modifier =
                 PlayerView(ctx).apply {
                     useController = true
                     controllerShowTimeoutMs = 3000
-                    setShowNextButton(false); setShowPreviousButton(false)   // one video: previous and next are clutter
+                    quietControls()
                     resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
                     setShowBuffering(PlayerView.SHOW_BUFFERING_WHEN_PLAYING)
                     setControllerVisibilityListener(PlayerView.ControllerVisibilityListener { v -> controlsVisible = v == android.view.View.VISIBLE })
@@ -114,5 +114,17 @@ fun InlinePlayer(player: Player?, onFullScreen: () -> Unit, modifier: Modifier =
             }
         }
     }
+    }
+}
+
+
+/** The media controls reduced to one vocabulary: play or pause, the time bar and (ours) full screen. No skip buttons and no settings gear (it opened a stock menu in another style). */
+@androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
+fun androidx.media3.ui.PlayerView.quietControls() {
+    setShowNextButton(false); setShowPreviousButton(false); setShowRewindButton(false); setShowFastForwardButton(false); setShowSubtitleButton(false); setShowShuffleButton(false)
+    for (id in intArrayOf(androidx.media3.ui.R.id.exo_settings, androidx.media3.ui.R.id.exo_fullscreen, androidx.media3.ui.R.id.exo_minimal_fullscreen)) findViewById<android.view.View>(id)?.let { v ->
+        v.visibility = android.view.View.GONE; v.layoutParams = v.layoutParams?.apply { width = 0 }
+        // the controller shows its buttons again whenever it lays itself out: keep this one gone
+        v.addOnLayoutChangeListener { view, _, _, _, _, _, _, _, _ -> if (view.visibility != android.view.View.GONE) view.visibility = android.view.View.GONE }
     }
 }

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="media_title">Media</string>
-    <string name="media_privacy_copy">Your photos are private to you. Only you can see them. Nobody at videomk browses them. They are used to find your photos and to make the videos you ask for. Delete any photo or everything, any time.</string>
+    <string name="media_privacy_copy">Your photos are private to you. Only you can see them. Nobody at VideoMK browses them. They are used to find your photos and to make the videos you ask for. Delete any photo or everything, any time.</string>
     <string name="media_add_photos">Add photos</string>
-    <string name="media_add_to_library">Add photos to My media</string>
+    <string name="media_add_to_library">Add photos to Media</string>
     <string name="media_select">Select</string>
     <string name="media_more">More</string>
     <string name="media_organize_library">Organize my library</string>
@@ -40,7 +40,7 @@
     <string name="media_rename_or_delete">Rename or delete</string>
     <string name="media_new_collection">New collection</string>
     <string name="media_create">Create</string>
-    <string name="media_collection_menu_note">Photos stay in My media. Only the collection is removed.</string>
+    <string name="media_collection_menu_note">Photos stay in Media. Only the collection is removed.</string>
     <string name="media_name">Name</string>
     <string name="media_cancel_selection">Cancel selection</string>
     <string name="media_collection">Collection</string>
@@ -70,7 +70,7 @@
     <string name="media_select_clear">Clear</string>
     <string name="media_select_all_count">Select all %1$d</string>
     <string name="media_select_all">Select all</string>
-    <string name="media_err_unavailable">My media isn\'t available in this build.</string>
+    <string name="media_err_unavailable">Media isn\'t available in this build.</string>
     <string name="media_added_to">Added to %1$s.</string>
     <string name="upload_banner">Uploading %1$d of %2$d · %3$s</string>
     <string name="upload_err_post">A photo couldn\'t be uploaded.</string>
@@ -137,7 +137,7 @@
     <string name="organize_stop_button">Stop</string>
     <string name="organize_paused">Organizing paused</string>
     <string name="organize_pill_progress">Organizing %1$,d of %2$,d</string>
-    <string name="organize_open_media">Open My media</string>
+    <string name="organize_open_media">Open Media</string>
     <string name="organize_auto">Auto</string>
     <string name="organize_auto_desc">Automatic collection</string>
     <string name="upload_newest_first">Newest first</string>
@@ -175,12 +175,12 @@
     <string name="upload_resume">Resume</string>
     <string name="upload_pause_all">Pause all</string>
     <string name="photos_tab_phone">This phone</string>
-    <string name="photos_tab_media">My media</string>
+    <string name="photos_tab_media">Media</string>
     <string name="photos_tab_desc">%1$s, tab %2$d of 2</string>
     <string name="photos_choose_title">Choose photos from your phone</string>
-    <string name="photos_picker_explain">The system photo picker shows your gallery. videomk only gets the photos you pick, and never needs access to the rest.</string>
+    <string name="photos_picker_explain">The system photo picker shows your gallery. VideoMK only gets the photos you pick, and never needs access to the rest.</string>
     <string name="photos_open_picker">Open photo picker</string>
-    <string name="photos_picker_note">Choose photos from your phone with the system picker. videomk only gets the photos you pick, and never needs access to your whole gallery.</string>
+    <string name="photos_picker_note">Choose photos from your phone with the system picker. VideoMK only gets the photos you pick, and never needs access to your whole gallery.</string>
     <string name="photos_open_picker_label">Open the photo picker</string>
     <string name="photos_choose_desc">Choose photos from this phone</string>
     <string name="photos_choose">Choose photos</string>
@@ -208,12 +208,12 @@
         <item quantity="other">%1$d photos</item>
     </plurals>
     <plurals name="media_delete_collection_body">
-        <item quantity="one">The collection is removed. Its %1$d photo stays in My media.</item>
-        <item quantity="other">The collection is removed. Its %1$d photos stay in My media.</item>
+        <item quantity="one">The collection is removed. Its %1$d photo stays in Media.</item>
+        <item quantity="other">The collection is removed. Its %1$d photos stay in Media.</item>
     </plurals>
     <plurals name="media_delete_collection_body_auto">
-        <item quantity="one">The collection is removed. Its %1$d photo stays in My media. New uploads from that month may create it again.</item>
-        <item quantity="other">The collection is removed. Its %1$d photos stay in My media. New uploads from that month may create it again.</item>
+        <item quantity="one">The collection is removed. Its %1$d photo stays in Media. New uploads from that month may create it again.</item>
+        <item quantity="other">The collection is removed. Its %1$d photos stay in Media. New uploads from that month may create it again.</item>
     </plurals>
     <plurals name="media_selected">
         <item quantity="one">%1$d selected</item>

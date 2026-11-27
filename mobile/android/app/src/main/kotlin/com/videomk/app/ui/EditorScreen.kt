@@ -118,7 +118,7 @@ fun EditorScreen(vm: EditorViewModel, onClose: () -> Unit) {
         topBar = {
             VmkTopBar(title = stringResource(R.string.editor_title), onBack = { if (!state.isLocked) requestClose() }, close = true, backTag = "closeEditor") {
                 if (state.phase == EditorPhase.Editing) {
-                    TextButton(onClick = { reorder = !reorder }, modifier = Modifier.heightIn(min = Vmk.minTouch).testTag("reorderToggle")) { Text(stringResource(if (reorder) R.string.common_done else R.string.editor_reorder)) }
+                    TextAction(stringResource(if (reorder) R.string.common_done else R.string.editor_reorder), { reorder = !reorder }, Modifier.testTag("reorderToggle"))
                 }
             }
         },
@@ -160,10 +160,8 @@ private fun BeatList(vm: EditorViewModel, state: EditorState, reorder: Boolean, 
         }
         item(key = "title") {
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                OutlinedTextField(
-                    value = state.title, onValueChange = vm::setTitle, label = { Text(stringResource(R.string.editor_field_title)) }, singleLine = true,
-                    modifier = Modifier.fillMaxWidth().testTag("titleField"),
-                )
+                Overline(stringResource(R.string.editor_field_title))
+                VmkField(state.title, vm::setTitle, Modifier.testTag("titleField"))
                 SubtitlesRow(state.captions, vm::setCaptions, Modifier.testTag("captionsToggle"))
                 Text(stringResource(R.string.editor_scenes_count, state.beats.size), style = MaterialTheme.typography.titleSmall, color = Vmk.colors.textSecondary, modifier = Modifier.padding(top = 12.dp))
             }
@@ -189,7 +187,7 @@ private fun SubtitlesRow(on: Boolean, onChange: (Boolean) -> Unit, modifier: Mod
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(stringResource(R.string.editor_subtitles), color = Vmk.colors.text, modifier = Modifier.weight(1f))
-        Switch(checked = on, onCheckedChange = null)
+        Switch(checked = on, onCheckedChange = null, colors = vmkSwitchColors())
     }
 }
 
@@ -198,10 +196,7 @@ private fun ActionBar(vm: EditorViewModel, state: EditorState) {
     Surface(color = Vmk.colors.surface, shadowElevation = 6.dp, modifier = Modifier.fillMaxWidth()) {
         Column(Modifier.navigationBarsPadding().padding(horizontal = 20.dp, vertical = 10.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                OutlinedButton(
-                    onClick = { vm.submit(RenderMode.Preview) }, enabled = state.isDirty,
-                    modifier = Modifier.weight(1f).heightIn(min = 52.dp).testTag("previewButton"),
-                ) { Text(stringResource(R.string.editor_preview)) }
+                TonalButton(stringResource(R.string.editor_preview), { vm.submit(RenderMode.Preview) }, Modifier.weight(1f).heightIn(min = Vmk.primaryButton).testTag("previewButton"), enabled = state.isDirty)
                 PrimaryButton(
                     stringResource(R.string.editor_publish), onClick = { vm.submit(RenderMode.Final) }, enabled = state.isDirty || state.canPublishWithoutChanges,
                     modifier = Modifier.weight(1f).testTag("publishButton"),
@@ -250,10 +245,10 @@ internal fun BeatRow(
             }
             if (reorder) {
                 Column {
-                    IconButton(onClick = onUp, enabled = canUp, modifier = Modifier.size(48.dp)) { Icon(Sym.ArrowUpward, stringResource(R.string.editor_move_up)) }
-                    IconButton(onClick = onDown, enabled = canDown, modifier = Modifier.size(48.dp)) { Icon(Sym.ArrowDownward, stringResource(R.string.editor_move_down)) }
+                    GlassIconButton(Sym.ArrowUpward, stringResource(R.string.editor_move_up), onUp, enabled = canUp)
+                    GlassIconButton(Sym.ArrowDownward, stringResource(R.string.editor_move_down), onDown, enabled = canDown)
                 }
-                IconButton(onClick = onDelete, modifier = Modifier.size(48.dp)) { Icon(Sym.Delete, stringResource(R.string.editor_delete_scene), tint = Vmk.colors.danger) }
+                GlassIconButton(Sym.Delete, stringResource(R.string.editor_delete_scene), onDelete, tint = Vmk.colors.danger)
             }
         }
     }
@@ -309,7 +304,7 @@ private fun BeatEditor(vm: EditorViewModel, state: EditorState, beatId: String, 
         containerColor = Vmk.colors.background,
         topBar = {
             VmkTopBar(title = stringResource(R.string.editor_scene_generic)) {
-                TextButton(onClick = onDone, enabled = error == null, modifier = Modifier.heightIn(min = Vmk.minTouch).testTag("beatDone")) { Text(stringResource(R.string.common_done)) }
+                TextAction(stringResource(R.string.common_done), onDone, Modifier.testTag("beatDone"), enabled = error == null)
             }
         },
     ) { padding ->
@@ -317,11 +312,11 @@ private fun BeatEditor(vm: EditorViewModel, state: EditorState, beatId: String, 
         Column(Modifier.fillMaxSize().padding(padding).imePadding().verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
             val words = EditorDiff.wordCount(beat.narration)
             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                OutlinedTextField(
-                    value = beat.narration, onValueChange = { vm.setNarration(beatId, it) }, label = { Text(stringResource(R.string.editor_field_narration)) },
-                    isError = error != null, minLines = 5, modifier = Modifier.fillMaxWidth().testTag("narrationField"),
-                    supportingText = { NarrationSupport(beat, words, state.limits.minWords, state.limits.maxWords, error) },
-                )
+                Overline(stringResource(R.string.editor_field_narration))
+                VmkField(beat.narration, { vm.setNarration(beatId, it) }, Modifier.testTag("narrationField"), singleLine = false, minHeight = 140.dp)
+                androidx.compose.runtime.CompositionLocalProvider(androidx.compose.material3.LocalTextStyle provides MaterialTheme.typography.bodySmall, androidx.compose.material3.LocalContentColor provides if (error != null) Vmk.colors.danger else Vmk.colors.textSecondary) {
+                    NarrationSupport(beat, words, state.limits.minWords, state.limits.maxWords, error)
+                }
             }
             Card {
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {

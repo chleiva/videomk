@@ -3,7 +3,7 @@
 <resources>
     <string name="feedback_title">Enviar comentarios</string>
     <string name="feedback_subtitle">Leemos todos los mensajes</string>
-    <string name="feedback_open">Escribir un mensaje al equipo de videomk</string>
+    <string name="feedback_open">Escribir un mensaje al equipo de VideoMK</string>
     <string name="feedback_intro">Cuéntanos lo que quieras.</string>
     <string name="feedback_intro_unhappy">Lamentamos oír eso. ¿Qué lo mejoraría?</string>
     <string name="feedback_field_label">Tu mensaje</string>
@@ -26,12 +26,12 @@
     <string name="feedback_err_invalid">No se pudo enviar ese mensaje. Revisa el texto e inténtalo de nuevo.</string>
     <string name="feedback_after_video">¿Algo que podamos mejorar? Cuéntanos</string>
 
-    <string name="rating_ask_title">¿Te está gustando videomk?</string>
+    <string name="rating_ask_title">¿Te está gustando VideoMK?</string>
     <string name="rating_yes">Sí</string>
     <string name="rating_not_really">No mucho</string>
     <string name="rating_love_title">Qué bueno oírlo</string>
-    <string name="rating_love_body">Una valoración rápida ayuda a que más gente conozca videomk. Solo toma un momento.</string>
-    <string name="rating_rate">Valorar videomk</string>
+    <string name="rating_love_body">Una valoración rápida ayuda a que más gente conozca VideoMK. Solo toma un momento.</string>
+    <string name="rating_rate">Valorar VideoMK</string>
     <string name="rating_later">Quizá más tarde</string>
     <string name="rating_already">Ya lo valoré</string>
 </resources>

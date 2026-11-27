@@ -28,8 +28,8 @@
     <string name="deck_status_failed">Corrige tu presentación para continuar</string>
     <string name="deck_status_short">Agrega algunas palabras más, o deja la descripción vacía</string>
     <string name="deck_title_fallback">Presentación narrada</string>
-    <string name="lib_sentence_deck_reading">Leyendo tus diapositivas.</string>
-    <string name="lib_sentence_deck_writing">Escribiendo la narración.</string>
+    <string name="lib_sentence_deck_reading">Leyendo tus diapositivas</string>
+    <string name="lib_sentence_deck_writing">Escribiendo la narración</string>
 
     <string name="deck_err_too_large_title">Ese archivo es demasiado grande</string>
     <string name="deck_err_too_large_body">Las presentaciones pueden pesar hasta %1$d MB. Prueba a reducir las imágenes o expórtala como PDF.</string>

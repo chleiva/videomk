@@ -36,6 +36,7 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
 import com.videomk.app.ui.Sym
+import com.videomk.app.ui.quietControls
 
 /**
  * Full screen video: always landscape (declared in the manifest), system bars hidden, a close button, and playback continues from the
@@ -95,6 +96,7 @@ class FullScreenPlayerActivity : ComponentActivity() {
                     factory = { ctx ->
                         PlayerView(ctx).apply {
                             useController = true
+                            quietControls()
                             resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
                             this.player = p
                         }
@@ -102,14 +104,7 @@ class FullScreenPlayerActivity : ComponentActivity() {
                     onRelease = { it.player = null },
                     modifier = Modifier.fillMaxSize(),
                 )
-                IconButton(
-                    onClick = ::close,
-                    modifier = Modifier.align(Alignment.TopStart).displayCutoutPadding().padding(12.dp).size(48.dp).testTag("closeFullScreenButton"),
-                ) {
-                    Box(Modifier.size(40.dp).clip(CircleShape).background(Color.Black.copy(alpha = 0.55f)), contentAlignment = Alignment.Center) {
-                        Icon(Sym.Close, contentDescription = stringResource(R.string.player_close_full_screen), tint = Color.White)
-                    }
-                }
+                com.videomk.app.ui.GlassIconButton(Sym.Close, stringResource(R.string.player_close_full_screen), ::close, Modifier.align(Alignment.TopStart).displayCutoutPadding().padding(12.dp).testTag("closeFullScreenButton"), onDark = true)
             }
         }
     }

@@ -38,6 +38,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -407,4 +408,22 @@ fun UndoBar(item: com.videomk.app.core.UndoCenter.Item, onUndo: () -> Unit, modi
             Text(undo, style = MaterialTheme.typography.titleSmall, color = if (Vmk.colors.dark) Color(0xFF000000L or DesignTokens.primary.light.toLong()) else Color(0xFF000000L or DesignTokens.primary.dark.toLong()))
         }
     }
+}
+
+
+/** The ONE menu: a rounded surface card under its button; rows are an icon and a few words, 48 dp, the destructive one in the danger colour and last. */
+@Composable
+fun VmkMenu(expanded: Boolean, onDismiss: () -> Unit, content: @Composable androidx.compose.foundation.layout.ColumnScope.() -> Unit) {
+    androidx.compose.material3.DropdownMenu(expanded = expanded, onDismissRequest = onDismiss, containerColor = Vmk.colors.surface, shape = RoundedCornerShape(Vmk.radii.card), content = content)
+}
+
+@Composable
+fun VmkMenuItem(text: String, icon: ImageVector?, modifier: Modifier = Modifier, danger: Boolean = false, selected: Boolean = false, enabled: Boolean = true, trailing: String? = null, onClick: () -> Unit) {
+    val c = if (danger) Vmk.colors.danger else Vmk.colors.text
+    androidx.compose.material3.DropdownMenuItem(
+        text = { Text(text, style = MaterialTheme.typography.bodyLarge, color = if (enabled) c else Vmk.colors.textTertiary, fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal) },
+        leadingIcon = icon?.let { i -> { Icon(i, null, tint = if (danger) Vmk.colors.danger else Vmk.colors.textSecondary, modifier = Modifier.size(22.dp)) } },
+        trailingIcon = if (selected) ({ Icon(Sym.Check, null, tint = Vmk.colors.primary, modifier = Modifier.size(20.dp)) }) else trailing?.let { t -> { Text(t, style = MaterialTheme.typography.labelMedium, color = Vmk.colors.primary, modifier = Modifier.clip(CircleShape).background(Vmk.colors.primaryContainer).padding(horizontal = Vmk.space.s, vertical = 2.dp)) } },
+        enabled = enabled, onClick = onClick, modifier = modifier.heightIn(min = Vmk.minTouch).semantics { this.selected = selected },
+    )
 }

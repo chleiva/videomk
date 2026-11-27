@@ -34,7 +34,7 @@ class MainActivity : ComponentActivity() {
         object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
             override fun <T : ViewModel> create(modelClass: Class<T>): T =
-                AppViewModel(container.backend, container.auth, container.config, container.signedOut, accountApi = container.accountApi, wiper = { withContext(Dispatchers.Main) { composer.clearAfterSend() }; container.wipeLocalData(); withContext(Dispatchers.Main) { composer.clearAfterSend() } }) as T
+                AppViewModel(container.backend, container.auth, container.config, container.signedOut, accountApi = container.accountApi, undoCenter = container.undo, wiper = { withContext(Dispatchers.Main) { composer.clearAfterSend() }; container.wipeLocalData(); withContext(Dispatchers.Main) { composer.clearAfterSend() } }) as T
         }
     }
     private val composer: ComposerViewModel by viewModels()

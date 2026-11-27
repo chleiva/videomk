@@ -195,8 +195,8 @@ fun PhotoGrid(
                                 )
                                 .testTag("mediaTile"),
                         ) {
-                            PhotoThumb(p, Modifier.fillMaxSize().padding(if (isSel) 8.dp else 0.dp).clip(RoundedCornerShape(if (isSel) 10.dp else 0.dp)).alpha(if (dimUnselected && !isSel) 0.45f else 1f))
-                            if (isSel) Box(Modifier.fillMaxSize().border(3.dp, MaterialTheme.colorScheme.primary).background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)))
+                            // chosen: the picture springs a little smaller inside ONE border that follows its own corners, with the tick (no second square frame)
+                            PhotoThumb(p, Modifier.fillMaxSize().padding(if (isSel) 6.dp else 0.dp).clip(RoundedCornerShape(if (isSel) Vmk.radii.tile else 0.dp)).then(if (isSel) Modifier.border(3.dp, Vmk.colors.primary, RoundedCornerShape(Vmk.radii.tile)) else Modifier).alpha(if (dimUnselected && !isSel) 0.45f else 1f))
                             if (selecting) SelectBadge(isSel, order[p.id], Modifier.align(Alignment.TopEnd).padding(6.dp))
                         }
                     }
@@ -249,7 +249,7 @@ fun MediaSearchBar(vm: MediaViewModel, modifier: Modifier = Modifier, label: Str
                         inner()
                     }
                     if (vm.searching) CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp)
-                    else if (vm.search.active) IconButton(onClick = { vm.clearSearch() }, modifier = Modifier.size(44.dp)) { Icon(Sym.Close, stringResource(R.string.media_clear_search)) }
+                    else if (vm.search.active) GlassIconButton(Sym.Close, stringResource(R.string.media_clear_search), { vm.clearSearch() })
                     else Box(Modifier.size(12.dp))
                 }
             },

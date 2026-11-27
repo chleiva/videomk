@@ -12,7 +12,7 @@
     <!-- Making -->
     <string name="making_keeps_going">You can leave. It keeps going.</string>
     <string name="making_notify">Tell me when it\'s ready</string>
-    <string name="making_notify_off">Notifications are off for videomk in your phone\'s settings.</string>
+    <string name="making_notify_off">Notifications are off for VideoMK in your phone\'s settings.</string>
     <string name="notify_channel">Video ready</string>
     <string name="notify_ready_title">Your video is ready</string>
     <string name="notify_failed_title">Your video didn\'t finish</string>
@@ -20,10 +20,10 @@
     <string name="lib_play">Play</string>
     <!-- Player -->
     <string name="remix_title">Make another</string>
-    <string name="remix_short">Make it a Short</string>
-    <string name="remix_spanish">Spanish version</string>
-    <string name="remix_english">English version</string>
-    <string name="remix_cut30">30-second cut</string>
+    <string name="remix_short">As a Short</string>
+    <string name="remix_spanish">In Spanish</string>
+    <string name="remix_english">In English</string>
+    <string name="remix_cut30">30 seconds</string>
     <!-- Sign-in -->
     <string name="auth_sample_prompt">How a forest breathes</string>
     <string name="auth_use_email">Use email</string>
