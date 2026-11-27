@@ -4,7 +4,7 @@ import VideoMKCore
 // The building blocks of the design bar (docs/DESIGN_BAR_2026.md sections 4 and 5), one of each: the primary button, the icon button, the top bar,
 // the pill, the suggestion chip, the floating tab bar, the live ring. Screens compose these; they do not draw their own.
 
-/// The Sparklet Trio mark on its gradient tile (docs/brand). One asset (`BrandMark`, a vector SVG), never redrawn.
+/// The VideoMK mark (a play and two stars, white on the action gradient tile; docs/BRAND.md section 2). One asset (`BrandMark`, a vector SVG made by docs/brand/final/build_final.py), never redrawn.
 struct BrandMark: View {
     var size: CGFloat = 30
     var body: some View {
