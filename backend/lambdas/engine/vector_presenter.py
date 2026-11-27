@@ -5,9 +5,10 @@ Standing still it reads as a person half sitting, and a raised sleeve leaves the
 
   legs      one straight piece per leg (thigh and shin fused once at load: widths matched at the knee, the inner outline removed), feet planted, toes turned out;
             the hips may shift a little over planted feet (weight shift) and a foot may take a small side step. There is no knee and no walk.
-  arms      shoulder pivot in the CENTRE of the round sleeve cap (the cap stays on the shoulder at any angle), elbow pivot inside both pieces, a two-bone IK from a wrist
-            target, with the elbow always on the same side of the shoulder-wrist line, so it cannot flip (see arm_ik), and the reach clamped so the arm never locks straight;
-            at home the arm hangs by its own angles (elbow out, forearm in: solve_arm), blended into the IK as the hand leaves
+  arms      shoulder pivot in the CENTRE of the round sleeve cap (the cap stays on the shoulder at any angle), elbow pivot inside both pieces. An arm is posed by its
+            two bone ANGLES (`solve` "arms"), inside joint limits that no pose can leave (limit_arm): the upper arm never swings in across the chest, the elbow
+            never folds or opens past its range, the bones keep their length. `elbow_need` says how far out the elbow belongs for a forearm at a given angle
+            (the gestures follow it). The older wrist-target IK (`solve` "hands", arm_ik, solve_arm) is kept for callers that have a point to reach
   hands     the forearm piece is cut at the wrist: the hand is its own piece that turns at the wrist and can be swapped (relaxed, open palm, one, two, three, thumb up)
   tail      optional piece behind the legs (the fox)
 
@@ -73,6 +74,8 @@ class Geom:
         self.leg_len = ULEG_U * (1 - KNEE_OV) + LLEG_U
         self.shoulder_x = 26.0
         self.shoulder_y = 70.0       # above the waist
+        self.head_w = 92.0           # the head's width (a raised hand keeps clear of it)
+        self.reach = 22.0            # wrist -> finger tips of the largest gesture hand
         self.neck_y = TORSO_U * 0.93
         self.upper = 38.0            # shoulder -> elbow
         self.fore = 34.0             # elbow -> wrist
@@ -105,20 +108,69 @@ def rest_target(g: Geom) -> Vec:
     return (g.upper * u[0] + g.fore * f[0], g.upper * u[1] + g.fore * f[1])
 
 
+# The elbow of a front-facing cut-out arm (docs/PRESENTERS.md "Arms"). Angles are from straight DOWN, positive AWAY from the body; bend = fore - upper.
+UPPER_MIN, UPPER_MAX = -6.0, 125.0    # the upper arm never swings in across the chest (the elbow stays outside the shoulder line), never above the head
+BEND_MIN, BEND_MAX = -150.0, 150.0    # the elbow's range: negative = the forearm comes in across the body (hands together), positive = it opens outward / upward
+FLEX_MAX = 45.0                       # the wrist
+# How far OUT the elbow must be for a forearm at a given angle. A forearm swung out sideways and downward from an upper arm that still hangs reads as an elbow broken
+# sideways (the "windscreen wiper"); a real arm lifts the elbow with it.
+ELBOW_PEAK = 19.0                     # degrees out, for a forearm at about 60 degrees
+
+
+def _s01(u: float) -> float:
+    u = min(1.0, max(0.0, u))
+    return u * u * (3 - 2 * u)
+
+
+def elbow_need(fore: float) -> float:
+    """The smallest upper-arm angle (degrees outward) that looks like an arm for a forearm at `fore` (a smooth curve: the elbow never jerks)."""
+    if fore <= 18.0:           # hanging, or coming in across the body (hands together): the elbow stays at the side
+        return 0.0
+    if fore <= 62.0:
+        return ELBOW_PEAK * _s01((fore - 18.0) / 44.0)
+    return 2.0 + (ELBOW_PEAK - 2.0) * (1.0 - _s01((fore - 62.0) / 70.0))
+
+
+def limit_arm(upper: float, fore: float) -> Tuple[float, float]:
+    """Joint limits: the hard stops of the rig (the animation stays inside them by itself; this is what makes a wrong pose impossible to draw)."""
+    upper = max(UPPER_MIN, min(UPPER_MAX, upper))
+    return upper, upper + max(BEND_MIN, min(BEND_MAX, fore - upper))
+
+
+def arm_fk(g: Geom, shoulder: Vec, upper: float, fore: float, side: int) -> Tuple[Vec, Vec]:
+    """-> (elbow, wrist) from the two bone angles (limited). The bones keep their length by construction."""
+    upper, fore = limit_arm(upper, fore)
+    du, df = _dir(upper, side), _dir(fore, side)
+    e = (shoulder[0] + g.upper * du[0], shoulder[1] + g.upper * du[1])
+    return e, (e[0] + g.fore * df[0], e[1] + g.fore * df[1])
+
+
+def reach_angles(g: Geom, target: Vec, bend: int) -> Tuple[float, float]:
+    """(upper, fore) angles that put the wrist on `target` (relative to the shoulder: x away from the body, y up; clamped to what the arm reaches).
+    bend: -1 = elbow out, forearm coming in (hands in front of the body); +1 = forearm opening outward."""
+    d = math.hypot(target[0], target[1])
+    full = g.upper + g.fore
+    d = max(max(REACH_MIN * full, abs(g.upper - g.fore) + 1e-3), min(REACH_MAX * full, d))
+    phi = math.atan2(target[0], -target[1])
+    al = math.acos(max(-1.0, min(1.0, (g.upper ** 2 + d * d - g.fore ** 2) / (2 * g.upper * d))))
+    up = phi + al if bend < 0 else phi - al
+    ex, ey = g.upper * math.sin(up), -g.upper * math.cos(up)
+    wx, wy = d * math.sin(phi), -d * math.cos(phi)
+    return math.degrees(up), math.degrees(math.atan2(wx - ex, -(wy - ey)))
+
+
 def solve_arm(g: Geom, shoulder: Vec, hand: Vec, side: int) -> Tuple[Vec, Vec]:
-    """-> (elbow, wrist). Far from home: the IK solution for the wrist target. At home: the home angles (elbow out, forearm in). In between the two bone ANGLES are blended, so the
-    bones keep their length and the arm passes through straight on its way from one bend to the other; nothing flips."""
+    """-> (elbow, wrist) for a WRIST TARGET (the older way to pose an arm; the gestures now give bone angles, see `solve` "arms"). Far from home: the IK solution.
+    At home: the home angles (elbow out, forearm in). In between the two bone ANGLES are blended, so the bones keep their length. The result passes the joint limits."""
     rt = rest_target(g)
     e, w = arm_ik(shoulder, (shoulder[0] + side * hand[0], shoulder[1] + hand[1]), g.upper, g.fore, side)
     k = min(1.0, math.hypot(hand[0] - rt[0], hand[1] - rt[1]) / (REST_ZONE * g.arm))
     home = 1.0 - k * k * (3 - 2 * k)
-    if home <= 0.0:
-        return e, w
     au = math.degrees(math.atan2(side * (e[0] - shoulder[0]), -(e[1] - shoulder[1])))
     af = math.degrees(math.atan2(side * (w[0] - e[0]), -(w[1] - e[1])))
-    du, df = _dir(au + (REST_UPPER - au) * home, side), _dir(af + (REST_FORE - af) * home, side)
-    e = (shoulder[0] + g.upper * du[0], shoulder[1] + g.upper * du[1])
-    return e, (e[0] + g.fore * df[0], e[1] + g.fore * df[1])
+    if af - au < -180.0:
+        af += 360.0
+    return arm_fk(g, shoulder, au + (REST_UPPER - au) * home, af + (REST_FORE - af) * home, side)
 
 
 def solve(g: Geom, pose: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
@@ -127,8 +179,10 @@ def solve(g: Geom, pose: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
       feet          ((x, lift), (x, lift)) left and right foot relative to the character's x; default (-stance, 0), (+stance, 0)
       lean          torso tilt about the waist, degrees, positive = toward the right of the picture
       torso_sy      breathing / squash of the torso (1 = none);  shrug: the shoulders rise by this many units
-      hands         ((x, y), (x, y)) wrist targets of the left and right arm RELATIVE TO THEIR SHOULDER, x positive = away from the body, y up; default: hanging
-      wrist         (deg, deg) hand turn relative to the forearm, positive = the same way the elbow bends (outward / up)
+      arms          ((upper, fore), (upper, fore)) bone angles of the left and right arm in degrees from straight down, positive = away from the body (what the
+                    gestures give: engine/character_gestures.py); limited by `limit_arm`. Default: hanging at home (REST_UPPER, REST_FORE)
+      hands         ((x, y), (x, y)) the older way: wrist targets RELATIVE TO THEIR SHOULDER, x positive = away from the body, y up (used when `arms` is absent)
+      wrist         (deg, deg) hand turn relative to the forearm, positive = the same way the elbow bends (outward / up); limited to FLEX_MAX
       hand_shape    (name, name) from HAND_SHAPES
       head_tilt, head_dx, head_dy, head_sx, head_sy, look (x, y), blink, mouth, eyes_scale, tail (deg)     drawn by Presenter.draw, passed through here
     Returns joints: hips, feet, leg (angle from vertical in degrees, positive = foot toward +x; length scale), waist, shoulders, elbows, wrists, hand_dir (unit vectors), neck."""
@@ -154,12 +208,16 @@ def solve(g: Geom, pose: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
 
     rt = rest_target(g)
     hands = p.get("hands") or (rt, rt)
-    wr = p.get("wrist") or (0.0, 0.0)
+    arms = p.get("arms")
+    wr = [max(-FLEX_MAX, min(FLEX_MAX, v)) for v in (p.get("wrist") or (0.0, 0.0))]
     shoulders, elbows, wrists, hdirs, fdirs = [], [], [], [], []
     for i, side in enumerate((-1, 1)):
         s = torso_pt(side * g.shoulder_x, g.shoulder_y * tsy + shrug)
-        hx, hy = hands[i] if hands[i] is not None else rt
-        e, w = solve_arm(g, s, (hx, hy), side)
+        if arms is not None and arms[i] is not None:
+            e, w = arm_fk(g, s, arms[i][0], arms[i][1], side)
+        else:
+            hx, hy = hands[i] if hands[i] is not None else rt
+            e, w = solve_arm(g, s, (hx, hy), side)
         f = ((w[0] - e[0]) / g.fore, (w[1] - e[1]) / g.fore)
         shoulders.append(s)
         elbows.append(e)
@@ -420,6 +478,9 @@ class Presenter:
         g.fore = (fore.end[1] - fore.pivot[1]) / u
         g.hand = (hand.img.height - hand.pivot[1]) / u
         g.leg_len = (leg.end[1] - leg.pivot[1]) / u
+        g.head_w = hw
+        # how far the finger tips of a gesture hand (open palm, a finger, a thumb) are from the wrist: they are drawn larger than the relaxed hand
+        g.reach = max([g.hand] + [(self.pieces[f"hand_{n}_r"].img.height - self.pieces[f"hand_{n}_r"].pivot[1]) / u for n in self.shapes if n != "relaxed"])
         self.g = g
         self.hw, self.tw = hw, tw
         self.height = g.hip_h - WAIST_UP + g.neck_y + HEAD_U     # ground to the top of the head, units

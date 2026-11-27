@@ -399,10 +399,12 @@ def enforce(plan: Dict[str, Any], policy: Optional[Policy], sanitize: Optional[A
 # ----------------------------------------------------------------------------- the timeline
 def link(scenes: List[Dict[str, Any]]) -> int:
     """Timeline step (engine/timeline.py): every `presenter` scene learns the words it speaks and when (`speech`, scene time: its gestures and mouth come from them),
-    whether the character walks in (`enter`: not when the scene before already showed it on the same side) and a seed of its own. Pure; -> how many scenes."""
+    whether the character walks in (`enter`: not when the scene before already showed it on the same side), a seed of its own, where in the video it starts (`at`:
+    the characters' breathing, weight and rest pose run on the video's clock, so they do not jump at a cut) and, in a conversation, who spoke in the scene before
+    and who speaks in the next one (`prev_speaker`, `next_speaker`: a listener keeps its hands together across the cut). Pure; -> how many scenes."""
     n = 0
     prev: Optional[Dict[str, Any]] = None
-    for sc in scenes:
+    for i, sc in enumerate(scenes):
         if sc.get("type") == "presenter":
             p = sc["props"]
             p["speech"] = [[str(w[0]), float(w[1]), float(w[2])] for w in sc.get("words") or []][:600]
@@ -410,6 +412,15 @@ def link(scenes: List[Dict[str, Any]]) -> int:
             same_group = bool(p.get("cast")) and pp.get("cast") == p.get("cast")     # a conversation: everyone is already standing there
             p["enter"] = not (prev is not None and prev.get("type") == "presenter" and (same_group or (not p.get("cast") and pp.get("character") == p.get("character") and pp.get("side") == p.get("side"))))
             p["seed"] = (zlib.crc32(str(sc.get("id", n)).encode("utf-8")) % 997) / 997.0
+            p["at"] = round(float(sc.get("start") or 0.0), 4)
+            p.pop("prev_speaker", None)
+            p.pop("next_speaker", None)
+            if p.get("cast"):
+                nxt = scenes[i + 1] if i + 1 < len(scenes) else None
+                if prev is not None and prev.get("type") == "presenter" and same_group:
+                    p["prev_speaker"] = pp.get("character")
+                if nxt is not None and nxt.get("type") == "presenter" and (nxt.get("props") or {}).get("cast") == p.get("cast"):
+                    p["next_speaker"] = nxt["props"].get("character")
             n += 1
         prev = sc
     return n
