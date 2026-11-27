@@ -194,6 +194,8 @@ fun CreateScreen(app: AppViewModel, composer: ComposerViewModel, onClose: () -> 
     LaunchedEffect(phase) {
         if (phaseText != null) { focusManager.clearFocus(); keyboard?.hide(); view.announceForAccessibility(phaseText) }
     }
+    // a refusal or a failure: the warning haptic, once
+    LaunchedEffect(composer.stop != null, composer.inlineError != null) { if (composer.stop != null || composer.inlineError != null) haptics.play(DesignTokens.Haptic.Warning) }
     fun haptic(ok: Boolean) {
         if (Build.VERSION.SDK_INT >= 30) view.performHapticFeedback(if (ok) HapticFeedbackConstants.CONFIRM else HapticFeedbackConstants.REJECT) else view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
     }

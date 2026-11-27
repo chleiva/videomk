@@ -49,6 +49,29 @@ Only where the server lists it: `capabilities.deck {max_mb, max_slides, formats}
   screenshots). `FakeDeckApi` (debug) answers the three calls; `FakeDebugBackend` adds two videos at `deck_reading` and `deck_writing`. Needs the real server flag (`-c deckToVideo=1`) to verify the true upload to
   storage, the real status codes and messages, and a real `generate`.
 
+## Design bar 2026 (docs/DESIGN_BAR_2026.md; this section wins where older sections below differ)
+Every screen was rebuilt to the design bar and its phone mockups (`docs/design_bar/mockups/phone_*.jpg`); captures of the result are in `docs/design_bar/android/`.
+- **Tokens**: `core/DesignTokens.kt` is the one source (the colour table of section 4, light and dark, the 20 dp gutter, radii, sizes, motion, haptics; `DesignTokensTest` checks the table value by value and the contrast pairs).
+  `ui/Theme.kt` turns it into the Material 3 colour scheme, `VmkColors` and the type roles (sp, no literal sizes in screens). `ui/UiKit.kt` has the shared pieces: `PrimaryButton` (the ONE gradient button per screen),
+  `GlassIconButton` (the one icon button: quiet, on-dark, raised or filled), `VmkTopBar` (large title or back), `Pill`, `SparkleChip`, `LiveRing`. Icons are Material Symbols Rounded as vector drawables (`res/drawable/sym_*.xml`, `ui/Sym.kt`).
+- **Create** (`ui/CreateScreen.kt`): the prompt at the top ("A video about…"), three example chips that type themselves in, photos and mic on the left and options on the right, three value pills (platform, length, look),
+  one gradient Create button with its price. After the tap the button becomes the live capsule ("Checking your request", then "Starting your video") with the ring and Cancel; the form is dimmed and locked.
+  The capsule is a state machine with no UI in it (`core/CreateSubmit.kt` `CreateCapsule`, `CreateSubmitTest`): a run ends in a question, a refusal, the Making screen, or the form restored intact.
+- **Videos** (`ui/LibraryScreen.kt`, `core/DayGroup.kt` `FeedLayout`): large title, the Making card with scene tiles, the newest video as a large poster and the rest two by two, skeletons in the final shapes.
+  The tab pill and the round New video button (play-sparkle glyph) float over the list, which fades out beneath them (`ui/Root.kt` `FloatingBar`, `LocalBarSpace`).
+- **Making** (`ui/MakingUi.kt`, `core/Making.kt`): the optional `making` object of a video item (docs/CREATE_API.md "Making status") is read leniently (`MakingInfo.fromJson`: every field optional, junk never crashes; `MakingTest`).
+  With it: the newest finished scene large inside the live ring, the film strip, "Scene 5 of 9", the live line as received and the sentence being narrated. Scene pictures are cached by video id and scene index, never by their signed link.
+  Without it (an older server, or before the plan exists): the title and one calm line. No step names, no percentages. "Tell me when it's ready" (`data/ReadyNotifier.kt`) posts a local notification when the app,
+  while off screen, sees the video finish: there is no push yet, so it works for as long as Android keeps the app alive (it keeps checking every 15 s for up to 30 minutes). `POST_NOTIFICATIONS` is asked only when the switch is turned on.
+- **Player** (`ui/VideoDetailScreen.kt`): the picture, the title and "1:31 · 1080p", Share as the one labelled gradient button, Save, Edit, Info and More as quiet icons, an end card with Replay and New video.
+  "Make another" chips (`core/Remix.kt`, `RemixTest`) open Create prefilled with the idea and one choice changed (a Short, the other language, a 30-second cut); they are drawn only when this server can make that change, and nothing is sent until Create is tapped.
+  The idea is what the person wrote when the app still knows it (videos made in this session), else the video's title: the video list does not carry the prompt.
+- **Sign-in** (`ui/SignInScreen.kt`): a still of a sample video fills the top (`res/drawable-nodpi/signin_sample.jpg`; `res/raw/sample_intro.mp4` plays there instead when it exists), the mark, the promise, and the ways in.
+  Google and Apple buttons are drawn only when the build has them on; beside them email is the text button "Use email", alone it is the one primary button.
+- **Media, Settings**: tokens, the 20 dp gutter, a tonal "Add photos" under the search field, a floating selection bar ("Make a video · N" as the one primary).
+- **Screenshots without an account**: the debug build's file flags (`files/fake_backend`, `fake_media`, `fake_intake`), plus `files/fake_pics/*.jpg` (posters and scene pictures for the canned videos), `files/fake_making`
+  (`none`, `plain`, `render`) and `files/fake_video.mp4`, with an unsigned token in `vmk_debug_id_token`.
+
 ## The interface (docs/UI_DESIGN.md)
 Tokens (colours, radii, shadows) live in `ui/Theme.kt` and shared pieces in `ui/UiKit.kt`. Main screen: docked **composer card** (`ComposerBar.kt`: photo strip, two-line field, ONE
 status line for price / reason / fix with a one-tap fix chip, toolbar with attach + count badge, options pill "3 min · ⚡3", mic, and a send button that is always drawn, tonal until
@@ -118,7 +141,7 @@ English is the base (`res/values`), Spanish is `res/values-es`; the contract (po
 
 ## Tests
 ```
-./gradlew testDebugUnitTest              # 332 JVM unit tests, no network (MockWebServer): API client, auth/PKCE/refresh, dictation plan + locale,
+./gradlew testDebugUnitTest              # 404 JVM unit tests, no network (MockWebServer): API client, auth/PKCE/refresh, dictation plan + locale,
                                          # library merge + progress estimator, photo geometry + multipart + uploader, editor diff/snapshot/view model, app view model
 ./scripts/run-ui-tests.sh                # instrumented tests on the running emulator, against QA (see below)
 ./scripts/run-ui-tests.sh com.videomk.app.E2ETest   # makes ONE real 1-minute video from 4 photos on QA (a few cents), plays it, full screen, edits it

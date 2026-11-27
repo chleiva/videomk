@@ -135,6 +135,7 @@ fun PhotoGrid(
     footer: (@Composable () -> Unit)? = null, flat: Boolean = false,
     order: Map<String, Int> = emptyMap(), dimUnselected: Boolean = false, localTiles: (@Composable () -> Unit)? = null, hiddenIds: Set<String> = emptySet(),
 ) {
+    val haptics = rememberHaptics()
     val bestFirst = stringResource(R.string.media_best_first)
     // one tile per photo id: the row keys below are built from ids, and a repeated id (an overlapping page, a search result listing a photo twice) would crash the list with "Key was already used"
     val shown = remember(photos, hiddenIds) { (if (hiddenIds.isEmpty()) photos else photos.filter { it.id !in hiddenIds }).distinctBy { it.id } }
@@ -190,7 +191,7 @@ fun PhotoGrid(
                                 .combinedClickable(
                                     role = Role.Button, onClickLabel = if (selecting) (if (isSel) stringResource(R.string.media_deselect) else stringResource(R.string.media_select)) else stringResource(R.string.media_open_photo),
                                     onLongClickLabel = stringResource(R.string.media_select_photos), onLongClick = { onLongPress(p.id) },
-                                    onClick = { if (selecting) onToggle(p.id) else onOpen(indexById[p.id] ?: 0) },
+                                    onClick = { if (selecting) { haptics.play(com.videomk.app.core.DesignTokens.Haptic.Selection); onToggle(p.id) } else onOpen(indexById[p.id] ?: 0) },   // a light tick for a photo chosen
                                 )
                                 .testTag("mediaTile"),
                         ) {
