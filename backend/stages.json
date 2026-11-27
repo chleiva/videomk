@@ -6,7 +6,8 @@
     "domain": null,
     "bgAnimated": true,
     "bgLoops": true,
-    "vectorScenes": true
+    "vectorScenes": true,
+    "forceWatermark": true
   },
   "prod": {
     "account": "464863885161",
@@ -23,6 +24,7 @@
     ],
     "apiHost": "backend.videomk.com",
     "bgAnimated": true,
-    "bgLoops": true
+    "bgLoops": true,
+    "forceWatermark": true
   }
 }

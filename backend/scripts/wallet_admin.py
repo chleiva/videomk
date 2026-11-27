@@ -6,6 +6,7 @@
   AWS_PROFILE=qa python backend/scripts/wallet_admin.py give you@example.com 20          # add 20 paid credits
   AWS_PROFILE=qa python backend/scripts/wallet_admin.py show you@example.com
   AWS_PROFILE=qa python backend/scripts/wallet_admin.py watermark you@example.com [--off]   # premium watermark: the person's own logo as the watermark (works in production too; docs/WATERMARK.md)
+  AWS_PROFILE=qa python backend/scripts/wallet_admin.py watermark you@example.com --default moments   # premium watermark AND a saved default: videomk lockup that comes and goes + the closing card (--off undoes both)
   AWS_PROFILE=qa python backend/scripts/wallet_admin.py storage you@example.com --plan pro [--extra-gb 100] [--until 2027-01-31]   # photo library size (free = 2 GB, pro = 100 GB, plus extra GB)
 The unlimited flag is only honoured outside production (ALLOW_UNLIMITED_ACCOUNTS is 0 there) and lives in a table the Lambdas cannot write.
 Accounts are found by email in the stage's Cognito pool, or pass a user id (the token `sub`). Defaults to stage qa; prod asks you to type prod.
@@ -27,6 +28,7 @@ def main() -> None:
     ap.add_argument("who", help="email or user id (sub)")
     ap.add_argument("amount", nargs="?", type=int)
     ap.add_argument("--off", action="store_true", help="with `watermark`: take premium watermark away again")
+    ap.add_argument("--default", choices=["moments", "always"], help="with `watermark`: also save this account's default watermark (videomk lockup + closing card, with this presence); with --off it is removed")
     ap.add_argument("--stage", default="qa")
     ap.add_argument("--plan", choices=["free", "pro"], default="free")
     ap.add_argument("--extra-gb", type=int, default=0)
@@ -60,6 +62,16 @@ def main() -> None:
     elif a.action == "watermark":
         boto3.resource("dynamodb").Table(os.environ["FLAGS_TABLE"]).update_item(Key={"user_id": uid}, UpdateExpression="SET watermark_custom = :v", ExpressionAttributeValues={":v": not a.off})   # keeps the other flags
         print(f"{a.who} ({a.stage}): premium watermark {'OFF' if a.off else 'ON'}")
+        if a.default:   # also save (or, with --off, remove) the account's default watermark, as PUT /users/{user}/watermark would: watermark/<user>/profile.json in the assets bucket
+            key = f"watermark/{uid}/profile.json"
+            s3 = session.client("s3")
+            if a.off:
+                s3.delete_object(Bucket=out["AssetsBucketName"], Key=key)
+                print(f"   saved default removed (s3://{out['AssetsBucketName']}/{key})")
+            else:
+                spec = {"mode": "videomk", "style": "lockup", "presence": a.default, "end_card": True, "position": "auto", "size": "small", "opacity": 0.65}
+                s3.put_object(Bucket=out["AssetsBucketName"], Key=key, Body=json.dumps(spec).encode("utf-8"), ContentType="application/json")
+                print(f"   saved default: {json.dumps(spec)} (s3://{out['AssetsBucketName']}/{key})")
         return
     elif a.action == "storage":
         import calendar, time as _t

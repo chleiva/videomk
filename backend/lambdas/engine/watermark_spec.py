@@ -7,6 +7,7 @@ Options (one dict, the same in the request, the profile, the plan and the timeli
   size      'small' (mark height 5 % of the short side) | 'medium' (7 %)
   style     'mark' (default) | 'lockup' (mark plus the word 'videomk')       only for mode 'videomk'
   end_card  true | false (default false)                                      only for mode 'videomk': 2.4 s 'Made with videomk' card after the last scene
+  presence  'always' (there for the whole video) | 'moments' (fades in for about 4 s near the start and about every 30 s, see `moments`)   only for mode 'videomk'
 
 Placement is worked out in DESIGN units (the frame's 1080-short-side canvas) and never covers the captions, the clip credit line or (auto, 9:16) the platform UI zones:
   16:9  bottom right, 3.5 % margin;  9:16  top left under the platform header (TikTok / Reels / Shorts keep the bottom 320 and the right 130 for their own buttons);
@@ -22,6 +23,18 @@ MODES = ("none", "videomk", "custom")
 POSITIONS = ("auto", "tl", "tr", "bl", "br")
 SIZES: Dict[str, float] = {"small": 0.050, "medium": 0.070}   # mark height as a share of the frame's short side
 STYLES = ("mark", "lockup")
+PRESENCES = ("always", "moments")
+KEYS = {"mode", "position", "opacity", "size", "style", "end_card", "presence"}
+# presence 'moments': the mark comes and goes. All times in seconds.
+MOMENT_FADE_S = 0.6          # eased fade in and fade out
+MOMENT_HOLD_S = 4.0          # fully visible between the fades
+MOMENT_FIRST_S = 1.2         # the first appearance starts fading in here: never over the first second of the opening
+MOMENT_EVERY_S = 30.0        # about one appearance every 30 s
+MOMENT_SNAP_S = 8.0          # ... moved to the nearest scene change within this distance
+MOMENT_MIN_GAP_S = 12.0      # between the end of one appearance and the start of the next
+MOMENT_END_CLEAR_S = 1.0     # the last appearance is gone this long before the closing card or the final fade
+# a scene whose point is a number landing or a ranking settling: the mark does not arrive at its start
+EMPHASIS_SCENES = frozenset({"counter", "stat", "bar_race", "pie", "chart", "ranking", "scale_compare"})
 DEFAULT_OPACITY = 0.65
 OPACITY_MIN, OPACITY_MAX = 0.2, 1.0
 MARGIN = 0.035           # of the short side
@@ -34,6 +47,8 @@ END_CARD_S = 2.4
 MAX_LOGO_RATIO = 6.3     # the widest a custom logo may be drawn, as a multiple of the mark height (the videomk lockup is 6.26)
 MARK_RATIO = 1384 / 1024     # width / height of assets/watermark/mark.png
 LOCKUP_RATIO = 6407 / 1024   # and of lockup.png
+LOCKUP_SCALE = 0.76          # the lockup is drawn at this share of the mark's height: at the full height it was 31 % of the width of a vertical video and as tall as a heading
+                             # (seen on frames of all four shapes, 2026-11-27); now 257 x 41 design px for 'small', a quarter of the width, the word still 17 px tall at 720p
 
 AUTO_POSITION = {"16:9": "br", "1:1": "tl", "4:5": "tl", "9:16": "tl"}   # square and 4:5: the captions take almost the whole bottom width, so the quiet corner is the top left
 _OTHERS = {"tl": ("bl", "br", "tr"), "tr": ("br", "bl", "tl"), "bl": ("tl", "tr", "br"), "br": ("tr", "tl", "bl")}
@@ -62,8 +77,8 @@ def parse(raw: Any, *, strict: bool = True) -> Optional[Dict[str, Any]]:
         if strict:
             raise WatermarkError("'watermark' must be an object")
         return None
-    if strict and set(raw) - {"mode", "position", "opacity", "size", "style", "end_card"}:
-        raise WatermarkError("unknown watermark option: " + ", ".join(sorted(set(raw) - {"mode", "position", "opacity", "size", "style", "end_card"})))
+    if strict and set(raw) - KEYS:
+        raise WatermarkError("unknown watermark option: " + ", ".join(sorted(set(raw) - KEYS)))
     out: Dict[str, Any] = {}
     mode = raw.get("mode", "videomk")
     if mode not in MODES:
@@ -104,11 +119,89 @@ def parse(raw: Any, *, strict: bool = True) -> Optional[Dict[str, Any]]:
         ec = False
     if mode == "videomk":
         out["style"], out["end_card"] = style, ec
+        pres = raw.get("presence")
+        if pres is not None and pres not in PRESENCES:
+            if strict:
+                raise WatermarkError("'presence' must be one of: " + ", ".join(PRESENCES))
+            pres = None
+        if pres is not None:   # absent stays absent: the policy decides the default (watermark_store.resolve); a video without it is 'always', as before the option existed
+            out["presence"] = pres
+        if not strict and pres == "moments" and isinstance(raw.get("windows"), list):   # server-written by the timeline: when the mark is on screen
+            out["windows"] = clean_windows(raw["windows"])
+    elif strict and raw.get("presence") is not None:
+        raise WatermarkError("'presence' is only for the videomk watermark")
     if not strict:   # server-written fields of a stored spec (the custom logo's file in the video's own folder, its content hash)
         if mode == "custom" and isinstance(raw.get("asset"), str):
             out["asset"] = raw["asset"]
             if isinstance(raw.get("hash"), str):
                 out["hash"] = raw["hash"][:40]
+    return out
+
+
+# ----------------------------------------------------------------------------- presence 'moments': when the mark is on screen
+def clean_windows(raw: Any) -> List[List[float]]:
+    out: List[List[float]] = []
+    for w in raw if isinstance(raw, list) else []:
+        try:
+            a, b = float(w[0]), float(w[1])
+        except (TypeError, ValueError, IndexError):
+            continue
+        if b > a:
+            out.append([round(a, 3), round(b, 3)])
+    return out[:64]
+
+
+def moments(scenes: List[Dict[str, Any]], total: float, end_card_s: float = 0.0, outro_fade_s: float = 0.7) -> List[List[float]]:
+    """The appearances of a 'moments' mark for a whole video: [[start, end], ...] in video seconds, each MOMENT_FADE_S in + MOMENT_HOLD_S + MOMENT_FADE_S out.
+    A pure function of the timeline, so every render chunk agrees. The first one starts after the first second of the opening; then about one every 30 s, moved
+    to the nearest scene change within 8 s whose scene is not an emphasis scene (a counter landing, a chart building): the mark arrives with the new picture, not
+    in the middle of a point. None overlaps the closing card or the final fade; they keep at least 12 s apart. A video too short for one gets none (the closing
+    card, when it has one, carries the name)."""
+    span = MOMENT_HOLD_S + 2 * MOMENT_FADE_S
+    limit = float(total) - max(float(end_card_s), float(outro_fade_s)) - MOMENT_END_CLEAR_S   # everything must have left by here
+    if limit - MOMENT_FIRST_S < span:
+        return []
+    starts = sorted(float(sc.get("start", 0.0)) for sc in scenes)
+    calm = sorted(float(sc.get("start", 0.0)) for sc in scenes if sc.get("type") not in EMPHASIS_SCENES and not sc.get("silent"))
+    out: List[List[float]] = [[MOMENT_FIRST_S, MOMENT_FIRST_S + span]]
+    k = 1
+    while True:
+        target = k * MOMENT_EVERY_S
+        k += 1
+        if target + span > limit + MOMENT_SNAP_S:
+            break
+        near = [x for x in calm if abs(x - target) <= MOMENT_SNAP_S]
+        t = min(near, key=lambda x: (abs(x - target), x)) + 0.3 if near else target   # 0.3 s into the new scene: after its crossfade has begun
+        if not near:   # no calm scene change nearby: if the plain time falls inside an emphasis scene, wait for the next calm scene
+            inside = [sc for sc in scenes if float(sc.get("start", 0)) <= t < float(sc.get("start", 0)) + float(sc.get("duration", 0)) and sc.get("type") in EMPHASIS_SCENES]
+            if inside:
+                later = [x for x in calm if x >= float(inside[0]["start"]) + float(inside[0]["duration"]) - 1e-6]
+                if not later:
+                    continue
+                t = later[0] + 0.3
+        if t + span > limit or t - out[-1][1] < MOMENT_MIN_GAP_S:
+            continue
+        out.append([t, t + span])
+    del starts
+    return [[round(a, 3), round(b, 3)] for a, b in out]
+
+
+def moment_alpha(windows: Any, t: float) -> float:
+    """0..1: how visible a 'moments' mark is at time t (an eased ramp at both ends of each appearance)."""
+    for a, b in windows or []:
+        if a <= t <= b:
+            u = min((t - a) / MOMENT_FADE_S, (b - t) / MOMENT_FADE_S, 1.0)
+            u = max(0.0, u)
+            return u * u * (3 - 2 * u)
+    return 0.0
+
+
+def shift_windows(windows: Any, base: float, duration: float) -> List[List[float]]:
+    """The appearances as a render chunk sees them: times relative to the chunk's start, only those that touch it (with a little room for the crossfade before it)."""
+    out = []
+    for a, b in windows or []:
+        if b - base >= -1.0 and a - base <= duration + 1.0:
+            out.append([round(a - base, 3), round(b - base, 3)])
     return out
 
 
@@ -138,6 +231,8 @@ def credit_rect(frame: Frame) -> Rect:
 def mark_box(frame: Frame, spec: Dict[str, Any], ratio: float) -> Tuple[float, float]:
     """(w, h) in design units of the mark for this size: height is a share of the short side; a wide logo is limited to MAX_LOGO_RATIO times the height."""
     h = SIZES.get(spec.get("size", "small"), SIZES["small"]) * min(frame.W, frame.H)
+    if spec.get("mode") == "videomk" and spec.get("style") == "lockup":
+        h *= LOCKUP_SCALE
     w = h * ratio
     if w > h * MAX_LOGO_RATIO:
         w, h = h * MAX_LOGO_RATIO, h * MAX_LOGO_RATIO / ratio

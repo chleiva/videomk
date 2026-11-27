@@ -174,7 +174,7 @@ def apply_watermark(user_id: str, options: Dict[str, Any], loc: str) -> Optional
         return json_response(e.status, {"message": i18n.t(e.key, loc, **e.params), **({"code": e.code} if e.code else {})})
     except Exception:   # noqa: BLE001 - a watermark lookup problem must never stop a video: the policy default decides
         logger.exception("WATERMARK_RESOLVE_FAILED user=%s", user_id)
-        spec = {"mode": "videomk"} if watermark_store.force_policy() else {"mode": "none"}
+        spec = dict(watermark_store.FORCED_SPEC) if watermark_store.force_policy() else {"mode": "none"}
     if spec.get("mode") == "none":
         options.pop("watermark", None)
     else:

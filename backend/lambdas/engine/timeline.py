@@ -166,6 +166,8 @@ def build_timeline(
         scenes.append({"id": "endcard", "type": "title", "start": round(t, 4), "duration": watermark_spec.END_CARD_S, "props": props, "words": [], "audio_key": None, "silent": True,
                        "narration_offset": 0.0, "cues": [round(c, 3) for c in SCENES["title"][1](props, watermark_spec.END_CARD_S)[:8]], "transition": "fade"})
         t += watermark_spec.END_CARD_S
+    if wm and wm.get("mode") == "videomk" and wm.get("presence") == "moments":   # the mark comes and goes: its appearances are fixed here, once, for the whole video
+        wm = {**wm, "windows": watermark_spec.moments(scenes, t, watermark_spec.END_CARD_S if wm.get("end_card") else 0.0)}
     # the director's animated background (engine/background.py; only in a plan made with BG_ANIMATED on): each scene knows where in the loop it starts, so the
     # background flows on across scene changes and chunks instead of jumping
     bg = plan.get("background") if isinstance(plan.get("background"), dict) else None
@@ -252,7 +254,7 @@ def chunk_plan(timeline: Dict[str, Any], target_seconds: float = 30, draft: bool
             "captions": timeline.get("captions", True), "language": timeline.get("language", "en"), "draft": draft,
             "scenes": [_scene_fingerprint(x) for x in scenes[lo:hi]],
             "lead": _scene_fingerprint(scenes[lo - 1]) if lo > 0 else None, "outro": hi == len(scenes),
-            **({"wm": timeline["watermark"], "first": lo == 0, "wmv": 2} if timeline.get("watermark") else {}),   # the mark is part of every frame (and fades in on the first chunk only)
+            **({"wm": _chunk_watermark(timeline, lo, hi), "first": lo == 0, "wmv": 3} if timeline.get("watermark") else {}),   # the mark is part of every frame (and fades in on the first chunk only; a 'moments' mark: this chunk's own appearances)
             **({"bg": timeline["background"]} if timeline.get("background") else {}),   # the animated background, when the plan has one
         }, sort_keys=True, ensure_ascii=False).encode("utf-8")).hexdigest()[:24]
         n = max(1, f1 - f0)
@@ -277,6 +279,18 @@ def chunk_timeline(timeline: Dict[str, Any], lo: int, hi: int) -> Dict[str, Any]
         "captions": timeline.get("captions", True), "language": timeline.get("language", "en"), "scenes": sub, "lead": scenes[lo - 1] if lo > 0 else None,
         "outro": hi == len(scenes), "duration": round(sum(float(x["duration"]) for x in sub), 6),
         **({"frame": timeline["frame"]} if timeline.get("frame") else {}),
-        **({"watermark": timeline["watermark"]} if timeline.get("watermark") else {}),
+        **({"watermark": _chunk_watermark(timeline, lo, hi)} if timeline.get("watermark") else {}),
         **({"background": timeline["background"]} if timeline.get("background") else {}),
     }
+
+
+def _chunk_watermark(timeline: Dict[str, Any], lo: int, hi: int) -> Dict[str, Any]:
+    """The watermark as the chunk of scenes [lo, hi) needs it: unchanged, except that the appearances of a 'moments' mark are given in the chunk's own time
+    (a chunk is rendered from t = 0), and only those that touch it."""
+    wm = timeline["watermark"]
+    if not isinstance(wm, dict) or "windows" not in wm:
+        return wm
+    scenes = timeline["scenes"]
+    base = float(scenes[lo]["start"])
+    dur = sum(float(x["duration"]) for x in scenes[lo:hi])
+    return {**wm, "windows": watermark_spec.shift_windows(wm["windows"], base, dur)}

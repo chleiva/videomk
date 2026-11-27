@@ -78,6 +78,7 @@ class Watermark:
         self.pos = (0, 0)
         self.inset = 0   # design units the scenes start lower by, so a top-corner mark has a band of its own (watermark_spec.content_inset)
         self.fade = ws.FADE_IN_S
+        self.windows = spec.get("windows", []) if spec.get("mode") == "videomk" and spec.get("presence") == "moments" else None   # presence 'moments': when it is on screen (this chunk's times); None = always
         out_w, out_h = out_size
         scale = out_w / float(frame.W)   # design units -> output pixels (a draft is half size, 4K is twice)
         logo, ratio = None, None
@@ -118,7 +119,9 @@ class Watermark:
         if self.layer is None:
             return img
         k = 1.0
-        if first and t < self.fade:
+        if self.windows is not None:   # it comes and goes: a pure function of the time (the timeline wrote the appearances, every chunk has its own copy)
+            k = ws.moment_alpha(self.windows, t)
+        elif first and t < self.fade:
             u = max(0.0, t) / self.fade
             k *= u * u * (3 - 2 * u)
         k *= 1.0 - max(0.0, min(1.0, outro_k))

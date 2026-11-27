@@ -56,8 +56,8 @@ def _clean(body: Dict[str, Any], *, premium: bool) -> Dict[str, Any]:
         raise store.WatermarkError(400, "wm.invalid", "invalid")
     if spec["mode"] == "custom" and not premium:
         raise store.WatermarkError(403, "wm.premium", "watermark_premium")
-    if spec["mode"] == "none" and store.force_policy() and not premium:
-        raise store.WatermarkError(403, "wm.premium", "watermark_required")   # the owner's policy: a free account's videos carry the mark
+    if store.force_policy() and not premium and (spec["mode"] == "none" or spec.get("presence") == "moments"):
+        raise store.WatermarkError(403, "wm.required", "watermark_required")   # the owner's policy: a free account's videos carry the videomk name for the whole video (capabilities.watermark.forced_watermark)
     return spec
 
 

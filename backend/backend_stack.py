@@ -608,7 +608,7 @@ class BackendStack(Stack):
             WatermarkSettings(
                 self, "Watermark", make_fn=make_fn, engine_layer=engine_layer, usage_table=usage_table, flags_table=flags_table, assets_bucket_name=ASSETS_BUCKET, user_id_resource=user_id,
                 cognito_auth=cognito_auth, cors_headers=["Content-Type", "Authorization", "X-Region", "X-Timezone", "X-Locale"], launcher_fn=launcher_fn, capabilities_fn=req_options.fn,
-                plan_fn=v2.plan_fn, force=watermark_forced(self.node),
+                plan_fn=v2.plan_fn, force=watermark_forced(self.node) if self.node.try_get_context("forceWatermark") is not None else bool(stage_cfg.get("forceWatermark")),   # stages.json "forceWatermark": free accounts always carry the videomk name (docs/WATERMARK.md section 5); -c forceWatermark=0|1 overrides
             )
 
         # The request check (safety, clarity) and the per-account record of safety stops: docs/INTAKE_AND_SAFETY.md. Same small-model override as above.

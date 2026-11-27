@@ -30,7 +30,7 @@ Not guaranteed: in **16:9** scenes sit at fixed heights and are not moved; the d
 ## 3. Options (one object everywhere)
 ```
 watermark: { mode: "none"|"videomk"|"custom", position: "auto"|"tl"|"tr"|"bl"|"br", opacity: 0.2..1.0 (0.65), size: "small"|"medium",
-             style: "mark"|"lockup" (videomk only), end_card: true|false (videomk only) }
+             style: "mark"|"lockup" (videomk only), end_card: true|false (videomk only), presence: "always"|"moments" (videomk only; absent = always, or moments for a premium account) }
 ```
 Strict validation (400 `'watermark': ...`, unknown keys refused). Absent in a create request = the person's saved default, else the stack policy (below).
 
@@ -42,15 +42,36 @@ Strict validation (400 `'watermark': ...`, unknown keys refused). Absent in a cr
 | `DELETE /users/{user}/watermark` | forget the settings and the logo |
 | `PUT /users/{user}/watermark/logo` | `{"data": "<base64>"}`, premium only, 20 uploads a day (429 `rate_limited`) |
 | `DELETE /users/{user}/watermark/logo` | remove the logo (a saved `custom` falls back to `videomk`) |
-| `GET /users/{user}/capabilities` | now also has `watermark: {modes: [{id, available, label, requires?}], positions, sizes, styles, opacity: {min, max, default}, premium, forced, end_card, logo: {max_bytes, max_px, types}}` (only where the stack has the feature on) |
+| `GET /users/{user}/capabilities` | now also has `watermark: {modes: [{id, available, label, requires?}], positions, sizes, styles, style_options: [{id, available, label}], presences: [{id, available, label, note, requires?}], default_presence, opacity: {min, max, default}, premium, forced, forced_watermark?, forced_note?, end_card, logo: {max_bytes, max_px, types}}` (only where the stack has the feature on). When `forced` is true: `forced_watermark` is the exact object every video of this account gets and `forced_note` the line to show; `modes[none]`, `modes[custom]`, `style_options[mark]` and `presences[moments]` are `available: false`. |
 | `POST /users/{user}/videos/generate` | optional `watermark` object. Resolution order: the request, else the saved default, else policy. Refusals happen before anything is charged. |
 Error bodies are `{message (localized EN/ES), code}`; codes: `invalid`, `watermark_premium`, `watermark_required`, `watermark_logo_missing`, `logo_too_big`, `logo_type`, `logo_svg`, `logo_px`, `logo_empty`, `rate_limited`.
 
-## 5. Entitlements and policy
-* **Premium** (may use `custom`): any of `flags.watermark_custom = true` (`AWS_PROFILE=<stage> python backend/scripts/wallet_admin.py watermark you@example.com [--off]`; works in production), an active Pro library plan (`flags.storage_plan = pro`, not lapsed), or an unlimited test account (not in production). The flags table is written only by an admin; no function can grant itself premium.
-* **Owner policy `forceWatermark`** (CDK `-c forceWatermark=1`, default **off**): every video of a non-premium account carries the videomk mark; `none` is not offered to it (`capabilities.watermark.forced`, modes[none].available = false). Premium accounts may still choose `none`. Both states are tested.
-* A saved `custom` whose plan lapsed or whose logo was deleted quietly falls back (videomk when forced, else none); an explicit `custom` request is refused with the reason.
+## 5. Entitlements and policy (owner decision 2026-11-27: free videos always carry the name)
+* **Premium** (may use `custom`, `none`, `moments`): any of `flags.watermark_custom = true` (`AWS_PROFILE=<stage> python backend/scripts/wallet_admin.py watermark you@example.com [--off]`; works in production), an active Pro library plan (`flags.storage_plan = pro`, not lapsed), or an unlimited test account (not in production). The flags table is written only by an admin; no function can grant itself premium.
+* **Owner policy `forceWatermark`: ON in QA and prod** (`backend/stages.json` `"forceWatermark": true` under both stages; `-c forceWatermark=0|1` on a deploy overrides; before 2026-11-27 it was a deploy flag, default off). Every video of a **non-premium** account carries exactly this, whatever the request or the saved settings say (`watermark_store.FORCED_SPEC`):
+  `{"mode": "videomk", "style": "lockup", "presence": "always", "end_card": true, "position": "auto", "size": "small", "opacity": 0.65}`
+  i.e. the mark **and the word "videomk"**, for the whole video, in the quiet corner of the shape, plus the closing "Made with videomk" card. `none`, `custom`, the mark without the name, `moments`, another corner, size or opacity are not available to them (an opacity of 0.2 would be a way round it). A create request that asks for something else is not refused: it simply gets the forced mark (an explicit `custom` is still answered 403 `watermark_premium`). `PUT /watermark` with `mode: none` or `presence: moments` answers 403 `watermark_required`.
+* **Premium accounts** choose: `none`, their own logo, or the videomk mark `always` / `moments`. A premium account's videomk mark without a stated `presence` is **`moments`** (`PREMIUM_DEFAULT_PRESENCE`). Nothing saved and nothing asked: no watermark.
+* **The owner's own promo videos:** `chris@plorer.ai` is premium for watermark purposes with a saved default of lockup + `moments` + end card (set with `wallet_admin.py watermark <email> --default moments`; see the report of 2026-11-27 for what was set where). Undo: `wallet_admin.py watermark <email> --off --default moments` (removes the flag and the saved default).
+* A saved `custom` whose plan lapsed or whose logo was deleted quietly falls back (the forced mark when forced, else none); an explicit `custom` request is refused with the reason.
 * Feature switch: `-c watermark=0` removes the routes and the function; the launcher then ignores a `watermark` option and capabilities does not list it (the workflow input is exactly what it always was).
+
+### The look that was chosen (judged on real frames, 2026-11-27)
+| | value | why |
+|---|---|---|
+| Artwork | the lockup: Sparklet mark + the word "videomk" | the name is the point (marketing, and free use is not a way round paying) |
+| Size | `small`, and the lockup is drawn at 76 % of the mark's height (`LOCKUP_SCALE`): **256 x 41 design px** (1080p), 24 % of the width of a vertical video; in 16:9 it sits beside the caption box and is shrunk to **218 x 34** | at the full height it was 337 x 54: as tall as a heading and 31 % of the width of a 9:16 video. Smaller than this the word stops being readable at 720p (it is 158 x 25 px there, letters about 15 px) |
+| Opacity | **0.65** (the documented default, kept) | compared 0.65 and 0.8 at two sizes on a bright cartoon frame, busy volcano footage and a dark 3D loop: at 0.65 the name reads on all three and stays behind the content; 0.8 starts to compete with captions. No backing plate: the soft shadow (white mark) or soft glow (ink mark on light pictures) was enough on every frame looked at |
+| Corner | 16:9 bottom right; 9:16 top left under the platform header (x 38, y 200); 1:1 and 4:5 top left (x 38, y 38); the scenes start below it (band of 109 / 27 / 17 design px) | unchanged rules of section 2: never on captions, the credit line, headings or the platform UI zones |
+| Fades | `always`: in over 0.6 s at the start, out with the closing fade. `moments`: see below | |
+| End card | 2.4 s "Made with videomk" / "Hecho con videomk" + videomk.com | closes every free video |
+
+### `presence: "moments"` (videomk mode only; `watermark_spec.moments`)
+The lockup comes and goes instead of sitting there: it fades in gently, stays about 4 seconds and fades out; the closing card ends the video when `end_card` is on.
+* **Timing:** each appearance = 0.6 s eased fade in + 4.0 s fully visible + 0.6 s eased fade out (5.2 s). The first starts at **1.2 s** (never over the first second of the opening). Then about one **every 30 s** (30, 60, 90 ...), moved to the **nearest scene change within 8 s** and starting 0.3 s into the new scene; a scene change that opens an **emphasis scene** (counter, stat, chart, pie, bar race, ranking, scale compare) is skipped, and if 30 s falls inside such a scene with no calm change nearby it waits for the next calm scene. Appearances keep at least 12 s apart and the last one has left 1 s before the closing card or the final fade. A video too short for one (under about 8 s of content) gets none.
+* **Examples:** a 30 s video: one appearance (1.2 to 6.4 s), then the closing card. A 61 s video with scene changes at 9, 20, 28, 40, 50: 1.2 s and about 28.3 s. Five minutes: about ten.
+* **Chunked rendering:** the appearances are worked out once when the timeline is built (`timeline.watermark.windows`, video seconds) and each render chunk gets them in its own time (`timeline._chunk_watermark`), so every chunk draws exactly what the whole video would (tested frame against frame). The chunk's own appearances are part of its hash (`wmv` 3), so a chunk with the mark and the same scenes without it never share a cached segment.
+* The scenes' top band (9:16, 1:1, 4:5) stays reserved for the whole video, also while the mark is away, so nothing shifts when it arrives.
 
 ## 6. How it flows (and what is stored)
 1. Launcher: `validate_options` (strict) -> `apply_watermark` (premium, saved default, policy; nothing for `none`) -> `options.watermark` in the Step Functions input.
@@ -78,10 +99,12 @@ Where: **Create > Options sheet** (a single row "Watermark", collapsed to its va
 | Style (videomk) | `style` | Mark only / With name | Solo el icono / Con el nombre |
 | End card (videomk) | `end_card` | Add a "Made with videomk" ending | Añadir un final «Hecho con videomk» |
 | Logo | `PUT .../logo` | Choose logo / Remove logo | Elegir logo / Quitar logo |
+| Presence (videomk) | `presence` | Always visible / Now and then (notes: "Stays in the corner for the whole video." / "Fades in for a few seconds near the start and about every 30 seconds.") | Siempre visible / De vez en cuando ("Se queda en la esquina durante todo el video." / "Aparece unos segundos cerca del inicio y más o menos cada 30 segundos.") |
 | Forced policy | `capabilities.watermark.forced` | The videomk watermark is included on this plan. | La marca de agua de videomk va incluida en este plan. |
+**Free accounts (forced, the normal case in QA and prod since 2026-11-27):** show the Watermark row as a fixed value, not a control: "videomk" with `forced_note` under it ("The videomk watermark is included on this plan."), no mode, style, presence, position, size or opacity controls, and do not send `watermark` in the create request. The video gets the lockup for its whole length and the closing card. **Premium accounts:** the full controls, plus the Presence row when the mode is videomk; preselect `default_presence` (`moments`) when nothing is saved. Labels and notes for the presence row come localized in `capabilities.watermark.presences`.
 Use `capabilities.watermark` to decide what is shown (`available: false` = show locked or hidden; `requires: premium`). Send `watermark` in the create request only when the person changed it for this video (otherwise the saved default applies). Show a small preview (a rounded rectangle with the mark in the chosen corner) rather than a long explanation. Error `code`s above have localized `message`s.
 
-## 9. Tests (`backend/tests/test_watermark.py`, 99 tests)
+## 9. Tests (`backend/tests/test_watermark.py`, 111 tests; presence and the forced policy: `backend/tests/test_watermark_presence.py`, 16 tests)
 Options (strict and lenient), placement for 4 aspects x 3 resolutions x captions on/off x every position, size, style and logo shape (inside the frame, off the captions and the credit, inside the UI-safe area), frames of the real renderer (corner and size per aspect and resolution incl. 720p and 4K, exact no-op without a watermark, opacity, fade in on the first chunk only, closing fade, ink on light and white on dark, never on the real caption pixels, custom colours kept, unreadable logo draws nothing), timeline and chunk hashes, end card, the policy matrix, the launcher (feature off sends nothing new, premium, saved default, forced), the plan step's logo copy, the API with moto (settings, premium gate, logo checks incl. scripts, entities, file references, bombs, wrong types, metadata stripping, rate limit, other users, locale), capabilities, and the CDK template (routes behind Cognito, rights, flags). Account deletion has the watermark objects and the counter in its seed.
 
 ## 10. Files

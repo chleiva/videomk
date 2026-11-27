@@ -104,6 +104,12 @@ def is_premium(user: str, item: Optional[Dict[str, Any]] = None, now: Optional[f
     return item.get("unlimited") is True and os.environ.get("ALLOW_UNLIMITED_ACCOUNTS", "0") == "1"
 
 
+# What a free (non-premium) account's video carries where the stack forces the mark (owner decision 2026-11-27, docs/WATERMARK.md section 5): the videomk lockup
+# (mark + the word), small, in the quiet corner of the shape, there for the whole video, and the closing "Made with videomk" card. Nothing of it can be chosen away.
+FORCED_SPEC: Dict[str, Any] = {"mode": "videomk", "style": "lockup", "presence": "always", "end_card": True, "position": "auto", "size": "small", "opacity": ws.DEFAULT_OPACITY}
+PREMIUM_DEFAULT_PRESENCE = "moments"   # a premium account that keeps the videomk mark gets the gentle form unless it says otherwise
+
+
 def capabilities(user: str, locale: Optional[str] = None) -> Dict[str, Any]:
     """The `watermark` block of GET /users/{user}/capabilities."""
     from common import i18n
@@ -114,14 +120,21 @@ def capabilities(user: str, locale: Optional[str] = None) -> Dict[str, Any]:
              {"id": "videomk", "available": True, "label": i18n.t("wm.mode.videomk", loc)},
              {"id": "custom", "available": premium, "requires": "premium", "label": i18n.t("wm.mode.custom", loc)}]
     return {"modes": modes, "positions": list(ws.POSITIONS), "sizes": list(ws.SIZES), "styles": list(ws.STYLES),
+            "style_options": [{"id": "mark", "available": not forced, "label": i18n.t("wm.style.mark", loc)}, {"id": "lockup", "available": True, "label": i18n.t("wm.style.lockup", loc)}],
+            "presences": [{"id": "always", "available": True, "label": i18n.t("wm.presence.always", loc), "note": i18n.t("wm.presence.always_note", loc)},
+                          {"id": "moments", "available": not forced, **({"requires": "premium"} if forced else {}), "label": i18n.t("wm.presence.moments", loc), "note": i18n.t("wm.presence.moments_note", loc)}],
+            "default_presence": "always" if forced or not premium else PREMIUM_DEFAULT_PRESENCE,
             "opacity": {"min": ws.OPACITY_MIN, "max": ws.OPACITY_MAX, "default": ws.DEFAULT_OPACITY},
             "premium": premium, "forced": forced, "end_card": True,
+            **({"forced_watermark": dict(FORCED_SPEC), "forced_note": i18n.t("wm.forced_note", loc)} if forced else {}),
             "logo": {"max_bytes": MAX_LOGO_BYTES, "max_px": MAX_LOGO_PX, "types": ["image/png", "image/jpeg", "image/svg+xml"]}}
 
 
 def resolve(requested: Optional[Dict[str, Any]], profile: Optional[Dict[str, Any]], *, premium: bool, forced: bool, has_logo: bool) -> Dict[str, Any]:
     """The watermark a video gets. `requested`: what the request asked for (already cleaned) or None; `profile`: the person's saved default or None.
-    An explicit 'custom' by someone who is not premium, or without a logo, is refused; a saved 'custom' that no longer applies (lapsed plan, deleted logo) quietly falls back."""
+    An explicit 'custom' by someone who is not premium, or without a logo, is refused; a saved 'custom' that no longer applies (lapsed plan, deleted logo) quietly falls back.
+    `forced` (a free account where the stack forces the mark): always exactly FORCED_SPEC, whatever was asked or saved. A premium account's videomk mark without a
+    stated presence is 'moments'; everyone else's is 'always'."""
     explicit = requested is not None
     spec = dict(requested if explicit else (profile or {}))
     if not spec:
@@ -134,8 +147,10 @@ def resolve(requested: Optional[Dict[str, Any]], profile: Optional[Dict[str, Any
             raise WatermarkError(400, "wm.logo_missing", "watermark_logo_missing")
         spec = {"mode": "videomk"} if forced else {"mode": "none"}
         mode = spec["mode"]
-    if mode == "none" and forced:   # the owner's policy: a free account's video always carries the mark
-        spec = {"mode": "videomk"}
+    if forced:   # the owner's policy: a free account's video always carries the name, for the whole video, with the closing card; nothing asked or saved changes it
+        return ws.parse(FORCED_SPEC, strict=False) or dict(FORCED_SPEC)
+    if mode == "videomk" and spec.get("presence") not in ws.PRESENCES and premium:
+        spec["presence"] = PREMIUM_DEFAULT_PRESENCE   # (everyone else: absent, which is 'always', exactly as before the option existed)
     out = ws.parse(spec, strict=False) or {"mode": "none"}
     return out
 
@@ -186,7 +201,8 @@ def public_profile(user: str) -> Dict[str, Any]:
     prof = get_profile(user)
     logo = has_logo(user)
     base = {"mode": "none", "position": "auto", "opacity": ws.DEFAULT_OPACITY, "size": "small", "style": "mark", "end_card": False}
-    return {**base, **{k: v for k, v in prof.items() if k in base}, "has_logo": logo, **({"logo_url": logo_link(user)} if logo else {})}
+    return {**base, **{k: v for k, v in prof.items() if k in base}, **({"presence": prof["presence"]} if prof.get("presence") in ws.PRESENCES else {}),
+            "has_logo": logo, **({"logo_url": logo_link(user)} if logo else {})}
 
 
 # ----------------------------------------------------------------------------- the logo upload

@@ -224,7 +224,7 @@ LIST = {"heading": "Lighthouse facts", "items": ["Warn of rocks and reefs", "Gui
 
 
 @pytest.mark.parametrize("aspect", ["9:16", "1:1", "4:5"])
-@pytest.mark.parametrize("spec", [{"mode": "videomk"}, {"mode": "videomk", "style": "lockup", "size": "medium"}, {"mode": "videomk", "position": "tr", "style": "lockup"}])
+@pytest.mark.parametrize("spec", [{"mode": "videomk"}, {"mode": "videomk", "style": "lockup", "size": "medium"}, {"mode": "videomk", "position": "tl", "style": "lockup"}])   # (a lockup asked for top right now fits bottom right in 1:1 and 4:5 since it is drawn smaller: watermark_spec.LOCKUP_SCALE)
 def test_a_top_corner_mark_gets_its_own_band_above_the_content(aspect, spec):
     f = Frame.parse(aspect)
     lay = ws.layout(spec, f, None, True)
@@ -419,7 +419,7 @@ def test_the_saved_default_is_used_when_the_request_says_nothing(launcher, wm_on
     _flags(wm_on, USER, watermark_custom=True)
     store.put_profile(USER, {"mode": "videomk", "position": "bl", "opacity": 0.5, "size": "medium", "style": "lockup", "end_card": True})
     assert _launch(launcher)["statusCode"] == 202
-    assert sent(launcher)["watermark"] == {"mode": "videomk", "position": "bl", "opacity": 0.5, "size": "medium", "style": "lockup", "end_card": True}
+    assert sent(launcher)["watermark"] == {"mode": "videomk", "position": "bl", "opacity": 0.5, "size": "medium", "style": "lockup", "end_card": True, "presence": "moments"}   # a premium account's videomk mark comes and goes unless it says 'always' (tests/test_watermark_presence.py)
     assert _launch(launcher, watermark={"mode": "none"}, target_minutes=2)["statusCode"] == 202 and "watermark" not in sent(launcher)   # the request wins
 
 
