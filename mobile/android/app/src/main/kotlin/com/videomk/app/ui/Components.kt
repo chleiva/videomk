@@ -1,5 +1,6 @@
 package com.videomk.app.ui
 
+import com.videomk.app.core.Txt
 import androidx.compose.material.icons.filled.CropSquare
 import androidx.compose.material.icons.filled.CropPortrait
 import androidx.compose.animation.Crossfade
@@ -126,11 +127,6 @@ fun VideoRow(video: VideoItem, meta: String?, onClick: () -> Unit, modifier: Mod
 @Composable
 private fun RowText(video: VideoItem, meta: String?) {
     Text(video.displayTitle, style = MaterialTheme.typography.titleMedium, color = Vmk.colors.text, maxLines = 2, overflow = TextOverflow.Ellipsis)
-    // one word of metadata only when it is not the default: a shape icon for vertical, square and 4:5 videos (the duration is on the picture, the day is the group header)
-    if (video.aspect != null && video.aspect != "16:9") Icon(
-        if (video.aspect == "1:1") Icons.Filled.CropSquare else Icons.Filled.CropPortrait, stringResource(R.string.lib_format_badge, video.aspect!!), tint = Vmk.colors.textSecondary,
-        modifier = Modifier.padding(top = 4.dp).size(18.dp),
-    )
     meta?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary, modifier = Modifier.padding(top = 2.dp)) }
 }
 
@@ -144,6 +140,9 @@ fun Poster(video: VideoItem, modifier: Modifier = Modifier, grey: Boolean = fals
         if (!grey) Box(Modifier.size(32.dp).clip(CircleShape).background(Color.Black.copy(alpha = 0.38f)), contentAlignment = Alignment.Center) {
             Icon(Icons.Filled.PlayArrow, null, tint = Color.White, modifier = Modifier.size(22.dp))
         }
+        // the shape of a vertical, square or 4:5 video, as numbers, top left of the picture (landscape is the default and says nothing)
+        if (!grey && video.aspect != null && video.aspect != "16:9") Text(video.aspect!!, style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.SemiBold, color = Color.White, maxLines = 1,
+            modifier = Modifier.align(Alignment.TopStart).padding(6.dp).clip(RoundedCornerShape(6.dp)).background(Color.Black.copy(alpha = 0.55f)).padding(horizontal = 6.dp, vertical = 2.dp).semantics { contentDescription = Txt.s(R.string.lib_format_badge, video.aspect!!) })
         video.durationSeconds?.let {
             Text(duration(it), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.SemiBold, color = Color.White, maxLines = 1,
                 modifier = Modifier.align(Alignment.BottomEnd).padding(6.dp).clip(RoundedCornerShape(6.dp)).background(Color.Black.copy(alpha = 0.55f)).padding(horizontal = 6.dp, vertical = 2.dp))

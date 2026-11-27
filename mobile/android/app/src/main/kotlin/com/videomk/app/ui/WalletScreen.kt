@@ -71,22 +71,6 @@ fun WalletScreen(app: AppViewModel, onBack: () -> Unit) {
             // the unlimited test account is a debug-build thing only: a release build shows the plain number
             val unlimited = w.unlimited && com.videomk.app.BuildConfig.DEBUG
             WalletHero(if (unlimited) "∞" else "${w.balance}", pluralStringResource(R.plurals.wallet_credit_word, if (unlimited) 2 else w.balance))
-            Card {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text(stringResource(R.string.wallet_what_you_have), style = MaterialTheme.typography.titleSmall, color = Vmk.colors.textSecondary, modifier = Modifier.semantics { heading() })
-                    if (w.buckets.isEmpty()) Text(stringResource(R.string.wallet_none), color = Vmk.colors.textSecondary)
-                    w.buckets.forEachIndexed { i, b ->
-                        if (i > 0) HorizontalDivider(color = Vmk.colors.textSecondary.copy(alpha = 0.15f))
-                        Row(Modifier.fillMaxWidth().heightIn(min = 48.dp).semantics(mergeDescendants = true) {}.testTag("bucketRow"), verticalAlignment = Alignment.CenterVertically) {
-                            Column(Modifier.weight(1f)) {
-                                Text(bucketTitle(b.kind), color = Vmk.colors.text)
-                                expiry(b)?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary) }
-                            }
-                            Text("${b.remaining}", style = MaterialTheme.typography.titleMedium, color = Vmk.colors.text)
-                        }
-                    }
-                }
-            }
             // one line about the free credits (when the next ones arrive, else the daily rule), then the (i) with the rules
             Text(
                 w.nextFreeAt?.let { stringResource(R.string.wallet_next_free, relative(it)) } ?: pluralStringResource(R.plurals.wallet_daily_rule, w.dailyCredits, w.dailyCredits),
@@ -101,7 +85,21 @@ fun WalletScreen(app: AppViewModel, onBack: () -> Unit) {
                 Icon(Icons.Filled.Info, null, tint = Vmk.colors.primary)
             }
             if (rules) androidx.compose.material3.AlertDialog(
-                onDismissRequest = { rules = false }, title = { Text(stringResource(R.string.wallet_cost_title)) }, text = { Text(stringResource(R.string.wallet_how_short), style = MaterialTheme.typography.bodyMedium) },
+                onDismissRequest = { rules = false }, title = { Text(stringResource(R.string.wallet_cost_title)) }, text = {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text(stringResource(R.string.wallet_how_short), style = MaterialTheme.typography.bodyMedium)
+                        if (w.buckets.isEmpty()) Text(stringResource(R.string.wallet_none), color = Vmk.colors.textSecondary)
+                        w.buckets.forEach { b ->
+                            Row(Modifier.fillMaxWidth().heightIn(min = 44.dp).semantics(mergeDescendants = true) {}.testTag("bucketRow"), verticalAlignment = Alignment.CenterVertically) {
+                                Column(Modifier.weight(1f)) {
+                                    Text(bucketTitle(b.kind), color = Vmk.colors.text)
+                                    expiry(b)?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary) }
+                                }
+                                Text("${b.remaining}", style = MaterialTheme.typography.titleMedium, color = Vmk.colors.text)
+                            }
+                        }
+                    }
+                },
                 confirmButton = { androidx.compose.material3.TextButton(onClick = { rules = false }, modifier = Modifier.heightIn(min = 48.dp)) { Text(stringResource(R.string.common_done)) } },
             )
         }

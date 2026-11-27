@@ -85,7 +85,7 @@ class QuickUiTest {
         Ui.require("balanceChip", 30_000).click()
         val value = Ui.require("balanceValue")
         assertEquals("∞", value.text)   // the QA test user has unlimited credits
-        Ui.require("bucketRow"); Ui.shot("05-credits")
+        Ui.require("creditsExplainer").click(); Ui.clickText("Done", exists = true); Ui.shot("05-credits")
         device.pressBack()
         Ui.require("settingsButton").click()
         assertEquals("qa-android@videomk.test", Ui.require("accountEmail").text)

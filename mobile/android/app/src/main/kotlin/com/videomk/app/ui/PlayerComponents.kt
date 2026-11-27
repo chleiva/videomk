@@ -94,7 +94,7 @@ fun InlinePlayer(player: Player?, onFullScreen: () -> Unit, modifier: Modifier =
                     this.player = player
                 }
             },
-            update = { if (it.player !== player) it.player = player },
+            update = { if (it.player !== player) it.player = player; it.useController = !ended },   // the end card replaces the controls
             onRelease = { it.player = null },
             modifier = Modifier.matchParentSize(),
         )
