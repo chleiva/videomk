@@ -114,3 +114,39 @@ def load(scene_id: str, width: int, height: int) -> VectorScene:
     if scene_id not in scene_ids():
         raise ValueError(f"unknown vector scene {scene_id!r}")
     return VectorScene(os.path.join(DIR, scene_id), width, height)
+
+
+@lru_cache(maxsize=4)
+def load_folder(folder: str, width: int, height: int) -> VectorScene:
+    """The same for a scene package anywhere on disk (a catalog scene fetched to /tmp)."""
+    return VectorScene(folder, width, height)
+
+
+MAX_RASTER_SIDE = 2560   # the longest side a scene is rasterised and animated at; a 4K frame is enlarged from it (flat colour art: no visible loss, about a third of the time)
+
+
+def cover_size(native: Tuple[int, int], w: int, h: int, max_side: int = MAX_RASTER_SIDE) -> Tuple[int, int, float]:
+    """(render width, render height, enlargement): the size at which a scene drawn for the shape `native` (e.g. 16:9) is rendered so that it COVERS a w x h frame
+    without being stretched (the frame then shows its centre), limited to `max_side` (the result is enlarged by the factor returned, 1.0 when no limit applies)."""
+    nw, nh = max(1, int(native[0])), max(1, int(native[1]))
+    k = max(w / nw, h / nh)
+    rw, rh = nw * k, nh * k
+    up = max(1.0, max(rw, rh) / float(max_side))
+    return max(2, int(round(rw / up))), max(2, int(round(rh / up))), up
+
+
+def frame_for(folder: str, w: int, h: int, t: float, dur: float) -> Image.Image:
+    """The picture of a scene package for a w x h frame at time t: the scene in its own shape, covering the frame (centre crop for another aspect), never stretched."""
+    try:
+        with open(os.path.join(folder, "manifest.json"), encoding="utf-8") as f:
+            a = json.load(f).get("aspect") or [16, 9]
+        native = (int(a[0]), int(a[1]))
+    except (OSError, ValueError, TypeError, IndexError):
+        native = (16, 9)
+    rw, rh, up = cover_size(native, w, h)
+    fr = load_folder(folder, rw, rh).frame(t, dur)
+    cw, ch = min(rw, int(round(w / up))), min(rh, int(round(h / up)))   # the frame's share of the rendered scene
+    if (cw, ch) != (rw, rh):
+        x, y = (rw - cw) // 2, (rh - ch) // 2
+        fr = fr.crop((x, y, x + cw, y + ch))
+    return fr if fr.size == (w, h) else fr.resize((w, h), Image.BICUBIC)

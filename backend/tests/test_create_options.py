@@ -298,7 +298,7 @@ def test_capabilities_shape_and_defaults(monkeypatch):
     r = capabilities_api.handler(cap_event(), None)
     body = json.loads(r["body"])
     assert r["statusCode"] == 200
-    assert set(body) == {"aspects", "resolutions", "platforms", "languages", "lengths", "max_photos", "intake"}
+    assert set(body) == {"aspects", "resolutions", "platforms", "languages", "lengths", "max_photos", "intake", "looks"}   # looks: the scene styles and moving backgrounds of this stage (tests/test_looks.py)
     assert body["aspects"] == [{"id": "16:9", "label": "Landscape", "ready": True, "beta": False}, {"id": "9:16", "label": "Vertical", "ready": False, "beta": False},
                                {"id": "1:1", "label": "Square", "ready": False, "beta": False}, {"id": "4:5", "label": "Portrait", "ready": False, "beta": False}]
     assert body["resolutions"] == [{"id": "720p", "label": "720p", "credits_multiplier": 1, "aspects": ["16:9"]}, {"id": "1080p", "label": "1080p", "credits_multiplier": 1, "aspects": ["16:9"]}]   # no 4K unless switched on (tests/test_four_k.py)

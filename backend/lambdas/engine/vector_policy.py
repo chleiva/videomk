@@ -152,9 +152,20 @@ class Policy:
         )
 
 
+# A scene is drawn for one shape (landscape or tall). The element shows it uncropped in that shape and as a centre crop in the others, so a square video takes the
+# landscape scenes (the middle 56 percent of the width) and a 4:5 video the tall ones (the middle 70 percent of the height).
+SCENE_SHAPE = {"16:9": "16:9", "9:16": "9:16", "1:1": "16:9", "4:5": "9:16"}
+
+
+# Scenes held back from the menu: the three with rotating wind turbines. Re-checked 2026-11-27: the rotors turn, but the cut-out leaves stubs at the hubs and a clipped
+# blade in the tall scene, visible at 1080p. They come back when the art is re-cut (docs/VECTOR_CATALOG.md).
+HELD_BACK_MOTION = frozenset({"rotate"})
+
+
 def _default_search(query: str, aspect: str, k: int) -> List[Dict[str, Any]]:
     from common import vector_catalog as vc
-    return vc.search(query, aspect=aspect, k=k)
+    found = vc.search(query, aspect=SCENE_SHAPE.get(aspect, "16:9"), k=k + 3)
+    return [r for r in found if not (HELD_BACK_MOTION & set(r.get("motion") or []))][:k]
 
 
 def _search_query(prompt: str) -> str:

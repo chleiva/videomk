@@ -335,8 +335,6 @@ def test_style_option_is_validated():
         sf.validate_options({"style": 3})
 
 
-# TODO(element owner): enable when engine/scenes/elements/vector_scene.py reads `catalog_id` (fetch_package) instead of the bundled `scene` id. Until then keep VECTOR_SCENES off in every stage.
-@pytest.mark.xfail(reason="the vector_scene element does not read catalog_id yet", strict=False)
 def test_element_accepts_the_catalog_id_prop():
     from engine.scenes import ELEMENTS
     out = ELEMENTS["vector_scene"].sanitize({"catalog_id": "pine_forest_valley"})

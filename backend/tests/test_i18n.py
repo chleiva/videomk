@@ -130,7 +130,7 @@ def test_capabilities_handler_spanish_and_english(monkeypatch):
     assert es["statusCode"] == en["statusCode"] == 200
     b_es, b_en = json.loads(es["body"]), json.loads(en["body"])
     assert [a["label"] for a in b_es["aspects"]] == ["Horizontal", "Vertical", "Cuadrado", "Retrato"] and [a["label"] for a in b_en["aspects"]][0] == "Landscape"
-    assert b_en == json.loads(json.dumps(fo.capabilities()))
+    assert {k: v for k, v in b_en.items() if k != "looks"} == json.loads(json.dumps(fo.capabilities()))   # looks: added by the handler from the stage's switches (tests/test_looks.py)
     assert next(r for r in b_es["resolutions"] if r["id"] == "2160p")["note"].startswith("4K (2160p) cuesta el doble")
     youtube = next(p for p in b_es["platforms"] if p["id"] == "youtube")
     assert youtube["note"] == "Horizontal 16:9 · 1080p · unos 3 min" and youtube["note_4k"] is None

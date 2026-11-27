@@ -5,7 +5,8 @@
     "profile": "qa",
     "domain": null,
     "bgAnimated": true,
-    "bgLoops": true
+    "bgLoops": true,
+    "vectorScenes": true
   },
   "prod": {
     "account": "464863885161",

@@ -409,6 +409,13 @@ class BackendStack(Stack):
             # the pre-rendered 3D background loops (docs/HERO_LOOPS_3D.md), the premium look the director may choose: same switch pattern (stages.json "bgLoops" or -c bgLoops=1)
             if str(self.node.try_get_context("bgLoops") or ("1" if stage_cfg.get("bgLoops") else "")).lower() in ("1", "true"):
                 engine_env["BG_LOOPS"] = "1"
+            # the cartoon vector scenes (docs/VECTOR_SCENE_POLICY.md): a special style the director may use only where the policy allows; same switch pattern (stages.json "vectorScenes" or -c vectorScenes=1).
+            # Needs the catalog bucket (-c imageCatalog=1): the scene packages are read from it at render time.
+            vector_scenes = str(self.node.try_get_context("vectorScenes") or ("1" if stage_cfg.get("vectorScenes") else "")).lower() in ("1", "true")
+            if vector_scenes:
+                if str(self.node.try_get_context("imageCatalog") or "").lower() not in ("1", "true"):
+                    raise ValueError("vectorScenes needs the catalog bucket: deploy with -c imageCatalog=1")
+                engine_env["VECTOR_SCENES"] = "1"
             for ctx_key, env_key in (("editDailyLimit", "EDIT_DAILY_LIMIT"), ("planModelId", "PLAN_MODEL_ID"), ("reviewModelId", "REVIEW_MODEL_ID"), ("unsplashAppName", "UNSPLASH_APP_NAME"), ("httpUserAgent", "HTTP_USER_AGENT"), ("ttsVoice", "TTS_VOICE"), ("pollyEngine", "POLLY_ENGINE"), ("pollyRegion", "POLLY_REGION")):
                 if self.node.try_get_context(ctx_key):
                     engine_env[env_key] = str(self.node.try_get_context(ctx_key))
@@ -425,6 +432,10 @@ class BackendStack(Stack):
         if v2 is not None and str(self.node.try_get_context("imageCatalog") or "").lower() in ("1", "true"):
             self.catalog = ImageCatalog(self, "ImageCatalog", stage=stage, account=self.account, region=self.region, is_prod=is_prod, beat_fn=v2.beat_fn,
                                         min_score=str(self.node.try_get_context("catalogMinScore") or ""))
+            if vector_scenes:   # the functions that draw frames read one scene package at a time: v/<scene id>/* of the catalog bucket, nothing else, no listing, no write
+                for fn in (v2.chunk_fn, v2.selftest_fn):
+                    fn.add_to_role_policy(iam.PolicyStatement(actions=["s3:GetObject"], resources=[f"{self.catalog.bucket.bucket_arn}/v/*"]))
+                    fn.add_environment("CATALOG_BUCKET", self.catalog.bucket.bucket_name)
 
         active_machine.grant_start_execution(launcher_fn)
         launcher_fn.add_environment("STATE_MACHINE_ARN", active_machine.state_machine_arn)
@@ -566,6 +577,10 @@ class BackendStack(Stack):
             ready_languages=str(self.node.try_get_context("readyLanguages") or "en,es"), intake_enabled=str(self.node.try_get_context("intakeEnabled") or "").lower() in ("1", "true"),
             ready_resolutions=ready_resolutions,
         )
+        # what capabilities says about the looks of this stage (lambdas/capabilities_api.looks): the same three switches the engine functions get
+        for ctx_key, env_key in (("vectorScenes", "VECTOR_SCENES"), ("bgAnimated", "BG_ANIMATED"), ("bgLoops", "BG_LOOPS")):
+            if str(self.node.try_get_context(ctx_key) or ("1" if stage_cfg.get(ctx_key) else "")).lower() in ("1", "true"):
+                req_options.fn.add_environment(env_key, "1")
 
         # PowerPoint to video (docs/DECK_TO_VIDEO.md): only with `-c deckToVideo=1` (default off) and the v2 engine. Needs Docker on the deploying machine (the converter image).
         if str(self.node.try_get_context("deckToVideo") or "").lower() in ("1", "true"):
