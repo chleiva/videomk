@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
-import en from "../i18n/en.json";
-import es from "../i18n/es.json";
+import { EN as en, ES as es } from "../i18n/catalog";
 import { FALLBACK_CAPS, parseDeckCaps } from "./create";
 import type { Capabilities } from "./create";
 import { acceptAttr, checkFile, deckCredits, deckGenerateExtras, deckAspectWarning, deckMinutes, deckReducer, isExpectedS3Url, parseDeckStatus, pollDelayMs, pollExpired, POLL_GIVE_UP_MS, problemFor } from "./deck";

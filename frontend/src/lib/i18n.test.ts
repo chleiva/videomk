@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
-import en from "../i18n/en.json";
-import es from "../i18n/es.json";
+import { EN as en, ES as es } from "../i18n/catalog";
 import { format, localeHeaders, localeOfPath, normalizeLocale, pathForLocale, pickLocale, translate } from "./i18n";
 
 describe("normalizeLocale", () => {

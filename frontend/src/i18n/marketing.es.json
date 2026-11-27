@@ -1,0 +1,20 @@
+{
+ "legal.back": "← videomk",
+ "legal.glance": "En resumen",
+ "legal.updated": "Última actualización: {date}",
+ "legal.provider": "Proveedor: {company}",
+ "legal.provider_number": "Proveedor: {company} (n.º de empresa {number})",
+ "legal.contact": "Contacto: {email}",
+ "legal.english_prevails": "Este documento es una traducción de la versión en inglés. Si hay alguna diferencia, prevalece la versión en inglés.",
+ "legal.page_title": "{title} — videomk",
+ "landing.title": "videomk",
+ "landing.heading": "Convierte tus ideas en",
+ "landing.sub": "Describe lo que quieres entender. Lo escribimos, lo narramos y le ponemos las imágenes, en minutos.",
+ "landing.how_title": "Cómo funciona",
+ "landing.step1_title": "Descríbelo",
+ "landing.step1_body": "Escribe o di tu idea en una frase. Elige cuánto debe durar.",
+ "landing.step2_title": "Nosotros lo creamos",
+ "landing.step2_body": "Guion, voz, imágenes y música se unen en unos minutos. Puedes salir mientras trabaja.",
+ "landing.step3_title": "Compártelo",
+ "landing.step3_body": "Míralo, edita cualquier escena y comparte o guarda el video."
+}

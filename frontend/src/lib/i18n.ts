@@ -1,7 +1,6 @@
 // Locale logic for the web app (docs/I18N.md). English is the default; any es-* is Spanish; anything else is English.
 // Selection order: the person's saved choice > the browser's languages > English. Pure functions first (tested), browser glue below.
-import en from "../i18n/en.json";
-import es from "../i18n/es.json";
+import { EN as en, ES as es } from "../i18n/catalog";
 
 export type Locale = "en" | "es";
 export const LOCALES: readonly Locale[] = ["en", "es"];

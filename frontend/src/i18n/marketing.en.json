@@ -1,0 +1,20 @@
+{
+ "legal.back": "← videomk",
+ "legal.glance": "At a glance",
+ "legal.updated": "Last updated {date}",
+ "legal.provider": "Provider: {company}",
+ "legal.provider_number": "Provider: {company} (company no. {number})",
+ "legal.contact": "Contact: {email}",
+ "legal.english_prevails": "This document is also available in Spanish. If the two versions differ, the English version prevails.",
+ "legal.page_title": "{title} — videomk",
+ "landing.title": "videomk",
+ "landing.heading": "Turn ideas into",
+ "landing.sub": "Describe what you want to understand. We write it, narrate it and add the pictures, in minutes.",
+ "landing.how_title": "How it works",
+ "landing.step1_title": "Describe it",
+ "landing.step1_body": "Type or say your idea in a sentence. Pick how long it should be.",
+ "landing.step2_title": "We make it",
+ "landing.step2_body": "Script, voice, pictures and music come together in a few minutes. You can leave while it works.",
+ "landing.step3_title": "Share it",
+ "landing.step3_body": "Watch it, edit any scene, then share or save the video."
+}

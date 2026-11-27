@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { buildFeedbackRequest, cleanText, contextFrom, failureFor, textProblem, TEXT_MAX } from "./feedback";
-import en from "../i18n/en.json";
-import es from "../i18n/es.json";
+import { EN as en, ES as es } from "../i18n/catalog";
 
 describe("feedback request", () => {
   it("builds the contract body for the web app", () => {

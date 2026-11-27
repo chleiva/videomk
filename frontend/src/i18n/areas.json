@@ -1,0 +1,59 @@
+{
+ "common": [
+  "common",
+  "footer",
+  "theme",
+  "nav",
+  "meta",
+  "time",
+  "status",
+  "api",
+  "val",
+  "consent",
+  "notfound",
+  "error",
+  "toast"
+ ],
+ "marketing": [
+  "landing",
+  "legal",
+  "home",
+  "hero",
+  "gallery",
+  "pricing",
+  "faq"
+ ],
+ "auth": [
+  "signin",
+  "callback",
+  "authErr",
+  "auth"
+ ],
+ "app-create": [
+  "create",
+  "deck",
+  "prompt",
+  "questions",
+  "intake",
+  "scenehint"
+ ],
+ "app-library": [
+  "gen",
+  "making",
+  "media",
+  "collections",
+  "library",
+  "upload"
+ ],
+ "app-player": [
+  "watch",
+  "editor",
+  "scene",
+  "wallet",
+  "feedback",
+  "settings",
+  "credits",
+  "player",
+  "edit"
+ ]
+}

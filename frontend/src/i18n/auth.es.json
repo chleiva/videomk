@@ -1,0 +1,22 @@
+{
+ "signin.page_title": "Iniciar sesión · videomk",
+ "signin.description": "Inicia sesión en videomk.",
+ "signin.title": "Inicia sesión en video",
+ "signin.sub": "Elige cómo quieres continuar.",
+ "signin.google": "Continuar con Google",
+ "signin.apple": "Continuar con Apple",
+ "signin.email": "Continuar con correo",
+ "signin.error": "No pudimos iniciar sesión. Inténtalo de nuevo.",
+ "signin.terms_link": "Términos",
+ "signin.privacy_link": "Política de privacidad",
+ "signin.fine": "Consulta nuestros {terms} y nuestra {privacy}.",
+ "callback.page_title": "Iniciando sesión…",
+ "callback.signing_in": "Iniciando sesión…",
+ "callback.failed": "No se pudo iniciar sesión.",
+ "callback.try_again": "Intentar de nuevo",
+ "authErr.cancelled": "Se canceló el inicio de sesión.",
+ "authErr.link": "No pudimos terminar de vincular tus cuentas. Intenta iniciar sesión de nuevo.",
+ "authErr.failed_with": "No se pudo iniciar sesión: {detail}",
+ "authErr.failed": "No se pudo iniciar sesión. Inténtalo de nuevo.",
+ "signin.tagline": "Descríbelo. Nosotros creamos el video."
+}
