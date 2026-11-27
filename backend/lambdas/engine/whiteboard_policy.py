@@ -58,10 +58,16 @@ def wish(option: Any, prompt: str) -> str:
 # have drawings made (the flag, the switches, an entitled account, a tracer), it allows a few new names here; object_ondemand.fill makes them and
 # object_ondemand.settle writes the name of any that could not be made. 0 (the default, and always without the flag): the prompt is byte for byte what it was.
 _new_drawings = 0
-_NEW_LINE = ("  * Use drawing ids from the list whenever one really shows the thing. When a KEY OBJECT of the topic is not in the list, do NOT use a different drawing as a "
-             "stand-in (never a house for a beehive): give `draw` the object's own plain name instead, one or two lowercase English words (\"honeycomb\", \"beehive\"). "
-             "At most {n} such new names in the whole video, each a simple physical everyday object; it is drawn when it can be made, otherwise its name is written. Never a new "
-             "name for a person, a brand, a flag, a map, a symbol, a weapon, anything medical, or text; for an idea that is not an object, WRITE the word instead.\n")
+_NEW_LINE = ("  * KEY OBJECTS FIRST. Before you write the items, decide what this video is ABOUT: the one or two objects a viewer must SEE for it to make sense (a sundial video: the "
+             "sundial itself, then its upright pointer; a windmill video: the windmill, then its sails; a compass video: the compass, then its needle). The list below is for everything "
+             "else. A list drawing may stand for an object ONLY when it really IS that object (a sun, a water drop, a plant); never a similar one: a clock is not a sundial, a house is "
+             "not a windmill, a lighthouse is not an iron lattice tower, a cheese is not a honeycomb, a cup is not a compass. Ask yourself for EACH key object: would a viewer who sees the list drawing recognise the object itself? When a key object is not in the list, `draw` is the object's own plain name, one or two lowercase "
+             "English words (\"sundial\", \"windmill\", \"compass\"), and give the item `describe`: 6 to 14 plain English words of what it LOOKS like, so a drawer who has never seen it can "
+             "draw it (\"a flat round plate with numbers around the edge and a thin pointer standing up that throws a shadow\"). At most {n} such new names in the whole video, in order of "
+             "importance: the thing the video is about FIRST, then its most distinctive parts; never spend them on small extras (a stick, an arrow, a number: write the word or use the "
+             "list). Each is a simple physical everyday object; it is drawn when it can be made, otherwise its name is written. A famous named place or building (the Eiffel Tower, Big Ben) "
+             "is never drawn by name: give its generic kind instead (\"iron lattice tower\") with `describe`, and WRITE the name beside it. Never a new name for a person, a brand, a flag, "
+             "a map, a symbol, a weapon, anything medical, or text; for an idea that is not an object, WRITE the word instead.\n")
 
 
 def allow_new_drawings(n: int) -> None:
@@ -965,6 +971,102 @@ def settle(plan: Dict[str, Any], policy: Optional[Policy]) -> List[str]:
             f"{tot['retied']} tie(s) moved to words still said, {tot['untied']} dropped, {tot['marks_added']} emphasis mark(s) added"]
 
 
+def loose_json(raw: str) -> Any:
+    """The first JSON object in a model's answer, read tolerantly (round 2, 2026-11-27: the director's second answer of the Spanish 9:16 vaccine video was
+    'Expecting , delimiter' and the whole rewrite was lost). Tries, in order: the text as it is, the outermost balanced {...} (code fences and talk round it
+    ignored), then a repair of what models really get wrong: a trailing comma, a missing comma between two values, single quotes round keys and words, comments,
+    an answer cut off in the middle (open strings, arrays and objects are closed). Raises ValueError when nothing can be made of it."""
+    import json
+
+    text = str(raw or "")
+    start = text.find("{")
+    if start < 0:
+        raise ValueError("no JSON object in the answer")
+    try:
+        return json.loads(text[start: text.rindex("}") + 1])
+    except ValueError:
+        pass
+    out: List[str] = []
+    stack: List[str] = []
+    i, n = start, len(text)
+    last = ""                         # what the last token written was: "value" (a string, number, closer, literal), "open", "comma", "colon", "key"
+    while i < n:
+        c = text[i]
+        if c in "\"'":
+            j = i + 1
+            buf = []
+            while j < n and text[j] != c:
+                if text[j] == "\\" and j + 1 < n:
+                    buf.append(text[j: j + 2])
+                    j += 2
+                    continue
+                buf.append(text[j])
+                j += 1
+            body = "".join(buf).replace("\n", "\\n").replace("\r", "").replace("\t", " ")
+            if c == "'":
+                body = body.replace('"', '\\"').replace("\\'", "'")
+            if last == "value":
+                out.append(",")
+            out.append('"' + body + '"')
+            last = "value"
+            i = j + 1
+            continue
+        if c in "{[":
+            if last == "value":
+                out.append(",")
+            out.append(c)
+            stack.append("}" if c == "{" else "]")
+            last = "open"
+        elif c in "}]":
+            while out and out[-1] == ",":
+                out.pop()
+            if stack and stack[-1] == c:
+                stack.pop()
+                out.append(c)
+                last = "value"
+                if not stack:
+                    break
+            # a closer that does not match the open one is dropped
+        elif c == ",":
+            if last == "value":
+                out.append(",")
+                last = "comma"
+        elif c == ":":
+            out.append(":")
+            last = "colon"
+        elif c == "/" and text[i: i + 2] in ("//", "/*"):
+            end = text.find("\n" if text[i + 1] == "/" else "*/", i)
+            i = n if end < 0 else end + (1 if text[i + 1] == "/" else 2)
+            continue
+        elif not c.isspace():
+            m = re.match(r"-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?|true|false|null", text[i:])
+            if m:
+                if last == "value":
+                    out.append(",")
+                out.append(m.group(0))
+                last = "value"
+                i += len(m.group(0))
+                continue
+            w = re.match(r"[A-Za-z_][\w-]*", text[i:])      # an unquoted key
+            if w:
+                if last == "value":
+                    out.append(",")
+                out.append('"' + w.group(0) + '"')
+                last = "value"
+                i += len(w.group(0))
+                continue
+        i += 1
+    while out and out[-1] in (",", ":"):
+        out.pop()
+    if out and out[-1] == ":":
+        out.append("null")
+    candidate = "".join(out) + "".join(reversed(stack))
+    try:
+        return json.loads(candidate)
+    except ValueError as e:
+        raise ValueError(f"the answer is not JSON and could not be repaired: {e}") from e
+
+
 REVIEW_SYSTEM = (
     "You repair the boards of a whiteboard explainer video. The narration is FINAL: never change, add or remove a spoken word. For each beat you are given, write its board again so that the complaints "
     "about its board are fixed, keeping everything that already works (the same ids where the item stays). "
@@ -972,10 +1074,68 @@ REVIEW_SYSTEM = (
     "Every `say` must be a word that this beat's narration really says, and the items of a beat are in the order the narration says their words.")
 
 
+def _repair(plan: Dict[str, Any], policy: Policy, scores: List[Dict[str, Any]], info: Dict[str, Any], notes: List[str], tag: str = "") -> List[Dict[str, Any]]:
+    """What is repaired WITHOUT a model, in this order, whatever the director did or did not do: things that overlap or leave the board (`make_safe`), marks and
+    arrows that touch something (`make_clean`), a board that "looks empty" (`fill_out`). -> the scores of the boards as they now are."""
+    from .whiteboard import score
+
+    import json
+    beats = plan.get("beats") or []
+    if any(s.get("overlaps") or s.get("off_board") for s in scores):
+        safe = make_safe(plan, policy.aspect)
+        if safe["boards"]:
+            scores = score.score_plan(plan, policy.aspect)
+            info["made_safe"] = safe
+            print("WHITEBOARD_SCORE " + json.dumps({"pass": "safe" + tag, **score.summary(scores), **{k: safe[k] for k in ("split", "moved", "smaller", "dropped", "left")}}, ensure_ascii=False))
+            notes.append(f"whiteboard self-check: board(s) {', '.join(map(str, safe['boards']))} still had things overlapping or off the board: {safe['split']} beat(s) given a board of "
+                         f"their own, {safe['moved']} thing(s) moved to a free zone, {safe['smaller']} made smaller, {safe['dropped']} taken off")
+    if any(s.get("collisions") or s.get("crossed") for s in scores):
+        clean = make_clean(plan, policy.aspect)
+        scores = score.score_plan(plan, policy.aspect)
+        info["made_clean"] = clean
+        print("WHITEBOARD_SCORE " + json.dumps({"pass": "clean" + tag, **score.summary(scores), "removed": clean["removed"], "left": clean["left"]}, ensure_ascii=False))
+        notes.append(f"whiteboard self-check: {len(clean['removed'])} mark(s) or arrow(s) that touched something taken off")
+    groups = score.boards_of(beats)
+    grown = []
+    for s, g in zip(scores, groups):
+        if any("looks empty" in c for c in s["complaints"]):
+            r = fill_out([beats[i]["scene"]["props"] for i in g], policy.aspect, bool(plan.get("captions", True)))
+            if r["larger"]:
+                grown.append({"board": s["board"], **r})
+    if grown:
+        scores = score.score_plan(plan, policy.aspect)
+        info["filled_out"] = grown
+        print("WHITEBOARD_SCORE " + json.dumps({"pass": "fill" + tag, **score.summary(scores), "boards": grown}, ensure_ascii=False))
+        notes.append("whiteboard self-check: " + "; ".join(f"board {x['board']} looked empty, {x['larger']} thing(s) made larger ({x['coverage'][0] * 100:.0f} % -> {x['coverage'][1] * 100:.0f} % covered)" for x in grown))
+    return scores
+
+
+def _ask_director(ask: Callable[[str, str], str], system: str, user: str, attempts: int = 2) -> Dict[str, Any]:
+    """The director's answer as a dict. A second try (with what was wrong said plainly) when the first is not JSON even after the tolerant reading of `loose_json`:
+    one retry, never more. Raises the last error when both fail."""
+    err: Optional[Exception] = None
+    note = ""
+    for k in range(max(1, attempts)):
+        raw = ask(system, user + note)
+        try:
+            data = loose_json(raw)
+            if isinstance(data, dict):
+                return data
+            raise ValueError("the answer is not a JSON object")
+        except ValueError as e:
+            err = e
+            logging.warning("whiteboard review: director's answer %d was not JSON (%s)", k + 1, str(e)[:120])
+            note = ("\n\nYour last answer could not be read as JSON (" + str(e)[:100] + "). Answer again with ONLY the JSON object, no talk, every comma in place.")
+    raise ValueError(f"director's answer unreadable after {attempts} tries: {err}")
+
+
 def review(plan: Dict[str, Any], policy: Optional[Policy], ask: Optional[Callable[[str, str], str]], language: str = "en") -> List[str]:
-    """The self-check (engine/whiteboard/score.py), after `settle`: every board is laid out and timed as the renderer will and scored. Boards that fail are
-    sent back to the director ONCE with their complaints (the narration stays as it is); the new boards are kept only if the video then scores at least as
-    well. The scores are logged (`WHITEBOARD_SCORE`) and kept in plan["whiteboard"]["score"]. Never fails a plan."""
+    """The self-check (engine/whiteboard/score.py), after `settle`: every board is laid out and timed as the renderer will and scored. Round 2 (2026-11-27)
+    changed the order: first everything that needs no model (`_repair`: overlaps, touching marks and arrows, a board that looks empty), THEN the boards that still
+    fail for a reason only the director can mend (too few things, an arrow with nothing to say what it joins, writing too small, an item finished late) are sent
+    back ONCE with their complaints (the narration stays as it is; an answer that is not JSON is read tolerantly and asked for once more; if it is still unreadable
+    the repaired first boards stand). The new boards are kept only if the video then scores at least as well. The scores are logged (`WHITEBOARD_SCORE`) and kept
+    in plan["whiteboard"]["score"]. Never fails a plan."""
     import copy
     import json
 
@@ -988,21 +1148,23 @@ def review(plan: Dict[str, Any], policy: Optional[Policy], ask: Optional[Callabl
         beats = plan.get("beats") or []
         scores = score.score_plan(plan, policy.aspect)
         first = score.summary(scores)
-        failed = [s for s in scores if not s["ok"]]
-        info: Dict[str, Any] = {"first": first, "replanned": False}
-        print("WHITEBOARD_SCORE " + json.dumps({"pass": 1, **first, "complaints": [c for s in failed for c in s["complaints"]][:12]}, ensure_ascii=False))
-        if failed and ask is not None:
-            want = sorted({i - 1 for s in failed for i in s["beats"]})
+        info: Dict[str, Any] = {"first": first, "replanned": False, "director_calls": 0}
+        print("WHITEBOARD_SCORE " + json.dumps({"pass": 1, **first, "complaints": [c for s in scores if not s["ok"] for c in s["complaints"]][:12]}, ensure_ascii=False))
+        scores = _repair(plan, policy, scores, info, notes)
+        asked = [s for s in scores if not s["ok"] and s.get("needs_director")]
+        info["failed_before_director"] = sum(1 for s in scores if not s["ok"])
+        if asked and ask is not None:
+            want = sorted({i - 1 for s in asked for i in s["beats"]})
             parts = []
-            for s in failed:
+            for s in asked:
                 parts.append(f"BOARD {s['board']} (beats {', '.join(str(i) for i in s['beats'])}). Complaints:\n" + "\n".join(f"- {c}" for c in s["complaints"]))
                 for i in s["beats"]:
                     pr = beats[i - 1]["scene"]["props"]
                     parts.append(f"Beat {i}. Narration (final): {json.dumps(beats[i - 1].get('narration') or '', ensure_ascii=False)}\n"
                                  f"Its board now: {json.dumps({'board': pr.get('board', 'new'), 'items': pr.get('items')}, ensure_ascii=False)}")
             try:
-                raw = ask(REVIEW_SYSTEM + policy.prompt_block(language), "\n\n".join(parts))
-                data = json.loads(raw[raw.index("{"): raw.rindex("}") + 1])
+                info["director_calls"] = 1
+                data = _ask_director(lambda sy, us: ask(sy, us), REVIEW_SYSTEM + policy.prompt_block(language), "\n\n".join(parts))
                 from .scenes import ELEMENTS
 
                 trial = copy.deepcopy(plan)
@@ -1026,6 +1188,7 @@ def review(plan: Dict[str, Any], policy: Optional[Policy], ask: Optional[Callabl
                         retie(b["scene"]["props"], str(b.get("narration") or ""))
                         keep_busy(b["scene"]["props"], str(b.get("narration") or ""))
                     again = score.score_plan(trial, policy.aspect)
+                    again = _repair(trial, policy, again, {}, [], tag="-2")      # the new boards get the same repairs as the first ones before they are compared
                     second = score.summary(again)
                     took = score.better(scores, again)
                     info.update(replanned=True, beats=[i + 1 for i in want], second=second, kept="new" if took else "first")
@@ -1038,40 +1201,14 @@ def review(plan: Dict[str, Any], policy: Optional[Policy], ask: Optional[Callabl
                             if (b.get("scene") or {}).get("type") == "whiteboard" and (trial["beats"][i].get("scene") or {}).get("type") == "whiteboard":
                                 b["scene"] = trial["beats"][i]["scene"]
                         scores = again
-                    notes.append(f"whiteboard self-check: {len(failed)} board(s) failed, written again once; kept the {'new' if took else 'first'} boards ({second['failed']} failing now)")
-            except Exception as e:  # noqa: BLE001 - the repair is a bonus: the first boards stand
+                    notes.append(f"whiteboard self-check: {len(asked)} board(s) failed for a reason only the director can mend, written again once; kept the {'new' if took else 'first'} boards ({second['failed']} failing now)")
+            except Exception as e:  # noqa: BLE001 - the repair is a bonus: the (already repaired) first boards stand
                 logging.warning("whiteboard review: repair failed (%s: %s)", type(e).__name__, str(e)[:200])
                 info["error"] = f"{type(e).__name__}: {str(e)[:120]}"
-        # Whatever happened above (no repair, a repair kept or thrown away, a repair that broke): a board whose things overlap or leave the board is never
-        # shipped as it is. What is recorded below is the score of the boards that ship.
-        if any(s.get("overlaps") or s.get("off_board") for s in scores):
-            safe = make_safe(plan, policy.aspect)
-            if safe["boards"]:
-                scores = score.score_plan(plan, policy.aspect)
-                info["made_safe"] = safe
-                print("WHITEBOARD_SCORE " + json.dumps({"pass": "safe", **score.summary(scores), **{k: safe[k] for k in ("split", "moved", "smaller", "dropped", "left")}}, ensure_ascii=False))
-                notes.append(f"whiteboard self-check: board(s) {', '.join(map(str, safe['boards']))} still had things overlapping or off the board: {safe['split']} beat(s) given a board of "
-                             f"their own, {safe['moved']} thing(s) moved to a free zone, {safe['smaller']} made smaller, {safe['dropped']} taken off")
-        # ... nor one on which a mark or an arrow touches something (the layout takes care of that; this is the plan's own check of it)
-        if any(s.get("collisions") or s.get("crossed") for s in scores):
-            clean = make_clean(plan, policy.aspect)
-            scores = score.score_plan(plan, policy.aspect)
-            info["made_clean"] = clean
-            print("WHITEBOARD_SCORE " + json.dumps({"pass": "clean", **score.summary(scores), "removed": clean["removed"], "left": clean["left"]}, ensure_ascii=False))
-            notes.append(f"whiteboard self-check: {len(clean['removed'])} mark(s) or arrow(s) that touched something taken off")
-        # A board that still "looks empty" is filled by what is on it (larger writing and drawings, while the layout stays clean): no second model call
-        groups = score.boards_of(beats)
-        grown = []
-        for s, g in zip(scores, groups):
-            if any("looks empty" in c for c in s["complaints"]):
-                r = fill_out([beats[i]["scene"]["props"] for i in g], policy.aspect, bool(plan.get("captions", True)))
-                if r["larger"]:
-                    grown.append({"board": s["board"], **r})
-        if grown:
-            scores = score.score_plan(plan, policy.aspect)
-            info["filled_out"] = grown
-            print("WHITEBOARD_SCORE " + json.dumps({"pass": "fill", **score.summary(scores), "boards": grown}, ensure_ascii=False))
-            notes.append("whiteboard self-check: " + "; ".join(f"board {x['board']} looked empty, {x['larger']} thing(s) made larger ({x['coverage'][0] * 100:.0f} % -> {x['coverage'][1] * 100:.0f} % covered)" for x in grown))
+                info["kept"] = "first (the director's answer could not be used)"
+                notes.append("whiteboard self-check: the director's rewrite could not be read; the boards stand as they were, with the model-free repairs")
+        # Whatever happened above, the same guarantees hold for what ships (idempotent: they find nothing when the repairs above already ran)
+        scores = _repair(plan, policy, score.score_plan(plan, policy.aspect), info, notes, tag="-final")
         final = score.summary(scores)
         plan.setdefault("whiteboard", policy.summary())["score"] = {**final, **{k: v for k, v in info.items() if k != "first"}, "first": first,
                                                                     "boards_detail": [{k: v for k, v in s.items() if k not in ("overlaps", "crossed", "off_board", "late", "collisions", "blocked")} for s in scores]}

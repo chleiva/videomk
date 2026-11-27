@@ -17,11 +17,11 @@ from typing import Any, Callable, Dict, Optional, Tuple
 from common import catalog_privacy, media_policy
 
 # words that make a search news-like, branded, about an identifiable person, or about something a camera cannot generically film
-_NEWS = re.compile(r"\b(news|breaking|election|elections|vote|voting|president|presidente|prime minister|minister|senator|politician|parliament|congress|government|"
-                   r"war|guerra|invasion|attack|ataque|bombing|terror\w*|shooting|riot|protest\w*|coup|refugee\w*|earthquake victims|crime scene|arrest\w*|trial|scandal|"
+_NEWS = re.compile(r"\b(news|breaking news|election|elections|vote|voting|president|presidente|prime minister|minister|senator|politician|parliament|congress|government|"
+                   r"war|guerra|invasion|attack|ataque|bombing|terror\w*|shooting(?! stars?\b)|riot|protest\w*|coup|refugee\w*|earthquake victims|crime scene|arrest\w*|trial|scandal|"
                    r"olympic\w*|world cup|super bowl|championship final|oscars?|grammy\w*)\b", re.I)
 _BRAND = re.compile(r"\b(logo|logos|brand|brands|branded|trademark|iphone|ipad|macbook|android phone|tesla|coca[- ]?cola|pepsi|nike|adidas|mcdonald\W?s|starbucks|google|"
-                    r"facebook|instagram|tiktok|youtube|netflix|amazon|microsoft|windows|playstation|xbox|disney|marvel|lego|ikea|ferrari|bmw|mercedes|toyota|boeing|airbus)\b", re.I)
+                    r"facebook|instagram|tiktok|youtube|netflix|amazon|microsoft|windows (?:logo|pc|laptop|computer|desktop|phone|tablet|operating system)|playstation|xbox|disney|marvel|lego|ikea|ferrari|bmw|mercedes|toyota|boeing|airbus)\b", re.I)
 _IDENTITY = re.compile(r"\b(celebrity|celebrities|famous|actor|actress|singer|footballer|athlete named|ceo|founder|king|queen|pope|portrait|selfie|face|faces|close-?up of a (man|woman|person|child)|"
                        r"interview|speech|press conference)\b", re.I)
 _TEXTY = re.compile(r"\b(text|caption|subtitle\w*|headline\w*|newspaper|sign|signs|signage|billboard|poster|banner|screen|screenshot|website|app interface|dashboard|chart|graph|"
@@ -68,12 +68,14 @@ def pre_filter(query: str, alt: str = "") -> Optional[str]:
             if label == "query":
                 return "empty"
             continue
+        t = " ".join(media_policy.cleared(t).split())   # a clearly benign compound ("water gun", "queen bee", "clock face") or a technical term ("Fresnel lens") is read as a plain noun by every filter below
         for name, rx in (("news", _NEWS), ("brand", _BRAND), ("identity", _IDENTITY), ("text or graphic", _TEXTY), ("unsafe", _UNSAFE)):
             if rx.search(t):
                 return name
         why = catalog_privacy.personal_reason(t[:catalog_privacy.MAX_CHARS]) if len(t.split()) <= catalog_privacy.MAX_WORDS else None
         if why and why not in _NOT_PERSONAL:
-            return f"personal ({why})"
+            policy = media_policy.text_reason(t)   # "baby crawling on floor" is the children policy, not somebody's family: the privacy filter only knows the word
+            return policy if (policy and why == "family or acquaintance") else f"personal ({why})"
         if _PROPER.search(t):
             return "proper noun"
     return media_policy.text_reason(query, alt)   # the ONE safety policy's word lists (English and Spanish), on the director's own wording
@@ -93,12 +95,13 @@ def post_filter(d: Dict[str, Any], media: str = "clip") -> Optional[str]:
         return "brief length"
     if re.search(r"\d", brief):
         return "digits"
-    if _PROPER.search(brief):
+    read = " ".join(media_policy.cleared(brief).split())   # as in pre_filter: benign compounds and technical terms are read as a plain noun
+    if _PROPER.search(read):
         return "proper noun"
     for name, rx in (("news", _NEWS), ("brand", _BRAND), ("identity", _IDENTITY), ("text or graphic", _TEXTY), ("unsafe", _UNSAFE), ("fast motion", _FAST), ("crowd", _CROWD)):
-        if rx.search(brief):
+        if rx.search(read):
             return name
-    if catalog_privacy.personal_reason(brief[:catalog_privacy.MAX_CHARS]) not in (None,) + _NOT_PERSONAL:
+    if catalog_privacy.personal_reason(read[:catalog_privacy.MAX_CHARS]) not in (None,) + _NOT_PERSONAL:
         return "personal"
     if d.get("people") not in ("none", "hands", "distant"):
         return "people"
@@ -106,7 +109,10 @@ def post_filter(d: Dict[str, Any], media: str = "clip") -> Optional[str]:
         return "motion"
     if not media_policy.english_only(brief):   # the generator is only ever sent plain English that the word lists below can read
         return "not plain English"
-    return media_policy.verdict_reason(d) or media_policy.text_reason(brief, " ".join(str(t) for t in (d.get("tags") or []) if isinstance(t, str)))
+    # the tags are single words: one that is a word of the brief was just read there in its phrase ("skeleton" of "dinosaur skeleton"); only the others are read alone
+    said = set(re.findall(r"[a-z]+", brief.lower()))
+    tags = [str(t).lower() for t in (d.get("tags") or []) if isinstance(t, str) and str(t).lower() not in said and str(t).lower() not in media_policy.SEASON_TAGS]
+    return media_policy.verdict_reason(d) or media_policy.text_reason(brief, *tags)   # each tag alone: two tags side by side are not a phrase
 
 
 def generalise(query: str, alt: str, narration: str, *, complete: Optional[Callable[..., Tuple[str, Dict[str, Any]]]] = None, media: str = "clip") -> Tuple[Dict[str, Any], float]:
@@ -120,7 +126,8 @@ def generalise(query: str, alt: str, narration: str, *, complete: Optional[Calla
 
         complete = complete or llm.complete
         user = f"{'Footage' if media == 'clip' else 'Picture'} search: {query[:120]}\nSecond wording: {alt[:120]}\nNarration of this moment: {narration[:400]}"
-        text, meta = complete(BRIEF_SYSTEM if media == "clip" else IMAGE_BRIEF_SYSTEM, user, max_tokens=400, temperature=0.0, model=llm.REVIEW_MODEL, effort="low")
+        # the model's own thinking counts against the limit: at 400 the answer of one search in six was cut short (a one-word search most of all), and a cut answer reads as a refusal
+        text, meta = complete(BRIEF_SYSTEM if media == "clip" else IMAGE_BRIEF_SYSTEM, user, max_tokens=1200, temperature=0.0, model=llm.REVIEW_MODEL, effort="low")
         cost = float(meta.get("cost_usd", 0.0))
         m = re.search(r"\{.*\}", text or "", flags=re.S)
         d = json.loads(m.group(0)) if m else {}

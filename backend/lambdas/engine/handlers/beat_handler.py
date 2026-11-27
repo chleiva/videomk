@@ -179,7 +179,8 @@ def make_photo(plan: Dict[str, Any], beat: Dict[str, Any], video_id: str, cost_f
         if clip_config.flag() and not pick:   # images on demand (docs/LIBRARY_ON_DEMAND.md): our catalog has nothing for this search; a general picture may be made for it while the stock search runs
             job = image_ondemand.begin(video_id=video_id, beat_id=str(beat["id"]), query=query, alt=props.get("alt", ""), narration=_context(beat), plan=plan,
                                        ctx=clip_ondemand.context(video_id), is_edit=cost_field != "cost_usd", beat_started=started)
-        result = stock.scout_reviewed(query, _context(beat), props.get("alt", ""), unsplash_key=unsplash_key, **({"big": True} if big else {}))
+        openverse_key = stock.optional_secret(stock.OPENVERSE_KEY_PARAM, get_secret_param)   # a registered Openverse application when the owner has stored one; without it the search is anonymous, as always
+        result = stock.scout_reviewed(query, _context(beat), props.get("alt", ""), unsplash_key=unsplash_key, **({"big": True} if big else {}), **({"openverse_key": openverse_key} if openverse_key else {}))
         if result:
             costs.add_cost(video_id, float(result.get("review", {}).get("cost_usd", 0.0)), field=cost_field, part="stock")
             if result.get("candidates"):

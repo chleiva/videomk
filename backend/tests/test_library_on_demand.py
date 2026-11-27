@@ -457,7 +457,7 @@ def test_the_director_may_name_missing_drawings_only_when_this_video_can_have_th
     wp.allow_new_drawings(oo.offer(ctx))
     try:
         opened = block()
-        assert only not in opened and "At most 6 such new names" in opened and "never a house for a beehive" in opened and "otherwise its name is written" in opened
+        assert only not in opened and "At most 6 such new names" in opened and "a house is not a windmill" in opened and "otherwise its name is written" in opened
         assert opened.replace(wp._NEW_LINE.format(n=6), "") == before.replace("  * " + only + " If nothing in the list shows the idea, WRITE the word instead (a written label is always fine); never invent an id.\n", "")   # nothing else changes
     finally:
         wp.allow_new_drawings(0)
@@ -494,3 +494,52 @@ def test_a_new_name_that_was_not_made_is_written_not_left_as_a_stand_in(wb, monk
     assert a["draw"] == "honeycomb" and c["draw"] == bundled                                      # the made drawing and the director's own choice from the list: untouched
     assert b["write"] == "blob thing" and b["boxed"] is True and b["size"] == "m" and not ({"draw", "asked", "match"} & set(b))
     assert oo.settle(plan) == 0
+
+
+# ----------------------------------------------------------------------------- round 2 (2026-11-27): the offer names the key objects, with a short description
+def test_what_the_director_says_it_looks_like_goes_to_the_generator_with_the_name(wb):
+    plan = _board_plan("sundial", "honeycomb")
+    items = plan["beats"][0]["scene"]["props"]["items"]
+    items[0]["describe"] = "a flat round plate with numbers around the edge and a thin pointer that throws a shadow"
+    items[1]["describe"] = "a pistol with a long barrel"                                 # the policy's word lists refuse this wording: the drawing is still made, from its name alone
+    seen = {}
+
+    def maker(objs, timeout, describe=None):
+        seen["objs"], seen["describe"] = list(objs), dict(describe or {})
+        return [_pkg(oid, name) for oid, name in objs], {"sheet_usd": 0.038, "rejected": {}, "thumbs": {oid: _picture(3, (64, 64)) for oid, _ in objs}}
+    oo.set_maker(maker)
+    got = oo.fill(plan, video_id="v1", ctx=od.context("v1"))
+    assert sorted(seen["describe"]) == ["sundial"] and "pointer" in seen["describe"]["sundial"] and got["described"] == ["sundial"]
+    assert [n for _, n in seen["objs"]] == ["sundial", "honeycomb"]
+    assert all("describe" not in it for it in plan["beats"][0]["scene"]["props"]["items"])      # nothing of it stays on the board once the drawing is there
+
+
+def test_a_maker_that_knows_nothing_of_descriptions_is_called_as_before(wb):
+    plan = _board_plan("honeycomb")                                                          # no description: the maker gets no extra argument (the deployed tracer is older)
+    got = oo.fill(plan, video_id="v1", ctx=od.context("v1"))
+    assert got["made"] == ["honeycomb"] and got["described"] == []
+
+
+def test_the_element_keeps_a_description_only_for_a_drawing_that_is_asked_for(monkeypatch):
+    from engine.scenes import ELEMENTS
+    from engine import whiteboard_policy as wp
+
+    monkeypatch.setenv("WHITEBOARD", "1")
+    with wp.scope(wp.Policy(True, "asked")):
+        props = ELEMENTS["whiteboard"].sanitize({"items": [{"id": "a", "draw": "sun", "zone": "left", "describe": "a round yellow thing with rays"},
+                                                           {"id": "b", "draw": "sundialzz", "zone": "right", "describe": "a flat plate; with 4 numbers!"}]})
+    sun, boxed = props["items"]
+    assert "describe" not in sun and boxed["boxed"] is True and boxed["describe"] == "a flat plate with numbers"
+
+
+def test_the_offer_wording_names_the_key_objects_first():
+    from engine import whiteboard_policy as wp
+
+    wp.allow_new_drawings(6)
+    try:
+        text = wp.Policy(True, "asked").prompt_block()
+    finally:
+        wp.allow_new_drawings(0)
+    for needle in ("KEY OBJECTS FIRST", "a clock is not a sundial", "describe", "At most 6", "the thing the video is about FIRST", "never spend them on small extras", "iron lattice tower"):
+        assert needle in text, needle
+    assert "KEY OBJECTS FIRST" not in wp.Policy(True, "asked").prompt_block()                    # offer off: the list only, as before

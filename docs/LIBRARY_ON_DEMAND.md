@@ -628,6 +628,42 @@ Built and tested against local stores only. **Not run against QA or prod.** The 
 * No real refusal by either provider's moderation was provoked (it would mean sending a bad prompt on purpose); the clients are tested against stand-ins of the documented answers.
 * The kill switches are the existing ones: `master_enabled` and the per-type switches (`clips_admin.py config set master_enabled false`, live within a minute).
 
+### C7. Over-refusal by single words, and the regression set (2026-11-27, round 2)
+QA refused a **bee smoker** (tobacco), a **beekeeper** (a real person), a **lighthouse Fresnel lens** (a named place), a **christmas tree** (religion) and a **water gun** (weapons): one listed WORD decided, in the word lists (`common/media_policy.py`, `clip_brief.py`) and in the model rubric ("when unsure, refuse" with no examples of what is NOT touched).
+* **Whole-phrase allow lists** (`BENIGN`, `TECHNICAL`, `IN_CONTEXT` in `media_policy.py`; `cleared(text)` reads a cleared phrase as the plain noun "thing"): only the phrase itself is cleared, every other word of the wording is still read ("water gun fight between soldiers" is still refused for "fight" and "soldiers"; "christmas nativity scene" for "nativity"). Festive OBJECTS only (tree, lights, baubles, gifts, eggs); a nativity scene, a church, a cross, an angel, a prayer are still religion. Used by `text_reason`, `clip_brief.pre_filter` and `post_filter`, and by the drawing-name filter in `object_ondemand.missing` (the privacy filter only knows single words). Adding a phrase is one line; when in doubt, do not add it.
+* **The models are told what is NOT touched** (`ALLOWED`, in the text rubric; a shorter version in the vision rubric): an ordinary occupation or generic role as an anonymous figure is not a real person (`real_people` is only a NAMED, famous or recognisable individual or a real face); an object whose name holds a policy word but is not that thing; a festive object with no religious scene; a quiet volcano or a cloud; a term of science whose common name comes from a person or place. The names rubric answers `"specific"` for a NAMED place, person or work (the Eiffel Tower): never drawn, no generic stand-in made for it.
+* **Other fixes found on the way**: "baby crawling" is logged as the children policy, not `personal`; "shooting stars" is not "shooting"; the brief's `max_tokens` 400 cut one answer in six short (read as a refusal): 1200; a tag that is already a word of the brief is read in its phrase, the others alone.
+* **Regression set** `backend/tests/fixtures/media_policy_regression.json`: 135 clearly safe educational asks (objects, animals, science, jobs, tools, food, weather, sports, festive) and 92 unsafe asks covering all 17 categories in English and Spanish plus 8 in German and French. `test_media_policy_regression.py` (the free layers, no model): every safe ask passes, every word-list unsafe ask is refused and keeps its reason; 12 rows (German and French, "hypodermic needle") only the model refuses.
+* **Measured** (2026-11-27, the same 227 asks, the real names rubric on Bedrock, about USD 0.014 for both runs):
+
+| | Before (538c351) | After |
+|---|---|---|
+| Safe asks passed, free layers only (word lists + search filters) | 83 / 135 (61 %) | **135 / 135 (100 %)** |
+| Safe asks passed, whole names check (lists + model) | 81 / 135 (60 %) | **135 / 135** |
+| Unsafe word-list asks refused, free layers | 80 / 80 | 80 / 80 |
+| Unsafe asks refused, whole names check (92 incl. German, French) | 91 / 92 ("Eiffel Tower at sunset" passed as an ordinary tower) | **92 / 92** |
+Unsafe recall did not drop. The vision check (finished drawings) was NOT measured on new images: its rubric got the same "not touched" examples and is tested against stand-ins only.
+
+### C8. Drawings on demand: the offer names the key objects, with a description (2026-11-27, round 2)
+QA, a sundial video with the offer on: the director asked for a drawing named "stick" only, and the library's wall clock stood in for the dial; labels did not match drawings. Cause: the offer wording ("a KEY OBJECT not in the list: give its plain name") left the director to decide what is key, and a list drawing that is only SIMILAR looked good enough.
+* **Wording** (`whiteboard_policy._NEW_LINE`, only when the offer is on): decide first what the video is ABOUT; a list drawing may stand for an object only when it IS that object ("a clock is not a sundial, a house is not a windmill, a lighthouse is not an iron lattice tower, a cheese is not a honeycomb"; "would a viewer recognise the object itself?"); new names (at most 6, unchanged) in order of importance, the thing the video is about FIRST; never spent on small extras; every new name carries `describe`, 6 to 14 plain words of what it looks like; a named landmark is never drawn by name: its generic kind plus `describe`, the name WRITTEN beside it.
+* **The description reaches the generator**: `describe` on the item (kept by the element only for a drawing that is asked for), checked by the word lists and the plain-English test (`object_ondemand.descriptions`), sent as the optional `describe` of the tracer call and appended to the name in the sheet prompt (`object_maker.make`). An older tracer ignores the key; a refused description is dropped and the drawing is made from its name alone. The generator's own prompt moderation still reads it. **The tracer function must be redeployed to use descriptions** (not deployed by this work).
+* **Measured with the real director at plan stage** (offer on, 6 names, 16:9, 40 s, QA models):
+
+| Topic | Before (old wording) | After | Cost |
+|---|---|---|---|
+| Sundial | QA: asked for "stick" only, the wall clock stood in for the dial. Re-run with the old wording (USD 0.153): the dial was the library's `clock` three times, and "sundial" was named once but would have matched an hourglass | asks **sundial**, with "a flat round plate with numbers around the edge and a thin pointer standing up that throws a shadow"; the policy lets it pass | USD 0.149 |
+| Windmill | (not run before) | `windmill` is in the library: used; asks **millstone** with a description; no stand-ins | 0.194 |
+| Eiffel Tower history | used `lighthouse` as the tower | second wording: asks **iron lattice tower** with a description (the named tower itself is refused by policy: "specific"; first wording had asked for nothing) | 0.075 + 0.189 |
+| How a compass works | (not run before) | every key object is in the library (compass, magnet, compass rose): nothing asked, correct | 0.206 |
+* **Landmarks and maps** (real names rubric): "eiffel tower" is refused (`specific`), "world map" and "map of france" are refused (`policy:flags_maps`); the label stays written in a box. A generic "iron lattice tower" is accepted.
+* Not measured: what the generator draws from a description (the QA sheet costs about USD 0.04 and the budget went to the director runs); the match score that decides "stand-in or ask" is unchanged (`object_sure_score` 0.55).
+Tests: `test_library_on_demand.py` (description reaches the maker, a refused description is dropped, an older maker is called as before, the element keeps it only for asked drawings, the wording).
+
+### C9. Small things found in the same QA run (2026-11-27, round 2)
+* A drawing name refused by the free filters used to leave no trace: each is now a decision `filter:<why>` (`object_ondemand.missing(..., refused=)`, logged by `fill`, counted in the day's decisions).
+* `clips_admin.py report`: the clips' block now reads only clip rows (image and drawing latencies and reasons were mixed in); `spend_by_day_all_media` shows a test account's spend on images and drawings by day (it showed "none"); the account totals stay the three types together; and the library of drawings made on demand is counted (`by_media.object.library`: how many, how many uses, top reused) because **reuse of library drawings is counted now** (`object_ondemand.count_reuse`: `uses`, `videos`, `used_library`, the `Used` metric).
+
 ## Part D. The tracer function: sketch objects on Lambda (2026-11-27, tracker R153; built, tested, NOT deployed)
 
 **Why its own stack**: the maker needs scipy and vtracer; the engine layer is 148 MB and may not grow by about 100 MB (250 MB limit); the main stack `videomk-<stage>` is near 500 resources.
@@ -668,6 +704,38 @@ In all 10 searches where the reviewer could see the other sources' photos it fou
 * **Picture quality may drop.** Openverse is Flickr, museums and public archives; the reviewer accepted "vintage" photographs twice in the sample. Unsplash was the better photography, which is why it used to come first. The reviewer still rejects what does not fit, and the lasting answer is our own library.
 * Pixabay and Pexels are not photo sources of the engine today (only video sources); adding Pixabay photos (the key exists) would give the first group better pictures: not built.
 * The editor's candidate list shows the other sources first too.
+
+### E2. Why Openverse still lost to Unsplash, and the fix (2026-11-27, round 2)
+QA after the ranking change: 13 of 17 photos were still Unsplash. The beat logs said "photo review failed: no thumbnails could be loaded" 11 times, "HTTP 403" on one search (three times), and "reviewer rejected all" 9 times. Probed against the live API (`engine/stock.py`; the API's own schema at `api.openverse.org/v1/schema/` and Wikimedia's pages, read 2026-11-27):
+
+| What was logged | Real cause | Fix |
+|---|---|---|
+| "no thumbnails could be loaded" | **Not a rate limit** (the response headers showed 19,850 of 20,000 thumbnails a day and 98 of 100 searches a minute left). Openverse's thumbnail endpoint answers **HTTP 424 for every Wikimedia Commons picture** (25 of 25: "Failed to render thumbnail" / "Thumbnail unavailable from provider"), and Commons is most of what it returns for many searches. `gather()` kept the first six candidates, often all Commons, so the reviewer saw nothing and the photo came from Unsplash. | A Commons picture is shown AND fetched from **Wikimedia's own renderings at its standard widths** (500 px for the reviewer, 1920 px for the video, 3840 px for a 4K video; `wikimedia_step`). Any other width is refused by Wikimedia with HTTP 400; its robot policy says "Prefer thumbnails to downloading of originals" (the engine used to download originals of up to 15 MB). The original stays as the way back (`full_alt`). Twelve candidates of the other sources are kept and **the reviewer is shown the first six whose thumbnails load** (`review_photos`), so a candidate that cannot be shown no longer uses up a place. |
+| HTTP 403 on a search, three times | Cloudflare in front of the API answers some search WORDS with a challenge page (`cf-mitigated: challenge`), whatever the client says it is: every search containing "outdoors" did, while "walking" and "toddler walking" passed. The same question three times got the same answer. | A 403 is never asked again as it was: the search is repeated with **one word left out** (the last word first, at most three other wordings). Server errors and timeouts are still tried three times. |
+| "reviewer rejected all" (9) | **Not a fault**: brand photos (Coca-Cola, Nike logos) and war scenes that the reviewer is told to reject. | none |
+
+Also: Wikimedia asks automated clients for "a total concurrency of at most 2" and answers HTTP 429 with a wait (11 s measured) after about 18 requests in 10 s. So no more than three Commons pictures stand among the reviewer's six when other sources have some (`_spread`), a 429 thumbnail is simply skipped, and the chosen picture waits ONCE when the wait is 12 s or less (`fetch_full`). Twelve beats are made in parallel, so the limit can still be met under load: the photo then comes from the next source, as before.
+
+**Measured on 20 real searches** (the same 20, old code then new code, real Openverse, Unsplash and reviewer, the chosen photo downloaded as the engine does; `docs/clips_on_demand/openverse_measure_2026-11-27.jsonl`):
+
+| | Before | After |
+|---|---|---|
+| Searches in which the reviewer could see at least one Openverse photo (19 had candidates) | 13 | **19** |
+| Openverse photos the reviewer was shown | 36 of 108 given | **108** (six a search wherever six exist; 208 candidates kept) |
+| Thumbnails that failed to load | 72 | 6 (Wikimedia's 429; each was replaced by the next candidate) |
+| Searches whose whole Openverse review failed ("no thumbnails could be loaded") | 6 | 0 |
+| Photo chosen from Openverse / Unsplash | 11 / 9 | **17 / 3** |
+| Licences of the Openverse photos chosen | CC0 only (11) | CC0 (11), CC BY (6): Commons pictures can now win, and CC BY needs its credit (already written by the engine) |
+The three that are still Unsplash: one search has a single Openverse result (a diagram), one has none even after the firewall retry (it is about a toddler), and in one the reviewer found no bicycle among six Openverse photos. Two searches took 15 and 20 s because the chosen Commons picture waited out a 429. Twenty searches are a sample, not a rate.
+
+**A registered Openverse application (optional; the owner's to do).** The API works without a key and the fix above needs none: none of the three causes was the anonymous limit. A registered application gets "slightly higher limits" and larger pages (the API's own words; numbers are not published), which matters when volume grows: **the anonymous limit is 1,000 searches a day and 100 a minute per network address**, and a video makes 4 to 10. To register (not done; nobody was registered by this work):
+1. `curl -X POST https://api.openverse.org/v1/auth_tokens/register/ -H 'Content-Type: application/json' -d '{"name": "<a unique application name>", "description": "<what the application does with the API>", "email": "<an address Openverse can write to>"}'`. The answer holds `client_id` and `client_secret` ONCE ("you will not be able to retrieve them later").
+2. Click the link in the e-mail Openverse sends ("Until you do that, the application will be subject to the same rate limits as an anonymous user").
+3. Store both as one SecureString, `<client_id>:<client_secret>`: `aws ssm put-parameter --name /videomk/openverse_api_key --type SecureString --value '<client_id>:<client_secret>'` in each account. The beat function may already read `/videomk/*_api_key`: no deploy change.
+The code then asks for a token (`POST /v1/auth_tokens/token/`, grant `client_credentials`), keeps it in the container until a minute before it expires, and sends it only with the SEARCH (never with a thumbnail or a picture, never stored with a candidate). A missing parameter is remembered for 15 minutes; a refused or failing credential falls back to the anonymous search. **Not verified with a real credential** (it needs the registration); tested against stand-ins of the documented answers. Whether a registered application passes the firewall's word rule is unknown.
+
+**What this does not fix**: Openverse's own thumbnail fault for Commons pictures (theirs to fix; we no longer depend on it); the picture quality point of E above (the reviewer now sees more Openverse photos, so it also has more to choose from); credits still on the frame. The editor's candidate list can now hold up to 18 photos (12 + 6) instead of 12.
+Tests: `backend/tests/test_stock_openverse.py` (12: Commons renderings and their limits, 4K, the six that load, a dead source still falls back to Unsplash, three Commons pictures at most among six, the 403 retry and its bound, server errors still tried three times, the token used once and only for the search, a failing or refused credential, the optional parameter, the 429 wait and the fall back to the original); `test_stock_ranking.py` updated for the pool of twelve.
 
 ## Tests added on 2026-11-27 (targeted files; the full suite was NOT run)
 | File | Tests | What |
