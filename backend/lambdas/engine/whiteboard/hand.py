@@ -339,6 +339,35 @@ def write_time(strokes: Sequence[np.ndarray], tool: str, size: float, hand: str)
 
 
 # ----------------------------------------------------------------------------- emphasis marks, by hand, around a box (x0, y0, x1, y1) in board units
+def mark_fit(kind: str, ink: Tuple[float, float, float, float], seed: int = 0, pad: float = 30.0, drawing: float = 0.0) -> List[np.ndarray]:
+    """A circle, box, underline or double underline sized from the REAL ink of what it marks (`ink`, board units) and drawn `pad` outside it: the loop of a
+    circle holds the whole padded rectangle, corners included (a plain ellipse through the middle of the sides cuts the first and last letters), an underline
+    runs below the lowest ink. Round a DRAWING (`drawing`: 1.2, or 1.1 for a close loop) the loop is a true ellipse that much larger than the padded box (a drawing does not fill the corners of its box as
+    a line of letters does). The caller checks the result against everything else on the board (spec.compile_board)."""
+    from . import primitives as pr
+
+    x0, y0, x1, y1 = ink
+    w, h = x1 - x0, y1 - y0
+    r = np.random.default_rng(seed)
+    if kind == "underline":
+        return pr.underline(x0, y1 + pad, w, seed)
+    if kind == "double_underline":
+        return pr.underline(x0, y1 + pad, w, seed) + pr.underline(x0 + 0.03 * w, y1 + pad + 32.0, w * 0.95, seed + 1)
+    if kind == "circle":       # one loop, started top-left, a little open and overshooting like a real circled word
+        n = 2.0 if drawing else (2.5 if w < 1.6 * h else (3.0 if w < 4.0 * h else 3.6))      # a flatter loop for a long line of writing
+        f = drawing if drawing else 2.0 ** (1.0 / n)                         # the loop |x/a|^n + |y/b|^n = 1 passes through the padded rectangle's corners
+        cx, cy, rx, ry = (x0 + x1) / 2, (y0 + y1) / 2, (w / 2 + pad) * f, (h / 2 + pad) * f
+        a = np.radians(np.linspace(215, 215 + 395, 110))
+        grow = np.linspace(1.0, 1.07, len(a))
+        co, si = np.cos(a), np.sin(a)
+        return [pr.wobble(np.stack([cx + rx * grow * np.sign(co) * np.abs(co) ** (2.0 / n), cy + ry * grow * np.sign(si) * np.abs(si) ** (2.0 / n)], 1), seed, 3.0)]
+    if kind == "box":
+        m = pad + 3.0
+        c = [(x0 - m, y0 - m), (x1 + m, y0 - m + r.uniform(-3, 3)), (x1 + m + r.uniform(-3, 3), y1 + m), (x0 - m + r.uniform(-3, 3), y1 + m + r.uniform(-3, 3)), (x0 - m + 2, y0 - m - 6)]
+        return [pr.line(c[i], c[i + 1], seed + i, 2.5) for i in range(4)]
+    raise ValueError(kind)
+
+
 def mark(kind: str, box: Tuple[float, float, float, float], seed: int = 0, frm: Optional[Tuple[float, float]] = None) -> List[np.ndarray]:
     from . import primitives as pr
 

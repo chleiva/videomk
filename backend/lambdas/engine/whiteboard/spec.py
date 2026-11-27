@@ -48,6 +48,22 @@ FILLS = {"yellow": (255, 216, 77), "orange": (250, 178, 92), "red": (240, 128, 1
 CHALK_PAPER = (38, 52, 50)
 MARGIN = 0.05                 # safe margin inside a zone, share of its size
 BENDS = (0.14, -0.14, 0.3, -0.3, 0.48, -0.48, 0.7, -0.7)      # how an arrow may curve (share of its length, either side), tried in this order until it crosses nothing
+# Marks and arrows are fitted to the REAL ink (docs/WHITEBOARD.md, "Marks and arrows"). Distances in board units, from the CENTRE LINE of the mark or arrow
+# (the marker is LINE wide: 10 of each distance is the stroke itself, the rest is paper you can see).
+MARK_PADS = (30.0, 22.0)      # a circle or box is drawn this far outside the ink it surrounds: a comfortable loop first, then a close one
+UNDER_PADS = (32.0, 25.0)     # an underline, below the lowest ink of its text (descenders included)
+MARK_OWN = 15.0               # ... and after the hand's wobble no point of it may be nearer than this to the ink it marks
+MARK_SAME = 15.0              # ... or to the other words of the same text
+MARK_CLEAR = 20.0             # ... or to the ink of anything else
+MARK_APART = 30.0             # ... or to another mark or an arrow (centre line to centre line)
+PATH_CLEAR = 24.0             # an arrow, to the ink of everything it passes and to the marks round it
+PATH_TIGHT = 16.0             # ... or this, when the only way round is a narrow one
+EDGE = 12.0                   # no arrow nearer than this to the edge of the board
+MARK_OUT = (70.0, 50.0, 34.0)  # a loop round a thing at the edge of the board may run this far into the paper around the board: at the sides, the top, the bottom (the frame keeps more paper than that on every side in every aspect; the captions are below)
+TOUCH = 11.0                  # what the report calls a collision: the stroke of a mark or arrow reaches the ink of something (half its width, and a hair) ...
+STROKE_TOUCH = 19.0           # ... or two strokes run into each other
+AUTO_MARK = re.compile(r"^(?:\d+:)?(?:em\d+_|\+r)")      # the ids of the marks the engine adds for pacing (whiteboard_policy.keep_busy: em<n>_<thing>; fill_rests: +r...)
+STUB = (170.0, 90.0)          # an arrow with no clean way through is shortened to a stub of this length at most, at least
 
 
 def _norm(w: str) -> str:
@@ -127,14 +143,16 @@ def _edge_point(box, towards, gap: float, cap: float = 0.42):
 def compile_board(items_in: List[Dict[str, Any]], anchors: Dict[str, float], dur: float, size_units: Tuple[float, float], scale: float, load: Callable[[str], Dict[str, Any]], *,
                   hand: str = "neat", tool: str = "marker", chalk: bool = False, camera: str = "auto", pad: Tuple[float, float, float, float] = (0.0, 0.0, 0.0, 0.0),
                   frame_aspect: Optional[float] = None, tail: float = 0.0, done: Sequence[str] = (), hidden: Sequence[str] = (), t_min: float = 0.3,
-                  layout_only: bool = False) -> Tuple[Optional[bd.Board], bd.Camera, Dict[str, Any]]:
+                  layout_only: bool = False, tidy: bool = True) -> Tuple[Optional[bd.Board], bd.Camera, Dict[str, Any]]:
     """-> (board, camera, report). Deterministic: the same items, anchor times, size and scale give the same board on any machine.
     `anchors`: item id -> scene-local time its narration word starts (items without one are drawn right after the previous item). `size_units`: the board's
     width and height in board units (the content box). `scale`: raster pixels per unit. `pad`: paper around the content (left, top, right, bottom, units). `tail`: seconds at the end of the
     scene by which everything is over (the last scene of a big board then pulls back over all its panels). `done`: ids already on the board when the scene starts
     (earlier scenes of the same board drew them); `hidden`: ids that keep their place but are not drawn in this scene (later scenes draw them). `t_min`: nothing
     is drawn before this time (the camera is still arriving). `layout_only`: no raster (board is None): layout, timing and the report only. `camera` is kept
-    for callers of the first version: the framing is always one still view."""
+    for callers of the first version: the framing is always one still view. `tidy` (always on in the product): emphasis marks and arrows are fitted to the
+    REAL ink of what is on the board and never touch anything ("Marks and arrows" in docs/WHITEBOARD.md); off, they are drawn where the plan asks whatever is
+    there, which is only for measuring a plan as it was written (the report's `collisions` says what touches what, either way)."""
     dur = max(2.0, dur - tail)
     L = Layout(size_units[0], size_units[1], *weights(items_in))
     b = None if layout_only else bd.Board(int(round(L.W + pad[0] + pad[2])), int(round(L.H + pad[1] + pad[3])), scale, paper=CHALK_PAPER if chalk else bd.PAPER, origin=(pad[0], pad[1]))
@@ -197,157 +215,334 @@ def compile_board(items_in: List[Dict[str, Any]], anchors: Dict[str, float], dur
         return (c0, r0, c1, r1)
 
     # an item may point at one that comes later in the list (an arrow drawn before its target): geometry is resolved in dependency order, timing keeps the list order
-    pending = list(items)
-    for _ in range(6):
-        later = []
-        for it in pending:
+    marks: Dict[str, List[Any]] = {"kept": [], "degraded": [], "dropped": [], "moved": []}      # what became of the emphasis marks and of the arrows (the report)
+    arrows: Dict[str, List[Any]] = {"direct": [], "rerouted": [], "stub": [], "dropped": []}
+    marked: Dict[str, str] = {}                                  # thing -> the ONE emphasis mark it has
+
+    def gone(it, like, why, book, like2=None) -> Dict[str, Any]:
+        """A mark or arrow that is not drawn: it keeps a place in the books (something may point at it) and never reaches the board."""
+        book["dropped"].append([it["id"], why])
+        return {"id": it["id"], "kind": "gone", "box": like["box"] if like2 is None else _union(like["box"], like2["box"]), "cells": like["cells"], "it": it}
+
+    def solids() -> List[Dict[str, Any]]:
+        return [g_ for g_ in by_id.values() if g_["kind"] in ("draw", "write", "chart")]
+
+    def fit_mark(it, t) -> Optional[Tuple[str, List[np.ndarray]]]:
+        """The mark `it` on the thing `t`, fitted to the real ink: -> (the kind that fits, its strokes), or None when nothing fits or `t` has a mark already."""
+        if t["id"] in marked:
+            return None
+        own = list(_inks(t))
+        loop_own = _own_inks(t)                                  # what a loop round it must stay clear of
+        if t["kind"] == "write" and it.get("word") is not None:
+            sel = _word_sel(t["blk"]["words"], it["word"])
+            if sel:
+                own = loop_own = [t["inks"][k] for k in sel]
+        rest = [(bx, MARK_SAME) for bx in _inks(t) if bx not in own]
+        labels = [g_ for g_ in solids() if g_["it"].get("near") == t["id"]] if len(own) == len(_inks(t)) else []
+        other = [(bx, MARK_CLEAR) for g_ in solids() if g_ is not t for bx in _inks(g_)]
+        far = [(bx, MARK_CLEAR) for g_ in solids() if g_ is not t and g_ not in labels for bx in _inks(g_)]
+        drawn = [_dense(g_["strokes"]) for g_ in by_id.values() if g_["kind"] in ("mark", "connect")]
+        seed = _seed(it["id"])
+        kind = it["mark"]
+        T = _union_all(own)
+        tries: List[Tuple[str, List[np.ndarray], List[Any], List[Any]]] = []        # (kind, strokes, the ink it must stay clear of with OWN, ... with their own clearance)
+        if kind in ("circle", "box"):
+            rnd = t["kind"] == "draw" and kind == "circle"
+            sizes = [(MARK_PADS[0], 1.2), (MARK_PADS[1], 1.2), (MARK_PADS[1], 1.1)] if rnd else [(pad, 0.0) for pad in MARK_PADS]
+            for pad, f in sizes:
+                tries.append((kind, wr.mark_fit(kind, T, seed, pad, f), loop_own if rnd else own, rest + other))
+            if labels:                                           # a drawing with its label right beside it: the loop goes round both
+                grp = [bx for g_ in labels for bx in _inks(g_)]
+                for pad, f in sizes:
+                    tries.append((kind, wr.mark_fit(kind, _union_all(own + grp), seed, pad, f), (loop_own if rnd else own) + grp, far))
+        if kind in ("double_underline",):
+            tries += [(kind, wr.mark_fit(kind, T, seed, pad), own, rest + other) for pad in UNDER_PADS]
+        if kind in ("tick", "cross") and it.get("side") != "over":
+            s_ = min((T[3] - T[1]) * 0.8, 0.5 * L.ch)
+            for side in ([it.get("side", "left")] + ["right", "left"]):
+                bx = T[0] - s_ * 1.35 if side == "left" else T[2] + s_ * 0.35
+                tries.append((kind, wr.mark(kind, (bx, T[1] + 0.1 * s_, bx + s_, T[1] + 1.1 * s_), seed=seed), own, rest + other))
+        if kind in ("cross", "cross_out", "highlight") and not (kind == "cross" and it.get("side") != "over"):      # these go OVER what they mark, and over nothing else
+            if kind == "cross":
+                d_ = 0.12 * min(T[2] - T[0], T[3] - T[1])
+                st = [pr.line((T[0] + d_, T[1] + d_), (T[2] - d_, T[3] - d_), seed, 3.0), pr.line((T[2] - d_, T[1] + d_), (T[0] + d_, T[3] - d_), seed + 1, 3.0)]
+            else:
+                st = wr.mark(kind, T, seed=seed)
+            tries.append((kind, st, [], rest + other))
+        else:                                                    # no room for the mark asked for: an underline, when there is room for that
+            # (a little shorter than the word when something stands right beside it: a label next to its drawing)
+            tries += [("underline", wr.mark_fit("underline", (T[0] + cut, T[1], T[2] - cut, T[3]), seed, pad), own, rest + other)
+                      for cut in ((0.0, 24.0) if T[2] - T[0] > 130.0 else (0.0,)) for pad in UNDER_PADS]
+        for kind_, st, mine, theirs in tries:
+            pts = _dense(st)
+            if _free(pts, [(bx, MARK_OWN) for bx in mine] + theirs, L, [-v for v in MARK_OUT]) and all(_apart(pts, d_) >= MARK_APART for d_ in drawn):
+                return kind_, st
+        return None
+
+    def route(it, a, c) -> Tuple[Optional[List[np.ndarray]], str]:
+        """An arrow between two things, through free space: its ends start outside the things and whatever marks them; everything else is in its way.
+        An arrow says more than an emphasis mark: when the marks ON its two ends leave it no direct way, it is routed as if they were not there and the
+        ones it would then touch are taken off."""
+        skip = {a["id"], c["id"]}
+        on_ends = [g_ for g_ in by_id.values() if g_["kind"] == "mark" and g_.get("on") in skip]
+        others = [bx for g_ in solids() if g_["id"] not in skip for bx in _inks(g_)] + [g_["box"] for g_ in by_id.values() if g_["kind"] == "mark" and g_.get("on") not in skip]
+        end = lambda e, ms: _union_all([e["box"]] + list(_inks(e)) + [g_["box"] for g_ in ms if g_["on"] == e["id"]])      # noqa: E731
+        strokes, how = _route(it, end(a, on_ends), end(c, on_ends), others, L)
+        if how != "direct" and on_ends:
+            bare, how2 = _route(it, end(a, []), end(c, []), others, L)
+            if how2 == "direct":
+                pts = _dense(bare)
+                for g_ in on_ends:
+                    if _apart(pts, _dense(g_["strokes"])) < MARK_APART:
+                        marks["kept"] = [x for x in marks["kept"] if x != g_["id"]]
+                        marks["degraded"] = [x for x in marks["degraded"] if x[0] != g_["id"]]
+                        if marked.get(g_["on"]) == g_["id"]:
+                            del marked[g_["on"]]
+                        by_id[g_["id"]] = gone(g_["it"], g_, "an arrow needed the room", marks)
+                return bare, how2
+        return strokes, how
+
+    def place(it) -> Dict[str, Any]:
+        g: Dict[str, Any] = {"id": it["id"]}
+        if "draw" in it:
             try:
-                if _ == 0 and ("near" in it or "connect" in it):
-                    raise KeyError(it.get("near") or it["from"])     # things placed beside others, and arrows, wait until every zone item is placed, so they can avoid them all
-                g: Dict[str, Any] = {"id": it["id"]}
-                if "draw" in it:
-                    try:
-                        pkg = load(it["draw"])
-                    except Exception:  # noqa: BLE001 - a missing drawing never leaves a hole: the name is written in a box instead
-                        warnings.append(f"{it['id']}: no drawing '{it['draw']}', written as a boxed label")
-                        it = it | {"write": str(it.get("label") or it["draw"]).replace("_", " "), "boxed": True}
-                        it.pop("draw")
-                        pkg = None
-                    if pkg is not None:
-                        if "near" in it:
-                            tb = by_id[it["near"]]["box"]
-                            hmax = NEAR_SIZE[it.get("size", "xs")] * min(L.cw, L.ch)
-                            k = min(hmax / pkg["h"], hmax * 1.3 / pkg["w"])
-                            w, h = pkg["w"] * k, pkg["h"] * k
-                            x, y = _free_side(tb, w, h, it.get("side", "right"), 26.0, by_id, L)
-                            cells = L.cells_of_box(tb)
-                        else:
-                            cells = L.cells(it["zone"])
-                            x0, y0, x1, y1 = L.rect(cells)
-                            peers = zone_draws[cells]
-                            slot_w = (x1 - x0) / len(peers)
-                            x0 = x0 + peers.index(it["id"]) * slot_w
-                            room = label_room.get(it["id"], {})
-                            below, above = min(room.get("below", 0.0), 0.42 * (y1 - y0)), min(room.get("above", 0.0), 0.3 * (y1 - y0))
-                            avail = (y1 - y0) - below - above
-                            hmax = min(DRAW_SIZE[it.get("size", "l")] * min(slot_w, y1 - y0, 1.5 * min(L.cw, L.ch)), avail)
-                            k = min(hmax / pkg["h"], slot_w * 0.96 / pkg["w"])
-                            w, h = pkg["w"] * k, pkg["h"] * k
-                            dx, dy = it.get("shift", [0, 0])
-                            x, y = x0 + (slot_w - w) / 2 + dx * slot_w, y0 + above + (avail - h) / 2 + dy * (y1 - y0)
-                        g.update(kind="draw", pkg=pkg, k=k, box=(x, y, x + w, y + h), cells=cells)
-                if "chart" in it:
-                    # a chart needs height for its bars under the numbers: it takes a free zone below or above its own
-                    cells = grown(L.cells(it["zone"]), lambda c_: c_[3] > c_[1], tall_first=True)
+                pkg = load(it["draw"])
+            except Exception:  # noqa: BLE001 - a missing drawing never leaves a hole: the name is written in a box instead
+                warnings.append(f"{it['id']}: no drawing '{it['draw']}', written as a boxed label")
+                it = it | {"write": str(it.get("label") or it["draw"]).replace("_", " "), "boxed": True}
+                it.pop("draw")
+                pkg = None
+            if pkg is not None:
+                if "near" in it:
+                    tb = by_id[it["near"]]["box"]
+                    hmax = NEAR_SIZE[it.get("size", "xs")] * min(L.cw, L.ch)
+                    k = min(hmax / pkg["h"], hmax * 1.3 / pkg["w"])
+                    w, h = pkg["w"] * k, pkg["h"] * k
+                    x, y = _free_side(tb, w, h, it.get("side", "right"), 26.0, by_id, L)
+                    cells = L.cells_of_box(tb)
+                else:
+                    cells = L.cells(it["zone"])
                     x0, y0, x1, y1 = L.rect(cells)
+                    peers = zone_draws[cells]
+                    slot_w = (x1 - x0) / len(peers)
+                    x0 = x0 + peers.index(it["id"]) * slot_w
                     room = label_room.get(it["id"], {})
-                    y0, y1 = y0 + min(room.get("above", 0.0), 0.3 * (y1 - y0)), y1 - min(room.get("below", 0.0), 0.3 * (y1 - y0))
-                    wmax = (0.34 if it.get("chart") != "line" else 0.6) * (y1 - y0) * max(2, len(it["values"])) + 60.0      # bars are taller than wide: a chart is never stretched across the board
-                    if x1 - x0 > wmax:
-                        x0, x1 = (x0 + x1 - wmax) / 2, (x0 + x1 + wmax) / 2
-                    g.update(kind="chart", cells=cells, **_chart(it, (x0, y0, x1, y1), hand_default, _seed(it["id"])))
-                elif "write" in it:
-                    hand, tool = it.get("hand", hand_default), it.get("tool", tool_default)
-                    size = max(text_size(it), TEXT_MIN)
-                    if "near" in it:
-                        tb = by_id[it["near"]]["box"]
-                        cells = by_id[it["near"]]["cells"]
-                        blk = wr.layout(it["write"], hand, size, max_width=L.cw * 0.95, align="center", seed=_seed(it["id"]), min_size=TEXT_MIN)
-                        x, y = _free_side(tb, blk["w"], blk["h"], it.get("side", "below"), 0.1 * blk["size"], by_id, L)
-                    else:
-                        align = it.get("align") or ("left" if "\n" in it["write"] else "center")
-                        home = L.rect(L.cells(it["zone"]))
+                    below, above = min(room.get("below", 0.0), 0.42 * (y1 - y0)), min(room.get("above", 0.0), 0.3 * (y1 - y0))
+                    avail = (y1 - y0) - below - above
+                    hmax = min(DRAW_SIZE[it.get("size", "l")] * min(slot_w, y1 - y0, 1.5 * min(L.cw, L.ch)), avail)
+                    k = min(hmax / pkg["h"], slot_w * 0.96 / pkg["w"])
+                    w, h = pkg["w"] * k, pkg["h"] * k
+                    dx, dy = it.get("shift", [0, 0])
+                    x, y = x0 + (slot_w - w) / 2 + dx * slot_w, y0 + above + (avail - h) / 2 + dy * (y1 - y0)
+                g.update(kind="draw", pkg=pkg, k=k, box=(x, y, x + w, y + h), cells=cells)
+        if "chart" in it:
+            # a chart needs height for its bars under the numbers: it takes a free zone below or above its own
+            cells = grown(L.cells(it["zone"]), lambda c_: c_[3] > c_[1], tall_first=True)
+            x0, y0, x1, y1 = L.rect(cells)
+            room = label_room.get(it["id"], {})
+            y0, y1 = y0 + min(room.get("above", 0.0), 0.3 * (y1 - y0)), y1 - min(room.get("below", 0.0), 0.3 * (y1 - y0))
+            wmax = (0.34 if it.get("chart") != "line" else 0.6) * (y1 - y0) * max(2, len(it["values"])) + 60.0      # bars are taller than wide: a chart is never stretched across the board
+            if x1 - x0 > wmax:
+                x0, x1 = (x0 + x1 - wmax) / 2, (x0 + x1 + wmax) / 2
+            g.update(kind="chart", cells=cells, **_chart(it, (x0, y0, x1, y1), hand_default, _seed(it["id"])))
+        elif "write" in it:
+            hand, tool = it.get("hand", hand_default), it.get("tool", tool_default)
+            size = max(text_size(it), TEXT_MIN)
+            if "near" in it:
+                tb = by_id[it["near"]]["box"]
+                cells = by_id[it["near"]]["cells"]
+                blk = wr.layout(it["write"], hand, size, max_width=L.cw * 0.95, align="center", seed=_seed(it["id"]), min_size=TEXT_MIN)
+                x, y = _free_side(tb, blk["w"], blk["h"], it.get("side", "below"), 0.1 * blk["size"], by_id, L)
+            else:
+                align = it.get("align") or ("left" if "\n" in it["write"] else "center")
+                home = L.rect(L.cells(it["zone"]))
 
-                        def lay(cells_, min_size):
-                            x0_, y0_, x1_, y1_ = L.rect(cells_)
-                            return wr.layout(it["write"], hand, size, max_width=x1_ - x0_, max_height=y1_ - y0_, align=align, seed=_seed(it["id"]), min_size=min_size)
+                def lay(cells_, min_size):
+                    x0_, y0_, x1_, y1_ = L.rect(cells_)
+                    return wr.layout(it["write"], hand, size, max_width=x1_ - x0_, max_height=y1_ - y0_, align=align, seed=_seed(it["id"]), min_size=min_size)
 
-                        def fits(cells_):
-                            x0_, y0_, x1_, y1_ = L.rect(cells_)
-                            blk_ = lay(cells_, size)
-                            return blk_["w"] <= (x1_ - x0_) * 1.02 and blk_["h"] <= (y1_ - y0_) * 1.04
+                def fits(cells_):
+                    x0_, y0_, x1_, y1_ = L.rect(cells_)
+                    blk_ = lay(cells_, size)
+                    return blk_["w"] <= (x1_ - x0_) * 1.02 and blk_["h"] <= (y1_ - y0_) * 1.04
 
-                        cells = grown(L.cells(it["zone"]), fits)
-                        blk = lay(cells, TEXT_MIN)
-                        natural = it["write"].count("\n") + 1
-                        if blk["lines"] > natural:               # it wrapped: a number, or a short phrase, is rather written a little smaller on its own line
-                            x0_, y0_, x1_, y1_ = L.rect(cells)
-                            floor = max(TEXT_MIN, size * (0.5 if not re.search(r"[^\W\d_]", it["write"]) else 0.74))
-                            sz = size * 0.93
-                            while sz >= floor:
-                                one = wr.layout(it["write"], hand, sz, max_width=x1_ - x0_, max_height=y1_ - y0_, align=align, seed=_seed(it["id"]), min_size=sz)
-                                if one["lines"] == natural and one["w"] <= (x1_ - x0_) * 1.02:
-                                    blk = one
-                                    break
-                                sz *= 0.93
-                        x0, y0, x1, y1 = L.rect(cells)
-                        hx = (home[0] + home[2]) / 2                                # stays centred on its own zone when the wider place allows it
-                        x = x0 if align == "left" else min(max(hx - blk["w"] / 2, x0), max(x0, x1 - blk["w"]))
-                        va = it.get("valign", "middle")
-                        hy = (home[1] + home[3]) / 2
-                        y = y0 if va == "top" else (y1 - blk["h"] if va == "bottom" else min(max(hy - blk["h"] / 2, y0), max(y0, y1 - blk["h"])))
-                        dx, dy = it.get("shift", [0, 0])
-                        x, y = x + dx * (x1 - x0), y + dy * (y1 - y0)
-                    g.update(kind="write", blk=blk, origin=(x, y), box=(x, y + 0.1 * blk["size"], x + blk["w"], y + blk["h"]), cells=cells, hand=hand, tool=tool)
-                elif "connect" in it:
-                    a, c = by_id[it["from"]], by_id[it["to"]]
-                    others = [g_["box"] for g_ in by_id.values() if g_.get("kind") in ("draw", "write", "chart") and g_["id"] not in (a["id"], c["id"])]
-                    strokes, crossed = _connector(it, a["box"], c["box"], others, L)
-                    g.update(kind="connect", strokes=strokes, cells=_cells_union(a["cells"], c["cells"]), crossed=crossed)
-                    allp = np.concatenate(g["strokes"])
-                    g["box"] = (float(allp[:, 0].min()), float(allp[:, 1].min()), float(allp[:, 0].max()), float(allp[:, 1].max()))
-                elif "mark" in it:
-                    t = by_id[it["on"]]
-                    box = t["box"]
-                    if t["kind"] == "write" and it.get("word") is not None:
-                        ws_ = t["blk"]["words"]
-                        def key(x):
-                            return _norm(re.sub(r"\\frac", "", x)) or x
-                        if isinstance(it["word"], int):
-                            sel = [ws_[it["word"]]]
-                        else:
-                            want = [key(x) for x in ([it["word"]] if isinstance(it["word"], str) else it["word"])]
-                            sel = [w for w in ws_ if key(w["text"]) in want]
-                        if sel:
-                            ox, oy = t["origin"]
-                            box = (min(w["box"][0] for w in sel) + ox, min(w["box"][1] for w in sel) + oy, max(w["box"][2] for w in sel) + ox, max(w["box"][3] for w in sel) + oy)
-                    if it["mark"] == "cross" and it.get("side") == "over":      # a big X across the target
-                        d_ = 0.12 * min(box[2] - box[0], box[3] - box[1])
-                        g.update(kind="mark", strokes=[pr.line((box[0] + d_, box[1] + d_), (box[2] - d_, box[3] - d_), _seed(it["id"]), 3.0),
-                                                       pr.line((box[2] - d_, box[1] + d_), (box[0] + d_, box[3] - d_), _seed(it["id"]) + 1, 3.0)], cells=t["cells"], mark="cross")
-                        allp = np.concatenate(g["strokes"])
-                        g["box"] = (float(allp[:, 0].min()), float(allp[:, 1].min()), float(allp[:, 0].max()), float(allp[:, 1].max()))
-                        g["it"] = it
-                        by_id[it["id"]] = g
-                        continue
-                    if it["mark"] in ("tick", "cross"):          # a tick or a cross goes beside its target, not over it
-                        s = min((box[3] - box[1]) * 0.8, 0.5 * L.ch)
-                        side = it.get("side", "left")
-                        if side == "left" and box[0] - s * 1.35 < 8.0:
-                            side = "right"
-                        if side == "right" and box[2] + s * 1.35 > L.W - 8.0 and box[0] - s * 1.35 >= 8.0:
-                            side = "left"
-                        bx = box[0] - s * 1.35 if side == "left" else box[2] + s * 0.35
-                        if bx < 8.0 or bx + s > L.W - 8.0:      # no room beside it on either side (a title across the board): underlined instead
-                            it = it | {"mark": "underline"}
-                        else:
-                            box = (bx, box[1] + 0.1 * s, bx + s, box[1] + 1.1 * s)
-                    g.update(kind="mark", strokes=wr.mark(it["mark"], box, seed=_seed(it["id"])), cells=t["cells"], mark=it["mark"])
-                    allp = np.concatenate(g["strokes"])
-                    g["box"] = (float(allp[:, 0].min()), float(allp[:, 1].min()), float(allp[:, 0].max()), float(allp[:, 1].max()))
+                cells = grown(L.cells(it["zone"]), fits)
+                blk = lay(cells, TEXT_MIN)
+                natural = it["write"].count("\n") + 1
+                if blk["lines"] > natural:               # it wrapped: a number, or a short phrase, is rather written a little smaller on its own line
+                    x0_, y0_, x1_, y1_ = L.rect(cells)
+                    floor = max(TEXT_MIN, size * (0.5 if not re.search(r"[^\W\d_]", it["write"]) else 0.74))
+                    sz = size * 0.93
+                    while sz >= floor:
+                        one = wr.layout(it["write"], hand, sz, max_width=x1_ - x0_, max_height=y1_ - y0_, align=align, seed=_seed(it["id"]), min_size=sz)
+                        if one["lines"] == natural and one["w"] <= (x1_ - x0_) * 1.02:
+                            blk = one
+                            break
+                        sz *= 0.93
+                x0, y0, x1, y1 = L.rect(cells)
+                hx = (home[0] + home[2]) / 2                                # stays centred on its own zone when the wider place allows it
+                x = x0 if align == "left" else min(max(hx - blk["w"] / 2, x0), max(x0, x1 - blk["w"]))
+                va = it.get("valign", "middle")
+                hy = (home[1] + home[3]) / 2
+                y = y0 if va == "top" else (y1 - blk["h"] if va == "bottom" else min(max(hy - blk["h"] / 2, y0), max(y0, y1 - blk["h"])))
+                dx, dy = it.get("shift", [0, 0])
+                x, y = x + dx * (x1 - x0), y + dy * (y1 - y0)
+            g.update(kind="write", blk=blk, origin=(x, y), box=(x, y + 0.1 * blk["size"], x + blk["w"], y + blk["h"]), cells=cells, hand=hand, tool=tool)
+            g["inks"] = word_inks(blk, (x, y), tool, hand)
+            if it.get("boxed"):                                  # the frame of a boxed label is ink too
+                m_ = 0.12 * (g["box"][3] - g["box"][1]) + 8 + LINE * 0.5
+                g["inks"].append((g["box"][0] - m_, g["box"][1] - m_, g["box"][2] + m_, g["box"][3] + m_))
+        elif "connect" in it:
+            a, c = by_id[it["from"]], by_id[it["to"]]
+            if tidy:
+                if "gone" in (a["kind"], c["kind"]):
+                    return gone(it, a, "one of its ends is not on the board", arrows)
+                strokes, how = route(it, a, c)
+                if strokes is None:
+                    return gone(it, a, "no clean path", arrows, c)
+                arrows[how].append(it["id"])
+                g.update(kind="connect", strokes=strokes, cells=_cells_union(a["cells"], c["cells"]), crossed=False, how=how)
+            else:
+                others = [g_["box"] for g_ in by_id.values() if g_.get("kind") in ("draw", "write", "chart") and g_["id"] not in (a["id"], c["id"])]
+                strokes, crossed = _connector(it, a["box"], c["box"], others, L)
+                arrows["direct"].append(it["id"])
+                g.update(kind="connect", strokes=strokes, cells=_cells_union(a["cells"], c["cells"]), crossed=crossed, how="direct")
+            allp = np.concatenate(g["strokes"])
+            g["box"] = (float(allp[:, 0].min()), float(allp[:, 1].min()), float(allp[:, 0].max()), float(allp[:, 1].max()))
+        elif "mark" in it and tidy and by_id[it["on"]]["kind"] in ("draw", "write", "chart", "gone"):
+            t = by_id[it["on"]]
+            if t["kind"] == "gone":
+                return gone(it, t, "what it marks is not on the board", marks)
+            fit = fit_mark(it, t)
+            if fit is None and AUTO_MARK.match(it["id"]):
+                # a mark the ENGINE added to keep the pen busy (whiteboard_policy.keep_busy, fill_rests) stresses "the latest thing": when that has no
+                # room, or has its mark, it goes to the latest thing drawn before it that is free (no mark of its own, room round it)
+                order = {x["id"]: k for k, x in enumerate(items)}
+                claimed = {x["on"] for x in items if "mark" in x and x["id"] != it["id"]} | set(marked)
+                for cand in sorted((g_ for g_ in solids() if order[g_["id"]] < order[it["id"]] and g_["id"] not in claimed and g_ is not t), key=lambda g_: -order[g_["id"]]):
+                    kind_ = "circle" if cand["kind"] != "write" and it["mark"] in ("underline", "double_underline") else it["mark"]
+                    fit = fit_mark({k: v for k, v in it.items() if k != "word"} | {"mark": kind_}, cand)
+                    if fit is not None:
+                        marks["moved"].append([it["id"], t["id"], cand["id"]])
+                        t = cand
+                        it = it | {"on": cand["id"], "mark": kind_}
+                        break
+            if fit is None:
+                return gone(it, t, "one mark per thing" if t["id"] in marked else "no room", marks)
+            kind_, strokes = fit
+            if kind_ != it["mark"]:
+                marks["degraded"].append([it["id"], it["mark"], kind_])
+                it = it | {"mark": kind_}
+            else:
+                marks["kept"].append(it["id"])
+            marked[t["id"]] = it["id"]
+            g.update(kind="mark", strokes=strokes, cells=t["cells"], mark=kind_, on=t["id"])
+            allp = np.concatenate(g["strokes"])
+            g["box"] = (float(allp[:, 0].min()), float(allp[:, 1].min()), float(allp[:, 0].max()), float(allp[:, 1].max()))
+        elif "mark" in it:
+            t = by_id[it["on"]]
+            box = t["box"]
+            marks["kept"].append(it["id"])
+            if t["kind"] == "write" and it.get("word") is not None:
+                ws_ = t["blk"]["words"]
+                def key(x):
+                    return _norm(re.sub(r"\\frac", "", x)) or x
+                if isinstance(it["word"], int):
+                    sel = [ws_[it["word"]]]
+                else:
+                    want = [key(x) for x in ([it["word"]] if isinstance(it["word"], str) else it["word"])]
+                    sel = [w for w in ws_ if key(w["text"]) in want]
+                if sel:
+                    ox, oy = t["origin"]
+                    box = (min(w["box"][0] for w in sel) + ox, min(w["box"][1] for w in sel) + oy, max(w["box"][2] for w in sel) + ox, max(w["box"][3] for w in sel) + oy)
+            if it["mark"] == "cross" and it.get("side") == "over":      # a big X across the target
+                d_ = 0.12 * min(box[2] - box[0], box[3] - box[1])
+                g.update(kind="mark", strokes=[pr.line((box[0] + d_, box[1] + d_), (box[2] - d_, box[3] - d_), _seed(it["id"]), 3.0),
+                                               pr.line((box[2] - d_, box[1] + d_), (box[0] + d_, box[3] - d_), _seed(it["id"]) + 1, 3.0)], cells=t["cells"], mark="cross")
+                allp = np.concatenate(g["strokes"])
+                g["box"] = (float(allp[:, 0].min()), float(allp[:, 1].min()), float(allp[:, 0].max()), float(allp[:, 1].max()))
                 g["it"] = it
-                by_id[it["id"]] = g
-            except KeyError as e:
-                if str(e).strip("'") not in {x["id"] for x in items}:
-                    raise
-                later.append(it)
-        pending = later
-        if not pending:
-            break
+                g["on"] = t["id"]
+                return g
+            if it["mark"] in ("tick", "cross"):          # a tick or a cross goes beside its target, not over it
+                s = min((box[3] - box[1]) * 0.8, 0.5 * L.ch)
+                side = it.get("side", "left")
+                if side == "left" and box[0] - s * 1.35 < 8.0:
+                    side = "right"
+                if side == "right" and box[2] + s * 1.35 > L.W - 8.0 and box[0] - s * 1.35 >= 8.0:
+                    side = "left"
+                bx = box[0] - s * 1.35 if side == "left" else box[2] + s * 0.35
+                if bx < 8.0 or bx + s > L.W - 8.0:      # no room beside it on either side (a title across the board): underlined instead
+                    it = it | {"mark": "underline"}
+                else:
+                    box = (bx, box[1] + 0.1 * s, bx + s, box[1] + 1.1 * s)
+            g.update(kind="mark", strokes=wr.mark(it["mark"], box, seed=_seed(it["id"])), cells=t["cells"], mark=it["mark"], on=t["id"])
+            allp = np.concatenate(g["strokes"])
+            g["box"] = (float(allp[:, 0].min()), float(allp[:, 1].min()), float(allp[:, 0].max()), float(allp[:, 1].max()))
+        g["it"] = it
+        return g
+
+    def settle_item(it) -> bool:
+        try:
+            by_id[it["id"]] = place(it)
+            return True
+        except KeyError as e:
+            if str(e).strip("'") not in {x["id"] for x in items}:
+                raise
+            return False
+
+    is_solid = lambda it: "draw" in it or "write" in it or "chart" in it      # noqa: E731
+    pending = list(items)
+    if tidy:
+        # what the board HOLDS first (zone things, then things beside them), then the emphasis marks, which must fit round that, then the arrows, which
+        # must find a way through all of it; whatever depends on a mark or an arrow comes last
+        for allowed in (lambda it: is_solid(it) and "near" not in it, is_solid, lambda it: is_solid(it) or "mark" in it, lambda it: True):
+            for _ in range(6):
+                n0 = len(pending)
+                pending = [it for it in pending if not (allowed(it) and settle_item(it))]
+                if len(pending) == n0:
+                    break
+    else:
+        for _ in range(6):
+            # things placed beside others, and arrows, wait until every zone item is placed, so they can avoid them all
+            pending = [it for it in pending if (_ == 0 and ("near" in it or "connect" in it)) or not settle_item(it)]
+            if not pending:
+                break
     if pending:
         raise ValueError(f"items that depend on each other: {[x['id'] for x in pending]}")
+    for g in by_id.values():
+        if "inks" not in g:
+            g["inks"] = [g["box"]]
+    if tidy:
+        # the last word: whatever was placed after a mark or an arrow was fitted (a label beside an arrow) may have landed on it. Until nothing touches:
+        # an arrow is routed again through what is there now, a mark is taken off; then what pointed at a thing that went is taken off too
+        for _ in range(2 * len(by_id) + 2):
+            hit = _collisions([g for g in by_id.values() if g["kind"] != "gone"])
+            if not hit:
+                break
+            g = by_id[hit[0][0]]
+            it = g["it"]
+            if g["kind"] == "connect" and not g.get("again"):
+                for book in arrows.values():
+                    book[:] = [x for x in book if x != it["id"]]
+                del by_id[it["id"]]
+                new = place(it)
+                new["again"] = True
+                by_id[it["id"]] = new
+            else:
+                book = arrows if g["kind"] == "connect" else marks
+                for k_ in book:
+                    book[k_] = [x for x in book[k_] if (x[0] if isinstance(x, list) else x) != it["id"]]
+                if marked.get(g.get("on")) == it["id"]:
+                    del marked[g["on"]]
+                by_id[it["id"]] = gone(it, g, "it touched something", book)
+            for g_ in list(by_id.values()):
+                if g_["kind"] == "mark" and by_id[g_["on"]]["kind"] == "gone":
+                    marks["kept"] = [x for x in marks["kept"] if x != g_["id"]]
+                    marks["degraded"] = [x for x in marks["degraded"] if x[0] != g_["id"]]
+                    by_id[g_["id"]] = gone(g_["it"], g_, "what it marks is not on the board", marks)
 
-    geo = [by_id[it["id"]] for it in items]
+    geo = [by_id[it["id"]] for it in items if by_id[it["id"]]["kind"] != "gone"]
     solid = [g for g in geo if g["kind"] in ("draw", "write", "chart")]
     overlaps: List[List[str]] = []
     for i, a in enumerate(solid):
@@ -359,7 +554,8 @@ def compile_board(items_in: List[Dict[str, Any]], anchors: Dict[str, float], dur
                 overlaps.append([a["id"], c["id"]])
         if a["box"][0] < 0 or a["box"][1] < 0 or a["box"][2] > L.W or a["box"][3] > L.H:
             warnings.append(f"{a['id']} leaves the board")
-    crossed = [g["id"] for g in geo if g.get("crossed")]
+    collisions = _collisions(geo)
+    crossed = sorted({a_ for a_, c_ in collisions if by_id[a_]["kind"] == "connect" and by_id[c_]["kind"] in ("draw", "write", "chart")} | {g["id"] for g in geo if g.get("crossed")})
 
     # ------------------------------------------------------------ 2. timing
     ops: List[Dict[str, Any]] = []
@@ -560,9 +756,203 @@ def compile_board(items_in: List[Dict[str, Any]], anchors: Dict[str, float], dur
               "late": [[o["g"]["id"], round(o["end"] - (o["anchor"] + 0.15), 2)] for o in live if o["how"] == "late"], "camera_moves": 0, "warnings": warnings,
               "boxes": {g["id"]: [round(v, 1) for v in g["box"]] for g in geo}, "kinds": {g["id"]: g["kind"] for g in geo},
               "text_sizes": {g["id"]: round(g["blk"]["size"], 1) for g in geo if g["kind"] == "write"}, "text_lines": {g["id"]: g["blk"]["lines"] for g in geo if g["kind"] == "write"}, "view": [round(v, 1) for v in final_view], "view_h": round(view_h, 1),
-              "coverage": round(float(mask.mean()), 3), "overlaps": overlaps, "crossed": crossed,
+              "coverage": round(float(mask.mean()), 3), "overlaps": overlaps, "crossed": crossed, "collisions": collisions, "marks": marks, "arrows": arrows,
               "times": {i_: [round(min(o["start"] for o in live if o["g"]["id"] == i_), 2), round(max(o["end"] for o in live if o["g"]["id"] == i_), 2)] for i_ in {o["g"]["id"] for o in live}}}
     return b, cam, report
+
+
+def word_inks(blk: Dict[str, Any], origin: Tuple[float, float], tool: str, hand: str) -> List[Tuple[float, float, float, float]]:
+    """The REAL ink of every written word of a block, in board units: the pen's path over its letters (accents, tails and tall letters included) grown by
+    half the stroke. This is what a mark is sized from and what nothing else may touch; the block's `box` is the room the lines were given, not the ink."""
+    ox, oy = origin
+    half = max(wr.tool_width(tool, blk["size"]), wr.natural_width(hand) * blk["size"]) / 2.0 + 8.0      # measured against the raster of accented, tall and tailed letters: the ink never reaches further (tests)
+    out = []
+    for w in blk["words"]:
+        if w["strokes"]:
+            p = np.concatenate(w["strokes"])
+            out.append((float(p[:, 0].min()) - half + ox, float(p[:, 1].min()) - half + oy, float(p[:, 0].max()) + half + ox, float(p[:, 1].max()) + half + oy))
+        else:
+            out.append((w["box"][0] + ox, w["box"][1] + oy, w["box"][2] + ox, w["box"][3] + oy))
+    return out
+
+
+def _inks(g: Dict[str, Any]) -> List[Tuple[float, float, float, float]]:
+    return g.get("inks") or [g["box"]]
+
+
+def _own_inks(g: Dict[str, Any]) -> List[Tuple[float, float, float, float]]:
+    """The ink of a thing as ITS OWN mark must respect it. A text: its real ink. A drawing: its box less the four corners (a cross of two boxes): drawings
+    are known here by their box only, and a loop round one may pass over the empty corners of that box, never over the rest."""
+    if g["kind"] != "draw":
+        return list(_inks(g))
+    x0, y0, x1, y1 = g["box"]
+    dx, dy = 0.2 * (x1 - x0), 0.2 * (y1 - y0)
+    return [(x0, y0 + dy, x1, y1 - dy), (x0 + dx, y0, x1 - dx, y1)]
+
+
+def _union_all(boxes):
+    return (min(b[0] for b in boxes), min(b[1] for b in boxes), max(b[2] for b in boxes), max(b[3] for b in boxes))
+
+
+def _word_sel(words: List[Dict[str, Any]], word) -> List[int]:
+    """Which written words a mark's `word` means: an index, or the word(s) by their letters."""
+    key = lambda x: _norm(re.sub(r"\\frac", "", x)) or x      # noqa: E731
+    if isinstance(word, int):
+        return [word] if -len(words) <= word < len(words) else []
+    want = {key(x) for w_ in ([word] if isinstance(word, str) else word) for x in [w_] + str(w_).split()}
+    return [k for k, w in enumerate(words) if key(w["text"]) in want]
+
+
+def _dense(strokes: Sequence[np.ndarray], step: float = 8.0) -> np.ndarray:
+    """The points of pen strokes, close enough together that nothing slips between two of them."""
+    out = []
+    for s_ in strokes:
+        s_ = np.asarray(s_, np.float64)
+        if len(s_) < 2:
+            out.append(s_)
+            continue
+        n = np.maximum(1, np.ceil(np.hypot(*np.diff(s_, axis=0).T) / step)).astype(int)
+        out.append(np.concatenate([s_[i] + (s_[i + 1] - s_[i]) * np.linspace(0, 1, k, endpoint=False)[:, None] for i, k in enumerate(n)] + [s_[-1:]]))
+    return np.concatenate(out) if out else np.zeros((0, 2))
+
+
+def _inside(pts: np.ndarray, box, pad: float) -> bool:
+    return bool(((pts[:, 0] > box[0] - pad) & (pts[:, 0] < box[2] + pad) & (pts[:, 1] > box[1] - pad) & (pts[:, 1] < box[3] + pad)).any())
+
+
+def _free(pts: np.ndarray, boxes: Sequence[Tuple[Any, float]], L, edge: Sequence[float] = (EDGE, EDGE, EDGE)) -> bool:
+    """Is a stroke on the board (`edge` inside it: sides, top, bottom) and clear of every (box, clearance)?"""
+    if not len(pts):
+        return False
+    if pts[:, 0].min() < edge[0] or pts[:, 1].min() < edge[1] or pts[:, 0].max() > L.W - edge[0] or pts[:, 1].max() > L.H - edge[2]:
+        return False
+    return not any(_inside(pts, bx, pad) for bx, pad in boxes)
+
+
+def _apart(p: np.ndarray, q: np.ndarray) -> float:
+    """The smallest distance between two strokes (their points)."""
+    if not len(p) or not len(q):
+        return math.inf
+    gap = max(q[:, 0].min() - p[:, 0].max(), p[:, 0].min() - q[:, 0].max(), q[:, 1].min() - p[:, 1].max(), p[:, 1].min() - q[:, 1].max())
+    if gap > 80.0:
+        return gap
+    d = p[:, None, :] - q[None, :, :]
+    return float(np.sqrt((d * d).sum(-1).min()))
+
+
+def _collisions(gs: List[Dict[str, Any]]) -> List[List[str]]:
+    """Every emphasis mark or arrow that touches something, on the geometry as it will be drawn: [[the mark or arrow, what it touches]]. A stroke touches a
+    drawing, text or chart when it reaches its ink (a text's real ink, word by word; a drawing's box), its own target included: a circle that cuts the phrase
+    it surrounds is a collision. Only a mark that is drawn OVER its target on purpose (highlight, cross-out, a big X) may touch that target. A mark touches
+    another mark or an arrow when their strokes meet. Two arrows may cross each other."""
+    solid = [g for g in gs if g["kind"] in ("draw", "write", "chart")]
+    pens = [g for g in gs if g["kind"] in ("mark", "connect")]
+    pts = {g["id"]: _dense(g["strokes"]) for g in pens}
+    out: List[List[str]] = []
+    for i, g in enumerate(pens):
+        p = pts[g["id"]]
+        over = g["kind"] == "mark" and (g["mark"] in ("cross_out", "highlight") or (g["mark"] == "cross" and g["it"].get("side") == "over"))
+        for s_ in solid:
+            mine = g["kind"] == "mark" and g.get("on") == s_["id"]
+            if over and mine:
+                continue
+            if any(_inside(p, bx, TOUCH) for bx in (_own_inks(s_) if mine and g["mark"] in ("circle", "box") else _inks(s_))):
+                out.append([g["id"], s_["id"]])
+        for h in pens[:i]:
+            if g["kind"] == "connect" and h["kind"] == "connect":
+                continue
+            if _apart(p, pts[h["id"]]) < STROKE_TOUCH:
+                out.append([g["id"], h["id"]])
+    return out
+
+
+def _route(it, box_a, box_c, others, L) -> Tuple[Optional[List[np.ndarray]], str]:
+    """An arrow (or wavy, dashed, plain line) from one thing to another through FREE space. `box_a`, `box_c`: the ends with whatever marks them; `others`:
+    the ink of everything else and the marks round it. In this order, the first path of which no point comes within PATH_CLEAR of anything, enters an end
+    or leaves the board: the straight way or the gentlest bend ("direct"); a way round the corners of what is in between, the shortest first ("rerouted");
+    a short arrow that leaves its start towards the target, or arrives at the target, and touches neither ("stub"). None of them: (None, "dropped")."""
+    style, n = it.get("connect", "arrow"), int(it.get("count", 1))
+    seed = _seed(it["id"])
+    gap = it.get("gap", 30.0)
+    ca, cc = np.array(_centre(box_a)), np.array(_centre(box_c))
+    d = cc - ca
+    Ln = float(np.hypot(*d)) or 1.0
+    nrm = np.array([-d[1], d[0]]) / Ln
+    def clean(strokes, clear: float = PATH_CLEAR) -> bool:
+        return _free(_dense(strokes), [(bx, clear) for bx in others] + [(box_a, 10.0), (box_c, 10.0)], L)
+
+    def ends(first, last):
+        return _edge_point(box_a, tuple(first), gap, 0.85), _edge_point(box_c, tuple(last), gap, 0.85)
+
+    def span() -> float:                                           # the free way between the two ends, along the line that joins them
+        p0, p1 = ends(cc, ca)
+        return float(np.dot(np.array(p1) - np.array(p0), d / Ln))
+
+    if span() < 70.0:                                              # neighbours: the arrow starts and ends closer to them
+        gap = min(gap, 14.0)
+    room = span()
+    if room < 44.0:                                                # no room for an arrow between two things that nearly touch: a hook round them says nothing
+        return None, "dropped"
+
+    def draw(pts, kind):
+        return pr.arrow(pts, seed=seed, size=it.get("head_size", 48.0)) if kind == "arrow" else [pr.path(pts, seed)]
+
+    if style in ("wavy", "dashed", "line"):
+        p0, p1 = ends((ca + cc) / 2, (ca + cc) / 2)
+        out: List[np.ndarray] = []
+        for k in range(n):
+            off = nrm * (k - (n - 1) / 2) * it.get("spread", 120.0)
+            a, c = tuple(np.array(p0) + off), tuple(np.array(p1) + off)
+            dl = float(np.hypot(c[0] - a[0], c[1] - a[1])) or 1.0
+            if style == "wavy":
+                out += pr.wavy_arrow(a, c, waves=max(1.5, dl / 190.0), seed=seed + k)
+            elif style == "dashed":
+                ds = pr.dashes(a, c, n=max(3, int(dl / 120)), seed=seed + k)
+                out += ds + ([pr.head(np.concatenate(ds[-2:]), 44.0, seed=seed)] if it.get("head", True) else [])
+            else:
+                out += [pr.line(a, c, seed + k)]
+        if clean(out):
+            return out, "direct"
+        style = "arrow" if it.get("head", True) else "curve"       # the straight way is blocked: a curved arrow round the obstacle instead
+    for bend in ([it["bend"]] if it.get("bend") is not None else []) + [b_ for b_ in BENDS if abs(b_) < 0.2 or room >= 220.0]:      # a short arrow is not bent hard
+        mid = (ca + cc) / 2 + nrm * bend * Ln
+        p0, p1 = ends(mid, mid)
+        m = (np.array(p0) + np.array(p1)) / 2 + nrm * bend * float(np.hypot(p1[0] - p0[0], p1[1] - p0[1]))
+        st = draw([p0, tuple(m), p1], style)
+        if clean(st):
+            return st, "direct"
+    # round the corners of what is in the way: one corner, or two neighbouring corners, of every obstacle; and the two elbows
+    D = PATH_CLEAR + 44.0
+    ways: List[List[Tuple[float, float]]] = [[(float(ca[0]), float(cc[1]))], [(float(cc[0]), float(ca[1]))]]
+    for x0, y0, x1, y1 in others:
+        cs = [(x0 - D, y0 - D), (x1 + D, y0 - D), (x1 + D, y1 + D), (x0 - D, y1 + D)]
+        ways += [[c_] for c_ in cs]
+        for k in range(4):
+            ways += [[cs[k], cs[(k + 1) % 4]], [cs[(k + 1) % 4], cs[k]]]
+    cands = []
+    for way in (ways if room >= 220.0 else []):
+        if any(not (EDGE < x < L.W - EDGE and EDGE < y < L.H - EDGE) for x, y in way):
+            continue
+        p0, p1 = ends(way[0], way[-1])
+        pts = [p0] + way + [p1]
+        cands.append((sum(math.hypot(b_[0] - a_[0], b_[1] - a_[1]) for a_, b_ in zip(pts, pts[1:])), pts))
+    cands.sort(key=lambda x: x[0])
+    for clear in (PATH_CLEAR, PATH_TIGHT):                         # a way round with comfortable room first; a close one is still better than an arrow that stops half way
+        for length, pts in cands:
+            if length > 2.6 * Ln + 300.0:                          # a way that long is not an arrow any more
+                break
+            st = draw(pts, style)
+            if clean(st, clear):
+                return st, "rerouted"
+    p0, p1 = ends(cc, ca)
+    u = d / Ln
+    free = float(np.hypot(p1[0] - p0[0], p1[1] - p0[1]))
+    for length in (min(STUB[0], max(STUB[1], 0.32 * free)), STUB[1]):
+        for a_, c_ in ((np.array(p0), np.array(p0) + u * length), (np.array(p1) - u * length, np.array(p1))):
+            st = draw([tuple(a_), tuple(c_)], style)
+            if clean(st):
+                return st, "stub"
+    return None, "dropped"
 
 
 def _chart(it: Dict[str, Any], rect, hand: str, seed: int) -> Dict[str, Any]:
