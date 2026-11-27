@@ -89,6 +89,8 @@ class MediaLibrary(Construct):
         def route(res: apigw.IResource, *methods: str) -> apigw.IResource:
             for m in methods:
                 res.add_method(m, integration, **cognito_auth)
+            # the web app (app.videomk.com) calls these with an Authorization header, so the browser asks first (OPTIONS): without this every library call from a browser is refused
+            res.add_cors_preflight(allow_origins=apigw.Cors.ALL_ORIGINS, allow_methods=[*methods, "OPTIONS"], allow_headers=["Content-Type", "Authorization", "X-Locale", "X-Timezone", "X-Region"])
             return res
 
         route(lib.add_resource("summary"), "GET")

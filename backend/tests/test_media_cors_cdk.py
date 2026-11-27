@@ -51,3 +51,25 @@ def test_prod_media_bucket_allows_only_the_web_origins(synth):
 def test_qa_media_bucket_also_allows_the_local_dev_server(synth):
     r = media_bucket(synth("qa"), "qa")["CorsConfiguration"]["CorsRules"][0]
     assert "http://localhost:4321" in r["AllowedOrigins"] and "POST" in r["AllowedMethods"] and "*" not in r["AllowedOrigins"]
+
+
+def test_every_library_route_answers_the_browser_preflight(synth):
+    """The web app sends Authorization, so the browser asks OPTIONS first: every /library route needs it (found 2026-11-27: all of them answered 403 and My media could not load in a browser)."""
+    t = synth("prod")
+    res = t["Resources"]
+    def path(rid):
+        r = res[rid]["Properties"]
+        parent = r.get("ParentId", {})
+        up = path(parent["Ref"]) if isinstance(parent, dict) and "Ref" in parent and parent["Ref"] in res and res[parent["Ref"]]["Type"] == "AWS::ApiGateway::Resource" else ""
+        return up + "/" + r["PathPart"]
+    by_res = {}
+    for v in res.values():
+        if v["Type"] == "AWS::ApiGateway::Method":
+            rid = v["Properties"]["ResourceId"].get("Ref")
+            if rid in res and res[rid]["Type"] == "AWS::ApiGateway::Resource":
+                by_res.setdefault(path(rid), set()).add(v["Properties"]["HttpMethod"])
+    lib = {p: m for p, m in by_res.items() if "/library/" in p}
+    assert len(lib) >= 12
+    for p, methods in lib.items():
+        assert "OPTIONS" in methods, f"{p} has no preflight"
+        assert methods - {"OPTIONS"}, p
