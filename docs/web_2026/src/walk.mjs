@@ -75,12 +75,14 @@ const SZ = { d: [1440, 900], p: [390, 844] };
 const out = [];
 const browser = await chromium.launch({ channel: "chrome" });
 async function shot(name, sz, url, { scheme = "dark", locale = "en", s = {}, act } = {}) {
+  if (ONLY && !name.includes(ONLY)) return;
   const [w, h] = SZ[sz];
   const ctx = await browser.newContext({ viewport: { width: w, height: h }, colorScheme: scheme, locale: locale === "es" ? "es-ES" : "en-US", deviceScaleFactor: sz === "p" ? 2 : 1 });
   tokens.id_token = `${b64({ alg: "none" })}.${b64({ sub: "user-1", email: "chris@example.com" })}.x`;
   await ctx.addInitScript(([t, loc]) => { try { localStorage.setItem("vmk_auth_tokens", JSON.stringify(t)); localStorage.setItem("vmk_locale", loc); localStorage.setItem("vmk_media_privacy_seen", "1"); } catch {} }, [tokens, locale]);
   await setup(ctx, s);
   const page = await ctx.newPage();
+  await page.addInitScript(() => { document.addEventListener("DOMContentLoaded", () => { const st = document.createElement("style"); st.textContent = "astro-dev-toolbar{display:none!important}"; document.head.appendChild(st); }); });   // the dev server's own toolbar is not part of the app
   const errs = [];
   page.on("pageerror", (e) => errs.push(String(e).slice(0, 160)));
   let note = "ok";

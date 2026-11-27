@@ -34,7 +34,8 @@ const tr = (k: string) => translate(k, "en");   // build-time English; the brows
 				const tok = await getTokensIfAvailable();
 				if (!tok) return;
 				try {
-					const mail = String(JSON.parse(decodeURIComponent(escape(atob(tok.id_token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/"))))).email || "");
+					const b64 = tok.id_token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
+					const mail = String(JSON.parse(decodeURIComponent(escape(atob(b64 + "=".repeat((4 - (b64.length % 4)) % 4))))).email || "");
 					const acc = document.querySelector<HTMLElement>("[data-account]");
 					if (acc && mail) { acc.querySelector("[data-account-mail]")!.textContent = mail; acc.querySelector("[data-account-initial]")!.textContent = mail[0].toUpperCase(); acc.hidden = false; }
 				} catch { /* no email claim: the row stays hidden */ }

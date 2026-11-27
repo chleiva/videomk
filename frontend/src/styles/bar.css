@@ -111,7 +111,7 @@
 .app-shell .selbar-del { color: var(--danger); }
 .app-shell .selbar-go { height: 3.125rem; padding: 0 var(--space-6); white-space: nowrap; }
 .app-shell .selbar .icon-btn:disabled, .app-shell .selbar .btn:disabled { opacity: 0.45; }
-@media (max-width: 47.99rem) { .app-shell .selbar { left: var(--space-4); right: var(--space-4); transform: none; width: auto; max-width: none; justify-content: space-between; padding-left: var(--space-4); } .app-shell .selbar-go { padding: 0 var(--space-4); } }
+@media (max-width: 47.99rem) { .app-shell .selbar { left: var(--space-3); right: var(--space-3); transform: none; width: auto; max-width: none; justify-content: space-between; gap: 0; padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4); } .app-shell .selbar-go { padding: 0 var(--space-4); } .app-shell .selbar-n { margin-right: 0; } .app-shell .selbar > .icon-btn:last-child { display: none; } /* Done in the header ends the selection on phones */ }
 .app-shell .upload-banner { position: fixed; z-index: var(--z-sticky); left: var(--space-4); right: var(--space-4); bottom: calc(var(--tabbar-height) + var(--space-4) + env(safe-area-inset-bottom)); margin: 0; padding: var(--space-4) var(--space-5); border-radius: var(--radius-video); background: var(--surface); box-shadow: inset 0 0 0 1px var(--outline), var(--elev-3); }
 @media (min-width: 48rem) { .app-shell .upload-banner { left: auto; right: 3rem; bottom: var(--space-6); width: 28rem; } }
 
