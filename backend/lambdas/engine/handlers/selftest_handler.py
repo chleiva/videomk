@@ -77,6 +77,26 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         out["clip_render_60_frames_s"] = round(time.time() - t, 2)
         out["clip_render_frames"] = info["frames"]
     out["has"]["clip_path"] = out["clip_frames"] >= 85 and out["clip_render_frames"] == 60
+    # the Making screen's small scene pictures (engine/making_progress.py): one frame of that clip and a large photograph, reduced on this runtime, and what each costs in time
+    try:
+        import io
+
+        from PIL import Image
+
+        from engine import making_progress
+
+        t = time.time()
+        poster = making_progress.clip_thumb(mp4) or b""
+        out["making_clip_thumb_s"], out["making_clip_thumb_bytes"] = round(time.time() - t, 3), len(poster)
+        buf = io.BytesIO()
+        Image.effect_noise((3000, 2000), 60).convert("RGB").save(buf, "JPEG", quality=90)
+        t = time.time()
+        small = making_progress.image_thumb(buf.getvalue())
+        out["making_image_thumb_s"], out["making_image_thumb_bytes"] = round(time.time() - t, 3), len(small)
+        out["has"]["making_thumbs"] = Image.open(io.BytesIO(poster)).width == making_progress.THUMB_WIDTH and Image.open(io.BytesIO(small)).size == (320, 213)
+    except Exception as e:  # noqa: BLE001
+        out["has"]["making_thumbs"] = False
+        out["error_making_thumbs"] = f"{type(e).__name__}: {e}"[:200]
     # 4K (docs/FOUR_K.md): the same mixed timeline at 3840x2160, to read the real ms per frame and memory of this runtime before switching 4K on. Never fails the self test.
     try:
         import resource

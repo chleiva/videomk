@@ -6,7 +6,9 @@ from typing import Any, Dict, List
 
 from generate_video.db import set_attributes, update_status
 
-from .. import assets, awsio, media, pipeline
+from common import making
+
+from .. import assets, awsio, making_progress, media, pipeline
 
 OUTPUT_BUCKET = os.environ.get("ASSETS_BUCKET", "videomk.com")
 
@@ -27,6 +29,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     video_id, user_id = str(event["video_id"]), str(event["user_id"])
     rev, mode = int(event.get("rev", 1)), event.get("mode", "final")
     tl = awsio.get_json(event["timeline_key"])
+    if rev == 1 and mode != "preview":
+        making_progress.finishing(video_id)   # the Making screen: "Adding the finishing touches" (only while the video is being made; never raises)
     segs = sorted(event["render"]["segments"], key=lambda s: int(s["k"]))
     with tempfile.TemporaryDirectory() as tmp:
         paths = []
@@ -64,5 +68,5 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         **({"preview_gif_uri": f"s3://{OUTPUT_BUCKET}/{gkey}"} if have_gif else {}),
     }
     update_status(video_id, "COMPLETE", extra_attributes=attrs)  # first render: flips status (no-op once COMPLETE)
-    set_attributes(video_id, attrs, remove=["edit_error"])         # edits: refresh the playable video on an already-COMPLETE item
+    set_attributes(video_id, attrs, remove=["edit_error", *making.ATTRS])   # edits: refresh the playable video on an already-COMPLETE item; the Making status is over
     return {"video_id": video_id, "status": "COMPLETE", "rev": rev, "duration_s": got}

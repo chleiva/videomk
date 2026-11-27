@@ -10,7 +10,7 @@ from decimal import Decimal
 from botocore.config import Config
 from boto3.dynamodb.types import TypeDeserializer
 
-from common import i18n
+from common import i18n, making
 
 
 def _extract_cognito_sub(event: Dict[str, Any]) -> Optional[str]:
@@ -273,6 +273,9 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 out["can_retry"] = int(it.get("retries") or 0) < int(os.environ.get("MAX_VIDEO_RETRIES", "3")) and not (it.get("deck") or str(it.get("stage") or "").startswith("deck"))
             if "preview_gif_url" in it:
                 out["preview_gif_url"] = it["preview_gif_url"]
+            mk = making.for_owner(it, user_id, loc)   # a video being made: the scenes done so far, one plain line in the app's language, the sentence being narrated (docs/CREATE_API.md "Making status"); None otherwise
+            if mk:
+                out["making"] = mk
             sanitized.append(out)
 
         body = {"user_id": user_id, "items": sanitized}

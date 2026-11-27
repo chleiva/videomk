@@ -8,7 +8,7 @@ from generate_video.db import set_attributes, update_status
 
 from common.secrets import get_secret_param
 
-from .. import curate, deck_plan, deckio, library, awsio, costs, director, format_options, llm, plan as plan_mod, usermedia, voices, websearch
+from .. import curate, deck_plan, deckio, library, awsio, costs, director, format_options, llm, making_progress, plan as plan_mod, usermedia, voices, websearch
 
 DEFAULT_MINUTES = float(os.environ.get("DEFAULT_TARGET_MINUTES", "3"))
 MAX_MINUTES = float(os.environ.get("MAX_TARGET_MINUTES", "12"))  # single-call planning limit; longer videos need chapter fan-out
@@ -131,6 +131,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     base = {"video_id": video_id, "user_id": user_id, "usage_day": event.get("usage_day")}
 
     update_status(video_id, "PLOT_CREATION")
+    making_progress.begin(video_id)   # the Making status of an earlier attempt is forgotten (docs/CREATE_API.md "Making status")
     spent: Dict[str, float] = {}   # what was spent, by what it paid for (costs.PARTS)
 
     def ask_small(system: str, user: str, max_tokens: int = 120) -> str:
@@ -194,6 +195,6 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         plan["tts"].update({"engine": os.environ.get("POLLY_ENGINE", "generative"), "region": os.environ.get("POLLY_REGION", "us-east-1")})
     key = awsio.prefix(video_id) + "plan_r1.json"
     awsio.put_json(key, plan)
-    update_status(video_id, "ASSETS_CREATION", extra_attributes={"title": plan["title"], "n_beats": len(plan["beats"])})
+    update_status(video_id, "ASSETS_CREATION", extra_attributes={"title": plan["title"], "n_beats": len(plan["beats"]), **making_progress.plan_attributes(plan)})   # + the planned scenes for the Making screen
     set_attributes(video_id, {"plan_key": key, "rev": 1, **({"photos_skipped": len(skipped)} if skipped else {})})
     return {**base, "plot": {"legit": True}, "plan_key": key, "rev": 1, "mode": "final", "cost_field": "cost_usd", "beat_ids": [b["id"] for b in plan["beats"]]}

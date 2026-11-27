@@ -262,12 +262,13 @@ def test_inserting_deleting_and_reordering_beats_keeps_everything_consistent(gen
 
 
 def test_only_re_creatable_intermediates_are_tagged_for_expiry(generated):
-    """Segments and audio mixes expire after a week (an edit rebuilds them). Anything an edit cannot rebuild must never carry the tag."""
+    """Segments and audio mixes expire after a week (an edit rebuilds them), and so do the Making screen's small scene pictures (only shown while the video is being made).
+    Anything an edit cannot rebuild must never carry the tag."""
     s3 = boto3.client("s3")
     bucket = os.environ["ASSETS_BUCKET"]
     keys = [o["Key"] for o in s3.list_objects_v2(Bucket=bucket).get("Contents", [])]
     tagged = {k for k in keys if {"Key": "retention", "Value": "working"} in s3.get_object_tagging(Bucket=bucket, Key=k)["TagSet"]}
-    expected = {k for k in keys if "/segments/" in k or "/audio/mix_" in k}
+    expected = {k for k in keys if "/segments/" in k or "/audio/mix_" in k or "/thumbs/" in k}
     assert expected and tagged == expected
     never = [k for k in keys if k.endswith(".wav") or "/assets/" in k or k.endswith(".json") or k.endswith(".mp4")]
     assert never and not (set(never) & tagged)

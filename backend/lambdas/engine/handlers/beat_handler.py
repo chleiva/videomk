@@ -11,7 +11,7 @@ from common.secrets import get_secret_param
 
 from ..scenes import ELEMENTS
 from ..scenes.registry import PrepareCtx
-from .. import align, assets, audio, awsio, catalog_pick, clips, costs, format_options, plan as plan_mod, stock, timeline as timeline_mod, tts, voices
+from .. import align, assets, audio, awsio, catalog_pick, clips, costs, format_options, making_progress, plan as plan_mod, stock, timeline as timeline_mod, tts, voices
 
 
 def _provider(cfg: Dict[str, Any]):
@@ -225,4 +225,5 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             except Exception:
                 logging.exception("element %s could not prepare beat %s", el.name, beat_id)
                 media["element_failed"] = True
+    making_progress.record_beat(video_id, plan, beat, media)   # the Making screen: this scene is ready, with a small picture when it has one (never raises; nothing during an edit)
     return {"id": beat_id, "media": media}

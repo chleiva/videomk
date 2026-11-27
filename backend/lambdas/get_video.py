@@ -8,7 +8,7 @@ import boto3
 from botocore.exceptions import ClientError
 from botocore.config import Config
 
-from common import i18n
+from common import i18n, making
 
 try:
     # Reuse validation semantics from generation flow
@@ -119,7 +119,11 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     video_uri = item.get("video_uri")
     if not video_uri:
         # If not complete yet, signal progress
-        return _json_response(409, {"message": i18n.t("video.not_ready", loc), "status": status})
+        body: Dict[str, Any] = {"message": i18n.t("video.not_ready", loc), "status": status}
+        mk = making.for_owner(item, user_id, loc)   # the same Making status the list carries, for a screen that follows one video (the owner only: checked above)
+        if mk:
+            body["making"] = mk
+        return _json_response(409, body)
 
     try:
         bucket, key = _parse_s3_uri(video_uri)

@@ -241,6 +241,9 @@ class BackendStack(Stack):
                     resources=[f"arn:aws:s3:::{ASSETS_BUCKET}", f"arn:aws:s3:::{ASSETS_BUCKET}/videos/*"],
                 )
             )
+            # The Making screen (lambdas/common/making.py): the small scene pictures of a video being made live in that video's working folder under thumbs/.
+            # Signing a short-lived URL for the owner needs the right to read exactly those objects: nothing else under generation/ (plans, photos, audio, clips).
+            fn.add_to_role_policy(iam.PolicyStatement(actions=["s3:GetObject"], resources=[f"arn:aws:s3:::{ASSETS_BUCKET}/generation/v2/*/thumbs/*"]))
 
         # ----------------------------
         # Workflow Lambdas
