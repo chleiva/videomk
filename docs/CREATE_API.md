@@ -147,3 +147,32 @@ What the Making screen shows (`docs/DESIGN_BAR_2026.md` section 3 item 3): finis
 * **`narration_line`**: the first sentence of the narration of the scene being worked on, in the **video's** language (not translated, at most 180 characters). Once every scene is done there is no single scene in work, and it is the video's opening sentence. Absent for a scene without narration (a pause).
 * **What it does not say.** The render and the final stitch have no per-scene progress: during them `scene_done == scene_total` and only `live_line` changes. There is no percentage and no time estimate here; keep the app's own estimate.
 * **Server side.** The plan step stores a compact list of the planned scenes on the video record (`making_plan`); each finished beat adds itself to `making_done` (and to `making_thumbs` when its small picture was stored at `generation/v2/<video>/thumbs/<beat>.jpg`); the last step sets `making_step`; all four are removed when the video is complete. No model call and no extra render: per scene one small read, one resize (or one frame grab from the clip) and one small write, inside the step that is already running. The two status functions may read `generation/v2/*/thumbs/*` and nothing else of the working files.
+
+## Plans: limits, locked options, the free plan's state, the gallery (2026-11-27; full contract in `docs/PLANS.md`)
+
+Where the server has plans on (QA and production from the next deploy), `generate`, `retry`, capabilities and the wallet follow the account's plan (Free, Pro, Max). Nothing can be bought yet: **`can_upgrade` is `false` everywhere and no app may show a buy button**; show the plan names and "coming soon".
+
+* **Send `X-Platform: ios` or `X-Platform: android` on every call** (next to `X-Locale`, `X-Timezone`, `X-Region`). The web sends nothing. Free credits are granted and spent only from the mobile apps.
+* **`GET .../capabilities`** gains `plan` (`id`, `name`, `state`, `period_end`, `renews`, `managed_by`, `limits`, `locked`, `plans`, `plan_credits`), `free_creation` (`none` | `welcome` | `daily`), `free` (`available`, `reason`, `message`, `credits_left`, `max_seconds`, `budget_paused`, `resumes_at`) and `can_upgrade`. The lists keep **every** option and say which are locked: `resolutions[].available` / `resolutions[].requires_plan` (put "Max" on the 4K tile), `lengths.plan_max_seconds` and `lengths.locked` (`[{over_seconds, max_seconds, requires_plan}]`: badge the lengths over the plan's longest), `plan_max_photos`, `watermark.modes[].requires_plan`. Nothing is granted by this call.
+* **`GET .../wallet`** gains the same `plan`, `free_creation`, `free`, `can_upgrade`; `buckets` may hold kind `plan` (the monthly plan credits, with their `expires_at`). With the default settings `next_free_credit_at` is `null` (the daily credit is off): hide that line.
+* **`GET /users/{user}/plan`**: the plan screen (`plan`, `plans`, `free`, `purchases`).
+* **Free plan today (defaults, all server settings):** 2 welcome credits once (valid 30 days) from the mobile app, no daily credit, videos up to **30 seconds**, up to 1080p, always the videomk watermark with the name and the end card. If `free.available` is `false`, do not show an empty or broken Create: show the gallery and the plans, with `free.message`. `free.reason`: `off` (gallery-only mode), `app_only` (web), `not_available`, `paused` (today's free videos are used up for everyone; back at `resumes_at`), `used`, `monthly_cap`.
+* **New answers of `generate` and `retry`** (nothing was charged; `message` is localized; all carry `plan`, `requires_plan` and `can_upgrade`):
+
+| HTTP | `code` | Meaning | Show |
+|---|---|---|---|
+| 403 | `plan_length` | longer than the plan's longest video (`limit.max_seconds`) | the upgrade prompt for `requires_plan` |
+| 403 | `plan_resolution` | e.g. 4K below Max | the same |
+| 403 | `plan_photos` | more photos than the plan uses (`limit.photos_per_video`) | the same |
+| 403 | `plan_watermark` | a watermark mode the plan lacks (`none` on Free) | the same |
+| 403 | `watermark_premium` | own logo below Max (now with `requires_plan: "max"`) | the same |
+| 403 | `free_not_available` | free credits cannot be used on this request; `reason`: `app_only` or `not_available` | `message`, the gallery and the plans |
+| 429 | `free_budget_spent` | today's free videos are used up for everyone; `resumes_at` | `message` ("back tomorrow") and the plans; the person's credits are untouched |
+| 429 | `free_monthly_cap` | this account's free videos for the month are used | `message` and the plans |
+| 402 | `insufficient_credits` | unchanged, now also `plan` and `can_upgrade` | as before |
+
+  A request **without** `target_minutes` is never refused for length: it gets the server default shortened to the plan's longest (30 s on Free). A request without `resolution` gets the plan's best when 1080p is above it.
+* **Watermark**: on Free the request may still choose `position` and `size`; the mode, the name and the end card are fixed. `PUT .../watermark` with `mode: "none"` on Free answers 403 `watermark_required` with `requires_plan: "pro"`.
+* **`GET /gallery`** (public, no token): the showcase of videos made by videomk, for signed-out screens and for Free accounts that cannot create. `{"videos": [{id, title, title_i18n, description, description_i18n, prompt | null, aspect, shape, width, height, seconds, lang, video_url, poster_url | null}], "count", "expires_in": 3600}`. The links last an hour: fetch the list again rather than storing them. An empty list is a valid answer.
+* **Device proof** (mobile, Free accounts only, where the server has the routes): `POST /users/{user}/device/challenge`, then `POST /users/{user}/device/verify` with an App Attest attestation or assertion (iOS) or a Play Integrity token (Android). Flow and fields: `docs/PLANS.md` section 7. Needed in production before a Free account can create; QA works without it.
+* **Purchases** (`POST /users/{user}/purchases/apple|google`): the routes exist and answer **501 `purchases_unavailable`** until store purchases are built; request and response shapes are in `docs/PLANS.md` section 9.
