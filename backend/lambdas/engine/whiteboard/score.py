@@ -17,6 +17,10 @@ MIN_COVERAGE = 0.30          # share of the framed picture covered by the boxes 
 MIN_TEXT = 0.044             # smallest letter size, as a share of the frame's shorter side
 MIN_BUSY = 0.45              # pen-busy share of the board's time
 MAX_IDLE_S = 2.2             # longest stretch with the pen off the board (estimated times: the real limit aimed at is about 1.5 s)
+COUNT_PASS_COVERAGE = 0.40  # a board ONE thing short of the count that already covers this much of the picture passes
+# What the director alone can repair. The rest of the complaints are mended without a model (overlaps, things off the board: `make_safe`; an empty-looking board:
+# `fill_out`; touching marks and arrows: `make_clean`; a resting pen: `fill_rests` at the timeline, with the real word times) and are never a reason to ask again.
+DIRECTOR_KINDS = ("count", "arrow", "crossed", "small", "late", "layout")
 MAX_LATE_S = 0.8             # with estimated word times only a clear delay is worth a complaint (the renderer starts things earlier to stay within about 0.3 s)
 
 
@@ -94,6 +98,28 @@ def defects(props_list: List[Dict[str, Any]], aspect: str = "16:9", captions: bo
             "text_sizes": rep["text_sizes"], "lost": len(rep["arrows"]["stub"]) + len(rep["arrows"]["dropped"]) + len(rep["marks"]["dropped"])}
 
 
+def _readable_without(arrow_id: str, props_list: List[Dict[str, Any]], shared: bool) -> bool:
+    """An arrow that could not be drawn in full (stub) or at all (dropped) is still a readable relation when BOTH of its ends are labelled: a written word
+    or phrase, or a drawing with a written label of its own beside it. Two bare drawings joined by an arrow are not: take the arrow away and nothing says
+    how they relate (that stays a complaint for the director)."""
+    j, iid = (arrow_id.split(":", 1) if shared and ":" in arrow_id else ("0", arrow_id))
+    try:
+        p = props_list[int(j)]
+    except (ValueError, IndexError):
+        return False
+    items = p.get("items") or []
+    by = {it.get("id"): it for it in items}
+    a = by.get(iid) or {}
+
+    def labelled(oid: Any) -> bool:
+        it = by.get(oid)
+        if not it:
+            return False
+        return bool(it.get("write")) or any(x.get("write") and x.get("near") == oid for x in items)
+
+    return bool(a.get("connect")) and labelled(a.get("from")) and labelled(a.get("to"))
+
+
 def score_plan(plan: Dict[str, Any], aspect: str = "16:9") -> List[Dict[str, Any]]:
     """-> one score per board: {"board", "beats", "seconds", "items", "solid", "coverage", "min_text", "min_drawing", "overlaps", "crossed", "off_board",
     "collisions": [[mark or arrow, what it touches]], "blocked": arrows shortened to a stub or left out for lack of a clean way, "marks": {"kept", "degraded",
@@ -119,7 +145,12 @@ def score_plan(plan: Dict[str, Any], aspect: str = "16:9") -> List[Dict[str, Any
     out: List[Dict[str, Any]] = []
     k = 0
     for bi, g in enumerate(groups):
-        sc: Dict[str, Any] = {"board": bi + 1, "beats": [i + 1 for i in g], "complaints": []}
+        sc: Dict[str, Any] = {"board": bi + 1, "beats": [i + 1 for i in g], "complaints": [], "kinds": [], "notes": []}
+
+        def add(kind: str, text: str, sc: Dict[str, Any] = sc) -> None:
+            sc["complaints"].append(text)
+            sc["kinds"].append(kind)
+
         try:
             total = busy = 0.0
             idle, late, rep = 0.0, [], None
@@ -154,36 +185,46 @@ def score_plan(plan: Dict[str, Any], aspect: str = "16:9") -> List[Dict[str, Any
             need = max(MIN_SOLID if total >= 10 else 2, int(total / 10.0 * MIN_SOLID_PER_10S))
             name = lambda j: j.split(":", 1)[-1]      # noqa: E731
             free = whiteboard_policy.free_zones([beats[i]["scene"]["props"] for i in g])
-            if len(solid) < need:
-                sc["complaints"].append(f"only {len(solid)} drawings and written phrases for about {total:.0f} s: it needs at least {need}. Add drawings (with a written label near each) or key words"
+
+            # A board one thing short of its count whose pictures and writing already cover 40 % or more says the same thing twice: it passes (round 2)
+            accepted = len(solid) == need - 1 and rep["coverage"] >= COUNT_PASS_COVERAGE
+            if accepted:
+                sc["notes"].append(f"{len(solid)} drawings and writings for {total:.0f} s (bar {need}) accepted: they cover {rep['coverage'] * 100:.0f} % of the picture")
+            if len(solid) < need and not accepted:
+                add("count", f"only {len(solid)} drawings and written phrases for about {total:.0f} s: it needs at least {need}. Add drawings (with a written label near each) or key words"
                                         + (f" in the free zones ({', '.join(free)})" if free else ""))
             elif rep["coverage"] < MIN_COVERAGE:
-                sc["complaints"].append(f"the board looks empty (its drawings and writing cover {rep['coverage'] * 100:.0f} % of the picture): use size l for the main drawings, write key terms larger"
+                add("empty", f"the board looks empty (its drawings and writing cover {rep['coverage'] * 100:.0f} % of the picture): use size l for the main drawings, write key terms larger"
                                         + (f" and fill the free zones ({', '.join(free)})" if free else ""))
             for a, c in rep["overlaps"][:3]:
-                sc["complaints"].append(f"'{name(a)}' and '{name(c)}' overlap: give each its own zone" + (f" (free: {', '.join(free)})" if free else "") + " or shorten the text")
+                add("overlap", f"'{name(a)}' and '{name(c)}' overlap: give each its own zone" + (f" (free: {', '.join(free)})" if free else "") + " or shorten the text")
             for j in off[:2]:
-                sc["complaints"].append(f"'{name(j)}' does not fit the board: shorten it or give it a wide zone")
+                add("off", f"'{name(j)}' does not fit the board: shorten it or give it a wide zone")
             for j in rep["crossed"][:2]:
-                sc["complaints"].append(f"the arrow '{name(j)}' runs across another drawing or text: connect neighbours, or move one end to a zone next to the other")
-            for j in sc["blocked"][:2]:
-                sc["complaints"].append(f"the arrow '{name(j)}' has no clear way between its two things (other drawings or texts are in between, or the two nearly touch): connect neighbours "
+                add("crossed", f"the arrow '{name(j)}' runs across another drawing or text: connect neighbours, or move one end to a zone next to the other")
+            lost_ok = [j for j in sc["blocked"] if _readable_without(j, [beats[i]["scene"]["props"] for i in g], len(g) > 1)]
+            sc["arrows_readable"] = lost_ok
+            for j in lost_ok:
+                sc["notes"].append(f"arrow '{name(j)}' could not be drawn in full: kept as it is, both of its ends are labelled so the relation is still read from the words")
+            for j in [x for x in sc["blocked"] if x not in lost_ok][:2]:
+                add("arrow", f"the arrow '{name(j)}' has no clear way between its two things (other drawings or texts are in between, or the two nearly touch): connect neighbours "
                                         "with free space between them, or move one end to a zone next to the other")
             for a, c in [x for x in rep["collisions"] if x[0] not in rep["crossed"]][:2]:
-                sc["complaints"].append(f"the mark '{name(a)}' touches '{name(c)}': mark something with free space round it")
+                add("mark", f"the mark '{name(a)}' touches '{name(c)}': mark something with free space round it")
             if texts and min(texts) < MIN_TEXT:
-                sc["complaints"].append("some writing is too small to read: fewer words per text, size m or larger")
+                add("small", "some writing is too small to read: fewer words per text, size m or larger")
             for gap, i, at in rests[:2]:
-                sc["complaints"].append(f"in beat {i + 1} the pen rests for about {gap:.1f} s" + (" at the start" if at == 0.0 else " at the end" if at > 0 else "")
+                add("rest", f"in beat {i + 1} the pen rests for about {gap:.1f} s" + (" at the start" if at == 0.0 else " at the end" if at > 0 else "")
                                         + ": tie an item (a drawing, a key word, an arrow or an underline/circle/tick) to a word said in that stretch")
             if not rests and busy / max(total, 1e-6) < MIN_BUSY:
-                sc["complaints"].append(f"the pen is busy only {busy / max(total, 1e-6) * 100:.0f} % of the time: add items tied to the words between the existing ones")
+                add("busy", f"the pen is busy only {busy / max(total, 1e-6) * 100:.0f} % of the time: add items tied to the words between the existing ones")
             for j, d in late[:2]:
-                sc["complaints"].append(f"'{name(j)}' is finished {d:.1f} s after its word: write fewer words there or tie the item before it to an earlier word")
+                add("late", f"'{name(j)}' is finished {d:.1f} s after its word: write fewer words there or tie the item before it to an earlier word")
         except Exception as e:  # noqa: BLE001 - a score never breaks a plan
-            sc["complaints"].append(f"the board could not be laid out ({type(e).__name__}: {str(e)[:120]})")
+            add("layout", f"the board could not be laid out ({type(e).__name__}: {str(e)[:120]})")
             k = sum(len(x) for x in groups[:bi + 1])
         sc["ok"] = not sc["complaints"]
+        sc["needs_director"] = any(k in DIRECTOR_KINDS for k in sc["kinds"])
         out.append(sc)
     return out
 
