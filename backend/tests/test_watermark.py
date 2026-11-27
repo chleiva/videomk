@@ -545,6 +545,19 @@ def test_the_logo_is_re_encoded_trimmed_and_scaled(wm_on):
     assert not img.info.get("exif") and "Comment" not in img.info
 
 
+def test_checking_a_logo_leaves_pillows_pixel_limit_as_it_was():
+    """The limit is process-wide: left lowered, a 4K canvas drawn later in the same process was refused as a decompression bomb (the hidden state behind a 4K test that failed only after this file)."""
+    before = Image.MAX_IMAGE_PIXELS
+    buf = io.BytesIO()
+    _png().save(buf, "PNG")
+    store.normalise_logo(buf.getvalue())
+    assert Image.MAX_IMAGE_PIXELS == before
+    with pytest.raises(store.WatermarkError):
+        store.normalise_logo(b"\x89PNG\r\n\x1a\n" + b"0" * 64)
+    assert Image.MAX_IMAGE_PIXELS == before
+    Image.new("RGB", (7680, 4400)).crop((0, 0, 7680, 4320))   # a 4K canvas at 4x: no error
+
+
 def test_a_jpeg_with_metadata_comes_back_clean(wm_on):
     _flags(wm_on, USER, watermark_custom=True)
     im = Image.new("RGB", (300, 200), (30, 90, 200))

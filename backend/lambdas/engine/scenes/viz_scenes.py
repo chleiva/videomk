@@ -571,9 +571,15 @@ FRAMED_SCALE = 1.5          # output pixels per source pixel in the window (1.0 
 FRAMED_MIN_FULL_W = 1900    # footage at least this wide (1080p) keeps the full-bleed look: it is enlarged 2x at most, the same as 720p footage in a 1080p video
 
 
+FRAMED_MIN_FULL_W_TALL = 1000   # vertical, square and 4:5 4K frames are 2160 wide: a 1080-wide working copy fills them at 2x, a 720-wide one would need 3x and gets the window
+
+
 def clip_is_framed(fr, size: Tuple[int, int]) -> bool:
-    """True for a landscape 4K frame and footage narrower than FRAMED_MIN_FULL_W. Every other frame (720p, 1080p, vertical, square) keeps the full-frame look unchanged."""
-    return bool(fr is not None and getattr(fr, "resolution", "") == "2160p" and fr.landscape and size[0] < FRAMED_MIN_FULL_W)
+    """True for a 4K frame and footage too small to fill it at 2x: narrower than FRAMED_MIN_FULL_W in landscape, than FRAMED_MIN_FULL_W_TALL in 9:16, 1:1 and 4:5.
+    Every 720p and 1080p frame keeps the full-frame look unchanged."""
+    if fr is None or getattr(fr, "resolution", "") != "2160p":
+        return False
+    return size[0] < (FRAMED_MIN_FULL_W if fr.landscape else FRAMED_MIN_FULL_W_TALL)
 
 
 _ROUND_MASK: Dict[Tuple[int, int, int], Image.Image] = {}
@@ -605,6 +611,10 @@ def _draw_clip_framed(cv: Canvas, props: Dict[str, Any], src: Image.Image, lt: f
     hd = wd * sh / sw
     caption = str(props.get("alt") or "").strip()
     credit = str(props.get("credit") or "").strip()
+    fr = ctx.frame
+    if fr is not None and not fr.landscape:   # 9:16, 1:1, 4:5: the same window inside this shape's content box, the caption line and the credit stacked under it
+        _draw_clip_framed_tall(cv, props, src, lt, dur, p, ctx, wd, hd, caption, credit)
+        return
     block = hd + (74 if (caption or credit) else 0)
     top_limit, bottom_limit = 70.0, (800.0 if ctx.captions else 1000.0)
     x = (cv.W - wd) / 2
@@ -625,6 +635,42 @@ def _draw_clip_framed(cv: Canvas, props: Dict[str, Any], src: Image.Image, lt: f
         cv.text(x + 6, ty, caption[:90], "regular", 30, with_alpha((255, 255, 255), 0.9 * a), anchor="lm")
     if credit:
         cv.text(x + wd - 6, ty, credit[:90], "regular", 22, with_alpha((255, 255, 255), 0.6 * a), anchor="rm")
+    _draw_word(cv, props, lt, dur, ctx, over=(x + wd / 2, y + hd * 0.52, wd * 0.84))
+
+
+def _draw_clip_framed_tall(cv: Canvas, props: Dict[str, Any], src: Image.Image, lt: float, dur: float, p: float, ctx: SceneCtx, wd: float, hd: float, caption: str, credit: str) -> None:
+    """The window of _draw_clip_framed for a vertical, square or 4:5 4K frame (the glow is already drawn). The footage has the video's own shape (it was normalised to it),
+    so the window is a smaller copy of the frame; it is centred in the content box and made a little smaller when the box is short (4:5), never larger than FRAMED_SCALE."""
+    from .style_kit import fit_lines
+
+    ss = cv.ss
+    sw, sh = src.size
+    x0, y0, x1, y1 = ctx.frame.box(ctx.captions)
+    lines: List[str] = []
+    size = 30.0
+    if caption:
+        size, lines = fit_lines(cv, caption[:90], "regular", min(wd, x1 - x0) - 12, 2, 32, 26)
+    under = (26 + len(lines) * size * 1.22 if lines else 0) + (36 if credit else 0)
+    k = min(1.0, (x1 - x0) / wd, max(0.3, (y1 - y0 - under) / hd))
+    wd, hd = wd * k, hd * k
+    x = (cv.W - wd) / 2
+    y = y0 + max(0.0, (y1 - y0 - hd - under) / 2)
+    a = ease_out_cubic(progress(lt, 0.0, 0.45))
+    y += (1 - a) * 14
+    wc, hc = max(2, round(wd * ss)), max(2, round(hd * ss))
+    z = lerp(1.0, 1.04, p)
+    vw, vh = sw / z, sh / z
+    win = _fill(src, wc, hc, ((sw - vw) / 2, (sh - vh) / 2, (sw + vw) / 2, (sh + vh) / 2), ss)
+    radius = 26
+    cv.shadow(x, y, wd, hd, radius, blur=34, dy=18, alpha=0.5 * a)
+    cv.im.paste(win, (round(x * ss), round(y * ss)), _round_mask(wc, hc, round(radius * ss)))
+    cv.rrect(x, y, wd, hd, radius, outline=with_alpha((255, 255, 255), 0.16), width=1.5)
+    ty = y + hd + 26 + size * 0.6
+    for line in lines:
+        cv.text(cv.W / 2, ty, line, "regular", size, with_alpha((255, 255, 255), 0.9 * a), anchor="mm")
+        ty += size * 1.22
+    if credit:
+        cv.text(cv.W / 2, ty + (4 if lines else 0), credit[:90], "regular", 22, with_alpha((255, 255, 255), 0.6 * a), anchor="mm")
     _draw_word(cv, props, lt, dur, ctx, over=(x + wd / 2, y + hd * 0.52, wd * 0.84))
 
 

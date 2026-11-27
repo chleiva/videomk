@@ -542,6 +542,7 @@ def verify(mp4: bytes, narration: str, alt: str, query: str, seconds: float, *, 
 
 # ----------------------------------------------------------------------------- normalise
 NATIVE_MIN_HD_W = 1900   # a source narrower than this is not enlarged to 1920x1080 for a 4K video (see transcode)
+NATIVE_MAX_ENLARGE = 1.06   # vertical and square 4K videos: a source that would have to be enlarged more than this to fill the 1080 working copy stays at the 720 one
 
 
 def probe_size(path: str) -> Tuple[int, int]:
@@ -560,11 +561,18 @@ def probe_size(path: str) -> Tuple[int, int]:
 
 def transcode(src_path: str, out_path: str, *, start: float, seconds: float, loop: bool = False, orientation: str = "landscape", hd: bool = False) -> None:
     """Trim, crop to the video's shape (16:9 1280x720 by default, 9:16 720x1280 portrait, 720x720 square; `hd`, for 4K videos: 1920x1080, 1080x1920, 1080x1080), 30 fps, no audio,
-    H.264: small, uniform, cheap to decode frame by frame. A source smaller than the target is enlarged here (bicubic), as before."""
+    H.264: small, uniform, cheap to decode frame by frame. A source smaller than the target is enlarged here (bicubic), as before; for a 4K video (`hd`) a source too small for
+    the 1080 copy is normalised to the 720 size instead (all shapes), which the renderer shows in a window."""
     if hd and _orient(orientation) == "landscape":
         w0, _h0 = probe_size(src_path)
         if 0 < w0 < NATIVE_MIN_HD_W:
             hd = False   # footage under ~1080p wide stays at its own resolution (1280x720) in a 4K video: the renderer shows it in a window instead of enlarging it 3x (docs/FOUR_K.md)
+    elif hd:   # a vertical or square 4K video: the 1080 working copy only when the source can fill it without being enlarged (a real vertical 1080x1920 file); a smaller or
+        # landscape source (whose crop to the shape is a narrow strip) gets the 720 copy it always got, and the renderer shows that in a window (docs/FOUR_K.md)
+        w0, h0 = probe_size(src_path)
+        tw, th = clip_size(orientation, True)
+        if w0 > 0 and h0 > 0 and max(tw / w0, th / h0) > NATIVE_MAX_ENLARGE:
+            hd = False
     CLIP_W, CLIP_H = clip_size(orientation, hd)
     cmd = [media.ffmpeg_bin(), "-y", "-hide_banner", "-loglevel", "error"]   # footage is never looped: `loop` is kept only for old callers and ignored
     cmd += ["-ss", f"{start:.3f}", "-i", src_path, "-t", f"{seconds:.3f}", "-an", "-sn",

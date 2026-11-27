@@ -33,12 +33,15 @@ def _digest(res, frames, t=1.5, **props):
     return hashlib.md5(r.frame_at(t).tobytes()).hexdigest(), r.frame_at(t)
 
 
-def test_framed_rule_is_only_for_landscape_4k_and_small_footage():
+def test_framed_rule_is_only_for_4k_and_small_footage():
     f4, f1 = Frame.parse("16:9", "2160p"), Frame.parse("16:9", "1080p")
     assert viz_scenes.clip_is_framed(f4, (1280, 720)) and viz_scenes.clip_is_framed(f4, (1600, 900))
     assert not viz_scenes.clip_is_framed(f4, (1920, 1080)) and not viz_scenes.clip_is_framed(f4, (3840, 2160))   # big enough: full bleed as before
     assert not viz_scenes.clip_is_framed(f1, (1280, 720)) and not viz_scenes.clip_is_framed(Frame.parse("16:9", "720p"), (1280, 720))
-    assert not viz_scenes.clip_is_framed(Frame.parse("9:16", "2160p"), (720, 1280)) and not viz_scenes.clip_is_framed(None, (1280, 720))
+    assert not viz_scenes.clip_is_framed(None, (1280, 720))
+    for aspect, small, big in (("9:16", (720, 1280), (1080, 1920)), ("1:1", (720, 720), (1080, 1080)), ("4:5", (720, 1280), (1080, 1920))):
+        assert viz_scenes.clip_is_framed(Frame.parse(aspect, "2160p"), small) and not viz_scenes.clip_is_framed(Frame.parse(aspect, "2160p"), big)   # a 1080 copy fills a 2160-wide frame at 2x
+        assert not viz_scenes.clip_is_framed(Frame.parse(aspect, "1080p"), small) and not viz_scenes.clip_is_framed(Frame.parse(aspect, "720p"), small)
 
 
 def test_720p_and_1080p_renders_do_not_depend_on_the_framed_layout(tmp_path, monkeypatch):
@@ -80,8 +83,68 @@ def test_hd_normalise_keeps_small_sources_native_and_big_ones_at_1080p(tmp_path)
     for size, want in (("640x360", (1280, 720)), ("1280x720", (1280, 720)), ("1600x900", (1280, 720)), ("1920x1080", (1920, 1080))):
         mp4, _ = clips.normalise(make_source(2, size, tmp_path=tmp_path), need_seconds=2.0, source_seconds=2.0, suffix=".mp4", hd=True)
         assert frame_sizes(mp4, tmp_path)[1] == want, size
-    mp4, _ = clips.normalise(make_source(2, "640x360", tmp_path=tmp_path), need_seconds=2.0, source_seconds=2.0, suffix=".mp4", hd=True, orientation="portrait")
-    assert frame_sizes(mp4, tmp_path)[1] == (1080, 1920)             # vertical 4K videos are unchanged
+    # vertical and square 4K videos: the 1080 copy only from a source that fills it without enlargement; anything else stays at the 720 copy (shown in a window)
+    for size, orient, want in (("640x360", "portrait", (720, 1280)), ("1920x1080", "portrait", (720, 1280)), ("1080x1920", "portrait", (1080, 1920)), ("720x1280", "portrait", (720, 1280)),
+                               ("1280x720", "square", (720, 720)), ("1920x1080", "square", (1080, 1080)), ("1080x1080", "square", (1080, 1080))):
+        mp4, _ = clips.normalise(make_source(2, size, tmp_path=tmp_path), need_seconds=2.0, source_seconds=2.0, suffix=".mp4", hd=True, orientation=orient)
+        assert frame_sizes(mp4, tmp_path)[1] == want, (size, orient)
+        mp4, _ = clips.normalise(make_source(2, size, tmp_path=tmp_path), need_seconds=2.0, source_seconds=2.0, suffix=".mp4", orientation=orient)
+        assert frame_sizes(mp4, tmp_path)[1] == clips.clip_size(orient), (size, orient)   # 720p and 1080p videos: exactly as before
+
+
+def _tall_timeline(aspect, res, captions=True):
+    f = Frame.parse(aspect, res)
+    tl = small_timeline(4.0, ["clip"])
+    tl.update({"width": f.width, "height": f.height, "frame": {"aspect": aspect, "resolution": res}, "captions": captions})
+    tl["scenes"][0]["props"] = {"asset": "c", "alt": "sunbeams in a forest in the early morning light", "credit": "Video: Z / videomk"}
+    return tl
+
+
+@pytest.mark.parametrize("aspect,src,orient", [("9:16", "720x1280", "portrait"), ("1:1", "720x720", "square"), ("4:5", "720x1280", "portrait")])
+def test_vertical_square_and_4_5_4k_show_small_footage_in_a_window_inside_the_content_box(tmp_path, aspect, src, orient):
+    import numpy as np
+
+    mp4, _ = clips.normalise(make_source(3, src, tmp_path=tmp_path), need_seconds=3.0, source_seconds=3.0, suffix=".mp4", hd=True, orientation=orient)
+    p = tmp_path / "t.mp4"
+    p.write_bytes(mp4)
+    frames = clips.ClipFrames(str(p))
+    fr = Frame.parse(aspect, "2160p")
+    assert frames.frame(0).size[0] == 720 and viz_scenes.clip_is_framed(fr, frames.frame(0).size)
+    im = Renderer(_tall_timeline(aspect, "2160p"), clip_loader=lambda k: frames).frame_at(1.5)
+    assert im.size == (fr.width, fr.height)
+    lum = np.asarray(im.convert("L"), np.float32)
+    x0, y0, x1, y1 = [v * 2 for v in fr.box(True)]   # the content box in output pixels
+    sw, sh = frames.frame(0).size
+    k = min(1.0, (y1 - y0 - 160) / (sh * viz_scenes.FRAMED_SCALE))
+    ww, wh = sw * viz_scenes.FRAMED_SCALE * k, sh * viz_scenes.FRAMED_SCALE * k
+    assert ww <= sw * viz_scenes.FRAMED_SCALE + 1 and ww < 0.55 * fr.width          # never enlarged more than 1.5x: at most half the frame wide
+    cx = fr.width // 2
+    inside = lum[int(y0 + 0.2 * wh):int(y0 + 0.7 * wh), int(cx - 0.3 * ww):int(cx + 0.3 * ww)].mean()
+    left = lum[int(y0):int(y1), 0:int(cx - ww / 2 - 60)].mean()
+    assert left < 0.6 * inside                                                       # beside the window: the darkened glow, not footage
+    assert lum[: max(1, int(y0) - 40)].mean() < 0.6 * inside                           # above the content box: only the glow
+    under = lum[int(y0 + wh):int(y1) + 30, int(cx - ww / 2):int(cx + ww / 2)]
+    assert under.max() > 200                                                         # the caption line and the credit are drawn under the window, natively
+
+
+@pytest.mark.parametrize("aspect", ["9:16", "1:1", "4:5"])
+def test_below_4k_the_other_shapes_never_use_the_window(tmp_path, monkeypatch, aspect):
+    frames = _clip_frames(tmp_path, size="720x1280", hd=False)
+    monkeypatch.setattr(viz_scenes, "_draw_clip_framed", lambda *a, **k: (_ for _ in ()).throw(AssertionError("framed layout used below 4K")))
+    for res in ("720p", "1080p"):
+        f = Frame.parse(aspect, res)
+        assert Renderer(_tall_timeline(aspect, res), clip_loader=lambda k: frames).frame_at(1.5).size == (f.width, f.height)
+
+
+def test_a_vertical_4k_video_with_real_vertical_1080_footage_keeps_the_full_bleed_look(tmp_path, monkeypatch):
+    mp4, _ = clips.normalise(make_source(3, "1080x1920", tmp_path=tmp_path), need_seconds=3.0, source_seconds=3.0, suffix=".mp4", hd=True, orientation="portrait")
+    p = tmp_path / "v.mp4"
+    p.write_bytes(mp4)
+    frames = clips.ClipFrames(str(p))
+    assert frames.frame(0).size == (1080, 1920)
+    monkeypatch.setattr(viz_scenes, "_draw_clip_framed", lambda *a, **k: (_ for _ in ()).throw(AssertionError("window used for 1080-wide vertical footage")))
+    im = Renderer(_tall_timeline("9:16", "2160p"), clip_loader=lambda k: frames).frame_at(1.5)
+    assert im.size == (2160, 3840) and max(im.getpixel((8, 8))) > 0
 
 
 def test_a_montage_of_mixed_sizes_in_a_4k_video_uses_the_smaller_one(tmp_path):

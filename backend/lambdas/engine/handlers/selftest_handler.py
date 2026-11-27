@@ -61,7 +61,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         subprocess.run([ff, "-y", "-hide_banner", "-loglevel", "error", "-f", "lavfi", "-i", "testsrc2=size=1280x720:rate=25", "-t", "4", "-pix_fmt", "yuv420p", src], check=True)
         t = time.time()
         with open(src, "rb") as fh:
-            mp4, _ = clips.normalise(fh.read(), need_seconds=3.0, source_seconds=4.0, suffix=".mp4")
+            raw_src = fh.read()
+        mp4, _ = clips.normalise(raw_src, need_seconds=3.0, source_seconds=4.0, suffix=".mp4")
         out["clip_normalise_s"] = round(time.time() - t, 2)
         path = os.path.join(tmp, "clip.mp4")
         with open(path, "wb") as fh:
@@ -111,6 +112,41 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             info = pipeline.render_chunk(big, 45, 75, seg)   # 30 frames across the cut between the two scenes
             out["ms_per_frame_4k"] = round((time.time() - t) / info["frames"] * 1000, 1)
             out["segment_bytes_4k"] = os.path.getsize(seg)
+        # 4K clips in the framed window (docs/FOUR_K.md): the 1280x720 footage made above in a landscape 4K frame, and its vertical and square 720 copies in 9:16, 1:1 and 4:5.
+        # Says whether the window was used and what a frame costs here; with {"frames": true} in the event it also returns one small JPEG per shape to look at.
+        import base64
+        import io as _io
+
+        from engine.renderer import Renderer
+        from engine.scenes import viz_scenes
+
+        framed: Dict[str, Any] = {}
+        for aspect, orient in (("16:9", "landscape"), ("9:16", "portrait"), ("1:1", "square"), ("4:5", "portrait")):
+            with tempfile.TemporaryDirectory() as tmp:
+                data, _ = clips.normalise(raw_src, need_seconds=3.0, source_seconds=4.0, suffix=".mp4", orientation=orient, hd=True)
+                path = os.path.join(tmp, "f.mp4")
+                with open(path, "wb") as fh:
+                    fh.write(data)
+                cf = clips.ClipFrames(path)
+            from engine.frame import Frame
+
+            fr = Frame.parse(aspect, "2160p")
+            ftl = {"fps": 30, "width": fr.width, "height": fr.height, "frame": {"aspect": aspect, "resolution": "2160p"}, "theme": "midnight", "duration": 3.0, "captions": True, "outro": False,
+                   "scenes": [{"id": "c", "type": "clip", "start": 0, "duration": 3.0, "props": {"asset": "x.mp4", "alt": "test footage in a window", "credit": "Video: self test"}, "words": [["Hello", 0.4, 0.8], ["window", 0.8, 1.6]]}]}
+            rr = Renderer(ftl, clip_loader=lambda key, cf=cf: cf)
+            t = time.time()
+            im = rr.frame_at(1.0)
+            row = {"clip": list(cf.frame(0).size), "framed": viz_scenes.clip_is_framed(fr, cf.frame(0).size), "ms": round((time.time() - t) * 1000), "size": list(im.size)}
+            if (event or {}).get("frames"):
+                buf = _io.BytesIO()
+                im.resize((im.width * 540 // im.height, 540)).save(buf, "JPEG", quality=80)
+                row["jpeg_b64"] = base64.b64encode(buf.getvalue()).decode()
+            framed[aspect] = row
+            renderer_mod = sys.modules.get("engine.renderer")
+            if renderer_mod is not None:
+                renderer_mod.release_caches()
+        out["framed_4k"] = framed
+        out["has"]["framed_4k"] = all(v["framed"] and v["size"] == [Frame.parse(a, "2160p").width, Frame.parse(a, "2160p").height] for a, v in framed.items())
         out["peak_rss_mb"] = round(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024)   # Linux reports kilobytes
     except Exception as e:  # noqa: BLE001
         out["error_4k"] = f"{type(e).__name__}: {e}"[:200]

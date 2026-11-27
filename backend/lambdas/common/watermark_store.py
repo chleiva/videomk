@@ -222,14 +222,18 @@ def normalise_logo(data: bytes) -> Tuple[bytes, int, int]:
             import resvg_py
             img = Image.open(io.BytesIO(bytes(resvg_py.svg_to_bytes(svg_string=data.decode("utf-8", "strict"), width=STORE_PX)))).convert("RGBA")
         else:
+            limit = Image.MAX_IMAGE_PIXELS
             Image.MAX_IMAGE_PIXELS = MAX_LOGO_PX * MAX_LOGO_PX * 4   # the decoder refuses a decompression bomb before it allocates
-            probe = Image.open(io.BytesIO(data))
-            if max(probe.size) > MAX_LOGO_PX:
-                raise WatermarkError(400, "wm.logo_px", "logo_px", px=MAX_LOGO_PX)
-            probe.verify()
-            img = Image.open(io.BytesIO(data))
-            img.load()
-            img = img.convert("RGBA")
+            try:
+                probe = Image.open(io.BytesIO(data))
+                if max(probe.size) > MAX_LOGO_PX:
+                    raise WatermarkError(400, "wm.logo_px", "logo_px", px=MAX_LOGO_PX)
+                probe.verify()
+                img = Image.open(io.BytesIO(data))
+                img.load()
+                img = img.convert("RGBA")
+            finally:   # the limit is Pillow's process-wide setting: left lowered it made every later large canvas in the same process (a 4K frame is 33 M pixels) a "bomb"
+                Image.MAX_IMAGE_PIXELS = limit
     except WatermarkError:
         raise
     except Exception:   # noqa: BLE001 - anything the decoder dislikes is just 'not an image'
