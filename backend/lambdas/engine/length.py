@@ -27,10 +27,12 @@ RATES: Dict[str, Tuple[float, float, float]] = {
     # sentence a voice: the estimate was 4 percent long for Léa and 6 to 8 percent short for Vicki, Camila and Laura.
     "Lea": (0.0482, 0.287, 0.17), "Vicki": (0.0548, 0.326, 0.20), "Bianca": (0.0584, 0.347, 0.21), "Camila": (0.0546, 0.325, 0.20),
     "Laura": (0.0548, 0.326, 0.20), "Ola": (0.0559, 0.333, 0.20), "Suvi": (0.0578, 0.344, 0.21),
+    # Beatrice (the Italian default since 2026-11-27) took 0.88 of what Bianca's fit predicts for two passages of 60 and 65 words (45.0 s against 51.1 s)
+    "Beatrice": (0.0514, 0.305, 0.18),
 }
 # WORDS a second of speech, per language (the default voice; the same passage and videos as above; English: the median of 174 QA videos). Characters predict
 # the time, words do not: French says 3.0 words a second and Finnish 1.9, so a budget counted in words must follow the language (engine/plan.words_per_s).
-WORDS_PER_S: Dict[str, float] = {"en": 2.63, "fr": 3.03, "de": 2.66, "it": 2.59, "pt": 3.09, "nl": 2.79, "pl": 2.37, "fi": 1.95}
+WORDS_PER_S: Dict[str, float] = {"en": 2.63, "fr": 3.03, "de": 2.66, "it": 2.85, "pt": 3.09, "nl": 2.79, "pl": 2.37, "fi": 1.95}
 LANG_RATES: Dict[str, Tuple[float, float, float]] = {"en": (0.0555, 0.33, 0.20), "es": (0.0530, 0.345, 0.14)}   # a voice without its own fit
 # The four fitted voices say the catalogue's sentence 4 to 10 percent faster than their fits predict (Ruth 11.6 s against 12.3, Amy 12.0 / 12.5, Lucia 10.7 / 11.2,
 # Lupe 11.2 / 12.3: finished beats carry a little more silence than one clean sentence), so a rate derived from that sentence is raised by the median of the four.
