@@ -88,7 +88,8 @@ def direct(prompt: str, *, minutes: float, ask_small: Ask, ask_big: Callable[[st
                                    expected_beats=plan_mod.expected_beats(minutes, len(photos or [])), search=vector_search,
                                    ask=(lambda sys_, usr: ask_small(sys_, usr, 160)) if vector_policy.enabled() else None)   # the cartoon scenes: a special style, offered only where the policy allows (docs/VECTOR_SCENE_POLICY.md)
     # the whiteboard look (docs/WHITEBOARD.md, flag WHITEBOARD): a whole-video style; when it is on for this video the cartoon scenes are not offered
-    wpolicy = whiteboard_policy.decide(prompt, options=options, skill_ids=skill_ids, photos=photos, research_mode=info["mode"],
+    wants_presenter = presenter_policy.enabled() and presenter_policy.wish((options or {}).get("presenter"), prompt) not in ("auto", "none")   # asked for a character: the whiteboard look is then never chosen by itself
+    wpolicy = whiteboard_policy.decide(prompt, options=options, skill_ids=skill_ids, photos=photos, research_mode=info["mode"], presenter_asked=wants_presenter,
                                        ask=(lambda sys_, usr: ask_small(sys_, usr, 120)) if whiteboard_policy.enabled() else None)
     if wpolicy.allowed:
         vpolicy = vector_policy.Policy(False, vpolicy.style, "whiteboard_video", aspect=vpolicy.aspect, flag=vpolicy.flag)

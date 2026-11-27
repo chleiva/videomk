@@ -325,8 +325,13 @@ def compile_board(items_in: List[Dict[str, Any]], anchors: Dict[str, float], dur
                         side = it.get("side", "left")
                         if side == "left" and box[0] - s * 1.35 < 8.0:
                             side = "right"
+                        if side == "right" and box[2] + s * 1.35 > L.W - 8.0 and box[0] - s * 1.35 >= 8.0:
+                            side = "left"
                         bx = box[0] - s * 1.35 if side == "left" else box[2] + s * 0.35
-                        box = (bx, box[1] + 0.1 * s, bx + s, box[1] + 1.1 * s)
+                        if bx < 8.0 or bx + s > L.W - 8.0:      # no room beside it on either side (a title across the board): underlined instead
+                            it = it | {"mark": "underline"}
+                        else:
+                            box = (bx, box[1] + 0.1 * s, bx + s, box[1] + 1.1 * s)
                     g.update(kind="mark", strokes=wr.mark(it["mark"], box, seed=_seed(it["id"])), cells=t["cells"], mark=it["mark"])
                     allp = np.concatenate(g["strokes"])
                     g["box"] = (float(allp[:, 0].min()), float(allp[:, 1].min()), float(allp[:, 0].max()), float(allp[:, 1].max()))

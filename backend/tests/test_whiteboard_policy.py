@@ -197,10 +197,10 @@ def _wb(n, zone, word):
 
 
 def test_compose_keeps_beats_on_a_board_until_it_is_full():
-    said = "one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen"        # 16 words
-    beats = [_beat(said, _wb(3, ("top", "left", "right"), "a")), _beat(said, _wb(3, ("bottom-left", "bottom", "bottom-right"), "b")),      # the director forgot to say "same": the board is far from full
-             _beat(said, _wb(3, ("top", "left", "right"), "c"), "new"), _beat(said, _wb(2, ("centre", "bottom"), "d"), "same"),
-             _beat(said + " " + said + " " + said + " " + said, _wb(3, ("top", "left", "right"), "e"), "same"),                           # no room for 64 more words: a new board whatever it says
+    said = "one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty"        # 20 words
+    beats = [_beat(said, _wb(4, ("top", "left", "right", "centre"), "a")), _beat(said, _wb(4, ("bottom-left", "bottom", "bottom-right", "top-left"), "b")),      # the director forgot to say "same": the board is not full yet
+             _beat(said, _wb(4, ("top", "left", "right", "centre"), "c"), "new"), _beat(said, _wb(2, ("bottom-left", "bottom"), "d"), "same"),      # 8 things and 40 words: full, a new board is right
+             _beat(said + " " + said + " " + said, _wb(3, ("top", "left", "right"), "e"), "same"),                           # no room for 60 more words: a new board whatever it says
              _beat("the end", [{"id": "k", "write": "Key", "zone": "bottom", "say": "end"}])]                                           # the closing beat never opens a nearly empty board
     st = wp.compose(beats)
     flags = [b["scene"]["props"].get("board") for b in beats]
@@ -272,3 +272,11 @@ def test_a_continued_board_keeps_its_first_word(on):
             assert p["cues"][0] > sync.WHITEBOARD_FIRST_S                         # it goes on drawing on a board that is in the picture: every thing on its word
         else:
             assert p["cues"][0] == sync.WHITEBOARD_FIRST_S                        # an empty board does not wait for a late word
+
+
+def test_auto_never_takes_a_video_whose_presenter_was_asked_for(on):
+    kw = dict(skill_ids=["kids-family"], ask=YES)
+    assert wp.decide("Why do leaves change colour? Explained by a fox", **kw).allowed                       # (the policy itself does not read presenter words)
+    p = wp.decide("Why do leaves change colour? Explained by a fox", presenter_asked=True, **kw)
+    assert not p.allowed and p.reason == "presenter_asked"
+    assert wp.decide("Leaves, as a whiteboard video, explained by a fox", presenter_asked=True, **kw).reason == "asked"      # asked for the whiteboard in words: that still wins

@@ -118,7 +118,7 @@ class Policy:
 
 
 def decide(prompt: str, *, options: Optional[Dict[str, Any]] = None, skill_ids: Optional[List[str]] = None, photos: Optional[List[Any]] = None, research_mode: str = "encyclopedia",
-           ask: Optional[Callable[[str, str], str]] = None) -> Policy:
+           ask: Optional[Callable[[str, str], str]] = None, presenter_asked: bool = False) -> Policy:
     """Is this video a whiteboard video? Cheap rules first; one small-model call only for `auto` on a kind of video that could suit it."""
     o = options or {}
     w = wish(o.get("style"), prompt)
@@ -139,6 +139,8 @@ def decide(prompt: str, *, options: Optional[Dict[str, Any]] = None, skill_ids: 
         return Policy(True, "asked", asked=True, aspect=o.get("aspect"))
     if research_mode == "web":
         return no("current_events")
+    if presenter_asked:                     # "explained by a fox": the person asked for a presenter character, which a whiteboard video never has (seen on QA: the look chosen by itself silently dropped the fox)
+        return no("presenter_asked")
     ids = set(skill_ids or [])
     if ids & NEVER_SKILLS or not ids & AUTO_SKILLS:
         return no("kind_of_video")
@@ -228,7 +230,7 @@ FILL_EVERY_WORDS = 5       # a stretch of narration this long with nothing drawn
 FILL_PER_GAP = 3           # at most this many marks in one stretch
 # A board (one full picture) is shared by consecutive beats (`compose`): how much it may hold, and when it is full enough to be left
 BOARD_MAX_BEATS, BOARD_MAX_SOLID, BOARD_MAX_WORDS = 3, 12, 66
-BOARD_FULL_SOLID, BOARD_FULL_WORDS = 6, 28
+BOARD_FULL_SOLID, BOARD_FULL_WORDS = 8, 40
 
 
 def _words(narration: str) -> List[str]:
@@ -450,7 +452,7 @@ def _place(p: Dict[str, Any], used: Dict[Any, int], dry: bool = False) -> Tuple[
 def compose(beats: List[Dict[str, Any]]) -> Dict[str, int]:
     """Which beats share a BOARD, decided when the script is final. The director marks a beat that goes on drawing on the previous beat's board ("board": "same");
     the engine keeps that when the board has room (BOARD_MAX_*), and ALSO keeps a beat on the board when the director started a new one although the board
-    is far from full (fewer than BOARD_FULL_SOLID things or BOARD_FULL_WORDS words): sparse boards were the main flaw of the first videos. Then, on each
+    is not full yet (fewer than BOARD_FULL_SOLID things or BOARD_FULL_WORDS words): sparse boards were the main flaw of the first videos. Then, on each
     board, a drawing, text or chart whose zone an earlier item of the board already has moves to a free zone of the same shape (or a free single zone).
     Deterministic, no model. -> {"boards", "shared": beats that continue a board, "merged": of those, decided by the engine, "rezoned": items moved}."""
     stats = {"boards": 0, "shared": 0, "merged": 0, "rezoned": 0}

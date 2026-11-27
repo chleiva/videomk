@@ -10,9 +10,9 @@ from typing import Any, Dict, List, Optional, Tuple
 WORDS_PER_S = 2.4            # engine/plan.SPOKEN_WORDS_PER_S
 LEAD_S = 0.45                # a beat's lead-in before its first word
 # What a board must reach (looked at on the hand-arranged demos: one board of 19 items, 12 of them drawings or writing, pen busy 60 to 82 %, longest rest 0.6 to 1.8 s)
-MIN_SOLID_PER_10S = 3.5      # drawings and written phrases per 10 seconds of board
+MIN_SOLID_PER_10S = 4.0      # drawings and written phrases per 10 seconds of board
 MIN_SOLID = 4                # ... and never fewer than this on a board of 10 s or more
-MIN_COVERAGE = 0.26          # share of the framed picture covered by the boxes of drawings and writing
+MIN_COVERAGE = 0.30          # share of the framed picture covered by the boxes of drawings and writing
 MIN_TEXT = 0.044             # smallest letter size, as a share of the frame's shorter side
 MIN_BUSY = 0.45              # pen-busy share of the board's time
 MAX_IDLE_S = 2.2             # longest stretch with the pen off the board (estimated times: the real limit aimed at is about 1.5 s)
