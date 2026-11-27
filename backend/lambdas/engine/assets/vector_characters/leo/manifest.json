@@ -1,0 +1,131 @@
+{
+ "id": "leo",
+ "parts": {
+  "head": {
+   "file": "head.svg",
+   "w": 378,
+   "h": 382,
+   "svg_bytes": 143889,
+   "pivot": [
+    189.0,
+    382
+   ]
+  },
+  "torso": {
+   "file": "torso.svg",
+   "w": 261,
+   "h": 357,
+   "svg_bytes": 100890,
+   "pivot": [
+    130.5,
+    357
+   ]
+  },
+  "upper_arm": {
+   "file": "upper_arm.svg",
+   "w": 127,
+   "h": 362,
+   "svg_bytes": 32565,
+   "pivot": [
+    55.5,
+    0.0
+   ],
+   "end": [
+    64.0,
+    362.0
+   ]
+  },
+  "lower_arm": {
+   "file": "lower_arm.svg",
+   "w": 123,
+   "h": 404,
+   "svg_bytes": 53201,
+   "pivot": [
+    38.5,
+    0.0
+   ],
+   "end": [
+    65.0,
+    404.0
+   ]
+  },
+  "upper_leg": {
+   "file": "upper_leg.svg",
+   "w": 152,
+   "h": 315,
+   "svg_bytes": 23924,
+   "pivot": [
+    84.0,
+    0.0
+   ],
+   "end": [
+    81.5,
+    315.0
+   ]
+  },
+  "lower_leg": {
+   "file": "lower_leg.svg",
+   "w": 245,
+   "h": 312,
+   "svg_bytes": 73751,
+   "pivot": [
+    68.5,
+    0.0
+   ],
+   "end": [
+    114.0,
+    312.0
+   ]
+  },
+  "eyes_open": {
+   "file": "eyes_open.svg",
+   "w": 264,
+   "h": 129,
+   "svg_bytes": 45878,
+   "pivot": [
+    132.0,
+    64.5
+   ]
+  },
+  "eyes_closed": {
+   "file": "eyes_closed.svg",
+   "w": 278,
+   "h": 56,
+   "svg_bytes": 13715,
+   "pivot": [
+    139.0,
+    28.0
+   ]
+  },
+  "mouth_closed": {
+   "file": "mouth_closed.svg",
+   "w": 208,
+   "h": 62,
+   "svg_bytes": 11199,
+   "pivot": [
+    104.0,
+    31.0
+   ]
+  },
+  "mouth_half": {
+   "file": "mouth_half.svg",
+   "w": 184,
+   "h": 79,
+   "svg_bytes": 12648,
+   "pivot": [
+    92.0,
+    39.5
+   ]
+  },
+  "mouth_wide": {
+   "file": "mouth_wide.svg",
+   "w": 201,
+   "h": 128,
+   "svg_bytes": 13869,
+   "pivot": [
+    100.5,
+    64.0
+   ]
+  }
+ }
+}

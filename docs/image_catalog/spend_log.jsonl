@@ -585,3 +585,8 @@
 {"ts": "2026-11-26T22:40:00Z", "run": "opportunities-qa-fixture", "item": "", "what": "text-embeddings+3 small-model subject calls (estimate, not metered)", "usd": 0.01, "run_total": 0.01}
 {"ts": "2026-11-27T00:26:24.301463Z", "run": "vector-scene-proto", "item": "sea", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon", "usd": 0.0371, "run_total": 0.0371}
 {"ts": "2026-11-27T00:26:31.957109Z", "run": "vector-scene-proto", "item": "mountain", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon", "usd": 0.0371, "run_total": 0.07418}
+{"ts": "2026-11-27T00:50:57.674397Z", "run": "vector-character-proto", "item": "sheet_girl", "what": "gpt-image-2.6-flare 1536x1024 medium parts sheet", "usd": 0.0347, "run_total": 0.03469}
+{"ts": "2026-11-27T00:52:14.452230Z", "run": "vector-character-proto", "item": "sheet_mia", "what": "gpt-image-2.6-flare 1536x1024 medium rig parts sheet", "usd": 0.0358, "run_total": 0.07047}
+{"ts": "2026-11-27T00:52:21.033777Z", "run": "vector-character-proto", "item": "sheet_leo", "what": "gpt-image-2.6-flare 1536x1024 medium rig parts sheet", "usd": 0.0358, "run_total": 0.10628}
+{"ts": "2026-11-27T00:52:28.816848Z", "run": "vector-character-proto", "item": "sheet_nora", "what": "gpt-image-2.6-flare 1536x1024 medium rig parts sheet", "usd": 0.0358, "run_total": 0.1421}
+{"ts": "2026-11-27T00:52:36.093671Z", "run": "vector-character-proto", "item": "sheet_sam", "what": "gpt-image-2.6-flare 1536x1024 medium rig parts sheet", "usd": 0.0357, "run_total": 0.17785}

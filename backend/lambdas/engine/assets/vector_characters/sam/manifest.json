@@ -1,0 +1,131 @@
+{
+ "id": "sam",
+ "parts": {
+  "head": {
+   "file": "head.svg",
+   "w": 357,
+   "h": 374,
+   "svg_bytes": 110856,
+   "pivot": [
+    178.5,
+    374
+   ]
+  },
+  "torso": {
+   "file": "torso.svg",
+   "w": 302,
+   "h": 317,
+   "svg_bytes": 56434,
+   "pivot": [
+    151.0,
+    317
+   ]
+  },
+  "upper_arm": {
+   "file": "upper_arm.svg",
+   "w": 141,
+   "h": 194,
+   "svg_bytes": 33989,
+   "pivot": [
+    77.5,
+    0.0
+   ],
+   "end": [
+    60.0,
+    194.0
+   ]
+  },
+  "lower_arm": {
+   "file": "lower_arm.svg",
+   "w": 127,
+   "h": 328,
+   "svg_bytes": 33139,
+   "pivot": [
+    63.0,
+    0.0
+   ],
+   "end": [
+    69.0,
+    328.0
+   ]
+  },
+  "upper_leg": {
+   "file": "upper_leg.svg",
+   "w": 128,
+   "h": 317,
+   "svg_bytes": 29407,
+   "pivot": [
+    66.5,
+    0.0
+   ],
+   "end": [
+    63.0,
+    317.0
+   ]
+  },
+  "lower_leg": {
+   "file": "lower_leg.svg",
+   "w": 223,
+   "h": 321,
+   "svg_bytes": 73230,
+   "pivot": [
+    60.0,
+    0.0
+   ],
+   "end": [
+    103.5,
+    321.0
+   ]
+  },
+  "eyes_open": {
+   "file": "eyes_open.svg",
+   "w": 275,
+   "h": 125,
+   "svg_bytes": 43649,
+   "pivot": [
+    137.5,
+    62.5
+   ]
+  },
+  "eyes_closed": {
+   "file": "eyes_closed.svg",
+   "w": 280,
+   "h": 51,
+   "svg_bytes": 12713,
+   "pivot": [
+    140.0,
+    25.5
+   ]
+  },
+  "mouth_closed": {
+   "file": "mouth_closed.svg",
+   "w": 193,
+   "h": 63,
+   "svg_bytes": 9402,
+   "pivot": [
+    96.5,
+    31.5
+   ]
+  },
+  "mouth_half": {
+   "file": "mouth_half.svg",
+   "w": 191,
+   "h": 89,
+   "svg_bytes": 18900,
+   "pivot": [
+    95.5,
+    44.5
+   ]
+  },
+  "mouth_wide": {
+   "file": "mouth_wide.svg",
+   "w": 221,
+   "h": 123,
+   "svg_bytes": 16293,
+   "pivot": [
+    110.5,
+    61.5
+   ]
+  }
+ }
+}
