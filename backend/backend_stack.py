@@ -28,6 +28,7 @@ from catalog import ImageCatalog
 from deck import DeckToVideo
 from media_library import MediaLibrary
 from social_auth import SocialAuth, flag as social_flag
+from login_branding import cdk as login_branding_cdk
 from auth_cleanup import UnconfirmedCleanup, enabled as unconfirmed_cleanup_enabled, max_age_hours as unconfirmed_max_age_hours
 from request_intake import RequestIntake
 from request_options import RequestOptions
@@ -502,11 +503,12 @@ class BackendStack(Stack):
         # Sign-in runs on our own host (`-c authDomain=login.videomk.com -c authCertArn=<ACM cert in us-east-1>`): Google and Apple show it on their consent screens.
         auth_host, auth_cert = self.node.try_get_context("authDomain"), self.node.try_get_context("authCertArn")
         if auth_host and auth_cert:
-            hosted_ui = user_pool.add_domain("HostedUi", custom_domain=cognito.CustomDomainOptions(domain_name=auth_host, certificate=acm.Certificate.from_certificate_arn(self, "AuthCert", auth_cert)))
+            hosted_ui = user_pool.add_domain("HostedUi", custom_domain=cognito.CustomDomainOptions(domain_name=auth_host, certificate=acm.Certificate.from_certificate_arn(self, "AuthCert", auth_cert)), managed_login_version=login_branding_cdk.domain_version(self.node))
             zone = route53.HostedZone.from_hosted_zone_attributes(self, "AuthZone", hosted_zone_id=self.node.try_get_context("authZoneId"), zone_name=auth_host.split(".", 1)[1])
             route53.ARecord(self, "AuthAlias", zone=zone, record_name=auth_host, target=route53.RecordTarget.from_alias(targets.UserPoolDomainTarget(hosted_ui)))
         else:
-            hosted_ui = user_pool.add_domain("HostedUi", cognito_domain=cognito.CognitoDomainOptions(domain_prefix=f"videomk-{stage}-{self.account[-6:]}"))
+            hosted_ui = user_pool.add_domain("HostedUi", cognito_domain=cognito.CognitoDomainOptions(domain_prefix=f"videomk-{stage}-{self.account[-6:]}"), managed_login_version=login_branding_cdk.domain_version(self.node))
+        login_branding_cdk.attach(self, user_pool=user_pool, clients=[user_pool_client, mobile_client], domain=hosted_ui)   # branded Managed Login page (login_branding/), docs/AUTH_SOCIAL.md
         social = SocialAuth(self, "SocialAuth", user_pool=user_pool, hosted_ui=hosted_ui, google=social_google, apple=social_apple, make_fn=make_fn)
         social.attach_clients(user_pool_client, mobile_client)
         if unconfirmed_cleanup_enabled(self.node):   # on by default; `-c unconfirmedCleanup=0` removes it
