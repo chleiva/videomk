@@ -37,6 +37,7 @@ MIN_READABLE_PX = 22   # design px at 1080 short side: smaller drawn text (after
 class Frame:
     aspect: str = DEFAULT_ASPECT
     resolution: str = DEFAULT_RESOLUTION
+    top_inset: int = 0   # design units the content box starts lower by: the band a top-corner watermark sits in (docs/WATERMARK.md); 0 for every video without one
 
     # ----- pixel size
     @property
@@ -111,7 +112,17 @@ class Frame:
 
     @property
     def margin_top(self) -> int:
+        return _MARGIN[self.aspect][1] + self.top_inset
+
+    @property
+    def base_margin_top(self) -> int:
+        """The top margin of the shape itself, without the watermark band (the credit line and the watermark are placed from it)."""
         return _MARGIN[self.aspect][1]
+
+    def with_top_inset(self, inset: float) -> "Frame":
+        """This frame with its content box starting `inset` design units lower (never negative, at most a tenth of the height: a band, not a layout change)."""
+        n = int(max(0, min(self.design_h // 10, round(inset))))
+        return self if n == self.top_inset else Frame(self.aspect, self.resolution, n)
 
     @property
     def right_reserve(self) -> int:

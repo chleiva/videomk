@@ -90,6 +90,9 @@ class Renderer:
         self._images: Dict[str, Optional[Image.Image]] = {}
         # the watermark (docs/WATERMARK.md): drawn last on every frame, at the output size; None when the timeline has none
         self.wm = watermark_mod.build(timeline.get("watermark"), self.frame, (self.out_w, self.out_h), self.ctx.captions, image_loader)
+        if self.wm is not None and self.wm.inset:   # a mark in a top corner: every scene's content box starts below it (seen on QA: a 9:16 logo on a list heading)
+            self.frame = self.frame.with_top_inset(self.wm.inset)
+            self.ctx.frame = self.frame
 
     # ----- assets
     def _load_image(self, key: str) -> Optional[Image.Image]:
@@ -131,7 +134,8 @@ class Renderer:
         draw = SCENES.get(sc["type"])
         fr = self.frame
         cv = Canvas(fr.W, fr.H, ss=self.ss)   # design units; the finished image is scaled to the real output size below
-        bg_t = max(0.0, lt) + self._ambient_phase(sc)
+        # an animated background runs on the video's own clock (the scene's place in the loop, written by the timeline), so it never jumps at a scene change
+        bg_t = max(0.0, lt) + (float(sc["bg_t0"]) if self.bg_anim is not None and "bg_t0" in sc else self._ambient_phase(sc))
         amb = sc["type"] != "image"
         cv.background(self.theme, bg_t, ambience=amb, anim=self.bg_anim)
         if draw is None:

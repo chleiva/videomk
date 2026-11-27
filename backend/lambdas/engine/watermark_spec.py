@@ -28,6 +28,7 @@ MARGIN = 0.035           # of the short side
 MARGIN_MIN = 0.020
 SHRINK_STEPS = (1.0, 0.85, 0.7, 0.6)
 GAP = 10.0               # design units kept clear of a protected zone
+CONTENT_GAP = 18.0       # design units between a top-corner mark and the first line of the scene under it
 FADE_IN_S = 0.6
 END_CARD_S = 2.4
 MAX_LOGO_RATIO = 6.3     # the widest a custom logo may be drawn, as a multiple of the mark height (the videomk lockup is 6.26)
@@ -129,7 +130,7 @@ def caption_rect(frame: Frame) -> Rect:
 
 def credit_rect(frame: Frame) -> Rect:
     """The clip / photo credit line (top right, up to 90 characters)."""
-    y = 40 if frame.landscape else max(40, frame.margin_top - 30)
+    y = 40 if frame.landscape else max(40, frame.base_margin_top - 30)
     size = 22 if frame.landscape else 26
     return (frame.W - 40 - 720.0, y - 8.0, frame.W - 40.0, y + size + 8.0)
 
@@ -153,6 +154,15 @@ def _corner(pos: str, area: Rect, w: float, h: float, m: float) -> Rect:
     x = area[0] + m if pos in ("tl", "bl") else area[2] - m - w
     y = area[1] + m if pos in ("tl", "tr") else area[3] - m - h
     return (x, y, x + w, y + h)
+
+
+def content_inset(lay: Dict[str, Any], frame: Frame) -> int:
+    """How far the scenes' content box must start lower so a mark in a TOP corner sits in a band of its own instead of on a heading (seen on QA: a 9:16 logo on the
+    first letters of a list heading). 0 for a bottom corner (the caption band is already kept clear) and when the mark is above the content anyway."""
+    if lay.get("position") not in ("tl", "tr") or frame.landscape:   # 16:9 scenes sit at fixed heights and keep 140 at the sides: the mark alone fits beside them (a wide logo in a chosen top corner can still touch a heading)
+        return 0
+    need = lay["rect"][3] + CONTENT_GAP - frame.base_margin_top
+    return int(max(0, min(frame.design_h // 10, round(need))))
 
 
 def effective_position(spec: Dict[str, Any], frame: Frame) -> str:

@@ -76,6 +76,7 @@ class Watermark:
         self.layer: Optional[Image.Image] = None   # the artwork as supplied (white mark, or the person's logo)
         self.layer_ink: Optional[Image.Image] = None   # the videomk mark in ink, for light pictures (None for a custom logo: the person's colours stay)
         self.pos = (0, 0)
+        self.inset = 0   # design units the scenes start lower by, so a top-corner mark has a band of its own (watermark_spec.content_inset)
         self.fade = ws.FADE_IN_S
         out_w, out_h = out_size
         scale = out_w / float(frame.W)   # design units -> output pixels (a draft is half size, 4K is twice)
@@ -86,7 +87,9 @@ class Watermark:
                 log.warning("WATERMARK_LOGO_UNREADABLE asset=%s: no watermark drawn", spec.get("asset"))
                 return
             ratio = logo.width / float(logo.height)
+        frame = frame.with_top_inset(0)   # placed on the shape itself, never on a frame that already carries the band
         lay = ws.layout(spec, frame, ratio, captions)
+        self.inset = ws.content_inset(lay, frame)
         x0, y0, x1, y1 = lay["rect"]
         w_px, h_px = max(2, int(round((x1 - x0) * scale))), max(2, int(round((y1 - y0) * scale)))
         key = ("custom:" + str(spec.get("hash") or spec.get("asset")) if logo is not None else spec.get("style", "mark"), w_px, h_px)

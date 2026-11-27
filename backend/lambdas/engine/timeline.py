@@ -152,6 +152,14 @@ def build_timeline(
         scenes.append({"id": "endcard", "type": "title", "start": round(t, 4), "duration": watermark_spec.END_CARD_S, "props": props, "words": [], "audio_key": None, "silent": True,
                        "narration_offset": 0.0, "cues": [round(c, 3) for c in SCENES["title"][1](props, watermark_spec.END_CARD_S)[:8]], "transition": "fade"})
         t += watermark_spec.END_CARD_S
+    # the director's animated background (engine/background.py; only in a plan made with BG_ANIMATED on): each scene knows where in the loop it starts, so the
+    # background flows on across scene changes and chunks instead of jumping
+    bg = plan.get("background") if isinstance(plan.get("background"), dict) else None
+    if bg:
+        from . import background as background_mod
+
+        for sc in scenes:
+            sc["bg_t0"] = background_mod.phase(sc["start"], bg)
     # segment boundaries must be a multiple of the GOP so chunks start on an IDR frame
     from . import music as music_mod
 
@@ -173,6 +181,7 @@ def build_timeline(
         "chapters": chapters,
         "title": plan.get("title", ""),
         **({"watermark": wm} if wm else {}),
+        **({"background": bg} if bg else {}),
     }
 
 
@@ -186,7 +195,7 @@ def beat_info_from_plan(plan: Dict[str, Any]) -> List[Dict[str, Any]]:
 
 
 def _scene_fingerprint(sc: Dict[str, Any]) -> Dict[str, Any]:
-    return {k: sc.get(k) for k in ("id", "type", "duration", "props", "words", "transition")}
+    return {**{k: sc.get(k) for k in ("id", "type", "duration", "props", "words", "transition")}, **({"bg_t0": sc["bg_t0"]} if "bg_t0" in sc else {})}   # bg_t0: only with an animated background
 
 
 def chunk_plan(timeline: Dict[str, Any], target_seconds: float = 30, draft: bool = False, max_frames: int = 0) -> List[Dict[str, Any]]:
@@ -228,7 +237,8 @@ def chunk_plan(timeline: Dict[str, Any], target_seconds: float = 30, draft: bool
             "captions": timeline.get("captions", True), "language": timeline.get("language", "en"), "draft": draft,
             "scenes": [_scene_fingerprint(x) for x in scenes[lo:hi]],
             "lead": _scene_fingerprint(scenes[lo - 1]) if lo > 0 else None, "outro": hi == len(scenes),
-            **({"wm": timeline["watermark"], "first": lo == 0} if timeline.get("watermark") else {}),   # the mark is part of every frame (and fades in on the first chunk only)
+            **({"wm": timeline["watermark"], "first": lo == 0, "wmv": 2} if timeline.get("watermark") else {}),   # the mark is part of every frame (and fades in on the first chunk only)
+            **({"bg": timeline["background"]} if timeline.get("background") else {}),   # the animated background, when the plan has one
         }, sort_keys=True, ensure_ascii=False).encode("utf-8")).hexdigest()[:24]
         n = max(1, f1 - f0)
         if not max_frames or n <= max_frames:
@@ -253,4 +263,5 @@ def chunk_timeline(timeline: Dict[str, Any], lo: int, hi: int) -> Dict[str, Any]
         "outro": hi == len(scenes), "duration": round(sum(float(x["duration"]) for x in sub), 6),
         **({"frame": timeline["frame"]} if timeline.get("frame") else {}),
         **({"watermark": timeline["watermark"]} if timeline.get("watermark") else {}),
+        **({"background": timeline["background"]} if timeline.get("background") else {}),
     }

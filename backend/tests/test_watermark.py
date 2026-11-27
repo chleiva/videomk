@@ -112,8 +112,11 @@ def _tl(aspect="16:9", resolution="1080p", theme="midnight", watermark=None, cap
     return tl
 
 
-def _frame(tl, t=1.2, draft=True, loader=None, first=False):
+def _frame(tl, t=1.2, draft=True, loader=None, first=False, band=0):
     r = Renderer(tl, image_loader=loader, draft=draft)
+    if band:   # a frame WITHOUT the mark but with the band a top-corner mark reserves, so the only difference to the marked frame is the mark itself
+        r.frame = r.frame.with_top_inset(band)
+        r.ctx.frame = r.frame
     if not first:
         r.lead = object()   # a chunk that is not the first: the mark is already fully in
     return r, r.frame_at(t).convert("RGB")
@@ -127,9 +130,8 @@ def _bbox(a, b, thr=6):
 
 @pytest.mark.parametrize("aspect", ASPECTS)
 def test_the_mark_is_where_the_layout_says_and_as_big(aspect):
-    base_tl = _tl(aspect)
-    _, plain = _frame(base_tl)
     r, marked = _frame(_tl(aspect, watermark={"mode": "videomk"}))
+    _, plain = _frame(_tl(aspect), band=r.wm.inset)
     box = _bbox(plain, marked)
     assert box is not None
     scale = r.out_w / r.frame.W
@@ -142,7 +144,7 @@ def test_the_mark_is_where_the_layout_says_and_as_big(aspect):
 @pytest.mark.parametrize("aspect,resolution,draft", [("16:9", "720p", False), ("9:16", "1080p", True), ("1:1", "720p", True), ("4:5", "1080p", True), ("16:9", "2160p", False)])
 def test_the_mark_is_drawn_at_the_output_size_in_every_resolution(aspect, resolution, draft):
     r, marked = _frame(_tl(aspect, resolution, watermark={"mode": "videomk"}), draft=draft)
-    _, plain = _frame(_tl(aspect, resolution), draft=draft)
+    _, plain = _frame(_tl(aspect, resolution), draft=draft, band=r.wm.inset)
     box = _bbox(plain, marked)
     expect_h = 0.05 * min(r.out_w, r.out_h)   # 5 % of the short side of what is really output
     assert marked.size == (r.out_w, r.out_h) and box and 0.8 * expect_h <= (box[3] - box[1]) <= 1.45 * expect_h
@@ -208,13 +210,62 @@ def test_the_mark_never_lands_on_the_captions():
                 spec = {"mode": "videomk", "position": pos, "style": style, "size": "medium"}
                 r, with_all = _frame(_tl(aspect, watermark=spec, words=WORDS))
                 _, no_caps = _frame(_tl(aspect, watermark=spec, captions=False))
-                _, only_caps = _frame(_tl(aspect), t=1.2)
-                _, nothing = _frame(_tl(aspect, captions=False))
+                _, only_caps = _frame(_tl(aspect), t=1.2, band=r.wm.inset)
+                _, nothing = _frame(_tl(aspect, captions=False), band=r.wm.inset)
                 cap_box = _bbox(nothing, only_caps)
                 wm_box = _bbox(only_caps, with_all)
                 assert cap_box is not None and wm_box is not None
                 inter = not (wm_box[2] <= cap_box[0] or wm_box[0] >= cap_box[2] or wm_box[3] <= cap_box[1] or wm_box[1] >= cap_box[3])
                 assert not inter, (aspect, pos, style, cap_box, wm_box)
+
+
+# ======================================================================== a top-corner mark has a band of its own (QA 2026-11-27: a 9:16 logo sat on a list heading)
+LIST = {"heading": "Lighthouse facts", "items": ["Warn of rocks and reefs", "Guide ships into harbors", "Fewer shine today"]}
+
+
+@pytest.mark.parametrize("aspect", ["9:16", "1:1", "4:5"])
+@pytest.mark.parametrize("spec", [{"mode": "videomk"}, {"mode": "videomk", "style": "lockup", "size": "medium"}, {"mode": "videomk", "position": "tr", "style": "lockup"}])
+def test_a_top_corner_mark_gets_its_own_band_above_the_content(aspect, spec):
+    f = Frame.parse(aspect)
+    lay = ws.layout(spec, f, None, True)
+    inset = ws.content_inset(lay, f)
+    assert lay["position"] in ("tl", "tr") and 0 <= inset <= f.design_h // 10
+    assert (inset > 0) == (lay["rect"][3] + ws.CONTENT_GAP > f.margin_top)   # a chosen corner of 9:16 sits in the platform header, above the content: nothing to move
+    assert f.with_top_inset(inset).margin_top >= lay["rect"][3] + ws.CONTENT_GAP - 0.5   # the content box starts below the mark
+    assert f.with_top_inset(inset).base_margin_top == f.margin_top and f.with_top_inset(0) is f   # the shape's own margin (credit line, mark placement) does not move
+    r, marked = _frame(_tl(aspect, watermark=spec, scene="bullets", props=LIST, words=[]), t=5.0)
+    assert r.frame.top_inset == inset and r.ctx.frame.top_inset == inset and r.ctx.top == f.margin_top + inset
+    # the heading is drawn below the mark: with the band, nothing of the scene differs from the bare background inside the mark's rectangle
+    _, scene = _frame(_tl(aspect, scene="bullets", props=LIST, words=[]), t=5.0, band=inset)
+    _, bare = _frame(_tl(aspect, scene="bullets", props={"heading": "", "items": [""]}, words=[]), t=5.0, band=inset)
+    k = r.out_w / f.W
+    x0, y0, x1, y1 = [int(round(v * k)) for v in lay["rect"]]
+    a, b = np.asarray(scene, np.int16)[y0:y1, x0:x1], np.asarray(bare, np.int16)[y0:y1, x0:x1]
+    assert np.abs(a - b).max() <= 6, (aspect, spec)
+    _, old = _frame(_tl(aspect, scene="bullets", props=LIST, words=[]), t=5.0)   # the frame as it was without the band, for the default corner: the heading ran under a wide mark
+    if spec.get("size") == "medium":
+        assert np.abs(np.asarray(old, np.int16)[y0:y1, x0:x1] - b).max() > 40
+
+
+def test_no_band_for_a_bottom_corner_for_landscape_or_without_a_watermark():
+    for aspect in ASPECTS:
+        f = Frame.parse(aspect)
+        assert Renderer(_tl(aspect)).frame.top_inset == 0 and Renderer(_tl(aspect, watermark={"mode": "none"})).frame is f
+    land = Frame.parse("16:9")
+    for pos in ws.POSITIONS:
+        assert ws.content_inset(ws.layout({"mode": "videomk", "position": pos, "style": "lockup"}, land, None, True), land) == 0
+    tall = Frame.parse("9:16")
+    lay = ws.layout({"mode": "videomk", "position": "br"}, tall, None, False)   # captions off: the chosen bottom corner is free
+    assert lay["position"] == "br" and ws.content_inset(lay, tall) == 0
+    assert Frame.parse("9:16").with_top_inset(10_000).top_inset == 192 and Frame.parse("9:16").with_top_inset(-5).top_inset == 0   # a band, never a layout change
+
+
+def test_the_band_is_part_of_the_segment_hash_so_old_segments_are_not_reused():
+    tl = _tl("9:16", watermark={"mode": "videomk"})
+    plain = _tl("9:16")
+    assert chunk_plan(tl)[0]["hash"] != chunk_plan(plain)[0]["hash"]
+    import hashlib, json as _json  # noqa: E401
+    assert '"wmv"' not in _json.dumps(chunk_plan(plain)) and hashlib   # nothing new in a video without a mark (its hash is covered by the existing test)
 
 
 def _png(w=300, h=120, color=(220, 30, 40, 255)):
