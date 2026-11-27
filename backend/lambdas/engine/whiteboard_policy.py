@@ -565,9 +565,9 @@ def linked_props(props_list: List[Dict[str, Any]], sizes: List[int], ends: Optio
     return out
 
 
-REST_S = 1.4               # the pen may rest this long between two things; a longer rest gets an emphasis mark (`fill_rests`)
+REST_S = 1.6               # the pen may rest this long between two things; a longer rest gets an emphasis mark (`fill_rests`)
 COVER_S = {"draw": 2.2, "chart": 3.0, "write": 1.2, "connect": 0.9, "mark": 0.5}      # how long before its word the pen is already busy with a thing (a drawing is drawn slowly when there is time)
-MAX_REST_MARKS = 4
+MAX_REST_MARKS = 3
 
 
 def fill_rests(props: Dict[str, Any], cues: Optional[List[float]], end: Optional[float] = None, tag: str = "") -> int:
