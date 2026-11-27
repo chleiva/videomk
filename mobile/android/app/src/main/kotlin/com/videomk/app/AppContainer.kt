@@ -21,6 +21,8 @@ class AppContainer(
     store: TokenStore? = null,
 ) {
     val http = defaultHttpClient()
+    /** "Tell me when it's ready": the switch on the Making screen and the local notification behind it. */
+    val readyNotifier by lazy { com.videomk.app.data.ReadyNotifier(appContext) }
     private val signedOutEvents = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
     /** Emits when the server or the token refresh says the session is over. */
     val signedOut: SharedFlow<Unit> get() = signedOutEvents

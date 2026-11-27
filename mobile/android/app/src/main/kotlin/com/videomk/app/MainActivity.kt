@@ -60,6 +60,7 @@ class MainActivity : ComponentActivity() {
             DebugHooks.mediaFiles(intent).takeIf { it.isNotEmpty() }?.let { files -> container.mediaUploads?.add(contentResolver, files.map { android.net.Uri.fromFile(java.io.File(it)) }) }
             handleAuthIntent(intent)
         }
+        app.makingEvents = container.readyNotifier
         lifecycleScope.launch { app.browserRequests.collect { openBrowser(it.toString()) } }
         app.deletion?.let { d -> lifecycleScope.launch { d.requests.collect { openBrowser(it.toString()) } } }
         setContent {
@@ -75,9 +76,17 @@ class MainActivity : ComponentActivity() {
         handleAuthIntent(intent)
     }
 
+    override fun onStart() {
+        super.onStart()
+        container.readyNotifier.appVisible = true
+        app.onForeground()
+    }
+
     override fun onStop() {
         super.onStop()
         composer.dictation.stop()
+        // "Tell me when it's ready": keep an eye on videos being made while the app is off screen (see ReadyNotifier for what that can and cannot promise)
+        if (!isChangingConfigurations) { container.readyNotifier.appVisible = false; app.onBackground(container.readyNotifier.active) }
     }
 
     override fun onResume() {

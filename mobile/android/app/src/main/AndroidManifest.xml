@@ -4,6 +4,8 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <!-- "Tell me when it's ready": asked only when the person turns that switch on. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <!-- Dictation is optional and so is the camera/mic hardware. -->
     <uses-feature android:name="android.hardware.microphone" android:required="false" />
     <uses-feature android:name="android.hardware.touchscreen" android:required="false" />

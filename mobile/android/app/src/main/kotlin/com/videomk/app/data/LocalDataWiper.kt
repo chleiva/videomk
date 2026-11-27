@@ -31,7 +31,7 @@ fun deleteChildren(dir: File?): Boolean {
 object LocalDataWiper {
     private const val TAG = "LocalDataWiper"
     /** The preference files the app writes (see PhotoSettings, CreatePrefsStore, SecureTokenStore). Anything else the app may add must be listed here (the wiper test checks the sources for getSharedPreferences). */
-    val PREFERENCE_FILES = listOf("videomk_settings", "videomk_create", "vmk_session", "app_language", "videomk_rating")
+    val PREFERENCE_FILES = listOf("videomk_settings", "videomk_create", "vmk_session", "app_language", "videomk_rating", "vmk_notify")
 
     suspend fun wipe(context: Context, stopWork: () -> Unit, clearTokens: () -> Unit, deckCache: File? = null) = withContext(Dispatchers.IO) {
         val app = context.applicationContext

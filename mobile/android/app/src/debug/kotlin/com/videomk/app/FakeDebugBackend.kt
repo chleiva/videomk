@@ -10,12 +10,23 @@ import java.time.Instant
  */
 class FakeDebugBackend(private val deckDemo: Boolean = false) : Backend {
     private val now = Instant.now()
+    /** Screenshots: pictures pushed to `files/fake_pics/` (any JPEG, by name) stand in for posters and scene pictures; without them the gradients show. */
+    private fun pic(name: String): String? = java.io.File("/data/data/com.videomk.app/files/fake_pics/$name").takeIf { it.exists() }?.let { "file://${it.path}" }
+    /** `files/fake_making`: "none" (a server that does not send `making`), "plain" (scenes without pictures), "render" (every scene done); anything else: scenes with pictures. */
+    private val makingMode = runCatching { java.io.File("/data/data/com.videomk.app/files/fake_making").readText().trim() }.getOrDefault("")
+    private val making: MakingInfo? = when (makingMode) {
+        "none" -> null
+        "render" -> MakingInfo(9, 9, "Putting the scenes together", "Deep in the forest, every tree is part of one slow breath.", (1..9).map { MakingInfo.Scene(it, true, pic("p%02d.jpg".format(it))) })
+        else -> MakingInfo(9, 4, "Adding footage of sunlit canopies", "Sunlight pours through the canopy, and the forest breathes.", (1..9).map { MakingInfo.Scene(it, it <= 4, if (makingMode == "plain" || it > 4) null else pic("p%02d.jpg".format(it))) })
+    }
     private val videos = mutableListOf(
-        VideoItem("v1", VideoStatus.Complete, "How bees make honey", 182.0, now.minusSeconds(3600), "https://example.com/v1.mp4", null, null, true, "16:9", "1080p"),
-        VideoItem("v2", VideoStatus.Running(VideoStatus.Stage.VoiceAndVisuals), "The history of the lighthouse", null, now.minusSeconds(240), null, null, null, false, "9:16", "1080p"),
+        VideoItem("v2", VideoStatus.Running(VideoStatus.Stage.VoiceAndVisuals), "How a forest breathes", null, now.minusSeconds(240), null, null, null, false, "16:9", "1080p", making = making),
+        VideoItem("v1", VideoStatus.Complete, "How bees make honey", 182.0, now.minusSeconds(3600), "https://example.com/v1.mp4", pic("s_bees.jpg"), null, true, "16:9", "1080p"),
+        VideoItem("v6", VideoStatus.Complete, "3 focus tips", 30.0, now.minusSeconds(7200), "https://example.com/v6.mp4", pic("s_focus.jpg"), null, true, "9:16", "1080p"),
+        VideoItem("v7", VideoStatus.Complete, "Why forests matter", 91.0, now.minusSeconds(9000), "https://example.com/v7.mp4", pic("s_forest.jpg"), null, true, "16:9", "1080p"),
         VideoItem("v3", VideoStatus.Failed, "A calm walk through Kyoto", null, now.minusSeconds(86400), null, null, null, false, "16:9", "1080p"),
         VideoItem("v4", VideoStatus.Rejected, null, null, now.minusSeconds(172800), null, null, "This request is outside what videomk can make.", false, "16:9", "1080p"),
-        VideoItem("v5", VideoStatus.Complete, "Why is the sky blue?", 61.0, now.minusSeconds(604800), "https://example.com/v5.mp4", null, null, true, "1:1", "720p"),
+        VideoItem("v5", VideoStatus.Complete, "Why is the sky blue?", 61.0, now.minusSeconds(604800), "https://example.com/v5.mp4", pic("mountain_lake.jpg"), null, true, "1:1", "720p"),
     )
 
     /** With the fake presentation switch on, two videos made from a deck are being prepared: one reading the slides, one writing the narration. */

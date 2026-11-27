@@ -208,7 +208,7 @@ fun LibraryScreen(app: AppViewModel, composer: ComposerViewModel, onOpenVideo: (
                                             // one item per video: Making settles into Ready with a cross-fade instead of a pop
                                             SettleCrossfade(kind, Modifier.animateItem()) { k ->
                                                 when (k) {
-                                                    0 -> MakingCard(rememberMakingSnapshot(v, state), Modifier.testTag("runningRow"), onClick = { onOpenVideo(v.id) })
+                                                    0 -> MakingCard(rememberMakingSnapshot(v, state), Modifier.testTag("runningRow"), onClick = { onOpenVideo(v.id) }, videoId = v.id)
                                                     1 -> VideoRow(v, null, remember(v.id, onOpenVideo) { { onOpenVideo(v.id) } })
                                                     else -> FailedRow(
                                                         title = state.briefs[v.id] ?: v.displayTitle, rejected = v.status == VideoStatus.Rejected, detail = v.rejectReason,
@@ -334,7 +334,7 @@ fun rememberMakingSnapshot(video: VideoItem, state: AppState): MakingSnapshot {
     val minutes = state.minutes[video.id] ?: CreateOptions.DEFAULT_MINUTES
     val title = state.briefs[video.id] ?: video.title?.takeIf { it.isNotEmpty() } ?: stringResource(R.string.lib_making_title)
     val deck = (video.status as? VideoStatus.Running)?.deck
-    return if (deck != null) MakingSnapshot.ofDeck(title, deck, inStage, minutes) else MakingSnapshot.of(title, stage, inStage, minutes)
+    return (if (deck != null) MakingSnapshot.ofDeck(title, deck, inStage, minutes) else MakingSnapshot.of(title, stage, inStage, minutes)).with(video.making)
 }
 
 /** The request is on its way (or failed before the server answered): the same card as a running one, so the list never jumps. */
@@ -418,9 +418,8 @@ fun StatusChip(status: VideoStatus) {
  * must not look like a new picture. The request is built once per picture; a failed load retries once with the newest link.
  */
 @Composable
-internal fun StableImage(url: String, scale: ContentScale, modifier: Modifier = Modifier, colorFilter: ColorFilter? = null) {
+internal fun StableImage(url: String, scale: ContentScale, modifier: Modifier = Modifier, colorFilter: ColorFilter? = null, key: String = com.videomk.app.core.ImageKeys.stable(url)) {
     val context = LocalContext.current
-    val key = com.videomk.app.core.ImageKeys.stable(url)
     val latest by androidx.compose.runtime.rememberUpdatedState(url)
     var retried by remember(key) { mutableStateOf(false) }
     val request = remember(key, retried) {

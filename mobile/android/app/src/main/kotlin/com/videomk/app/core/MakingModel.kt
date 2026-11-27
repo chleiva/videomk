@@ -19,10 +19,25 @@ data class MakingSnapshot(
     val scene: MakingScene? = null,
     val thumbnails: List<String> = emptyList(),
     val narrationLine: String? = null,
+    /** One tile per planned scene (empty until the server reports scenes): the film strip. */
+    val tiles: List<MakingTile> = emptyList(),
+    /** The newest finished scene with a picture, for the large frame. */
+    val hero: MakingTile? = null,
+    /** True when the line came from the server's `live_line` (shown as received). */
+    val live: Boolean = false,
 ) {
+    /** The estimate without its full stop, for the corner of the card ("About 2 min left"). */
+    val etaShort: String? get() = eta?.trimEnd('.', ' ')
+
+    /** What the server says about this video's scenes laid over the app's own estimate: every part is optional, so whatever is missing keeps the calm fallback. */
+    fun with(making: MakingInfo?): MakingSnapshot {
+        making ?: return this
+        return copy(stageLine = making.liveLine ?: stageLine, live = making.liveLine != null, scene = making.counter ?: scene, narrationLine = making.narrationLine ?: narrationLine, tiles = making.tiles(), hero = making.heroTile())
+    }
+
     /** What TalkBack reads for the whole card. */
     fun spoken(): String {
-        val line = listOfNotNull(stageLine, scene?.let { Txt.s(R.string.making_scene_counter, it.index, it.total) }, eta).joinToString(" ")
+        val line = listOfNotNull(scene?.let { Txt.s(R.string.making_scene_counter, it.index, it.total) + "." }, stageLine.trimEnd('.') + ".", eta).joinToString(" ")
         return Txt.s(R.string.lib_making_desc, title, line)
     }
 

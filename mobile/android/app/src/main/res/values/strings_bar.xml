@@ -9,4 +9,11 @@
     <string name="create_capsule_starting">Starting your video</string>
     <string name="create_capsule_sub">A few seconds</string>
     <string name="create_capsule_photo">Photo %1$d of %2$d</string>
+    <!-- Making -->
+    <string name="making_keeps_going">You can leave. It keeps going.</string>
+    <string name="making_notify">Tell me when it\'s ready</string>
+    <string name="making_notify_off">Notifications are off for videomk in your phone\'s settings.</string>
+    <string name="notify_channel">Video ready</string>
+    <string name="notify_ready_title">Your video is ready</string>
+    <string name="notify_failed_title">Your video didn\'t finish</string>
 </resources>

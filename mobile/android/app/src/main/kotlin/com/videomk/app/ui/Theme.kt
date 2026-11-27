@@ -109,6 +109,8 @@ object VmkType {
     )
     /** The prompt on Create ("A video about…") and the narration line on Making: the one large reading size. */
     val prompt: TextStyle get() = typography.headlineMedium
+    /** The sentence being narrated, on the Making screen. */
+    val narration: TextStyle get() = typography.headlineSmall.copy(fontWeight = FontWeight.Medium)
     /** The title on the Making card. */
     val makingTitle = TextStyle(fontSize = 19.sp, lineHeight = 24.sp, fontWeight = FontWeight.SemiBold)
     val question: TextStyle get() = typography.headlineMedium.copy(fontWeight = FontWeight.Bold)

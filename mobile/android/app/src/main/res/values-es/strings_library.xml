@@ -51,7 +51,7 @@
     <string name="lib_step_final_cut">Montaje</string>
     <string name="lib_sentence_starting">Empezando.</string>
     <string name="lib_sentence_writing">Escribiendo la historia.</string>
-    <string name="lib_sentence_voice">Voz e imágenes.</string>
+    <string name="lib_sentence_voice">Buscando imágenes y voz.</string>
     <string name="lib_sentence_rendering">Uniendo todo.</string>
 
     <!-- relative times -->

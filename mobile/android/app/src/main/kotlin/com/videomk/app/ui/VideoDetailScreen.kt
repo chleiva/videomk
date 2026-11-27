@@ -112,7 +112,7 @@ fun VideoDetailScreen(app: AppViewModel, detail: VideoDetailViewModel, http: OkH
                 Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(16.dp)) {
                     when (k) {
                         1 -> PlayerSection(video, detail, playback, http, onEdit = { detail.pause(); onEdit() }, onMakeAnother = onMakeAnother, onFeedback = onFeedback)
-                        0 -> Column(Modifier.padding(20.dp)) { MakingCard(rememberMakingSnapshot(video, state), Modifier.testTag("progressCard"), MakingLayout.Detail) }
+                        0 -> MakingBody(rememberMakingSnapshot(video, state), video.id, video.frameRatio, LocalContainerOrNull.current?.readyNotifier, Modifier.testTag("progressCard"))
                         2 -> Column(Modifier.padding(20.dp)) { MessageCard(stringResource(R.string.video_failed_title), stringResource(R.string.video_failed_body), Sym.Warning, Vmk.colors.danger) }
                         else -> Column(Modifier.padding(20.dp)) { MessageCard(stringResource(R.string.video_rejected_title), video.rejectReason ?: stringResource(R.string.video_rejected_body), Sym.PanTool, Vmk.colors.warning) }
                     }

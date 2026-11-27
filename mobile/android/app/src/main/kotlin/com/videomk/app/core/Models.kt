@@ -55,6 +55,8 @@ data class VideoItem(
     val resolution: String? = null,
     /** The server's answer to "is Try again worth offering" (retries left, not a presentation); null from a server that does not say (older ones). */
     val canRetry: Boolean? = null,
+    /** While it is being made, once the plan exists: scenes, the live line, the narration line (docs/CREATE_API.md "Making status"). Null from an older server. */
+    val making: MakingInfo? = null,
 ) {
     /** Width over height of the frame, from the server's `aspect` ("16:9", "9:16", "1:1", "4:5"); landscape 16:9 when it is absent (older videos). */
     val frameRatio: Float get() = VideoItem.ratioOf(aspect)
@@ -73,6 +75,7 @@ data class VideoItem(
             rejectReason = o.str("reject_reason"),
             editable = o.bool("editable") ?: false,
             aspect = o.str("aspect"), resolution = o.str("resolution"), canRetry = o.bool("can_retry"),
+            making = MakingInfo.fromJson(o.obj("making")),
         )
 
         fun ratioOf(aspect: String?): Float {

@@ -23,6 +23,7 @@ import com.videomk.app.core.VideoItem
 import com.videomk.app.core.VideoStatus
 import com.videomk.app.core.WalletInfo
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -259,6 +260,18 @@ class AppViewModel(
         return stages to completions
     }
 
+    private var backgroundWatch: Job? = null
+    /** Off screen with "Tell me when it's ready" on: keep checking, slowly, until everything has settled or half an hour has passed (then Android may well have stopped the app anyway). */
+    fun onBackground(watch: Boolean) {
+        backgroundWatch?.cancel()
+        if (!watch || !_state.value.hasRunningVideos) return
+        backgroundWatch = viewModelScope.launch {
+            val until = clock() + BACKGROUND_WATCH_MILLIS
+            while (isActive && _state.value.hasRunningVideos && clock() < until) { delay(BACKGROUND_POLL_MILLIS); refresh() }
+        }
+    }
+    fun onForeground() { backgroundWatch?.cancel(); backgroundWatch = null }
+
     /** Polls while anything is running; ends when the caller's coroutine is cancelled or everything has settled. */
     suspend fun pollWhileRunning() {
         while (currentIsActive() && _state.value.hasRunningVideos) {
@@ -421,6 +434,8 @@ class AppViewModel(
 
     companion object {
         const val POLL_MILLIS = 4000L
+        const val BACKGROUND_POLL_MILLIS = 15_000L
+        const val BACKGROUND_WATCH_MILLIS = 30 * 60_000L
         val SIGN_IN_FAILED: String get() = Txt.s(R.string.auth_sign_in_failed)
         val ACCOUNT_LINK_FAILED: String get() = Txt.s(R.string.auth_account_link_failed)
     }
