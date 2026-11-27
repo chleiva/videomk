@@ -37,6 +37,8 @@ from engine import vector_scene as vs  # noqa: E402
 from engine.audio import SR  # noqa: E402
 
 ORDER = ["ines", "david", "priya", "mateo", "fox"]
+ANIMALS = ["owl", "bear"]                # the animal cast: rendered when named in --only (talk) or with --animals (the group still)
+TAILS = {"fox", "owl"}
 # script, framing, side of the frame where the character stands, the card beside it (title, [(word that reveals the line, line)])
 TALK: Dict[str, Dict[str, Any]] = {
     "ines": {"text": "Hello, I'm Inés. Learning something new takes three things: time, practice and patience. Some days it feels slow, but every small step counts. So, what will you learn today? Thank you for listening!",
@@ -49,8 +51,12 @@ TALK: Dict[str, Dict[str, Any]] = {
               "framing": "full", "side": "right", "scene": "home_garden_backyard", "card": ("Fresh tomatoes", [("ripe,", "Ripe"), ("red", "Red"), ("flavour.", "Full of flavour")])},
     "fox": {"text": "Hi! I'm Fox, your guide. Today we explore the forest together. On one side there are tall old trees, but on the other side, a quiet river. Stay close, and remember: every path leads home. Ready? Great, follow me!",
             "framing": "three_quarter", "side": "left", "scene": "autumn_forest_path", "card": ("The forest", [("trees,", "Tall old trees"), ("river.", "A quiet river")])},
+    "owl": {"text": "Good day! I'm Hugo. Why is the sky blue? Sunlight is made of many colours. First, it meets the air. Second, the blue light scatters the most. So look up: that blue is sunlight, playing. Thank you for listening!",
+            "framing": "three_quarter", "side": "left", "scene": "library_interior_view", "card": ("Why the sky is blue", [("colours.", "Light has many colours"), ("First,", "1  It meets the air"), ("Second,", "2  Blue scatters most")])},
+    "bear": {"text": "Hello, I'm Bruno. Feeling worried is okay. Here are three things that help: breathe slowly, name the feeling, and tell someone you trust. Big feelings come, but they also go. You are doing great. Sleep well!",
+             "framing": "three_quarter", "side": "right", "scene": "bedroom_window_morning", "card": ("When you feel worried", [("slowly,", "Breathe slowly"), ("name", "Name the feeling"), ("tell", "Tell someone you trust")])},
 }
-SIZE = {c: old.CAST[c]["size"] for c in ORDER}
+SIZE = {c: old.CAST[c]["size"] for c in ORDER + ANIMALS}
 
 
 def ramp(t: float, a: float, b: float) -> float:
@@ -73,7 +79,7 @@ def shifted(words: List[cg.Word], t0: float) -> List[cg.Word]:
 
 
 def performer(cid: str, n: Dict[str, Any], t0: float, fps: int, seed: float, content_side: int, lift: float = 0.0) -> cg.Performance:
-    perf = cg.Performance(seed=seed, content_side=content_side, tail=cid == "fox", lift=lift)
+    perf = cg.Performance(seed=seed, content_side=content_side, tail=cid in TAILS, lift=lift)
     perf.speak(shifted(n["words"], t0), n["level"], t0 + n["dur"])
     perf.mouth(t0, fps, n["mouth"])
     return perf
@@ -188,7 +194,7 @@ def backdrop(store: str, scene: str, W: int, H: int, dim: float = 0.0):
 def build_talk(cid: str, W: int, H: int, fps: int, store: str, cache: str, framing: Optional[str] = None, side: Optional[str] = None, captions: bool = True):
     cfg = TALK[cid]
     fr = vp.framing(framing or cfg["framing"], side or cfg["side"], W, H)
-    seed = 0.3 + 0.17 * ORDER.index(cid)
+    seed = 0.3 + 0.17 * (ORDER + ANIMALS).index(cid)
     ch = vp.load(cid, fr["ppu"], SIZE[cid])
     n = narrate(cid, f"talk3_{cid}", cfg["text"], cache, fps)
     t_talk = 1.0
@@ -239,7 +245,7 @@ def build_compare(cid: str, W: int, H: int, fps: int, store: str, cache: str):
     hw = W // 2
     ppu = 0.70 * H / 290.0
     ground = 0.90 * H
-    seed = 0.3 + 0.17 * ORDER.index(cid)
+    seed = 0.3 + 0.17 * (ORDER + ANIMALS).index(cid)
     ac = old.Actor(cid, hw, H, fps, ppu, seed)
     ac.add_talk(t_talk, n["audio"])
     t_w = t_talk + n["dur"] + 0.2
@@ -446,7 +452,7 @@ def main() -> int:
             encode(frame, audio, total, W, H, a.fps, os.path.join(a.out, name + ".mp4"), music)
 
     if a.talk:
-        for cid in ORDER:
+        for cid in ORDER + [c for c in ANIMALS if c in (a.only or [])]:
             if a.only and cid not in a.only:
                 continue
             run(f"talk_{cid}", build_talk(cid, W, H, a.fps, a.store, a.cache))

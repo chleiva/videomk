@@ -325,8 +325,9 @@ class Presenter:
         hw = P["head"]["w"] * HEAD_U / P["head"]["h"]
         sc = {"head": HEAD_U / P["head"]["h"], "torso": TORSO_U / P["torso"]["h"], "upper_arm": UARM_U / P["upper_arm"]["h"], "lower_arm": LARM_U / P["lower_arm"]["h"],
               "upper_leg": ULEG_U / P["upper_leg"]["h"], "lower_leg": LLEG_U / P["lower_leg"]["h"]}
-        es = 0.50 * hw / P["eyes_open"]["w"]
-        ms = 0.27 * hw / P["mouth_wide"]["w"]
+        face = self.man.get("face", {})           # optional, per character: where the eyes and the mouth sit on the head and how wide they are (animal faces differ)
+        es = face.get("eyes_w", 0.50) * hw / P["eyes_open"]["w"]
+        ms = face.get("mouth_w", 0.27) * hw / P["mouth_wide"]["w"]
         for k in ("eyes_open", "eyes_closed"):
             sc[k] = es
         for k in ("mouth_closed", "mouth_half", "mouth_wide"):
@@ -339,9 +340,9 @@ class Presenter:
         # head and face
         hd = raw["head"]
         self.pieces["head"] = Piece(hd, (P["head"]["pivot"][0] * hd.width / P["head"]["w"], P["head"]["pivot"][1] * hd.height / P["head"]["h"]))
+        top = face.get("mouth_anchor") == "top"   # a beak hangs from its top edge (it opens downward); a mouth is centred
         for k in ("eyes_open", "eyes_closed", "mouth_closed", "mouth_half", "mouth_wide"):
-            self.pieces[k] = Piece(raw[k], (raw[k].width / 2, raw[k].height / 2))
-        face = self.man.get("face", {})
+            self.pieces[k] = Piece(raw[k], (raw[k].width / 2, 0.0 if top and k.startswith("mouth") else raw[k].height / 2))
         self.eyes_y, self.mouth_y, self.eyes_x = face.get("eyes_y", 0.60), face.get("mouth_y", 0.80), face.get("eyes_x", 0.5)
         # torso
         to = raw["torso"]
