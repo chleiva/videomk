@@ -60,6 +60,8 @@ data class VideoItem(
     val canRetry: Boolean? = null,
     /** While it is being made, once the plan exists: scenes, the live line, the narration line (docs/CREATE_API.md "Making status"). Null from an older server. */
     val making: MakingInfo? = null,
+    /** The look the video was made in and why (docs/CREATE_API.md "Video look", the video record). Null from an older server or before the plan exists. */
+    val look: AppliedLook? = null,
 ) {
     /** Width over height of the frame, from the server's `aspect` ("16:9", "9:16", "1:1", "4:5"); landscape 16:9 when it is absent (older videos). */
     val frameRatio: Float get() = VideoItem.ratioOf(aspect)
@@ -79,6 +81,7 @@ data class VideoItem(
             editable = o.bool("editable") ?: false,
             aspect = o.str("aspect"), resolution = o.str("resolution"), canRetry = o.bool("can_retry"),
             making = MakingInfo.fromJson(o.obj("making")),
+            look = AppliedLook.fromJson(o.obj("look")),
         )
 
         fun ratioOf(aspect: String?): Float {
@@ -113,6 +116,8 @@ data class CreateOptions(
     val watermarkMode: String? = null, val watermarkPresence: String? = null,
     /** What the chosen resolution costs relative to 1080p (the server's `credits_multiplier`; 2 for 4K). */
     val creditsMultiplier: Int = 1,
+    /** The chosen, enforced look of the video (Auto, Real, Whiteboard, Cartoon with its cast). Only used when the server lists `looks.look`; Auto sends nothing. */
+    val lookChoice: LookChoice = LookChoice(),
 ) {
     /** 1 credit per started minute, at least 1, at most 12 (matches the server; the server's number is the one that is charged). A presentation at its suggested length shows the server's price. */
     val credits: Int get() = suggestedCredits ?: (Lengths.credits(minutes) * maxOf(1, creditsMultiplier))

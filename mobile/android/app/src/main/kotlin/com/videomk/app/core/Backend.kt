@@ -5,6 +5,9 @@ interface Backend {
     suspend fun listVideos(): List<VideoItem>
     suspend fun wallet(): WalletInfo
     suspend fun startGeneration(prompt: String, clientRequestId: String, options: CreateOptions, media: List<String>, mediaMeta: kotlinx.serialization.json.JsonObject? = null, libraryMedia: List<String> = emptyList(), brief: kotlinx.serialization.json.JsonObject? = null, deck: String? = null): String
+    /** The same start with what the answer says about the look (`look`, `note`); a backend that only knows the id answers with the id alone. */
+    suspend fun startVideo(prompt: String, clientRequestId: String, options: CreateOptions, media: List<String>, mediaMeta: kotlinx.serialization.json.JsonObject? = null, libraryMedia: List<String> = emptyList(), brief: kotlinx.serialization.json.JsonObject? = null, deck: String? = null): StartedVideo =
+        StartedVideo(startGeneration(prompt, clientRequestId, options, media, mediaMeta, libraryMedia, brief, deck))
     suspend fun uploadPhotos(photos: List<ByteArray>, progress: (done: Int, total: Int) -> Unit): List<String>
     suspend fun playback(videoId: String): PlaybackInfo
     suspend fun editorSnapshot(videoId: String): EditorSnapshot
@@ -35,6 +38,8 @@ class ApiBackend(private val api: ApiClient, private val uploader: PhotoUploader
     override suspend fun wallet() = guarded { api.wallet() }
     override suspend fun startGeneration(prompt: String, clientRequestId: String, options: CreateOptions, media: List<String>, mediaMeta: kotlinx.serialization.json.JsonObject?, libraryMedia: List<String>, brief: kotlinx.serialization.json.JsonObject?, deck: String?) =
         guarded { api.startGeneration(prompt, clientRequestId, options, media, mediaMeta, libraryMedia, brief, deck) }
+    override suspend fun startVideo(prompt: String, clientRequestId: String, options: CreateOptions, media: List<String>, mediaMeta: kotlinx.serialization.json.JsonObject?, libraryMedia: List<String>, brief: kotlinx.serialization.json.JsonObject?, deck: String?) =
+        guarded { api.startVideo(prompt, clientRequestId, options, media, mediaMeta, libraryMedia, brief, deck) }
     override suspend fun uploadPhotos(photos: List<ByteArray>, progress: (Int, Int) -> Unit) = guarded { uploader.upload(photos, progress) }
     override suspend fun playback(videoId: String) = guarded { api.playback(videoId) }
     override suspend fun editorSnapshot(videoId: String) = guarded { api.editorSnapshot(videoId) }

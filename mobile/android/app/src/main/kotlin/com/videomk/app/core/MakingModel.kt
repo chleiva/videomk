@@ -25,6 +25,8 @@ data class MakingSnapshot(
     val hero: MakingTile? = null,
     /** True when the line came from the server's `live_line` (shown as received). */
     val live: Boolean = false,
+    /** The chosen look was adapted: the server's one sentence, shown quietly on the Making screen. */
+    val note: String? = null,
 ) {
     /** The estimate without its full stop, for the corner of the card ("About 2 min left"). */
     val etaShort: String? get() = eta?.trimEnd('.', ' ')
