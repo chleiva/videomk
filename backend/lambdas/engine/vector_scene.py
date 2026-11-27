@@ -7,6 +7,8 @@ rendered anywhere is identical.
 A scene folder holds `manifest.json` and one SVG per layer, back to front. Layer keys: `z` (0 far .. 1 near: parallax and zoom weight), `drift` (share of the
 frame width crossed over the scene, for clouds), `sway` {amp (share of width), period (s), phase}, `bob` {amp (share of height), period, phase}.
 Manifest `motion`: `push` (zoom of the nearest layer over the scene) and `pan` (parallax travel of the nearest layer, share of the width).
+A layer may also be a SPRITE (`sprite: true`, `kind`) with `tags` (engine/vector_motion.py): turbine blades rotate about the hub, fish swim and wiggle, boats bob, birds, trains and cars travel,
+smoke rises and fades, flames flicker, lit windows and stars twinkle. A sprite is cut out of the picture offline (scripts/vector_sprites.py) and drawn at the depth of the object it belongs to.
 The art is built offline with backend/scripts/vector_scene_build.py (depth model -> colour regions -> bands -> filled layers -> vtracer).
 """
 import io
@@ -17,6 +19,8 @@ from functools import lru_cache
 from typing import Any, Dict, List, Tuple
 
 from PIL import Image
+
+from . import vector_motion as vm
 
 DIR = os.path.join(os.path.dirname(__file__), "assets", "vector_scenes")
 MARGIN = 1.12   # each layer is 12% larger than the frame: room for the parallax travel
@@ -44,6 +48,9 @@ class VectorScene:
             self.man: Dict[str, Any] = json.load(f)
         self.cw, self.ch = round(self.W * MARGIN * RS), round(self.H * MARGIN * RS)
         self.layers: List[Dict[str, Any]] = self.man["layers"]
+        for lay in self.layers:   # motion tags of the catalog (vector_motion.py): validated here, so a bad manifest never reaches the renderer
+            if "tags" in lay:
+                lay["tags"] = vm.clean_tags(lay["tags"])
         self.rasters: List[Image.Image] = []
         for lay in self.layers:
             with open(os.path.join(folder, lay["file"]), encoding="utf-8") as f:
@@ -74,7 +81,13 @@ class VectorScene:
             def src(x: float, y: float, dx: float = 0.0) -> Tuple[float, float]:
                 return (cx + (x - W / 2 - tx - dx) * a, cy + (y - H / 2 - ty) * a)
 
-            if not sway:
+            tr = vm.layer_transform(lay.get("tags"), t, dur) if lay.get("tags") else None   # motion tags (vector_motion.py): rotate, wiggle, drift, flicker...
+            if tr is not None:
+                coef = vm.affine(tr, W=W, H=H, cw=self.cw, ch=self.ch, rs=RS, margin=MARGIN, s=s, tx=tx, ty=ty)
+                fr = ras.transform((W, H), Image.AFFINE, coef, Image.BILINEAR)
+                if tr["alpha"] < 0.999:
+                    fr.putalpha(fr.getchannel("A").point(lambda v, k=tr["alpha"]: int(v * k)))
+            elif not sway:
                 fr = ras.transform((W, H), Image.AFFINE, (a, 0, cx - (W / 2 + tx) * a, 0, a, cy - (H / 2 + ty) * a), Image.BILINEAR)
             else:
                 amp, per, ph = sway["amp"] * W, sway["period"], sway.get("phase", 0.0)

@@ -125,3 +125,391 @@
 {"ts": "2026-11-27T00:57:22.912268Z", "run": "vector-catalog-1", "item": "tall_lighthouse_cliff", "what": "vision check", "usd": 0.00032, "run_total": 2.34549}
 {"ts": "2026-11-27T00:57:23.733495Z", "run": "vector-catalog-1", "item": "tall_forest_trail", "what": "vision check", "usd": 0.00037, "run_total": 2.34586}
 {"ts": "2026-11-27T01:02:59.791737Z", "run": "vector-catalog-1", "item": "embeddings", "what": "Cohere Embed v4 x92 (estimate)", "usd": 0.02852}
+{"ts": "2026-11-27T01:27:04.454330Z", "run": "vector-catalog-2", "item": "airport_apron_sky", "what": "motion audit", "usd": 0.00041, "run_total": 2.37489}
+{"ts": "2026-11-27T01:27:05.447324Z", "run": "vector-catalog-2", "item": "alien_planet_surface", "what": "motion audit", "usd": 0.00018, "run_total": 2.37507}
+{"ts": "2026-11-27T01:27:06.552147Z", "run": "vector-catalog-2", "item": "autumn_forest_path", "what": "motion audit", "usd": 0.00019, "run_total": 2.37525}
+{"ts": "2026-11-27T01:27:08.147201Z", "run": "vector-catalog-2", "item": "camping_lake_night", "what": "motion audit", "usd": 0.00023, "run_total": 2.37549}
+{"ts": "2026-11-27T01:27:09.498018Z", "run": "vector-catalog-2", "item": "city_skyline_day", "what": "motion audit", "usd": 0.0002, "run_total": 2.37569}
+{"ts": "2026-11-27T01:27:12.119575Z", "run": "vector-catalog-2", "item": "city_skyline_dusk", "what": "motion audit", "usd": 0.00036, "run_total": 2.37605}
+{"ts": "2026-11-27T01:27:13.407743Z", "run": "vector-catalog-2", "item": "classroom_window_view", "what": "motion audit", "usd": 0.00018, "run_total": 2.37623}
+{"ts": "2026-11-27T01:27:16.034126Z", "run": "vector-catalog-2", "item": "coast_cliffs", "what": "motion audit", "usd": 0.00039, "run_total": 2.37662}
+{"ts": "2026-11-27T01:27:20.631096Z", "run": "vector-catalog-2", "item": "data_center_landscape", "what": "motion audit", "usd": 0.00058, "run_total": 2.3772}
+{"ts": "2026-11-27T01:27:23.260913Z", "run": "vector-catalog-2", "item": "deep_ocean_reef", "what": "motion audit", "usd": 0.00038, "run_total": 2.37758}
+{"ts": "2026-11-27T01:27:24.128852Z", "run": "vector-catalog-2", "item": "desert_canyon", "what": "motion audit", "usd": 0.00018, "run_total": 2.37776}
+{"ts": "2026-11-27T01:27:26.588460Z", "run": "vector-catalog-2", "item": "factory_skyline", "what": "motion audit", "usd": 0.00035, "run_total": 2.3781}
+{"ts": "2026-11-27T01:27:27.575046Z", "run": "vector-catalog-2", "item": "farmland_patchwork", "what": "motion audit", "usd": 0.00017, "run_total": 2.37828}
+{"ts": "2026-11-27T01:27:28.620214Z", "run": "vector-catalog-2", "item": "flower_meadow", "what": "motion audit", "usd": 0.00017, "run_total": 2.37845}
+{"ts": "2026-11-27T01:27:29.567665Z", "run": "vector-catalog-2", "item": "glacier_arctic", "what": "motion audit", "usd": 0.00017, "run_total": 2.37862}
+{"ts": "2026-11-27T01:27:32.599407Z", "run": "vector-catalog-2", "item": "harbour_boats", "what": "motion audit", "usd": 0.00039, "run_total": 2.37901}
+{"ts": "2026-11-27T01:27:33.665643Z", "run": "vector-catalog-2", "item": "home_garden_backyard", "what": "motion audit", "usd": 0.00018, "run_total": 2.3792}
+{"ts": "2026-11-27T01:27:34.704985Z", "run": "vector-catalog-2", "item": "kitchen_window_garden", "what": "motion audit", "usd": 0.00017, "run_total": 2.37937}
+{"ts": "2026-11-27T01:27:35.940194Z", "run": "vector-catalog-2", "item": "laboratory_building", "what": "motion audit", "usd": 0.00021, "run_total": 2.37958}
+{"ts": "2026-11-27T01:27:37.727041Z", "run": "vector-catalog-2", "item": "library_interior_view", "what": "motion audit", "usd": 0.00018, "run_total": 2.37976}
+{"ts": "2026-11-27T01:27:38.691636Z", "run": "vector-catalog-2", "item": "modern_office_exterior", "what": "motion audit", "usd": 0.00017, "run_total": 2.37993}
+{"ts": "2026-11-27T01:27:42.357838Z", "run": "vector-catalog-2", "item": "moon_base_surface", "what": "motion audit", "usd": 0.00044, "run_total": 2.38037}
+{"ts": "2026-11-27T01:27:43.158340Z", "run": "vector-catalog-2", "item": "mountain_lake", "what": "motion audit", "usd": 0.00014, "run_total": 2.38051}
+{"ts": "2026-11-27T01:27:44.852044Z", "run": "vector-catalog-2", "item": "observatory_night", "what": "motion audit", "usd": 0.00025, "run_total": 2.38076}
+{"ts": "2026-11-27T01:27:47.649062Z", "run": "vector-catalog-2", "item": "old_town_street", "what": "motion audit", "usd": 0.00037, "run_total": 2.38113}
+{"ts": "2026-11-27T01:27:48.606745Z", "run": "vector-catalog-2", "item": "pine_forest_valley", "what": "motion audit", "usd": 0.00017, "run_total": 2.3813}
+{"ts": "2026-11-27T01:27:49.515727Z", "run": "vector-catalog-2", "item": "river_valley_morning", "what": "motion audit", "usd": 0.00018, "run_total": 2.38148}
+{"ts": "2026-11-27T01:27:51.554503Z", "run": "vector-catalog-2", "item": "road_trip_highway", "what": "motion audit", "usd": 0.00027, "run_total": 2.38175}
+{"ts": "2026-11-27T01:27:52.619343Z", "run": "vector-catalog-2", "item": "rooftop_city_view", "what": "motion audit", "usd": 0.00019, "run_total": 2.38194}
+{"ts": "2026-11-27T01:27:53.823945Z", "run": "vector-catalog-2", "item": "savanna_acacia", "what": "motion audit", "usd": 0.00019, "run_total": 2.38213}
+{"ts": "2026-11-27T01:27:54.809659Z", "run": "vector-catalog-2", "item": "skyscraper_district", "what": "motion audit", "usd": 0.00017, "run_total": 2.3823}
+{"ts": "2026-11-27T01:27:57.310831Z", "run": "vector-catalog-2", "item": "snowy_peaks_cabin", "what": "motion audit", "usd": 0.00034, "run_total": 2.38264}
+{"ts": "2026-11-27T01:28:00.118844Z", "run": "vector-catalog-2", "item": "solar_wind_farm", "what": "motion audit", "usd": 0.00042, "run_total": 2.38306}
+{"ts": "2026-11-27T01:28:00.954803Z", "run": "vector-catalog-2", "item": "spring_orchard", "what": "motion audit", "usd": 0.00017, "run_total": 2.38323}
+{"ts": "2026-11-27T01:28:03.038170Z", "run": "vector-catalog-2", "item": "stone_bridge_river", "what": "motion audit", "usd": 0.00031, "run_total": 2.38354}
+{"ts": "2026-11-27T01:28:05.424219Z", "run": "vector-catalog-2", "item": "study_desk_window", "what": "motion audit", "usd": 0.00032, "run_total": 2.38386}
+{"ts": "2026-11-27T01:28:06.366031Z", "run": "vector-catalog-2", "item": "suburb_street_morning", "what": "motion audit", "usd": 0.00017, "run_total": 2.38403}
+{"ts": "2026-11-27T01:28:07.276604Z", "run": "vector-catalog-2", "item": "tall_city_tower", "what": "motion audit", "usd": 0.00018, "run_total": 2.38422}
+{"ts": "2026-11-27T01:28:08.145255Z", "run": "vector-catalog-2", "item": "tall_forest_trail", "what": "motion audit", "usd": 0.00018, "run_total": 2.38439}
+{"ts": "2026-11-27T01:28:10.320889Z", "run": "vector-catalog-2", "item": "tall_lighthouse_cliff", "what": "motion audit", "usd": 0.00032, "run_total": 2.38472}
+{"ts": "2026-11-27T01:28:11.805548Z", "run": "vector-catalog-2", "item": "train_through_hills", "what": "motion audit", "usd": 0.00024, "run_total": 2.38496}
+{"ts": "2026-11-27T01:28:13.422238Z", "run": "vector-catalog-2", "item": "tropical_beach", "what": "motion audit", "usd": 0.00025, "run_total": 2.38521}
+{"ts": "2026-11-27T01:28:16.130870Z", "run": "vector-catalog-2", "item": "volcano_island", "what": "motion audit", "usd": 0.00035, "run_total": 2.38556}
+{"ts": "2026-11-27T01:28:17.017013Z", "run": "vector-catalog-2", "item": "waterfall_jungle", "what": "motion audit", "usd": 0.00016, "run_total": 2.38573}
+{"ts": "2026-11-27T01:28:21.053267Z", "run": "vector-catalog-2", "item": "winter_village", "what": "motion audit", "usd": 0.00058, "run_total": 2.38631}
+{"ts": "2026-11-27T01:28:23.600936Z", "run": "vector-catalog-2", "item": "workshop_exterior", "what": "motion audit", "usd": 0.00034, "run_total": 2.38665}
+{"ts": "2026-11-27T01:46:14.578900Z", "run": "vector-catalog-2", "item": "greek_temple_ruins", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 1", "usd": 0.03714, "run_total": 2.42376}
+{"ts": "2026-11-27T01:46:16.090284Z", "run": "vector-catalog-2", "item": "medieval_village_street", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 1", "usd": 0.03718, "run_total": 2.46093}
+{"ts": "2026-11-27T01:46:16.300420Z", "run": "vector-catalog-2", "item": "medieval_castle_hill", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 1", "usd": 0.03719, "run_total": 2.49812}
+{"ts": "2026-11-27T01:46:16.435420Z", "run": "vector-catalog-2", "item": "greek_temple_ruins", "what": "vision check", "usd": 0.0002, "run_total": 2.49833}
+{"ts": "2026-11-27T01:46:17.572004Z", "run": "vector-catalog-2", "item": "medieval_castle_hill", "what": "vision check", "usd": 0.0002, "run_total": 2.49852}
+{"ts": "2026-11-27T01:46:17.605704Z", "run": "vector-catalog-2", "item": "medieval_village_street", "what": "vision check", "usd": 0.00021, "run_total": 2.49873}
+{"ts": "2026-11-27T01:46:23.153226Z", "run": "vector-catalog-2", "item": "egypt_pyramids_desert", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 1", "usd": 0.03714, "run_total": 2.53587}
+{"ts": "2026-11-27T01:46:24.104844Z", "run": "vector-catalog-2", "item": "roman_aqueduct", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 1", "usd": 0.03713, "run_total": 2.573}
+{"ts": "2026-11-27T01:46:24.492693Z", "run": "vector-catalog-2", "item": "egypt_pyramids_desert", "what": "vision check", "usd": 0.00021, "run_total": 2.57321}
+{"ts": "2026-11-27T01:46:25.528421Z", "run": "vector-catalog-2", "item": "viking_fjord", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 1", "usd": 0.03716, "run_total": 2.61037}
+{"ts": "2026-11-27T01:46:25.630262Z", "run": "vector-catalog-2", "item": "roman_aqueduct", "what": "vision check", "usd": 0.0002, "run_total": 2.61056}
+{"ts": "2026-11-27T01:46:26.819025Z", "run": "vector-catalog-2", "item": "viking_fjord", "what": "vision check", "usd": 0.0002, "run_total": 2.61076}
+{"ts": "2026-11-27T01:46:30.933781Z", "run": "vector-catalog-2", "item": "japanese_pagoda_garden", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 1", "usd": 0.03715, "run_total": 2.64791}
+{"ts": "2026-11-27T01:46:31.349932Z", "run": "vector-catalog-2", "item": "cave_valley_stone_age", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 1", "usd": 0.03717, "run_total": 2.68508}
+{"ts": "2026-11-27T01:46:32.716376Z", "run": "vector-catalog-2", "item": "cave_valley_stone_age", "what": "vision check", "usd": 0.0002, "run_total": 2.68528}
+{"ts": "2026-11-27T01:46:33.820344Z", "run": "vector-catalog-2", "item": "japanese_pagoda_garden", "what": "vision check", "usd": 0.00036, "run_total": 2.68564}
+{"ts": "2026-11-27T01:46:34.049752Z", "run": "vector-catalog-2", "item": "dutch_windmill_polder", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 1", "usd": 0.03717, "run_total": 2.72281}
+{"ts": "2026-11-27T01:46:35.602253Z", "run": "vector-catalog-2", "item": "dutch_windmill_polder", "what": "vision check", "usd": 0.0002, "run_total": 2.72301}
+{"ts": "2026-11-27T01:46:39.456885Z", "run": "vector-catalog-2", "item": "old_harbour_fort", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 1", "usd": 0.03715, "run_total": 2.76016}
+{"ts": "2026-11-27T01:46:40.661443Z", "run": "vector-catalog-2", "item": "silk_road_oasis", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 1", "usd": 0.0372, "run_total": 2.79735}
+{"ts": "2026-11-27T01:46:40.797180Z", "run": "vector-catalog-2", "item": "old_harbour_fort", "what": "vision check", "usd": 0.0002, "run_total": 2.79755}
+{"ts": "2026-11-27T01:46:41.537324Z", "run": "vector-catalog-2", "item": "tall_castle_tower", "what": "gpt-image-2.6-flare 1024x1536 medium flat-cartoon attempt 1", "usd": 0.03477, "run_total": 2.83232}
+{"ts": "2026-11-27T01:46:42.157089Z", "run": "vector-catalog-2", "item": "silk_road_oasis", "what": "vision check", "usd": 0.0002, "run_total": 2.83252}
+{"ts": "2026-11-27T01:46:42.697433Z", "run": "vector-catalog-2", "item": "tall_castle_tower", "what": "vision check", "usd": 0.00022, "run_total": 2.83273}
+{"ts": "2026-11-27T01:46:47.520385Z", "run": "vector-catalog-2", "item": "running_track", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 1", "usd": 0.03717, "run_total": 2.8699}
+{"ts": "2026-11-27T01:46:48.125778Z", "run": "vector-catalog-2", "item": "football_stadium", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 1", "usd": 0.03717, "run_total": 2.90707}
+{"ts": "2026-11-27T01:46:48.647305Z", "run": "vector-catalog-2", "item": "tennis_court", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 1", "usd": 0.03712, "run_total": 2.94419}
+{"ts": "2026-11-27T01:46:48.772438Z", "run": "vector-catalog-2", "item": "running_track", "what": "vision check", "usd": 0.00021, "run_total": 2.9444}
+{"ts": "2026-11-27T01:46:49.781886Z", "run": "vector-catalog-2", "item": "tennis_court", "what": "vision check", "usd": 0.0002, "run_total": 2.9446}
+{"ts": "2026-11-27T01:46:50.572254Z", "run": "vector-catalog-2", "item": "football_stadium", "what": "vision check", "usd": 0.00032, "run_total": 2.94492}
+{"ts": "2026-11-27T01:46:56.441814Z", "run": "vector-catalog-2", "item": "swimming_pool", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 1", "usd": 0.03713, "run_total": 2.98204}
+{"ts": "2026-11-27T01:46:56.642085Z", "run": "vector-catalog-2", "item": "basketball_court_park", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 1", "usd": 0.03714, "run_total": 3.01918}
+{"ts": "2026-11-27T01:46:56.873933Z", "run": "vector-catalog-2", "item": "ski_slope_lifts", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 1", "usd": 0.03715, "run_total": 3.05632}
+{"ts": "2026-11-27T01:46:57.714616Z", "run": "vector-catalog-2", "item": "swimming_pool", "what": "vision check", "usd": 0.0002, "run_total": 3.05652}
+{"ts": "2026-11-27T01:46:57.905467Z", "run": "vector-catalog-2", "item": "basketball_court_park", "what": "vision check", "usd": 0.0002, "run_total": 3.05672}
+{"ts": "2026-11-27T01:46:58.102913Z", "run": "vector-catalog-2", "item": "ski_slope_lifts", "what": "vision check", "usd": 0.0002, "run_total": 3.05692}
+{"ts": "2026-11-27T01:47:03.985484Z", "run": "vector-catalog-2", "item": "cycling_road_hills", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 1", "usd": 0.03714, "run_total": 3.09405}
+{"ts": "2026-11-27T01:47:04.033863Z", "run": "vector-catalog-2", "item": "skate_park", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 1", "usd": 0.03715, "run_total": 3.1312}
+{"ts": "2026-11-27T01:47:04.233358Z", "run": "vector-catalog-2", "item": "hospital_exterior", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 1", "usd": 0.03716, "run_total": 3.16835}
+{"ts": "2026-11-27T01:47:05.230834Z", "run": "vector-catalog-2", "item": "skate_park", "what": "vision check", "usd": 0.0002, "run_total": 3.16856}
+{"ts": "2026-11-27T01:47:06.543409Z", "run": "vector-catalog-2", "item": "cycling_road_hills", "what": "vision check", "usd": 0.00035, "run_total": 3.1689}
+{"ts": "2026-11-27T01:47:06.878165Z", "run": "vector-catalog-2", "item": "hospital_exterior", "what": "vision check", "usd": 0.00029, "run_total": 3.1692}
+{"ts": "2026-11-27T01:47:11.025658Z", "run": "vector-catalog-2", "item": "pharmacy_street", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 1", "usd": 0.03715, "run_total": 3.20634}
+{"ts": "2026-11-27T01:47:12.172252Z", "run": "vector-catalog-2", "item": "pharmacy_street", "what": "vision check", "usd": 0.0002, "run_total": 3.20654}
+{"ts": "2026-11-27T01:47:13.779069Z", "run": "vector-catalog-2", "item": "hospital_exterior", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 2", "usd": 0.03716, "run_total": 3.24369}
+{"ts": "2026-11-27T01:47:14.095521Z", "run": "vector-catalog-2", "item": "microscope_lab_bench", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 1", "usd": 0.03719, "run_total": 3.28088}
+{"ts": "2026-11-27T01:47:15.223183Z", "run": "vector-catalog-2", "item": "microscope_lab_bench", "what": "vision check", "usd": 0.0002, "run_total": 3.28108}
+{"ts": "2026-11-27T01:47:15.797948Z", "run": "vector-catalog-2", "item": "hospital_exterior", "what": "vision check", "usd": 0.0003, "run_total": 3.28138}
+{"ts": "2026-11-27T01:47:18.357035Z", "run": "vector-catalog-2", "item": "health_clinic_garden", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 1", "usd": 0.03714, "run_total": 3.31852}
+{"ts": "2026-11-27T01:47:19.596661Z", "run": "vector-catalog-2", "item": "health_clinic_garden", "what": "vision check", "usd": 0.0002, "run_total": 3.31871}
+{"ts": "2026-11-27T01:47:21.329921Z", "run": "vector-catalog-2", "item": "research_lab_dusk", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 1", "usd": 0.03716, "run_total": 3.35587}
+{"ts": "2026-11-27T01:47:22.311492Z", "run": "vector-catalog-2", "item": "spa_stones_pond", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 1", "usd": 0.03715, "run_total": 3.39301}
+{"ts": "2026-11-27T01:47:22.695095Z", "run": "vector-catalog-2", "item": "research_lab_dusk", "what": "vision check", "usd": 0.0002, "run_total": 3.39322}
+{"ts": "2026-11-27T01:47:23.655221Z", "run": "vector-catalog-2", "item": "spa_stones_pond", "what": "vision check", "usd": 0.0002, "run_total": 3.39342}
+{"ts": "2026-11-27T01:47:25.377214Z", "run": "vector-catalog-2", "item": "tall_hospital_tower", "what": "gpt-image-2.6-flare 1024x1536 medium flat-cartoon attempt 1", "usd": 0.03478, "run_total": 3.42819}
+{"ts": "2026-11-27T01:47:26.747308Z", "run": "vector-catalog-2", "item": "tall_hospital_tower", "what": "vision check", "usd": 0.00022, "run_total": 3.42841}
+{"ts": "2026-11-27T01:47:28.627840Z", "run": "vector-catalog-2", "item": "dna_lab_window", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 1", "usd": 0.03717, "run_total": 3.46558}
+{"ts": "2026-11-27T01:47:30.043355Z", "run": "vector-catalog-2", "item": "dna_lab_window", "what": "vision check", "usd": 0.0002, "run_total": 3.46578}
+{"ts": "2026-11-27T01:47:32.428406Z", "run": "vector-catalog-2", "item": "stock_exchange_facade", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 1", "usd": 0.03715, "run_total": 3.50293}
+{"ts": "2026-11-27T01:47:33.703836Z", "run": "vector-catalog-2", "item": "stock_exchange_facade", "what": "vision check", "usd": 0.0002, "run_total": 3.50313}
+{"ts": "2026-11-27T01:47:34.121709Z", "run": "vector-catalog-2", "item": "bank_building", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 1", "usd": 0.03715, "run_total": 3.54028}
+{"ts": "2026-11-27T01:47:35.465306Z", "run": "vector-catalog-2", "item": "bank_building", "what": "vision check", "usd": 0.0002, "run_total": 3.54048}
+{"ts": "2026-11-27T01:47:37.189371Z", "run": "vector-catalog-2", "item": "financial_district_night", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 1", "usd": 0.03714, "run_total": 3.57762}
+{"ts": "2026-11-27T01:47:38.371161Z", "run": "vector-catalog-2", "item": "financial_district_night", "what": "vision check", "usd": 0.0002, "run_total": 3.57782}
+{"ts": "2026-11-27T01:47:41.733688Z", "run": "vector-catalog-2", "item": "market_square_stalls", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 1", "usd": 0.03716, "run_total": 3.61497}
+{"ts": "2026-11-27T01:47:41.761297Z", "run": "vector-catalog-2", "item": "container_port_cranes", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 1", "usd": 0.03715, "run_total": 3.65212}
+{"ts": "2026-11-27T01:47:43.127312Z", "run": "vector-catalog-2", "item": "container_port_cranes", "what": "vision check", "usd": 0.0002, "run_total": 3.65232}
+{"ts": "2026-11-27T01:47:44.312690Z", "run": "vector-catalog-2", "item": "coin_hills_whimsical", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 1", "usd": 0.03717, "run_total": 3.68949}
+{"ts": "2026-11-27T01:47:44.347330Z", "run": "vector-catalog-2", "item": "market_square_stalls", "what": "vision check", "usd": 0.00034, "run_total": 3.68982}
+{"ts": "2026-11-27T01:47:45.485383Z", "run": "vector-catalog-2", "item": "coin_hills_whimsical", "what": "vision check", "usd": 0.0002, "run_total": 3.69003}
+{"ts": "2026-11-27T01:47:48.486452Z", "run": "vector-catalog-2", "item": "office_tower_dusk", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 1", "usd": 0.03712, "run_total": 3.72715}
+{"ts": "2026-11-27T01:47:49.972938Z", "run": "vector-catalog-2", "item": "office_tower_dusk", "what": "vision check", "usd": 0.00019, "run_total": 3.72734}
+{"ts": "2026-11-27T01:47:50.206014Z", "run": "vector-catalog-2", "item": "tall_skyline_vertical", "what": "gpt-image-2.6-flare 1024x1536 medium flat-cartoon attempt 1", "usd": 0.03475, "run_total": 3.76209}
+{"ts": "2026-11-27T01:47:51.403305Z", "run": "vector-catalog-2", "item": "tall_skyline_vertical", "what": "vision check", "usd": 0.00022, "run_total": 3.76231}
+{"ts": "2026-11-27T01:47:51.674429Z", "run": "vector-catalog-2", "item": "wheat_field_tractor", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 1", "usd": 0.03715, "run_total": 3.79945}
+{"ts": "2026-11-27T01:47:53.036856Z", "run": "vector-catalog-2", "item": "wheat_field_tractor", "what": "vision check", "usd": 0.0002, "run_total": 3.79965}
+{"ts": "2026-11-27T01:47:56.294863Z", "run": "vector-catalog-2", "item": "vineyard_hills", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 1", "usd": 0.03713, "run_total": 3.83678}
+{"ts": "2026-11-27T01:47:57.607692Z", "run": "vector-catalog-2", "item": "vineyard_hills", "what": "vision check", "usd": 0.0002, "run_total": 3.83698}
+{"ts": "2026-11-27T01:47:58.237829Z", "run": "vector-catalog-2", "item": "greenhouse_rows", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 1", "usd": 0.03714, "run_total": 3.87412}
+{"ts": "2026-11-27T01:47:59.369838Z", "run": "vector-catalog-2", "item": "rice_terraces", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 1", "usd": 0.03713, "run_total": 3.91125}
+{"ts": "2026-11-27T01:48:00.768440Z", "run": "vector-catalog-2", "item": "greenhouse_rows", "what": "vision check", "usd": 0.00032, "run_total": 3.91157}
+{"ts": "2026-11-27T01:48:00.806998Z", "run": "vector-catalog-2", "item": "rice_terraces", "what": "vision check", "usd": 0.0002, "run_total": 3.91177}
+{"ts": "2026-11-27T01:48:04.128359Z", "run": "vector-catalog-2", "item": "dairy_farm_barn", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 1", "usd": 0.03716, "run_total": 3.94893}
+{"ts": "2026-11-27T01:48:05.736831Z", "run": "vector-catalog-2", "item": "dairy_farm_barn", "what": "vision check", "usd": 0.0002, "run_total": 3.94913}
+{"ts": "2026-11-27T01:48:06.720339Z", "run": "vector-catalog-2", "item": "tall_sunflower_field", "what": "gpt-image-2.6-flare 1024x1536 medium flat-cartoon attempt 1", "usd": 0.03476, "run_total": 3.98389}
+{"ts": "2026-11-27T01:48:07.887641Z", "run": "vector-catalog-2", "item": "hydro_dam", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 1", "usd": 0.03715, "run_total": 4.02104}
+{"ts": "2026-11-27T01:48:07.908540Z", "run": "vector-catalog-2", "item": "tall_sunflower_field", "what": "vision check", "usd": 0.00022, "run_total": 4.02126}
+{"ts": "2026-11-27T01:48:09.833173Z", "run": "vector-catalog-2", "item": "hydro_dam", "what": "vision check", "usd": 0.00029, "run_total": 4.02155}
+{"ts": "2026-11-27T01:48:12.659280Z", "run": "vector-catalog-2", "item": "power_lines_sunset", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 1", "usd": 0.03713, "run_total": 4.05868}
+{"ts": "2026-11-27T01:48:13.892050Z", "run": "vector-catalog-2", "item": "power_lines_sunset", "what": "vision check", "usd": 0.0002, "run_total": 4.05888}
+{"ts": "2026-11-27T01:48:14.639202Z", "run": "vector-catalog-2", "item": "desert_solar_plant", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 1", "usd": 0.03714, "run_total": 4.09602}
+{"ts": "2026-11-27T01:48:15.987310Z", "run": "vector-catalog-2", "item": "desert_solar_plant", "what": "vision check", "usd": 0.0002, "run_total": 4.09622}
+{"ts": "2026-11-27T01:48:16.304381Z", "run": "vector-catalog-2", "item": "offshore_wind_farm", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 1", "usd": 0.03713, "run_total": 4.13335}
+{"ts": "2026-11-27T01:48:17.675672Z", "run": "vector-catalog-2", "item": "offshore_wind_farm", "what": "vision check", "usd": 0.0002, "run_total": 4.13355}
+{"ts": "2026-11-27T01:48:19.800448Z", "run": "vector-catalog-2", "item": "cooling_tower_steam", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 1", "usd": 0.03712, "run_total": 4.17066}
+{"ts": "2026-11-27T01:48:21.181511Z", "run": "vector-catalog-2", "item": "cooling_tower_steam", "what": "vision check", "usd": 0.0002, "run_total": 4.17086}
+{"ts": "2026-11-27T01:48:23.409928Z", "run": "vector-catalog-2", "item": "ev_charging_street", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 1", "usd": 0.03714, "run_total": 4.208}
+{"ts": "2026-11-27T01:48:23.463516Z", "run": "vector-catalog-2", "item": "geothermal_steam", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 1", "usd": 0.03713, "run_total": 4.24512}
+{"ts": "2026-11-27T01:48:24.808872Z", "run": "vector-catalog-2", "item": "geothermal_steam", "what": "vision check", "usd": 0.00021, "run_total": 4.24533}
+{"ts": "2026-11-27T01:48:24.839950Z", "run": "vector-catalog-2", "item": "ev_charging_street", "what": "vision check", "usd": 0.0002, "run_total": 4.24553}
+{"ts": "2026-11-27T01:48:27.515272Z", "run": "vector-catalog-2", "item": "tall_wind_turbines_vertical", "what": "gpt-image-2.6-flare 1024x1536 medium flat-cartoon attempt 1", "usd": 0.03476, "run_total": 4.28029}
+{"ts": "2026-11-27T01:48:30.126583Z", "run": "vector-catalog-2", "item": "tall_wind_turbines_vertical", "what": "vision check", "usd": 0.00032, "run_total": 4.28061}
+{"ts": "2026-11-27T01:48:31.516827Z", "run": "vector-catalog-2", "item": "cargo_ship_sea", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 1", "usd": 0.03713, "run_total": 4.31774}
+{"ts": "2026-11-27T01:48:31.659821Z", "run": "vector-catalog-2", "item": "railway_station_platform", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 1", "usd": 0.03715, "run_total": 4.35489}
+{"ts": "2026-11-27T01:48:32.884114Z", "run": "vector-catalog-2", "item": "cargo_ship_sea", "what": "vision check", "usd": 0.0002, "run_total": 4.35509}
+{"ts": "2026-11-27T01:48:34.121162Z", "run": "vector-catalog-2", "item": "railway_station_platform", "what": "vision check", "usd": 0.00029, "run_total": 4.35538}
+{"ts": "2026-11-27T01:48:36.998213Z", "run": "vector-catalog-2", "item": "highway_interchange", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 1", "usd": 0.03714, "run_total": 4.39252}
+{"ts": "2026-11-27T01:48:38.458111Z", "run": "vector-catalog-2", "item": "highway_interchange", "what": "vision check", "usd": 0.0002, "run_total": 4.39273}
+{"ts": "2026-11-27T01:48:40.210328Z", "run": "vector-catalog-2", "item": "airport_runway_plane", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 1", "usd": 0.03714, "run_total": 4.42987}
+{"ts": "2026-11-27T01:48:42.743701Z", "run": "vector-catalog-2", "item": "suspension_bridge_traffic", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 1", "usd": 0.03714, "run_total": 4.46701}
+{"ts": "2026-11-27T01:48:42.763368Z", "run": "vector-catalog-2", "item": "airport_runway_plane", "what": "vision check", "usd": 0.00032, "run_total": 4.46732}
+{"ts": "2026-11-27T01:48:43.982154Z", "run": "vector-catalog-2", "item": "suspension_bridge_traffic", "what": "vision check", "usd": 0.0002, "run_total": 4.46752}
+{"ts": "2026-11-27T01:48:44.638939Z", "run": "vector-catalog-2", "item": "bicycle_lane_city", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 1", "usd": 0.03713, "run_total": 4.50465}
+{"ts": "2026-11-27T01:48:46.164625Z", "run": "vector-catalog-2", "item": "bicycle_lane_city", "what": "vision check", "usd": 0.0002, "run_total": 4.50485}
+{"ts": "2026-11-27T01:48:49.299033Z", "run": "vector-catalog-2", "item": "rocket_launch_pad", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 1", "usd": 0.03715, "run_total": 4.54199}
+{"ts": "2026-11-27T01:48:50.633145Z", "run": "vector-catalog-2", "item": "rocket_launch_pad", "what": "vision check", "usd": 0.0002, "run_total": 4.5422}
+{"ts": "2026-11-27T01:48:50.932808Z", "run": "vector-catalog-2", "item": "tall_train_viaduct", "what": "gpt-image-2.6-flare 1024x1536 medium flat-cartoon attempt 1", "usd": 0.03478, "run_total": 4.57697}
+{"ts": "2026-11-27T01:48:52.042888Z", "run": "vector-catalog-2", "item": "tall_train_viaduct", "what": "vision check", "usd": 0.00021, "run_total": 4.57718}
+{"ts": "2026-11-27T01:48:56.111148Z", "run": "vector-catalog-2", "item": "thunderstorm_plains", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 1", "usd": 0.03714, "run_total": 4.61432}
+{"ts": "2026-11-27T01:48:57.288458Z", "run": "vector-catalog-2", "item": "thunderstorm_plains", "what": "vision check", "usd": 0.0002, "run_total": 4.61452}
+{"ts": "2026-11-27T01:48:59.892271Z", "run": "vector-catalog-2", "item": "sunrise_over_ocean", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 1", "usd": 0.03716, "run_total": 4.65168}
+{"ts": "2026-11-27T01:49:01.166205Z", "run": "vector-catalog-2", "item": "sunrise_over_ocean", "what": "vision check", "usd": 0.0002, "run_total": 4.65188}
+{"ts": "2026-11-27T01:49:02.596001Z", "run": "vector-catalog-2", "item": "misty_lake_dawn", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 1", "usd": 0.03716, "run_total": 4.68904}
+{"ts": "2026-11-27T01:49:03.849294Z", "run": "vector-catalog-2", "item": "misty_lake_dawn", "what": "vision check", "usd": 0.0002, "run_total": 4.68924}
+{"ts": "2026-11-27T01:49:04.200458Z", "run": "vector-catalog-2", "item": "autumn_lake_reflection", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 1", "usd": 0.03712, "run_total": 4.72635}
+{"ts": "2026-11-27T01:49:05.581454Z", "run": "vector-catalog-2", "item": "autumn_lake_reflection", "what": "vision check", "usd": 0.0002, "run_total": 4.72655}
+{"ts": "2026-11-27T01:49:07.044990Z", "run": "vector-catalog-2", "item": "snowy_forest_night", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 1", "usd": 0.03715, "run_total": 4.7637}
+{"ts": "2026-11-27T01:49:08.245038Z", "run": "vector-catalog-2", "item": "snowy_forest_night", "what": "vision check", "usd": 0.0002, "run_total": 4.7639}
+{"ts": "2026-11-27T01:49:10.679677Z", "run": "vector-catalog-2", "item": "tropical_river_jungle", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 1", "usd": 0.03714, "run_total": 4.80104}
+{"ts": "2026-11-27T01:49:11.279796Z", "run": "vector-catalog-2", "item": "mangrove_coast", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 1", "usd": 0.03714, "run_total": 4.83818}
+{"ts": "2026-11-27T01:49:12.004409Z", "run": "vector-catalog-2", "item": "tropical_river_jungle", "what": "vision check", "usd": 0.0002, "run_total": 4.83838}
+{"ts": "2026-11-27T01:49:12.614424Z", "run": "vector-catalog-2", "item": "mangrove_coast", "what": "vision check", "usd": 0.0002, "run_total": 4.83858}
+{"ts": "2026-11-27T01:49:14.760997Z", "run": "vector-catalog-2", "item": "cherry_blossom_temple", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 1", "usd": 0.03715, "run_total": 4.87573}
+{"ts": "2026-11-27T01:49:15.992957Z", "run": "vector-catalog-2", "item": "cherry_blossom_temple", "what": "vision check", "usd": 0.0002, "run_total": 4.87593}
+{"ts": "2026-11-27T01:49:18.273453Z", "run": "vector-catalog-2", "item": "canyon_river_rafting", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 1", "usd": 0.03716, "run_total": 4.91308}
+{"ts": "2026-11-27T01:49:18.852746Z", "run": "vector-catalog-2", "item": "spring_hills_flowers", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 1", "usd": 0.03715, "run_total": 4.95023}
+{"ts": "2026-11-27T01:49:19.649640Z", "run": "vector-catalog-2", "item": "canyon_river_rafting", "what": "vision check", "usd": 0.0002, "run_total": 4.95042}
+{"ts": "2026-11-27T01:49:20.090064Z", "run": "vector-catalog-2", "item": "spring_hills_flowers", "what": "vision check", "usd": 0.0002, "run_total": 4.95063}
+{"ts": "2026-11-27T01:49:22.791126Z", "run": "vector-catalog-2", "item": "savanna_sunset_acacia", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 1", "usd": 0.03714, "run_total": 4.98776}
+{"ts": "2026-11-27T01:49:24.118942Z", "run": "vector-catalog-2", "item": "savanna_sunset_acacia", "what": "vision check", "usd": 0.00019, "run_total": 4.98796}
+{"ts": "2026-11-27T01:49:25.543413Z", "run": "vector-catalog-2", "item": "iceberg_sea_polar", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 1", "usd": 0.03714, "run_total": 5.0251}
+{"ts": "2026-11-27T01:49:26.830418Z", "run": "vector-catalog-2", "item": "iceberg_sea_polar", "what": "vision check", "usd": 0.0002, "run_total": 5.0253}
+{"ts": "2026-11-27T01:49:26.877885Z", "run": "vector-catalog-2", "item": "mountain_pass_road", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 1", "usd": 0.03715, "run_total": 5.06244}
+{"ts": "2026-11-27T01:49:30.340628Z", "run": "vector-catalog-2", "item": "mountain_pass_road", "what": "vision check", "usd": 0.00021, "run_total": 5.06265}
+{"ts": "2026-11-27T01:49:30.449394Z", "run": "vector-catalog-2", "item": "tall_waterfall_forest", "what": "gpt-image-2.6-flare 1024x1536 medium flat-cartoon attempt 1", "usd": 0.03478, "run_total": 5.09742}
+{"ts": "2026-11-27T01:49:31.693034Z", "run": "vector-catalog-2", "item": "tall_waterfall_forest", "what": "vision check", "usd": 0.00022, "run_total": 5.09764}
+{"ts": "2026-11-27T01:49:33.241448Z", "run": "vector-catalog-2", "item": "tall_snow_peak_vertical", "what": "gpt-image-2.6-flare 1024x1536 medium flat-cartoon attempt 1", "usd": 0.03476, "run_total": 5.13239}
+{"ts": "2026-11-27T01:49:34.610373Z", "run": "vector-catalog-2", "item": "tall_snow_peak_vertical", "what": "vision check", "usd": 0.00021, "run_total": 5.13261}
+{"ts": "2026-11-27T01:49:36.303003Z", "run": "vector-catalog-2", "item": "tall_sunset_beach_vertical", "what": "gpt-image-2.6-flare 1024x1536 medium flat-cartoon attempt 1", "usd": 0.03476, "run_total": 5.16736}
+{"ts": "2026-11-27T01:49:37.494073Z", "run": "vector-catalog-2", "item": "tall_sunset_beach_vertical", "what": "vision check", "usd": 0.00022, "run_total": 5.16758}
+{"ts": "2026-11-27T01:49:37.701790Z", "run": "vector-catalog-2", "item": "school_building_exterior", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 1", "usd": 0.03716, "run_total": 5.20474}
+{"ts": "2026-11-27T01:49:39.019442Z", "run": "vector-catalog-2", "item": "school_building_exterior", "what": "vision check", "usd": 0.0002, "run_total": 5.20494}
+{"ts": "2026-11-27T01:49:40.914320Z", "run": "vector-catalog-2", "item": "playground_empty", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 1", "usd": 0.03714, "run_total": 5.24208}
+{"ts": "2026-11-27T01:49:42.280050Z", "run": "vector-catalog-2", "item": "playground_empty", "what": "vision check", "usd": 0.00021, "run_total": 5.2423}
+{"ts": "2026-11-27T01:49:43.310448Z", "run": "vector-catalog-2", "item": "bedroom_window_morning", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 1", "usd": 0.03716, "run_total": 5.27946}
+{"ts": "2026-11-27T01:49:45.432498Z", "run": "vector-catalog-2", "item": "living_room_plants", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 1", "usd": 0.03718, "run_total": 5.31663}
+{"ts": "2026-11-27T01:49:46.279358Z", "run": "vector-catalog-2", "item": "bedroom_window_morning", "what": "vision check", "usd": 0.00033, "run_total": 5.31696}
+{"ts": "2026-11-27T01:49:48.879981Z", "run": "vector-catalog-2", "item": "library_entrance_hall", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 1", "usd": 0.03716, "run_total": 5.35412}
+{"ts": "2026-11-27T01:49:50.374931Z", "run": "vector-catalog-2", "item": "living_room_plants", "what": "vision check", "usd": 0.0003, "run_total": 5.35442}
+{"ts": "2026-11-27T01:49:52.926924Z", "run": "vector-catalog-2", "item": "library_entrance_hall", "what": "vision check", "usd": 0.0002, "run_total": 5.35462}
+{"ts": "2026-11-27T01:49:53.662563Z", "run": "vector-catalog-2", "item": "science_museum_exterior", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 1", "usd": 0.03714, "run_total": 5.39176}
+{"ts": "2026-11-27T01:49:57.441791Z", "run": "vector-catalog-2", "item": "campus_quad_autumn", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 1", "usd": 0.03713, "run_total": 5.42889}
+{"ts": "2026-11-27T01:49:58.325180Z", "run": "vector-catalog-2", "item": "science_museum_exterior", "what": "vision check", "usd": 0.0002, "run_total": 5.42909}
+{"ts": "2026-11-27T01:50:03.547552Z", "run": "vector-catalog-2", "item": "campus_quad_autumn", "what": "vision check", "usd": 0.0003, "run_total": 5.42938}
+{"ts": "2026-11-27T01:50:03.707927Z", "run": "vector-catalog-2", "item": "tall_home_garden_vertical", "what": "gpt-image-2.6-flare 1024x1536 medium flat-cartoon attempt 1", "usd": 0.03478, "run_total": 5.46416}
+{"ts": "2026-11-27T01:50:04.828059Z", "run": "vector-catalog-2", "item": "space_station_earth", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 1", "usd": 0.03713, "run_total": 5.50129}
+{"ts": "2026-11-27T01:50:05.814155Z", "run": "vector-catalog-2", "item": "tall_home_garden_vertical", "what": "vision check", "usd": 0.00022, "run_total": 5.50151}
+{"ts": "2026-11-27T01:50:07.189367Z", "run": "vector-catalog-2", "item": "space_station_earth", "what": "vision check", "usd": 0.00021, "run_total": 5.50171}
+{"ts": "2026-11-27T01:50:10.030486Z", "run": "vector-catalog-2", "item": "mars_surface_rover", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 1", "usd": 0.03716, "run_total": 5.53887}
+{"ts": "2026-11-27T01:50:12.964823Z", "run": "vector-catalog-2", "item": "galaxy_planets_view", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 1", "usd": 0.03716, "run_total": 5.57603}
+{"ts": "2026-11-27T01:50:14.083061Z", "run": "vector-catalog-2", "item": "space_station_earth", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 2", "usd": 0.03713, "run_total": 5.61316}
+{"ts": "2026-11-27T01:50:14.506356Z", "run": "vector-catalog-2", "item": "mars_surface_rover", "what": "vision check", "usd": 0.00035, "run_total": 5.61351}
+{"ts": "2026-11-27T01:50:16.527925Z", "run": "vector-catalog-2", "item": "galaxy_planets_view", "what": "vision check", "usd": 0.00031, "run_total": 5.61382}
+{"ts": "2026-11-27T01:50:16.862833Z", "run": "vector-catalog-2", "item": "space_station_earth", "what": "vision check", "usd": 0.0002, "run_total": 5.61402}
+{"ts": "2026-11-27T01:50:22.569729Z", "run": "vector-catalog-2", "item": "submarine_deep_sea", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 1", "usd": 0.03715, "run_total": 5.65117}
+{"ts": "2026-11-27T01:50:23.764267Z", "run": "vector-catalog-2", "item": "tall_rocket_vertical", "what": "gpt-image-2.6-flare 1024x1536 medium flat-cartoon attempt 1", "usd": 0.03477, "run_total": 5.68593}
+{"ts": "2026-11-27T01:50:24.010149Z", "run": "vector-catalog-2", "item": "telescope_hill_stars", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 1", "usd": 0.03718, "run_total": 5.72311}
+{"ts": "2026-11-27T01:50:25.064753Z", "run": "vector-catalog-2", "item": "submarine_deep_sea", "what": "vision check", "usd": 0.00031, "run_total": 5.72341}
+{"ts": "2026-11-27T01:50:26.144636Z", "run": "vector-catalog-2", "item": "tall_rocket_vertical", "what": "vision check", "usd": 0.00036, "run_total": 5.72377}
+{"ts": "2026-11-27T01:50:26.689209Z", "run": "vector-catalog-2", "item": "telescope_hill_stars", "what": "vision check", "usd": 0.00032, "run_total": 5.72409}
+{"ts": "2026-11-27T01:50:30.719686Z", "run": "vector-catalog-2", "item": "server_corridor", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 1", "usd": 0.03718, "run_total": 5.76127}
+{"ts": "2026-11-27T01:50:32.030648Z", "run": "vector-catalog-2", "item": "circuit_board_city", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 1", "usd": 0.03716, "run_total": 5.79842}
+{"ts": "2026-11-27T01:50:32.819679Z", "run": "vector-catalog-2", "item": "smart_city_day", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 1", "usd": 0.03716, "run_total": 5.83558}
+{"ts": "2026-11-27T01:50:33.577164Z", "run": "vector-catalog-2", "item": "server_corridor", "what": "vision check", "usd": 0.00032, "run_total": 5.83589}
+{"ts": "2026-11-27T01:50:33.930158Z", "run": "vector-catalog-2", "item": "circuit_board_city", "what": "vision check", "usd": 0.0002, "run_total": 5.8361}
+{"ts": "2026-11-27T01:50:34.742095Z", "run": "vector-catalog-2", "item": "smart_city_day", "what": "vision check", "usd": 0.0002, "run_total": 5.83629}
+{"ts": "2026-11-27T01:50:40.335345Z", "run": "vector-catalog-2", "item": "satellite_dish_field", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 1", "usd": 0.03713, "run_total": 5.87342}
+{"ts": "2026-11-27T01:50:41.478931Z", "run": "vector-catalog-2", "item": "tall_future_city_vertical", "what": "gpt-image-2.6-flare 1024x1536 medium flat-cartoon attempt 1", "usd": 0.03476, "run_total": 5.90818}
+{"ts": "2026-11-27T01:50:41.935244Z", "run": "vector-catalog-2", "item": "robotics_lab_window", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 1", "usd": 0.0372, "run_total": 5.94538}
+{"ts": "2026-11-27T01:50:41.947076Z", "run": "vector-catalog-2", "item": "satellite_dish_field", "what": "vision check", "usd": 0.0002, "run_total": 5.94558}
+{"ts": "2026-11-27T01:50:43.916520Z", "run": "vector-catalog-2", "item": "tall_future_city_vertical", "what": "vision check", "usd": 0.00034, "run_total": 5.94591}
+{"ts": "2026-11-27T01:50:44.644477Z", "run": "vector-catalog-2", "item": "robotics_lab_window", "what": "vision check", "usd": 0.00031, "run_total": 5.94623}
+{"ts": "2026-11-27T01:50:47.854364Z", "run": "vector-catalog-2", "item": "tall_ocean_lighthouse_night", "what": "gpt-image-2.6-flare 1024x1536 medium flat-cartoon attempt 1", "usd": 0.03476, "run_total": 5.98099}
+{"ts": "2026-11-27T01:50:50.075302Z", "run": "vector-catalog-2", "item": "tall_space_vertical", "what": "gpt-image-2.6-flare 1024x1536 medium flat-cartoon attempt 1", "usd": 0.03476, "run_total": 6.01575}
+{"ts": "2026-11-27T01:50:50.400749Z", "run": "vector-catalog-2", "item": "tall_ocean_lighthouse_night", "what": "vision check", "usd": 0.00036, "run_total": 6.01611}
+{"ts": "2026-11-27T01:50:51.416228Z", "run": "vector-catalog-2", "item": "candy_hills", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 1", "usd": 0.03716, "run_total": 6.05327}
+{"ts": "2026-11-27T01:50:53.042991Z", "run": "vector-catalog-2", "item": "candy_hills", "what": "vision check", "usd": 0.0002, "run_total": 6.05347}
+{"ts": "2026-11-27T01:50:53.092898Z", "run": "vector-catalog-2", "item": "tall_space_vertical", "what": "vision check", "usd": 0.0004, "run_total": 6.05387}
+{"ts": "2026-11-27T01:50:56.935519Z", "run": "vector-catalog-2", "item": "toy_village", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 1", "usd": 0.03715, "run_total": 6.09102}
+{"ts": "2026-11-27T01:50:58.582272Z", "run": "vector-catalog-2", "item": "toy_village", "what": "vision check", "usd": 0.0002, "run_total": 6.09122}
+{"ts": "2026-11-27T01:50:59.032538Z", "run": "vector-catalog-2", "item": "rainbow_meadow", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 1", "usd": 0.03715, "run_total": 6.12836}
+{"ts": "2026-11-27T01:51:00.500071Z", "run": "vector-catalog-2", "item": "rainbow_meadow", "what": "vision check", "usd": 0.0002, "run_total": 6.12856}
+{"ts": "2026-11-27T01:51:02.094102Z", "run": "vector-catalog-2", "item": "cloud_kingdom", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 1", "usd": 0.03713, "run_total": 6.16569}
+{"ts": "2026-11-27T01:51:03.371377Z", "run": "vector-catalog-2", "item": "cloud_kingdom", "what": "vision check", "usd": 0.0002, "run_total": 6.16589}
+{"ts": "2026-11-27T01:51:04.733031Z", "run": "vector-catalog-2", "item": "forest_cottage_kids", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 1", "usd": 0.03716, "run_total": 6.20305}
+{"ts": "2026-11-27T01:51:06.285918Z", "run": "vector-catalog-2", "item": "forest_cottage_kids", "what": "vision check", "usd": 0.0002, "run_total": 6.20325}
+{"ts": "2026-11-27T01:51:07.108554Z", "run": "vector-catalog-2", "item": "pirate_cove_island", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 1", "usd": 0.03718, "run_total": 6.24043}
+{"ts": "2026-11-27T01:51:08.534610Z", "run": "vector-catalog-2", "item": "pirate_cove_island", "what": "vision check", "usd": 0.0002, "run_total": 6.24063}
+{"ts": "2026-11-27T01:51:08.956271Z", "run": "vector-catalog-2", "item": "space_playground_kids", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 1", "usd": 0.03716, "run_total": 6.27778}
+{"ts": "2026-11-27T01:51:10.776942Z", "run": "vector-catalog-2", "item": "space_playground_kids", "what": "vision check", "usd": 0.0002, "run_total": 6.27799}
+{"ts": "2026-11-27T01:51:14.110114Z", "run": "vector-catalog-2", "item": "underwater_castle_kids", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 1", "usd": 0.03716, "run_total": 6.31514}
+{"ts": "2026-11-27T01:51:14.781576Z", "run": "vector-catalog-2", "item": "snowman_field_kids", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 1", "usd": 0.03717, "run_total": 6.35231}
+{"ts": "2026-11-27T01:51:15.307464Z", "run": "vector-catalog-2", "item": "underwater_castle_kids", "what": "vision check", "usd": 0.0002, "run_total": 6.35251}
+{"ts": "2026-11-27T01:51:16.226249Z", "run": "vector-catalog-2", "item": "snowman_field_kids", "what": "vision check", "usd": 0.0002, "run_total": 6.35271}
+{"ts": "2026-11-27T01:51:16.379921Z", "run": "vector-catalog-2", "item": "tall_rainbow_vertical", "what": "gpt-image-2.6-flare 1024x1536 medium flat-cartoon attempt 1", "usd": 0.03475, "run_total": 6.38746}
+{"ts": "2026-11-27T01:51:18.223608Z", "run": "vector-catalog-2", "item": "tall_rainbow_vertical", "what": "vision check", "usd": 0.00022, "run_total": 6.38768}
+{"ts": "2026-11-27T01:51:20.898182Z", "run": "vector-catalog-2", "item": "abstract_dunes_minimal", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 1", "usd": 0.03717, "run_total": 6.42485}
+{"ts": "2026-11-27T01:51:21.508048Z", "run": "vector-catalog-2", "item": "abstract_pastel_hills", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 1", "usd": 0.03714, "run_total": 6.46199}
+{"ts": "2026-11-27T01:51:22.338808Z", "run": "vector-catalog-2", "item": "abstract_dunes_minimal", "what": "vision check", "usd": 0.0002, "run_total": 6.46219}
+{"ts": "2026-11-27T01:51:24.051241Z", "run": "vector-catalog-2", "item": "abstract_pastel_hills", "what": "vision check", "usd": 0.00033, "run_total": 6.46252}
+{"ts": "2026-11-27T01:51:24.846706Z", "run": "vector-catalog-2", "item": "abstract_mountain_layers", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 1", "usd": 0.03714, "run_total": 6.49965}
+{"ts": "2026-11-27T01:51:27.721438Z", "run": "vector-catalog-2", "item": "abstract_misty_lake_minimal", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 1", "usd": 0.03715, "run_total": 6.5368}
+{"ts": "2026-11-27T01:51:27.955949Z", "run": "vector-catalog-2", "item": "abstract_mountain_layers", "what": "vision check", "usd": 0.00038, "run_total": 6.53718}
+{"ts": "2026-11-27T01:51:29.198085Z", "run": "vector-catalog-2", "item": "abstract_misty_lake_minimal", "what": "vision check", "usd": 0.0002, "run_total": 6.53737}
+{"ts": "2026-11-27T01:51:29.349315Z", "run": "vector-catalog-2", "item": "abstract_pastel_hills", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 2", "usd": 0.03714, "run_total": 6.57451}
+{"ts": "2026-11-27T01:51:32.537892Z", "run": "vector-catalog-2", "item": "abstract_pastel_hills", "what": "vision check", "usd": 0.00037, "run_total": 6.57488}
+{"ts": "2026-11-27T01:51:33.859641Z", "run": "vector-catalog-2", "item": "abstract_waves_geometric", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 1", "usd": 0.03713, "run_total": 6.61201}
+{"ts": "2026-11-27T01:51:35.685976Z", "run": "vector-catalog-2", "item": "abstract_waves_geometric", "what": "vision check", "usd": 0.0002, "run_total": 6.61221}
+{"ts": "2026-11-27T01:51:36.295075Z", "run": "vector-catalog-2", "item": "abstract_desert_moon", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon attempt 1", "usd": 0.03714, "run_total": 6.64934}
+{"ts": "2026-11-27T01:51:37.798119Z", "run": "vector-catalog-2", "item": "abstract_desert_moon", "what": "vision check", "usd": 0.0002, "run_total": 6.64954}
+{"ts": "2026-11-27T01:53:30.721745Z", "run": "vector-catalog-2", "item": "abstract_desert_moon", "what": "motion audit", "usd": 0.00017, "run_total": 6.65003}
+{"ts": "2026-11-27T01:53:32.058645Z", "run": "vector-catalog-2", "item": "abstract_dunes_minimal", "what": "motion audit", "usd": 0.00016, "run_total": 6.6502}
+{"ts": "2026-11-27T01:53:33.537664Z", "run": "vector-catalog-2", "item": "abstract_misty_lake_minimal", "what": "motion audit", "usd": 0.00018, "run_total": 6.65037}
+{"ts": "2026-11-27T01:53:34.829081Z", "run": "vector-catalog-2", "item": "abstract_mountain_layers", "what": "motion audit", "usd": 0.00017, "run_total": 6.65054}
+{"ts": "2026-11-27T01:53:36.283388Z", "run": "vector-catalog-2", "item": "abstract_waves_geometric", "what": "motion audit", "usd": 0.00018, "run_total": 6.65072}
+{"ts": "2026-11-27T01:53:37.930573Z", "run": "vector-catalog-2", "item": "airport_runway_plane", "what": "motion audit", "usd": 0.00021, "run_total": 6.65093}
+{"ts": "2026-11-27T01:53:39.293004Z", "run": "vector-catalog-2", "item": "autumn_lake_reflection", "what": "motion audit", "usd": 0.00017, "run_total": 6.6511}
+{"ts": "2026-11-27T01:53:40.903195Z", "run": "vector-catalog-2", "item": "bank_building", "what": "motion audit", "usd": 0.00018, "run_total": 6.65128}
+{"ts": "2026-11-27T01:53:42.375845Z", "run": "vector-catalog-2", "item": "basketball_court_park", "what": "motion audit", "usd": 0.00017, "run_total": 6.65145}
+{"ts": "2026-11-27T01:53:43.671435Z", "run": "vector-catalog-2", "item": "bedroom_window_morning", "what": "motion audit", "usd": 0.0002, "run_total": 6.65165}
+{"ts": "2026-11-27T01:53:44.835181Z", "run": "vector-catalog-2", "item": "bicycle_lane_city", "what": "motion audit", "usd": 0.00017, "run_total": 6.65181}
+{"ts": "2026-11-27T01:53:46.163611Z", "run": "vector-catalog-2", "item": "campus_quad_autumn", "what": "motion audit", "usd": 0.00018, "run_total": 6.65199}
+{"ts": "2026-11-27T01:53:47.285509Z", "run": "vector-catalog-2", "item": "candy_hills", "what": "motion audit", "usd": 0.00018, "run_total": 6.65217}
+{"ts": "2026-11-27T01:53:49.709698Z", "run": "vector-catalog-2", "item": "canyon_river_rafting", "what": "motion audit", "usd": 0.0003, "run_total": 6.65246}
+{"ts": "2026-11-27T01:53:51.807460Z", "run": "vector-catalog-2", "item": "cargo_ship_sea", "what": "motion audit", "usd": 0.00028, "run_total": 6.65274}
+{"ts": "2026-11-27T01:53:52.908064Z", "run": "vector-catalog-2", "item": "cave_valley_stone_age", "what": "motion audit", "usd": 0.00017, "run_total": 6.65291}
+{"ts": "2026-11-27T01:53:55.052066Z", "run": "vector-catalog-2", "item": "cherry_blossom_temple", "what": "motion audit", "usd": 0.00027, "run_total": 6.65318}
+{"ts": "2026-11-27T01:53:56.430946Z", "run": "vector-catalog-2", "item": "circuit_board_city", "what": "motion audit", "usd": 0.0002, "run_total": 6.65337}
+{"ts": "2026-11-27T01:54:00.524594Z", "run": "vector-catalog-2", "item": "cloud_kingdom", "what": "motion audit", "usd": 0.00058, "run_total": 6.65395}
+{"ts": "2026-11-27T01:54:01.781072Z", "run": "vector-catalog-2", "item": "coin_hills_whimsical", "what": "motion audit", "usd": 0.00018, "run_total": 6.65413}
+{"ts": "2026-11-27T01:54:05.464771Z", "run": "vector-catalog-2", "item": "container_port_cranes", "what": "motion audit", "usd": 0.00047, "run_total": 6.6546}
+{"ts": "2026-11-27T01:54:07.485486Z", "run": "vector-catalog-2", "item": "cooling_tower_steam", "what": "motion audit", "usd": 0.00032, "run_total": 6.65492}
+{"ts": "2026-11-27T01:54:09.935713Z", "run": "vector-catalog-2", "item": "cycling_road_hills", "what": "motion audit", "usd": 0.00031, "run_total": 6.65523}
+{"ts": "2026-11-27T01:54:11.922483Z", "run": "vector-catalog-2", "item": "dairy_farm_barn", "what": "motion audit", "usd": 0.00028, "run_total": 6.65551}
+{"ts": "2026-11-27T01:54:13.621463Z", "run": "vector-catalog-2", "item": "desert_solar_plant", "what": "motion audit", "usd": 0.00022, "run_total": 6.65572}
+{"ts": "2026-11-27T01:54:15.549597Z", "run": "vector-catalog-2", "item": "dna_lab_window", "what": "motion audit", "usd": 0.00027, "run_total": 6.65599}
+{"ts": "2026-11-27T01:54:18.067356Z", "run": "vector-catalog-2", "item": "dutch_windmill_polder", "what": "motion audit", "usd": 0.00034, "run_total": 6.65633}
+{"ts": "2026-11-27T01:54:19.224149Z", "run": "vector-catalog-2", "item": "egypt_pyramids_desert", "what": "motion audit", "usd": 0.00018, "run_total": 6.65651}
+{"ts": "2026-11-27T01:54:21.004627Z", "run": "vector-catalog-2", "item": "ev_charging_street", "what": "motion audit", "usd": 0.00024, "run_total": 6.65675}
+{"ts": "2026-11-27T01:54:26.095758Z", "run": "vector-catalog-2", "item": "financial_district_night", "what": "motion audit", "usd": 0.00051, "run_total": 6.65726}
+{"ts": "2026-11-27T01:54:27.881184Z", "run": "vector-catalog-2", "item": "football_stadium", "what": "motion audit", "usd": 0.00022, "run_total": 6.65748}
+{"ts": "2026-11-27T01:54:32.809823Z", "run": "vector-catalog-2", "item": "forest_cottage_kids", "what": "motion audit", "usd": 0.00058, "run_total": 6.65806}
+{"ts": "2026-11-27T01:54:35.070536Z", "run": "vector-catalog-2", "item": "galaxy_planets_view", "what": "motion audit", "usd": 0.00018, "run_total": 6.65824}
+{"ts": "2026-11-27T01:54:37.941396Z", "run": "vector-catalog-2", "item": "geothermal_steam", "what": "motion audit", "usd": 0.00032, "run_total": 6.65856}
+{"ts": "2026-11-27T01:54:38.944535Z", "run": "vector-catalog-2", "item": "greek_temple_ruins", "what": "motion audit", "usd": 0.00017, "run_total": 6.65873}
+{"ts": "2026-11-27T01:54:40.744066Z", "run": "vector-catalog-2", "item": "greenhouse_rows", "what": "motion audit", "usd": 0.00025, "run_total": 6.65898}
+{"ts": "2026-11-27T01:54:43.093169Z", "run": "vector-catalog-2", "item": "health_clinic_garden", "what": "motion audit", "usd": 0.00031, "run_total": 6.65928}
+{"ts": "2026-11-27T01:54:45.802469Z", "run": "vector-catalog-2", "item": "highway_interchange", "what": "motion audit", "usd": 0.00038, "run_total": 6.65966}
+{"ts": "2026-11-27T01:54:48.071668Z", "run": "vector-catalog-2", "item": "hospital_exterior", "what": "motion audit", "usd": 0.00031, "run_total": 6.65997}
+{"ts": "2026-11-27T01:54:49.595083Z", "run": "vector-catalog-2", "item": "hydro_dam", "what": "motion audit", "usd": 0.0002, "run_total": 6.66017}
+{"ts": "2026-11-27T01:54:50.517846Z", "run": "vector-catalog-2", "item": "iceberg_sea_polar", "what": "motion audit", "usd": 0.00017, "run_total": 6.66034}
+{"ts": "2026-11-27T01:54:51.916050Z", "run": "vector-catalog-2", "item": "japanese_pagoda_garden", "what": "motion audit", "usd": 0.0002, "run_total": 6.66054}
+{"ts": "2026-11-27T01:54:54.616367Z", "run": "vector-catalog-2", "item": "library_entrance_hall", "what": "motion audit", "usd": 0.00034, "run_total": 6.66088}
+{"ts": "2026-11-27T01:54:56.293438Z", "run": "vector-catalog-2", "item": "living_room_plants", "what": "motion audit", "usd": 0.00018, "run_total": 6.66106}
+{"ts": "2026-11-27T01:54:58.527836Z", "run": "vector-catalog-2", "item": "mangrove_coast", "what": "motion audit", "usd": 0.0003, "run_total": 6.66136}
+{"ts": "2026-11-27T01:54:59.666912Z", "run": "vector-catalog-2", "item": "market_square_stalls", "what": "motion audit", "usd": 0.00019, "run_total": 6.66155}
+{"ts": "2026-11-27T01:55:01.862801Z", "run": "vector-catalog-2", "item": "mars_surface_rover", "what": "motion audit", "usd": 0.00029, "run_total": 6.66184}
+{"ts": "2026-11-27T01:55:06.311392Z", "run": "vector-catalog-2", "item": "medieval_castle_hill", "what": "motion audit", "usd": 0.00054, "run_total": 6.66238}
+{"ts": "2026-11-27T01:55:09.957944Z", "run": "vector-catalog-2", "item": "medieval_village_street", "what": "motion audit", "usd": 0.00042, "run_total": 6.6628}
+{"ts": "2026-11-27T01:55:11.272052Z", "run": "vector-catalog-2", "item": "microscope_lab_bench", "what": "motion audit", "usd": 0.00019, "run_total": 6.66298}
+{"ts": "2026-11-27T01:55:12.537868Z", "run": "vector-catalog-2", "item": "misty_lake_dawn", "what": "motion audit", "usd": 0.00018, "run_total": 6.66317}
+{"ts": "2026-11-27T01:55:13.581559Z", "run": "vector-catalog-2", "item": "mountain_pass_road", "what": "motion audit", "usd": 0.00018, "run_total": 6.66334}
+{"ts": "2026-11-27T01:55:15.224230Z", "run": "vector-catalog-2", "item": "office_tower_dusk", "what": "motion audit", "usd": 0.00024, "run_total": 6.66358}
+{"ts": "2026-11-27T01:55:19.344691Z", "run": "vector-catalog-2", "item": "offshore_wind_farm", "what": "motion audit", "usd": 0.00054, "run_total": 6.66412}
+{"ts": "2026-11-27T01:55:22.008026Z", "run": "vector-catalog-2", "item": "old_harbour_fort", "what": "motion audit", "usd": 0.00032, "run_total": 6.66444}
+{"ts": "2026-11-27T01:55:23.206600Z", "run": "vector-catalog-2", "item": "pharmacy_street", "what": "motion audit", "usd": 0.00017, "run_total": 6.66461}
+{"ts": "2026-11-27T01:55:27.264738Z", "run": "vector-catalog-2", "item": "pirate_cove_island", "what": "motion audit", "usd": 0.0005, "run_total": 6.66511}
+{"ts": "2026-11-27T01:55:29.892989Z", "run": "vector-catalog-2", "item": "playground_empty", "what": "motion audit", "usd": 0.00034, "run_total": 6.66545}
+{"ts": "2026-11-27T01:55:31.005209Z", "run": "vector-catalog-2", "item": "power_lines_sunset", "what": "motion audit", "usd": 0.00018, "run_total": 6.66563}
+{"ts": "2026-11-27T01:55:32.973774Z", "run": "vector-catalog-2", "item": "railway_station_platform", "what": "motion audit", "usd": 0.00028, "run_total": 6.6659}
+{"ts": "2026-11-27T01:55:35.412942Z", "run": "vector-catalog-2", "item": "rainbow_meadow", "what": "motion audit", "usd": 0.00033, "run_total": 6.66623}
+{"ts": "2026-11-27T01:55:38.244014Z", "run": "vector-catalog-2", "item": "research_lab_dusk", "what": "motion audit", "usd": 0.00038, "run_total": 6.66661}
+{"ts": "2026-11-27T01:55:39.472054Z", "run": "vector-catalog-2", "item": "rice_terraces", "what": "motion audit", "usd": 0.00019, "run_total": 6.6668}
+{"ts": "2026-11-27T01:55:42.215116Z", "run": "vector-catalog-2", "item": "robotics_lab_window", "what": "motion audit", "usd": 0.00036, "run_total": 6.66716}
+{"ts": "2026-11-27T01:55:45.273013Z", "run": "vector-catalog-2", "item": "rocket_launch_pad", "what": "motion audit", "usd": 0.00037, "run_total": 6.66753}
+{"ts": "2026-11-27T01:55:45.999407Z", "run": "vector-catalog-2", "item": "roman_aqueduct", "what": "motion audit", "usd": 0.00014, "run_total": 6.66766}
+{"ts": "2026-11-27T01:55:47.314208Z", "run": "vector-catalog-2", "item": "running_track", "what": "motion audit", "usd": 0.00019, "run_total": 6.66785}
+{"ts": "2026-11-27T01:55:50.406164Z", "run": "vector-catalog-2", "item": "satellite_dish_field", "what": "motion audit", "usd": 0.00031, "run_total": 6.66817}
+{"ts": "2026-11-27T01:55:51.346998Z", "run": "vector-catalog-2", "item": "savanna_sunset_acacia", "what": "motion audit", "usd": 0.00017, "run_total": 6.66834}
+{"ts": "2026-11-27T01:55:53.888306Z", "run": "vector-catalog-2", "item": "school_building_exterior", "what": "motion audit", "usd": 0.00033, "run_total": 6.66867}
+{"ts": "2026-11-27T01:55:56.135027Z", "run": "vector-catalog-2", "item": "science_museum_exterior", "what": "motion audit", "usd": 0.00033, "run_total": 6.66899}
+{"ts": "2026-11-27T01:55:57.678170Z", "run": "vector-catalog-2", "item": "server_corridor", "what": "motion audit", "usd": 0.00021, "run_total": 6.66921}
+{"ts": "2026-11-27T01:55:58.961266Z", "run": "vector-catalog-2", "item": "silk_road_oasis", "what": "motion audit", "usd": 0.00019, "run_total": 6.6694}
+{"ts": "2026-11-27T01:56:00.013764Z", "run": "vector-catalog-2", "item": "skate_park", "what": "motion audit", "usd": 0.00018, "run_total": 6.66958}
+{"ts": "2026-11-27T01:56:04.868596Z", "run": "vector-catalog-2", "item": "ski_slope_lifts", "what": "motion audit", "usd": 0.00058, "run_total": 6.67016}
+{"ts": "2026-11-27T01:56:07.673577Z", "run": "vector-catalog-2", "item": "smart_city_day", "what": "motion audit", "usd": 0.00041, "run_total": 6.67057}
+{"ts": "2026-11-27T01:56:09.679511Z", "run": "vector-catalog-2", "item": "snowman_field_kids", "what": "motion audit", "usd": 0.00029, "run_total": 6.67086}
+{"ts": "2026-11-27T01:56:11.851532Z", "run": "vector-catalog-2", "item": "snowy_forest_night", "what": "motion audit", "usd": 0.00032, "run_total": 6.67117}
+{"ts": "2026-11-27T01:56:15.709176Z", "run": "vector-catalog-2", "item": "spa_stones_pond", "what": "motion audit", "usd": 0.00047, "run_total": 6.67165}
+{"ts": "2026-11-27T01:56:19.242029Z", "run": "vector-catalog-2", "item": "space_playground_kids", "what": "motion audit", "usd": 0.00046, "run_total": 6.6721}
+{"ts": "2026-11-27T01:56:20.540203Z", "run": "vector-catalog-2", "item": "space_station_earth", "what": "motion audit", "usd": 0.00018, "run_total": 6.67228}
+{"ts": "2026-11-27T01:56:21.660539Z", "run": "vector-catalog-2", "item": "spring_hills_flowers", "what": "motion audit", "usd": 0.00019, "run_total": 6.67247}
+{"ts": "2026-11-27T01:56:23.761275Z", "run": "vector-catalog-2", "item": "stock_exchange_facade", "what": "motion audit", "usd": 0.00029, "run_total": 6.67276}
+{"ts": "2026-11-27T01:56:26.305764Z", "run": "vector-catalog-2", "item": "submarine_deep_sea", "what": "motion audit", "usd": 0.00029, "run_total": 6.67305}
+{"ts": "2026-11-27T01:56:28.625195Z", "run": "vector-catalog-2", "item": "sunrise_over_ocean", "what": "motion audit", "usd": 0.00031, "run_total": 6.67336}
+{"ts": "2026-11-27T01:56:32.356057Z", "run": "vector-catalog-2", "item": "suspension_bridge_traffic", "what": "motion audit", "usd": 0.00047, "run_total": 6.67383}
+{"ts": "2026-11-27T01:56:33.535810Z", "run": "vector-catalog-2", "item": "swimming_pool", "what": "motion audit", "usd": 0.00018, "run_total": 6.67401}
+{"ts": "2026-11-27T01:56:35.810279Z", "run": "vector-catalog-2", "item": "tall_castle_tower", "what": "motion audit", "usd": 0.00036, "run_total": 6.67437}
+{"ts": "2026-11-27T01:56:39.189673Z", "run": "vector-catalog-2", "item": "tall_future_city_vertical", "what": "motion audit", "usd": 0.00046, "run_total": 6.67484}
+{"ts": "2026-11-27T01:56:40.307857Z", "run": "vector-catalog-2", "item": "tall_home_garden_vertical", "what": "motion audit", "usd": 0.00019, "run_total": 6.67502}
+{"ts": "2026-11-27T01:56:41.384078Z", "run": "vector-catalog-2", "item": "tall_hospital_tower", "what": "motion audit", "usd": 0.00019, "run_total": 6.67521}
+{"ts": "2026-11-27T01:56:45.012577Z", "run": "vector-catalog-2", "item": "tall_ocean_lighthouse_night", "what": "motion audit", "usd": 0.00047, "run_total": 6.67568}
+{"ts": "2026-11-27T01:56:47.212432Z", "run": "vector-catalog-2", "item": "tall_rainbow_vertical", "what": "motion audit", "usd": 0.00035, "run_total": 6.67603}
+{"ts": "2026-11-27T01:56:50.783686Z", "run": "vector-catalog-2", "item": "tall_rocket_vertical", "what": "motion audit", "usd": 0.00049, "run_total": 6.67653}
+{"ts": "2026-11-27T01:56:51.870001Z", "run": "vector-catalog-2", "item": "tall_skyline_vertical", "what": "motion audit", "usd": 0.00019, "run_total": 6.67672}
+{"ts": "2026-11-27T01:56:54.233974Z", "run": "vector-catalog-2", "item": "tall_snow_peak_vertical", "what": "motion audit", "usd": 0.00035, "run_total": 6.67707}
+{"ts": "2026-11-27T01:56:56.025001Z", "run": "vector-catalog-2", "item": "tall_space_vertical", "what": "motion audit", "usd": 0.0003, "run_total": 6.67736}
+{"ts": "2026-11-27T01:56:57.144540Z", "run": "vector-catalog-2", "item": "tall_sunflower_field", "what": "motion audit", "usd": 0.0002, "run_total": 6.67757}
+{"ts": "2026-11-27T01:56:58.751153Z", "run": "vector-catalog-2", "item": "tall_sunset_beach_vertical", "what": "motion audit", "usd": 0.00026, "run_total": 6.67783}
+{"ts": "2026-11-27T01:57:00.417931Z", "run": "vector-catalog-2", "item": "tall_train_viaduct", "what": "motion audit", "usd": 0.00024, "run_total": 6.67807}
+{"ts": "2026-11-27T01:57:03.213199Z", "run": "vector-catalog-2", "item": "tall_waterfall_forest", "what": "motion audit", "usd": 0.00038, "run_total": 6.67844}
+{"ts": "2026-11-27T01:57:06.301477Z", "run": "vector-catalog-2", "item": "tall_wind_turbines_vertical", "what": "motion audit", "usd": 0.0005, "run_total": 6.67895}
+{"ts": "2026-11-27T01:57:08.076247Z", "run": "vector-catalog-2", "item": "telescope_hill_stars", "what": "motion audit", "usd": 0.00026, "run_total": 6.6792}
+{"ts": "2026-11-27T01:57:09.143342Z", "run": "vector-catalog-2", "item": "tennis_court", "what": "motion audit", "usd": 0.00018, "run_total": 6.67938}
+{"ts": "2026-11-27T01:57:10.783807Z", "run": "vector-catalog-2", "item": "thunderstorm_plains", "what": "motion audit", "usd": 0.00023, "run_total": 6.67961}
+{"ts": "2026-11-27T01:57:13.722719Z", "run": "vector-catalog-2", "item": "toy_village", "what": "motion audit", "usd": 0.00029, "run_total": 6.6799}
+{"ts": "2026-11-27T01:57:16.665754Z", "run": "vector-catalog-2", "item": "tropical_river_jungle", "what": "motion audit", "usd": 0.00039, "run_total": 6.68029}
+{"ts": "2026-11-27T01:57:20.363364Z", "run": "vector-catalog-2", "item": "underwater_castle_kids", "what": "motion audit", "usd": 0.00055, "run_total": 6.68084}
+{"ts": "2026-11-27T01:57:23.442747Z", "run": "vector-catalog-2", "item": "viking_fjord", "what": "motion audit", "usd": 0.00037, "run_total": 6.68121}
+{"ts": "2026-11-27T01:57:25.249455Z", "run": "vector-catalog-2", "item": "vineyard_hills", "what": "motion audit", "usd": 0.00019, "run_total": 6.6814}
+{"ts": "2026-11-27T01:57:28.065715Z", "run": "vector-catalog-2", "item": "wheat_field_tractor", "what": "motion audit", "usd": 0.00028, "run_total": 6.68168}
+{"ts": "2026-11-27T02:23:45.635543Z", "run": "vector-catalog-2", "item": "embeddings", "what": "Cohere Embed v4 x314 (estimate)", "usd": 0.09734}

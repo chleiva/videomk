@@ -51,34 +51,55 @@ def palette(path, k=5):
     return ["#%02x%02x%02x" % tuple(int(x) for x in cen[i]) for i in order]
 
 
+# batch 1 categories have no use_for / avoid_for in the plan: defaults (batch 2 carries its own per item). The cartoon look is for a peculiar kind of video, see docs/VECTOR_CATALOG.md "When to use".
+DEFAULT_USE = {
+    "nature": ("education, explainer, kids, wellness, travel", "news, current events, realistic documentary, disaster topics"),
+    "city": ("explainer, business-light, education, travel", "news, current events, real places and addresses, crime and disaster topics"),
+    "tech": ("tech, explainer, business-light, education", "news, security incidents, surveillance"),
+    "science": ("education, explainer, kids, science", "news, conspiracy topics"),
+    "education": ("education, explainer, kids, lifestyle", "news, serious topics"),
+    "travel": ("travel, explainer, education, lifestyle", "news, accidents, disaster topics"),
+    "seasons": ("wellness, lifestyle, kids, explainer, holidays", "news, serious topics"),
+}
+
+
+# solid structures that tore under the default merge (docs/VECTOR_CATALOG.md, tear check): (edge threshold, depth range cap), see vector_objects.py
+STRONG_MERGE = {"space_station_earth": (0.30, 0.65), "satellite_dish_field": (0.24, 0.5)}
+
+
+def audit_subjects(iid):
+    """implied-motion subjects of a scene from vector_motion_audit.py (VC_AUDIT = its json), [] when none"""
+    path = os.environ.get("VC_AUDIT")
+    if not path or not os.path.exists(path):
+        return []
+    return (json.load(open(path)).get(iid) or {}).get("subjects", [])
+
+
 def build_one(args):
-    import vector_scene_build as vsb
+    import vector_scene_build as vsb  # noqa: F401  (depth model path, helpers)
+    import vector_sprites as vsp
     from PIL import Image
 
     item, src, store = args
     out = os.path.join(store, item["id"])
-    if os.path.exists(os.path.join(out, "meta.json")):
+    if os.path.exists(os.path.join(out, "meta.json")) and not os.environ.get("VC_REBUILD"):
         return item["id"], "exists", 0
     if os.path.exists(out):
         shutil.rmtree(out)
     tall = item["orientation"] == "tall"
-    if tall:
-        vsb.crop169 = lambda im: im     # keep the 2:3 picture whole: the scene is a 9:16-family scene
     nosky = item["id"] in NO_SKY
-    if nosky:
-        import numpy as np
-        vsb.sky_mask = lambda rgb, comp: np.zeros(comp.shape, bool)
-    stats = vsb.build(src, out, CUTS, item["id"], sun=False, clouds=not nosky, layer_motion=None)
+
+    def add_motion(man):
+        # gentle sway on the two nearest ground layers of outdoor scenes (foliage); sprites and clouds keep their own tags
+        base = [i for i, lay in enumerate(man["layers"]) if not lay.get("sprite") and lay["name"].startswith("layer")]
+        if item["category"] in OUTDOOR and len(base) >= 2:
+            man["layers"][base[-1]]["sway"] = {"amp": 0.0034, "period": 3.0, "phase": 2.0}
+            man["layers"][base[-2]]["sway"] = {"amp": 0.0020, "period": 3.8, "phase": 0.8}
+        man["catalog"] = item["id"]
+
+    stats, sprites = vsp.build(src, out, CUTS, item["id"], audit_subjects(item["id"]), tall=tall, nosky=nosky, motion_cb=add_motion, merge=STRONG_MERGE.get(item["id"]))
     man = json.load(open(os.path.join(out, "manifest.json")))
     n = len(man["layers"])
-    # motion by layer position (nearest layers sway): apply after the build, the layer list is known
-    mot = motion_for(item, n)
-    for i, lay in enumerate(man["layers"]):
-        if i in mot:
-            lay.update(mot[i])
-    man["aspect"] = [2, 3] if tall else [16, 9]
-    man["catalog"] = item["id"]
-    json.dump(man, open(os.path.join(out, "manifest.json"), "w"), indent=1)
     im = Image.open(src).convert("RGB")
     t = im.copy()
     t.thumbnail((384, 384))
@@ -91,7 +112,11 @@ def build_one(args):
     prompt_hash = hashlib.sha256((item["desc"]).encode()).hexdigest()[:16]
     meta = dict(id=item["id"], title=item["title"], category=item["category"], mood=item["mood"], tags=item["tags"].split(","), topics=item["topics"], description=item["desc"],
                 aspects=["9:16"] if tall else ["16:9"], orientation=item["orientation"], palette=palette(src), layers=n, svg_kb=svg_kb, paths=sum(s[2] for s in stats),
-                provenance=dict(model=MODEL, size=list(im.size), quality="medium", prompt_sha256_16=prompt_hash, run="vector-catalog-1", qa=qa, review_status="approved"))
+                motion=sorted({t["type"] for l in man["layers"] if l.get("sprite") for t in l["tags"]} | ({"drift"} if any(l.get("drift") for l in man["layers"]) else set()) | ({"sway"} if any(l.get("sway") for l in man["layers"]) else set())),
+                sprites=[dict(kind=l["kind"], tags=[t["type"] for t in l["tags"]]) for l in man["layers"] if l.get("sprite")],
+                use_for=item.get("use_for") or DEFAULT_USE.get(item["category"], ("explainer, education", "news"))[0],
+                avoid_for=item.get("avoid_for") or DEFAULT_USE.get(item["category"], ("explainer, education", "news"))[1],
+                provenance=dict(model=MODEL, size=list(im.size), quality="medium", prompt_sha256_16=prompt_hash, run=os.environ.get("VC_RUN", "vector-catalog-1"), qa=qa, review_status="approved"))
     json.dump(meta, open(os.path.join(out, "meta.json"), "w"), indent=1)
     return item["id"], "built", svg_kb
 
@@ -102,8 +127,11 @@ def main():
     ap.add_argument("--store", required=True)
     ap.add_argument("--only", nargs="*")
     ap.add_argument("--workers", type=int, default=3)
+    ap.add_argument("--plan", default=PLAN)
+    ap.add_argument("--run", default="vector-catalog-1", help="provenance run name of this batch")
     a = ap.parse_args()
-    plan = json.load(open(PLAN))
+    os.environ["VC_RUN"] = a.run
+    plan = json.load(open(a.plan))
     jobs = []
     for it in plan["items"]:
         p = os.path.join(a.src, "accepted", it["id"] + ".png")

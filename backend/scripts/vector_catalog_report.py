@@ -38,7 +38,9 @@ def sheet(store, out, check):
     wide = [m for m in ms if m["orientation"] != "tall"]
     rows = (len(wide) + cols - 1) // cols
     th = 320
-    S = Image.new("RGB", (cols * cw, rows * (ch + 30) + (th + 30 if tall else 0)), "white")
+    tcols = cols * cw // 230                                  # tall tiles wrap into rows of the sheet width
+    trows = (len(tall) + tcols - 1) // tcols
+    S = Image.new("RGB", (cols * cw, rows * (ch + 30) + trows * (th + 30)), "white")
     d = ImageDraw.Draw(S)
 
     def tile(m, x, y, w, h):
@@ -54,7 +56,7 @@ def sheet(store, out, check):
     for n, m in enumerate(wide):
         tile(m, (n % cols) * cw, (n // cols) * (ch + 30), cw, ch)
     for n, m in enumerate(tall):
-        tile(m, n * 230, rows * (ch + 30), 213, th)
+        tile(m, (n % tcols) * 230, rows * (ch + 30) + (n // tcols) * (th + 30), 213, th)
     S.save(out)
     print("sheet", out, len(ms), "scenes")
 

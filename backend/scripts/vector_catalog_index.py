@@ -41,6 +41,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--store", required=True)
     ap.add_argument("--upload", choices=["qa"])
+    ap.add_argument("--run", default="vector-catalog-2", help="ledger run name for the embedding estimate")
     a = ap.parse_args()
     items, est = [], 0.0
     for sid in sorted(os.listdir(a.store)):
@@ -54,11 +55,12 @@ def main():
         vi = library_search._embed({"input_type": "search_document", "images": ["data:image/jpeg;base64," + base64.b64encode(jpg).decode("ascii")]})
         vt = library_search._embed({"input_type": "search_document", "texts": [describe(m)[:1800]]})
         est += EMBED_USD_TEXT + EMBED_USD_IMAGE
-        items.append({k: m[k] for k in ("id", "title", "category", "mood", "tags", "topics", "aspects", "palette", "layers", "svg_kb")} | {"vi": enc(vi), "vt": enc(vt)})
+        items.append({k: m[k] for k in ("id", "title", "category", "mood", "tags", "topics", "aspects", "palette", "layers", "svg_kb")}
+                     | {k: m[k] for k in ("use_for", "avoid_for", "motion") if k in m} | {"vi": enc(vi), "vt": enc(vt)})
         print("embedded", sid, flush=True)
     json.dump({"model": library_search.EMBED_MODEL, "dim": library_search.EMBED_DIM, "built": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d"), "items": items}, open(OUT, "w"), separators=(",", ":"))
     with open(LEDGER, "a") as f:
-        f.write(json.dumps({"ts": datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None).isoformat() + "Z", "run": "vector-catalog-1", "item": "embeddings", "what": f"Cohere Embed v4 x{2 * len(items)} (estimate)", "usd": round(est, 5)}) + "\n")
+        f.write(json.dumps({"ts": datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None).isoformat() + "Z", "run": a.run, "item": "embeddings", "what": f"Cohere Embed v4 x{2 * len(items)} (estimate)", "usd": round(est, 5)}) + "\n")
     print(f"index: {len(items)} scenes, {os.path.getsize(OUT) // 1024} KB")
     if a.upload:
         import boto3
@@ -70,6 +72,10 @@ def main():
         n = 0
         for it in items:
             d = os.path.join(a.store, it["id"])
+            keep = {f for f in os.listdir(d) if f.endswith(".svg") or f in ("manifest.json", "meta.json", "thumb.jpg")}
+            for obj in s3.list_objects_v2(Bucket=bucket, Prefix=f"v/{it['id']}/").get("Contents", []):   # a rebuilt scene has other layer files: remove the stale ones
+                if obj["Key"].rsplit("/", 1)[1] not in keep:
+                    s3.delete_object(Bucket=bucket, Key=obj["Key"])
             for f in sorted(os.listdir(d)):
                 if f.endswith(".svg") or f in ("manifest.json", "meta.json", "thumb.jpg"):
                     ct = {"svg": "image/svg+xml", "json": "application/json", "jpg": "image/jpeg"}[f.rsplit(".", 1)[1]]

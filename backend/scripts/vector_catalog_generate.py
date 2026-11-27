@@ -79,8 +79,8 @@ def judge(text):
     except ValueError:
         v = {}
     bad = ("text_visible", "logo_or_brand", "person_visible", "warped_objects", "too_busy")
-    ok = bool(v) and all(v.get(k) is False for k in bad) and v.get("flat_style") is True and v.get("calm_bottom") is True \
-        and min(float(v.get("adherence", 0)), float(v.get("quality", 0))) >= 7 and float(v.get("depth", 0)) >= 6
+    ok = bool(v) and all(v.get(k) is False for k in bad) and v.get("flat_style") is True \
+        and min(float(v.get("adherence", 0)), float(v.get("quality", 0))) >= 7 and float(v.get("depth", 0)) >= 6   # calm_bottom is recorded, not required: captions get a scrim in the engine, and batch 1 lost 17 good pictures to it
     return ok, v
 
 
@@ -105,13 +105,21 @@ def main():
     ap.add_argument("--only", nargs="*")
     ap.add_argument("--workers", type=int, default=2)
     ap.add_argument("--attempts", type=int, default=2)
+    ap.add_argument("--plan", default=PLAN, help="plan json (docs/vector_catalog/plan.json = batch 1, plan2.json = batch 2)")
+    ap.add_argument("--run", default=None, help="ledger run name for this batch (default vector-catalog-1)")
+    ap.add_argument("--extra-cap", type=float, default=None, help="spend cap for THIS batch on top of what the ledger already holds (overrides --cap)")
     a = ap.parse_args()
-    plan = json.load(open(PLAN))
+    global RUN
+    if a.run:
+        RUN = a.run
+    plan = json.load(open(a.plan))
     items = [i for i in plan["items"] if not a.only or i["id"] in a.only]
     for d in ("accepted", "rejected"):
         os.makedirs(os.path.join(a.out, d), exist_ok=True)
     api = cg.openai_api("qa")
     bud = Budget(a.cap)
+    if a.extra_cap is not None:
+        bud.cap = bud.total + a.extra_cap
     log = threading.Lock()
     results = {}
 

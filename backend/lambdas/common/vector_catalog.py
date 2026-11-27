@@ -78,12 +78,25 @@ def search(query: str, aspect: str = "16:9", k: int = 5, *, embed: Optional[Call
             score = max(_cos(q, it["vi"]), _cos(q, it["vt"]))
             if score >= min_score:
                 out.append({"id": it["id"], "score": round(score, 4), "title": it["title"], "category": it["category"], "mood": it["mood"],
-                            "aspects": it["aspects"], "palette": it.get("palette", []), "layers": it.get("layers"), "svg_kb": it.get("svg_kb")})
+                            "aspects": it["aspects"], "palette": it.get("palette", []), "layers": it.get("layers"), "svg_kb": it.get("svg_kb"),
+                            "use_for": it.get("use_for", ""), "avoid_for": it.get("avoid_for", ""), "motion": it.get("motion", [])})
         out.sort(key=lambda r: -r["score"])
         return out[:max(1, int(k))]
     except Exception:      # noqa: BLE001 - search is best effort: no match means a normal scene
         logger.exception("vector catalog search failed")
         return []
+
+
+def suits(scene: Dict[str, Any], video_kind: str) -> bool:
+    """Does a catalog scene (a search result or an index item) suit this kind of video? `video_kind` is one word from the vocabulary of `use_for` / `avoid_for`
+    (kids, education, explainer, tech, business-light, travel, wellness, lifestyle, science, sustainability, news ...). The cartoon look is for a peculiar kind of video:
+    use it only when the kind is listed in `use_for` and not named in `avoid_for` (docs/VECTOR_CATALOG.md, "When to use")."""
+    kind = (video_kind or "").strip().lower()
+    if not kind:
+        return False
+    use = [x.strip().lower() for x in str(scene.get("use_for", "")).split(",") if x.strip()]
+    avoid = [x.strip().lower() for x in str(scene.get("avoid_for", "")).split(",") if x.strip()]
+    return any(kind == u or kind in u.split() for u in use) and not any(kind == a or kind in a.split() for a in avoid)
 
 
 def scene_ids() -> List[str]:
