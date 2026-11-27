@@ -4,6 +4,7 @@ import io
 import json
 import os
 import sys
+import time
 import urllib.error
 
 import numpy as np
@@ -210,6 +211,59 @@ def test_object_names_word_lists_first_then_one_model_call_that_gives_the_englis
     out, _ = mp.judge_names(["geige"], complete=Stub(names={"names": [{"n": 1, "english": "Violín Stradivarius 1700", "policy": "none"}]}))
     assert out[0]["ok"] is False                                                                                                              # not a plain English name
     assert mp.judge_names(["casino"], complete=Stub())[0][0]["reason"] == "policy:gambling" and mp.judge_names([], complete=Stub()) == ([], 0.0)
+
+
+def test_a_name_the_word_lists_refuse_leaves_a_decision_and_a_counter_like_every_other_refusal(wb, caplog):
+    """Round 2, item 9: `missing` dropped such a name without a trace, so a refused drawing could not be told from one nobody asked for."""
+    refused = {}
+    assert oo.missing(_board_plan("honeycomb", "church", "wine glass", "baby", "word cloud", "maria", "a very long name of five words"), 6, refused=refused) == [("honeycomb", "honeycomb")]
+    assert refused == {"church": "policy:religion", "wine glass": "policy:drugs_alcohol_tobacco", "baby": "policy:children",      # the children policy, not "family or acquaintance"
+                       "word cloud": "banned word", "maria": "personal (first name)"}                                              # a wording that is no drawing name at all is not a refusal
+    with caplog.at_level("WARNING"):
+        got = oo.fill(_board_plan("church", "wine glass"), video_id="v1", ctx=od.context("v1"))
+    assert got == {"asked": [], "made": [], "reason": "filter"} and wb.calls == []                                               # nothing to make, nothing paid
+    lines = [r.getMessage() for r in caplog.records if "OBJECT_DECISION" in r.getMessage()]
+    assert len(lines) == 2 and '"outcome": "filter:policy:religion"' in lines[0] and '"name": "church"' in lines[0] and "drugs_alcohol_tobacco" in lines[1]
+    assert outcomes(wb.store, "object") == {"filter": 2} and spent(wb.store, "object", "test") == 0
+    oo.fill(_board_plan("honeycomb", "baby"), video_id="v1", ctx=od.context("v1"))                                               # one made, one refused: both are counted
+    assert outcomes(wb.store, "object") == {"filter": 3, "generated": 1}
+    wb.rows["v1"]["plan"] = "free"                                                                                               # an account that could never have had it made: no decision is logged for it
+    assert oo.fill(_board_plan("church"), video_id="v1", ctx=od.context("v1"))["reason"] == "not_entitled" and outcomes(wb.store, "object") == {"filter": 3, "generated": 1}
+
+
+def test_the_report_keeps_the_three_types_apart_shows_test_spend_and_counts_reused_drawings(wb, capsys):
+    """Round 2, item 9: with only images and drawings made, the report said "spend by day (test): none", gave the clips block their latencies and decisions, and
+    could not say whether a drawing made on demand was ever used again."""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("clips_admin", os.path.join(os.path.dirname(__file__), "..", "scripts", "clips_admin.py"))
+    admin = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(admin)
+    assert oo.fill(_board_plan("honeycomb", "church"), video_id="v1", ctx=od.context("v1"))["made"] == ["honeycomb"]           # one drawing made, one name refused by the word lists
+    wb.store.add(cs.ledger_pk(cs.month()), "img1", fields={"media": "image", "outcome": "generated", "latency_s": 9.5, "charged_usd": 0.05, "at": int(time.time()), "account": "a1"})
+    wb.store.add(cs.ledger_pk(cs.month()), "img2", fields={"media": "image", "outcome": "gate_rejected", "reason": "bright table", "latency_s": 7.0, "charged_usd": 0.05, "at": int(time.time()), "account": "a1"})
+    wb.store.add(cs.spend_pk("test", "day", "image"), cs.day(), {"spent": 100_000})
+    reuse = {"beats": [{"id": "w1", "scene": {"type": "whiteboard", "props": {"items": [{"id": "a", "draw": "honeycomb", "zone": "centre"}, {"id": "b", "draw": "sun", "zone": "left"}]}}}]}
+    wb.rows["v2"] = {**wb.rows["v1"], "plan": "free"}                                                                         # a Free video whose boards draw the honeycomb we own: reuse, by any plan
+    assert oo.fill(reuse, video_id="v2", ctx=od.context("v2"))["made"] == [] and oo.fill(reuse, video_id="v3", ctx=od.context("v2"))["made"] == []
+    rep = admin.report(wb.store, 30)
+    obj, img = rep["by_media"]["object"], rep["by_media"]["image"]
+    assert obj["used"] == {"generated": 1, "library": 2} and obj["library"] == {"drawings": 1, "uses": 2, "reused": 1, "top": [{"id": "honeycomb", "uses": 2, "videos": 2}]}   # the bundled sun is not ours to count
+    assert obj["decisions"] == {"filter": 1, "generated": 1} and obj["latency_p50_s"] is not None and img["latency_p50_s"] in (7.0, 9.5) and img["kept"] == 1 and img["rejected"] == 1
+    assert rep["spend_by_day"] == {"paid": {}, "test": {}}                                                                    # clips spent nothing ...
+    assert rep["spend_by_day_all_media"] == {"paid": {cs.day(): pytest.approx(0.047)}, "test": {cs.day(): pytest.approx(0.1)}}  # ... the drawing (this account pays) and the test account's images did
+    assert rep["generations"] == 0 and rep["latency_s"] == {"p50": None, "p95": None, "max": None} and rep["not_kept_by_reason"] == {} and rep["decisions"] == {} and rep["used"] == {}   # the clips block is the clips' own
+    capsys.readouterr()
+    admin.cmd_report(type("A", (), {"store": "local:" + wb.store.path, "days": 30, "json": False})())
+    text = capsys.readouterr().out
+    assert "spend by day, the three types together (test): {" in text and "drawings made on demand in the library: 1, reused 2 times" in text and "clips only, spend by day (test): none" in text
+
+
+def test_a_search_about_a_baby_is_logged_under_the_children_policy_not_as_somebodys_family():
+    for q in ("baby crawling on floor", "baby standing holding sofa", "kid on a swing", "un bebé en su cuna"):
+        assert clip_brief.pre_filter(q) == "policy:children", q
+    assert clip_brief.generalise("baby pulling up on furniture", "", "n", complete=Stub())[0]["reason"] == "filter:policy:children"
+    assert clip_brief.pre_filter("our wedding day") == "personal (first person)" and clip_brief.pre_filter("grandma baking bread") == "personal (family or acquaintance)"   # really personal: as before
+    assert clip_brief.pre_filter("baby elephant with its mother") == "personal (family or acquaintance)" and clip_brief.pre_filter("baby elephant at a waterhole") is None
 
 
 def test_a_name_the_policy_refuses_is_never_drawn_and_a_foreign_name_is_drawn_from_its_english(wb):

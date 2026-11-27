@@ -91,22 +91,21 @@ def report(store: cs.Store, days: int = 30, now: float = None) -> dict:
     months = sorted({cs.month(now - d * 86400) for d in range(days + 1)})
     since = now - days * 86400
     ledger = [r for m in months for r in store.query(cs.ledger_pk(m)) if float(r.get("at") or 0) >= since]
-    made = [r for r in ledger if r.get("outcome") == "generated"]
-    rejected = [r for r in ledger if r.get("outcome") == "gate_rejected"]
+    clip_ledger = [r for r in ledger if r.get("media", "clip") == "clip"]   # the clips' own block reads the clips' own rows: images and objects have theirs in `by_media` (their latencies and reasons used to be mixed in here)
     reasons: dict = {}
-    for r in ledger:
+    for r in clip_ledger:
         if r.get("outcome") not in ("generated", "started"):
             key = f"{r.get('outcome')}:{r.get('reason')}"
             reasons[key] = reasons.get(key, 0) + 1
-    lat = sorted(float(r["latency_s"]) for r in ledger if r.get("latency_s") is not None and r.get("outcome") in ("generated", "gate_rejected"))
+    lat = sorted(float(r["latency_s"]) for r in clip_ledger if r.get("latency_s") is not None and r.get("outcome") in ("generated", "gate_rejected"))
     by_account: dict = {}
-    for r in ledger:
+    for r in ledger:   # every type: the account's allowance is one counter for the three
         by_account[r.get("account", "?")] = round(by_account.get(r.get("account", "?"), 0.0) + float(r.get("charged_usd") or 0), 4)
     spend_day = {k: {r["sk"]: cs.usd(r.get("spent")) for r in store.query(cs.spend_pk(k, "day")) if r["sk"] >= cs.day(since)} for k in ("paid", "test")}
     spend_month = {k: {r["sk"]: cs.usd(r.get("spent")) for r in store.query(cs.spend_pk(k, "month")) if r["sk"] in months} for k in ("paid", "test")}
     stats: dict = {}
     for r in store.query(cs.STATS):
-        if r["sk"] >= cs.day(since):
+        if r["sk"] >= cs.day(since) and ":" not in r["sk"]:   # the clips' counters of the day; "<day>:image" and "<day>:object" are read per type below
             for k, v in r.items():
                 if k[:2] in ("d_", "g_") or k[:4] in ("cap_", "used"):
                     stats[k] = stats.get(k, 0) + int(v or 0)
@@ -133,7 +132,15 @@ def report(store: cs.Store, days: int = 30, now: float = None) -> dict:
                        "spend_by_day": {k: {r["sk"]: cs.usd(r.get("spent")) for r in store.query(cs.spend_pk(k, "day", m)) if r["sk"] >= cs.day(since)} for k in ("paid", "test")},
                        "cap_hits": {k[4:]: v for k, v in st.items() if k.startswith("cap_")}, "decisions": {k[2:]: v for k, v in st.items() if k.startswith("d_")},
                        "used": {k[5:]: v for k, v in st.items() if k.startswith("used_")}}
-    ledger = [r for r in ledger if r.get("media", "clip") == "clip"]   # the figures below are the clips' own, as before
+    spend_all: dict = {k: {} for k in ("paid", "test")}   # every type together, by day: a test account's spend on images or drawings used to show as "none" because only the clips' counter was read
+    for m in by_media:
+        for k in ("paid", "test"):
+            for d, v in by_media[m]["spend_by_day"][k].items():
+                spend_all[k][d] = round(spend_all[k].get(d, 0.0) + v, 6)
+    wobj = [r for r in store.query(cs.P + "wobj") if r.get("status", "active") == "active"]   # the drawings made on demand (engine/object_ondemand.WOBJ)
+    by_media["object"]["library"] = {"drawings": len(wobj), "uses": sum(int(r.get("uses") or 0) for r in wobj), "reused": len([r for r in wobj if int(r.get("uses") or 0) > 0]),
+                                     "top": [{"id": r["sk"], "uses": int(r.get("uses") or 0), "videos": len(r.get("videos") or [])} for r in sorted(wobj, key=lambda r: -int(r.get("uses") or 0))[:10] if int(r.get("uses") or 0) > 0]}
+    ledger = clip_ledger   # the figures below are the clips' own, as before
     made = [r for r in ledger if r.get("outcome") == "generated"]
     rejected = [r for r in ledger if r.get("outcome") == "gate_rejected"]
     return {
@@ -141,7 +148,7 @@ def report(store: cs.Store, days: int = 30, now: float = None) -> dict:
         "days": days, "generations": len([r for r in ledger if r.get("outcome") != "started"]), "unfinished": len([r for r in ledger if r.get("outcome") == "started"]),
         "kept": len(made), "rejected": len(rejected), "rejection_rate": round(len(rejected) / max(1, len(made) + len(rejected)), 3), "not_kept_by_reason": reasons,
         "spend_usd": round(sum(float(r.get("charged_usd") or 0) for r in ledger), 4), "cost_per_kept_clip_usd": round(sum(float(r.get("charged_usd") or 0) for r in ledger) / max(1, len(made)), 3),
-        "spend_by_day": spend_day, "spend_by_month": spend_month, "spend_by_account": dict(sorted(by_account.items(), key=lambda t: -t[1])[:20]),
+        "spend_by_day": spend_day, "spend_by_day_all_media": spend_all, "spend_by_month": spend_month, "spend_by_account": dict(sorted(by_account.items(), key=lambda t: -t[1])[:20]),
         "decisions": {k[2:]: v for k, v in stats.items() if k.startswith("d_")}, "cap_hits": {k[4:]: v for k, v in stats.items() if k.startswith("cap_")},
         "budget_stops": sum(v for k, v in stats.items() if k in ("cap_platform_day", "cap_platform_month", "cap_test_day", "cap_test_month")),
         "used": {k[5:]: v for k, v in stats.items() if k.startswith("used_")},
@@ -165,6 +172,13 @@ def cmd_report(a) -> None:
     for m, v in rep["by_media"].items():
         print(f"  {m:<6} calls {v['calls']:3d}  kept {v['kept']:3d}  rejected {v['rejected']:3d} ({v['rejection_rate']:.0%})  charged ${v['spend_usd']:.2f} (provider ${v['provider_usd']:.2f})  "
               f"latency p50 {v['latency_p50_s']} s max {v['latency_max_s']} s  cap hits {v['cap_hits'] or 'none'}  used {v['used'] or 'none'}")
+        for kind in ("paid", "test"):
+            if v["spend_by_day"][kind]:
+                print(f"         spend by day ({kind}): {v['spend_by_day'][kind]}")
+    ol = rep["by_media"]["object"]["library"]
+    print(f"  drawings made on demand in the library: {ol['drawings']}, reused {ol['uses']} times ({ol['reused']} of them at least once){': ' + str(ol['top']) if ol['top'] else ''}")
+    for kind in ("paid", "test"):
+        print(f"  spend by day, the three types together ({kind}): {rep['spend_by_day_all_media'][kind] or 'none'}")
     print("  clips in detail:")
     print(f"  generations {rep['generations']} (kept {rep['kept']}, rejected by the gate {rep['rejected']}, rate {rep['rejection_rate']:.0%}; unfinished {rep['unfinished']})")
     print(f"  spend ${rep['spend_usd']:.2f}   per kept clip ${rep['cost_per_kept_clip_usd']:.2f}   latency p50 {rep['latency_s']['p50']} s, p95 {rep['latency_s']['p95']} s")
@@ -172,8 +186,8 @@ def cmd_report(a) -> None:
     print(f"  decisions: {rep['decisions']}")
     print(f"  CAP HITS: {rep['cap_hits'] or 'none'}   BUDGET STOPS: {rep['budget_stops']}")
     for kind in ("paid", "test"):
-        print(f"  spend by day ({kind}): {rep['spend_by_day'][kind] or 'none'}   by month: {rep['spend_by_month'][kind] or 'none'}")
-    print(f"  spend by account (salted): {rep['spend_by_account'] or 'none'}")
+        print(f"  clips only, spend by day ({kind}): {rep['spend_by_day'][kind] or 'none'}   by month: {rep['spend_by_month'][kind] or 'none'}")
+    print(f"  spend by account, the three types together (salted): {rep['spend_by_account'] or 'none'}")
     lib_ = rep["library"]
     print(f"  library: {lib_['clips']} clips ({lib_['retired']} retired), ${lib_['invested_usd']:.2f} invested, {lib_['uses']} uses; used in videos: {rep['used'] or 'none'}")
     r = rep["reuse"]

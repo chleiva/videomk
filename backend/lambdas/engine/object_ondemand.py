@@ -64,9 +64,10 @@ def _items(plan: Dict[str, Any]):
             yield from (sc.get("props") or {}).get("items") or []
 
 
-def missing(plan: Dict[str, Any], limit: int, sure: float = 0.55) -> List[Tuple[str, str]]:
+def missing(plan: Dict[str, Any], limit: int, sure: float = 0.55, refused: Optional[Dict[str, str]] = None) -> List[Tuple[str, str]]:
     """(id, name) of the drawings the boards asked for and the library does not really have. In order, distinct, at most `limit`.
-    A name that could never be a general library drawing (a brand, a flag, text, a person) is left as it is."""
+    A name that could never be a general library drawing (a brand, a flag, text, a person) is left as it is. `refused`, when given, collects name -> why for
+    every name the free filters refuse (the policy's word lists first, then a brand or text word, then a personal wording): `fill` logs each as a decision."""
     from common import catalog_privacy
 
     out: List[Tuple[str, str]] = []
@@ -75,9 +76,15 @@ def missing(plan: Dict[str, Any], limit: int, sure: float = 0.55) -> List[Tuple[
         if not name:
             continue
         oid = object_id(name)
-        if not NAME_RE.match(name) or len(oid) < 3 or len(name.split()) > 4 or _BANNED.search(name) or catalog_privacy.personal_reason(name) not in (None, "address"):
+        if not NAME_RE.match(name) or len(oid) < 3 or len(name.split()) > 4:
             continue
-        if media_policy.text_reason(name):   # the ONE safety policy's word lists: such a drawing is never made for the library; the label stays
+        # the ONE safety policy's word lists: such a drawing is never made for the library; the label stays. A clearly benign compound ("queen bee", "water gun",
+        # "baby elephant": media_policy.BENIGN) is read as a plain noun by the lists and by the privacy filter, which only knows single words
+        personal = catalog_privacy.personal_reason(media_policy.cleared(name))
+        why = media_policy.text_reason(name) or ("banned word" if _BANNED.search(name) else None) or (f"personal ({personal})" if personal not in (None, "address") else None)
+        if why:
+            if refused is not None:
+                refused.setdefault(name, why)
             continue
         if oid not in [o for o, _ in out] and len(out) < limit:
             out.append((oid, name))
@@ -295,6 +302,24 @@ def load_dynamic(store: Optional[cs.Store] = None) -> int:
         return 0
 
 
+def count_reuse(plan: Dict[str, Any], video_id: str, store: cs.Store) -> int:
+    """How many drawings on this plan's boards the library got on demand EARLIER (rows under WOBJ). Each is counted like a library clip or image that a video
+    reuses: the row's `uses` and distinct `videos`, the day's `used_library`, the metric. The report could not say whether a drawing we paid for was ever used
+    again. Best effort: a counter never costs a plan."""
+    try:
+        ids = {str(it.get("draw")) for it in _items(plan) if isinstance(it, dict) and it.get("draw")}
+        mine = sorted(str(r["sk"]) for r in store.query(WOBJ) if str(r["sk"]) in ids and r.get("status", "active") == "active") if ids else []
+        for oid in mine:
+            store.add(WOBJ, oid, {"uses": 1}, sets={"videos": [lib.video_ref(video_id)]}, fields={"last_used": int(time.time())})
+        if mine:
+            ondemand.emit("Used", len(mine), Source="library", Media=MEDIA)
+            ondemand._stat(store, MEDIA, used_library=len(mine))
+        return len(mine)
+    except Exception:   # noqa: BLE001
+        logging.exception("reuse of library drawings not counted")
+        return 0
+
+
 # ----------------------------------------------------------------------------- the safety policy on the finished drawings
 def _policy_gate(pkgs: List[Dict[str, Any]], stats: Dict[str, Any]) -> Tuple[List[Dict[str, Any]], Dict[str, Any], Dict[str, str]]:
     """Every drawing the maker accepted is shown to the policy's vision check (common/media_policy.py), in parallel. -> (the drawings that passed, stats, {id: why} of
@@ -329,9 +354,11 @@ def fill(plan: Dict[str, Any], *, video_id: str, ctx: Optional[Dict[str, Any]], 
         store = cs.current()
         if store is None:
             return out
+        count_reuse(plan, video_id, store)   # drawings of our library that an earlier video had made: every plan reuses them, and the report counts it
         cfg = clip_config.config()
-        want = missing(plan, int(cfg["object_max_per_call"]), float(cfg["object_sure_score"]))
-        if not want:
+        free_refused: Dict[str, str] = {}
+        want = missing(plan, int(cfg["object_max_per_call"]), float(cfg["object_sure_score"]), refused=free_refused)
+        if not want and not free_refused:
             return out
         out["asked"] = [n for _, n in want]
         kind = ondemand.entitlement(ctx)
@@ -343,6 +370,11 @@ def fill(plan: Dict[str, Any], *, video_id: str, ctx: Optional[Dict[str, Any]], 
                 out["reason"] = why
                 ondemand.decision(store, why, MEDIA)
                 return out
+        for name, why in free_refused.items():   # a name the free filters refused (the word lists, mostly) used to leave no trace: one decision each, like every other refusal
+            ondemand.decision(store, f"filter:{why}", MEDIA, name=name)
+        if not want:
+            out["reason"] = "filter"
+            return out
         maker = _maker or default_maker()
         if maker is None:
             out["reason"] = "no_tracer"
