@@ -1,0 +1,45 @@
+# Cartoon vector scene catalog (2026-11-27)
+
+46 flat-cartoon scenes, each split into depth layers and vectorised (SVG), ready for the `vector_scene` runtime (docs/VECTOR_SCENES.md: parallax, sway, drift). Built after the owner approved the look of the cabin/lighthouse prototypes ("100%", cap USD 3).
+
+## What is in it
+* **43 landscape (16:9) + 3 tall (9:16)** scenes: nature (pine valley, mountain lake, desert canyon, meadow, snowy cabin, tropical beach, autumn path, jungle waterfall, river valley, savanna, sea cliffs, glacier, volcano, coral reef, farmland), city and architecture (skyline day and dusk, old town, stone bridge, harbour, suburb, financial district), tech and business (office, data center, rooftop, workshop, laboratory, solar and wind farm, factory), science and space (observatory, alien planet, moon base), education and home (library, classroom, kitchen window, backyard garden, study desk), travel (train, airport, road trip, camping), seasons (spring orchard, winter village), plus tall: forest trail, city tower, lighthouse cliff.
+* Plan and prompts: `docs/vector_catalog/plan.json` (id, title, category, mood, tags, topics, prompt). Every scene: no people, no text, no logos, bold outlines, flat colour, four depth planes.
+* Per scene (local store `<id>/`, uploaded to QA): `manifest.json` (layers back to front, motion), 5 to 7 SVG layers, `thumb.jpg`, `meta.json` (title, category, mood, tags, topics, aspects, 5-colour palette, layer count, svg KB, provenance: model, size, prompt hash, QA scores, review status).
+* **Size:** 35 MB of SVG for the 46 scenes (mean 761 KB, largest old town 2.0 MB, stone bridge 1.7 MB, kitchen window 1.6 MB, smallest 0.25 MB). That is too big for the Lambda code zip, so the packages are **not** in the repo or the layer.
+
+## Where it is stored (decision)
+* **Packages:** the QA catalog bucket `videomk-qa-catalog-552357225438`, prefix `v/<id>/` (433 objects, SSE-S3, uploaded by `scripts/vector_catalog_index.py --upload qa`; no deploy). Same bucket and pattern as the image catalog (private, versioned, retained). The beat Lambda's IAM today allows `GetObject` only on `o/*` and `p/*`: **it needs `v/*` added** before it can read them (see "Wiring").
+* **Index:** `backend/lambdas/common/vector_catalog_index.json` (261 KB: 46 scenes x two 1024-d Cohere Embed v4 vectors as base64 float16 + metadata). It ships in the Lambda zip: no S3 Vectors index, no infra, no per-query vector service cost. At 46 scenes a linear scan is microseconds; if the catalog passes about 2,000 scenes move it to S3 Vectors like the image catalog.
+* Prod: copy the `v/` prefix to the prod catalog bucket when the catalog stack is enabled there (a plain `aws s3 sync`, nothing is regenerated).
+
+## Lookup API (`common/vector_catalog.py`, tests `tests/test_vector_catalog.py`, 7 pass)
+```python
+from common import vector_catalog as vc
+vc.search("renewable energy", aspect="16:9", k=5)
+# -> [{"id": "solar_wind_farm", "score": 0.591, "title": ..., "category": ..., "mood": ..., "aspects": ["16:9"], "palette": [...], "layers": 7, "svg_kb": 736}]
+vc.fetch_package("solar_wind_farm", "/tmp/work")      # -> "/tmp/work/solar_wind_farm", the folder engine.vector_scene.VectorScene(folder, w, h) reads
+```
+* Embeds the phrase with Cohere (`search_query`) through `library_search.embed_text` (never Titan); score = best cosine of the scene's image vector and description vector. Only scenes drawn for the asked aspect are returned (a 16:9 scene rasterised into a 9:16 frame would stretch). Never raises: any failure returns `[]`.
+* `fetch_package` reads `VECTOR_CATALOG_DIR/<id>` when that variable is set (tests, laptops), else the catalog bucket (`CATALOG_BUCKET`, keys `v/<id>/<file>`); ids are validated (`[a-z0-9_]{3,64}`).
+* **Measured scores** (QA, Bedrock embeddings, 15 phrases): a real match scores 0.31 to 0.62 (river sunrise 0.62, wind and solar 0.59, moon landing 0.45, classroom 0.42, ocean life 0.37, startup office 0.37, road trip 0.34, trains 0.31, forests and climate 0.31); phrases the catalog does not cover score 0.15 to 0.27 (medieval castle 0.27, quantum computing 0.25, stock market 0.21, cats and dogs 0.20). `MIN_SCORE = 0.30` separates them on this sample. Borderline: the water cycle matched a waterfall at 0.34 (acceptable) and "forests and climate change" matched the pine valley at only 0.31 (the picture is right, the phrase is abstract). The planner should use the scene's mood and category, not the score alone.
+
+## How it was made and what it cost
+* `scripts/vector_catalog_generate.py` (OpenAI `gpt-image-2.6-flare` 2048x1152 medium, tall ones 1024x1536; flat-cartoon house prompt; Haiku-class check with its own cartoon QA prompt; hard cap), `scripts/vector_catalog_build.py` (depth split + vtracer, the pipeline of vector_scene_build.py with 4 depth cuts, sway on the two nearest layers of outdoor scenes, drifting clouds), `scripts/vector_catalog_index.py` (embeddings, index, upload), `scripts/vector_catalog_report.py` (contact sheet rendered through the real runtime, showreel).
+* **Spend: USD 2.375 of the USD 3.00 cap** (ledger `docs/vector_catalog_spend.jsonl`): about 62 pictures at about USD 0.037, checks about USD 0.02, embeddings about USD 0.03 (estimate: 92 embeddings; the real Bedrock charge shows in Cost Explorer a day later).
+* **Check results:** 29 of the 46 items passed the check on the first attempt. The other 17 had a first attempt rejected, always and only on the `calm_bottom` test (white captions readable over the bottom quarter), which contradicts the brief itself (it asks for big foreground shapes in the bottom corners). For 12 of them the second attempt failed the same way; for 5 the second attempt passed. I viewed all 29 rejected pictures, found them clean (no text, people, logos, warped objects; flat style; adherence and quality 7+), and stored for each of these 17 items the better first or second picture I judged by eye, with `review_override` recorded in its `.qa.json` and `meta.json` provenance (for the 5 items whose second attempt had passed, the stored picture is the reviewed first attempt, an equally good alternative). All 46 final scenes: no person, no text, flat style, depth 6+.
+
+## Honest weak spots
+* **Sky detection assumes a blue sky touching the top.** Space and interior scenes broke on the first build (the Earth's blue was eaten; the library window view turned into brown blobs). Fixed by switching the sky/cloud detector off for `moon_base_surface` and `library_interior_view` (`NO_SKY` in the build script). Dusk, night and sunset scenes (city dusk, camping, observatory, desert, savanna, volcano, orchard, winter village) have no separate sky layer or drifting clouds (their sky is part of the far layer): parallax and sway still work, only the cloud drift is missing.
+* **Heavy scenes:** old town (2.0 MB), stone bridge (1.7), kitchen window (1.6) and a few at 1.1 to 1.2 MB make slower rasterisation (the layers are rasterised once per scene and size).
+* Thin (about 1 px) outline doubling at some layer cuts and slight curve wobble remain (docs/VECTOR_SCENES.md).
+* Coverage is generic: nothing for medieval, fantasy, sport, medicine, finance charts, people-centred stories. People scenes need the character rig (separate prototype).
+* Tall scenes are only 3: other aspects (1:1, 4:5) have none; landscape scenes cannot be served to them without a cropped layout.
+* The three prototype scenes (forest_path, seaside, mountain_cabin) are not in this catalog (they ship in the engine assets); the owner's favourite, the cabin with mountains, is the model for `snowy_peaks_cabin`.
+
+## Wiring (what the planner agent has to do; nothing here is wired)
+1. **Planner menu:** a `vector_scene` choice only for cartoon/illustration-style videos and calm explainer, education, light business and science topics (not news, real places, products or realistic requests), with `scene` = an id returned by `vc.search(beat phrase, aspect)` and `score >= MIN_SCORE`; fall back to a normal scene otherwise. The element's props must be validated against `vc.scene_ids()`.
+2. **Element:** `elements/vector_scene.py` currently reads `engine/assets/vector_scenes/<id>`; it must accept catalog ids by calling `vc.fetch_package(id, tmp)` once per chunk (and fall back to a card on any failure). It is owned by the character-animation agent: not edited here.
+3. **IAM and env (CDK, not deployed):** beat/render Lambdas need `s3:GetObject` on `<catalog bucket>/v/*` and `CATALOG_BUCKET` in the environment of whichever Lambda renders the scene (the chunk Lambda, not only the beat Lambda), plus `bedrock:InvokeModel` for the Cohere query embedding where search runs (the planner/beat step already has it).
+4. **Layouts:** 9:16, 1:1 and 4:5 for landscape scenes (today only tall scenes serve 9:16); the faster 4K path (docs/VECTOR_SCENES.md: a 4K 30 s chunk is about 15 minutes).
+5. Add the id, title and mood to the planner prompt as a short menu of the top 3 results only (never the whole catalog).

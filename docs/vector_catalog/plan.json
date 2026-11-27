@@ -1,0 +1,467 @@
+{
+ "plan_id": "vector-catalog-1",
+ "approved_by": "owner (chat, 2026-11-27: 'Let's go ahead. Absolutely. 100%')",
+ "cap_usd": 3.0,
+ "items": [
+  {
+   "id": "pine_forest_valley",
+   "title": "Pine forest valley",
+   "category": "nature",
+   "mood": "calm",
+   "desc": "a wide valley of tall pine trees with a winding stream, layered blue-green hills behind, big pine trunks and ferns framing the foreground corners",
+   "tags": "forest,pine,trees,valley,stream,hills,wilderness,green",
+   "topics": "nature, environment, climate, forests, hiking, ecology, wildlife",
+   "orientation": "landscape"
+  },
+  {
+   "id": "mountain_lake",
+   "title": "Mountain lake at dawn",
+   "category": "nature",
+   "mood": "calm",
+   "desc": "a still mountain lake with a small wooden jetty, jagged snowy peaks reflected in the water, pine trees on the shores, big rocks and reeds in the foreground",
+   "tags": "lake,mountains,reflection,jetty,peaks,water,dawn",
+   "topics": "travel, nature, meditation, geography, water, outdoors",
+   "orientation": "landscape"
+  },
+  {
+   "id": "desert_canyon",
+   "title": "Desert canyon sunset",
+   "category": "nature",
+   "mood": "warm",
+   "desc": "a red rock desert canyon with layered mesas, a few cacti and a dry trail, warm orange and purple sunset sky, big boulders and cactus in the foreground",
+   "tags": "desert,canyon,mesa,cactus,sunset,rocks,arid",
+   "topics": "geography, climate, drought, travel, geology, american west",
+   "orientation": "landscape"
+  },
+  {
+   "id": "flower_meadow",
+   "title": "Flower meadow hills",
+   "category": "nature",
+   "mood": "cheerful",
+   "desc": "rolling green hills covered in wildflowers under a bright sky, a dirt path and a rustic fence, big flowers and grass tufts in the foreground corners",
+   "tags": "meadow,flowers,hills,fence,spring,grass,countryside",
+   "topics": "spring, farming, biology, pollination, countryside, gardening, wellness",
+   "orientation": "landscape"
+  },
+  {
+   "id": "snowy_peaks_cabin",
+   "title": "Snowy peaks with cabin",
+   "category": "nature",
+   "mood": "cosy",
+   "desc": "a small cosy wooden cabin with smoking chimney beside snowy pine trees, tall snow-capped mountains behind with a pale sky, snow-covered rocks and spruce in the foreground",
+   "tags": "snow,cabin,mountains,winter,pine,chimney,peaks",
+   "topics": "winter, holidays, travel, geography, energy, cosy, mountains",
+   "orientation": "landscape"
+  },
+  {
+   "id": "tropical_beach",
+   "title": "Tropical beach with palms",
+   "category": "nature",
+   "mood": "relaxed",
+   "desc": "a tropical beach with curved palm trees, turquoise water, a small distant island and a sailboat, big palm leaves and shells on the sand in the foreground",
+   "tags": "beach,palm,tropical,island,sea,sand,sailboat",
+   "topics": "travel, summer, ocean, islands, tourism, climate, relaxation",
+   "orientation": "landscape"
+  },
+  {
+   "id": "autumn_forest_path",
+   "title": "Autumn forest path",
+   "category": "nature",
+   "mood": "warm",
+   "desc": "a winding path through a forest of orange, red and yellow autumn trees with distant misty hills, fallen leaves and big tree trunks in the foreground",
+   "tags": "autumn,forest,path,leaves,orange,fall",
+   "topics": "seasons, nature, mindfulness, education, trees, climate change",
+   "orientation": "landscape"
+  },
+  {
+   "id": "waterfall_jungle",
+   "title": "Jungle waterfall",
+   "category": "nature",
+   "mood": "lush",
+   "desc": "a tall waterfall falling into a turquoise pool in a lush jungle, big tropical leaves and ferns in the foreground, distant green cliffs",
+   "tags": "waterfall,jungle,tropical,pool,rainforest,leaves,cliffs",
+   "topics": "rainforest, water cycle, biodiversity, geography, travel, ecology",
+   "orientation": "landscape"
+  },
+  {
+   "id": "river_valley_morning",
+   "title": "River valley at sunrise",
+   "category": "nature",
+   "mood": "calm",
+   "desc": "a wide river winding through a green valley with farm fields and distant mountains under a pastel sunrise sky, riverbank reeds and rocks in the foreground",
+   "tags": "river,valley,sunrise,farm,mountains,reeds,fields",
+   "topics": "geography, agriculture, water, history, civilisation, climate",
+   "orientation": "landscape"
+  },
+  {
+   "id": "savanna_acacia",
+   "title": "African savanna",
+   "category": "nature",
+   "mood": "warm",
+   "desc": "an open savanna with flat-topped acacia trees, golden grass, distant hills and a large setting sun, tall grass and a termite mound in the foreground",
+   "tags": "savanna,acacia,grassland,sunset,africa,golden",
+   "topics": "wildlife, ecology, geography, climate, safari, biology",
+   "orientation": "landscape"
+  },
+  {
+   "id": "coast_cliffs",
+   "title": "Sea cliffs and coast",
+   "category": "nature",
+   "mood": "fresh",
+   "desc": "dramatic green sea cliffs with a winding coastal path, blue ocean with gentle waves, a few seabirds in the sky, big grassy rocks in the foreground",
+   "tags": "cliffs,coast,sea,ocean,path,birds,waves",
+   "topics": "ocean, travel, geography, erosion, seabirds, climate",
+   "orientation": "landscape"
+  },
+  {
+   "id": "city_skyline_day",
+   "title": "City skyline by day",
+   "category": "city",
+   "mood": "modern",
+   "desc": "a modern city skyline of glass towers across a calm river with a bridge, bright blue sky with soft clouds, riverside trees and a railing in the foreground",
+   "tags": "city,skyline,towers,river,bridge,modern,urban",
+   "topics": "business, economy, urban planning, technology, finance, careers",
+   "orientation": "landscape"
+  },
+  {
+   "id": "city_skyline_dusk",
+   "title": "City skyline at dusk",
+   "category": "city",
+   "mood": "moody",
+   "desc": "a city skyline at dusk with lit windows, purple and orange sky, a harbour with calm water reflecting the lights, foreground dock posts and a lamp post",
+   "tags": "city,skyline,dusk,lights,harbour,purple,evening",
+   "topics": "night economy, finance, urban life, technology, news, energy",
+   "orientation": "landscape"
+  },
+  {
+   "id": "old_town_street",
+   "title": "Old town street",
+   "category": "city",
+   "mood": "charming",
+   "desc": "a cobblestone European old-town street with colourful narrow houses with shutters, a clock tower in the distance, flower pots and a bicycle in the foreground",
+   "tags": "old town,street,europe,houses,clock tower,cobblestone,historic",
+   "topics": "history, travel, culture, europe, architecture, tourism",
+   "orientation": "landscape"
+  },
+  {
+   "id": "stone_bridge_river",
+   "title": "Stone bridge over river",
+   "category": "city",
+   "mood": "calm",
+   "desc": "an old arched stone bridge over a calm river in a green town with a church spire, soft morning sky, willow branches and boats in the foreground",
+   "tags": "bridge,stone,river,town,church,arches,willow",
+   "topics": "history, engineering, architecture, europe, travel",
+   "orientation": "landscape"
+  },
+  {
+   "id": "harbour_boats",
+   "title": "Harbour with boats",
+   "category": "city",
+   "mood": "cheerful",
+   "desc": "a small colourful harbour town with fishing boats, red-roofed houses on a hill, a lighthouse on the breakwater, ropes and barrels in the foreground",
+   "tags": "harbour,boats,town,houses,fishing,lighthouse,sea",
+   "topics": "trade, fishing, travel, history, economy, ocean",
+   "orientation": "landscape"
+  },
+  {
+   "id": "suburb_street_morning",
+   "title": "Suburban street",
+   "category": "city",
+   "mood": "friendly",
+   "desc": "a friendly suburban street with neat houses, lawns, trees and a mailbox, blue morning sky, hills in the distance, a hedge and a bin in the foreground",
+   "tags": "suburb,houses,street,lawn,trees,neighbourhood",
+   "topics": "real estate, home, family, community, economy, safety",
+   "orientation": "landscape"
+  },
+  {
+   "id": "skyscraper_district",
+   "title": "Financial district towers",
+   "category": "city",
+   "mood": "professional",
+   "desc": "a financial district with tall glass skyscrapers seen from a plaza with trees and fountains, clear sky, big planters and benches in the foreground",
+   "tags": "skyscrapers,finance,district,glass,plaza,towers,business",
+   "topics": "finance, banking, investing, economy, corporate, careers",
+   "orientation": "landscape"
+  },
+  {
+   "id": "modern_office_exterior",
+   "title": "Modern office building",
+   "category": "tech",
+   "mood": "professional",
+   "desc": "a modern glass office building with a green lawn and trees, a winding path, clear sky with a few clouds, bushes and a bike rack in the foreground",
+   "tags": "office,building,glass,corporate,lawn,campus,work",
+   "topics": "business, startups, work, management, productivity, careers",
+   "orientation": "landscape"
+  },
+  {
+   "id": "data_center_landscape",
+   "title": "Data center landscape",
+   "category": "tech",
+   "mood": "futuristic",
+   "desc": "a friendly illustration of a data center campus in green hills: low white server halls with cooling fans, cable lines and wind turbines, blue sky, big rocks and shrubs in the foreground",
+   "tags": "data center,servers,cloud,technology,hills,wind turbines,infrastructure",
+   "topics": "cloud computing, AI, technology, energy, internet, cybersecurity",
+   "orientation": "landscape"
+  },
+  {
+   "id": "rooftop_city_view",
+   "title": "Rooftop city view",
+   "category": "tech",
+   "mood": "urban",
+   "desc": "a rooftop terrace with plants and a low wall looking out over a city of rooftops and towers at golden hour, antennas, a water tank and potted plants in the foreground",
+   "tags": "rooftop,city,terrace,golden hour,plants,antennas",
+   "topics": "urban life, startups, architecture, lifestyle, business, technology",
+   "orientation": "landscape"
+  },
+  {
+   "id": "workshop_exterior",
+   "title": "Workshop and garage",
+   "category": "tech",
+   "mood": "industrious",
+   "desc": "an artisan workshop building with a big door, stacked wooden crates, a bicycle and tools leaning on the wall, a tree and hills behind, barrels and crates in the foreground",
+   "tags": "workshop,garage,tools,crates,maker,craft,building",
+   "topics": "manufacturing, craftsmanship, small business, engineering, diy",
+   "orientation": "landscape"
+  },
+  {
+   "id": "laboratory_building",
+   "title": "Science laboratory",
+   "category": "tech",
+   "mood": "clean",
+   "desc": "a modern science research building with big windows, a satellite dish and solar panels on the roof, a green lawn with a path, blue sky, shrubs and a lamp post in the foreground",
+   "tags": "laboratory,science,research,building,dish,solar,campus",
+   "topics": "science, research, medicine, education, biotech, innovation",
+   "orientation": "landscape"
+  },
+  {
+   "id": "solar_wind_farm",
+   "title": "Solar and wind farm",
+   "category": "tech",
+   "mood": "hopeful",
+   "desc": "a green landscape with rows of solar panels and tall wind turbines on rolling hills under a bright sky, a power line and a small road, tall grass and a fence post in the foreground",
+   "tags": "solar,wind,turbines,energy,renewable,hills,power lines",
+   "topics": "renewable energy, climate, sustainability, electricity, economy, engineering",
+   "orientation": "landscape"
+  },
+  {
+   "id": "factory_skyline",
+   "title": "Factory and industry",
+   "category": "tech",
+   "mood": "industrial",
+   "desc": "a clean cartoon industrial area with factory halls, chimneys with soft steam, storage tanks and a rail track, warm evening sky, pipes and crates in the foreground",
+   "tags": "factory,industry,chimneys,rail,storage,manufacturing",
+   "topics": "manufacturing, economy, supply chain, history, industrial revolution, pollution",
+   "orientation": "landscape"
+  },
+  {
+   "id": "observatory_night",
+   "title": "Observatory under the stars",
+   "category": "science",
+   "mood": "wonder",
+   "desc": "a hilltop observatory dome with a telescope under a deep blue night sky full of stars and a crescent moon, silhouetted pine trees and rocks in the foreground",
+   "tags": "observatory,telescope,night,stars,moon,dome,hill",
+   "topics": "astronomy, space, science, education, universe, physics",
+   "orientation": "landscape"
+  },
+  {
+   "id": "alien_planet_surface",
+   "title": "Alien planet surface",
+   "category": "science",
+   "mood": "wonder",
+   "desc": "a colourful alien planet surface with rocky purple and orange terrain, two small moons and a ringed planet in the sky, crystals and craters in the foreground",
+   "tags": "planet,alien,space,moons,rings,crystals,craters",
+   "topics": "space, science fiction, astronomy, exploration, physics, future",
+   "orientation": "landscape"
+  },
+  {
+   "id": "moon_base_surface",
+   "title": "Moon surface and Earth",
+   "category": "science",
+   "mood": "quiet",
+   "desc": "the grey surface of the moon with craters and a small lunar base with dome and antenna, planet Earth rising in a black starry sky, boulders and craters in the foreground",
+   "tags": "moon,earth,space,craters,lunar,base,stars",
+   "topics": "space exploration, history, science, astronomy, technology",
+   "orientation": "landscape"
+  },
+  {
+   "id": "deep_ocean_reef",
+   "title": "Coral reef underwater",
+   "category": "science",
+   "mood": "lush",
+   "desc": "an underwater coral reef with colourful corals, kelp and a few simple fish, soft rays of light from the surface, big corals and seaweed in the foreground",
+   "tags": "ocean,underwater,reef,coral,fish,kelp,sea",
+   "topics": "ocean, marine biology, climate, biodiversity, conservation, water",
+   "orientation": "landscape"
+  },
+  {
+   "id": "farmland_patchwork",
+   "title": "Farmland patchwork",
+   "category": "science",
+   "mood": "fresh",
+   "desc": "a patchwork of farm fields in green and gold with a red barn, a silo, a tractor-free dirt road and hills, soft sky, crop rows and a fence in the foreground",
+   "tags": "farm,fields,barn,silo,crops,agriculture,countryside",
+   "topics": "agriculture, food, economy, climate, sustainability, rural life",
+   "orientation": "landscape"
+  },
+  {
+   "id": "volcano_island",
+   "title": "Volcano island",
+   "category": "science",
+   "mood": "dramatic",
+   "desc": "a volcano island with a gentle smoke plume, black rock slopes, green jungle at the base and a calm sea, a bright orange sunset sky, black rocks and palms in the foreground",
+   "tags": "volcano,island,lava,smoke,sea,tropical,geology",
+   "topics": "geology, earth science, natural disasters, travel, geography",
+   "orientation": "landscape"
+  },
+  {
+   "id": "glacier_arctic",
+   "title": "Arctic glacier",
+   "category": "science",
+   "mood": "cool",
+   "desc": "an arctic landscape with a blue glacier, ice floes on dark water, snowy mountains and a pale pink sky, ice blocks and snow in the foreground",
+   "tags": "arctic,glacier,ice,snow,polar,cold,mountains",
+   "topics": "climate change, polar regions, geography, science, environment",
+   "orientation": "landscape"
+  },
+  {
+   "id": "library_interior_view",
+   "title": "Library interior",
+   "category": "education",
+   "mood": "cosy",
+   "desc": "a cosy empty library interior with tall bookshelves, a ladder, reading lamps, a big arched window and warm light, a wooden table with stacked books and a globe in the foreground",
+   "tags": "library,books,shelves,window,reading,study,interior",
+   "topics": "education, reading, history, learning, literature, research",
+   "orientation": "landscape"
+  },
+  {
+   "id": "classroom_window_view",
+   "title": "Classroom window view",
+   "category": "education",
+   "mood": "friendly",
+   "desc": "an empty bright classroom seen from the back with rows of desks, a plain green chalkboard without writing, large windows showing trees and hills, desks and a plant in the foreground",
+   "tags": "classroom,desks,school,window,chalkboard,learning",
+   "topics": "education, school, teaching, study, kids, learning",
+   "orientation": "landscape"
+  },
+  {
+   "id": "kitchen_window_garden",
+   "title": "Kitchen window with garden",
+   "category": "education",
+   "mood": "cosy",
+   "desc": "a cosy kitchen counter with herbs in pots and a kettle in front of a big window looking onto a sunny garden with flowers and fruit trees, bowls and cutting board in the foreground",
+   "tags": "kitchen,window,garden,herbs,home,cooking,sunny",
+   "topics": "food, cooking, home, wellness, lifestyle, sustainability",
+   "orientation": "landscape"
+  },
+  {
+   "id": "home_garden_backyard",
+   "title": "Backyard garden",
+   "category": "education",
+   "mood": "cheerful",
+   "desc": "a backyard garden with raised vegetable beds, a small shed, a wooden fence, apple tree and flowers, sunny sky, watering can and pots in the foreground",
+   "tags": "garden,backyard,vegetables,shed,fence,tree,flowers",
+   "topics": "gardening, food, sustainability, home, family, biology",
+   "orientation": "landscape"
+  },
+  {
+   "id": "study_desk_window",
+   "title": "Study desk with window",
+   "category": "education",
+   "mood": "calm",
+   "desc": "a tidy wooden study desk with a closed laptop, notebook, lamp and mug beside a window overlooking a calm evening town and hills, plant and books in the foreground",
+   "tags": "desk,study,laptop,notebook,window,evening,work",
+   "topics": "productivity, learning, remote work, careers, technology, wellness",
+   "orientation": "landscape"
+  },
+  {
+   "id": "train_through_hills",
+   "title": "Train through the hills",
+   "category": "travel",
+   "mood": "adventurous",
+   "desc": "a small red train crossing a stone viaduct through green hills and pine forest with distant mountains, bright sky, trackside bushes and a signal post in the foreground",
+   "tags": "train,viaduct,hills,railway,travel,mountains,forest",
+   "topics": "travel, transport, engineering, history, sustainability, europe",
+   "orientation": "landscape"
+  },
+  {
+   "id": "airport_apron_sky",
+   "title": "Airport and planes",
+   "category": "travel",
+   "mood": "bright",
+   "desc": "an airport apron with two airplanes, a control tower and terminal in the distance, bright blue sky with big clouds, luggage carts and cones in the foreground",
+   "tags": "airport,airplane,tower,terminal,sky,travel,runway",
+   "topics": "aviation, travel, economy, transport, tourism, logistics",
+   "orientation": "landscape"
+  },
+  {
+   "id": "road_trip_highway",
+   "title": "Road trip highway",
+   "category": "travel",
+   "mood": "free",
+   "desc": "a long straight highway through colourful desert and rolling hills with a small car far away, big sky with clouds, road signs without text and cacti and rocks in the foreground",
+   "tags": "road,highway,car,desert,travel,hills,sky",
+   "topics": "travel, driving, geography, adventure, economy, lifestyle",
+   "orientation": "landscape"
+  },
+  {
+   "id": "camping_lake_night",
+   "title": "Camping by the lake",
+   "category": "travel",
+   "mood": "cosy",
+   "desc": "a tent beside a glowing campfire on a lakeshore at dusk, pine forest and mountains across the water, early stars, logs and rocks in the foreground",
+   "tags": "camping,tent,campfire,lake,pine,mountains,dusk",
+   "topics": "outdoors, travel, wellness, nature, family, adventure",
+   "orientation": "landscape"
+  },
+  {
+   "id": "spring_orchard",
+   "title": "Spring orchard",
+   "category": "seasons",
+   "mood": "fresh",
+   "desc": "an orchard of blossoming pink and white trees on a green hill with a path and a farmhouse, soft blue sky, petals and grass in the foreground",
+   "tags": "spring,orchard,blossom,pink,farmhouse,hill",
+   "topics": "spring, agriculture, biology, wellness, gardening, seasons",
+   "orientation": "landscape"
+  },
+  {
+   "id": "winter_village",
+   "title": "Winter village",
+   "category": "seasons",
+   "mood": "cosy",
+   "desc": "a small snowy village with warm lit windows, a church and pine trees, snow falling gently under a deep blue evening sky, snow drifts and a fence in the foreground",
+   "tags": "winter,village,snow,church,lights,evening,pine",
+   "topics": "holidays, winter, travel, culture, europe, seasons",
+   "orientation": "landscape"
+  },
+  {
+   "id": "tall_forest_trail",
+   "title": "Forest trail (vertical)",
+   "category": "nature",
+   "mood": "calm",
+   "desc": "a tall vertical composition: a winding trail climbing through a green pine forest toward distant misty mountains and a bright sky at the top, big trunks and ferns framing the foreground",
+   "tags": "forest,trail,pine,mountains,vertical,hike",
+   "topics": "nature, hiking, environment, mindfulness, wellness",
+   "orientation": "tall"
+  },
+  {
+   "id": "tall_city_tower",
+   "title": "City tower and sky (vertical)",
+   "category": "city",
+   "mood": "modern",
+   "desc": "a tall vertical composition: a glass skyscraper rising from a park with trees toward a bright sky with clouds, other towers and bridge behind, big planters in the foreground",
+   "tags": "city,tower,skyscraper,park,vertical,sky",
+   "topics": "business, finance, urban life, technology, careers",
+   "orientation": "tall"
+  },
+  {
+   "id": "tall_lighthouse_cliff",
+   "title": "Lighthouse on a cliff (vertical)",
+   "category": "nature",
+   "mood": "dramatic",
+   "desc": "a tall vertical composition: a lighthouse on a green sea cliff above waves with a big sky of clouds and a few birds, rocks and grass in the foreground",
+   "tags": "lighthouse,cliff,sea,waves,vertical,birds",
+   "topics": "ocean, travel, history, navigation, nature",
+   "orientation": "tall"
+  }
+ ]
+}
