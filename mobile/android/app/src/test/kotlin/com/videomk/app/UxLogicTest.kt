@@ -78,7 +78,7 @@ class UxLogicTest {
         assertTrue(CreateOptions(resolution = "2160p").isFourK)
     }
 
-    @Test fun `videos screen: making first, fresh failures next, the newest video large, the rest in pairs, old failures last`() {
+    @Test fun `the videos screen puts making first, fresh failures next, the newest video large, the rest in pairs, old failures last`() {
         val now = Instant.parse("2026-11-27T12:00:00Z")
         fun v(id: String, status: com.videomk.app.core.VideoStatus, hoursAgo: Long) = com.videomk.app.core.LibraryEntry.Video(com.videomk.app.core.VideoItem(id, status, id, createdAt = now.minusSeconds(hoursAgo * 3600)))
         val done = com.videomk.app.core.VideoStatus.Complete; val failed = com.videomk.app.core.VideoStatus.Failed
