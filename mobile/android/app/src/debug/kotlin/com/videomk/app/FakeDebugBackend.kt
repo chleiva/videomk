@@ -40,7 +40,14 @@ class FakeDebugBackend(private val deckDemo: Boolean = false) : Backend {
      * is finished from then on. That is how "it finished while the phone was locked" is checked by hand and in the instrumented test (tracker R124).
      */
     private fun finished(): Boolean = java.io.File("/data/data/com.videomk.app/files/fake_finish").exists()
-    override suspend fun listVideos(): List<VideoItem> {
+    /** With the fake look picker on (`files/fake_looks`), the first finished video says which look the director chose and why, as the video record does. */
+    private fun withLooks(list: List<VideoItem>): List<VideoItem> {
+        if (!java.io.File("/data/data/com.videomk.app/files/fake_looks").exists()) return list
+        val why = if (Txt.localeTag == "es") "Un proceso paso a paso se entiende mejor dibujado." else "A step-by-step process is clearest drawn."
+        return list.map { if (it.id == "v1") it.copy(look = AppliedLook("auto", "whiteboard", why = why, byAuto = true)) else it }
+    }
+    override suspend fun listVideos(): List<VideoItem> = withLooks(allVideos())
+    private fun allVideos(): List<VideoItem> {
         val list = if (finished()) videos.map { if (it.id == "v2") it.copy(status = VideoStatus.Complete, durationSeconds = 62.0, making = null, editable = true, videoUrl = "https://example.com/v2.mp4", previewGifUrl = pic("s_forest.jpg")) else it } else videos.toList()
         return if (deckDemo) deckVideos + list else list
     }
@@ -83,6 +90,22 @@ class FakeDebugBackend(private val deckDemo: Boolean = false) : Backend {
         if (planMode == "free" && options.minutes * 60 > 30.5) throw ApiError.Plan("plan_length", "Videos on your plan can be up to 0:30 long. Pro makes longer ones.", "pro", null, 30)
         return "v-new"
     }
+    /**
+     * The start as the real server answers it (docs/CREATE_API.md "Video look"): the new video is being made from now on, the answer says which look it gets, and a
+     * conversation asked for in under 20 s comes back as one character with the server's sentence. [lastStart] is what was asked (instrumented tests read it).
+     */
+    override suspend fun startVideo(prompt: String, clientRequestId: String, options: CreateOptions, media: List<String>, mediaMeta: kotlinx.serialization.json.JsonObject?, libraryMedia: List<String>, brief: kotlinx.serialization.json.JsonObject?, deck: String?): StartedVideo {
+        val id = startGeneration(prompt, clientRequestId, options, media, mediaMeta, libraryMedia, brief, deck)
+        lastStart = options
+        videos.removeAll { it.id == id }
+        videos.add(0, VideoItem(id, VideoStatus.Running(VideoStatus.Stage.Writing), prompt.take(60), null, Instant.now(), null, null, null, false, options.aspect, options.resolution))
+        val c = options.lookChoice
+        if (c.isAuto) return StartedVideo(id)
+        if (c.cast.size >= 2 && options.minutes * 60 < 20) return StartedVideo(id, AppliedLook(c.look, c.look, c.cast.take(1), c.extras, "too_short"),
+            if (Txt.localeTag == "es") "Presenta un solo personaje. Una conversación necesita 20 s o más." else "One character presents. A conversation needs 20 s or more.")
+        return StartedVideo(id, AppliedLook(c.look, c.look, c.cast, c.extras))
+    }
+    companion object { @Volatile var lastStart: CreateOptions? = null }
     override suspend fun uploadPhotos(photos: List<ByteArray>, progress: (Int, Int) -> Unit): List<String> = photos.indices.map { "m$it" }
     override suspend fun playback(videoId: String): PlaybackInfo {
         // screenshots: a real local file when `files/fake_video.mp4` exists (push one with `adb push` + `run-as`), else an address that never resolves

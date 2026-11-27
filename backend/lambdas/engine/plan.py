@@ -492,6 +492,8 @@ def tts_hash(plan: Dict[str, Any], beat: Dict[str, Any]) -> str:
     parts = [cfg.get("provider", ""), voice_mod.beat_voice(plan, beat), cfg.get("style", ""), beat["narration"]]
     if cfg.get("engine"):  # a different engine sounds different; plans made before engines were recorded keep their old hashes
         parts += [cfg["engine"], cfg.get("region", "")]
+    if cfg.get("rate"):    # full-band audio is another sound: plans made before the sample rate was recorded keep their hashes (and their 16 kHz audio)
+        parts.append(int(cfg["rate"]))
     raw = json.dumps(parts, ensure_ascii=False)
     return hashlib.sha1(raw.encode("utf-8")).hexdigest()[:16]
 

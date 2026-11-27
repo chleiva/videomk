@@ -75,7 +75,7 @@ struct EditorView: View {
                         TextField(tr("editor.title"), text: $model.title, axis: .vertical).font(.role(.body)).foregroundStyle(Theme.text).padding(.horizontal, Theme.Space.l).frame(minHeight: 52).accessibilityIdentifier("titleField")
                         SettingsDivider()
                         Toggle(isOn: $model.captions) { Label(tr("create.subtitles"), systemImage: "captions.bubble").font(.role(.body)).foregroundStyle(Theme.text) }
-                            .tint(Theme.success).padding(.horizontal, Theme.Space.l).frame(minHeight: 52).accessibilityIdentifier("captionsToggle")
+                            .tint(Theme.primary).padding(.horizontal, Theme.Space.l).frame(minHeight: 52).accessibilityIdentifier("captionsToggle")
                     }
                 }
                 SectionLabel(tr("editor.scenes_title", model.beats.count)).padding(.top, Theme.Space.s)

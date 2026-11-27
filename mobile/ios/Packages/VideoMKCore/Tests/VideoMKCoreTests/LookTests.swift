@@ -10,14 +10,14 @@ private let contract = #"""
 {"aspects":[{"id":"16:9","label":"Landscape","ready":true}],"resolutions":[{"id":"1080p"}],
  "looks":{"style":{"param":"style"},
   "look":{"param":"look","default":"auto","enforced":true,"options":[
-   {"id":"auto","label":"Auto","note":"We pick one look that suits your topic.","preview":"data:image/jpeg;base64,/9j/AA==","available":true,"allowed":true,"requires_plan":null,"with_photos":true,"with_deck":true,"min_seconds":15,"aspects":["16:9","9:16"],"best_aspects":["16:9","9:16"],"cast":false,"extras":[]},
-   {"id":"real","label":"Real","note":"Photos and video footage.","preview":"https://example.com/not-inline.jpg","with_photos":true,"with_deck":true,"cast":false,"extras":[]},
-   {"id":"whiteboard","label":"Whiteboard","note":"Drawn by hand as it is explained.","with_photos":false,"with_deck":false,"best_aspects":["16:9","1:1"],"cast":false,"extras":[]},
-   {"id":"cartoon","label":"Cartoon","note":"Cartoon characters explain it.","with_photos":false,"with_deck":false,"min_seconds":15,"cast":true,
-    "extras":[{"id":"board","label":"Hand-drawn board","note":"The characters explain on a board.","available":true}]}]},
+   {"id":"auto","label":"Auto","note":"Picked for your topic","preview":"data:image/jpeg;base64,/9j/AA==","available":true,"allowed":true,"requires_plan":null,"with_photos":true,"with_deck":true,"min_seconds":15,"aspects":["16:9","9:16"],"best_aspects":["16:9","9:16"],"cast":false,"extras":[]},
+   {"id":"real","label":"Real","note":"Photos and footage","preview":"https://example.com/not-inline.jpg","with_photos":true,"with_deck":true,"cast":false,"extras":[]},
+   {"id":"whiteboard","label":"Whiteboard","note":"Drawn by hand","with_photos":false,"with_deck":false,"best_aspects":["16:9","1:1"],"cast":false,"extras":[]},
+   {"id":"cartoon","label":"Cartoon","note":"Characters explain it","with_photos":false,"with_deck":false,"min_seconds":15,"cast":true,
+    "extras":[{"id":"board","label":"Characters explain at a board","note":"The characters explain on a board.","available":true}]}]},
   "cast":{"param":"cast","default":"auto","min":1,"max":3,"available":true,
-   "auto":{"id":"auto","label":"Auto","note":"We pick characters that suit the topic."},
-   "conversation":{"from":2,"min_seconds":20,"note":"Pick 2 or 3 and they talk it through together."},
+   "auto":{"id":"auto","label":"Auto","note":"We pick for you. Or choose up to 3."},
+   "conversation":{"from":2,"min_seconds":20,"note":"They talk it through."},
    "members":[{"id":"ines","name":"Inés","role":"Teacher","kind":"person","topic":"Learning","thumbnail":"data:image/png;base64,iVBORw0KGgo="},
               {"id":"fox","name":"Fox","role":"Guide for children","kind":"animal","topic":"For children","thumbnail":"data:image/png;base64,iVBORw0KGgo="}]}}}
 """#
@@ -29,13 +29,13 @@ private let contract = #"""
         let l = try #require(try decode(contract).looks)
         #expect(l.options.map(\.id) == ["auto", "real", "whiteboard", "cartoon"])
         let auto = l.options[0], cartoon = l.options[3]
-        #expect(auto.label == "Auto" && auto.note == "We pick one look that suits your topic." && auto.preview?.hasPrefix("data:image/jpeg") == true && auto.minSeconds == 15 && auto.requiresPlan == nil && auto.allowed && auto.available)
+        #expect(auto.label == "Auto" && auto.note == "Picked for your topic" && auto.preview?.hasPrefix("data:image/jpeg") == true && auto.minSeconds == 15 && auto.requiresPlan == nil && auto.allowed && auto.available)
         #expect(l.options[1].preview == nil, "only inline pictures are drawn: a link is not fetched")
         #expect(!l.options[2].withPhotos && !l.options[2].withDeck && l.options[2].bestAspects == ["16:9", "1:1"])
-        #expect(cartoon.cast && cartoon.extras == [.init(id: "board", label: "Hand-drawn board", note: "The characters explain on a board.", available: true)])
+        #expect(cartoon.cast && cartoon.extras == [.init(id: "board", label: "Characters explain at a board", note: "The characters explain on a board.", available: true)])
         let cast = try #require(l.cast)
-        #expect(cast.max == 3 && cast.min == 1 && cast.autoLabel == "Auto" && cast.autoNote == "We pick characters that suit the topic." && cast.conversationFrom == 2 && cast.conversationMinSeconds == 20)
-        #expect(cast.conversationNote == "Pick 2 or 3 and they talk it through together." && cast.members.map(\.name) == ["Inés", "Fox"] && cast.members[1].kind == "animal" && cast.members[1].topic == "For children")
+        #expect(cast.max == 3 && cast.min == 1 && cast.autoLabel == "Auto" && cast.autoNote == "We pick for you. Or choose up to 3." && cast.conversationFrom == 2 && cast.conversationMinSeconds == 20)
+        #expect(cast.conversationNote == "They talk it through." && cast.members.map(\.name) == ["Inés", "Fox"] && cast.members[1].kind == "animal" && cast.members[1].topic == "For children")
         #expect(DataURI.data(cast.members[0].thumbnail) != nil && DataURI.data("https://x") == nil && DataURI.data(nil) == nil)
     }
 
@@ -65,7 +65,7 @@ private let contract = #"""
     @Test func theRealFixtureDecodes() throws {
         // the answer the backend builds (`look_choice.capabilities`), saved for UI tests and screenshots
         let dir = URL(fileURLWithPath: #filePath).deletingLastPathComponent().appendingPathComponent("../../../../VideoMKUITests/Fixtures").standardizedFileURL
-        for (lang, cartoon) in [("en", "Cartoon"), ("es", "Dibujos animados")] {
+        for (lang, cartoon) in [("en", "Cartoon"), ("es", "Animado")] {
             let l = try #require(LookCapabilities.from(file: dir.appendingPathComponent("looks_\(lang).json").path))
             #expect(l.options.map(\.id) == ["auto", "real", "whiteboard", "cartoon"] && l.options[3].label == cartoon)
             #expect(l.options.allSatisfy { DataURI.data($0.preview) != nil } && l.cast?.members.count == 10 && l.cast?.members.allSatisfy { DataURI.data($0.thumbnail) != nil } == true)
@@ -135,12 +135,12 @@ extension CoreTests {
         nonisolated(unsafe) var body: [String: Any] = [:]
         StubProtocol.handler = { req in
             body = (try? JSONSerialization.jsonObject(with: req.bodyData ?? Data()) as? [String: Any]) ?? [:]
-            return (202, Data(#"{"video_id":"abc","note":"In a video this short one character presents; a conversation needs at least 20 seconds.","look":{"chosen":"cartoon","applied":"cartoon","cast":["fox"],"extras":["board"],"reason":"too_short"}}"#.utf8))
+            return (202, Data(#"{"video_id":"abc","note":"One character presents. A conversation needs 20 s or more.","look":{"chosen":"cartoon","applied":"cartoon","cast":["fox"],"extras":["board"],"reason":"too_short"}}"#.utf8))
         }
         let api = APIClient(config: config, auth: FixedAuth(), session: stubSession())
         let started = try await api.startVideo(prompt: "A day out with the family", clientRequestID: "r", options: CreateOptions(minutes: 0.25, lookChoice: LookChoice(look: "cartoon", cast: ["fox", "bear"], extras: ["board"])))
         #expect(body["look"] as? String == "cartoon" && body["cast"] as? [String] == ["fox", "bear"] && body["extras"] as? [String] == ["board"])
-        #expect(started.videoID == "abc" && started.look?.reason == "too_short" && started.look?.cast == ["fox"] && started.note?.hasPrefix("In a video this short") == true)
+        #expect(started.videoID == "abc" && started.look?.reason == "too_short" && started.look?.cast == ["fox"] && started.note?.hasPrefix("One character presents") == true)
         _ = try await api.startGeneration(prompt: "A day out with the family", clientRequestID: "r", options: CreateOptions(look: .paper))
         #expect(body["look"] == nil && body["cast"] == nil && body["extras"] == nil && body["theme"] as? String == "paper", "Auto: nothing new is sent; the colour theme is its own field")
         _ = try await api.startGeneration(prompt: "A day out with the family", clientRequestID: "r", options: CreateOptions(lookChoice: LookChoice(look: "cartoon")))
@@ -151,7 +151,7 @@ extension CoreTests {
 @Suite struct LookRuleTests {
     @Test func fourTilesAutoFirstAndTheUnavailableOnesHidden() {
         #expect(LookRules.tiles(looks).map(\.id) == ["auto", "real", "whiteboard", "cartoon"] && LookRules.tiles(looks).allSatisfy { !$0.locked })
-        #expect(LookRules.tiles(looks.variant("soon")).map(\.id) == ["auto", "real", "cartoon"], "a look this stage does not have is not shown")
+        #expect(LookRules.tiles(looks.variant("soon")).map(\.id) == ["auto", "real", "cartoon"], "a look this stage does not have is the only kind that is not shown")
         var many = looks; many.options.append(.init(id: "claymation", label: "Clay"))
         #expect(LookRules.tiles(many).count == 4, "never more than four")
     }
@@ -159,17 +159,18 @@ extension CoreTests {
     @Test func aLookThePlanDoesNotIncludeIsShownLockedAndCannotBeChosen() {
         let locked = looks.variant("locked")
         let tile = LookRules.tiles(locked).first { $0.id == "cartoon" }
-        #expect(tile?.locked == true && tile?.option.requiresPlan == "Pro")
+        #expect(tile?.locked == true && tile?.blocked == .plan && tile?.option.requiresPlan == "Pro")
         #expect(LookRules.select("cartoon", in: LookChoice(), caps: locked) == LookChoice(), "a tap on a locked tile changes nothing")
         #expect(LookRules.select("whiteboard", in: LookChoice(), caps: locked) == LookChoice(look: "whiteboard"))
         let stored = LookRules.normalized(LookChoice(look: "cartoon", cast: ["fox"]), caps: locked)
         #expect(stored.choice == LookChoice() && stored.reset == .plan, "a remembered look the plan lost goes back to Auto")
     }
 
-    @Test func photosAndDecksLeaveOnlyTheLooksMadeFromThem() {
-        #expect(LookRules.tiles(looks, attached: .init(photos: true)).map(\.id) == ["auto", "real"])
-        #expect(LookRules.tiles(looks, attached: .init(deck: true)).map(\.id) == ["auto", "real"])
-        #expect(LookRules.hidden(looks, attached: .init(photos: true)).map(\.label) == ["Whiteboard", "Cartoon"] && LookRules.hidden(looks, attached: .nothing).isEmpty)
+    @Test func withPhotosOrADeckTheDrawnLooksStayInPlaceBlockedWithTheReason() {
+        #expect(LookRules.tiles(looks, attached: .init(photos: true)).map(\.id) == ["auto", "real", "whiteboard", "cartoon"], "the grid never changes shape")
+        #expect(LookRules.tiles(looks, attached: .init(photos: true)).map(\.blocked) == [nil, nil, .photos, .photos])
+        #expect(LookRules.tiles(looks, attached: .init(deck: true)).map(\.blocked) == [nil, nil, .deck, .deck])
+        #expect(LookRules.tiles(looks.variant("locked"), attached: .init(photos: true)).last?.blocked == .photos, "the reason that can be fixed now comes first")
         #expect(LookRules.select("cartoon", in: LookChoice(), caps: looks, attached: .init(photos: true)) == LookChoice())
     }
 
@@ -177,11 +178,11 @@ extension CoreTests {
         var f = CreateForm()
         f.selectLook("cartoon", caps: caps); f.toggleCast("fox", caps: caps); f.setLookExtra("board", on: true)
         #expect(f.reconcileLook(caps, attached: .nothing) == nil && f.lookChoice.look == "cartoon")
-        #expect(f.reconcileLook(caps, attached: .init(photos: true)) == "Look is now Auto: Cartoon is not made from your photos.")
+        #expect(f.reconcileLook(caps, attached: .init(photos: true)) == "Look set to Auto. Cartoon can't use your photos.")
         #expect(f.lookChoice == LookChoice() && f.options.lookChoice.fields.isEmpty)
         #expect(f.reconcileLook(caps, attached: .init(photos: true)) == nil, "said once")
         f.selectLook("whiteboard", caps: caps)
-        #expect(f.reconcileLook(caps, attached: .init(deck: true)) == "Look is now Auto: Whiteboard is not made from a presentation.")
+        #expect(f.reconcileLook(caps, attached: .init(deck: true)) == "Look set to Auto. Whiteboard can't use a presentation.")
         f.selectLook("real", caps: caps, attached: .init(photos: true))
         #expect(f.reconcileLook(caps, attached: .init(photos: true, deck: false)) == nil && f.lookChoice.look == "real", "Real is made from photos")
     }
@@ -194,8 +195,18 @@ extension CoreTests {
         #expect(LookRules.toggle("owl", in: &c, caps: looks) == .full && c.cast.count == 3, "a fourth is refused")
         #expect(LookRules.toggle("bear", in: &c, caps: looks) == .removed && c.cast == ["fox", "cat"])
         #expect(LookRules.toggle("nobody", in: &c, caps: looks) == .full && c.cast == ["fox", "cat"], "only characters the server lists")
-        var f = CreateForm(); f.selectLook("cartoon", caps: caps); f.toggleCast("fox", caps: caps); f.clearCast()
-        #expect(f.lookChoice == LookChoice(look: "cartoon"), "Auto in the cast: we choose")
+        var f = CreateForm(); f.selectLook("cartoon", caps: caps); f.toggleCast("fox", caps: caps); f.toggleCast("fox", caps: caps)
+        #expect(f.lookChoice == LookChoice(look: "cartoon"), "none chosen is Auto: we choose")
+    }
+
+    @Test func oneLineSaysWhatTheCastMeansAndAtTheLimitTheOthersWait() {
+        var c = LookChoice(look: "cartoon")
+        #expect(LookRules.castLine(c, caps: looks) == "We pick for you. Or choose up to 3." && !LookRules.castIsFull(c, caps: looks))
+        c.cast = ["fox"]; #expect(LookRules.castLine(c, caps: looks) == "Fox presents.")
+        c.cast = ["fox", "bear"]; #expect(LookRules.castLine(c, caps: looks) == "Fox and Bruno talk it through." && !LookRules.castIsFull(c, caps: looks))
+        c.cast = ["fox", "bear", "cat"]; #expect(LookRules.castLine(c, caps: looks) == "Fox, Bruno and Mika talk it through." && LookRules.castIsFull(c, caps: looks))
+        var two = looks; two.cast?.max = 2
+        #expect(LookRules.castLine(LookChoice(look: "cartoon"), caps: two) == "We pick for you. Or choose up to 2." && LookRules.castIsFull(LookChoice(look: "cartoon", cast: ["fox", "bear"]), caps: two))
     }
 
     @Test func anotherLookDropsTheCastAndTheExtra() {
@@ -233,15 +244,12 @@ extension CoreTests {
         #expect(LookRules.lengthNudge(LookChoice(look: "cartoon"), caps: looks.variant("short"), minutes: 0.25, presets: [0.25]) == nil, "no length on offer is long enough: nothing is moved")
     }
 
-    @Test func thePillSaysTheChoiceCompactly() {
+    @Test func thePillSaysTheLookOnly() {
         #expect(LookRules.pillLabel(LookChoice(), caps: looks) == "Auto" && LookRules.pillLabel(LookChoice(look: "cartoon"), caps: nil) == "Auto")
         #expect(LookRules.pillLabel(LookChoice(look: "whiteboard"), caps: looks) == "Whiteboard")
         #expect(LookRules.pillLabel(LookChoice(look: "cartoon"), caps: looks) == "Cartoon")
-        #expect(LookRules.pillLabel(LookChoice(look: "cartoon", cast: ["fox"]), caps: looks) == "Cartoon · Fox")
-        #expect(LookRules.pillLabel(LookChoice(look: "cartoon", cast: ["fox", "bear"]), caps: looks) == "Cartoon · Fox + Bruno")
-        #expect(LookRules.pillLabel(LookChoice(look: "cartoon", cast: ["fox", "bear", "cat"]), caps: looks) == "Cartoon · Fox + 2", "three names would not fit: none is ever cut")
-        #expect(LookRules.spoken(LookChoice(look: "cartoon", cast: ["fox", "bear", "cat"], extras: ["board"]), caps: looks) == "Cartoon, Fox, Bruno and Mika, Hand-drawn board")
-        #expect(LookRules.betterAspects(LookChoice(look: "whiteboard"), caps: looks, aspect: "9:16") == ["16:9", "1:1"] && LookRules.betterAspects(LookChoice(look: "whiteboard"), caps: looks, aspect: "16:9").isEmpty && LookRules.betterAspects(LookChoice(), caps: looks, aspect: "9:16").isEmpty)
+        #expect(LookRules.pillLabel(LookChoice(look: "cartoon", cast: ["fox"]), caps: looks) == "Cartoon", "the cast is faces in the pill, never names")
+        #expect(LookRules.pillLabel(LookChoice(look: "cartoon", cast: ["fox", "bear", "cat"]), caps: looks) == "Cartoon")
     }
 
     @Test func theLastChoiceIsRememberedAndKeptInsideWhatTheServerLists() throws {

@@ -84,6 +84,7 @@ object Sym {
     val Mail: ImageVector @Composable get() = ImageVector.vectorResource(R.drawable.sym_mail)
     val Person: ImageVector @Composable get() = ImageVector.vectorResource(R.drawable.sym_person)
     val Circle: ImageVector @Composable get() = ImageVector.vectorResource(R.drawable.sym_circle)
+    val Lock: ImageVector @Composable get() = ImageVector.vectorResource(R.drawable.sym_lock_fill)
     val Help: ImageVector @Composable get() = ImageVector.vectorResource(R.drawable.sym_help)
     val Sparkle: ImageVector @Composable get() = ImageVector.vectorResource(R.drawable.ic_sparkle)
     val PlaySparkle: ImageVector @Composable get() = ImageVector.vectorResource(R.drawable.ic_play_sparkle)

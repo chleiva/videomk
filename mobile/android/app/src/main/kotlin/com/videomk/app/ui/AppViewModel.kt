@@ -78,6 +78,10 @@ data class AppState(
     val minutes: Map<String, Double> = emptyMap(),
     /** Videos made from a presentation (their deck is gone once planning starts, so a failed one is made again from Create, not retried from its text). */
     val deckVideos: Set<String> = emptySet(),
+    /** The server's one sentence when the chosen look had to be adapted (shown on Making and in Info), by video id. */
+    val lookNotes: Map<String, String> = emptyMap(),
+    /** What the start answer said the video gets, until the video record says it itself. */
+    val startedLooks: Map<String, com.videomk.app.core.AppliedLook> = emptyMap(),
     /** A message about "Try again" or removing a failed video (shown once, then dismissed): the server's own text, or that it cannot be done from here. */
     val retryNotice: String? = null,
     /** Failed videos whose Try again is being sent (the button waits; the server also answers a second tap with the current state). */
@@ -492,7 +496,8 @@ class AppViewModel(
                 media = b.uploadPhotos(photos) { done, total -> setProgress(id, done, total) }
                 if (_state.value.pending.any { it.id == id }) setPendingState(id, PendingVideo.State.Sending)
             }
-            val videoId = b.startGeneration(p.brief, p.id, p.options, media, PhotoMeta.requestJson(media, photoMeta[id].orEmpty()), libraryData[id].orEmpty(), briefData[id], deckData[id])
+            val started = b.startVideo(p.brief, p.id, p.options, media, PhotoMeta.requestJson(media, photoMeta[id].orEmpty()), libraryData[id].orEmpty(), briefData[id], deckData[id])
+            val videoId = started.videoId
             val wasDeck = deckData[id] != null
             attachments[videoId] = media.size + libraryData[id].orEmpty().size + (if (wasDeck) 1 else 0)
             photoData.remove(id); photoMeta.remove(id); libraryData.remove(id); briefData.remove(id); deckData.remove(id)
@@ -500,6 +505,7 @@ class AppViewModel(
                 s.copy(
                     briefs = s.briefs + (videoId to p.shownTitle), minutes = s.minutes + (videoId to p.options.minutes),
                     deckVideos = if (wasDeck) s.deckVideos + videoId else s.deckVideos,
+                    lookNotes = started.note?.let { s.lookNotes + (videoId to it) } ?: s.lookNotes, startedLooks = started.look?.let { s.startedLooks + (videoId to it) } ?: s.startedLooks,
                     pending = s.pending.map { if (it.id == id) it.copy(state = PendingVideo.State.Accepted(videoId)) else it },
                 )
             }

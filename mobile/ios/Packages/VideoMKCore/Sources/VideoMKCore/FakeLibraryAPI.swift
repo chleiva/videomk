@@ -363,12 +363,12 @@ public extension LookCapabilities {
         let all = ["16:9", "9:16", "1:1", "4:5"]
         func m(_ id: String, _ name: String, _ role: String, _ kind: String, _ topic: String) -> Member { Member(id: id, name: name, role: role, kind: kind, topic: topic) }
         return LookCapabilities(options: [
-            Option(id: "auto", label: "Auto", note: "We pick one look that suits your topic.", minSeconds: 15, aspects: all, bestAspects: all),
-            Option(id: "real", label: "Real", note: "Photos and video footage.", minSeconds: 15, aspects: all, bestAspects: all),
-            Option(id: "whiteboard", label: "Whiteboard", note: "Drawn by hand as it is explained.", withPhotos: false, withDeck: false, minSeconds: 15, aspects: all, bestAspects: ["16:9", "1:1"]),
-            Option(id: "cartoon", label: "Cartoon", note: "Cartoon characters explain it.", withPhotos: false, withDeck: false, minSeconds: 15, aspects: all, bestAspects: ["16:9", "1:1", "4:5"], cast: true,
-                   extras: [Extra(id: "board", label: "Hand-drawn board", note: "The characters explain on a board that is drawn as they speak.")]),
-        ], cast: Cast(min: 1, max: 3, autoLabel: "Auto", autoNote: "We pick characters that suit the topic.", conversationFrom: 2, conversationMinSeconds: 20, conversationNote: "Pick 2 or 3 and they talk it through together.", members: [
+            Option(id: "auto", label: "Auto", note: "Picked for your topic", minSeconds: 15, aspects: all, bestAspects: all),
+            Option(id: "real", label: "Real", note: "Photos and footage", minSeconds: 15, aspects: all, bestAspects: all),
+            Option(id: "whiteboard", label: "Whiteboard", note: "Drawn by hand", withPhotos: false, withDeck: false, minSeconds: 15, aspects: all, bestAspects: ["16:9", "1:1"]),
+            Option(id: "cartoon", label: "Cartoon", note: "Characters explain it", withPhotos: false, withDeck: false, minSeconds: 15, aspects: all, bestAspects: ["16:9", "1:1", "4:5"], cast: true,
+                   extras: [Extra(id: "board", label: "Characters explain at a board", note: "A board beside them is drawn by hand as they speak.")]),
+        ], cast: Cast(min: 1, max: 3, autoLabel: "Auto", autoNote: "We pick for you. Or choose up to 3.", conversationFrom: 2, conversationMinSeconds: 20, conversationNote: "They talk it through.", members: [
             m("ines", "Inés", "Teacher", "person", "Learning"), m("david", "David", "Engineer", "person", "Technology"), m("priya", "Priya", "Doctor", "person", "Health"), m("mateo", "Mateo", "Chef", "person", "Food"),
             m("fox", "Fox", "Guide for children", "animal", "For children"), m("owl", "Hugo", "Owl professor", "animal", "Science and history"), m("bear", "Bruno", "Caring bear", "animal", "Feelings and bedtime"),
             m("cat", "Mika", "Curious cat", "animal", "How things work"), m("parrot", "Paco", "Travelling parrot", "animal", "Travel and languages"), m("turtle", "Tula", "Wise turtle", "animal", "Nature"),
@@ -416,7 +416,7 @@ public enum FakeLook {
         }
         if c.cast.count >= 2, options.minutes * 60 < (caps?.cast?.conversationMinSeconds ?? 20) {
             return StartedVideo(videoID: videoID, look: AppliedLook(chosen: c.look, applied: c.look, cast: [c.cast[0]], extras: c.extras, reason: "too_short"),
-                                note: spanish ? "En un video tan corto presenta un solo personaje; una conversación necesita al menos 20 segundos." : "In a video this short one character presents; a conversation needs at least 20 seconds.")
+                                note: spanish ? "Presenta un solo personaje. Una conversación necesita 20 s o más." : "One character presents. A conversation needs 20 s or more.")
         }
         return StartedVideo(videoID: videoID, look: AppliedLook(chosen: c.look, applied: c.look, cast: c.cast, extras: c.extras))
     }

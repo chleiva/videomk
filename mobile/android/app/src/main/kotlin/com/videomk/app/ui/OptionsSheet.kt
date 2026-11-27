@@ -77,14 +77,16 @@ fun CreateOptionsSheet(composer: ComposerViewModel, caps: com.videomk.app.core.C
                 }
             }
             // LOOK: the colour theme; two rows of two at large text so no label shrinks
-            Section(stringResource(R.string.create_look)) {
+            // with the look picker, "Look" is the pill's word: these are the colours
+            Section(stringResource(if (caps.lookPicker == null) R.string.create_look else R.string.looks_colours)) {
                 val looks = listOf<VideoLook?>(null) + VideoLook.entries
                 for (row in if (isLargeText()) looks.chunked(2) else listOf(looks)) Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(Vmk.space.s)) {
                     for (l in row) LookSwatch(l?.displayName() ?: stringResource(R.string.create_look_auto), l?.displayName() ?: stringResource(R.string.create_look_auto_desc), l, o.look == l, Modifier.weight(1f).testTag("look-${l?.wire ?: "auto"}")) { composer.updateOptions(o.copy(look = l)) }
                 }
             }
             // SCENES: the server's own styles (Auto, Illustrated, Real, Whiteboard...), only where it lists a real choice; the chosen one says what it means
-            caps.looks?.takeIf { it.hasStyleChoice }?.let { looks ->
+            // (a server with the look picker offers that INSTEAD: the older style wish is neither shown nor sent)
+            caps.looks?.takeIf { it.hasStyleChoice && caps.lookPicker == null }?.let { looks ->
                 Section(stringResource(R.string.opt_scenes)) {
                     FlowRow(horizontalArrangement = Arrangement.spacedBy(Vmk.space.s), verticalArrangement = Arrangement.spacedBy(Vmk.space.s), modifier = Modifier.fillMaxWidth().testTag("styleChips")) {
                         for (st in looks.styles.filter { it.available }) ChoiceChip(st.label, o.style == st.id, Modifier.testTag("style-${st.id}")) { composer.updateOptions(o.copy(style = st.id)) }

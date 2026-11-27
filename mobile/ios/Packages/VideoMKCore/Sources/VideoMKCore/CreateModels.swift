@@ -304,9 +304,6 @@ public struct CreateForm: Equatable, Sendable {
         return (tap, tap == .added ? applyLookLength(caps) : nil)
     }
 
-    /// "Auto" in the cast: we choose the characters.
-    public mutating func clearCast() { lookChoice.cast = []; userTouched = true }
-
     public mutating func setLookExtra(_ id: String, on: Bool) { LookRules.setExtra(id, on: on, in: &lookChoice); userTouched = true }
 
     private mutating func applyLookLength(_ caps: CreateCapabilities) -> LookRules.LengthNudge? {

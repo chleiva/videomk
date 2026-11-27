@@ -356,7 +356,7 @@ fun rememberMakingSnapshot(video: VideoItem, state: AppState): MakingSnapshot {
     val minutes = state.minutes[video.id] ?: CreateOptions.DEFAULT_MINUTES
     val title = state.briefs[video.id] ?: video.title?.takeIf { it.isNotEmpty() } ?: stringResource(R.string.lib_making_title)
     val deck = (video.status as? VideoStatus.Running)?.deck
-    return (if (deck != null) MakingSnapshot.ofDeck(title, deck, inStage, minutes) else MakingSnapshot.of(title, stage, inStage, minutes)).with(video.making)
+    return (if (deck != null) MakingSnapshot.ofDeck(title, deck, inStage, minutes) else MakingSnapshot.of(title, stage, inStage, minutes)).with(video.making).copy(note = state.lookNotes[video.id])
 }
 
 /** The request is on its way (or failed before the server answered): the same card as a running one, so the list never jumps. */

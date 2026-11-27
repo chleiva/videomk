@@ -260,6 +260,11 @@ fun CreateScreen(app: AppViewModel, composer: ComposerViewModel, onClose: () -> 
     var lengthOpen by remember { mutableStateOf(false) }
     var lookOpen by remember { mutableStateOf(false) }
     var optionsOpen by rememberSaveable { mutableStateOf(false) }
+    var lookSheet by rememberSaveable { mutableStateOf(false) }
+    var castSheet by rememberSaveable { mutableStateOf(false) }
+    // photos or a presentation were attached or removed (or the server's list changed): a look that is not made from them goes back to Auto, and one line says so
+    val attached = composer.attached
+    LaunchedEffect(attached, caps.lookPicker) { composer.syncLook()?.let { view.announceForAccessibility(it) } }
 
     // example chips type themselves into the prompt (reduced motion: the text simply appears)
     var typing by remember { mutableStateOf<String?>(null) }
@@ -299,7 +304,10 @@ fun CreateScreen(app: AppViewModel, composer: ComposerViewModel, onClose: () -> 
                 val forDesc = stringResource(R.string.create_what_for)
                 val lengthDesc = stringResource(R.string.create_length)
                 val lookDesc = stringResource(R.string.create_look)
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(Vmk.space.s), itemVerticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().testTag("pills")) {
+                // the look was changed for the person (photos sent it back to Auto, a look moved the length): said right above the pill it is about
+                composer.lookNotice?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary, modifier = Modifier.fillMaxWidth().padding(bottom = Vmk.space.xs).semantics { liveRegion = androidx.compose.ui.semantics.LiveRegionMode.Polite }.testTag("lookNotice")) }
+                val picker = caps.lookPicker
+                PillRows(Modifier.fillMaxWidth().testTag("pills")) {
                     Pill(platformPillValue(options, caps), forDesc, Modifier.testTag("pillFor"), expanded = forOpen, onExpandedChange = { haptics.play(DesignTokens.Haptic.Selection); forOpen = it }, locked = locked) {
                         for (c in chips) androidx.compose.material3.DropdownMenuItem(
                             text = { Text(c.label, fontWeight = if (c.id == options.platform && !CreatePlatforms.isCustom(options, caps)) FontWeight.Bold else FontWeight.Normal) },
@@ -324,12 +332,25 @@ fun CreateScreen(app: AppViewModel, composer: ComposerViewModel, onClose: () -> 
                         }
                         if (anyOver && maxMinutes != null) Text(stringResource(R.string.create_over_max, CreatePlatforms.chip(caps, options.platform)!!.label, Lengths.clock(maxMinutes)), style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary, modifier = Modifier.padding(horizontal = Vmk.space.l, vertical = Vmk.space.s).widthIn(max = 240.dp))
                     }
-                    Pill(options.look?.let { stringResource(R.string.create_summary_look, it.displayName()) } ?: stringResource(R.string.create_summary_look_auto), lookDesc, Modifier.testTag("pillLook"), expanded = lookOpen, onExpandedChange = { haptics.play(DesignTokens.Haptic.Selection); lookOpen = it }, locked = locked) {
+                    // with the server's look picker the pill says the look only and opens the sheet of four tiles (the characters have their own pill); without it (an older server): the menu it always was
+                    if (picker != null) PillButton(com.videomk.app.core.LookRules.pillLabel(options.lookChoice, picker), lookDesc, Modifier.testTag("pillLook"), locked = locked, onClick = { haptics.play(DesignTokens.Haptic.Selection); focusManager.clearFocus(); composer.dismissLookNotice(); lookSheet = true })
+                    else Pill(options.look?.let { stringResource(R.string.create_summary_look, it.displayName()) } ?: stringResource(R.string.create_summary_look_auto), lookDesc, Modifier.testTag("pillLook"), expanded = lookOpen, onExpandedChange = { haptics.play(DesignTokens.Haptic.Selection); lookOpen = it }, locked = locked) {
                         for (l in listOf<VideoLook?>(null) + VideoLook.entries) androidx.compose.material3.DropdownMenuItem(
                             text = { Text(l?.displayName() ?: stringResource(R.string.create_look_auto), fontWeight = if (options.look == l) FontWeight.Bold else FontWeight.Normal) },
                             trailingIcon = { if (options.look == l) Icon(Sym.Check, null, tint = Vmk.colors.primary) },
                             onClick = { lookOpen = false; haptics.play(DesignTokens.Haptic.Selection); composer.updateOptions(options.copy(look = l)) }, modifier = Modifier.testTag("look-${l?.wire ?: "auto"}"),
                         )
+                    }
+                    // only for a look with characters: who explains it. The chosen faces (or the sparkle of "we choose") sit in the pill; it opens the Characters sheet.
+                    // The second form is the faces alone, for where the word does not fit in two rows of pills (large text, small phones); TalkBack hears "Characters" either way.
+                    if (picker != null && composer.lookHasCast) {
+                        val castDesc = stringResource(R.string.looks_cast)
+                        val faces = options.lookChoice.cast.mapNotNull { picker.cast?.member(it) }
+                        val spoken = com.videomk.app.core.LookRules.castSpoken(options.lookChoice, picker)
+                        val open = { haptics.play(DesignTokens.Haptic.Selection); focusManager.clearFocus(); composer.dismissLookNotice(); castSheet = true }
+                        for (compact in listOf(false, true)) PillButton(if (compact) "" else castDesc, castDesc, Modifier.testTag("pillCast"), spoken = spoken, locked = locked, onClick = open) {
+                            if (faces.isEmpty()) { if (compact) Icon(Sym.Person, null, tint = Vmk.colors.text, modifier = Modifier.size(18.dp)); Sparkle(size = 14.dp) } else PillFaces(faces)
+                        }
                     }
                 }
             }
@@ -370,6 +391,13 @@ fun CreateScreen(app: AppViewModel, composer: ComposerViewModel, onClose: () -> 
                             om.useMinutes?.let { u -> FixChip(stringResource(R.string.create_over_max_use, Lengths.short(u)), stringResource(R.string.create_over_max_use_desc, Lengths.long(u)), Modifier.testTag("overMaxChip")) { composer.setLength(u) } }
                         }
                     }
+                    // the length was shortened after the look was chosen: the video would still be made (one character presents), so this only offers the way back
+                    composer.lookLengthNudge()?.takeIf { composer.lookNotice == null }?.let { nudge ->
+                        FlowRow(Modifier.fillMaxWidth().testTag("lookLengthHint"), itemVerticalAlignment = Alignment.CenterVertically) {
+                            Text(com.videomk.app.core.LookRules.needsLine(nudge, options.lookChoice, caps.lookPicker) + " ", style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary)
+                            FixChip(stringResource(R.string.create_over_max_use, Lengths.short(nudge.minutes)), stringResource(R.string.create_over_max_use_desc, Lengths.long(nudge.minutes)), Modifier.testTag("lookLengthFix")) { composer.setLength(nudge.minutes) }
+                        }
+                    }
                     if (photoHint != null) PhotoHintBlock(photoHint, hintFix, composer, options)
                 }
                 if (compact) controls()
@@ -398,6 +426,8 @@ fun CreateScreen(app: AppViewModel, composer: ComposerViewModel, onClose: () -> 
         }
     }
 
+    if (lookSheet) LookSheet(composer) { lookSheet = false }
+    if (castSheet) CharactersSheet(composer) { castSheet = false }
     if (optionsOpen) CreateOptionsSheet(composer, caps, options, photoTotal > 0 || deckState.attached, onCostInfo = { costInfo = true }, onDismiss = { optionsOpen = false })
 
     if (composer.addPhotosRequest != null && container?.mediaApi != null) AddPhotosSheet(composer, container.mediaApi, container.mediaUploads?.arrivals, onDismiss = { composer.closeAddPhotos() })

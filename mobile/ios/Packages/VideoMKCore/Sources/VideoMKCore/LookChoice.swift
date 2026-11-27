@@ -163,8 +163,11 @@ public enum LookRules {
     }
 
     public struct Tile: Sendable, Equatable, Identifiable {
+        /// Why a tile is shown but cannot be chosen: the plan does not include it, or it is not made from the attached photos or slides.
+        public enum Block: Sendable, Equatable { case plan, photos, deck }
         public let option: LookCapabilities.Option
-        public let locked: Bool
+        public let blocked: Block?
+        public var locked: Bool { blocked != nil }
         public var id: String { option.id }
     }
 
@@ -173,14 +176,13 @@ public enum LookRules {
     /// A look made from these attachments? (The person's own photos or slides are the pictures of the video: the drawn looks are not offered then.)
     static func fits(_ o: LookCapabilities.Option, _ a: Attached) -> Bool { (!a.photos || o.withPhotos) && (!a.deck || o.withDeck) }
 
-    /// At most four tiles in the server's order. Hidden: a look this stage does not have, and a look that is not made from what is attached.
-    /// A look the plan does not include is shown, locked.
+    /// At most four tiles in the server's order, always in the same places. Hidden: only a look this stage does not have. A look that is not made from
+    /// what is attached, or that the plan does not include, stays in place, dimmed, with its reason (one treatment for "you cannot have this").
     public static func tiles(_ caps: LookCapabilities, attached: Attached = .nothing) -> [Tile] {
-        Array(caps.options.filter { $0.available && fits($0, attached) }.prefix(4)).map { Tile(option: $0, locked: !$0.allowed) }
+        Array(caps.options.filter(\.available).prefix(4)).map { o in
+            Tile(option: o, blocked: attached.photos && !o.withPhotos ? .photos : attached.deck && !o.withDeck ? .deck : !o.allowed ? .plan : nil)
+        }
     }
-
-    /// The looks that were left out because of the attachments (their labels, for the one line that says so).
-    public static func hidden(_ caps: LookCapabilities, attached: Attached) -> [LookCapabilities.Option] { caps.options.filter { $0.available && !fits($0, attached) } }
 
     /// Keeps a choice inside what can be made now. Returns the reason when the look itself had to go back to Auto.
     public static func normalized(_ choice: LookChoice, caps: LookCapabilities?, attached: Attached = .nothing) -> (choice: LookChoice, reset: Reset?) {
@@ -208,7 +210,7 @@ public enum LookRules {
 
     public enum CastTap: Sendable, Equatable { case added, removed, full }
 
-    /// A tap on a face: ticks it, or unticks it; a fourth is refused (`full`).
+    /// A tap on a face: chooses it, or lets it go; a fourth is refused (`full`: the picker dims those faces, so this is only the safety net).
     public static func toggle(_ member: String, in choice: inout LookChoice, caps: LookCapabilities) -> CastTap {
         guard let cast = caps.cast, cast.member(member) != nil else { return .full }
         if let i = choice.cast.firstIndex(of: member) { choice.cast.remove(at: i); return .removed }
@@ -246,40 +248,31 @@ public enum LookRules {
         return LengthNudge(minutes: fix, needSeconds: need, conversation: isConversation(choice, caps: caps) && (caps?.option(choice.look)?.minSeconds ?? 0) < need)
     }
 
-    /// The chosen shape is not one the look is at its best in: the shapes that are (their ids), for a quiet hint. Empty: nothing to say.
-    public static func betterAspects(_ choice: LookChoice, caps: LookCapabilities?, aspect: String) -> [String] {
-        guard let o = caps?.option(choice.look), !o.isAuto, !o.bestAspects.isEmpty, !o.bestAspects.contains(aspect) else { return [] }
-        return o.bestAspects
-    }
-
     // MARK: words
 
     /// The names of the ticked characters, in the order they were ticked.
     public static func castNames(_ ids: [String], caps: LookCapabilities?) -> [String] { ids.map { caps?.cast?.member($0)?.name ?? $0 } }
 
-    /// What the pill says: "Auto", "Whiteboard", "Cartoon · Fox + Bruno" (three: "Cartoon · Fox + 2", so no name is ever cut).
+    /// What the pill says: the look only ("Auto", "Whiteboard", "Cartoon"). The cast is shown as faces, never as names in the pill.
     public static func pillLabel(_ choice: LookChoice, caps: LookCapabilities?) -> String {
-        guard let caps, let o = caps.option(choice.look) else { return tr("look.auto") }
-        if o.isAuto { return tr("look.auto") }
+        guard let caps, let o = caps.option(choice.look), !o.isAuto else { return tr("look.auto") }
+        return o.label
+    }
+
+    /// The limit is reached: the faces that are not chosen are dimmed and do nothing.
+    public static func castIsFull(_ choice: LookChoice, caps: LookCapabilities?) -> Bool { caps?.cast.map { choice.cast.count >= $0.max } ?? false }
+
+    /// The one line under the faces: "We pick for you. Or choose up to 3.", "Fox presents.", "Fox and Bruno talk it through."
+    public static func castLine(_ choice: LookChoice, caps: LookCapabilities?) -> String {
         let names = castNames(choice.cast, caps: caps)
         switch names.count {
-        case 0: return o.label
-        case 1, 2: return "\(o.label) · \(names.joined(separator: " + "))"
-        default: return "\(o.label) · \(names[0]) + \(names.count - 1)"
+        case 0: return tr("looks.cast_none", caps?.cast?.max ?? 3)
+        case 1: return tr("looks.cast_one", names[0])
+        default: return tr("looks.cast_talk", Localization.shared.list(names))
         }
     }
 
-    /// The same for a screen reader and for Info, in full: "Cartoon, Fox, Bruno and Mika, Hand-drawn board".
-    public static func spoken(_ choice: LookChoice, caps: LookCapabilities?) -> String {
-        guard let caps, let o = caps.option(choice.look) else { return tr("look.auto") }
-        var parts = [o.label]
-        let names = castNames(choice.cast, caps: caps)
-        if !names.isEmpty { parts.append(Localization.shared.list(names)) }
-        parts += choice.extras.compactMap { id in o.extras.first { $0.id == id }?.label }
-        return parts.joined(separator: ", ")
-    }
-
-    /// One line saying why the look went back to Auto ("Look is Auto: Cartoon is not made from your photos.").
+    /// One line saying why the look went back to Auto ("Look set to Auto. Cartoon can't use your photos.").
     public static func resetLine(_ reason: Reset, was: String) -> String {
         switch reason {
         case .photos: tr("looks.reset_photos", was)

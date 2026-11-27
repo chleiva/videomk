@@ -107,7 +107,7 @@ struct OrganizeSheet: View {
                 Text(tr("organize.photos_from_later_uploads_join")).font(.role(.footnote)).foregroundStyle(Theme.textSecondary).fixedSize(horizontal: false, vertical: true)       // the whole sentence, never clipped under the buttons
             }
         }
-        .tint(Theme.success).padding(.vertical, Theme.Space.s).accessibilityIdentifier("alwaysOrganize")
+        .tint(Theme.primary).padding(.vertical, Theme.Space.s).accessibilityIdentifier("alwaysOrganize")
     }
 
     /// Organize is the one primary; "Put all in one collection" is the labelled secondary; Not now is a text button.

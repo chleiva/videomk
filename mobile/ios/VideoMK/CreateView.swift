@@ -51,9 +51,6 @@ struct CreateView: View {
                             if form.hasDeck { Text(tr("deck.prompt_hint")).font(.role(.footnote)).foregroundStyle(Theme.textSecondary).fixedSize(horizontal: false, vertical: true).accessibilityIdentifier("deckPromptHint") }
                             attachments
                             deckSection
-                            if let line = create.lookNotice, !locked {      // photos or a presentation sent the look back to Auto: one line says so
-                                Label(line, systemImage: "info.circle").font(.role(.footnote)).foregroundStyle(Theme.textSecondary).fixedSize(horizontal: false, vertical: true).accessibilityIdentifier("lookNotice")
-                            }
                             if locked { chosen.transition(.opacity) }
                             notice
                         }
@@ -127,7 +124,8 @@ struct CreateView: View {
         } message: { Text(tr("deck.replace_deck.message")) }
         .onChange(of: create.deck.state, initial: true) { _, _ in create.syncDeck() }
         .sheet(isPresented: $create.showMore) { CreateOptionsSheet(create: create) }
-        .sheet(isPresented: $create.showLook) { LookPickerSheet(create: create, attached: attached) }
+        .sheet(isPresented: $create.showLook) { LookSheet(create: create, attached: attached) }
+        .sheet(isPresented: $create.showCast) { CharactersSheet(create: create) }
         .onChange(of: attached, initial: true) { _, a in create.syncLook(attached: a) }
         .onChange(of: create.caps.looks) { _, _ in create.syncLook(attached: attached) }
         .sheet(isPresented: Binding(get: { create.stage != .form }, set: { if !$0 { create.dismissOverlay() } })) {
@@ -292,13 +290,22 @@ struct CreateView: View {
 
     // three choices already made: platform, length, look. Values only, no key labels.
 
-    private var pills: some View {
-        WrapLayout(spacing: Theme.Space.s) {
-            forPill
-            lengthPill
-            lookPill
+    /// With a look that has characters there is a fourth pill, and the row is laid out by what fits, never in more than two rows: all four in one row,
+    /// or Characters under the three, or two and two, or two and two with the Characters pill reduced to its faces (large text, small phones).
+    @ViewBuilder private var pills: some View {
+        let s = Theme.Space.s
+        if create.lookHasCast {
+            ViewThatFits(in: .horizontal) {
+                HStack(spacing: s) { forPill; lengthPill; lookPill; castPill(compact: false) }
+                VStack(alignment: .leading, spacing: s) { HStack(spacing: s) { forPill; lengthPill; lookPill }; castPill(compact: false) }
+                VStack(alignment: .leading, spacing: s) { HStack(spacing: s) { forPill; lengthPill }; HStack(spacing: s) { lookPill; castPill(compact: false) } }
+                VStack(alignment: .leading, spacing: s) { HStack(spacing: s) { forPill; lengthPill }; HStack(spacing: s) { lookPill; castPill(compact: true) } }
+                WrapLayout(spacing: s) { forPill; lengthPill; lookPill; castPill(compact: true) }
+            }
+            .accessibilityElement(children: .contain)
+        } else {
+            WrapLayout(spacing: s) { forPill; lengthPill; lookPill }.accessibilityElement(children: .contain)
         }
-        .accessibilityElement(children: .contain)
     }
 
     /// The same three, as plain words, while the screen is locked.
@@ -353,10 +360,10 @@ struct CreateView: View {
         }
     }
 
-    /// With the server's look picker: the pill opens the sheet of tiles (Auto, Real, Whiteboard, Cartoon and its cast). Without it (an older server): the menu it always was.
+    /// With the server's look picker: the pill says the look only and opens the sheet of four tiles (the characters have their own pill). Without it (an older server): the menu it always was.
     @ViewBuilder private var lookPill: some View {
-        if let looks = create.caps.looks {
-            PillButton(value: lookValue, spoken: tr("create.look"), spokenValue: LookRules.spoken(form.lookChoice, caps: looks), identifier: "lookPill") { focused = false; create.showLook = true }
+        if create.caps.looks != nil {
+            PillButton(value: lookValue, spoken: tr("create.look"), identifier: "lookPill") { focused = false; create.dismissLookNotice(); create.showLook = true }
         } else {
             Pill(value: lookValue, spoken: tr("create.look"), identifier: "lookPill") {
                 Button { create.form.look = nil; Haptics.play(.selection) } label: { if form.look == nil { Label(tr("look.auto"), systemImage: "checkmark") } else { Text(tr("look.auto")) } }
@@ -364,6 +371,20 @@ struct CreateView: View {
                     Button { create.form.look = l; Haptics.play(.selection) } label: { if form.look == l { Label(l.title, systemImage: "checkmark") } else { Text(l.title) } }
                 }
             }
+        }
+    }
+
+    /// Only for a look with characters: who explains it. The chosen faces (or the sparkle of "we choose") sit in the pill; it opens the Characters sheet.
+    /// `compact`: where the word does not fit in two rows of pills, the faces alone (none chosen: two figures and the sparkle); VoiceOver still hears "Characters".
+    private func castPill(compact: Bool) -> some View {
+        let looks = create.caps.looks, choice = form.lookChoice
+        let faces = choice.cast.compactMap { looks?.cast?.member($0) }
+        let extras = choice.extras.compactMap { id in looks?.option(choice.look)?.extras.first { $0.id == id }?.label }
+        let spoken = ([faces.isEmpty ? tr("look.auto") : Localization.shared.list(faces.map(\.name))] + extras).joined(separator: ", ")
+        return PillButton(value: compact ? "" : tr("looks.cast"), spoken: tr("looks.cast"), spokenValue: spoken, identifier: "castPill") { focused = false; create.dismissLookNotice(); create.showCast = true } accessory: {
+            if compact, faces.isEmpty { Image(systemName: "person.2.fill").font(.role(.subhead, weight: .semibold)).foregroundStyle(Theme.text).accessibilityHidden(true) }
+            if faces.isEmpty { Image(systemName: "sparkle").font(.role(.footnote, weight: .semibold)).foregroundStyle(Theme.primary).accessibilityHidden(true) }
+            else { PillFaces(members: faces) }
         }
     }
 
@@ -408,7 +429,15 @@ struct CreateView: View {
                         Spacer(minLength: Theme.Space.s)
                         IconButton(symbol: "slider.horizontal.3", label: tr("create.options"), identifier: "moreOptions") { focused = false; create.showMore = true }
                     }
-                    if !(keyboardUp && typeSize.isAccessibilitySize) { pills.frame(maxWidth: .infinity, alignment: .leading) }      // largest text with the keyboard up: the room goes to the sentence
+                    if !(keyboardUp && typeSize.isAccessibilitySize) {      // largest text with the keyboard up: the room goes to the sentence
+                        VStack(alignment: .leading, spacing: Theme.Space.s) {
+                            if let line = create.lookNotice {      // the look was changed for the person (photos sent it back to Auto): said right above the pill it is about
+                                Text(line).font(.role(.footnote)).foregroundStyle(Theme.textSecondary).fixedSize(horizontal: false, vertical: true).accessibilityIdentifier("lookNotice").transition(.opacity)
+                            }
+                            pills
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    }
                     createButton(s, proxy).padding(.top, Theme.Space.xs)
                     caption(s)
                 }

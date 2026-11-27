@@ -229,6 +229,66 @@ fun Pill(
 }
 
 /**
+ * A pill that opens a sheet instead of a menu: the same shape as [Pill], with an optional [accessory] after the word (the chosen faces, the sparkle of "we choose").
+ * An empty [value] draws the accessory alone (where the word does not fit); TalkBack still hears [description] and [spoken].
+ */
+@Composable
+fun PillButton(value: String, description: String, modifier: Modifier = Modifier, spoken: String = value, locked: Boolean = false, onClick: () -> Unit, accessory: (@Composable () -> Unit)? = null) {
+    Row(
+        modifier.heightIn(min = Vmk.minTouch).wrapContentSize(Alignment.CenterStart).clip(CircleShape)
+            .clickable(enabled = !locked, role = Role.Button, onClickLabel = description, onClick = onClick)
+            .semantics(mergeDescendants = true) { contentDescription = "$description: $spoken"; stateDescription = spoken },
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Row(
+            Modifier.heightIn(min = Vmk.iconButton).clip(CircleShape).background(Vmk.colors.surfaceRaised).padding(start = Vmk.space.l, end = if (locked) Vmk.space.l else Vmk.space.m),
+            verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            if (value.isNotEmpty()) Text(value, style = MaterialTheme.typography.labelLarge, color = if (locked) Vmk.colors.textSecondary else Vmk.colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false))
+            accessory?.invoke()
+            if (!locked) Icon(Sym.ExpandMore, null, tint = Vmk.colors.textSecondary, modifier = Modifier.size(18.dp))
+        }
+    }
+}
+
+/**
+ * The pills of Create, never in more than two rows when there are four (a look with characters adds the fourth): all four in one row, or the fourth under the
+ * three, or two and two, or two and two with the fourth reduced to [lastCompact] (large text, small phones). Anything else simply wraps.
+ * Children, in order: the first three pills, the fourth, and the fourth's compact form (only one of the last two is placed).
+ */
+@Composable
+fun PillRows(modifier: Modifier = Modifier, gap: Dp = Vmk.space.s, content: @Composable () -> Unit) {
+    androidx.compose.ui.layout.Layout(content, modifier) { measurables, constraints ->
+        val loose = constraints.copy(minWidth = 0, minHeight = 0)
+        val p = measurables.map { it.measure(loose) }
+        val g = gap.roundToPx(); val max = constraints.maxWidth
+        fun width(row: List<Int>) = row.sumOf { p[it].width } + g * (row.size - 1).coerceAtLeast(0)
+        fun fits(vararg rows: List<Int>) = rows.all { width(it) <= max }
+        val rows: List<List<Int>> = if (p.size < 5) {
+            // no fourth pill: plain wrapping
+            val out = mutableListOf(mutableListOf<Int>())
+            for (i in p.indices) { if (out.last().isNotEmpty() && width(out.last() + i) > max) out += mutableListOf<Int>(); out.last() += i }
+            out
+        } else when {
+            fits(listOf(0, 1, 2, 3)) -> listOf(listOf(0, 1, 2, 3))
+            fits(listOf(0, 1, 2), listOf(3)) -> listOf(listOf(0, 1, 2), listOf(3))
+            fits(listOf(0, 1), listOf(2, 3)) -> listOf(listOf(0, 1), listOf(2, 3))
+            fits(listOf(0, 1), listOf(2, 4)) -> listOf(listOf(0, 1), listOf(2, 4))
+            else -> { val out = mutableListOf(mutableListOf<Int>()); for (i in listOf(0, 1, 2, 4)) { if (out.last().isNotEmpty() && width(out.last() + i) > max) out += mutableListOf<Int>(); out.last() += i }; out }
+        }
+        val heights = rows.map { r -> r.maxOfOrNull { p[it].height } ?: 0 }
+        layout(max, heights.sum()) {
+            var y = 0
+            rows.forEachIndexed { n, r ->
+                var x = 0
+                for (i in r) { p[i].placeRelative(x, y + (heights[n] - p[i].height) / 2); x += p[i].width + g }
+                y += heights[n]
+            }
+        }
+    }
+}
+
+/**
  * A suggestion chip (an example prompt on Create, "Make another" on the player): the sparkle and a few words on an opaque pill.
  * 44 dp to look at, 48 dp to hit; the text wraps to two lines at large sizes.
  */

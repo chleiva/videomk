@@ -1,6 +1,7 @@
 """The self-check of a whiteboard plan (docs/WHITEBOARD.md, "Self-check"): every board is laid out and timed exactly as the renderer will, without drawing a
-pixel, and scored: how full it is, the smallest handwriting, overlaps, arrows that cross things, how busy the pen is. A board that fails gets a complaint in
-plain words that the director is shown once (engine/whiteboard_policy.review).
+pixel, and scored: how full it is, the smallest handwriting, overlaps, marks and arrows that touch something (`collisions`, measured on the renderer's own
+strokes and the real ink of the writing), arrows that found no clean way, how busy the pen is. A board that fails gets a complaint in plain words that the
+director is shown once (engine/whiteboard_policy.review).
 
 No model, no storage, no drawing packages: a drawing's shape and drawing time come from the bundled library index, the word times from the measured speaking
 rate (the real ones are only known after the voice is made; the renderer then uses those).
@@ -78,7 +79,8 @@ def _off_board(rep: Dict[str, Any]) -> List[str]:
 
 def defects(props_list: List[Dict[str, Any]], aspect: str = "16:9", captions: bool = True) -> Dict[str, List[Any]]:
     """The geometry of ONE board, the props of the beats that share it, laid out as the renderer will: -> {"overlaps": [[id, id]], "off_board": [id]} of its
-    drawings, texts and charts. Ids are the board-wide names (`j:id`, j the beat's place on the board) when beats share it, the plain ids when it is one beat's.
+    drawings, texts and charts, "collisions": [[mark or arrow, what it touches]] (spec._collisions; the layout fits marks and arrows so that there are none),
+    and "coverage". Ids are the board-wide names (`j:id`, j the beat's place on the board) when beats share it, the plain ids when it is one beat's.
     Raises what the layout raises: the caller decides what a board that cannot be laid out means."""
     from .. import whiteboard_policy
     from ..frame import Frame
@@ -88,12 +90,14 @@ def defects(props_list: List[Dict[str, Any]], aspect: str = "16:9", captions: bo
     ctx = SceneCtx(frame=Frame.parse(aspect, "1080p"), captions=captions)
     props = dict(whiteboard_policy.linked_props([{k: v for k, v in p.items() if k != "cues"} for p in props_list], [len(props_list)])[-1])
     _, _, _, rep = wbe.build(props, 10.0, ctx, 480, 270, load=_stub_loader(), layout_only=True)
-    return {"overlaps": [list(x) for x in rep["overlaps"]], "off_board": _off_board(rep)}
+    return {"overlaps": [list(x) for x in rep["overlaps"]], "off_board": _off_board(rep), "collisions": [list(x) for x in rep["collisions"]], "coverage": rep["coverage"],
+            "text_sizes": rep["text_sizes"], "lost": len(rep["arrows"]["stub"]) + len(rep["arrows"]["dropped"]) + len(rep["marks"]["dropped"])}
 
 
 def score_plan(plan: Dict[str, Any], aspect: str = "16:9") -> List[Dict[str, Any]]:
     """-> one score per board: {"board", "beats", "seconds", "items", "solid", "coverage", "min_text", "min_drawing", "overlaps", "crossed", "off_board",
-    "pen_busy", "longest_idle_s", "late", "ok", "complaints": [plain sentences]}. Never raises: a board that cannot be laid out fails with that as its complaint."""
+    "collisions": [[mark or arrow, what it touches]], "blocked": arrows shortened to a stub or left out for lack of a clean way, "marks": {"kept", "degraded",
+    "dropped"} (counts), "pen_busy", "longest_idle_s", "late", "ok", "complaints": [plain sentences]}. Never raises: a board that cannot be laid out fails with that as its complaint."""
     from .. import whiteboard_policy
     from ..frame import Frame
     from ..scenes.base import SceneCtx
@@ -144,6 +148,8 @@ def score_plan(plan: Dict[str, Any], aspect: str = "16:9") -> List[Dict[str, Any
             off = _off_board(rep)
             sc.update(seconds=round(total, 1), items=len(kinds), solid=len(solid), coverage=rep["coverage"], min_text=round(min(texts), 3) if texts else None,
                       min_drawing=round(min(draws), 3) if draws else None, overlaps=rep["overlaps"], crossed=rep["crossed"], off_board=off,
+                      collisions=rep["collisions"], blocked=[x for x in rep["arrows"]["stub"]] + [x[0] for x in rep["arrows"]["dropped"]],
+                      marks={k_: len(v) for k_, v in rep["marks"].items()},
                       pen_busy=round(busy / max(total, 1e-6), 2), longest_idle_s=round(idle, 2), late=late)
             need = max(MIN_SOLID if total >= 10 else 2, int(total / 10.0 * MIN_SOLID_PER_10S))
             name = lambda j: j.split(":", 1)[-1]      # noqa: E731
@@ -160,6 +166,11 @@ def score_plan(plan: Dict[str, Any], aspect: str = "16:9") -> List[Dict[str, Any
                 sc["complaints"].append(f"'{name(j)}' does not fit the board: shorten it or give it a wide zone")
             for j in rep["crossed"][:2]:
                 sc["complaints"].append(f"the arrow '{name(j)}' runs across another drawing or text: connect neighbours, or move one end to a zone next to the other")
+            for j in sc["blocked"][:2]:
+                sc["complaints"].append(f"the arrow '{name(j)}' has no clear way between its two things (other drawings or texts are in between, or the two nearly touch): connect neighbours "
+                                        "with free space between them, or move one end to a zone next to the other")
+            for a, c in [x for x in rep["collisions"] if x[0] not in rep["crossed"]][:2]:
+                sc["complaints"].append(f"the mark '{name(a)}' touches '{name(c)}': mark something with free space round it")
             if texts and min(texts) < MIN_TEXT:
                 sc["complaints"].append("some writing is too small to read: fewer words per text, size m or larger")
             for gap, i, at in rests[:2]:
@@ -178,8 +189,8 @@ def score_plan(plan: Dict[str, Any], aspect: str = "16:9") -> List[Dict[str, Any
 
 
 def summary(scores: List[Dict[str, Any]]) -> Dict[str, Any]:
-    """The video in a few numbers (logged, and kept in plan["whiteboard"]["score"]). Overlaps and things off the board are counted on EVERY board, passing or
-    failing, shared or not; a board that could not be laid out at all has no numbers and is counted in `not_laid_out`."""
+    """The video in a few numbers (logged, and kept in plan["whiteboard"]["score"]). Overlaps, things off the board and `collisions` (a mark or an arrow that
+    touches something) are counted on EVERY board, passing or failing, shared or not; a board that could not be laid out at all has no numbers and is counted in `not_laid_out`."""
     good = [s for s in scores if "seconds" in s]
     tot = sum(s["seconds"] for s in good) or 1.0
     texts = [s["min_text"] for s in good if s.get("min_text")]
@@ -188,7 +199,9 @@ def summary(scores: List[Dict[str, Any]]) -> Dict[str, Any]:
             "min_text": min(texts) if texts else None, "pen_busy": round(sum(s["pen_busy"] * s["seconds"] for s in good) / tot, 2),
             "longest_idle_s": max((s["longest_idle_s"] for s in good), default=0.0), "overlaps": sum(len(s.get("overlaps") or []) for s in scores),
             "off_board": sum(len(s.get("off_board") or []) for s in scores), "not_laid_out": len(scores) - len(good),
-            "crossed": sum(len(s.get("crossed") or []) for s in scores), "seconds_per_board": round(tot / max(1, len(good)), 1)}
+            "crossed": sum(len(s.get("crossed") or []) for s in scores), "collisions": sum(len(s.get("collisions") or []) for s in scores),
+            "arrows_blocked": sum(len(s.get("blocked") or []) for s in scores), "marks_degraded": sum((s.get("marks") or {}).get("degraded", 0) for s in scores),
+            "marks_dropped": sum((s.get("marks") or {}).get("dropped", 0) for s in scores), "seconds_per_board": round(tot / max(1, len(good)), 1)}
 
 
 def better(a: Optional[List[Dict[str, Any]]], b: List[Dict[str, Any]]) -> bool:

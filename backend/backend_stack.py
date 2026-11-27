@@ -491,6 +491,7 @@ class BackendStack(Stack):
                 v2.beat_fn.add_to_role_policy(iam.PolicyStatement(actions=["dynamodb:PutItem"], resources=[self.catalog.table.table_arn]))
                 v2.beat_fn.add_to_role_policy(iam.PolicyStatement(actions=["s3vectors:PutVectors"], resources=[self.catalog.index_arn]))
                 v2.plan_fn.add_to_role_policy(iam.PolicyStatement(actions=["s3:PutObject"], resources=[f"{self.catalog.bucket.bucket_arn}/w/*"]))   # a new whiteboard drawing's package
+                v2.plan_fn.add_environment("CATALOG_BUCKET", self.catalog.bucket.bucket_name)   # where that package goes (object_ondemand._put_package reads it; without it every drawing was paid for and never stored)
             if vector_scenes:   # the functions that draw frames read one scene package at a time: v/<scene id>/* of the catalog bucket, nothing else, no listing, no write
                 for fn in (v2.chunk_fn, v2.selftest_fn):
                     fn.add_to_role_policy(iam.PolicyStatement(actions=["s3:GetObject"], resources=[f"{self.catalog.bucket.bucket_arn}/v/*"]))
