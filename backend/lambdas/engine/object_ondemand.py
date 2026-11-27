@@ -8,8 +8,11 @@ Whatever is late, rejected or refused stays the written label: the plan is never
 
     fill(plan, video_id=..., ctx=...) -> {"made": [...ids], "asked": [...names], "reason": "..."}     never raises
 
-The MAKER (sheet -> packages) needs the tracing code and two libraries (scipy, vtracer) that are not in the engine's Lambda layer today; where they are
-missing `fill` logs `no_tracer` and changes nothing. See the document for what going live on Lambda needs.
+The MAKER (names -> sheet -> packages, common/object_maker.py) needs the tracing code and two libraries (scipy, vtracer) that do not fit the engine's Lambda
+layer. On Lambda it therefore runs in a small function of its own stack (backend/object_tracer.py) that the plan step calls when OBJECT_TRACER_FUNCTION names
+it; on a laptop it runs in process. Where neither exists `fill` logs `no_tracer` and changes nothing; a function that is missing, slow or failing leaves the labels.
+Safety (common/media_policy.py): the names are checked before anything is asked for, the provider's own moderation reads the prompt and the sheet, and every
+finished drawing passes the policy's vision check before it is stored.
 """
 import json
 import logging
@@ -20,7 +23,7 @@ import time
 import uuid
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
-from common import clip_config, clip_store as cs
+from common import clip_config, clip_store as cs, media_policy, takedown
 
 from . import clip_library as lib, ondemand
 
@@ -74,6 +77,8 @@ def missing(plan: Dict[str, Any], limit: int, sure: float = 0.55) -> List[Tuple[
         oid = object_id(name)
         if not NAME_RE.match(name) or len(oid) < 3 or len(name.split()) > 4 or _BANNED.search(name) or catalog_privacy.personal_reason(name) not in (None, "address"):
             continue
+        if media_policy.text_reason(name):   # the ONE safety policy's word lists: such a drawing is never made for the library; the label stays
+            continue
         if oid not in [o for o, _ in out] and len(out) < limit:
             out.append((oid, name))
     return out
@@ -92,75 +97,82 @@ def apply(plan: Dict[str, Any], made: Dict[str, str], sure: float = 0.55) -> int
     return n
 
 
-# ----------------------------------------------------------------------------- the default maker: the library builder's own pipeline (scripts/whiteboard_proto)
+# ----------------------------------------------------------------------------- the maker: the library builder's own pipeline, here or in the tracer function
+TRACER_ENV = "OBJECT_TRACER_FUNCTION"   # the name of the small tracer function of its own stack (backend/object_tracer.py). Unset = no function to call
+
+
+class Refused(Exception):
+    """The maker made nothing. `billed` False = the image provider was never paid, so the reservation goes back."""
+
+    def __init__(self, kind: str, *, billed: bool):
+        super().__init__(str(kind)[:120])
+        self.kind, self.billed = str(kind)[:120], billed
+
+
+_invoke: Optional[Callable[[str, bytes, float], bytes]] = None
+
+
+def set_invoker(fn: Optional[Callable[[str, bytes, float], bytes]]) -> None:
+    """Tests: how the tracer function is called (name, request JSON, seconds) -> response JSON."""
+    global _invoke
+    _invoke = fn
+
+
+def _lambda_invoke(name: str, payload: bytes, timeout: float) -> bytes:
+    import boto3
+    from botocore.config import Config
+
+    res = boto3.client("lambda", config=Config(read_timeout=max(5.0, timeout), connect_timeout=3, retries={"max_attempts": 0})).invoke(FunctionName=name, Payload=payload)
+    body = res["Payload"].read()
+    if res.get("FunctionError"):
+        raise RuntimeError("tracer function error")
+    return body
+
+
+def tracer_maker(name: str) -> Maker:
+    """The maker behind the tracer function: ONE synchronous call, no retry, bounded by the plan step's own limit. A function that is missing, throttled, slow or
+    failing raises here and the boards keep what they had. Only plain English names go in; packages and their thumbnails come back."""
+    import base64
+
+    def make(objs: List[Tuple[str, str]], timeout: float) -> Tuple[List[Dict[str, Any]], Dict[str, Any]]:
+        try:
+            raw = (_invoke or _lambda_invoke)(name, json.dumps({"action": "make", "objects": [[o, n] for o, n in objs], "timeout": timeout}).encode(), timeout + 2.0)
+        except Exception as e:   # noqa: BLE001 - not there, not allowed, throttled, or no answer in time
+            code = str(getattr(e, "response", {}).get("Error", {}).get("Code") or type(e).__name__)
+            late = "timeout" in code.lower() or "timed out" in str(e).lower()
+            raise Refused("timeout" if late else f"tracer unavailable ({code[:40]})", billed=late) from None   # no answer in time: the sheet may have been paid for
+        res = json.loads(raw)
+        if not isinstance(res, dict) or not isinstance(res.get("packages"), list):
+            if isinstance(res, dict) and res.get("refused"):
+                raise Refused(str(res["refused"]), billed=bool(res.get("billed", True)))
+            raise Refused("tracer answer unreadable", billed=True)
+        stats = dict(res.get("stats") or {})
+        stats["thumbs"] = {str(k): base64.b64decode(v) for k, v in (res.get("thumbs") or {}).items()}
+        return res["packages"], stats
+    return make
+
+
 def default_maker() -> Optional[Maker]:
-    """sheet of N names -> accepted packages, with the library's house prompt, cutter, tracer and gate (scripts/whiteboard_proto/lib_build.py). None where the
-    tracing code or its libraries are not present (the engine's functions today)."""
+    """Where the tracer function is configured (the plan step on Lambda): a call to it. On a laptop: the builder's pipeline itself (common/object_maker.py).
+    None where neither exists (the engine's functions without the tracer stack): `fill` then answers `no_tracer` and spends nothing."""
+    name = os.environ.get(TRACER_ENV, "").strip()
+    if name:
+        return tracer_maker(name)
     try:
-        import sys
-        here = os.path.dirname(os.path.abspath(__file__))
-        proto = os.environ.get("WHITEBOARD_PROTO_DIR") or os.path.join(here, "..", "..", "scripts", "whiteboard_proto")
-        if not os.path.isdir(proto):
+        from common import object_maker
+
+        if not object_maker.available():
             return None
-        for p in (proto, os.path.join(proto, "..")):
-            if p not in sys.path:
-                sys.path.insert(0, p)
-        import base64
-        import tempfile
-        from concurrent.futures import ThreadPoolExecutor
 
-        import gen_art
-        import lib_build
-        import trace as tr
-
-        from common import catalog_make as cm
-        from .image_ondemand import OpenAIImages
+        def make(objs: List[Tuple[str, str]], timeout: float) -> Tuple[List[Dict[str, Any]], Dict[str, Any]]:
+            try:
+                return object_maker.make(objs, timeout)
+            except object_maker.Refused as e:
+                raise Refused(e.kind, billed=e.billed) from None
+        return make
     except Exception as e:   # noqa: BLE001
         logging.info("whiteboard tracer unavailable (%s)", type(e).__name__)
         return None
-
-    def make(objs: List[Tuple[str, str]], timeout: float) -> Tuple[List[Dict[str, Any]], Dict[str, Any]]:
-        t0, n = time.time(), lib_build.COLS * lib_build.ROWS
-        subjects = [name for _, name in objs] + ["a small plain circle"] * (n - len(objs))
-        prompt = gen_art.HOUSE.format(n=n, cols=lib_build.COLS, rows=lib_build.ROWS, subjects="; ".join(f"({i + 1}) {s}" for i, s in enumerate(subjects)))
-        key = OpenAIImages()._read_key()
-        import urllib.request
-        req = urllib.request.Request("https://api.openai.com/v1/images/generations", json.dumps({"model": cm.OPENAI_MODEL, "prompt": prompt, "size": gen_art.SIZE, "quality": "medium",
-                                                                                                   "output_format": "png", "n": 1}).encode(), {"Authorization": "Bearer " + key, "Content-Type": "application/json"})
-        with urllib.request.urlopen(req, timeout=max(5.0, timeout)) as r:
-            res = json.loads(r.read())
-        stats: Dict[str, Any] = {"sheet_s": round(time.time() - t0, 1), "sheet_usd": round(cm.real_cost(res.get("usage") or {}), 4), "rejected": {}}
-        with tempfile.TemporaryDirectory() as tmp:
-            path = os.path.join(tmp, "sheet.png")
-            with open(path, "wb") as fh:
-                fh.write(base64.b64decode(res["data"][0]["b64_json"]))
-            stats["sheet_png"] = open(path, "rb").read()
-            t1 = time.time()
-            cells = lib_build.cut(tr.load_ink(path))
-            stats["cut_s"] = round(time.time() - t1, 2)
-            lib_build.LIB = tmp   # packages are written here and read back: nothing touches the builder's own library folder
-
-            def one(job):
-                (oid, name), cell = job
-                t = time.time()
-                try:
-                    row = lib_build.build_object(oid, "on-demand", name, cell, "on-demand", 1)
-                except Exception as e:  # noqa: BLE001
-                    row = {"ok": False, "why": f"build failed: {type(e).__name__}"}
-                row["s"] = round(time.time() - t, 1)
-                return oid, row
-            with ThreadPoolExecutor(max_workers=6) as ex:
-                rows = list(ex.map(one, zip(objs, cells)))
-            out = []
-            for oid, row in rows:
-                if row.get("ok"):
-                    out.append(json.load(open(os.path.join(tmp, oid + ".json"))))
-                else:
-                    stats["rejected"][oid] = str(row.get("why"))[:80]
-            stats["object_s"] = {oid: row["s"] for oid, row in rows}
-        stats["total_s"] = round(time.time() - t0, 1)
-        return out, stats
-    return make
 
 
 # ----------------------------------------------------------------------------- our library: the package, the index row, the search overlay
@@ -215,6 +227,23 @@ def register(oid: str, row: Dict[str, Any]) -> None:
                 delattr(fn, attr)
 
 
+def unregister(ids: List[str]) -> int:
+    """Drop drawings from THIS process's index (a takedown): they can no longer be found by id, by name or by meaning. -> how many were dropped."""
+    from .whiteboard import library
+
+    gone = set(ids)
+    if not gone:
+        return 0
+    idx = library.index()
+    before = len(idx["items"])
+    idx["items"] = [it for it in idx["items"] if it["id"] not in gone]
+    for fn in (library.by_name, library.search):
+        for attr in ("_t", "_m"):
+            if hasattr(fn, attr):
+                delattr(fn, attr)
+    return before - len(idx["items"])
+
+
 def load_dynamic(store: Optional[cs.Store] = None) -> int:
     """Read the drawings made on demand so far into this process's index (the plan step calls it once before the director writes boards). -> how many."""
     try:
@@ -224,10 +253,34 @@ def load_dynamic(store: Optional[cs.Store] = None) -> int:
         rows = store.query(WOBJ)
         for r in rows:
             register(str(r["sk"]), r)
+        unregister(takedown.denied(store, MEDIA))   # drawings taken out of the library (common/takedown.py), bundled ones included: never drawn again
         return len(rows)
     except Exception:
         logging.exception("dynamic whiteboard objects not loaded")
         return 0
+
+
+# ----------------------------------------------------------------------------- the safety policy on the finished drawings
+def _policy_gate(pkgs: List[Dict[str, Any]], stats: Dict[str, Any]) -> Tuple[List[Dict[str, Any]], Dict[str, Any], Dict[str, str]]:
+    """Every drawing the maker accepted is shown to the policy's vision check (common/media_policy.py), in parallel. -> (the drawings that passed, stats, {id: why} of
+    the refused). A drawing without a picture to judge, or whose check fails or is unsure, is refused: it is never stored."""
+    from concurrent.futures import ThreadPoolExecutor
+
+    thumbs = stats.get("thumbs") or {}
+
+    def one(pkg: Dict[str, Any]) -> Tuple[Dict[str, Any], Optional[str]]:
+        oid = str(pkg.get("id"))
+        name = str(pkg.get("what") or oid)
+        why = media_policy.text_reason(name, (pkg.get("meta") or {}).get("title_en"), (pkg.get("meta") or {}).get("title_es"))   # what the gate named it, too
+        if not why:
+            ok, why, _v, _c = media_policy.vision_check([thumbs.get(oid) or b""], f"a simple whiteboard marker drawing of: {name}")
+            why = None if ok else why
+        return pkg, why
+    if not pkgs:
+        return [], stats, {}
+    with ThreadPoolExecutor(max_workers=6) as ex:
+        rows = list(ex.map(one, pkgs))
+    return [p for p, why in rows if not why], stats, {str(p.get("id")): str(why) for p, why in rows if why}
 
 
 # ----------------------------------------------------------------------------- the step
@@ -260,21 +313,39 @@ def fill(plan: Dict[str, Any], *, video_id: str, ctx: Optional[Dict[str, Any]], 
             out["reason"] = "no_tracer"
             ondemand.decision(store, "no_tracer", MEDIA, asked=out["asked"])
             return out
+        # the ONE safety policy on the names (common/media_policy.py): word lists, then one small-model call that also gives the plain ENGLISH name, which is the
+        # only wording the generator is sent. A refused name keeps its label; nothing is reserved for it.
+        judged, _jcost = media_policy.judge_names([n for _, n in want])
+        refused = {oid: j["reason"] for (oid, _), j in zip(want, judged) if not j["ok"]}
+        asks: List[Tuple[str, str]] = []          # (id from the English name, English name): what the maker gets
+        origin: Dict[str, str] = {}               # that id -> the id of the name the board wrote
+        for (oid, _), j in zip(want, judged):
+            en_id = object_id(j["english"]) if j["ok"] else ""
+            if j["ok"] and len(en_id) >= 3 and en_id not in origin:
+                asks.append((en_id, j["english"]))
+                origin[en_id] = oid
+        if not asks:
+            out["reason"] = "policy_refused"
+            ondemand.decision(store, "policy_refused", MEDIA, asked=out["asked"], refused=refused)
+            return out
         t = time.time() if now is None else now
-        price = round(float(cfg["object_call_usd"]) + float(cfg["object_gate_usd"]) * len(want), 4)
+        price = round(float(cfg["object_call_usd"]) + float(cfg["object_gate_usd"]) * len(asks), 4)
         lines, why, allowance = ondemand.reserve(store, cfg, media=MEDIA, kind=kind, ctx=ctx, video_id=video_id, price=price, now=t)
         if lines is None:
             out["reason"] = why
             ondemand.decision(store, why, MEDIA, asked=out["asked"], price_usd=price, allowance_usd=allowance, kind=kind)
             return out
         ledger = (cs.ledger_pk(cs.month(t)), f"{int(t * 1000):013d}-{uuid.uuid4().hex[:6]}")
-        store.put(ledger[0], ledger[1], {"at": int(t), "media": MEDIA, "outcome": "started", "brief": ", ".join(out["asked"])[:200], "kind": kind, "reserved_usd": price, "charged_usd": price,
-                                         "account": lib.account_ref(str(ctx["user_id"])), "video": lib.video_ref(video_id), "allowance_usd": allowance, "asked_n": len(want), "ttl": int(t) + 500 * 86400})
+        store.put(ledger[0], ledger[1], {"at": int(t), "media": MEDIA, "outcome": "started", "brief": ", ".join(n for _, n in asks)[:200], "kind": kind, "reserved_usd": price, "charged_usd": price,
+                                         "account": lib.account_ref(str(ctx["user_id"])), "video": lib.video_ref(video_id), "allowance_usd": allowance, "asked_n": len(asks), "ttl": int(t) + 500 * 86400})
         box: Dict[str, Any] = {}
 
         def run() -> None:
             try:
-                box["pkgs"], box["stats"] = maker(want, float(cfg["object_timeout_s"]))
+                pkgs, stats = maker(asks, float(cfg["object_timeout_s"]))
+                box["pkgs"], box["stats"], box["policy"] = _policy_gate(pkgs, stats or {})   # the same after-generation check as clips and images, on every drawing
+            except Refused as e:
+                box["error"], box["billed"] = e.kind, e.billed
             except Exception as e:  # noqa: BLE001
                 box["error"] = type(e).__name__
         th = threading.Thread(target=run, name="objectgen", daemon=True)
@@ -284,25 +355,30 @@ def fill(plan: Dict[str, Any], *, video_id: str, ctx: Optional[Dict[str, Any]], 
         took = round(time.time() - t0, 1)
         ondemand.emit("GenerationSeconds", took, "Seconds", Media=MEDIA)
         if th.is_alive() or "error" in box:
-            outcome = "timeout" if th.is_alive() else "provider_failed"
+            outcome = "timeout" if th.is_alive() or box.get("error") == "timeout" else "policy_refused" if str(box.get("error", "")).startswith("moderation:") else "provider_failed"
             out["reason"] = outcome
-            store.add(ledger[0], ledger[1], fields={"outcome": outcome, "reason": box.get("error", "not ready in time"), "latency_s": took})
+            charged = price
+            if not th.is_alive() and box.get("billed") is False:   # refused before the provider was paid (no function, no key, the prompt refused by moderation): the reservation goes back
+                ondemand.release(store, lines, media=MEDIA, kind=kind, price=price)
+                charged = 0.0
+            store.add(ledger[0], ledger[1], fields={"outcome": outcome, "reason": box.get("error", "not ready in time"), "latency_s": took, "charged_usd": charged})
             ondemand._stat(store, MEDIA, **{f"g_{outcome}": 1, "g_n": 1, "g_latency_ds": int(took * 10)})
-            ondemand.decision(store, outcome, MEDIA, asked=out["asked"], waited=took)
-            return out       # assumed billed: the reservation stays
+            ondemand.decision(store, outcome, MEDIA, asked=out["asked"], waited=took, why=box.get("error"), charged_usd=charged)
+            return out       # otherwise assumed billed: the reservation stays
         stats = box.get("stats") or {}
-        made: Dict[str, str] = {}
+        made: Dict[str, str] = {}                 # the id of the name the board wrote -> the library id of its new drawing
         each = price / max(1, len(box["pkgs"]))
         for pkg in box["pkgs"]:
             try:
-                made[object_id(str(pkg["id"]))] = store_object(store, pkg, video_id=video_id, cost_usd=each)   # OUR library first
+                en_id = object_id(str(pkg["id"]))
+                made[origin.get(en_id, en_id)] = store_object(store, pkg, video_id=video_id, cost_usd=each)   # OUR library first
             except Exception:
                 logging.exception("on-demand object not stored")
         n = apply(plan, made, float(cfg["object_sure_score"]))                                                                                 # only then the video
         out["made"] = sorted(made.values())
-        rejected = dict(stats.get("rejected") or {})
+        rejected = {**refused, **dict(stats.get("rejected") or {}), **dict(box.get("policy") or {})}
         for _oid in rejected:
-            ondemand.emit("Rejected", Reason="gate", Media=MEDIA)
+            ondemand.emit("Rejected", Reason="policy" if str(rejected[_oid]).startswith(("policy:", "moderation:")) else "gate", Media=MEDIA)
         store.add(ledger[0], ledger[1], fields={"outcome": "generated" if made else "gate_rejected", "reason": json.dumps(rejected)[:200] if rejected else "ok", "latency_s": took,
                                                 "made_n": len(made), "rejected_n": len(rejected), "provider_usd": stats.get("sheet_usd"), "clip_id": ",".join(out["made"])[:200]})
         ondemand._stat(store, MEDIA, g_n=1, g_latency_ds=int(took * 10), o_made=len(made), o_rejected=len(rejected), o_asked=len(want), used_generated=n, **{f"g_{'generated' if made else 'gate_rejected'}": 1})

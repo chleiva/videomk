@@ -9,7 +9,7 @@ import numpy as np
 import pytest
 from PIL import Image
 
-from common import catalog, catalog_store, clip_config as cc, clip_store as cs, ownership
+from common import catalog, catalog_store, clip_config as cc, clip_store as cs, media_policy, ownership
 from engine import clip_brief, clip_gen, clip_library as lib, clip_ondemand as od, image_ondemand as io_, llm, ondemand
 sys.path.insert(0, os.path.dirname(__file__))
 from test_clips_on_demand import GOOD_BRIEF, GOOD_GATE, MP4, Different, _vec, _info   # the same stand-ins as the clip tests
@@ -17,7 +17,7 @@ from test_clips_on_demand import GOOD_BRIEF, GOOD_GATE, MP4, Different, _vec, _i
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "scripts"))
 
 QA_OK = {"adherence": 9, "quality": 8, "text_visible": False, "logo_or_brand": False, "real_person_likeness": False, "anatomy_problem": False, "warped_objects": False, "unsafe": False,
-         "centre_subject": True, "calm_bottom": True, "style_ok": True, "reasons": "clean"}
+         "centre_subject": True, "calm_bottom": True, "style_ok": True, "policy": "none", "reasons": "clean"}
 ON = {"enabled": True, "image_enabled": True, "clip_account_cap_usd": 3.0}
 
 
@@ -31,6 +31,7 @@ def _picture(seed=1, size=(640, 360)):
 class Models:
     def __init__(self):
         self.brief, self.qa, self.fits, self.calls = dict(GOOD_BRIEF, brief="calm alpine lake at dawn with soft mist over still water", people="none"), dict(QA_OK), True, []
+        self.names, self.vision = {}, {"policy": "none", "sure": True, "seen": "a drawing", "reason": ""}
 
     def __call__(self, system, user, **kw):
         if system in (clip_brief.BRIEF_SYSTEM, clip_brief.IMAGE_BRIEF_SYSTEM):
@@ -41,6 +42,13 @@ class Models:
             return json.dumps(self.qa), {"cost_usd": 0.0003}
         if "quality gate of a stock-footage library" in system:
             return json.dumps(GOOD_GATE), {"cost_usd": 0.0}
+        if system == media_policy.NAMES_SYSTEM:      # the policy on object names: every name allowed, already English, unless a test says otherwise
+            self.calls.append("names")
+            names = [ln.split(". ", 1)[1] for ln in user.splitlines()]
+            return json.dumps({"names": [{"n": k + 1, **self.names.get(n, {"english": n, "policy": "none"})} for k, n in enumerate(names)]}), {"cost_usd": 0.0002}
+        if system == media_policy.VISION_SYSTEM:     # the policy on a finished drawing
+            self.calls.append("policy")
+            return json.dumps(self.vision), {"cost_usd": 0.0002}
         self.calls.append("fits")
         return json.dumps({"fits": self.fits, "reason": "x"}), {"cost_usd": 0.0003}
 
@@ -282,7 +290,7 @@ def test_the_openai_client_asks_for_the_catalog_tier_and_keeps_the_key_out_of_er
     out = io_.OpenAIImages(key="SECRET", opener=opener).generate("a calm lake")
     assert out["jpeg"][:2] == b"\xff\xd8" and out["usd"] == pytest.approx(0.0429, abs=0.0001)
     url, headers, body = seen[0]
-    assert body == {"model": "gpt-image-2.6-flare", "prompt": "a calm lake", "size": "2048x1152", "quality": "high", "output_format": "jpeg", "n": 1} and "SECRET" not in url
+    assert body == {"model": "gpt-image-2.6-flare", "prompt": "a calm lake", "size": "2048x1152", "quality": "high", "output_format": "jpeg", "n": 1, "moderation": "auto"} and "SECRET" not in url
     import urllib.error
 
     def refuse(req, timeout=0):
@@ -339,7 +347,7 @@ def wb(env, tmp_path, monkeypatch):
     def maker(objs, timeout):
         calls.append(list(objs))
         ok = [o for o in objs if o[1] != "blob thing"]
-        return [_pkg(oid, name) for oid, name in ok], {"sheet_usd": 0.038, "rejected": {oid: "gate: blob" for oid, name in objs if name == "blob thing"}}
+        return [_pkg(oid, name) for oid, name in ok], {"sheet_usd": 0.038, "rejected": {oid: "gate: blob" for oid, name in objs if name == "blob thing"}, "thumbs": {oid: _picture(3, (64, 64)) for oid, _ in ok}}
     oo.set_maker(maker)
     env.calls, env.dir = calls, tmp_path
     yield env

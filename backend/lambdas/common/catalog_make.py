@@ -7,6 +7,8 @@ import json
 import os
 from typing import Any, Dict, Tuple
 
+from common import media_policy
+
 # OpenAI gpt-image-2.6-flare, image output USD 30 per 1M tokens, text input USD 5 per 1M tokens (https://developers.openai.com/api/docs/pricing, read 2026-11-26 and again 2026-11-27).
 # Measured at 2048x1152: high = 1413 output tokens (USD 0.0424), medium 1212 (0.0364).
 OPENAI_MODEL = "gpt-image-2.6-flare"
@@ -24,7 +26,9 @@ Answer ONLY with JSON:
  "text_visible": bool (any readable letters, numbers, signs, labels, screen text), "logo_or_brand": bool, "real_person_likeness": bool (a recognisable real person, or any clear face close-up),
  "anatomy_problem": bool (bad hands, fingers, faces, bodies), "warped_objects": bool (distorted, melted or impossible objects/architecture), "unsafe": bool (nudity, violence, hate, minors in a sensitive context),
  "centre_subject": bool (the main subject survives a centred 9:16 crop and a centred 1:1 crop), "calm_bottom": bool (white captions would stay readable over the bottom quarter: moderate texture is fine, but bright or high-contrast detail such as white foam, glare, bright leaves or sharp edges is not),
- "style_ok": bool (natural editorial photograph, not cartoon, not 3d render, not oversaturated), "reasons": "<at most 25 words>"}"""
+ "style_ok": bool (natural editorial photograph, not cartoon, not 3d render, not oversaturated), "policy": "none" or "<category code of the safety policy below>", "reasons": "<at most 25 words>"}
+
+""" + media_policy.VISION_RUBRIC
 
 
 
@@ -72,6 +76,7 @@ def judge(text: str) -> Tuple[bool, Dict[str, Any]]:
     bad = ("text_visible", "logo_or_brand", "real_person_likeness", "anatomy_problem", "warped_objects", "unsafe")
     need = ("centre_subject", "calm_bottom", "style_ok")
     ok = bool(v) and all(v.get(k) is False for k in bad) and all(v.get(k) is True for k in need) and min(float(v.get("adherence", 0)), float(v.get("quality", 0))) >= MIN_QA_SCORE
+    ok = ok and media_policy.verdict_reason(v) is None   # the ONE safety policy (common/media_policy.py): "policy" must be "none"; missing or unknown fails closed
     return ok, v
 
 

@@ -22,6 +22,7 @@ DEMAND = P + "demand"             # sort = brief key: who asked for which genera
 LOCK = P + "lock"                 # sort = brief key: a generation of this scene is in flight
 STATS = P + "stats"               # sort = UTC day: counters of decisions and outcomes (what the report reads without CloudWatch)
 ACCT = P + "acct:"                # + user id; sort = YYYY-MM: the account's clip spend of the month (removed with the account: common/deletion.USAGE_PREFIXES)
+TAKEDOWN = P + "takedown"         # sort = "<media>:<id>": every asset taken out of the library, when and why (common/takedown.py)
 VIDEO = P + "video:"              # + video id; sort = "n" (generations of the video) or "beat:<id>" (the claim that stops a retried beat paying twice)
 STAGES = {"qa": {"profile": "qa", "region": "eu-west-1", "account": "552357225438"}, "prod": {"profile": "default", "region": "us-west-2", "account": "464863885161"}}
 
@@ -83,10 +84,11 @@ class Store:
     def get_object(self, key: str) -> bytes: raise NotImplementedError
     def has_object(self, key: str) -> bool: raise NotImplementedError
     def list_objects(self, prefix: str) -> List[str]: raise NotImplementedError
+    def delete_object(self, key: str) -> None: raise NotImplementedError   # only the takedown uses it (common/takedown.py), after the copy to quarantine/
 
 
 def _check_key(key: str) -> str:
-    if not isinstance(key, str) or ".." in key or key.startswith("/") or not key[:2] in ("v/", "p/", "m/"):
+    if not isinstance(key, str) or ".." in key or key.startswith("/") or not (key[:2] in ("v/", "p/", "m/") or key[:4] in ("q/v/", "q/p/")):   # q/ = quarantine (common/takedown.py)
         raise ValueError("bad library key")
     return key
 
@@ -192,6 +194,10 @@ class LocalStore(Store):
     def list_objects(self, prefix):
         d = os.path.join(self.path, "objects", prefix.rstrip("/"))
         return sorted(f"{prefix.rstrip('/')}/{n}" for n in (os.listdir(d) if os.path.isdir(d) else []) if not n.endswith(".tmp"))
+
+    def delete_object(self, key):
+        if os.path.isfile(self._obj(key)):
+            os.remove(self._obj(key))
 
 
 class AwsStore(Store):
@@ -310,6 +316,9 @@ class AwsStore(Store):
             if e.response.get("Error", {}).get("Code") in ("404", "403", "NoSuchKey", "NotFound"):   # 403: a missing key without the right to list
                 return False
             raise
+
+    def delete_object(self, key):
+        self.s3.delete_object(Bucket=self.bucket, Key=PREFIX + _check_key(key))   # the assets bucket is NOT versioned (checked on QA, 2026-11-27): the takedown copies to q/ first, and that copy is the one that stays
 
     def list_objects(self, prefix):
         out, kw = [], {}

@@ -22,7 +22,7 @@ from typing import Any, Callable, Dict, List, Optional, Tuple
 
 import numpy as np
 
-from common import catalog, catalog_make as cm, catalog_style, clip_config, clip_store as cs, ownership
+from common import catalog, catalog_make as cm, catalog_style, clip_config, clip_store as cs, media_policy, ownership
 
 from . import clip_brief, clip_library as lib, ondemand
 from .clip_ondemand import Job
@@ -47,12 +47,24 @@ class ImageProvider:
         """-> {"jpeg": bytes, "usd": real cost from the provider's token counts, "model": str}"""
         raise NotImplementedError
 
+    def moderate(self, *, text: str = "", image: bytes = b"", mime: str = "image/jpeg") -> Optional[str]:
+        """The provider's OWN moderation model on a prompt and/or a picture: why it refuses ('moderation:<category>'), or None when clean. The second gate of the
+        safety policy (common/media_policy.py). A provider without one must say so by refusing: the default FAILS CLOSED."""
+        return "moderation:unavailable"
+
 
 class MockImages(ImageProvider):
     name = "mock"
 
     def __init__(self, jpeg: bytes = b"", *, error: Optional[Exception] = None, delay: float = 0.0, usd: float = 0.0442):
         self.jpeg, self.error, self.delay, self.usd, self.model, self.calls = jpeg, error, delay, usd, "mock-image-1", []
+        self.moderated: List[str] = []                 # "text" / "image", in the order asked
+        self.refuse: Dict[str, str] = {}               # {"text": "moderation:violence"} makes that check refuse
+
+    def moderate(self, *, text="", image=b"", mime="image/jpeg"):
+        what = "image" if image else "text"
+        self.moderated.append(what)
+        return self.refuse.get(what)
 
     def generate(self, prompt, *, timeout=75.0):
         self.calls.append({"prompt": prompt, "timeout": timeout})
@@ -88,7 +100,8 @@ class OpenAIImages(ImageProvider):
         key = self._read_key()
         if not key:
             raise ImageError("auth", "no provider key configured", billed=False)
-        body = {"model": self.model, "prompt": prompt[:30000], "size": cm.IMAGE_SIZE, "quality": cm.IMAGE_QUALITY, "output_format": "jpeg", "n": 1}
+        # moderation "auto" is the provider's stricter filtering level and its default (the other value, "low", is "less restrictive": API reference, read 2026-11-27). Sent on purpose.
+        body = {"model": self.model, "prompt": prompt[:30000], "size": cm.IMAGE_SIZE, "quality": cm.IMAGE_QUALITY, "output_format": "jpeg", "n": 1, "moderation": "auto"}
         req = urllib.request.Request("https://api.openai.com/v1/images/generations", json.dumps(body).encode(), {"Authorization": "Bearer " + key, "Content-Type": "application/json"})
         try:
             with self._open(req, timeout=max(1.0, timeout)) as r:
@@ -99,7 +112,7 @@ class OpenAIImages(ImageProvider):
                 text = " ".join(e.read(600).decode("utf-8", "replace").split())[:200]
             except Exception:
                 pass
-            kind = "auth" if e.code in (401, 403) else "quota" if e.code == 429 else ("blocked" if "safety" in text.lower() or "policy" in text.lower() else "bad_request") if e.code == 400 else "provider"
+            kind = "auth" if e.code in (401, 403) else "quota" if e.code == 429 else ("blocked" if any(w in text.lower() for w in ("safety", "policy", "moderation")) else "bad_request") if e.code == 400 else "provider"
             raise ImageError(kind, f"HTTP {e.code} {text}", billed=e.code >= 500) from None
         except (TimeoutError, OSError) as e:
             if "timed out" in str(e).lower() or isinstance(e, TimeoutError):
@@ -112,6 +125,9 @@ class OpenAIImages(ImageProvider):
         if jpeg[:2] != b"\xff\xd8":
             raise ImageError("no_image", "not a JPEG")
         return {"jpeg": jpeg, "usd": cm.real_cost(res.get("usage") or {}), "model": self.model}
+
+    def moderate(self, *, text="", image=b"", mime="image/jpeg"):
+        return media_policy.moderation(text=text, image=image, mime=mime, key=self._read_key(), opener=self._open)
 
 
 _provider: Optional[ImageProvider] = None
@@ -216,8 +232,15 @@ def _run(job: Job, *, store: cs.Store, cat: Cat, cfg: Dict[str, Any], lines: Lis
     t0 = time.time()
     outcome, reason, charged, cid, verdict, provider_usd = "provider_failed", "", price, None, {}, None
     try:
+        prov = provider(str(cfg["image_model"]))
+        why = prov.moderate(text=prompt)   # second gate, BEFORE paying: the provider's own moderation model on the exact prompt. Refused or unavailable = nothing is generated
+        if why:
+            outcome, reason, charged = "policy_refused", why, 0.0
+            ondemand.release(store, lines, media=MEDIA, kind=kind, price=price)
+            ondemand.emit("Rejected", Reason="moderation", Media=MEDIA)
+            return
         try:
-            made = provider(str(cfg["image_model"])).generate(prompt, timeout=float(cfg["image_timeout_s"]))
+            made = prov.generate(prompt, timeout=float(cfg["image_timeout_s"]))
         except ImageError as e:
             outcome, reason = ("timeout" if e.kind == "timeout" else "provider_failed"), e.kind
             if not e.billed:
@@ -231,8 +254,14 @@ def _run(job: Job, *, store: cs.Store, cat: Cat, cfg: Dict[str, Any], lines: Lis
         if not ok:
             bad = [k for k in ("text_visible", "logo_or_brand", "real_person_likeness", "anatomy_problem", "warped_objects", "unsafe") if verdict.get(k) is True] + \
                   [k for k in ("centre_subject", "calm_bottom", "style_ok") if verdict.get(k) is False]
-            outcome, reason = "gate_rejected", (bad[0] if bad else "unreadable" if "unreadable" in verdict else "low score")
-            ondemand.emit("Rejected", Reason=reason, Media=MEDIA)
+            policy = None if "unreadable" in verdict else media_policy.verdict_reason(verdict)
+            outcome, reason = "gate_rejected", (bad[0] if bad else "unreadable" if "unreadable" in verdict else policy or "low score")
+            ondemand.emit("Rejected", Reason=reason.split(":")[0], Media=MEDIA)
+            return   # never used, never stored
+        why = prov.moderate(image=made["jpeg"])   # second gate, AFTER generation: the provider's own moderation model on the picture itself. Fails closed
+        if why:
+            outcome, reason = "gate_rejected", why
+            ondemand.emit("Rejected", Reason="moderation", Media=MEDIA)
             return   # never used, never stored
         asset = catalog.content_hash(made["jpeg"])            # the asset id: the hash of the picture as the provider made it
         thumb = cm._thumb(made["jpeg"], catalog.THUMB_PX)

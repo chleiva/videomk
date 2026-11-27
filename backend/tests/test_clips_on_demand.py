@@ -41,8 +41,8 @@ def _info(seconds=8.0, w=1280, h=720, moving=True):
     return {"width": w, "height": h, "seconds": seconds, "frames": [_jpeg(100 + i) for i in range(6)], "gray": gray}
 
 
-GOOD_BRIEF = {"reusable": True, "reason": "general", "brief": "busy outdoor fruit market stall, close on hands choosing ripe fruit", "tags": ["market", "fruit", "hands"], "people": "hands", "motion": "slow"}
-GOOD_GATE = {"score": 9, "artefacts": False, "text": False, "brand": False, "person": False, "unsafe": False, "cut": False, "center_safe": True, "reason": "clean"}
+GOOD_BRIEF = {"reusable": True, "reason": "general", "brief": "busy outdoor fruit market stall, close on hands choosing ripe fruit", "tags": ["market", "fruit", "hands"], "people": "hands", "motion": "slow", "policy": "none"}
+GOOD_GATE = {"score": 9, "artefacts": False, "text": False, "brand": False, "person": False, "unsafe": False, "cut": False, "center_safe": True, "policy": "none", "reason": "clean"}
 
 
 class Different(clip_gen.Mock):

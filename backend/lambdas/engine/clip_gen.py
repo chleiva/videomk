@@ -108,7 +108,7 @@ class GeminiOmni(Provider):
                 raise GenError("quota", f"HTTP 429 {msg}", billed=False) from None
             if e.code == 400:
                 low = msg.lower()
-                raise GenError("blocked" if any(w in low for w in ("safety", "policy", "blocked", "prohibited")) else "bad_request", f"HTTP 400 {msg}", billed=False) from None
+                raise GenError("blocked" if any(w in low for w in ("safety", "policy", "blocked", "prohibited", "jailbreak", "blocklist")) else "bad_request", f"HTTP 400 {msg}", billed=False) from None
             raise GenError("provider", f"HTTP {e.code} {msg}", billed=e.code >= 500) from None
         except (TimeoutError, OSError) as e:   # urllib wraps socket timeouts in URLError (an OSError)
             if "timed out" in str(e).lower() or isinstance(e, TimeoutError):
