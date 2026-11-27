@@ -20,7 +20,7 @@ from common.http import json_response
 from common.identity import extract_cognito_sub
 import plan_gate
 import video_retry
-from common import deck_limits, i18n, intake, library, looks, safety, usage, wallet, watermark_store
+from common import deck_limits, i18n, intake, library, look_choice, looks, safety, usage, wallet, watermark_store
 from engine import format_options, presenter_policy, watermark_spec
 from common.photo_ids import MAX_PHOTOS, PhotoError, upload_key, valid_media_ids, valid_media_meta
 
@@ -156,6 +156,10 @@ def validate_options(body: Dict[str, Any]) -> Dict[str, Any]:
             raise BadRequest("'presenter' must be one of: " + ", ".join(PRESENTER_OPTIONS))
         if body["presenter"] != "auto":
             out["presenter"] = body["presenter"]
+    try:   # the chosen video look: `look`, `cast`, `extras` (docs/CREATE_API.md "Video look (chosen and enforced)"); enforced by the engine (engine/art_direction.py)
+        out.update(look_choice.parse(body))
+    except look_choice.Invalid as e:
+        raise BadRequest(str(e)) from e
     if body.get("watermark") is not None:   # {mode, position, opacity, size, style, end_card}: docs/WATERMARK.md; who may use which mode is decided in the handler (it needs the account)
         try:
             out["watermark"] = watermark_spec.parse(body["watermark"], strict=True)
@@ -307,7 +311,12 @@ def look_note(prompt: str, options: Dict[str, Any], loc: str, read: Optional[Dic
     except Exception:   # a note must never stop a video
         logger.exception("look note failed")
         return {}
-    return {"look": {"style": r["style"], "asked": r["asked"], "adapted": r["adapted"], "presenter": r["presenter"]}, **({"note": r["note"]} if r["note"] else {})} if r["asked"] else {}
+    out = {"look": {"style": r["style"], "asked": r["asked"], "adapted": r["adapted"], "presenter": r["presenter"]}, **({"note": r["note"]} if r["note"] else {})} if r["asked"] else {}
+    try:   # a CHOSEN look (`look`, `cast`, `extras`): what the video gets and, when it had to be adapted, why; its fields are added to `look` and its note wins
+        out = look_choice.merge(out, look_choice.answer(options, loc, media_count=len(options.get("media") or []) + len(options.get("library_media") or []), deck=bool(options.get("deck"))))
+    except Exception:
+        logger.exception("look choice note failed")
+    return out
 
 
 def handler(event: Dict[str, Any], context: Any):

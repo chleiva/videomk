@@ -3,7 +3,7 @@
 Owner decisions: a 15-45 s video still costs 1 credit (`MIN_MINUTES = 1`); vertical, square and 4:5 formats are being made to work now; **safety checks stop the video** (nothing is charged) and repeated violations are tracked per account; the planner may add about $0.03 and 25 s to a 3 minute video if the audit shows a quality gain; the owner reviews Spanish videos. Background and reasoning: `docs/PIPELINE_V3.md`, UI: `docs/UI_DESIGN.md` section (o).
 
 ## Creation options (all optional; absent means today's behaviour)
-Sent in the body of `POST /users/{user}/videos/generate` next to `prompt`, `target_minutes`, `theme`, `captions`, `media`, `library_media`, `media_meta`, `max_images_per_minute`:
+Sent in the body of `POST /users/{user}/videos/generate` next to `prompt`, `target_minutes`, `theme`, `captions`, `media`, `library_media`, `media_meta`, `max_images_per_minute` (and `look`, `cast`, `extras`: see "Video look (chosen and enforced)"):
 | Field | Values | Default | Meaning |
 |---|---|---|---|
 | `platform` | `youtube`, `shorts`, `tiktok`, `reels`, `instagram_feed`, `linkedin`, `x`, `other` | `other` | What the video is for. Only informs recommendations and the director's pacing; the format fields decide the picture. |
@@ -25,7 +25,7 @@ An unknown value is a 400 with a plain message. An `aspect` not listed as `ready
  "platforms": [{"id": "youtube", "label": "YouTube", "aspect": "16:9", "resolution": "1080p", "recommended_minutes": 3, "max_minutes": null, "other_aspects": ["1:1", "4:5"], "note": "Landscape 16:9 · 1080p · about 3 min", "supports_4k": true, "note_4k": null},
                {"id": "linkedin", "label": "LinkedIn", "aspect": "4:5", "resolution": "1080p", "recommended_minutes": 1, "max_minutes": 10, "other_aspects": ["1:1", "16:9"], "note": "Portrait 4:5 · 1080p · about 1 min", "supports_4k": false, "note_4k": "LinkedIn publishes at 1080p or lower; 4K would cost twice the credits for no visible gain."}, ...],
  "languages": [{"id": "en", "label": "English"}, {"id": "es", "label": "Español"}],
- "lengths": {"min_minutes": 0.25, "max_minutes": 12, "presets": [0.25, 0.5, 0.75, 1, 2, 3, 5, 8, 12]}, "max_photos": 100, "intake": true, "looks": {...see "Looks" below...}}
+ "lengths": {"min_minutes": 0.25, "max_minutes": 12, "presets": [0.25, 0.5, 0.75, 1, 2, 3, 5, 8, 12]}, "max_photos": 100, "intake": true, "looks": {...see "Video look" and "Looks" below...}}
 ```
 **Lengths.** `target_minutes` is a number from 0.25 (15 s) to 12; `presets` are the chips to show (15 s, 30 s, 45 s, 1 min, 2 min ...). Credits are the started minutes, at least 1: 15, 30, 45 and 60 seconds cost 1 credit, 61 seconds costs 2. Under a minute the engine writes a short-form script (about 2 to 4 beats, hook in the first 2 seconds), see `docs/SHORT_VIDEOS.md`.
 
@@ -43,6 +43,75 @@ An unknown value is a 400 with a plain message. An `aspect` not listed as `ready
 * A failed or rejected 4K video refunds everything it was charged (the doubled amount). Edits and re-renders of a 4K video stay 4K, cost no credits (as for every video), and their **previews are the same small draft as for a 1080p video** (960x540 for 16:9); only the final render is 4K. `GET .../videos` and the video item report `resolution: "2160p"` for a finished 4K video.
 * A 4K video takes about 2 to 3 times as long to render as the same video at 1080p (roughly 15 to 20 minutes for a 12-minute video) and its file is about 2.3 times as large (about 70 MB per minute, at most 180 MB per minute): the app should say that it takes longer and should not assume the file is small when downloading or sharing.
 * The `brief` request accepts `"resolution": "2160p"` in `options` like any other value; it never changes the questions.
+
+## Video look (chosen and enforced) (contract 2026-11-28; `lambdas/common/look_choice.py`, engine `engine/art_direction.py`, tests `tests/test_look_choice.py`)
+
+One simple choice when asking for a video. **A chosen look is the video's identity and is enforced**; it is not a hint to the director. It replaces the scattered wishes (`style`, `presenter`, words in the prompt), which keep working as described under "Looks" below. Read everything from capabilities; never hard-code the tiles, the cast or the previews.
+
+**Send (all optional, in the body of `POST /users/{user}/videos/generate`; the same three keys are accepted in `options` of `brief`):**
+| Field | Values | Default | Meaning |
+|---|---|---|---|
+| `look` | `auto`, `real`, `whiteboard`, `cartoon` | `auto` | The look of the WHOLE video. `auto`: the director commits to one look for the video by itself (see "Auto" below). `real`: photographs and footage, with our titles, charts and maps; never a cartoon scene, a board or a character. `whiteboard`: drawn and written by a marker, every scene. `cartoon`: cartoon characters explain it in front of cartoon backdrops, every scene. (`presenters` is accepted as another name for `cartoon`.) |
+| `cast` | `"auto"`, or a list of 1 to 3 different character ids from `capabilities.looks.cast.members` | `"auto"` | Only with `look: "cartoon"`. One id: that character presents the whole video. **Two or three ids: the video is a conversation between them**, on screen together (one asks, one explains, a third adds an example). `auto`: we cast by topic and audience, one character or a pair, never mixing people and animals. |
+| `extras` | a list; today only `"board"` | `[]` | Switches a look allows (listed per look in capabilities). `board` (look `cartoon`): the characters explain on a hand-drawn board that is drawn while they speak. |
+
+* A `cast` list or `extras: ["board"]` sent without `look` (or with `auto`) means `look: "cartoon"`.
+* Wrong values are a 400 with a plain message, nothing charged: an unknown `look`; a `cast` that is not `"auto"` or 1 to 3 different known ids (a single string id is not accepted: send `["fox"]`); a `cast` with `real` or `whiteboard`; an extra the look does not list.
+* `look` wins over `style` and `presenter` when both are sent. Without `look`: `style: "real"` and `style: "whiteboard"` are treated as that chosen look (they always meant the whole video); `style: "cartoon"` and `presenter: "<id>"` keep their older, softer meaning (some cartoon scenes, a presenter in some scenes).
+* There is no strictness setting: a chosen look is always enforced.
+
+**What "enforced" means (the engine checks the written plan and repairs it; a chosen look never fails a video and is never silently dropped):**
+| Look | Rule, by duration of the scenes | Exceptions |
+|---|---|---|
+| `whiteboard` | every scene is a board | a real picture where it is clearly the better way to show that moment: at most one per 30 seconds, never the opening or the closing scene |
+| `cartoon` | every scene shows the character(s), or a cartoon backdrop full screen; with `board`, the content beside them is the hand-drawn board | none; at least 80 % of the time a character is on screen |
+| `real` | no cartoon scene, no board, no character, anywhere | none |
+| `auto` | the director's one direction for the video, held to the same rules (a real-footage direction mixes photos, clips, charts, maps and text scenes by design, under one background and type treatment) | as for the direction chosen |
+
+A scene that breaks the rule is converted to the look's own scene type with the same narration (a list becomes a board, or a character beside the list). A chosen look overrides the "only for some topics" policies (those now govern `auto` only): a whiteboard video about a city, or a fox explaining the stock market, is made as asked. **What still overrides a chosen look:** safety (the request is stopped as always); the person's own photos or a deck (those videos are made from the photos or slides: the picker must not offer the other looks then, see `with_photos` / `with_deck`); the plan's limits (length, resolution); a look this stage does not have yet (`available: false`).
+
+**Capabilities** (`GET /users/{user}/capabilities`, inside `looks`; labels and notes in the `X-Locale` language):
+```json
+"looks": {
+  "look": {"param": "look", "default": "auto", "enforced": true, "options": [
+    {"id": "auto",       "label": "Auto",       "note": "We pick one look that suits your topic.", "preview": "data:image/jpeg;base64,...",
+     "available": true, "allowed": true, "requires_plan": null, "with_photos": true, "with_deck": true,
+     "min_seconds": 15, "aspects": ["16:9", "9:16", "1:1", "4:5"], "best_aspects": ["16:9", "9:16", "1:1", "4:5"], "cast": false, "extras": []},
+    {"id": "real",       "label": "Real",       "note": "Photos and video footage.",         "preview": "...", "with_photos": true,  "with_deck": true,  "cast": false, "extras": [], ...},
+    {"id": "whiteboard", "label": "Whiteboard", "note": "Drawn by hand as it is explained.", "preview": "...", "with_photos": false, "with_deck": false, "best_aspects": ["16:9", "1:1"], "cast": false, "extras": [], ...},
+    {"id": "cartoon",    "label": "Cartoon",    "note": "Cartoon characters explain it.",    "preview": "...", "with_photos": false, "with_deck": false, "best_aspects": ["16:9", "1:1", "4:5"], "cast": true,
+     "extras": [{"id": "board", "label": "Hand-drawn board", "note": "The characters explain on a board that is drawn as they speak.", "available": true}], ...}]},
+  "cast": {"param": "cast", "default": "auto", "min": 1, "max": 3, "available": true,
+    "auto": {"id": "auto", "label": "Auto", "note": "We pick characters that suit the topic."},
+    "conversation": {"from": 2, "min_seconds": 20, "note": "Pick 2 or 3 and they talk it through together."},
+    "members": [{"id": "ines", "name": "Inés", "role": "Teacher", "kind": "person", "topic": "Learning", "thumbnail": "data:image/png;base64,..."},
+                {"id": "fox", "name": "Fox", "role": "Guide for children", "kind": "animal", "topic": "For children", "thumbnail": "..."}, ...]}
+}
+```
+* **Four tiles, in this order: Auto, Real, Whiteboard, Cartoon** (Spanish: `Automático`, `Real`, `Pizarra`, `Dibujos animados`; notes "Elegimos un estilo que encaje con tu tema.", "Fotos y video reales.", "Dibujado a mano mientras se explica.", "Personajes de dibujos lo explican."). "Cartoon scenes" and "cartoon characters" are ONE tile: the characters live in the cartoon world, and a cartoon video without anyone in it was the weakest of the looks. Auto is preselected.
+* `preview`: a 320x180 JPEG as a data URI (8 to 14 KB each, 41 KB for the four; `lambdas/common/look_previews.json`, built by a script from real videos). Draw it as the tile's picture; crop to the tile.
+* Per tile: `available` (this stage has the look: false = hide it or show "coming soon"; sending it anyway is accepted and adapted, see below); `allowed` and `requires_plan` (this account's plan may use it: today every plan may use every look, so `allowed` is false only when the plan's longest video is shorter than `min_seconds`); `with_photos` / `with_deck` (false = do not offer the tile once the person attached photos / a deck; if they attach photos after choosing, fall back to Auto); `min_seconds` (the shortest video the look works in); `aspects` (the shapes it can be made in: all four) and `best_aspects` (where it looks best: preselect nothing, but a hint such as "looks best in landscape" is fair when the chosen shape is not in it); `cast` (true = show the cast picker under the tile); `extras` (the switches to show under the tile, each with its own `available`).
+* **The cast picker** (`looks.cast`, shown only for a tile with `cast: true`): `auto` first (preselected), then `members` (ten today: four people, six animals) with `thumbnail` (112 px PNG data URI), `name`, `role`, `kind` (`person` | `animal`: group them), `topic` (two or three words on what the character suits). The person may tick 1 to `max` (3). From `conversation.from` (2) ticked, show `conversation.note`; a conversation needs a video of at least `conversation.min_seconds` (20 s): in a shorter one the first character presents alone and the answer says so.
+* The older `looks.style` and `looks.presenter` objects stay for older apps. A new app shows this picker INSTEAD of them and sends only `look`, `cast`, `extras`.
+
+**What the answers say.** `brief` (`ok` and `questions`) and the 202 of `generate` carry the optional `look` object, and `note` when the look had to be adapted:
+```json
+{"message": "workflow started", "video_id": "...",
+ "look": {"chosen": "cartoon", "applied": "cartoon", "enforced": true, "recipe": "conversation_board", "cast": ["fox", "bear"], "extras": ["board"], "reason": null,
+          "style": "cartoon", "asked": ["cartoon", "characters"], "adapted": [], "presenter": true}}
+```
+```json
+{"status": "ok", "brief": {},
+ "note": "Made from your photos: the Cartoon look is not used with your own photos.",
+ "look": {"chosen": "cartoon", "applied": "real", "enforced": false, "recipe": null, "extras": [], "reason": "own_photos", "style": "real", "asked": ["cartoon", "characters"], "adapted": ["cartoon", "characters"], "presenter": false}}
+```
+* `chosen`: the look sent. `applied`: the look the video gets. `enforced`: true when they are the same. `recipe`: the named recipe of the video: `footage`, `whiteboard`, `presenter`, `conversation`, `presenter_board`, `conversation_board` (null when the look was adapted to `auto`: the director then decides, and the video record says what it chose). `cast`: the ids, or `"auto"` (only for `cartoon`). `extras`: the extras that will be used.
+* `reason` (null, or a stable code) and `note` (the same thing as one localized sentence to show as a line on the Making screen or a toast): `not_available` (this stage does not have the look, or the extra, yet), `own_photos`, `deck`, `too_short` (a conversation asked for in under 20 s: one character presents). **Never a refusal**: the video is made.
+* The older keys (`style`, `asked`, `adapted`, `presenter`) are filled in the same terms. Both fields are absent when nothing was chosen and nothing was asked in words. Apps must treat them as optional.
+
+**The video record** (`GET .../videos` items and `GET .../videos/{id}`, once the plan exists; additive, optional): `look` = `{"chosen": "auto" | id, "applied": id, "recipe": id, "cast": [ids], "extras": [ids], "why": "one sentence: why this look for this video", "by": "you" | "auto", "share": 0.0-1.0 (the share of the video's time that is in the look), "repaired": n (scenes the engine converted to keep the look), "reason": null | code}`. Show `why` in the video's Info ("Look: Whiteboard, chosen for you: a step-by-step process is clearest drawn"). The full record, with every scene the repair touched, is `plan.look`.
+
+**Auto is one decision per video, not one per scene.** With `look: "auto"` (or nothing sent) the director first commits to ONE direction for the whole video (one of the recipes above), with a one-sentence reason from the topic, the audience, the platform and the length, and every scene must then fit it, by the same check and repair as a chosen look. The topic policies (cartoon characters only for children's, fun and tutorial videos; the whiteboard only for explaining a process or concept; real pictures for news, real people and places) decide which directions `auto` may choose from; they no longer sprinkle single cartoon scenes into a photo video.
 
 ## Looks: scene style and moving backgrounds (2026-11-27; `lambdas/capabilities_api.looks`, `engine/vector_policy.py`, `engine/background.py`, tests `tests/test_looks.py`)
 What a client can ask for and what the server decides by itself. Capabilities says what THIS stage has switched on; read it instead of assuming.

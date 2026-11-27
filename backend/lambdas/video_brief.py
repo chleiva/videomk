@@ -8,7 +8,7 @@ import logging
 import os
 from typing import Any, Dict, Optional
 
-from common import i18n, intake, looks, safety, usage
+from common import i18n, intake, look_choice, looks, safety, usage
 from common.http import json_response
 from common.identity import extract_cognito_sub
 
@@ -34,11 +34,15 @@ def _look(prompt: str, options: Dict[str, Any], media_count: int, lang: str, chk
     """The look part of an answer that lets the video go on (docs/CREATE_API.md "Looks"): `look` = what the person asked for and what the video gets, and `note` = one
     short friendly sentence when a wish was adapted ("Made as a narrated explainer with animated backgrounds; talking characters are coming soon."). Never a blocker."""
     r = looks.resolve(prompt, options.get("style"), lang, model=chk.look if chk else None, media_count=media_count, presenter=options.get("presenter"))
-    if not r["asked"] and not r["note"]:
-        return {}
-    out: Dict[str, Any] = {"look": {"style": r["style"], "asked": r["asked"], "adapted": r["adapted"], "presenter": r["presenter"]}}
-    if r["note"]:
-        out["note"] = r["note"]
+    out: Dict[str, Any] = {}
+    if r["asked"] or r["note"]:
+        out = {"look": {"style": r["style"], "asked": r["asked"], "adapted": r["adapted"], "presenter": r["presenter"]}}
+        if r["note"]:
+            out["note"] = r["note"]
+    try:   # a CHOSEN look (`look`, `cast`, `extras` in `options`): what the video gets and, when it had to be adapted, why (docs/CREATE_API.md "Video look")
+        out = look_choice.merge(out, look_choice.answer(options, lang, media_count=media_count))
+    except Exception:   # noqa: BLE001 - never a blocker
+        logger.exception("brief look choice failed")
     return out
 
 

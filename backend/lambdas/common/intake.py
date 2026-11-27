@@ -75,6 +75,11 @@ def clean_options(options: Any) -> Dict[str, Any]:
         out["presenter"] = _s(options["presenter"], 12)
     if options.get("style") in looks.STYLES:   # the look the person chose in the form (docs/CREATE_API.md "Looks"); anything else is ignored here (generate validates it)
         out["style"] = options["style"]
+    try:   # the chosen video look (docs/CREATE_API.md "Video look"): kept only when valid; anything else is ignored here (generate validates it)
+        from common import look_choice
+        out.update(look_choice.parse(options))
+    except ValueError:
+        pass
     if isinstance(options.get("captions"), bool):
         out["captions"] = options["captions"]
     m = options.get("target_minutes")

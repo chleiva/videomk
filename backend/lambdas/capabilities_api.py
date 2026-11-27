@@ -8,7 +8,7 @@ from typing import Any, Dict
 import logging
 import time
 
-from common import free_grants, i18n, looks as look_flags, plans, wallet, watermark_store
+from common import free_grants, i18n, look_choice, looks as look_flags, plans, wallet, watermark_store
 from common.http import json_response
 from common.identity import extract_cognito_sub
 from engine import format_options
@@ -98,9 +98,16 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         body["looks"]["presenter"] = presenter(loc, look_flags.flags()["presenters"])
     except Exception:   # noqa: BLE001
         logger.exception("CAPABILITIES_PRESENTER_FAILED")
+    plan_max_s = None
     if plans.enabled():   # a read failure must never stop the creation options: the launcher still enforces
         try:
             add_plan(body, user, event, loc)
         except Exception:   # noqa: BLE001
             logger.exception("CAPABILITIES_PLAN_FAILED")
+    try:   # the look picker and the cast (docs/CREATE_API.md "Video look (chosen and enforced)"): after the plan, whose longest video decides `allowed`
+        plan_max_s = (body.get("lengths") or {}).get("plan_max_seconds")
+        body["looks"].update(look_choice.capabilities(loc, (body["looks"].get("presenter") or {}).get("cast") or [], aspects=[a["id"] for a in body.get("aspects", []) if a.get("ready")] or None,
+                                                      plan_max_seconds=plan_max_s))
+    except Exception:   # noqa: BLE001
+        logger.exception("CAPABILITIES_LOOK_PICKER_FAILED")
     return json_response(200, body, {"Cache-Control": "private, max-age=60", "Content-Language": loc, **i18n.vary_headers()})
