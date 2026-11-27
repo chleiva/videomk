@@ -78,19 +78,14 @@
 .composer-card { padding: var(--space-4) var(--space-4) var(--space-3); border-radius: var(--radius-composer); background: var(--surface); box-shadow: var(--elev-2), inset 0 0 0 1px var(--outline); }
 .composer-card:focus-within { box-shadow: var(--elev-2), inset 0 0 0 2px var(--primary); }
 .compose-text { display: block; width: 100%; min-height: 6.5rem; resize: none; border: 0; outline: 0; background: transparent; font: inherit; font-size: var(--fs-title3); line-height: var(--lh-snug); color: var(--text); padding: var(--space-2) var(--space-2) var(--space-3); field-sizing: content; max-height: 18rem; }
-.compose-text::placeholder { color: var(--text-tertiary); opacity: 1; }
-.composer-bar { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-3); }
-.composer-tools, .composer-pills { display: flex; align-items: center; gap: var(--space-1); flex-wrap: wrap; }
-.composer-pills { flex: 1; min-width: 0; }
-.compose-go { margin-left: auto; }
+.compose-text::placeholder { color: var(--text-secondary); opacity: 1; }
 .tool-btn { background: var(--surface-2); color: var(--text); }
 .tool-btn:hover { background: var(--surface-3); }
 .tool-btn.is-live { background: var(--danger-container); color: var(--danger); animation: vmk-pulse 1.6s ease-in-out infinite; }
 .tool-btn:disabled { opacity: 0.45; cursor: default; }
-.pill { display: inline-flex; align-items: center; gap: var(--space-1); min-height: 2.5rem; padding: 0 var(--space-3); border-radius: var(--radius-pill); background: var(--surface-2); color: var(--text); font-size: var(--fs-subhead); font-weight: 600; white-space: nowrap; }
-.pill:hover { background: var(--surface-3); }
 .pill[aria-expanded="true"] { background: var(--primary-container); color: var(--primary); }
-.compose-notes { min-height: 1.5rem; margin: var(--space-3) var(--space-3) 0; display: flex; flex-direction: column; gap: var(--space-1); }
+.compose-notes { margin: var(--space-2) 0 0; display: flex; flex-direction: column; gap: var(--space-1); }
+.compose-notes:not(:has(.hint)) { margin: 0; }
 .compose-examples { justify-content: center; margin-top: var(--space-5); }
 .attach-strip { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); padding: var(--space-1) var(--space-2) var(--space-3); }
 .attach { position: relative; width: 3.5rem; height: 3.5rem; border-radius: var(--radius-field); overflow: hidden; background: var(--surface-3); flex: none; }
@@ -109,10 +104,6 @@
 kbd { display: inline-flex; align-items: center; justify-content: center; min-width: 1.75rem; height: 1.75rem; padding: 0 var(--space-2); border-radius: 0.5rem; background: var(--surface-2); box-shadow: inset 0 0 0 1px var(--outline); font: inherit; font-size: var(--fs-footnote); font-weight: 700; color: var(--text); }
 @media (max-width: 40rem) {
   .compose { padding-top: var(--space-6); }
-  .composer-bar { gap: var(--space-2); }
-  .composer-pills { order: 3; flex-basis: 100%; }
-  .compose-go { order: 4; flex-basis: 100%; margin-left: 0; }
-  .composer-tools { order: 1; }
 }
 
 /* ---- My media */
@@ -182,16 +173,10 @@ kbd { display: inline-flex; align-items: center; justify-content: center; min-wi
 .vtile-actions .btn { gap: var(--space-2); }
 
 /* ---- Create, from the tap until the answer: the card is dimmed and cannot be touched (the form element is also `inert`), one line says what is happening */
-.composer-card.is-locked { opacity: 0.55; pointer-events: none; transition: opacity var(--dur-fast, 150ms) ease; }
-.composer-card.is-locked .compose-go { opacity: 1; }
-.compose-progress { display: flex; align-items: center; justify-content: center; gap: var(--space-3); margin: var(--space-4) 0 0; color: var(--text-secondary); font-size: var(--fs-body); }
 .chip.chip-add { gap: var(--space-2); }
 
 /* ---- the Look picker (docs/CREATE_API.md "Video look"): the pill, the surface under the card (a bottom sheet on a phone), picture tiles, the cast, the board switch */
-.composer-bar { position: relative; }
 .look-root { display: inline-block; }   /* not positioned: the surface is placed against the composer bar, so it is as wide as the card at every width */
-.look-pill-thumb { display: none; width: 1.5rem; height: 1.5rem; border-radius: 0.375rem; object-fit: cover; flex: none; }
-.look-pill-auto { width: auto; height: auto; color: var(--primary); }
 .look-pill-faces { display: inline-flex; align-items: center; flex: none; }
 .look-pill-faces .face-img { width: 1.375rem; height: 1.375rem; margin-left: -0.375rem; box-shadow: 0 0 0 2px var(--surface-2); font-size: var(--fs-caption); }
 .look-pill-faces .face-img:first-child { margin-left: 0; }
@@ -215,8 +200,7 @@ kbd { display: inline-flex; align-items: center; justify-content: center; min-wi
 .look-tile.is-off { opacity: 0.4; cursor: default; }   /* stays in its place, dimmed; the reason is where the note was */
 .look-close { margin-right: calc(-1 * var(--space-2)); color: var(--text); }
 .look-line { min-height: 1.25rem; font-size: var(--fs-caption); line-height: 1.4; color: var(--text-secondary); }
-.look-reset { margin-top: var(--space-4); font-size: var(--fs-caption); line-height: 1.4; color: var(--text-secondary); }
-.app-shell .look-reset + .composer-bar { margin-top: var(--space-2); }
+.look-reset { margin-top: var(--space-2); font-size: var(--fs-caption); line-height: 1.4; color: var(--text-secondary); }
 .look-cast { display: flex; flex-direction: column; gap: var(--space-3); padding-top: var(--space-4); border-top: 1px solid var(--outline); animation: vmk-fade var(--dur-insert) var(--ease); }
 .look-cast .label { margin: 0; }
 .cast-row { display: grid; grid-template-columns: repeat(5, 3.5rem); justify-content: space-between; align-items: start; gap: var(--space-3) 0; }   /* five by two; the first face sits on the gutter */
@@ -235,12 +219,6 @@ kbd { display: inline-flex; align-items: center; justify-content: center; min-wi
   .look-tiles[data-count="3"] { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .look-tiles[data-count="2"] { grid-template-columns: repeat(2, minmax(0, 14rem)); }
   .cast-row { grid-template-columns: repeat(10, 3.5rem); }   /* the ten on one line */
-}
-@media (max-width: 47.99rem) {   /* phones: the pill is the look's picture and its name; a long name (Spanish) takes the next line, it is never cut */
-  .app-shell .composer-pills:has(.look-root) { flex-wrap: wrap; }
-  .app-shell .composer-pills .look-pill > span { overflow: visible; }
-  .look-pill-thumb { display: block; }
-  .look-pill:has(.look-pill-faces) .look-pill-thumb { display: none; }   /* the faces already say which look */
 }
 @media (prefers-reduced-motion: reduce) { .look-pic, .face-img { transition: none; } }
 

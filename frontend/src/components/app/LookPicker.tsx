@@ -109,22 +109,27 @@ export function LookPanel({ caps, choice, ctx, planName, onChange, onDone, t, lo
   );
 }
 
-/** The pill and its surface. The pill says the choice compactly: the look's name and the faces picked. */
+/** The Look pill, the Characters pill (only for a look with a cast: never a fifth control) and the ONE surface both open. The Look pill says the look only, with a sparkle;
+ *  the Characters pill says who explains it: the faces picked, or a sparkle when we choose. */
 export default function LookPicker(props: LookPickerProps) {
   const { caps, choice } = props;
   const { t, locale } = useLocale();
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState<null | "look" | "cast">(null);
   const root = useRef<HTMLDivElement>(null);
   const btn = useRef<HTMLButtonElement>(null);
+  const castBtn = useRef<HTMLButtonElement>(null);
   const panel = useRef<HTMLDivElement>(null);
   const id = useId();
-  const close = useCallback(() => { setOpen(false); btn.current?.focus(); }, []);
+  const opener = useRef<"look" | "cast">("look");
+  const close = useCallback(() => { setOpen(null); (opener.current === "cast" ? castBtn.current ?? btn.current : btn.current)?.focus(); }, []);
   useEffect(() => {
     if (!open) return;
-    const down = (e: MouseEvent | TouchEvent) => { if (root.current && !root.current.contains(e.target as Node)) setOpen(false); };
+    const down = (e: MouseEvent | TouchEvent) => { if (root.current && !root.current.contains(e.target as Node)) setOpen(null); };
     const key = (e: KeyboardEvent) => { if (e.key === "Escape") { e.stopPropagation(); close(); } };
     document.addEventListener("mousedown", down); document.addEventListener("touchstart", down); document.addEventListener("keydown", key, true);
-    panel.current?.querySelector<HTMLElement>('[role="radio"][aria-checked="true"]')?.focus();
+    // from the Look pill the focus lands on the chosen tile; from the Characters pill on the cast (the face picked, or the first)
+    (open === "cast" ? panel.current?.querySelector<HTMLElement>('[data-face][tabindex="0"]') : null)?.focus();
+    if (open === "look") panel.current?.querySelector<HTMLElement>('[role="radio"][aria-checked="true"]')?.focus();
     return () => { document.removeEventListener("mousedown", down); document.removeEventListener("touchstart", down); document.removeEventListener("keydown", key, true); };
   }, [open, close]);
   // on a wide screen the surface opens under the card and may reach past the window, more so when Cartoon reveals its cast: bring it into view (a phone's sheet is fixed)
@@ -134,18 +139,26 @@ export default function LookPicker(props: LookPickerProps) {
     panel.current?.scrollIntoView?.({ block: "nearest", behavior: still ? "auto" : "smooth" });
   }, [open, choice.look]);
   const pill = pillOf(choice, caps);
-  const thumb = choice.look === "auto" ? undefined : optionOf(caps, choice.look)?.preview;
+  const chosen = optionOf(caps, choice.look);
+  const hasCast = !!chosen?.cast && !!caps.cast;
   const label = choice.look === "auto" ? t("create.look_auto") : pill.label;
-  const said = [label, pill.names, ...choice.extras.flatMap((x) => optionOf(caps, choice.look)?.extras.find((e) => e.id === x)?.label ?? [])].filter(Boolean).join(", ");
+  const said = [label, ...choice.extras.flatMap((x) => chosen?.extras.find((e) => e.id === x)?.label ?? [])].filter(Boolean).join(", ");
+  const castSaid = t("create.cast_a11y", { names: pill.names ? listOf(pill.faces.map((m) => m.name), locale) : t("create.look_auto") });
+  const toggle = (which: "look" | "cast") => { opener.current = which; setOpen((v) => (v === which ? null : which)); };
   return (
     <div className="look-root" ref={root}>
-      <button ref={btn} type="button" className="pill look-pill" aria-haspopup="dialog" aria-expanded={open} aria-controls={open ? id : undefined} aria-label={t("create.pick_a11y", { look: said })} onClick={() => setOpen((v) => !v)}>
-        {choice.look === "auto" && <span className="pill-k">{t("create.pill_look_k")}</span>}{/* a named look says what it is; "Auto" alone would not */}
-        {thumb ? <img className="look-pill-thumb" src={thumb} alt="" /> : choice.look === "auto" && <span className="look-pill-thumb look-pill-auto"><Icon name="sparkle" size={18} /></span>}
+      <button ref={btn} type="button" className="pill look-pill" aria-haspopup="dialog" aria-expanded={open === "look"} aria-controls={open ? id : undefined} aria-label={t("create.pick_a11y", { look: said })} onClick={() => toggle("look")}>
+        <Icon name="sparkle" size={16} className="pill-glyph" />
         <span className="look-pill-v">{label}</span>
-        {pill.faces.length > 0 && <span className="look-pill-faces" aria-hidden="true">{pill.faces.map((m) => <Face key={m.id} m={m} size={22} />)}</span>}
         <Icon name="chevdown" size={16} />
       </button>
+      {hasCast && (
+        <button ref={castBtn} type="button" className="pill cast-pill" aria-haspopup="dialog" aria-expanded={open === "cast"} aria-controls={open ? id : undefined} aria-label={castSaid} onClick={() => toggle("cast")}>
+          {pill.faces.length > 0 ? <span className="look-pill-faces" aria-hidden="true">{pill.faces.map((m) => <Face key={m.id} m={m} size={22} />)}</span> : <Icon name="people" size={16} className="pill-glyph" />}
+          <span className="cast-pill-v">{t("create.pill_cast")}</span>
+          <Icon name="chevdown" size={16} />
+        </button>
+      )}
       {open && <div className="vm-pop-scrim" aria-hidden="true" onClick={close} />}
       {open && <div id={id} ref={panel} role="dialog" aria-label={t("create.pill_look")} className="vm-pop look-pop"><LookPanel {...props} onDone={close} t={t} locale={locale} /></div>}
     </div>

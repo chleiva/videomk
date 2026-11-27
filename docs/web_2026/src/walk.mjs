@@ -100,7 +100,7 @@ for (const sz of ["d", "p"]) {
   await shot("04_videos", sz, "/generations/");
   await shot("05a_create_empty", sz, "/new/");
   await shot("05_create", sz, "/new/?prompt=" + encodeURIComponent(PROMPT), { act: async (p) => { const v = await p.locator("#create-text").inputValue(); return v === PROMPT ? "prompt carried" : "PROMPT NOT CARRIED: " + v; } });
-  await shot("06_create_locked", sz, "/new/?prompt=" + encodeURIComponent(PROMPT), { s: { slowBrief: true }, act: async (p) => { await p.locator(".compose-go").click(); await p.waitForTimeout(700); const inert = await p.locator("form.composer-card").evaluate((f) => f.hasAttribute("inert")); const txt = await p.locator(".compose-progress").innerText(); return `inert=${inert} status="${txt.replace(/\n/g, " ")}"`; } });
+  await shot("06_create_locked", sz, "/new/?prompt=" + encodeURIComponent(PROMPT), { s: { slowBrief: true }, act: async (p) => { await p.locator(".compose-go").click(); await p.waitForTimeout(700); const inert = await p.locator(".composer-top").evaluate((f) => f.hasAttribute("inert")); const txt = await p.locator(".create-capsule").innerText(); return `inert=${inert} status="${txt.replace(/\n/g, " ")}"`; } });
   await shot("07_media_selected", sz, "/media/", { act: async (p) => { await p.locator("button:has-text('Select')").first().click(); for (const n of [1, 2, 4, 7, 9]) await p.locator(".mtile-btn").nth(n).click(); await p.waitForTimeout(300); return "bar=" + (await p.locator(".selbar-go").innerText()); } });
 }
 await shot("08_watch", "d", "/watch/?id=v3");
