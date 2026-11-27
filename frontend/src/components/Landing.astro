@@ -19,7 +19,7 @@ const heroPrompt = HERO.prompt ?? "";
 const gallery = galleryFor(locale);
 const url = siteUrl("/", locale);
 const ld = [
-	{ "@context": "https://schema.org", "@type": "SoftwareApplication", name: "videomk", applicationCategory: "MultimediaApplication", operatingSystem: "Web, iOS, Android", description: tr("landing.meta_desc"), url, image: "https://videomk.com/og.jpg", inLanguage: ["en", "es"], offers: { "@type": "Offer", price: "0", priceCurrency: "USD" }, publisher: { "@type": "Organization", name: COMPANY, url: "https://videomk.com/", logo: "https://videomk.com/icon-512.png", email: CONTACT_EMAIL } },
+	{ "@context": "https://schema.org", "@type": "SoftwareApplication", name: "VideoMK", applicationCategory: "MultimediaApplication", operatingSystem: "Web, iOS, Android", description: tr("landing.meta_desc"), url, image: "https://videomk.com/og.jpg", inLanguage: ["en", "es"], offers: { "@type": "Offer", price: "0", priceCurrency: "USD" }, publisher: { "@type": "Organization", name: COMPANY, url: "https://videomk.com/", logo: "https://videomk.com/icon-512.png", email: CONTACT_EMAIL } },
 	{ "@context": "https://schema.org", "@type": "VideoObject", name: HERO.title[locale], description: HERO.description[locale], thumbnailUrl: `https://videomk.com${HERO.poster}`, uploadDate: "2026-11-26", duration: `PT${HERO.seconds}S`, contentUrl: `https://videomk.com${HERO.file}` },
 ];
 const formats = [["wide", 16, 9], ["tall", 9, 16], ["square", 1, 1], ["portrait", 4, 5]] as const;
@@ -31,7 +31,7 @@ const faq = ["own", "lang", "photos", "google", "cost"] as const;
 		<script type="application/ld+json" data-keep set:html={JSON.stringify(ld)} />
 		<link rel="preload" as="image" href={HERO.poster} type="image/webp" fetchpriority="high" />
 	</Fragment>
-	<nav slot="nav" class="mk-nav" aria-label="videomk">
+	<nav slot="nav" class="mk-nav" aria-label="VideoMK">
 		<a href="#gallery">{tr("landing.nav_gallery")}</a>
 		<a href="#pricing">{tr("landing.nav_pricing")}</a>
 		<a href={pathForLocale("/support", locale)}>{tr("landing.nav_help")}</a>

@@ -10,7 +10,7 @@ import Head from "./Head.astro";
 import { APP_NAV } from "../lib/appNav";
 import { translate } from "../lib/i18n";
 import { siteUrl } from "../lib/links";
-const { title = "videomk", description, titleKey, active = "", shell = true } = Astro.props as { title?: string; description?: string; titleKey?: string; active?: string; shell?: boolean };
+const { title = "VideoMK", description, titleKey, active = "", shell = true } = Astro.props as { title?: string; description?: string; titleKey?: string; active?: string; shell?: boolean };
 const tr = (k: string) => translate(k, "en");   // build-time English; the browser script re-writes every data-i18n element in the person's language
 ---
 <html lang="en" data-i18n-title={titleKey} class="app">
@@ -57,15 +57,15 @@ const tr = (k: string) => translate(k, "en");   // build-time English; the brows
 		{shell && (
 			<>
 				<header class="app-topbar">
-					<a href="/generations" class="brand" aria-label="videomk">
+					<a href="/generations" class="brand" aria-label="VideoMK">
 						<span class="brand-mark" aria-hidden="true"><img src="/favicon.svg" alt="" width="32" height="32" /></span>
-						<span>videomk</span>
+						<span>VideoMK</span>
 					</a>
 				</header>
-				<nav class="app-nav" aria-label="videomk" data-i18n-aria="shell.menu">
-					<a href="/generations" class="brand app-nav-brand" aria-label="videomk">
+				<nav class="app-nav" aria-label="VideoMK" data-i18n-aria="shell.menu">
+					<a href="/generations" class="brand app-nav-brand" aria-label="VideoMK">
 						<span class="brand-mark" aria-hidden="true"><img src="/favicon.svg" alt="" width="32" height="32" /></span>
-						<span>videomk</span>
+						<span>VideoMK</span>
 					</a>
 					<ul class="app-nav-list">
 						{APP_NAV.filter((n) => n.rail).map((n) => (
