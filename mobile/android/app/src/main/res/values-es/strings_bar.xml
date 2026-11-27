@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- docs/DESIGN_BAR_2026.md: Create -->
+    <string name="create_example_bees">Cómo nace la miel</string>
+    <string name="create_example_focus">3 consejos para concentrarte</string>
+    <string name="create_example_forests">Por qué importan los bosques</string>
+    <string name="create_example_use">Usar esta idea</string>
+    <string name="create_capsule_checking">Revisando tu idea</string>
+    <string name="create_capsule_starting">Iniciando tu video</string>
+    <string name="create_capsule_sub">Unos segundos</string>
+    <string name="create_capsule_photo">Foto %1$d de %2$d</string>
+</resources>

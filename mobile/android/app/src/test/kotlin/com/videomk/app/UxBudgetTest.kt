@@ -22,9 +22,17 @@ class UxBudgetTest {
         }
     }
 
-    /** Create's main surface: the prompt hint, three pill values (a platform word, a length, a look), the Create button and one caption. Budget 14. */
-    @Test fun `create surface stays within 14 words`() =
-        check("Create surface", 14, "create_prompt_hint", "create_pill_video", "create_look_auto", "create_create_video", "composer_describe")
+    /** Create's main surface (docs/DESIGN_BAR_2026.md rule 4): the prompt hint, three pill values (a platform word, a length, a look), the Create button and the credits caption. Budget 14. */
+    @Test fun `create surface stays within 14 words`() {
+        check("Create surface", 11, "create_prompt_hint", "create_pill_video", "create_summary_look_auto", "create_create_video", "create_capsule_sub")   // + "1 min" and "N credits left" = 14 at most
+        for (c in listOf(en, es)) assertTrue(c.plurals["create_credits_left"]!!.values.all { it.split(" ").size <= 3 })
+    }
+
+    /** The three example chips are suggestions, a few words each; the capsule says what is happening in three words. */
+    @Test fun `example chips and the capsule stay short`() {
+        check("Example chips", 13, "create_example_bees", "create_example_focus", "create_example_forests")
+        check("Capsule, checking", 3, "create_capsule_checking"); check("Capsule, starting", 3, "create_capsule_starting")
+    }
 
     /** First run: the headline, the prompt field and three short example chips. Budget 14. */
     @Test fun `first run stays within 14 words`() =

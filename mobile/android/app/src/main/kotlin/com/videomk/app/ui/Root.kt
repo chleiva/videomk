@@ -133,7 +133,7 @@ private fun SignedInNav(app: AppViewModel, composer: ComposerViewModel, containe
             )
         }
         composable("create") {
-            CreateScreen(app, composer, onClose = { nav.popBackStack() }, onOpenWallet = { nav.navigate("wallet") }, onSent = { navigateTab(nav, "library") })
+            CreateScreen(app, composer, onClose = { nav.popBackStack() }, onOpenWallet = { nav.navigate("wallet") }, onSent = { nav.popBackStack("library", inclusive = false) })   // straight to Videos, where the Making card is (navigateTab would save Create and restore it at once)
         }
         composable("media") { entry ->
             val vm: MediaViewModel = viewModel(entry, key = "media-home", factory = mediaFactory)
