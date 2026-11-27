@@ -1,5 +1,14 @@
 package com.videomk.app.ui
 
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -32,25 +41,27 @@ fun LanguageSetting() {
     val context = LocalContext.current
     val language = remember { AppLanguage(context) }
     var choice by remember { mutableStateOf(language.choice) }
-    Column(Modifier.fillMaxWidth().testTag("languageSetting"), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-        Text(stringResource(R.string.settings_language_title), style = MaterialTheme.typography.titleSmall, color = Vmk.colors.textSecondary)
-        AppLocale.choices.forEach { c ->
-            Row(
-                Modifier.fillMaxWidth().heightIn(min = 48.dp).selectable(selected = choice == c, role = Role.RadioButton) {
-                    if (choice != c) {
-                        choice = c
-                        if (language.set(c)) (context as? android.app.Activity)?.recreate()
-                    }
-                }.testTag("language-$c"),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                RadioButton(selected = choice == c, onClick = null)
-                Text(
-                    stringResource(when (c) { "en" -> R.string.settings_language_en; "es" -> R.string.settings_language_es; else -> R.string.settings_language_system }),
-                    color = Vmk.colors.text, modifier = Modifier.padding(start = 12.dp),
+    var open by remember { mutableStateOf(false) }
+    @Composable fun nameOf(c: String) = stringResource(when (c) { "en" -> R.string.settings_language_en; "es" -> R.string.settings_language_es; else -> R.string.settings_language_system })
+    // one row: the name on the left, the value and a chevron on the right; the choices are a menu (no footer: the app language does not change the language of videos)
+    Box(Modifier.fillMaxWidth().testTag("languageSetting")) {
+        Row(
+            Modifier.fillMaxWidth().heightIn(min = 56.dp).clickable(role = Role.DropdownList, onClickLabel = stringResource(R.string.settings_language_title)) { open = true },
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(stringResource(R.string.settings_language_title), color = Vmk.colors.text, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
+            Text(nameOf(choice), color = Vmk.colors.textSecondary, style = MaterialTheme.typography.bodyMedium)
+            Icon(Icons.Filled.ExpandMore, null, tint = Vmk.colors.textSecondary)
+        }
+        DropdownMenu(expanded = open, onDismissRequest = { open = false }, containerColor = Vmk.colors.surface) {
+            AppLocale.choices.forEach { c ->
+                DropdownMenuItem(
+                    text = { Text(nameOf(c), fontWeight = if (choice == c) FontWeight.Bold else FontWeight.Normal) },
+                    trailingIcon = { if (choice == c) Icon(Icons.Filled.Check, null, tint = Vmk.colors.primary) },
+                    onClick = { open = false; if (choice != c) { choice = c; if (language.set(c)) (context as? android.app.Activity)?.recreate() } },
+                    modifier = Modifier.testTag("language-$c"),
                 )
             }
         }
-        Text(stringResource(R.string.settings_language_hint), style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary)
     }
 }

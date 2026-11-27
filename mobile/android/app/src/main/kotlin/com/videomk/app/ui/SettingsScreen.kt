@@ -1,5 +1,10 @@
 package com.videomk.app.ui
 
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.ui.semantics.heading
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -62,66 +67,71 @@ fun SettingsScreen(
         containerColor = Vmk.colors.background,
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.settings_title)) },
+                title = { Text(stringResource(R.string.settings_title), style = MaterialTheme.typography.headlineMedium) },
                 navigationIcon = { IconButton(onClick = onBack, modifier = Modifier.size(48.dp)) { Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.common_back)) } },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Vmk.colors.background, titleContentColor = Vmk.colors.text),
             )
         },
     ) { padding ->
-        Column(Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        Column(Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(horizontal = 16.dp).padding(bottom = 24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            // account: the email is the header row; signing out is a plain row (not destructive: no red)
             Card {
                 Column {
-                    Text(stringResource(R.string.settings_account), style = MaterialTheme.typography.titleSmall, color = Vmk.colors.textSecondary)
-                    if (email != null) @OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class) androidx.compose.foundation.layout.FlowRow(
-                        Modifier.fillMaxWidth().heightIn(min = 48.dp).semantics(mergeDescendants = true) {}, horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalArrangement = Arrangement.Center, itemVerticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Text(stringResource(R.string.settings_signed_in_as), color = Vmk.colors.text, modifier = Modifier.padding(end = 12.dp))
-                        Text(email, color = Vmk.colors.textSecondary, modifier = Modifier.testTag("accountEmail"))
-                    }
-                    TextButton(onClick = { confirm = true }, modifier = Modifier.heightIn(min = 48.dp).testTag("signOutButton")) { Text(stringResource(R.string.settings_sign_out), color = Vmk.colors.primary) }   // signing out is not destructive: no danger red
+                    if (email != null) Text(email, style = MaterialTheme.typography.titleMedium, color = Vmk.colors.text, modifier = Modifier.heightIn(min = 48.dp).wrapContentHeight(Alignment.CenterVertically).testTag("accountEmail"))
+                    SettingsRow(stringResource(R.string.settings_sign_out), color = Vmk.colors.primary, tag = "signOutButton") { confirm = true }
                 }
             }
             Card { LanguageSetting() }
-            if (onFeedback != null) Card { FeedbackRow(onFeedback) }
             val context = androidx.compose.ui.platform.LocalContext.current
             val photoSettings = remember { com.videomk.app.data.PhotoSettings(context) }
             var dates by remember { mutableStateOf(photoSettings.useDates) }
             var places by remember { mutableStateOf(photoSettings.useLocations) }
+            var photoInfo by rememberSaveable { mutableStateOf(false) }
+            val organize = com.videomk.app.ui.LocalContainerOrNull.current?.organize
+            // photos: two switches and the organize row; the three explanations live behind one (i)
             Card {
                 Column {
-                    Text(stringResource(R.string.settings_photos), style = MaterialTheme.typography.titleSmall, color = Vmk.colors.textSecondary)
-                    SwitchRow(stringResource(R.string.settings_photo_dates), stringResource(R.string.settings_photo_dates_hint), dates, "photoDatesSwitch") { dates = it; photoSettings.useDates = it }
-                    SwitchRow(
-                        stringResource(R.string.settings_photo_locations),
-                        stringResource(R.string.settings_photo_locations_hint),
-                        places, "photoLocationsSwitch",
-                    ) { places = it; photoSettings.useLocations = it }
-                    Text(stringResource(R.string.settings_media_privacy), style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary, modifier = Modifier.padding(top = 8.dp).testTag("mediaPrivacyCopy"))
-                    com.videomk.app.ui.LocalContainerOrNull.current?.organize?.let { OrganizeSetting(it) }
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(stringResource(R.string.settings_photos), style = MaterialTheme.typography.titleMedium, color = Vmk.colors.text, modifier = Modifier.weight(1f).semantics { heading() })
+                        GlassIconButton(Icons.Filled.Info, stringResource(R.string.settings_photos_info), { photoInfo = true }, Modifier.testTag("photosInfo"), size = 44.dp)
+                    }
+                    SwitchRow(stringResource(R.string.settings_photo_dates), dates, "photoDatesSwitch") { dates = it; photoSettings.useDates = it }
+                    SwitchRow(stringResource(R.string.settings_photo_locations), places, "photoLocationsSwitch") { places = it; photoSettings.useLocations = it }
+                    organize?.let { OrganizeSetting(it) }
                 }
             }
-            if (onDeleteAccount != null) DeleteAccountCard { deleteSheet = true }
+            if (photoInfo) androidx.compose.material3.AlertDialog(
+                onDismissRequest = { photoInfo = false }, title = { Text(stringResource(R.string.settings_photos)) },
+                text = {
+                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        Text(stringResource(R.string.settings_photo_dates_hint), style = MaterialTheme.typography.bodyMedium)
+                        Text(stringResource(R.string.settings_photo_locations_hint), style = MaterialTheme.typography.bodyMedium)
+                        Text(stringResource(R.string.settings_organize_hint), style = MaterialTheme.typography.bodyMedium)
+                        Text(stringResource(R.string.settings_media_privacy), style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.textSecondary, modifier = Modifier.testTag("mediaPrivacyCopy"))
+                    }
+                },
+                confirmButton = { TextButton(onClick = { photoInfo = false }, modifier = Modifier.heightIn(min = 48.dp)) { Text(stringResource(R.string.common_done)) } },
+            )
             Card {
                 Column {
-                    Text(stringResource(R.string.settings_about), style = MaterialTheme.typography.titleSmall, color = Vmk.colors.textSecondary)
+                    if (onFeedback != null) FeedbackRow(onFeedback)
+                    val mailto = stringResource(R.string.settings_support_mailto)
+                    SettingsRow(stringResource(R.string.settings_support), tag = "supportLink", onClickLabel = stringResource(R.string.settings_support_open)) { runCatching { uri.openUri(mailto) } }
+                }
+            }
+            Card {
+                Column {
                     Row(Modifier.fillMaxWidth().heightIn(min = 48.dp).semantics(mergeDescendants = true) {}, verticalAlignment = Alignment.CenterVertically) {
-                        Text(stringResource(R.string.settings_version), color = Vmk.colors.text, modifier = Modifier.weight(1f))
+                        Text(stringResource(R.string.settings_about), color = Vmk.colors.text, modifier = Modifier.weight(1f))
                         Text(BuildConfig.VERSION_NAME, color = Vmk.colors.textSecondary)
                     }
-                    Row(Modifier.fillMaxWidth().heightIn(min = 48.dp).clickable(onClickLabel = stringResource(R.string.settings_privacy_open)) { runCatching { uri.openUri("https://videomk.com/privacy") } }, verticalAlignment = Alignment.CenterVertically) {
-                        Text(stringResource(R.string.settings_privacy_policy), color = MaterialTheme.colorScheme.primary)
-                    }
+                    SettingsRow(stringResource(R.string.settings_privacy_policy), onClickLabel = stringResource(R.string.settings_privacy_open)) { runCatching { uri.openUri("https://videomk.com/privacy") } }
                     val termsUrl = stringResource(R.string.settings_terms_url)
-                    Row(Modifier.fillMaxWidth().heightIn(min = 48.dp).clickable(onClickLabel = stringResource(R.string.settings_terms_open)) { runCatching { uri.openUri(termsUrl) } }, verticalAlignment = Alignment.CenterVertically) {
-                        Text(stringResource(R.string.settings_terms), color = MaterialTheme.colorScheme.primary)
-                    }
-                    val mailto = stringResource(R.string.settings_support_mailto)
-                    Row(Modifier.fillMaxWidth().heightIn(min = 48.dp).clickable(onClickLabel = stringResource(R.string.settings_support_open)) { runCatching { uri.openUri(mailto) } }.testTag("supportLink"), verticalAlignment = Alignment.CenterVertically) {
-                        Text(stringResource(R.string.settings_support), color = MaterialTheme.colorScheme.primary)
-                    }
+                    SettingsRow(stringResource(R.string.settings_terms), onClickLabel = stringResource(R.string.settings_terms_open)) { runCatching { uri.openUri(termsUrl) } }
                 }
             }
+            // the confirmation screen already lists what is lost, so the row is just the words, in red
+            if (onDeleteAccount != null) Card { SettingsRow(stringResource(R.string.deletion_card_button), color = Vmk.colors.danger, tag = "deleteAccountButton") { deleteSheet = true } }
         }
     }
     if (deleteSheet && onDeleteAccount != null) {
@@ -141,44 +151,43 @@ fun SettingsScreen(
 }
 
 @Composable
-private fun SwitchRow(title: String, explanation: String, checked: Boolean, tag: String, onChange: (Boolean) -> Unit) {
+private fun SwitchRow(title: String, checked: Boolean, tag: String, onChange: (Boolean) -> Unit) {
     Row(
-        Modifier.fillMaxWidth().heightIn(min = 56.dp).padding(vertical = 6.dp)
-            .toggleable(value = checked, role = Role.Switch, onValueChange = onChange).testTag(tag),
+        Modifier.fillMaxWidth().heightIn(min = 56.dp).toggleable(value = checked, role = Role.Switch, onValueChange = onChange).testTag(tag),
         verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            Text(title, color = Vmk.colors.text)
-            Text(explanation, style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary)
-        }
+        Text(title, color = Vmk.colors.text, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
         Switch(checked = checked, onCheckedChange = null)
     }
 }
 
-/** "Organize new uploads: Ask / Always / Never": reads and writes the server preference. */
+/** A plain one-line row: the words only (a value or a chevron only when it adds something). */
+@Composable
+private fun SettingsRow(text: String, color: androidx.compose.ui.graphics.Color = Vmk.colors.text, tag: String? = null, onClickLabel: String? = null, onClick: () -> Unit) {
+    Row(
+        Modifier.fillMaxWidth().heightIn(min = 52.dp).clickable(onClickLabel = onClickLabel, role = Role.Button, onClick = onClick).then(if (tag != null) Modifier.testTag(tag) else Modifier),
+        verticalAlignment = Alignment.CenterVertically,
+    ) { Text(text, color = color, style = MaterialTheme.typography.bodyLarge, fontWeight = if (color == Vmk.colors.danger) androidx.compose.ui.text.font.FontWeight.SemiBold else null) }
+}
+
+/** "Organize new uploads": a row with its value (Ask, Always, Never) and a menu; the explanation is behind the Photos (i). Reads and writes the server preference. */
 @Composable
 private fun OrganizeSetting(controller: com.videomk.app.data.OrganizeController) {
     val pref by controller.pref.collectAsState()
     androidx.compose.runtime.LaunchedEffect(Unit) { controller.refreshPref() }
-    val big = androidx.compose.ui.platform.LocalDensity.current.fontScale >= 1.5f
-    Column(Modifier.fillMaxWidth().padding(top = 14.dp).testTag("organizeSetting"), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            Icon(androidx.compose.material.icons.Icons.Filled.AutoAwesome, null, tint = Vmk.colors.primary)
-            Text(stringResource(R.string.settings_organize_title), style = MaterialTheme.typography.bodyLarge, fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold, color = Vmk.colors.text)
+    var open by remember { mutableStateOf(false) }
+    androidx.compose.foundation.layout.Box(Modifier.fillMaxWidth().testTag("organizeSetting")) {
+        Row(Modifier.fillMaxWidth().heightIn(min = 56.dp).clickable(role = Role.DropdownList, onClickLabel = stringResource(R.string.settings_organize_title)) { open = true }, verticalAlignment = Alignment.CenterVertically) {
+            Text(stringResource(R.string.settings_organize_title), style = MaterialTheme.typography.bodyLarge, color = Vmk.colors.text, modifier = Modifier.weight(1f))
+            Text(pref.label, style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.textSecondary)
+            Icon(Icons.Filled.ExpandMore, null, tint = Vmk.colors.textSecondary)
         }
-        val shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp)
-        val options = com.videomk.app.core.OrganizePref.entries
-        @Composable fun seg(o: com.videomk.app.core.OrganizePref, modifier: Modifier) {
-            val sel = o == pref
-            androidx.compose.foundation.layout.Box(
-                modifier.heightIn(min = 44.dp).clip(androidx.compose.foundation.shape.RoundedCornerShape(10.dp))
-                    .then(if (sel) Modifier.background(if (Vmk.colors.dark) Vmk.colors.surface3 else Vmk.colors.surface) else Modifier)
-                    .toggleable(value = sel, role = androidx.compose.ui.semantics.Role.RadioButton) { controller.setPref(o) }.testTag("organizePref-${o.wire}"),
-                contentAlignment = Alignment.Center,
-            ) { Text(o.label, style = MaterialTheme.typography.titleSmall, fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold, color = if (sel) Vmk.colors.text else Vmk.colors.textSecondary) }
+        androidx.compose.material3.DropdownMenu(expanded = open, onDismissRequest = { open = false }, containerColor = Vmk.colors.surface) {
+            for (o in com.videomk.app.core.OrganizePref.entries) androidx.compose.material3.DropdownMenuItem(
+                text = { Text(o.label, fontWeight = if (o == pref) androidx.compose.ui.text.font.FontWeight.Bold else androidx.compose.ui.text.font.FontWeight.Normal) },
+                trailingIcon = { if (o == pref) Icon(Icons.Filled.Check, null, tint = Vmk.colors.primary) },
+                onClick = { open = false; controller.setPref(o) }, modifier = Modifier.testTag("organizePref-${o.wire}"),
+            )
         }
-        if (big) Column(verticalArrangement = Arrangement.spacedBy(4.dp)) { options.forEach { seg(it, Modifier.fillMaxWidth()) } }
-        else Row(Modifier.fillMaxWidth().clip(shape).background(Vmk.colors.surfaceRaised).padding(3.dp)) { options.forEach { seg(it, Modifier.weight(1f)) } }
-        Text(stringResource(R.string.settings_organize_hint), style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary)
     }
 }

@@ -87,6 +87,7 @@ fun InlinePlayer(player: Player?, onFullScreen: () -> Unit, modifier: Modifier =
                 PlayerView(ctx).apply {
                     useController = true
                     controllerShowTimeoutMs = 3000
+                    setShowNextButton(false); setShowPreviousButton(false)   // one video: previous and next are clutter
                     resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
                     setShowBuffering(PlayerView.SHOW_BUFFERING_WHEN_PLAYING)
                     setControllerVisibilityListener(PlayerView.ControllerVisibilityListener { v -> controlsVisible = v == android.view.View.VISIBLE })

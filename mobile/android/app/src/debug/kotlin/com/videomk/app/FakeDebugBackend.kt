@@ -28,7 +28,11 @@ class FakeDebugBackend(private val deckDemo: Boolean = false) : Backend {
     override suspend fun wallet() = WalletInfo(balance = 9, buckets = listOf(WalletBucket("daily", 1, now.plusSeconds(7200)), WalletBucket("signup", 3, now.plusSeconds(86400L * 20)), WalletBucket("paid", 5, null)), nextFreeAt = now.plusSeconds(5400))
     override suspend fun startGeneration(prompt: String, clientRequestId: String, options: CreateOptions, media: List<String>, mediaMeta: kotlinx.serialization.json.JsonObject?, libraryMedia: List<String>, brief: kotlinx.serialization.json.JsonObject?, deck: String?) = "v-new"
     override suspend fun uploadPhotos(photos: List<ByteArray>, progress: (Int, Int) -> Unit): List<String> = photos.indices.map { "m$it" }
-    override suspend fun playback(videoId: String) = PlaybackInfo("https://example.invalid/$videoId.mp4", "A short story about how bees turn nectar into honey.")
+    override suspend fun playback(videoId: String): PlaybackInfo {
+        // screenshots: a real local file when `files/fake_video.mp4` exists (push one with `adb push` + `run-as`), else an address that never resolves
+        val local = java.io.File("/data/data/com.videomk.app/files/fake_video.mp4")
+        return PlaybackInfo(if (local.exists()) "file://${local.path}" else "https://example.invalid/$videoId.mp4", "A short story about how bees turn nectar into honey.\n\nVideo by Jane Doe on Pexels (https://www.pexels.com)")
+    }
     override suspend fun editorSnapshot(videoId: String) = EditorSnapshot(
         videoId, 3, EditState.fromServer("IDLE"), null, "How bees make honey", true,
         listOf(

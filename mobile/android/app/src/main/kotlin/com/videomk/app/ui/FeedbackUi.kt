@@ -76,10 +76,7 @@ internal fun FeedbackRow(onOpen: () -> Unit) {
         verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         Icon(Icons.AutoMirrored.Filled.Chat, null, tint = Vmk.colors.primary, modifier = Modifier.size(22.dp))
-        Column(Modifier.weight(1f)) {
-            Text(stringResource(R.string.feedback_title), color = Vmk.colors.text, style = MaterialTheme.typography.bodyLarge)
-            Text(stringResource(R.string.feedback_subtitle), color = Vmk.colors.textSecondary, style = MaterialTheme.typography.bodySmall)
-        }
+        Text(stringResource(R.string.feedback_title), color = Vmk.colors.text, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
         Icon(Icons.Filled.ChevronRight, null, tint = Vmk.colors.textSecondary)
     }
 }

@@ -4,14 +4,14 @@
     <string name="feedback_title">Enviar comentarios</string>
     <string name="feedback_subtitle">Leemos todos los mensajes</string>
     <string name="feedback_open">Escribir un mensaje al equipo de videomk</string>
-    <string name="feedback_intro">Cuéntanos lo que quieras: una idea, algo que falta, algo que te molestó. Leemos todos los mensajes.</string>
+    <string name="feedback_intro">Cuéntanos lo que quieras.</string>
     <string name="feedback_intro_unhappy">Lamentamos oír eso. ¿Qué lo mejoraría?</string>
     <string name="feedback_field_label">Tu mensaje</string>
     <string name="feedback_field_hint">Escribe aquí…</string>
     <string name="feedback_counter">%1$d / %2$d</string>
     <string name="feedback_counter_a11y">%1$d de %2$d caracteres</string>
     <string name="feedback_min_hint">Unas palabras más, por favor (mínimo %1$d caracteres).</string>
-    <string name="feedback_kind_label">¿Qué tipo de mensaje es? (opcional)</string>
+    <string name="feedback_kind_label">Tema</string>
     <string name="feedback_kind_idea">Idea</string>
     <string name="feedback_kind_problem">Problema</string>
     <string name="feedback_kind_other">Otro</string>

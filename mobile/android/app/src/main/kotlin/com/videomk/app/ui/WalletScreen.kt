@@ -1,5 +1,8 @@
 package com.videomk.app.ui
 
+import androidx.compose.runtime.setValue
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -67,7 +70,7 @@ fun WalletScreen(app: AppViewModel, onBack: () -> Unit) {
         Column(Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
             // the unlimited test account is a debug-build thing only: a release build shows the plain number
             val unlimited = w.unlimited && com.videomk.app.BuildConfig.DEBUG
-            WalletHero(if (unlimited) "∞" else "${w.balance}", if (unlimited) stringResource(R.string.wallet_unlimited) else pluralStringResource(R.plurals.wallet_credit_word, w.balance))
+            WalletHero(if (unlimited) "∞" else "${w.balance}", pluralStringResource(R.plurals.wallet_credit_word, if (unlimited) 2 else w.balance))
             Card {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text(stringResource(R.string.wallet_what_you_have), style = MaterialTheme.typography.titleSmall, color = Vmk.colors.textSecondary, modifier = Modifier.semantics { heading() })
@@ -84,24 +87,23 @@ fun WalletScreen(app: AppViewModel, onBack: () -> Unit) {
                     }
                 }
             }
-            Card {
-                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    w.nextFreeAt?.let {
-                        Row(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
-                            Icon(Icons.Filled.Schedule, null, tint = MaterialTheme.colorScheme.primary)
-                            Text(stringResource(R.string.wallet_next_free, relative(it)), color = Vmk.colors.text)
-                        }
-                    }
-                    Row(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Filled.CardGiftcard, null, tint = MaterialTheme.colorScheme.primary)
-                        Text(
-                            pluralStringResource(R.plurals.wallet_daily_rule, w.dailyCredits, w.dailyCredits),
-                            color = Vmk.colors.text,
-                        )
-                    }
-                }
+            // one line about the free credits (when the next ones arrive, else the daily rule), then the (i) with the rules
+            Text(
+                w.nextFreeAt?.let { stringResource(R.string.wallet_next_free, relative(it)) } ?: pluralStringResource(R.plurals.wallet_daily_rule, w.dailyCredits, w.dailyCredits),
+                style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.textSecondary, modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp),
+            )
+            var rules by androidx.compose.runtime.saveable.rememberSaveable { androidx.compose.runtime.mutableStateOf(false) }
+            Row(
+                Modifier.fillMaxWidth().heightIn(min = 48.dp).clickable(role = androidx.compose.ui.semantics.Role.Button, onClickLabel = stringResource(R.string.wallet_cost_title)) { rules = true }.padding(horizontal = 4.dp).testTag("creditsExplainer"),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(stringResource(R.string.wallet_cost_title), style = MaterialTheme.typography.bodyLarge, color = Vmk.colors.text, modifier = Modifier.weight(1f))
+                Icon(Icons.Filled.Info, null, tint = Vmk.colors.primary)
             }
-            Card { CreditsExplainer() }
+            if (rules) androidx.compose.material3.AlertDialog(
+                onDismissRequest = { rules = false }, title = { Text(stringResource(R.string.wallet_cost_title)) }, text = { Text(stringResource(R.string.wallet_how_short), style = MaterialTheme.typography.bodyMedium) },
+                confirmButton = { androidx.compose.material3.TextButton(onClick = { rules = false }, modifier = Modifier.heightIn(min = 48.dp)) { Text(stringResource(R.string.common_done)) } },
+            )
         }
     }
 }

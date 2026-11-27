@@ -4,14 +4,14 @@
     <string name="feedback_title">Send feedback</string>
     <string name="feedback_subtitle">We read every message</string>
     <string name="feedback_open">Write a message to the videomk team</string>
-    <string name="feedback_intro">Tell us anything: an idea, something missing, something that annoyed you. We read every message.</string>
+    <string name="feedback_intro">Tell us anything.</string>
     <string name="feedback_intro_unhappy">Sorry about that. What would make it better?</string>
     <string name="feedback_field_label">Your message</string>
     <string name="feedback_field_hint">Write here…</string>
     <string name="feedback_counter">%1$d / %2$d</string>
     <string name="feedback_counter_a11y">%1$d of %2$d characters</string>
     <string name="feedback_min_hint">A few more words, please (at least %1$d characters).</string>
-    <string name="feedback_kind_label">What kind of message is it? (optional)</string>
+    <string name="feedback_kind_label">Topic</string>
     <string name="feedback_kind_idea">Idea</string>
     <string name="feedback_kind_problem">Problem</string>
     <string name="feedback_kind_other">Other</string>

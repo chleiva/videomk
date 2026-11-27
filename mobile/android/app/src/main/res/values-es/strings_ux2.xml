@@ -14,4 +14,6 @@
         <item quantity="one">Queda %1$d</item>
         <item quantity="other">Quedan %1$d</item>
     </plurals>
+    <string name="settings_photos_info">Sobre los ajustes de fotos</string>
+    <string name="wallet_how_short">1 min = 1 crédito. 4K = 2x. Los gratis caducan; los comprados no.</string>
 </resources>
