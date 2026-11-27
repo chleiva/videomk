@@ -16,4 +16,7 @@
     </plurals>
     <string name="settings_photos_info">About photo settings</string>
     <string name="wallet_how_short">1 min = 1 credit. 4K = 2x. Free credits expire; bought credits never do.</string>
+    <string name="lib_example_chip_lighthouse">Lighthouse</string>
+    <string name="lib_example_chip_bees">Honey bees</string>
+    <string name="lib_example_chip_holiday">Holiday photos</string>
 </resources>

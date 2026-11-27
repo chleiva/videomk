@@ -74,9 +74,7 @@ fun SignInScreen(state: AppState, social: SocialSwitches = SocialSwitches(), onS
             Modifier.padding(horizontal = 32.dp, vertical = 32.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp), horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Box(Modifier.size(96.dp).clip(RoundedCornerShape(24.dp)).background(Vmk.gradient).clearAndSetSemantics { }, contentAlignment = Alignment.Center) {
-                Icon(Icons.Filled.PlayArrow, null, tint = Color.White, modifier = Modifier.size(56.dp))
-            }
+            LogoMark(Modifier.clearAndSetSemantics { }, size = 96.dp)   // the Sparklet Trio mark, the same layers as the app icon
             Text("videomk", style = VmkType.wordmark, color = Vmk.colors.text, maxLines = 1)
             // seam for the sample video (docs/UX_REVIEW.md section 5): drop an MP4 at res/raw/sample_intro.mp4 and it plays muted and looped here (a still frame with Reduce Motion)
             sampleVideoRes(androidx.compose.ui.platform.LocalContext.current)?.let { SignInSample(it) }

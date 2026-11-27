@@ -91,7 +91,7 @@
     <string name="media_deselect">Quitar de la selección</string>
     <string name="media_open_photo">Abrir foto</string>
     <string name="media_select_photos">Seleccionar fotos</string>
-    <string name="media_search_hint">Busca tus fotos, prueba “playa en Tailandia”</string>
+    <string name="media_search_hint">Buscar fotos</string>
     <string name="media_meter_full">%1$s - lleno</string>
     <string name="media_meter_almost_full">%1$s - casi lleno</string>
     <string name="media_storage_desc">Almacenamiento: %1$s</string>

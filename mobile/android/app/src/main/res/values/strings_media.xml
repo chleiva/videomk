@@ -91,7 +91,7 @@
     <string name="media_deselect">Deselect</string>
     <string name="media_open_photo">Open photo</string>
     <string name="media_select_photos">Select photos</string>
-    <string name="media_search_hint">Search your photos, try \'beach in Thailand\'</string>
+    <string name="media_search_hint">Search photos</string>
     <string name="media_meter_full">%1$s - full</string>
     <string name="media_meter_almost_full">%1$s - almost full</string>
     <string name="media_storage_desc">Storage: %1$s</string>

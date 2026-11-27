@@ -1,5 +1,7 @@
 package com.videomk.app.ui
 
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -93,7 +95,7 @@ fun CreateSheetsHost(composer: ComposerViewModel, balance: Int?, options: Create
     ModalBottomSheet(
         onDismissRequest = { composer.dismissSheet() }, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true), shape = shape, containerColor = Vmk.colors.surface,
     ) {
-        Column(Modifier.fillMaxWidth().heightIn(min = 470.dp).padding(horizontal = 20.dp).navigationBarsPadding().padding(bottom = 12.dp).semantics { if (com.videomk.app.BuildConfig.DEBUG) testTagsAsResourceId = true }.testTag("createSheet")) {
+        Column(Modifier.fillMaxWidth().heightIn(min = if (kind == ComposerViewModel.CreateSheetKind.Stop) 0.dp else 470.dp).padding(horizontal = 20.dp).navigationBarsPadding().padding(bottom = 12.dp).semantics { if (com.videomk.app.BuildConfig.DEBUG) testTagsAsResourceId = true }.testTag("createSheet")) {
             when (kind) {
                 ComposerViewModel.CreateSheetKind.Checking -> CheckingBody(composer)
                 ComposerViewModel.CreateSheetKind.Asking -> AskingBody(composer)
@@ -109,7 +111,7 @@ fun CreateSheetsHost(composer: ComposerViewModel, balance: Int?, options: Create
 private fun CheckingBody(composer: ComposerViewModel) {
     Row(Modifier.fillMaxWidth().heightIn(min = 48.dp), verticalAlignment = Alignment.CenterVertically) {
         Box(Modifier.weight(1f))
-        TextButton(onClick = { composer.skipCheck() }, modifier = Modifier.heightIn(min = 48.dp).testTag("makeItNow")) { Text(stringResource(R.string.question_make_it_now), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold) }
+        TextButton(onClick = { composer.skipCheck() }, modifier = Modifier.heightIn(min = 48.dp).testTag("makeItNow")) { Text(stringResource(R.string.question_skip), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold) }
     }
     val checkingText = stringResource(R.string.composer_checking)
     Column(Modifier.semantics { contentDescription = checkingText; liveRegion = LiveRegionMode.Polite }, verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -134,14 +136,11 @@ private fun androidx.compose.foundation.layout.ColumnScope.AskingBody(composer: 
         Row(Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally), verticalAlignment = Alignment.CenterVertically) {
             for (i in 0 until f.total) Box(Modifier.size(width = if (i == f.index) 22.dp else 8.dp, height = 8.dp).clip(CircleShape).background(if (i == f.index) Vmk.colors.primary else Vmk.colors.surface3))
         }
-        TextButton(onClick = { composer.makeItNow() }, modifier = Modifier.heightIn(min = 48.dp).testTag("makeItNow")) { Text(stringResource(R.string.question_make_it_now), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold) }
+        TextButton(onClick = { composer.makeItNow() }, modifier = Modifier.heightIn(min = 48.dp).testTag("makeItNow")) { Text(stringResource(R.string.question_skip), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold) }
     }
     Crossfade(version to f.index, animationSpec = tween(if (still) 0 else 280), label = "question", modifier = Modifier.weight(1f, fill = false)) { (_, idx) ->
         val question = f.questions.getOrNull(idx) ?: q
         QuestionContent(composer, question, f.overline(idx), f.answerOf(question.id))
-    }
-    Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-        TextButton(onClick = { composer.skipQuestion() }, modifier = Modifier.heightIn(min = 48.dp).testTag("questionSkip")) { Text(stringResource(R.string.question_skip), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold, color = Vmk.colors.textSecondary) }
     }
     val announce = stringResource(R.string.question_announce, f.index + 1, f.total, q.text)
     LaunchedEffect(f.index) { view.announceForAccessibility(announce) }
@@ -157,9 +156,7 @@ private fun QuestionContent(composer: ComposerViewModel, q: Question, overline: 
     LaunchedEffect(picked) { picked?.let { delay(250); composer.choose(it) } }
     // scrolls when the question and its chips are taller than the sheet (large text, a small phone): nothing is ever hidden
     Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(top = 4.dp)) {
-        Overline(overline)
         Text(q.text, style = VmkType.question, color = Vmk.colors.text, modifier = Modifier.padding(top = 4.dp).semantics { heading() }.testTag("questionTitle"))
-        q.helper?.let { Text(it, style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.textSecondary, modifier = Modifier.padding(top = 4.dp)) }
         Box(Modifier.size(14.dp))
         if (other) {
             val shape = RoundedCornerShape(14.dp)
@@ -217,11 +214,10 @@ private fun androidx.compose.foundation.layout.ColumnScope.SummaryBody(composer:
     val status = ComposerLogic.status(composer.text, options, balance, 0, false, false, createScreen = true)
     Row(Modifier.fillMaxWidth().heightIn(min = 52.dp), verticalAlignment = Alignment.CenterVertically) {
         Text(stringResource(R.string.summary_title), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = Vmk.colors.text, modifier = Modifier.weight(1f).semantics { heading() }.testTag("summaryTitle"))
-        TextButton(onClick = { composer.dismissSheet() }, modifier = Modifier.heightIn(min = 48.dp)) { Text(stringResource(R.string.common_close), color = Vmk.colors.textSecondary, fontWeight = FontWeight.SemiBold) }
+        GlassIconButton(Icons.Filled.Close, stringResource(R.string.common_close), { composer.dismissSheet() }, Modifier.testTag("editRequest"))
     }
     Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp)).background(Vmk.colors.primaryContainer).padding(16.dp)) {
-        Overline(stringResource(R.string.summary_your_request))
-        Text(composer.text, style = MaterialTheme.typography.bodyLarge, color = Vmk.colors.text, maxLines = 4, modifier = Modifier.padding(top = 4.dp))
+        Text(composer.text, style = MaterialTheme.typography.bodyLarge, color = Vmk.colors.text, maxLines = 4)
     }
     val changeAnswer = stringResource(R.string.summary_change_answer)
     FlowRow(Modifier.padding(top = 14.dp), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -230,9 +226,6 @@ private fun androidx.compose.foundation.layout.ColumnScope.SummaryBody(composer:
             verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) { Text(c.label, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold, color = Vmk.colors.primary, maxLines = 3, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false)); Icon(Icons.Filled.Edit, null, tint = Vmk.colors.primary, modifier = Modifier.size(14.dp)) }
     }
-    Text(stringResource(R.string.summary_tap_hint), style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary, modifier = Modifier.padding(top = 6.dp))
-    Box(Modifier.fillMaxWidth().padding(vertical = 12.dp).size(1.dp).background(Vmk.colors.outline))
-    Text(stringResource(R.string.create_summary_line, CreatePlatforms.recommendation(options, composer.caps), com.videomk.app.core.Lengths.short(options.minutes)), style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.textSecondary)
     Box(Modifier.weight(1f, fill = false).heightIn(min = 16.dp))
     StatusLine(status, 0f, 0f) { if (status.fix?.addCredits == true) onWallet() else status.fix?.minutes?.let { composer.setLength(it) } }
     val ready = status.sendReady
@@ -247,9 +240,6 @@ private fun androidx.compose.foundation.layout.ColumnScope.SummaryBody(composer:
             Icon(Icons.Filled.Bolt, null, tint = c, modifier = Modifier.size(20.dp)); Text("${options.credits}", style = VmkType.cta, color = c)
         }
     }
-    Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-        TextButton(onClick = { composer.dismissSheet() }, modifier = Modifier.heightIn(min = 48.dp).testTag("editRequest")) { Text(stringResource(R.string.summary_edit_request), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold) }
-    }
     if (version < 0) Box(Modifier)   // read above so the summary refreshes after an edit
 }
 
@@ -260,19 +250,22 @@ private fun androidx.compose.foundation.layout.ColumnScope.StopBody(composer: Co
         is CreateStop.Blocked -> StopText(stringResource(R.string.stop_title), stop.message, null, null)
         is CreateStop.Paused -> StopText(stringResource(R.string.stop_paused_title), stop.message, null, CreateErrors.retryText(stop.retryAfterSeconds))
     }
-    Column(Modifier.fillMaxWidth().padding(top = 12.dp)) {
-        Box(Modifier.size(56.dp).clip(CircleShape).background(Vmk.colors.warningContainer), contentAlignment = Alignment.Center) { Icon(Icons.Filled.Warning, null, tint = Vmk.colors.warning, modifier = Modifier.size(28.dp)) }
+    Column(Modifier.fillMaxWidth().padding(top = 4.dp)) {
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Box(Modifier.size(56.dp).clip(CircleShape).background(Vmk.colors.warningContainer), contentAlignment = Alignment.Center) { Icon(Icons.Filled.Warning, null, tint = Vmk.colors.warning, modifier = Modifier.size(28.dp)) }
+            Spacer(Modifier.weight(1f))
+            GlassIconButton(Icons.Filled.Close, stringResource(R.string.common_close), { composer.dismissSheet() }, Modifier.testTag("stopClose"))
+        }
         Text(title, style = MaterialTheme.typography.headlineMedium, color = Vmk.colors.text, modifier = Modifier.padding(top = 14.dp).semantics { heading() }.testTag("stopTitle"))
         Text(message, style = MaterialTheme.typography.bodyLarge, color = Vmk.colors.textSecondary, modifier = Modifier.padding(top = 6.dp).semantics { liveRegion = LiveRegionMode.Polite }.testTag("stopMessage"))
         retry?.let { Text(it, style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.textSecondary, modifier = Modifier.padding(top = 6.dp)) }
         if (suggestion != null) Row(Modifier.fillMaxWidth().padding(top = 14.dp).clip(RoundedCornerShape(18.dp)).background(Vmk.colors.primaryContainer).padding(14.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            Column(Modifier.weight(1f)) { Overline(stringResource(R.string.stop_example)); Text(suggestion, style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.text) }
+            Text(suggestion, style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.text, modifier = Modifier.weight(1f))
             Text(stringResource(R.string.stop_use_this), style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold, color = Vmk.colors.primary, modifier = Modifier.clip(CircleShape).background(Vmk.colors.surface).clickable(role = Role.Button) { composer.useSuggestion(suggestion) }.padding(horizontal = 14.dp, vertical = 10.dp).testTag("useSuggestion"))
         }
         Text(stringResource(R.string.stop_nothing_charged), style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.textSecondary, modifier = Modifier.padding(top = 12.dp, bottom = 8.dp).testTag("nothingCharged"))
         Box(Modifier.weight(1f, fill = false))
         PrimaryButton(stringResource(R.string.summary_edit_request), { composer.dismissSheet() }, Modifier.testTag("editRequest"))
-        Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) { TextButton(onClick = { composer.dismissSheet() }, modifier = Modifier.heightIn(min = 48.dp).testTag("stopClose")) { Text(stringResource(R.string.common_close), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold, color = Vmk.colors.textSecondary) } }
     }
 }
 

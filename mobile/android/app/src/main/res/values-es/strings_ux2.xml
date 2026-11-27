@@ -16,4 +16,7 @@
     </plurals>
     <string name="settings_photos_info">Sobre los ajustes de fotos</string>
     <string name="wallet_how_short">1 min = 1 crédito. 4K = 2x. Los gratis caducan; los comprados no.</string>
+    <string name="lib_example_chip_lighthouse">Faro</string>
+    <string name="lib_example_chip_bees">Abejas</string>
+    <string name="lib_example_chip_holiday">Fotos de viaje</string>
 </resources>

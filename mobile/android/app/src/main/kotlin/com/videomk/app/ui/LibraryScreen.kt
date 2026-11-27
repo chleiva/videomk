@@ -126,12 +126,12 @@ import com.videomk.app.core.VideoStatus
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-private class Example(@androidx.annotation.StringRes val text: Int, @androidx.annotation.StringRes val tag: Int, val minutes: Double?, val photos: Boolean, val icon: ImageVector)
+private class Example(@androidx.annotation.StringRes val text: Int, @androidx.annotation.StringRes val chip: Int, @androidx.annotation.StringRes val tag: Int, val minutes: Double?, val photos: Boolean, val icon: ImageVector)
 
 private val Examples = listOf(
-    Example(R.string.lib_example_lighthouse, R.string.lib_example_tag_1min, 1.0, false, Icons.Filled.Movie),
-    Example(R.string.lib_example_bees, R.string.lib_example_tag_3min, 3.0, false, Icons.Filled.AutoAwesome),
-    Example(R.string.lib_example_holiday, R.string.lib_example_tag_photos, null, true, Icons.Filled.Image),
+    Example(R.string.lib_example_lighthouse, R.string.lib_example_chip_lighthouse, R.string.lib_example_tag_1min, 1.0, false, Icons.Filled.Movie),
+    Example(R.string.lib_example_bees, R.string.lib_example_chip_bees, R.string.lib_example_tag_3min, 3.0, false, Icons.Filled.AutoAwesome),
+    Example(R.string.lib_example_holiday, R.string.lib_example_chip_holiday, R.string.lib_example_tag_photos, null, true, Icons.Filled.Image),
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -193,7 +193,7 @@ fun LibraryScreen(app: AppViewModel, composer: ComposerViewModel, onOpenVideo: (
                 entries.isEmpty() -> EmptyState(
                     onExample = { e -> newVideo(e) },
                     onFirst = { app.submit(Txt.s(R.string.lib_first_prompt), CreateOptions(minutes = com.videomk.app.core.CreateDefaults.FIRST_TIME_MINUTES)) },
-                    onChange = { newVideo(Example(R.string.lib_first_prompt, R.string.lib_example_tag_1min, com.videomk.app.core.CreateDefaults.FIRST_TIME_MINUTES, false, Icons.Filled.Movie)) },
+                    onChange = { newVideo(Example(R.string.lib_first_prompt, R.string.lib_example_chip_bees, R.string.lib_example_tag_1min, com.videomk.app.core.CreateDefaults.FIRST_TIME_MINUTES, false, Icons.Filled.Movie)) },
                 )
                 else -> {
                     var refreshing by remember { mutableStateOf(false) }
@@ -319,7 +319,7 @@ private fun EmptyState(onExample: (Example) -> Unit, onFirst: () -> Unit, onChan
                     verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     Icon(e.icon, null, tint = Vmk.colors.primary, modifier = Modifier.size(18.dp))
-                    Text(stringResource(e.text), style = MaterialTheme.typography.labelLarge, color = Vmk.colors.text)
+                    Text(stringResource(e.chip), style = MaterialTheme.typography.labelLarge, color = Vmk.colors.text)
                 }
             }
         }
