@@ -4,7 +4,7 @@
   python backend/scripts/i18n_check.py           # human report; exit 1 on errors
   python backend/scripts/i18n_check.py --strict  # warnings are errors too
 
-Catalogs checked: the server (backend/lambdas/common/i18n.py: EN and ES) and the web (frontend/src/i18n/en.json, es.json).
+Catalogs checked: the server (backend/lambdas/common/i18n.py: EN and ES) and the web (frontend/src/i18n/<area>.en.json and <area>.es.json).
 Errors: a key missing in either language, placeholder names that differ ({name}, plural arguments), an empty string, different ICU plural shape.
 Warnings: a Spanish text identical to the English one (allowed for a short list of names and numbers), a Spanish text that looks untranslated
 (many common English words in it), 'vídeo' with an accent, words the glossary avoids (ordenador, computadora, móvil, celular), or a text more than
@@ -74,8 +74,14 @@ def check_all():
     warnings += w
     web = os.path.join(ROOT, "frontend", "src", "i18n")
     if os.path.isdir(web):
-        en = json.load(open(os.path.join(web, "en.json"), encoding="utf-8"))
-        es = json.load(open(os.path.join(web, "es.json"), encoding="utf-8"))
+        en, es = {}, {}
+        for fn in sorted(os.listdir(web)):   # per-area catalogs (common, marketing, auth, app-create, app-library, app-player): `<area>.en.json` / `<area>.es.json`
+            for lang, target in (("en", en), ("es", es)):
+                if fn.endswith(f".{lang}.json"):
+                    target.update(json.load(open(os.path.join(web, fn), encoding="utf-8")))
+        for legacy, target in (("en.json", en), ("es.json", es)):   # the old single files, if a branch still has them
+            if os.path.isfile(os.path.join(web, legacy)):
+                target.update(json.load(open(os.path.join(web, legacy), encoding="utf-8")))
         e, w = compare("web", en, es)
         errors += e
         warnings += w
