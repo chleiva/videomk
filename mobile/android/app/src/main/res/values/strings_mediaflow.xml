@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="media_make_video_count">Make a video · %1$d</string>
+    <string name="media_make_video_none">Choose photos</string>
+    <string name="media_select_hint">Tap Select, choose photos, then Make a video.</string>
+    <string name="media_remove_photo">Remove photo</string>
+    <string name="media_new_collection_text">New collection</string>
+    <string name="media_selection_top_desc">Selecting photos. Close to stop.</string>
+    <string name="media_make_video_desc">Make a video from the %1$d selected photos</string>
+    <string name="create_phase_checking">Checking your request…</string>
+    <string name="create_phase_starting">Starting your video…</string>
+</resources>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="media_make_video_count">Crear video · %1$d</string>
+    <string name="media_make_video_none">Elige fotos</string>
+    <string name="media_select_hint">Toca Seleccionar, elige fotos y luego Crear video.</string>
+    <string name="media_remove_photo">Quitar foto</string>
+    <string name="media_new_collection_text">Nueva colección</string>
+    <string name="media_selection_top_desc">Seleccionando fotos. Cierra para terminar.</string>
+    <string name="media_make_video_desc">Crear un video con las %1$d fotos seleccionadas</string>
+    <string name="create_phase_checking">Revisando tu solicitud…</string>
+    <string name="create_phase_starting">Iniciando tu video…</string>
+</resources>

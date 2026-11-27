@@ -24,7 +24,7 @@ import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Movie
 import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material3.Icon
@@ -101,7 +101,10 @@ private fun SignedInNav(app: AppViewModel, composer: ComposerViewModel, containe
     var seenCompletions by androidx.compose.runtime.saveable.rememberSaveable { androidx.compose.runtime.mutableIntStateOf(completions) }
     androidx.compose.runtime.LaunchedEffect(completions) { if (completions > seenCompletions) haptics.play(com.videomk.app.core.DesignTokens.Haptic.VideoReady); seenCompletions = completions }
     var feedbackFrom by androidx.compose.runtime.saveable.rememberSaveable { androidx.compose.runtime.mutableStateOf<FeedbackContext?>(null) }
-    val showTabs = route == "library" || route == "media"
+    // photos picked in My media and sent to Create stay selected until the video is sent or the draft is discarded: back from Create returns to the same selection
+    var mediaSelecting by androidx.compose.runtime.saveable.rememberSaveable { androidx.compose.runtime.mutableStateOf(false) }
+    var madeFromSelection by androidx.compose.runtime.saveable.rememberSaveable { androidx.compose.runtime.mutableStateOf(false) }
+    val showTabs = (route == "library" || route == "media") && !(route == "media" && mediaSelecting)
     val mediaFactory = viewModelFactory { initializer { MediaViewModel(container.mediaApi, null, MediaCache(FilePageDisk(java.io.File(application.cacheDir, "media-pages"))), Int.MAX_VALUE, container.mediaUploads?.arrivals ?: com.videomk.app.core.ArrivalTracker()) } }
     Scaffold(
         containerColor = Vmk.colors.background, contentWindowInsets = WindowInsets(0),
@@ -118,7 +121,7 @@ private fun SignedInNav(app: AppViewModel, composer: ComposerViewModel, containe
                         .clickable(role = Role.Button, onClickLabel = newVideo) { composer.openCreate(container.createPrefs?.load(email)); nav.navigate("create") }
                         .semantics { contentDescription = newVideo }.testTag("newVideoFab"),
                     contentAlignment = Alignment.Center,
-                ) { Icon(Icons.Filled.Add, null, tint = Vmk.colors.onPrimary, modifier = Modifier.size(28.dp)) }
+                ) { Icon(Icons.Filled.AutoAwesome, null, tint = Vmk.colors.onPrimary, modifier = Modifier.size(26.dp)) }
             }
         },
     ) { inner ->
@@ -134,11 +137,12 @@ private fun SignedInNav(app: AppViewModel, composer: ComposerViewModel, containe
             )
         }
         composable("create") {
-            CreateScreen(app, composer, onClose = { nav.popBackStack() }, onOpenWallet = { nav.navigate("wallet") })
+            CreateScreen(app, composer, onClose = { nav.popBackStack() }, onOpenWallet = { nav.navigate("wallet") }, onSent = { navigateTab(nav, "library") })
         }
         composable("media") { entry ->
             val vm: MediaViewModel = viewModel(entry, key = "media-home", factory = mediaFactory)
-            MediaScreen(vm, container.mediaUploads, onOpenCollection = { nav.navigate("media/collection/$it") }, onMakeVideo = { composer.addLibrary(it); navigateTab(nav, "library") }, organize = container.organize, onOpenCollections = { nav.navigate("media/collections") })
+            SelectionAfterCreate(vm, composer, madeFromSelection) { madeFromSelection = false }
+            MediaScreen(vm, container.mediaUploads, onOpenCollection = { nav.navigate("media/collection/$it") }, onMakeVideo = { madeFromSelection = vm.selecting; makeVideoFrom(nav, composer, container, email, it) }, organize = container.organize, onOpenCollections = { nav.navigate("media/collections") }, onSelectingChange = { mediaSelecting = it })
         }
         composable("media/collections") {
             val parent = remember(it) { nav.getBackStackEntry("media") }
@@ -149,7 +153,8 @@ private fun SignedInNav(app: AppViewModel, composer: ComposerViewModel, containe
         composable("media/collection/{id}", arguments = listOf(navArgument("id") { type = NavType.StringType })) { entry ->
             val id = entry.arguments?.getString("id").orEmpty()
             val vm: MediaViewModel = viewModel(entry, key = "media-collection-$id", factory = viewModelFactory { initializer { MediaViewModel(container.mediaApi, id, null) } })
-            CollectionScreen(vm, id, onBack = { nav.popBackStack() }, onMakeVideo = { composer.addLibrary(it); navigateTab(nav, "library") })
+            SelectionAfterCreate(vm, composer, madeFromSelection) { madeFromSelection = false }
+            CollectionScreen(vm, id, onBack = { nav.popBackStack() }, onMakeVideo = { madeFromSelection = vm.selecting; makeVideoFrom(nav, composer, container, email, it) })
         }
         composable("video/{id}", arguments = listOf(navArgument("id") { type = NavType.StringType })) { entry ->
             val id = entry.arguments?.getString("id").orEmpty()
@@ -189,4 +194,25 @@ private fun tabColors() = androidx.compose.material3.NavigationBarItemDefaults.c
 
 private fun navigateTab(nav: androidx.navigation.NavHostController, route: String) {
     nav.navigate(route) { popUpTo("library") { saveState = true }; launchSingleTop = true; restoreState = true }
+}
+
+/** "Make a video" from photos: they join the draft, Create opens with the prompt focused, and Media stays underneath (back returns to it). */
+private fun makeVideoFrom(nav: androidx.navigation.NavHostController, composer: ComposerViewModel, container: AppContainer, email: String?, photos: List<com.videomk.app.core.MediaPhoto>) {
+    composer.addLibrary(photos)
+    composer.openCreate(container.createPrefs?.load(email))
+    composer.requestFocus()
+    nav.navigate("create")
+}
+
+/**
+ * Back on a Media screen after Create: if the video was sent or the draft discarded (no photos left in the draft) the selection ends; if the draft still holds photos
+ * (the person pressed back and kept it) the selection becomes exactly those photos, so what Media shows matches what Create will use.
+ */
+@Composable
+private fun SelectionAfterCreate(vm: MediaViewModel, composer: ComposerViewModel, made: Boolean, onDone: () -> Unit) {
+    androidx.compose.runtime.LaunchedEffect(made, composer.library.size) {
+        if (!made) return@LaunchedEffect
+        if (composer.library.isEmpty()) { vm.clearSelection(); onDone() }
+        else vm.startPicker(composer.library.toList())
+    }
 }

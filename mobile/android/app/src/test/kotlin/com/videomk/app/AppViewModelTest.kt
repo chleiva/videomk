@@ -6,6 +6,7 @@ import com.videomk.app.core.CreateOptions
 import com.videomk.app.core.InMemoryTokenStore
 import com.videomk.app.core.LibraryEntry
 import com.videomk.app.core.PendingVideo
+import com.videomk.app.core.RetryResult
 import com.videomk.app.core.Tokens
 import com.videomk.app.core.VideoItem
 import com.videomk.app.core.VideoStatus
@@ -246,5 +247,70 @@ class AppViewModelTest {
         a.onAuthCallback("com.videomk.app://auth/callback?$quirk&state=${retry.queryParameter("state")}")
         val s = a.await { !it.isSigningIn }
         assertEquals(AppViewModel.ACCOUNT_LINK_FAILED, s.signInError); assertEquals(Phase.SignedOut, s.phase)
+    }
+
+    // ---- "Try again" reuses the failed video (docs/CREATE_API.md, "Retry a video")
+
+    private fun failed(id: String = "v-failed") = VideoItem(id = id, status = VideoStatus.Failed, title = "Mattia", createdAt = Instant.now())
+
+    @Test fun `try again asks the server to restart the SAME video and never creates a new request`() = runBlocking {
+        backend.videos = listOf(failed()); val a = vm(); a.start(); runBlocking { a.refresh() }; a.await { it.videos.size == 1 }
+        a.tryAgain(a.state.value.videos.single())
+        a.await { it.videos.single().status.isRunning }
+        assertEquals(listOf("v-failed"), backend.retryCalls)
+        assertTrue(backend.startCalls.isEmpty())                 // nothing is built from the phone: no prompt, no photos, no new row
+        assertEquals(1, a.state.value.videos.size)
+    }
+
+    @Test fun `a refused retry says why and starts nothing`() = runBlocking {
+        backend.videos = listOf(failed()); backend.retryResult = RetryResult.Refused("attachments_unavailable", "Your photos are no longer stored.")
+        val a = vm(); a.start(); runBlocking { a.refresh() }; a.await { it.videos.size == 1 }
+        a.tryAgain(a.state.value.videos.single())
+        a.await { it.retryNotice != null }
+        assertEquals("Your photos are no longer stored.", a.state.value.retryNotice)
+        assertTrue(backend.startCalls.isEmpty()); assertEquals(VideoStatus.Failed, a.state.value.videos.single().status)
+        a.dismissRetryNotice(); assertNull(a.state.value.retryNotice)
+    }
+
+    @Test fun `an older server without the route never rebuilds a request that may have had photos`() = runBlocking {
+        backend.videos = listOf(failed()); backend.retryResult = RetryResult.Unsupported
+        val a = vm(); a.start(); runBlocking { a.refresh() }; a.await { it.videos.size == 1 }
+        a.tryAgain(a.state.value.videos.single())
+        a.await { it.retryNotice != null }
+        assertTrue(backend.startCalls.isEmpty())                  // INVARIANT: no photo-less copy of a video that had attachments (or that we cannot tell about)
+    }
+
+    @Test fun `an older server is asked the old way only for a video made without attachments in this session`() = runBlocking {
+        backend.retryResult = RetryResult.Unsupported; backend.newVideoId = "v-made"
+        val a = vm(); a.start()
+        a.submit("A short explainer about how black holes form", CreateOptions(2.0))
+        a.await { it.pending.any { p -> p.state is PendingVideo.State.Accepted } }
+        backend.videos = listOf(VideoItem(id = "v-made", status = VideoStatus.Failed))
+        a.refresh(); a.await { it.videos.any { v -> v.id == "v-made" } }
+        backend.startCalls.clear()
+        a.tryAgain(a.state.value.videos.first { it.id == "v-made" })
+        a.await { backend.startCalls.size == 1 }
+        assertEquals("A short explainer about how black holes form", backend.startCalls.single().first)
+        assertTrue(backend.startCalls.single().third.isEmpty())
+    }
+
+    @Test fun `with photos the old way is never used even when the video is known`() = runBlocking {
+        backend.retryResult = RetryResult.Unsupported; backend.newVideoId = "v-photos"
+        val a = vm(); a.start()
+        a.submit("The story of the trip, with my photos", CreateOptions(2.0), photos = List(64) { byteArrayOf(1) })
+        a.await { it.pending.any { p -> p.state is PendingVideo.State.Accepted } }
+        backend.videos = listOf(VideoItem(id = "v-photos", status = VideoStatus.Failed))
+        a.refresh(); a.await { it.videos.any { v -> v.id == "v-photos" } }
+        val calls = backend.startCalls.size
+        a.tryAgain(a.state.value.videos.first { it.id == "v-photos" })
+        a.await { it.retryNotice != null }
+        assertEquals(calls, backend.startCalls.size)
+    }
+
+    @Test fun `removing a failed video takes the row away`() = runBlocking {
+        backend.videos = listOf(failed("a"), failed("b")); val a = vm(); a.start(); runBlocking { a.refresh() }; a.await { it.videos.size == 2 }
+        a.removeFailed(a.state.value.videos.first { it.id == "a" })
+        a.await { it.videos.size == 1 }
+        assertEquals(listOf("a"), backend.deleteCalls); assertEquals("b", a.state.value.videos.single().id)
     }
 }

@@ -166,6 +166,14 @@ fun LibraryScreen(app: AppViewModel, composer: ComposerViewModel, onOpenVideo: (
         onDispose { runCatching { cm?.unregisterNetworkCallback(cb) } }
     }
 
+    state.retryNotice?.let { notice ->
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { app.dismissRetryNotice() },
+            confirmButton = { TextButton(onClick = { app.dismissRetryNotice() }, modifier = Modifier.heightIn(min = Vmk.minTouch).testTag("retryNoticeOk")) { Text(stringResource(android.R.string.ok)) } },
+            text = { Text(notice, style = MaterialTheme.typography.bodyLarge, color = Vmk.colors.text) },
+            containerColor = Vmk.colors.surface,
+        )
+    }
     Scaffold(
         containerColor = Vmk.colors.background,
         contentWindowInsets = WindowInsets(0),
@@ -222,8 +230,9 @@ fun LibraryScreen(app: AppViewModel, composer: ComposerViewModel, onOpenVideo: (
                                                     else -> FailedRow(
                                                         title = state.briefs[v.id] ?: v.displayTitle, rejected = v.status == VideoStatus.Rejected, detail = v.rejectReason,
                                                         thumb = v.previewGifUrl, tag = "videoRow",
-                                                        onRetry = state.briefs[v.id]?.takeIf { v.id !in state.deckVideos }?.let { brief -> { app.submit(brief, CreateOptions(state.minutes[v.id] ?: CreateOptions.DEFAULT_MINUTES)) } },
-                                                        onDismiss = null,
+                                                        // "Try again" starts THIS video again on the server (all its photos and options): no new row. Not offered for a refused video, a used-up presentation or one out of retries.
+                                                        onRetry = if (v.status == VideoStatus.Failed && v.canRetry != false && v.id !in state.deckVideos && v.id !in state.retrying) { { app.tryAgain(v) } } else null,
+                                                        onDismiss = { app.removeFailed(v) },
                                                     )
                                                 }
                                             }

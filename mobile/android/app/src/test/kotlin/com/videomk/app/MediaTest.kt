@@ -59,6 +59,8 @@ class MediaTest {
         assertEquals(StorageMeter.State.Warning, StorageMeter.state(999, 1000))
         assertEquals(StorageMeter.State.Full, StorageMeter.state(1000, 1000))
         assertEquals(StorageMeter.State.Full, StorageMeter.state(1200, 1000))
+        // the meter stays quiet until half full
+        assertFalse(StorageMeter.shouldShow(499, 1000)); assertTrue(StorageMeter.shouldShow(500, 1000)); assertTrue(StorageMeter.shouldShow(1000, 1000)); assertFalse(StorageMeter.shouldShow(0, 0))
         assertEquals(StorageMeter.State.Ok, StorageMeter.state(0, 0))
         assertEquals("1.2 GB of 2 GB", StorageMeter.label(1_200_000_000, 2_000_000_000))
         assertEquals("640 MB", StorageMeter.format(640_000_000)); assertEquals("12 KB", StorageMeter.format(12_000))

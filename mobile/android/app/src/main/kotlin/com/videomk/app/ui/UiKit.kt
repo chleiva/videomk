@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -144,19 +145,22 @@ fun GlassIconButton(
         tooltip = { PlainTooltip { Text(description) } },
         state = rememberTooltipState(),
     ) {
-        Box(
-            modifier.size(size).alpha(if (enabled) 1f else 0.4f).clip(CircleShape)
-                .clickable(enabled = enabled, role = Role.Button, onClickLabel = null, onClick = onClick)
-                .semantics { contentDescription = description },
-            contentAlignment = Alignment.Center,
-        ) {
+        Box(modifier.size(size).alpha(if (enabled) 1f else 0.4f), contentAlignment = Alignment.Center) {
             Box(
-                Modifier.size(size - 8.dp).clip(CircleShape).then(if (filled) Modifier.background(Vmk.gradientNow) else Modifier.background(container!!)),
+                Modifier.matchParentSize().clip(CircleShape)
+                    .clickable(enabled = enabled, role = Role.Button, onClickLabel = null, onClick = onClick)
+                    .semantics { contentDescription = description },
                 contentAlignment = Alignment.Center,
-            ) { Icon(icon, null, tint = tint, modifier = Modifier.size(22.dp)) }
+            ) {
+                Box(
+                    Modifier.size(size - 8.dp).clip(CircleShape).then(if (filled) Modifier.background(Vmk.gradientNow) else Modifier.background(container!!)),
+                    contentAlignment = Alignment.Center,
+                ) { Icon(icon, null, tint = tint, modifier = Modifier.size(22.dp)) }
+            }
+            // drawn outside the clipped circle and nudged inwards, so a count such as "45" is never cut off
             if (badge != null) Text(
-                badge, style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = Vmk.colors.onPrimary, maxLines = 1,
-                modifier = Modifier.align(Alignment.TopEnd).clip(CircleShape).background(Vmk.colors.primary).padding(horizontal = 5.dp, vertical = 1.dp).clearAndSetSemantics { },
+                badge, style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = Vmk.colors.onPrimary, maxLines = 1, softWrap = false,
+                modifier = Modifier.align(Alignment.TopEnd).offset(x = 2.dp, y = (-2).dp).clip(CircleShape).background(Vmk.colors.primary).padding(horizontal = 6.dp, vertical = 2.dp).clearAndSetSemantics { },
             )
         }
     }

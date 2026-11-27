@@ -19,9 +19,14 @@ class PhotoSettings(context: Context) {
         get() = runCatching { prefs.getBoolean(MEDIA_PRIVACY, false) }.getOrDefault(false)
         set(v) { runCatching { prefs.edit().putBoolean(MEDIA_PRIVACY, v).apply() } }
 
+    /** The one-time "Tap Select, choose photos, then Make a video" tip of My media was seen. */
+    var mediaSelectHintSeen: Boolean
+        get() = runCatching { prefs.getBoolean(MEDIA_SELECT_HINT, false) }.getOrDefault(false)
+        set(v) { runCatching { prefs.edit().putBoolean(MEDIA_SELECT_HINT, v).apply() } }
+
     val policy: PhotoMetaPolicy get() = PhotoMetaPolicy(useDates, useLocations)
 
-    private companion object { const val DATES = "photo_use_dates"; const val LOCATIONS = "photo_use_locations"; const val MEDIA_PRIVACY = "media_privacy_seen" }
+    private companion object { const val DATES = "photo_use_dates"; const val LOCATIONS = "photo_use_locations"; const val MEDIA_PRIVACY = "media_privacy_seen"; const val MEDIA_SELECT_HINT = "media_select_hint_seen" }
 }
 
 /** What Create remembers per person (platform, format, resolution, length, look, subtitles, language), in plain preferences. Prompt and photos never. */

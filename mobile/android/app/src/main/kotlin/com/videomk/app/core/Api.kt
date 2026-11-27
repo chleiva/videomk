@@ -22,6 +22,16 @@ import java.util.concurrent.TimeUnit
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
+/** The answer to "Try again" on a video that did not finish (docs/CREATE_API.md, "Retry a video"). */
+sealed interface RetryResult {
+    /** The SAME video is making again with everything it was made with; [photos] is how many photos it carries, [unusable] how many of the original ones could not be used. */
+    data class Started(val photos: Int?, val unusable: Int) : RetryResult
+    data object AlreadyRunning : RetryResult
+    /** An older server without the route: the caller must NOT rebuild the request from the phone (that would drop the attachments). */
+    data object Unsupported : RetryResult
+    data class Refused(val code: String, val message: String) : RetryResult
+}
+
 /** Runs the call without blocking a thread and cancels it with the coroutine. */
 suspend fun Call.await(): Response = suspendCancellableCoroutine { cont ->
     cont.invokeOnCancellation { runCatching { cancel() } }
@@ -92,6 +102,38 @@ class ApiClient(
             brief?.let { put("brief", it) }
         }
         return send("POST", listOf("videos", "generate"), body = body, deck = deck != null).requireString("video_id")
+    }
+
+    /** "Try again": the same video starts again on the server with every photo, option, language and watermark it had. Nothing is resent from the phone. */
+    suspend fun retryVideo(videoId: String): RetryResult {
+        val a = auth.authorization()
+        val (code, text) = try { raw("POST", listOf("videos", videoId, "retry"), a.idToken, a.userId, JsonObject(emptyMap())) } catch (e: IOException) { throw ApiError.Network }
+        val o = runCatching { parseObject(text) }.getOrNull()
+        return when (code) {
+            202 -> RetryResult.Started(o?.int("photos"), o?.int("photos_unusable") ?: 0)
+            200 -> RetryResult.AlreadyRunning
+            401 -> throw ApiError.Unauthorized
+            402 -> throw ApiError.InsufficientCredits(o?.int("balance") ?: 0, o?.int("needed") ?: 1)
+            429 -> throw ApiError.Quota(o?.str("message") ?: Txt.s(R.string.err_daily_limit))
+            403, 404 -> if (o?.str("code") == null) RetryResult.Unsupported else RetryResult.Refused(o.str("code") ?: "not_found", o.str("message") ?: Txt.s(R.string.err_server))   // no code: API Gateway's own answer for a route the server does not have
+            400, 409 -> RetryResult.Refused(o?.str("code") ?: "refused", o?.str("message") ?: Txt.s(R.string.err_server))
+            else -> throw ApiError.Server
+        }
+    }
+
+    /** Removes a video that did not finish (failed, cancelled or refused); a made video is never deleted here (409). False: the server does not have the route. */
+    suspend fun deleteVideo(videoId: String): Boolean {
+        val a = auth.authorization()
+        val (code, text) = try { raw("DELETE", listOf("videos", videoId), a.idToken, a.userId, JsonObject(emptyMap())) } catch (e: IOException) { throw ApiError.Network }
+        val o = runCatching { parseObject(text) }.getOrNull()
+        return when (code) {
+            200, 204 -> true
+            401 -> throw ApiError.Unauthorized
+            404 -> o?.str("code") == "not_found"   // already gone is fine; no code: an older server
+            403 -> false
+            409 -> throw ApiError.Conflict(o?.str("message") ?: Txt.s(R.string.err_server))
+            else -> throw ApiError.Server
+        }
     }
 
     // presentations (docs/CREATE_API.md, "Making a video from a presentation deck")
@@ -165,6 +207,7 @@ class ApiClient(
             .header("X-Platform", "android")
             .header("X-App-Version", appVersion)
             .header("X-Locale", locale())
+            .header("X-Timezone", timeZone())
             .method(method, body.toString().toRequestBody("application/json".toMediaType()))
         val response = try { http.newBuilder().callTimeout(30, TimeUnit.SECONDS).build().newCall(rb.build()).await() } catch (e: CancellationException) { throw e }
         return response.use { r -> r.code to r.body.string() }

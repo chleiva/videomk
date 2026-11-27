@@ -9,6 +9,10 @@ interface Backend {
     suspend fun playback(videoId: String): PlaybackInfo
     suspend fun editorSnapshot(videoId: String): EditorSnapshot
     suspend fun applyEdits(videoId: String, baseRev: Int, ops: List<EditOp>, mode: RenderMode): Int
+    /** "Try again" reuses the failed video on the server (all its photos and options); [RetryResult.Unsupported] from an older server. */
+    suspend fun retryVideo(videoId: String): RetryResult = RetryResult.Unsupported
+    /** Removes a video that did not finish; false when the server cannot. */
+    suspend fun deleteVideo(videoId: String): Boolean = false
 }
 
 /**
@@ -31,4 +35,6 @@ class ApiBackend(private val api: ApiClient, private val uploader: PhotoUploader
     override suspend fun playback(videoId: String) = guarded { api.playback(videoId) }
     override suspend fun editorSnapshot(videoId: String) = guarded { api.editorSnapshot(videoId) }
     override suspend fun applyEdits(videoId: String, baseRev: Int, ops: List<EditOp>, mode: RenderMode) = guarded { api.applyEdits(videoId, baseRev, ops, mode) }
+    override suspend fun retryVideo(videoId: String) = guarded { api.retryVideo(videoId) }
+    override suspend fun deleteVideo(videoId: String) = guarded { api.deleteVideo(videoId) }
 }

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="retry_unavailable">Try again isn\'t available for this video right now. Start a new video from Create.</string>
+    <string name="retry_remove_unavailable">This video can\'t be removed right now. Please try again later.</string>
+    <plurals name="retry_photos_unusable">
+        <item quantity="one">%1$d photo couldn\'t be used the first time and was left out.</item>
+        <item quantity="other">%1$d photos couldn\'t be used the first time and were left out.</item>
+    </plurals>
+</resources>

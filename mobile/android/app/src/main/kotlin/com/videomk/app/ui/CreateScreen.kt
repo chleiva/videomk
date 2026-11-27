@@ -40,6 +40,10 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import com.videomk.app.core.CreateSubmit
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
@@ -140,7 +144,7 @@ import kotlinx.coroutines.launch
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun CreateScreen(app: AppViewModel, composer: ComposerViewModel, onClose: () -> Unit, onOpenWallet: () -> Unit) {
+fun CreateScreen(app: AppViewModel, composer: ComposerViewModel, onClose: () -> Unit, onOpenWallet: () -> Unit, onSent: () -> Unit = onClose) {
     val context = LocalContext.current
     val view = LocalView.current
     val scope = rememberCoroutineScope()
@@ -198,6 +202,14 @@ fun CreateScreen(app: AppViewModel, composer: ComposerViewModel, onClose: () -> 
     val photoHint = PhotoCapacity.hint(photoTotal, options.minutes, lengths).takeIf { status.sendReady }
     val hintFix = PhotoCapacity.suggestion(photoTotal, options.minutes, lengths)
 
+    // between the tap and the answer the form is locked (CreateSubmit): the close icon cancels the request check; during the send itself it waits for the answer
+    val phase = CreateSubmit.phase(composer.checking, composer.submitting)
+    val locked = CreateSubmit.locked(phase)
+    val phaseText = when (phase) { CreateSubmit.Phase.Checking -> stringResource(R.string.create_phase_checking); CreateSubmit.Phase.Starting -> stringResource(R.string.create_phase_starting); else -> null }
+    val focusManager = androidx.compose.ui.platform.LocalFocusManager.current
+    LaunchedEffect(phase) {
+        if (phaseText != null) { focusManager.clearFocus(); keyboard?.hide(); view.announceForAccessibility(phaseText) }
+    }
     fun haptic(ok: Boolean) {
         if (Build.VERSION.SDK_INT >= 30) view.performHapticFeedback(if (ok) HapticFeedbackConstants.CONFIRM else HapticFeedbackConstants.REJECT) else view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
     }
@@ -224,11 +236,11 @@ fun CreateScreen(app: AppViewModel, composer: ComposerViewModel, onClose: () -> 
         container?.createPrefs?.save(person, CreatePrefs.of(options))
         haptic(true)
         composer.dismissSheet()
-        onClose()
+        onSent()   // the new video is on the Videos tab as a Making card
     }
 
     fun tapCreate() {
-        if (composer.checking || composer.submitting) return
+        if (!CreateSubmit.tapAllowed(phase)) return
         if (status.sendReady) { haptic(true); composer.create(container?.intake, ::send, ::accepted) }
         else {
             haptic(false); pulse++
@@ -242,7 +254,13 @@ fun CreateScreen(app: AppViewModel, composer: ComposerViewModel, onClose: () -> 
         if (fix.addCredits) onOpenWallet() else composer.setLength(fix.minutes!!)
     }
 
-    fun close() { if (composer.submitting) return; if (composer.hasDraft) discard = true else { composer.discardDraft(); onClose() } }
+    // back is never destructive: a draft that is only photos picked in My media just closes (they stay attached, and Media keeps its selection); anything typed asks first
+    fun close() {
+        if (CreateSubmit.closeIsBlocked(phase)) { view.announceForAccessibility(phaseText.orEmpty()); return }
+        if (CreateSubmit.closeCancelsCheck(phase)) { composer.dismissSheet(); return }
+        val onlyLibraryPhotos = composer.text.isBlank() && composer.photos.isEmpty() && composer.loading == 0 && !composer.deckState.attached
+        if (composer.hasDraft && !onlyLibraryPhotos) discard = true else if (onlyLibraryPhotos && composer.library.isNotEmpty()) onClose() else { composer.discardDraft(); onClose() }
+    }
     BackHandler { close() }
 
     var forOpen by remember { mutableStateOf(false) }
@@ -257,7 +275,7 @@ fun CreateScreen(app: AppViewModel, composer: ComposerViewModel, onClose: () -> 
         }
         Box(Modifier.fillMaxWidth().size(1.dp).background(if (scroll.value > 0) Vmk.colors.outline else Color.Transparent))
 
-        Column(Modifier.weight(1f).verticalScroll(scroll).padding(horizontal = 20.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+        Column(Modifier.weight(1f).then(if (locked) Modifier.alpha(0.5f).lockTouches() else Modifier).verticalScroll(scroll).padding(horizontal = 20.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
             PromptField(composer, listening, focus, deck = deckState.attached)
             // photo and mic: two icons under the prompt; the count is a badge, "Tap the mic to speak" is gone (the mic icon is universal)
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -325,7 +343,7 @@ fun CreateScreen(app: AppViewModel, composer: ComposerViewModel, onClose: () -> 
         }
 
         // the bar that never goes away: Create (one primary action) and one caption, only when it says something
-        Surface(color = Vmk.colors.background, modifier = Modifier.fillMaxWidth()) {
+        Surface(color = Vmk.colors.background, modifier = Modifier.fillMaxWidth().then(if (locked) Modifier.lockTouches() else Modifier)) {
             Column(Modifier.padding(horizontal = 20.dp).padding(top = 6.dp, bottom = 12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 composer.inlineError?.let { m ->
                     Row(Modifier.fillMaxWidth().testTag("createError").semantics { liveRegion = androidx.compose.ui.semantics.LiveRegionMode.Assertive }, verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -333,7 +351,7 @@ fun CreateScreen(app: AppViewModel, composer: ComposerViewModel, onClose: () -> 
                         Text(stringResource(R.string.create_error_retry, m), style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.danger)
                     }
                 }
-                CreateButton(status.sendReady, composer.checking || composer.submitting, options.credits, status.text, status.fix != null, ::tapCreate)
+                CreateButton(status.sendReady, phaseText, options.credits, status.text, status.fix != null, ::tapCreate)
                 if (status.kind == StatusKind.Ready || status.kind == StatusKind.PhotoHint) {
                     if (balance != null) Text(pluralStringResource(R.plurals.create_credits_left, balance, balance), style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary, textAlign = androidx.compose.ui.text.style.TextAlign.Center, modifier = Modifier.fillMaxWidth().testTag("costLine"))
                 } else StatusLine(status, flash.value, shake.value, ::applyFix)
@@ -394,30 +412,41 @@ private fun PhotoHintBlock(hint: String, fix: Double?, composer: ComposerViewMod
 
 /** Create: 54 dp, full width, never absent. Filled when it can act, tonal when it cannot; a spinner while the request is being checked. */
 @Composable
-private fun CreateButton(ready: Boolean, checking: Boolean, credits: Int, reason: String, hasFix: Boolean, onClick: () -> Unit) {
+private fun CreateButton(ready: Boolean, busyText: String?, credits: Int, reason: String, hasFix: Boolean, onClick: () -> Unit) {
     val shape = CircleShape
     val createLabel = stringResource(R.string.create_create_video)
-    val boxState = if (checking) stringResource(R.string.create_state_checking)
+    val busy = busyText != null
+    val boxState = if (busy) busyText!!
         else if (ready) pluralStringResource(R.plurals.create_state_ready, credits, credits)
         else stringResource(if (hasFix) R.string.create_state_not_ready_fix else R.string.create_state_not_ready, reason)
     Box(
-        Modifier.fillMaxWidth().heightIn(min = 54.dp).clip(shape).then(if (ready || checking) Modifier.background(Vmk.gradientNow) else Modifier.background(Vmk.colors.surface3))
-            .clickable(role = Role.Button, onClickLabel = if (ready) createLabel else stringResource(R.string.create_explain_not_ready), onClick = onClick)
-            .semantics { contentDescription = createLabel; stateDescription = boxState }.testTag("sendButton"),
+        Modifier.fillMaxWidth().heightIn(min = 54.dp).clip(shape).then(if (ready || busy) Modifier.background(Vmk.gradientNow) else Modifier.background(Vmk.colors.surface3))
+            .clickable(enabled = !busy, role = Role.Button, onClickLabel = if (ready) createLabel else stringResource(R.string.create_explain_not_ready), onClick = onClick)
+            .semantics { contentDescription = if (busy) busyText!! else createLabel; stateDescription = boxState }.testTag("sendButton"),
         contentAlignment = Alignment.Center,
     ) {
-        val c = if (ready || checking) Vmk.colors.onPrimary else Vmk.colors.textSecondary
+        val c = if (ready || busy) Vmk.colors.onPrimary else Vmk.colors.textSecondary
         Row(Modifier.padding(horizontal = 16.dp, vertical = 12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            if (checking) CircularProgressIndicator(Modifier.size(20.dp), color = c, strokeWidth = 2.dp)
-            // the label may wrap (Spanish, large text); the price stays together
-            Text(createLabel, style = VmkType.cta, color = c, textAlign = androidx.compose.ui.text.style.TextAlign.Center, modifier = Modifier.weight(1f, fill = false))
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text("·", style = VmkType.cta, color = c, modifier = Modifier.padding(end = 8.dp))
-                Icon(Icons.Filled.Bolt, null, tint = c, modifier = Modifier.size(20.dp))
-                Text("$credits", style = VmkType.cta, color = c)
+            if (busy) {
+                // locked: a spinner and one honest line, no price
+                CircularProgressIndicator(Modifier.size(20.dp), color = c, strokeWidth = 2.dp)
+                Text(busyText!!, style = VmkType.cta, color = c, textAlign = androidx.compose.ui.text.style.TextAlign.Center, modifier = Modifier.weight(1f, fill = false).testTag("sendBusyText"))
+            } else {
+                // the label may wrap (Spanish, large text); the price stays together
+                Text(createLabel, style = VmkType.cta, color = c, textAlign = androidx.compose.ui.text.style.TextAlign.Center, modifier = Modifier.weight(1f, fill = false))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text("·", style = VmkType.cta, color = c, modifier = Modifier.padding(end = 8.dp))
+                    Icon(Icons.Filled.Bolt, null, tint = c, modifier = Modifier.size(20.dp))
+                    Text("$credits", style = VmkType.cta, color = c)
+                }
             }
         }
     }
+}
+
+/** Swallows every touch on this part of the screen (the form while a request is running). */
+private fun Modifier.lockTouches(): Modifier = this.pointerInput(Unit) {
+    awaitPointerEventScope { while (true) { awaitPointerEvent(PointerEventPass.Initial).changes.forEach { it.consume() } } }
 }
 
 @Composable
@@ -461,15 +490,22 @@ private fun PromptField(composer: ComposerViewModel, listening: Boolean, focus: 
 @Composable
 private fun PhotoStrip(composer: ComposerViewModel, onAdd: () -> Unit) {
     val total = composer.totalPhotos
+    // copy the live lists once, here: the lazy row reads them later, after the picker may already have changed them
+    val stripPhotos = composer.photos.toList().take(12)
+    val stripLibrary = composer.library.toList().distinctBy { it.id }.take(12 - stripPhotos.size)
     Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
         androidx.compose.foundation.lazy.LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().testTag("photoStrip")) {
-            items(composer.photos.size.coerceAtMost(12)) { i ->
-                composer.photos[i].thumbnail?.let { androidx.compose.foundation.Image(it.asImageBitmap(), null, contentScale = ContentScale.Crop, modifier = Modifier.size(56.dp).clip(RoundedCornerShape(12.dp)).testTag("attachedPhoto")) }
+            items(stripPhotos.size) { i ->
+                val photo = stripPhotos[i]
+                photo.thumbnail?.let { bmp -> RemovableThumb({ composer.removePhoto(photo.id) }) { androidx.compose.foundation.Image(bmp.asImageBitmap(), null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize().testTag("attachedPhoto")) } }
             }
-            items(composer.library.take(12 - composer.photos.size.coerceAtMost(12)).size) { i -> PhotoThumb(composer.library[i], Modifier.size(56.dp).clip(RoundedCornerShape(12.dp)).testTag("attachedLibraryPhoto")) }
+            items(stripLibrary.size) { i ->
+                val photo = stripLibrary[i]
+                RemovableThumb({ composer.removeLibrary(photo.id) }) { PhotoThumb(photo, Modifier.fillMaxSize().testTag("attachedLibraryPhoto")) }
+            }
             item {
                 val add = stringResource(R.string.create_add_photos)
-                Box(Modifier.size(56.dp).clip(RoundedCornerShape(12.dp)).background(Vmk.colors.surfaceRaised).clickable(role = Role.Button, onClickLabel = add, onClick = onAdd).semantics { contentDescription = add }, contentAlignment = Alignment.Center) {
+                Box(Modifier.size(64.dp).clip(RoundedCornerShape(12.dp)).background(Vmk.colors.surfaceRaised).clickable(role = Role.Button, onClickLabel = add, onClick = onAdd).semantics { contentDescription = add }, contentAlignment = Alignment.Center) {
                     Icon(Icons.Filled.Add, null, tint = Vmk.colors.primary)
                 }
             }
@@ -478,6 +514,20 @@ private fun PhotoStrip(composer: ComposerViewModel, onAdd: () -> Unit) {
         if (composer.loading > 0) Text(composer.preparingText, style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary, modifier = Modifier.testTag("photosPreparing"))
         composer.notice?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = Vmk.colors.warning, modifier = Modifier.testTag("photosNotice")) }
         Text(pluralStringResource(R.plurals.create_photos_count, total, total), style = MaterialTheme.typography.labelMedium, color = Vmk.colors.textTertiary, modifier = Modifier.testTag("photosNote"))
+    }
+}
+
+/** An attached photo: a 64 dp thumbnail with a small close button (a 40 dp target) in its corner, so every photo can be taken out in one tap. */
+@Composable
+private fun RemovableThumb(onRemove: () -> Unit, content: @Composable () -> Unit) {
+    val remove = stringResource(R.string.media_remove_photo)
+    Box(Modifier.size(64.dp)) {
+        Box(Modifier.fillMaxSize().clip(RoundedCornerShape(12.dp))) { content() }
+        Box(Modifier.align(Alignment.TopEnd).size(40.dp).clickable(role = Role.Button, onClickLabel = remove, onClick = onRemove).semantics { contentDescription = remove }.testTag("removePhoto"), contentAlignment = Alignment.TopEnd) {
+            Box(Modifier.padding(2.dp).size(22.dp).clip(CircleShape).background(Color.Black.copy(alpha = 0.65f)), contentAlignment = Alignment.Center) {
+                Icon(Icons.Filled.Close, null, tint = Color.White, modifier = Modifier.size(14.dp))
+            }
+        }
     }
 }
 

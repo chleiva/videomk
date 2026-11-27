@@ -3,6 +3,7 @@ package com.videomk.app.ui
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.videomk.app.R
+import com.videomk.app.core.RetryResult
 import com.videomk.app.core.ApiError
 import com.videomk.app.core.Txt
 import com.videomk.app.core.SubmitOutcome
@@ -73,6 +74,10 @@ data class AppState(
     val minutes: Map<String, Double> = emptyMap(),
     /** Videos made from a presentation (their deck is gone once planning starts, so a failed one is made again from Create, not retried from its text). */
     val deckVideos: Set<String> = emptySet(),
+    /** A message about "Try again" or removing a failed video (shown once, then dismissed): the server's own text, or that it cannot be done from here. */
+    val retryNotice: String? = null,
+    /** Failed videos whose Try again is being sent (the button waits; the server also answers a second tap with the current state). */
+    val retrying: Set<String> = emptySet(),
 ) {
     val entries: List<LibraryEntry> get() = LibraryMerge.entries(pending, videos)
     val hasRunningVideos: Boolean get() = videos.any { it.status.isRunning } || pending.any { it.state == PendingVideo.State.Sending }
@@ -103,6 +108,7 @@ class AppViewModel(
     private val briefData = HashMap<String, kotlinx.serialization.json.JsonObject>()   // the answers of the request check, kept for a retry
     private val deckData = HashMap<String, String>()   // the ready presentation's id of a pending request (the file is already on the server)
     private val photoMeta = HashMap<String, List<PhotoMeta?>>()   // what was read from each photo, same order as photoData
+    private val attachments = HashMap<String, Int>()   // videos made in this session: how many photos (uploaded, library) and presentations they were made with, so an older server's fallback never drops them
     private val refreshLock = Mutex()
     private var started = false
     /** True while the sign-in browser tab is open (so the screen can tell "came back without finishing" from "redirect arriving"). Survives rotation. */
@@ -300,6 +306,67 @@ class AppViewModel(
         viewModelScope.launch { send(id) }
     }
 
+    /**
+     * "Try again" on a video the server could not finish: the SAME video starts again on the server with everything it was made with (every photo, option, language,
+     * watermark): no new row, nothing resent from the phone. An older server without the route: only a video known to have had no attachments is asked for again the old
+     * way; any other is never rebuilt without its photos (that is how a 60-photo video once came back with none): the person is told instead.
+     */
+    fun tryAgain(video: VideoItem) {
+        val b = backend ?: return
+        if (video.id in _state.value.retrying) return
+        update { it.copy(retrying = it.retrying + video.id) }
+        viewModelScope.launch {
+            try {
+                when (val r = b.retryVideo(video.id)) {
+                    is RetryResult.Started, RetryResult.AlreadyRunning -> {
+                        update { s -> s.copy(videos = s.videos.map { if (it.id == video.id) it.copy(status = VideoStatus.Running(VideoStatus.Stage.Starting), canRetry = null) else it }) }   // the row turns into the making card at once
+                        refresh()
+                        if (r is RetryResult.Started && r.unusable > 0) update { it.copy(retryNotice = Txt.n(R.plurals.retry_photos_unusable, r.unusable, r.unusable)) }
+                    }
+                    RetryResult.Unsupported -> {
+                        val brief = _state.value.briefs[video.id]
+                        if (attachments[video.id] == 0 && brief != null && video.id !in _state.value.deckVideos) submit(brief, CreateOptions(_state.value.minutes[video.id] ?: CreateOptions.DEFAULT_MINUTES))
+                        else update { it.copy(retryNotice = Txt.s(R.string.retry_unavailable)) }
+                    }
+                    is RetryResult.Refused -> { update { it.copy(retryNotice = r.message) }; refresh() }
+                }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: ApiError.Unauthorized) {
+                signOut()
+            } catch (e: ApiError) {
+                if (e is ApiError.InsufficientCredits) refreshWallet()
+                update { it.copy(retryNotice = e.message) }
+            } catch (e: Exception) {
+                update { it.copy(retryNotice = ApiError.Server.message) }
+            } finally {
+                update { it.copy(retrying = it.retrying - video.id) }
+            }
+        }
+    }
+
+    /** Removes a video that did not finish from the list (and from the server). */
+    fun removeFailed(video: VideoItem) {
+        val b = backend ?: return
+        viewModelScope.launch {
+            try {
+                if (b.deleteVideo(video.id)) update { s -> s.copy(videos = s.videos.filterNot { it.id == video.id }) }
+                else update { it.copy(retryNotice = Txt.s(R.string.retry_remove_unavailable)) }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: ApiError.Unauthorized) {
+                signOut()
+            } catch (e: ApiError) {
+                update { it.copy(retryNotice = e.message) }
+                refresh()
+            } catch (e: Exception) {
+                update { it.copy(retryNotice = ApiError.Server.message) }
+            }
+        }
+    }
+
+    fun dismissRetryNotice() = update { it.copy(retryNotice = null) }
+
     fun dismissPending(id: String) {
         photoData.remove(id); photoMeta.remove(id); libraryData.remove(id); briefData.remove(id); deckData.remove(id)
         update { s -> s.copy(pending = s.pending.filterNot { it.id == id }) }
@@ -322,6 +389,7 @@ class AppViewModel(
             }
             val videoId = b.startGeneration(p.brief, p.id, p.options, media, PhotoMeta.requestJson(media, photoMeta[id].orEmpty()), libraryData[id].orEmpty(), briefData[id], deckData[id])
             val wasDeck = deckData[id] != null
+            attachments[videoId] = media.size + libraryData[id].orEmpty().size + (if (wasDeck) 1 else 0)
             photoData.remove(id); photoMeta.remove(id); libraryData.remove(id); briefData.remove(id); deckData.remove(id)
             update { s ->
                 s.copy(

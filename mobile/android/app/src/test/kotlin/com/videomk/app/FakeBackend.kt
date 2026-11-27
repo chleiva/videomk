@@ -7,6 +7,7 @@ import com.videomk.app.core.EditOp
 import com.videomk.app.core.EditorSnapshot
 import com.videomk.app.core.PlaybackInfo
 import com.videomk.app.core.RenderMode
+import com.videomk.app.core.RetryResult
 import com.videomk.app.core.VideoItem
 import com.videomk.app.core.WalletInfo
 
@@ -23,6 +24,11 @@ class FakeBackend : Backend {
     var editCalls = mutableListOf<Triple<Int, List<EditOp>, RenderMode>>()
     var editError: Exception? = null
     var newVideoId = "new-video"
+    var retryResult: RetryResult = RetryResult.Started(photos = null, unusable = 0)
+    var retryError: Exception? = null
+    val retryCalls = mutableListOf<String>()
+    var deleteResult = true
+    val deleteCalls = mutableListOf<String>()
     val startBriefs = mutableListOf<kotlinx.serialization.json.JsonObject?>()
     val startLibrary = mutableListOf<List<String>>()
     val startDecks = mutableListOf<String?>()
@@ -47,6 +53,12 @@ class FakeBackend : Backend {
         photos.indices.forEach { progress(it + 1, photos.size) }
         return photos.indices.map { "media$it" }
     }
+    override suspend fun retryVideo(videoId: String): RetryResult {
+        retryCalls += videoId; retryError?.let { throw it }
+        if (retryResult is RetryResult.Started || retryResult == RetryResult.AlreadyRunning) videos = videos.map { if (it.id == videoId) it.copy(status = com.videomk.app.core.VideoStatus.Running(com.videomk.app.core.VideoStatus.Stage.Starting)) else it }   // the server list shows the same video making
+        return retryResult
+    }
+    override suspend fun deleteVideo(videoId: String): Boolean { deleteCalls += videoId; return deleteResult }
     override suspend fun playback(videoId: String) = PlaybackInfo("https://example.com/$videoId.mp4", null)
     override suspend fun editorSnapshot(videoId: String): EditorSnapshot = if (snapshots.size > 1) snapshots.removeFirst() else snapshots.firstOrNull() ?: throw ApiError.Server
     override suspend fun applyEdits(videoId: String, baseRev: Int, ops: List<EditOp>, mode: RenderMode): Int {

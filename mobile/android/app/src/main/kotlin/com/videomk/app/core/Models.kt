@@ -53,6 +53,8 @@ data class VideoItem(
     val editable: Boolean = false,
     val aspect: String? = null,
     val resolution: String? = null,
+    /** The server's answer to "is Try again worth offering" (retries left, not a presentation); null from a server that does not say (older ones). */
+    val canRetry: Boolean? = null,
 ) {
     /** Width over height of the frame, from the server's `aspect` ("16:9", "9:16", "1:1", "4:5"); landscape 16:9 when it is absent (older videos). */
     val frameRatio: Float get() = VideoItem.ratioOf(aspect)
@@ -70,7 +72,7 @@ data class VideoItem(
             previewGifUrl = o.str("preview_gif_url"),
             rejectReason = o.str("reject_reason"),
             editable = o.bool("editable") ?: false,
-            aspect = o.str("aspect"), resolution = o.str("resolution"),
+            aspect = o.str("aspect"), resolution = o.str("resolution"), canRetry = o.bool("can_retry"),
         )
 
         fun ratioOf(aspect: String?): Float {

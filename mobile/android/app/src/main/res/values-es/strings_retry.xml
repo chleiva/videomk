@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="retry_unavailable">Ahora no se puede reintentar este video. Crea uno nuevo desde Crear.</string>
+    <string name="retry_remove_unavailable">Ahora no se puede quitar este video. Inténtalo más tarde.</string>
+    <plurals name="retry_photos_unusable">
+        <item quantity="one">%1$d foto no se pudo usar la primera vez y se dejó fuera.</item>
+        <item quantity="other">%1$d fotos no se pudieron usar la primera vez y se dejaron fuera.</item>
+    </plurals>
+</resources>

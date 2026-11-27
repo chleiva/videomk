@@ -19,6 +19,9 @@ object StorageMeter {
     enum class State { Ok, Warning, Full }
 
     const val WARNING_AT = 0.85
+    /** The meter is quiet until it matters: from half full on (the Storage sheet is always in the overflow menu). */
+    const val SHOW_FROM = 0.5
+    fun shouldShow(used: Long, limit: Long): Boolean = fraction(used, limit) >= SHOW_FROM
 
     fun fraction(used: Long, limit: Long): Double = if (limit <= 0) 0.0 else (used.toDouble() / limit).coerceIn(0.0, 1.0)
 

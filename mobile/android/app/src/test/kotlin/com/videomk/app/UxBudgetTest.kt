@@ -36,6 +36,10 @@ class UxBudgetTest {
     /** Credits: the explanation is one popover, not four paragraphs. Budget 18 for the rules; the question sheets drop the helper lines. */
     @Test fun `credit rules fit one short popover`() = check("Credit rules", 18, "wallet_how_short")
 
+    /** The Media tab's selection flow: the one primary button and the one-time tip stay short. */
+    @Test fun `media selection button stays within 4 words`() = check("Make a video button", 4, "media_make_video_count")
+    @Test fun `media select tip stays within 10 words`() = check("Select tip", 10, "media_select_hint")
+
     @Test fun `making promise is one short sentence`() = check("Making promise", 12, "making_leave_promise")
 
     @Test fun `feedback intro is three words`() = check("Feedback intro", 5, "feedback_intro")
