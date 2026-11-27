@@ -196,7 +196,8 @@ export default function Composer() {
     const measure = () => {
       const go = row.querySelector<HTMLElement>(".compose-go"), cl = row.querySelector<HTMLElement>(".tool-cluster"); if (!go || !cl) return;
       row.classList.remove("is-stacked");
-      row.classList.toggle("is-stacked", go.getBoundingClientRect().top > cl.getBoundingClientRect().top + 8);
+      const say = row.querySelector<HTMLElement>(".tool-listening");
+      row.classList.toggle("is-stacked", go.getBoundingClientRect().top > cl.getBoundingClientRect().top + 8 || (!!say && say.scrollWidth > say.clientWidth + 1));
     };
     measure();
     if (typeof ResizeObserver === "undefined") return;
