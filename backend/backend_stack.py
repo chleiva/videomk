@@ -629,6 +629,12 @@ class BackendStack(Stack):
             self, "RequestIntake", account=self.account, is_prod=is_prod, make_fn=make_fn, flags_table=flags_table, usage_table=usage_table, videos_resource=videos, cognito_auth=cognito_auth,
             launcher_fn=launcher_fn, extra_env={"REVIEW_MODEL_ID": str(self.node.try_get_context("reviewModelId"))} if self.node.try_get_context("reviewModelId") else {},
         )
+        # The request check and the launcher know the looks of this stage (common/looks.py): the same switches as capabilities and the engine, so the check never claims
+        # the product "cannot make cartoons" and a look wish that is adapted gets its note. Environment variables on existing functions only: no new resource.
+        for ctx_key, env_key in (("vectorScenes", "VECTOR_SCENES"), ("bgAnimated", "BG_ANIMATED"), ("bgLoops", "BG_LOOPS"), ("whiteboard", "WHITEBOARD")):
+            if str(self.node.try_get_context(ctx_key) or ("1" if stage_cfg.get(ctx_key) else "")).lower() in ("1", "true"):
+                for fn in (intake.brief_fn, launcher_fn):
+                    fn.add_environment(env_key, "1")
 
         # ----------------------------------------------------------------------------
         # Account deletion (docs/ACCOUNT_DELETION.md): POST /users/{user}/account/delete, an SQS worker that removes everything and then the Cognito user.

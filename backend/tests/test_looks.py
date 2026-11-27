@@ -220,6 +220,20 @@ def test_the_stack_switches_the_cartoon_scenes_on_only_where_asked_and_only_with
         synth(2, {"vectorScenes": True})                                                       # no catalog bucket, no cartoon scenes
 
 
+def test_the_request_check_and_the_launcher_get_the_same_look_switches_and_no_new_resource(synth):
+    """common/looks.py: the request check must know what this stage can make, or it refuses what the product does (the "can't make cartoons" refusal of 2026-11-27)."""
+    off = synth(0, imageCatalog="1")
+    on = synth(1, {"vectorScenes": True, "bgAnimated": True, "bgLoops": True}, imageCatalog="1")
+
+    def by_handler(t, handler):
+        return next(v["Properties"]["Environment"]["Variables"] for v in t["Resources"].values() if v["Type"] == "AWS::Lambda::Function" and v["Properties"].get("Handler") == handler)
+    for handler in ("video_brief.handler", "sf_launcher.handler"):
+        assert not {"VECTOR_SCENES", "BG_ANIMATED", "BG_LOOPS"} & set(by_handler(off, handler))
+        e = by_handler(on, handler)
+        assert (e["VECTOR_SCENES"], e["BG_ANIMATED"], e["BG_LOOPS"]) == ("1", "1", "1") and "WHITEBOARD" not in e
+    assert len(on["Resources"]) == len(off["Resources"])   # variables on existing functions only
+
+
 def test_stages_json_turns_the_cartoon_scenes_on_in_qa_only():
     stages = json.load(open(os.path.join(ROOT, "stages.json")))
     assert stages["qa"].get("vectorScenes") is True and "vectorScenes" not in stages["prod"]
