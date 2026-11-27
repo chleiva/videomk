@@ -46,6 +46,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.liveRegion
@@ -123,7 +124,7 @@ fun VideoDetailScreen(
             SettleCrossfade(kind, Modifier.fillMaxSize()) { k ->
                 Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(Vmk.space.l)) {
                     when (k) {
-                        1 -> PlayerSection(video, detail, playback, http, onEdit = { detail.pause(); onEdit() }, onMakeAnother = { detail.pause(); onMakeAnother() }, onFeedback = onFeedback, remixPrompt = Remix.prompt(state.briefs[video.id], video.title), caps = caps, onRemix = { p, k -> detail.pause(); onRemix(p, k) }, onDelete = { detail.pause(); app.delete(video) })
+                        1 -> PlayerSection(video, detail, playback, http, onEdit = { detail.pause(); onEdit() }, onMakeAnother = { detail.pause(); onMakeAnother() }, onFeedback = onFeedback, remixPrompt = Remix.prompt(state.briefs[video.id], video.title), caps = caps, onRemix = { p, k -> detail.pause(); onRemix(p, k) }, onDelete = { detail.pause(); app.delete(video) }, look = video.look ?: state.startedLooks[video.id], lookNote = state.lookNotes[video.id])
                         0 -> MakingBody(rememberMakingSnapshot(video, state), video.id, video.frameRatio, LocalContainerOrNull.current?.readyNotifier, Modifier.testTag("progressCard"))
                         // a video that did not finish names itself and keeps its two ways on: the same card as on the list
                         else -> Column(Modifier.padding(horizontal = Vmk.space.screen)) {
@@ -148,7 +149,7 @@ private fun captionOf(video: VideoItem): String? = listOfNotNull(video.durationS
 @Composable
 private fun PlayerSection(
     video: VideoItem, detail: VideoDetailViewModel, playback: PlaybackState, http: OkHttpClient, onEdit: () -> Unit, onMakeAnother: () -> Unit, onFeedback: () -> Unit,
-    remixPrompt: String?, caps: com.videomk.app.core.Capabilities, onRemix: (String, RemixKind) -> Unit, onDelete: () -> Unit = {},
+    remixPrompt: String?, caps: com.videomk.app.core.Capabilities, onRemix: (String, RemixKind) -> Unit, onDelete: () -> Unit = {}, look: com.videomk.app.core.AppliedLook? = null, lookNote: String? = null,
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -250,7 +251,7 @@ private fun PlayerSection(
             )
         }
 
-        if (infoOpen && description != null) InfoSheet(description, onDismiss = { infoOpen = false })
+        if (infoOpen && description != null) InfoSheet(description, look?.infoLine(caps.lookPicker), listOfNotNull(look?.why, lookNote).distinct(), onDismiss = { infoOpen = false })
     }
 }
 
@@ -258,20 +259,26 @@ private fun PlayerSection(
  * Info, in three short groups: About (made with AI, captions are part of the picture), the description, and the sources and credits with their links.
  * One Copy button for the description with its credits.
  */
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, androidx.compose.ui.ExperimentalComposeUiApi::class)
 @Composable
-private fun InfoSheet(description: String, onDismiss: () -> Unit) {
+private fun InfoSheet(description: String, lookLine: String?, lookWhy: List<String>, onDismiss: () -> Unit) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     var copied by remember { mutableStateOf(false) }
     val parts = remember(description) { com.videomk.app.core.InfoText.split(description) }
     androidx.compose.material3.ModalBottomSheet(onDismissRequest = onDismiss, containerColor = Vmk.colors.surface, shape = RoundedCornerShape(topStart = Vmk.radii.sheet, topEnd = Vmk.radii.sheet), modifier = Modifier.testTag("infoSheet")) {
-        Column(Modifier.padding(horizontal = Vmk.space.sheet).padding(bottom = Vmk.space.xxl).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(Vmk.space.l)) {
+        Column(Modifier.padding(horizontal = Vmk.space.sheet).padding(bottom = Vmk.space.xxl).verticalScroll(rememberScrollState()).semantics { if (com.videomk.app.BuildConfig.DEBUG) testTagsAsResourceId = true }, verticalArrangement = Arrangement.spacedBy(Vmk.space.l)) {
             SheetHeader(stringResource(R.string.video_info_title), onDismiss)
             Column(verticalArrangement = Arrangement.spacedBy(Vmk.space.xs)) {
                 Overline(stringResource(R.string.info_about))
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Vmk.space.s)) { Sparkle(size = 16.dp); Text(stringResource(R.string.info_made_with_ai), style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.text) }
                 Text(stringResource(R.string.info_captions), style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.textSecondary)
+            }
+            // the look the video was made in, and why (the director's reason, or the server's sentence when the chosen look was adapted)
+            if (lookLine != null) Column(Modifier.semantics(mergeDescendants = true) { }.testTag("infoLook"), verticalArrangement = Arrangement.spacedBy(Vmk.space.xs)) {
+                Overline(stringResource(R.string.create_look))
+                Text(lookLine, style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.text)
+                for (w in lookWhy) Text(w, style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.textSecondary)
             }
             if (parts.about.isNotBlank()) androidx.compose.foundation.text.selection.SelectionContainer { Text(parts.about, style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.text) }
             if (parts.credits.isNotBlank()) Column(verticalArrangement = Arrangement.spacedBy(Vmk.space.xs)) {

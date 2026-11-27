@@ -100,17 +100,20 @@ object CreatePlatforms {
 }
 
 /** What is remembered per person after a successful Create (prompt and photos never). */
-data class CreatePrefs(val platform: String, val aspect: String, val resolution: String, val minutes: Double, val look: String?, val captions: Boolean, val language: String, val style: String = "auto") {
+data class CreatePrefs(val platform: String, val aspect: String, val resolution: String, val minutes: Double, val look: String?, val captions: Boolean, val language: String, val style: String = "auto", /** The chosen look with its cast and switches ([look] is the older colour theme). */ val pick: LookChoice = LookChoice()) {
     fun toJson(): String = buildJsonObject {
         put("platform", platform); put("aspect", aspect); put("resolution", resolution); put("minutes", minutes); look?.let { put("look", it) }; put("captions", captions); put("language", language); if (style != "auto") put("style", style)
+        if (!pick.isAuto) put("pick", buildJsonObject { pick.putInto(this) })
     }.toString()
 
     companion object {
-        fun of(o: CreateOptions) = CreatePrefs(o.platform, o.aspect, o.resolution, o.minutes, o.look?.wire, o.captions, o.language, o.style)
+        fun of(o: CreateOptions) = CreatePrefs(o.platform, o.aspect, o.resolution, o.minutes, o.look?.wire, o.captions, o.language, o.style, o.lookChoice)
         fun fromJson(text: String?): CreatePrefs? = runCatching {
             val o = parseObject(text ?: return null)
-            CreatePrefs(o.str("platform") ?: "other", o.str("aspect") ?: "16:9", o.str("resolution") ?: "1080p", o.num("minutes") ?: 3.0, o.str("look"), o.bool("captions") ?: true, o.str("language") ?: "auto", o.str("style") ?: "auto")
+            CreatePrefs(o.str("platform") ?: "other", o.str("aspect") ?: "16:9", o.str("resolution") ?: "1080p", o.num("minutes") ?: 3.0, o.str("look"), o.bool("captions") ?: true, o.str("language") ?: "auto", o.str("style") ?: "auto",
+                o.obj("pick")?.let { p -> p.str("look")?.let { l -> LookChoice(l, strings(p, "cast"), strings(p, "extras")) } } ?: LookChoice())
         }.getOrNull()
+        private fun strings(o: JsonObject, key: String): List<String> = o.arr(key)?.mapNotNull { (it as? JsonPrimitive)?.takeIf { p -> p.isString }?.content } ?: emptyList()
     }
 }
 
@@ -144,8 +147,9 @@ object CreateDefaults {
             val lang = if (stored.language == "auto" || caps.languages.any { it.id == stored.language }) stored.language else "auto"
             val minutes = stored.minutes.takeIf { m -> caps.presets.any { Math.abs(it - m) < 1e-9 } } ?: FIRST_TIME_MINUTES.takeIf { it in caps.presets } ?: caps.presets.first()
             val platform = if (CreatePlatforms.chip(caps, stored.platform)?.enabled == true) stored.platform else "other"
-            val style = stored.style.takeIf { s -> caps.looks?.styles?.any { it.id == s && it.available } == true } ?: "auto"
-            CreateOptions(minutes, VideoLook.entries.firstOrNull { it.wire == stored.look }, stored.captions, platform, aspect, res, lang, style = style)
+            // with the look picker the older style wish is not offered and not sent; the remembered look stays only while the server still lists it
+            val style = stored.style.takeIf { s -> caps.lookPicker == null && caps.looks?.styles?.any { it.id == s && it.available } == true } ?: "auto"
+            CreateOptions(minutes, VideoLook.entries.firstOrNull { it.wire == stored.look }, stored.captions, platform, aspect, res, lang, style = style, lookChoice = LookRules.normalized(stored.pick, caps.lookPicker).choice)
         }
         return priced(o.copy(minutes = withinPlan(o.minutes, caps)), caps)
     }

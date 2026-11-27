@@ -214,7 +214,7 @@ def test_compose_keeps_beats_on_a_board_until_it_is_full():
 def test_compose_gives_every_thing_its_own_zone_on_the_board():
     said = "one two three four five six seven eight"
     beats = [_beat(said, [{"id": "t", "write": "Title", "zone": "top-row", "say": "one"}, {"id": "a", "draw": "sun", "zone": "left", "say": "two"}]),
-             _beat(said, [{"id": "x", "write": "Again", "zone": "top-row", "say": "one"}, {"id": "b", "draw": "piggy_bank", "zone": "left", "say": "two"},
+             _beat(said, [{"id": "x", "write": "Again", "zone": "middle-row", "say": "one"}, {"id": "b", "draw": "piggy_bank", "zone": "left", "say": "two"},
                           {"id": "l", "write": "label", "near": "b", "say": "three"}], "same")]
     st = wp.compose(beats)
     items = beats[1]["scene"]["props"]["items"]
@@ -286,3 +286,27 @@ def test_auto_never_takes_a_video_whose_presenter_was_asked_for(on):
     p = wp.decide("Why do leaves change colour? Explained by a fox", presenter_asked=True, **kw)
     assert not p.allowed and p.reason == "presenter_asked"
     assert wp.decide("Leaves, as a whiteboard video, explained by a fox", presenter_asked=True, **kw).reason == "asked"      # asked for the whiteboard in words: that still wins
+
+
+def test_a_beat_with_its_own_title_never_joins_another_beats_board():
+    """Real QA video 379216f6: the director marked "Three risks" (it writes its own title) "same", so it was drawn on the board of an unrelated forecast chart and 'A guess'."""
+    import json, os
+    from lambdas.engine import whiteboard_policy as wp
+    beats = json.load(open(os.path.join(os.path.dirname(__file__), "fixtures", "plans", "self_evolving_boards_beats.json")))["beats"]
+    titled = [i for i, b in enumerate(beats) if wp._opens_a_topic(b["scene"]["props"])]
+    assert titled, "the fixture has titled beats"
+    stats = wp.compose(beats, "16:9")
+    for i in titled:
+        assert beats[i]["scene"]["props"].get("board") != "same", f"beat {i + 20} writes a title and must open a new board"
+    assert stats["topic_breaks"] >= 1
+    # the beat after a titled one may still continue its board (it adds to the same subject)
+    assert any(b["scene"]["props"].get("board") == "same" for b in beats), "boards are still shared where no new title opens a subject"
+
+
+def test_a_beat_without_a_title_still_continues_the_board():
+    from lambdas.engine import whiteboard_policy as wp
+    a = {"narration": "First the idea in a few words here.", "scene": {"type": "whiteboard", "props": {"items": [{"id": "t", "write": "Idea", "zone": "top-row", "size": "l"}, {"id": "d", "draw": "robot", "zone": "left", "size": "l"}]}}}
+    b = {"narration": "Then one more drawing for it.", "scene": {"type": "whiteboard", "props": {"board": "same", "items": [{"id": "e", "draw": "brain", "zone": "right", "size": "l"}]}}}
+    c = {"narration": "Now a new subject.", "scene": {"type": "whiteboard", "props": {"board": "same", "items": [{"id": "t2", "write": "Risks", "zone": "top-row", "size": "l"}]}}}
+    wp.compose([a, b, c])
+    assert b["scene"]["props"].get("board") == "same" and c["scene"]["props"].get("board") != "same"

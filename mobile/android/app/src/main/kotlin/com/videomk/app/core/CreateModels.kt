@@ -63,6 +63,8 @@ data class Capabilities(
     val deck: DeckCaps? = null,
     /** Scene styles and background wishes, only when the server lists them. */
     val looks: LooksCaps? = null,
+    /** The chosen, enforced look (`looks.look` and `looks.cast`). Null from a server that does not have it: Create then keeps its older Look menu and sends nothing new. */
+    val lookPicker: LookCaps? = null,
     /** The watermark choices, only where the server has the feature. */
     val watermark: WatermarkCaps? = null,
     /** The plan, the free plan's state, and what the plan caps: the longest video in seconds (`lengths.plan_max_seconds`) and the photos one video uses. Absent on a server without plans. */
@@ -96,7 +98,7 @@ data class Capabilities(
             presets = o.obj("lengths")?.arr("presets")?.mapNotNull { (it as? kotlinx.serialization.json.JsonPrimitive)?.content?.toDoubleOrNull() }?.filter { it > 0 }?.distinct()?.sorted()?.takeIf { it.isNotEmpty() } ?: Lengths.OLD_PRESETS,
             maxPhotos = o.int("max_photos") ?: 100, intake = o.bool("intake") ?: false,
             deck = o.obj("deck")?.let { DeckCaps.fromJson(it) },
-            looks = LooksCaps.fromJson(o.obj("looks")), watermark = WatermarkCaps.fromJson(o.obj("watermark")),
+            looks = LooksCaps.fromJson(o.obj("looks")), lookPicker = LookCaps.fromJson(o.obj("looks")), watermark = WatermarkCaps.fromJson(o.obj("watermark")),
             plans = PlanState.fromJson(o), planMaxSeconds = o.obj("lengths")?.int("plan_max_seconds"), planMaxPhotos = o.int("plan_max_photos"),
             longerPlan = o.obj("lengths")?.arr("locked")?.firstNotNullOfOrNull { it.asObject()?.str("requires_plan") },
         ).let { c -> if (c.readyAspects.isEmpty() || c.resolutions.isEmpty()) FALLBACK else c }
@@ -126,7 +128,8 @@ data class IntakeRequest(val prompt: String, val options: CreateOptions, val med
         put("options", buildJsonObject {
             put("platform", options.platform); put("aspect", options.aspect); put("resolution", options.resolution)
             put("captions", options.captions); put("language", options.language); put("target_minutes", options.minutes)
-            if (options.style != "auto") put("style", options.style)
+            if (options.style != "auto" && options.lookChoice.isAuto) put("style", options.style)
+            options.lookChoice.putInto(this)   // look, cast, extras: nothing at all for Auto
         })
         put("media_count", mediaCount)
         put("answers", JsonArray(answers.map { it.toJson() }))

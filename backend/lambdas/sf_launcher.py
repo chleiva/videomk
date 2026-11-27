@@ -182,7 +182,7 @@ def apply_watermark(user_id: str, options: Dict[str, Any], loc: str) -> Optional
         profile = watermark_store.get_profile(user_id) if requested is None else None
         needs_logo = (requested or profile or {}).get("mode") == "custom"
         spec = watermark_store.resolve(requested, profile, premium=premium, forced=forced,
-                                       has_logo=watermark_store.has_logo(user_id) if needs_logo else False, modes=wr.get("modes"))
+                                       has_logo=watermark_store.has_logo(user_id) if needs_logo else False, modes=wr.get("modes"), test=bool(wr.get("test")))
         if forced and wr.get("by_plan"):
             spec = watermark_store.forced_spec(spec)
     except watermark_store.WatermarkError as e:

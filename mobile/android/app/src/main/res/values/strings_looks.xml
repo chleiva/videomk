@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The Look picker and the Characters picker (docs/CREATE_API.md "Video look (chosen and enforced)"). Tile labels, notes, names and the board switch come from the server. -->
+<resources>
+    <string name="looks_auto">Auto</string>
+    <string name="looks_cast">Characters</string>
+    <string name="looks_cast_none">We pick for you. Or choose up to %1$d.</string>
+    <string name="looks_cast_one">%1$s presents.</string>
+    <string name="looks_cast_talk">%1$s talk it through.</string>
+    <string name="looks_list_two">%1$s and %2$s</string>
+    <string name="looks_list_two_e">%1$s and %2$s</string>
+    <string name="looks_list_more">%1$s and %2$s</string>
+    <string name="looks_list_more_e">%1$s and %2$s</string>
+    <string name="looks_chosen_for_you">%1$s · chosen for you</string>
+    <string name="looks_length_moved_look">Length changed to %1$s. %2$s needs %3$s or more.</string>
+    <string name="looks_length_moved_talk">Length changed to %1$s. A conversation needs %2$s or more.</string>
+    <string name="looks_needs_look">%1$s needs %2$s.</string>
+    <string name="looks_needs_talk">A conversation needs %1$s.</string>
+    <string name="looks_name_real">Real</string>
+    <string name="looks_name_whiteboard">Whiteboard</string>
+    <string name="looks_name_cartoon">Cartoon</string>
+    <string name="looks_no_deck">Not with slides</string>
+    <string name="looks_no_photos">Not with photos</string>
+    <string name="looks_plan">%1$s plan</string>
+    <string name="looks_plan_none">Not in your plan</string>
+    <string name="looks_reset_deck">Look set to Auto. %1$s can\'t use a presentation.</string>
+    <string name="looks_reset_gone">Look set to Auto. %1$s is not available.</string>
+    <string name="looks_reset_photos">Look set to Auto. %1$s can\'t use your photos.</string>
+    <string name="looks_colours">Colors</string>
+    <string name="looks_not_available">Not available</string>
+</resources>

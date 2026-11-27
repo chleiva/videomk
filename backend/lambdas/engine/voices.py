@@ -15,7 +15,7 @@ from . import voice_data
 # What the catalogue knows about a voice, and nothing more: language, accent, gender, measured pace. Polly publishes no description of a voice's character
 # ("warm", "calm"), nobody has listened to all of them, so there are no such labels here and the resolver does not pretend to match on them.
 INFO: Dict[str, Dict[str, Any]] = {v["id"]: v for v in voice_data.VOICES}
-# The order voices are offered in when nothing else decides: the owner's choices first (Ruth for US English, Lucia for Spain, Mia for Mexico), then the order
+# The order voices are offered in when nothing else decides: the owner's choices first (Ruth for US English, Lucia for Spain, Mia for a Mexican accent), then the order
 # the English and Spanish catalogue always had, then Polly's own order for the languages added on 2026-11-27.
 _FIRST = ("Ruth Danielle Joanna Salli Tiffany Matthew Stephen Kenneth Nate Amy Brian Olivia Russell Curtis Kajal Kiara Arjun Niamh Aria Ayanda Jasmine "
           "Lucia Sergio Mia Andres Lupe Pedro Carlos Lea Remi Celine Ambre Florian Gabrielle Liam Isabelle Vicki Daniel Tina Lennart Hannah Sabrina "
@@ -48,14 +48,21 @@ _EN_BY_REGION = {"GB": "Amy", "IE": "Niamh", "AU": "Olivia", "NZ": "Aria", "ZA":
 _LATAM = set("MX AR CO CL PE VE EC GT CU BO DO HN PY SV NI CR PA UY PR".split())
 # The languages added on 2026-11-27: the voice Polly has offered longest in each accent (nobody has listened and chosen yet: the owner should).
 _BY_REGION = {"fr": {"CA": "Gabrielle", "BE": "Isabelle"}, "de": {"AT": "Hannah", "CH": "Sabrina"}, "nl": {"BE": "Lisa"}}
-_DEFAULT = {"fr": "Lea", "de": "Vicki", "it": "Bianca", "pt": "Camila", "nl": "Laura", "pl": "Ola", "fi": "Suvi", "ko": "Seoyeon"}
+_DEFAULT = {"fr": "Lea", "de": "Vicki", "it": "Beatrice", "pt": "Camila", "nl": "Laura", "pl": "Ola", "fi": "Suvi", "ko": "Seoyeon"}
+# Polly's "generative" engine is two families of voices, and they do not speak alike (measured 2026-11-27, docs/VOICE_QUALITY_IT_ES_2026-11-27.md).
+# These 18 give the same audio every time for the same text, read each sentence alone, ignore what the text is about, and move their pitch about as little as
+# the neural engine does (Bianca: 2.8 semitones of spread on a children's passage, Lucia 3.3, Mia 3.2). The other 37 (Vicki, Ruth, Amy, Beatrice, Lorenzo,
+# Lupe, Carlos ...) give a new take each time, lift their voice for a question or a lively text, and move twice as much (Beatrice 6.6, Lupe 5.2, Vicki 5.6).
+# They are also exactly the voices missing from eu-west-2 and ca-central-1 (voice_data.PARTIAL_REGIONS). A default should not be one of these when its accent
+# has another voice: that is why Italian is Beatrice and Latin America is Lupe. Spain has only Lucia and Sergio, both of this family.
+STEADY = frozenset("Andres Ayanda Bianca Celine Daniel Ewa Gabrielle Isabelle Kajal Laura Lea Liam Lucia Mia Ola Pedro Remi Sergio".split())
 
 
 def default_voice(language: str, region: Optional[str] = None) -> str:
     """The voice for a viewer in `region` (ISO 3166 alpha-2, any case) when the brief doesn't ask for one."""
     r = (region or "").strip().upper()
     if language == "es":
-        return "Lucia" if r in ("", "ES") else "Lupe" if r == "US" else "Mia" if r in _LATAM else "Lucia"
+        return "Lucia" if r in ("", "ES") else "Lupe" if (r == "US" or r in _LATAM) else "Lucia"   # Latin America was Mia (Mexican) until 2026-11-27: see STEADY
     if language in _DEFAULT:
         return _BY_REGION.get(language, {}).get(r, _DEFAULT[language])
     return _EN_BY_REGION.get(r, "Ruth")
@@ -101,7 +108,7 @@ def speaker_id(raw: object) -> str:
 # ----------------------------------------------------------------------------- the resolver: what was wanted -> the closest voice there is
 # An accent as people and models write it -> Polly locales, best first. A locale we have no voice for maps to the nearest one we do have, and the note says so.
 _ACCENTS: List[Tuple[str, List[str]]] = [
-    (r"latin|latam|latino|hispano", ["es-MX", "es-US"]),   # before "american": the owner's rule is Mexican Spanish for Latin America
+    (r"latin|latam|latino|hispano", ["es-US", "es-MX"]),   # before "american"; es-US first since 2026-11-27 (Lupe and Carlos are the lively voices: see STEADY)
     (r"american|\bu\.?s\.?a?\b|united states|estadounidense|am[eé]ricain|amerikanisch", ["en-US", "es-US"]),
     (r"british|\bu\.?k\b|england|english \(uk\)|brit[aá]nic|britannique|britisch|\bgb\b|london", ["en-GB"]),
     (r"scottish|scotland|welsh|wales", ["~en-GB"]),

@@ -205,6 +205,7 @@ class ComposerViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     fun clearAfterSend() {
+        lookNotice = null
         photos.clear(); library.clear(); deck.cancel()
         cleanupIfIdle()
         notice = null
@@ -268,8 +269,61 @@ class ComposerViewModel(app: Application) : AndroidViewModel(app) {
         storedPrefs = stored; touched = false; lengthChosen = false
         options = CreateDefaults.resolve(stored, caps)
         deck.ready?.let { options = DeckOptions.onReady(options, it) }   // reopened with a presentation still attached
-        sheetKind = CreateSheetKind.None; cancelCheck(); stop = null
+        sheetKind = CreateSheetKind.None; cancelCheck(); stop = null; lookNotice = null
     }
+
+    // ---- the chosen look (docs/CREATE_API.md "Video look"): only when the server lists `looks.look`
+
+    /** One line right above the pills when something about the look was changed for the person (photos sent it back to Auto, a look moved the length). */
+    var lookNotice by mutableStateOf<String?>(null)
+        private set
+    /** What is attached decides which looks can be made (the person's own photos or slides are the pictures of the video). */
+    val attached: com.videomk.app.core.LookRules.Attached get() = com.videomk.app.core.LookRules.Attached(photos = totalPhotos > 0, deck = deckState.attached)
+    val lookHasCast: Boolean get() = com.videomk.app.core.LookRules.hasCast(options.lookChoice, caps.lookPicker)
+
+    /** A tap on a look tile; the length moves when the look needs a longer video, and the line above the pills says so (the returned line is also read out). */
+    fun pickLook(id: String): String? {
+        val looks = caps.lookPicker ?: return null
+        lookNotice = null
+        options = options.copy(lookChoice = com.videomk.app.core.LookRules.select(id, options.lookChoice, looks, attached)); touched = true
+        return applyLookLength()?.let { com.videomk.app.core.LookRules.movedLine(it, options.lookChoice, looks) }?.also { lookNotice = it }
+    }
+
+    /** A tap on a face. Two or three are a conversation, which needs its own shortest length: the returned line says when the length was moved. */
+    fun toggleCast(member: String): Pair<com.videomk.app.core.LookRules.CastTap, String?> {
+        val looks = caps.lookPicker ?: return com.videomk.app.core.LookRules.CastTap.Full to null
+        val (choice, tap) = com.videomk.app.core.LookRules.toggle(member, options.lookChoice, looks)
+        options = options.copy(lookChoice = choice); touched = true
+        val line = if (tap == com.videomk.app.core.LookRules.CastTap.Added) applyLookLength()?.let { com.videomk.app.core.LookRules.movedLine(it, choice, looks) } else null
+        return tap to line
+    }
+
+    fun setLookExtra(id: String, on: Boolean) { options = options.copy(lookChoice = com.videomk.app.core.LookRules.setExtra(id, on, options.lookChoice)); touched = true }
+
+    /** The length is shorter than the chosen look (or a conversation) needs: the length to use instead (never one the plan does not make). A presentation keeps its own length. */
+    fun lookLengthNudge(): com.videomk.app.core.LookRules.LengthNudge? =
+        if (deckState.attached) null else com.videomk.app.core.LookRules.lengthNudge(options.lookChoice, caps.lookPicker, options.minutes, caps.presets.filter { caps.lengthAllowed(it) })
+
+    private fun applyLookLength(): com.videomk.app.core.LookRules.LengthNudge? {
+        val nudge = lookLengthNudge() ?: return null
+        options = CreateDefaults.priced(options.copy(minutes = nudge.minutes), caps)
+        return nudge
+    }
+
+    /** Photos or a presentation were attached or removed (or the server's list changed): a look that is not made from them goes back to Auto, with one line saying so. Returns that line. */
+    fun syncLook(): String? {
+        val was = options.lookChoice
+        val r = com.videomk.app.core.LookRules.normalized(was, caps.lookPicker, attached)
+        if (r.choice != was) options = options.copy(lookChoice = r.choice)
+        val label = caps.lookPicker?.option(was.look)?.label
+        if (r.reset != null && label != null) { lookNotice = com.videomk.app.core.LookRules.resetLine(r.reset, label); return lookNotice }
+        if (!attached.any && r.choice == was && lookNoticeIsReset) lookNotice = null
+        return null
+    }
+    private val lookNoticeIsReset: Boolean get() = lookNotice != null && options.lookChoice.isAuto
+
+    /** The line was read: the next touch of the pill it sits above takes it away. */
+    fun dismissLookNotice() { lookNotice = null }
 
     /** Stops a running request check (nothing exists on the server yet, so this is clean). Does nothing while the send itself is in flight. */
     private fun cancelCheck() { checkJob?.cancel(); fire(E.Cancel) }
@@ -277,7 +331,7 @@ class ComposerViewModel(app: Application) : AndroidViewModel(app) {
     fun applyCapabilities(c: Capabilities) {
         caps = c; capsLoaded = true
         if (!touched) options = CreateDefaults.resolve(storedPrefs, c)
-        else options = CreateDefaults.priced(options.copy(minutes = if (options.useSuggestedLength) options.minutes else CreateDefaults.withinPlan(options.minutes, c)), c)
+        else options = CreateDefaults.priced(options.copy(minutes = if (options.useSuggestedLength) options.minutes else CreateDefaults.withinPlan(options.minutes, c), style = if (c.lookPicker != null) "auto" else options.style), c)
         waitingDeck?.let { if (c.deck != null) { waitingDeck = null; addDeck(it, true) } }
     }
 

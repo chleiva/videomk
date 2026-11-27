@@ -91,7 +91,11 @@ class ApiClient(
     }
 
     /** [clientRequestId] makes a retry of the same attempt idempotent (no double charge, no second video). */
-    suspend fun startGeneration(prompt: String, clientRequestId: String, options: CreateOptions = CreateOptions(), media: List<String> = emptyList(), mediaMeta: JsonObject? = null, libraryMedia: List<String> = emptyList(), brief: JsonObject? = null, deck: String? = null): String {
+    suspend fun startGeneration(prompt: String, clientRequestId: String, options: CreateOptions = CreateOptions(), media: List<String> = emptyList(), mediaMeta: JsonObject? = null, libraryMedia: List<String> = emptyList(), brief: JsonObject? = null, deck: String? = null): String =
+        startVideo(prompt, clientRequestId, options, media, mediaMeta, libraryMedia, brief, deck).videoId
+
+    /** The same call with everything its answer says: the video, and (optional) the look it gets and one sentence when the look had to be adapted. */
+    suspend fun startVideo(prompt: String, clientRequestId: String, options: CreateOptions = CreateOptions(), media: List<String> = emptyList(), mediaMeta: JsonObject? = null, libraryMedia: List<String> = emptyList(), brief: JsonObject? = null, deck: String? = null): StartedVideo {
         val body = buildJsonObject {
             // a presentation needs no description: an empty one is simply not sent (the server then uses its short default)
             // a background wish is asked for in words: the server's own phrase goes at the end of the description (docs/CREATE_API.md "Looks")
@@ -111,11 +115,12 @@ class ApiClient(
             if (options.aspect != "16:9") put("aspect", options.aspect)
             if (options.resolution != "1080p") put("resolution", options.resolution)
             if (options.language != "auto") put("language", options.language)
-            if (options.style != "auto") put("style", options.style)
+            if (options.style != "auto" && options.lookChoice.isAuto) put("style", options.style)   // a chosen look replaces the older style wish
+            options.lookChoice.putInto(this)   // look, cast, extras (docs/CREATE_API.md "Video look"): nothing at all for Auto, so an older server sees no new key
             options.watermarkMode?.let { mode -> put("watermark", buildJsonObject { put("mode", mode); if (mode == "videomk") options.watermarkPresence?.let { put("presence", it) } }) }
             brief?.let { put("brief", it) }
         }
-        return send("POST", listOf("videos", "generate"), body = body, deck = deck != null).requireString("video_id")
+        return StartedVideo.fromJson(send("POST", listOf("videos", "generate"), body = body, deck = deck != null))
     }
 
     /** "Try again": the same video starts again on the server with every photo, option, language and watermark it had. Nothing is resent from the phone. */

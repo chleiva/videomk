@@ -415,6 +415,29 @@ def test_a_pro_plan_and_an_unlimited_test_account_are_premium_but_a_lapsed_plan_
     assert not store.is_premium(USER, {"unlimited": True}) and store.is_premium(USER, {"watermark_custom": True})
 
 
+def test_an_unlimited_test_account_carries_the_name_by_default_and_can_remove_it(launcher, wm_on, monkeypatch):
+    """Owner decision 2026-11-27: every video made by a test account has the brand (lockup, always, end card) unless the account says otherwise; customers are untouched."""
+    _flags(wm_on, USER, unlimited=True)
+    assert _launch(launcher)["statusCode"] == 202
+    wm = sent(launcher)["watermark"]
+    assert wm["mode"] == "videomk" and wm["style"] == "lockup" and wm.get("presence") == "always" and wm["end_card"] is True
+    assert _launch(launcher, watermark={"mode": "none"}, target_minutes=2)["statusCode"] == 202 and "watermark" not in sent(launcher)     # the setting removes it
+    assert _launch(launcher, watermark={"mode": "videomk", "presence": "moments"}, target_minutes=3)["statusCode"] == 202
+    assert sent(launcher)["watermark"]["presence"] == "moments"                                                                        # and can soften it
+    store.put_profile(USER, {"mode": "none"})                                                                                          # a saved choice is honoured
+    assert _launch(launcher, target_minutes=1)["statusCode"] == 202 and "watermark" not in sent(launcher)
+    store.put_profile(USER, {"mode": "videomk"})                                                                                       # saved mark without a stated presence: always, not moments
+    assert _launch(launcher, target_minutes=2)["statusCode"] == 202 and sent(launcher)["watermark"].get("presence") == "always"
+    assert store.capabilities(USER)["default_presence"] == "always"
+
+
+def test_the_test_account_default_never_reaches_a_customer_or_production(launcher, wm_on, monkeypatch):
+    assert _launch(launcher)["statusCode"] == 202 and "watermark" not in sent(launcher)                                               # an ordinary account: nothing changed
+    assert store.rights(USER, {})["test"] is False
+    monkeypatch.setenv("ALLOW_UNLIMITED_ACCOUNTS", "0")                                                                                # production ignores the unlimited flag
+    assert store.rights(USER, {"unlimited": True})["test"] is False and not store.is_test_account(USER, {"unlimited": True})
+
+
 def test_the_saved_default_is_used_when_the_request_says_nothing(launcher, wm_on):
     _flags(wm_on, USER, watermark_custom=True)
     store.put_profile(USER, {"mode": "videomk", "position": "bl", "opacity": 0.5, "size": "medium", "style": "lockup", "end_card": True})

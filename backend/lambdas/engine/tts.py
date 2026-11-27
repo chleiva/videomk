@@ -8,6 +8,7 @@ import base64
 import io
 import json
 import os
+import subprocess
 import urllib.request
 import wave
 from typing import Any, Dict, List, Optional, Tuple
@@ -76,20 +77,38 @@ class MockTTS:
         return np.concatenate(out) if out else np.zeros(int(0.2 * SR), np.float32)
 
 
-class PollyTTS:
-    """Amazon Polly (neural engine): no API key (the Lambda's IAM role is the credential), in-account, no data leaves AWS.
+def _decode(raw: bytes, sr: int) -> np.ndarray:
+    """Compressed audio (MP3, OGG) -> mono float32 at `sr`, through the ffmpeg the render already ships."""
+    from .media import ffmpeg_bin
 
-    Polly has no style prompt, so `style` is ignored. Voice defaults to Ruth (en-US); Matthew, Stephen, Joanna, Amy and Brian also work.
-    Raw PCM comes back as s16le mono at 16 kHz and is resampled to SR.
+    proc = subprocess.run([ffmpeg_bin(), "-hide_banner", "-loglevel", "error", "-i", "pipe:0", "-vn", "-ac", "1", "-ar", str(sr), "-f", "s16le", "pipe:1"],
+                          input=raw, capture_output=True, timeout=120)
+    if proc.returncode != 0 or not proc.stdout:
+        raise TTSError("could not decode the speech audio")
+    return _pcm16_to_float(proc.stdout)
+
+
+class PollyTTS:
+    """Amazon Polly: no API key (the Lambda's IAM role is the credential), in-account, no data leaves AWS.
+
+    Polly has no style prompt, so `style` is ignored. Voice defaults to Ruth (en-US).
+
+    `rate` is the sample rate asked of Polly. The neural and generative engines make speech at 24 kHz, but Polly's raw PCM stops at 16 kHz: everything above
+    8 kHz (the air of an s, an f, a breath) is cut, and the voice sounds duller than the one in Polly's console. Measured on 2026-11-27: PCM has nothing above
+    8 kHz; the same request as MP3 at 24 kHz carries speech up to about 11 kHz and is otherwise the same waveform (docs/VOICE_QUALITY_IT_ES_2026-11-27.md).
+    So at 24000 the audio is asked as MP3 and decoded (no resampling: 24 kHz is SR); at 16000, what plans made before `rate` was recorded keep, it is the
+    raw PCM as always, resampled to SR.
     """
 
     name = "polly"
-    PCM_RATE = 16000
+    PCM_RATE = 16000     # the most Polly gives as raw PCM
+    FULL_RATE = 24000    # what the neural and generative engines really make; only as MP3 or OGG
     # $/character, list prices (verify): standard $4/M, neural $16/M, generative $30/M, long-form $100/M
     PER_CHAR = {"standard": 0.000004, "neural": 0.000016, "generative": 0.00003, "long-form": 0.0001}
 
-    def __init__(self, client: Any = None, region: Optional[str] = None, engine: str = "neural"):
+    def __init__(self, client: Any = None, region: Optional[str] = None, engine: str = "neural", rate: int = PCM_RATE):
         self._client, self._region, self.engine = client, region, engine
+        self.rate = self.FULL_RATE if int(rate or 0) >= self.FULL_RATE else self.PCM_RATE
 
     @property
     def cost_per_char(self) -> float:
@@ -103,17 +122,24 @@ class PollyTTS:
             self._client = boto3.client("polly", region_name=self._region or os.environ.get("AWS_REGION") or os.environ.get("AWS_DEFAULT_REGION"))
         return self._client
 
-    def synth(self, text: str, voice: str = "", style: str = "") -> np.ndarray:
+    def _ask(self, text: str, voice: str, fmt: str, rate: int) -> bytes:
         try:
-            resp = self.client.synthesize_speech(
-                Text=text[:2900], OutputFormat="pcm", SampleRate=str(self.PCM_RATE), VoiceId=voice or "Ruth", Engine=self.engine, TextType="text",
-            )
+            resp = self.client.synthesize_speech(Text=text[:2900], OutputFormat=fmt, SampleRate=str(rate), VoiceId=voice or "Ruth", Engine=self.engine, TextType="text")
             raw = resp["AudioStream"].read()
         except Exception as e:  # botocore errors can echo request details: surface the type only
             raise TTSError(f"Polly request failed: {type(e).__name__}") from e
         if not raw:
             raise TTSError("Polly returned no audio")
-        return _resample(_pcm16_to_float(raw), self.PCM_RATE, SR)
+        return raw
+
+    def synth(self, text: str, voice: str = "", style: str = "") -> np.ndarray:
+        if self.rate >= self.FULL_RATE:
+            raw = self._ask(text, voice, "mp3", self.FULL_RATE)
+            try:
+                return _resample(_decode(raw, self.FULL_RATE), self.FULL_RATE, SR)
+            except Exception as e:  # never lose a video to a decoder: say it loudly and take the narrow-band audio (engine_selftest checks decode_mp3)
+                print(f"polly_fullband_fallback: {type(e).__name__}: narrow-band PCM used for this beat")
+        return _resample(_pcm16_to_float(self._ask(text, voice, "pcm", self.PCM_RATE)), self.PCM_RATE, SR)
 
 
 class OpenAITTS:
@@ -162,9 +188,9 @@ def get_provider(name: Optional[str] = None, api_key: str = "", cfg: Optional[Di
     name = (name or DEFAULT_PROVIDER).lower()
     if name == "mock":
         return MockTTS()
-    if name == "polly":  # plans made before the engine was recorded keep the neural engine in the stack's own region
+    if name == "polly":  # plans made before the engine (or the sample rate) was recorded keep the neural engine in the stack's own region (and 16 kHz PCM)
         cfg = cfg or {}
-        return PollyTTS(region=cfg.get("region") or None, engine=cfg.get("engine") or "neural")
+        return PollyTTS(region=cfg.get("region") or None, engine=cfg.get("engine") or "neural", rate=int(cfg.get("rate") or PollyTTS.PCM_RATE))
     if name == "openai":
         return OpenAITTS(api_key)
     if name == "gemini":
