@@ -173,5 +173,21 @@
  "media.make_video_n": "Make a video · {n}",
  "media.select": "Select",
  "media.select_done": "Done",
- "media.photos_n": "{n, plural, one {# photo} other {# photos}}"
+ "media.photos_n": "{n, plural, one {# photo} other {# photos}}",
+ "making.cancel": "Cancel",
+ "making.cancel_a11y": "Cancel making {title}",
+ "making.cancel_title": "Stop making this video?",
+ "making.cancel_body": "Your credits come back.",
+ "making.cancel_keep": "Keep making",
+ "making.cancel_stop": "Stop",
+ "making.cancelled": "Cancelled.",
+ "making.cancelled_refund": "Cancelled. {n, plural, one {# credit is back} other {# credits are back}}.",
+ "making.cancel_done": "It finished before it could be cancelled.",
+ "making.cancel_error": "We couldn’t cancel it. Try again.",
+ "making.cancel_unsupported": "Cancelling isn’t available right now.",
+ "gen.cancelled_detail": "You cancelled this video. Your credits came back.",
+ "gen.delete": "Delete",
+ "gen.deleted": "Deleted",
+ "gen.undo": "Undo",
+ "gen.delete_error": "We couldn’t delete it. It’s back in your videos."
 }

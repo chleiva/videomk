@@ -26,6 +26,7 @@ export const apiGateway = {
   feedback: (userId: string) => `${API_BASE}/users/${u(userId)}/feedback`,
   wallet: (userId: string) => `${API_BASE}/users/${u(userId)}/wallet`,
   retryVideo: (userId: string, videoId: string) => `${API_BASE}/users/${u(userId)}/videos/${u(videoId)}/retry`,
+  cancelVideo: (userId: string, videoId: string) => `${API_BASE}/users/${u(userId)}/videos/${u(videoId)}/cancel`,
   edits: (userId: string, videoId: string) => `${API_BASE}/users/${u(userId)}/videos/${u(videoId)}/edits`,
 };
 
