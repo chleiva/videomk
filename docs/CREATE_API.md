@@ -74,21 +74,21 @@ A scene that breaks the rule is converted to the look's own scene type with the 
 ```json
 "looks": {
   "look": {"param": "look", "default": "auto", "enforced": true, "options": [
-    {"id": "auto",       "label": "Auto",       "note": "We pick one look that suits your topic.", "preview": "data:image/jpeg;base64,...",
+    {"id": "auto",       "label": "Auto",       "note": "Picked for your topic", "preview": "data:image/jpeg;base64,...",
      "available": true, "allowed": true, "requires_plan": null, "with_photos": true, "with_deck": true,
      "min_seconds": 15, "aspects": ["16:9", "9:16", "1:1", "4:5"], "best_aspects": ["16:9", "9:16", "1:1", "4:5"], "cast": false, "extras": []},
-    {"id": "real",       "label": "Real",       "note": "Photos and video footage.",         "preview": "...", "with_photos": true,  "with_deck": true,  "cast": false, "extras": [], ...},
-    {"id": "whiteboard", "label": "Whiteboard", "note": "Drawn by hand as it is explained.", "preview": "...", "with_photos": false, "with_deck": false, "best_aspects": ["16:9", "1:1"], "cast": false, "extras": [], ...},
-    {"id": "cartoon",    "label": "Cartoon",    "note": "Cartoon characters explain it.",    "preview": "...", "with_photos": false, "with_deck": false, "best_aspects": ["16:9", "1:1", "4:5"], "cast": true,
-     "extras": [{"id": "board", "label": "Hand-drawn board", "note": "The characters explain on a board that is drawn as they speak.", "available": true}], ...}]},
+    {"id": "real",       "label": "Real",       "note": "Photos and footage", "preview": "...", "with_photos": true,  "with_deck": true,  "cast": false, "extras": [], ...},
+    {"id": "whiteboard", "label": "Whiteboard", "note": "Drawn by hand", "preview": "...", "with_photos": false, "with_deck": false, "best_aspects": ["16:9", "1:1"], "cast": false, "extras": [], ...},
+    {"id": "cartoon",    "label": "Cartoon",    "note": "Characters explain it", "preview": "...", "with_photos": false, "with_deck": false, "best_aspects": ["16:9", "1:1", "4:5"], "cast": true,
+     "extras": [{"id": "board", "label": "Characters explain at a board", "note": "A board beside them is drawn by hand as they speak.", "available": true}], ...}]},
   "cast": {"param": "cast", "default": "auto", "min": 1, "max": 3, "available": true,
-    "auto": {"id": "auto", "label": "Auto", "note": "We pick characters that suit the topic."},
-    "conversation": {"from": 2, "min_seconds": 20, "note": "Pick 2 or 3 and they talk it through together."},
+    "auto": {"id": "auto", "label": "Auto", "note": "We pick for you. Or choose up to 3."},
+    "conversation": {"from": 2, "min_seconds": 20, "note": "They talk it through."},
     "members": [{"id": "ines", "name": "Inés", "role": "Teacher", "kind": "person", "topic": "Learning", "thumbnail": "data:image/png;base64,..."},
                 {"id": "fox", "name": "Fox", "role": "Guide for children", "kind": "animal", "topic": "For children", "thumbnail": "..."}, ...]}
 }
 ```
-* **Four tiles, in this order: Auto, Real, Whiteboard, Cartoon** (Spanish: `Automático`, `Real`, `Pizarra`, `Dibujos animados`; notes "Elegimos un estilo que encaje con tu tema.", "Fotos y video reales.", "Dibujado a mano mientras se explica.", "Personajes de dibujos lo explican."). "Cartoon scenes" and "cartoon characters" are ONE tile: the characters live in the cartoon world, and a cartoon video without anyone in it was the weakest of the looks. Auto is preselected.
+* **Four tiles, in this order: Auto, Real, Whiteboard, Cartoon** (Spanish: `Auto`, `Real`, `Pizarra`, `Animado`; notes "Elegido según tu tema", "Fotos y video", "Dibujado a mano", "Personajes lo explican"). Notes are one line: 24 characters at most, no full stop. The board extra is labelled by its effect ("Characters explain at a board" / "Los personajes explican en una pizarra": the board beside them is drawn by the marker, the characters do not draw it). "Cartoon scenes" and "cartoon characters" are ONE tile: the characters live in the cartoon world, and a cartoon video without anyone in it was the weakest of the looks. Auto is preselected.
 * `preview`: a 320x180 JPEG as a data URI (8 to 14 KB each, 41 KB for the four; `lambdas/common/look_previews.json`, built by a script from real videos). Draw it as the tile's picture; crop to the tile.
 * Per tile: `available` (this stage has the look: false = hide it or show "coming soon"; sending it anyway is accepted and adapted, see below); `allowed` and `requires_plan` (this account's plan may use it: today every plan may use every look, so `allowed` is false only when the plan's longest video is shorter than `min_seconds`); `with_photos` / `with_deck` (false = do not offer the tile once the person attached photos / a deck; if they attach photos after choosing, fall back to Auto); `min_seconds` (the shortest video the look works in); `aspects` (the shapes it can be made in: all four) and `best_aspects` (where it looks best: preselect nothing, but a hint such as "looks best in landscape" is fair when the chosen shape is not in it); `cast` (true = show the cast picker under the tile); `extras` (the switches to show under the tile, each with its own `available`).
 * **The cast picker** (`looks.cast`, shown only for a tile with `cast: true`): `auto` first (preselected), then `members` (ten today: four people, six animals) with `thumbnail` (112 px PNG data URI), `name`, `role`, `kind` (`person` | `animal`: group them), `topic` (two or three words on what the character suits). The person may tick 1 to `max` (3). From `conversation.from` (2) ticked, show `conversation.note`; a conversation needs a video of at least `conversation.min_seconds` (20 s): in a shorter one the first character presents alone and the answer says so.

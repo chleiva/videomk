@@ -95,16 +95,22 @@ def test_the_picker_has_four_tiles_with_a_preview_each_in_both_languages(monkeyp
     tiles = en["look"]["options"]
     assert en["look"]["param"] == "look" and en["look"]["default"] == "auto" and en["look"]["enforced"] is True
     assert [t["id"] for t in tiles] == list(lc.LOOKS) == ["auto", "real", "whiteboard", "cartoon"] and len(tiles) <= 5
-    assert [t["label"] for t in tiles] == ["Auto", "Real", "Whiteboard", "Cartoon"] and [t["label"] for t in es["look"]["options"]] == ["Automático", "Real", "Pizarra", "Dibujos animados"]
+    assert [t["label"] for t in tiles] == ["Auto", "Real", "Whiteboard", "Cartoon"] and [t["label"] for t in es["look"]["options"]] == ["Auto", "Real", "Pizarra", "Animado"]
     for t, s in zip(tiles, es["look"]["options"]):
         raw = base64.b64decode(t["preview"].split(",", 1)[1])
         assert t["preview"].startswith("data:image/jpeg;base64,") and raw[:2] == b"\xff\xd8" and len(raw) < 60_000
-        assert t["note"] and s["note"] and len(t["note"]) <= 48 and len(s["note"]) <= 48 and t["available"] is True and t["allowed"] is True and t["requires_plan"] is None
+        assert t["note"] and s["note"] and len(t["note"]) <= 24 and len(s["note"]) <= 24 and not (t["note"] + s["note"]).count(".") and t["available"] is True and t["allowed"] is True and t["requires_plan"] is None
         assert set(t["best_aspects"]) <= set(t["aspects"]) and t["min_seconds"] >= 15
     by = {t["id"]: t for t in tiles}
     assert by["auto"]["with_photos"] and by["real"]["with_deck"] and not by["whiteboard"]["with_photos"] and not by["cartoon"]["with_deck"]
     assert by["cartoon"]["cast"] is True and not by["real"]["cast"] and [e["id"] for e in by["cartoon"]["extras"]] == ["board"] and by["cartoon"]["extras"][0]["available"] is True
     assert all(not by[k]["extras"] for k in ("auto", "real", "whiteboard"))
+    assert [t["note"] for t in tiles] == ["Picked for your topic", "Photos and footage", "Drawn by hand", "Characters explain it"]
+    assert [t["note"] for t in es["look"]["options"]] == ["Elegido según tu tema", "Fotos y video", "Dibujado a mano", "Personajes lo explican"]
+    assert by["cartoon"]["extras"][0]["label"] == "Characters explain at a board" and es["look"]["options"][3]["extras"][0]["label"] == "Los personajes explican en una pizarra"
+    assert en["cast"]["auto"]["note"] == "We pick for you. Or choose up to 3." and es["cast"]["conversation"]["note"] == "Lo conversan."
+    short = lc.resolve({"look": "cartoon", "cast": ["fox", "bear"], "target_minutes": 0.25}, "en", f=ALL_ON)["note"]
+    assert short == "One character presents. A conversation needs 20 s or more."
 
 
 def test_the_cast_lists_people_and_animals_with_a_face_and_a_topic(monkeypatch):
@@ -114,7 +120,7 @@ def test_the_cast_lists_people_and_animals_with_a_face_and_a_topic(monkeypatch):
     assert [m["kind"] for m in c["members"]] == ["person"] * 4 + ["animal"] * 6
     assert all(m["name"] and m["role"] and m["topic"] and m["thumbnail"].startswith("data:image/png;base64,") for m in c["members"])
     es = _caps(monkeypatch, "es", PRESENTERS="1")["cast"]
-    assert es["members"][5]["role"] == "Búho profesor" and es["members"][5]["topic"] == "Ciencia e historia" and es["auto"]["label"] == "Automático"
+    assert es["members"][5]["role"] == "Búho profesor" and es["members"][5]["topic"] == "Ciencia e historia" and es["auto"]["label"] == "Auto"
 
 
 def test_a_stage_without_the_looks_says_so_per_tile(monkeypatch):
