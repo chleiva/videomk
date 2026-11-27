@@ -2,7 +2,7 @@
 
 Owner request: a few pre-rendered "advanced 3D" gas/nebula backgrounds, modern and lean, usable behind text, as the premium tier above the procedural backgrounds (docs/BACKGROUNDS_ANIMATED.md).
 
-**State:** four loops rendered, checked and stored in the QA bucket; an engine module that plays them, with tests. Nothing is wired into a render yet (the hook-up steps are below; other work owns those files right now) and nothing was deployed.
+**State (2026-11-27, evening):** four loops rendered, checked and stored in the QA bucket AND copied to the prod bucket; wired into the engine behind the flag `BG_LOOPS` (on in QA through `stages.json` `"bgLoops": true`, off in prod); two real QA videos made and looked at. See "Wired into the engine" below.
 
 ## What exists
 | id | look | text colour | 1080p | 4K master | worst / mean title contrast in the middle |
@@ -78,7 +78,26 @@ Measured on 11 frames of each file (`first`, `last`, and nine in between), nothi
 * 4K: decoded at half size and enlarged smoothly (bicubic) with one level of grain; gas has no detail to lose. The 4K master is not used by the engine.
 * `release()` frees the decoded frames.
 
-## Hook-up steps (not done: these files belong to other work in flight)
+## Wired into the engine (2026-11-27, flag `BG_LOOPS`, QA only; tests `backend/tests/test_bg_loops_wiring.py`, 32)
+* **Who chooses:** the director, in the same small-model call that picks the procedural background (`engine/background.py choose`). With the flag on, the menu gains a "Premium 3D loops" part listing only the loops that fit the video's theme, and the answer may carry `"loop": "<id>"`. Fit = same light/dark mode as the theme (it decides the text colour) and a palette that suits the theme's cards: midnight: `gas-brand-dark`, `gas-aurora-dark`; sunrise: `gas-ember-dark`; paper: `gas-brand-light` (`LOOP_PALETTES`). A loop that does not fit, or is not in the index, is never used. No usable answer: the loop whose tags name the video's mood (calm, bright, tense), else the procedural style.
+* **Three looks:** loop (premium) when the director picks one; procedural (`BG_ANIMATED`) otherwise; **static** for videos of the person's own photos and for data-heavy videos (half or more of the beats are charts, tables, maps, code or equations: `background.data_heavy`), where nothing moving should compete with the values.
+* **Plan and timeline:** `plan["background"]` keeps the procedural choice and adds `loop`, `loop_palette` and `loop_seconds = 10` (the loop's length), so every scene's `bg_t0 = start mod 10` and the picture runs on the video's clock; the loop id is in every chunk's hash. If the loop cannot be used (flag off, index unreadable, theme changed) the procedural style of the same plan plays; if the file cannot be fetched inside a render the static glow is drawn and the download is not retried for every frame (`canvas._moving_background`, log line `BG_LOOP_FAILED`).
+* **Edits:** a theme change keeps the loop only while it still fits (`background.retheme`); otherwise it is dropped and the procedural style follows the new theme.
+* **IAM:** `s3:GetObject` on `backgrounds/loops/*` for the chunk renderer and the self-test, on `backgrounds/loops/index.json` for the planner; granted in every stage (read only, no listing), so switching the flag needs no new rights.
+* **Production:** code deployed, files copied (13 objects, 223,249,438 bytes, same sizes as QA), flag OFF. To switch on: `"bgLoops": true` under `prod` in `backend/stages.json` (or `-c bgLoops=1`) and deploy. Prod render functions have 3008 MB; the loop needs about 190 MB of decoded frames at 1080p.
+
+### Measured on QA (two real videos, 30 s, made 2026-11-27 13:45 UTC)
+| video | format | loop | where the loop shows |
+|---|---|---|---|
+| `555ee526` "neural network learns a digit" | 16:9 1080p, 32.9 s, 4 scenes | `gas-brand-dark` (director) | all of it (kinetic text, diagram, steps) |
+| `4ff1e3c5` "Pompeii" | 9:16 1080p, 30.4 s, 3 scenes | `gas-ember-dark` (director) | 8.5 to 19.1 s only (a title card that replaced a clip nobody found); the rest is full-screen footage and a photo |
+* **Seams (frame-to-frame difference on a text-free strip, 0 to 255):** scene changes 3.28 and 2.63 against a normal 3.60 and 2.67; the chunk boundary at 15.9 s 3.39 against 2.92; the loop point at 10 s 3.98 against 3.14 (it is also a keyframe), at 20 s 3.51 against 3.35, at 30 s 3.58 against 3.38; vertical at 10 s 2.19 against 1.98. No jump anywhere; the frames either side of each seam were also looked at side by side.
+* **Readability:** titles, cards and the caption box read cleanly on both; nothing had to be changed.
+* **Banding:** 16:9: none visible even with the dark range stretched 4 times; 9 one-level stairs in 104 rows of the finished video. 9:16: the loop is a 608 px wide centre crop enlarged 1.78 times, so it is softer, and the finished video has 55 stairs in 104 rows; at normal contrast the frame is smooth, stretched 5 times it shows the encoder's blotches in the dark areas (no contour lines). Not judged on a phone at full brightness.
+* **Cost on Lambda (the same 476-frame chunk of `555ee526` rendered three ways on warm functions):** static glow 166 ms per frame, **loop 296 ms**, procedural 408 ms. The loop costs about 130 ms a frame more than the static look and about 110 ms less than the procedural background that was already live on QA. The first real render of that video took 122, 75 and 144 s in its three render functions.
+* **Memory:** the three cold render functions of the loop video peaked at 1376, 759 and 1064 MB (of 10240 MB); a 720p vertical video with a procedural background earlier the same day peaked at 524 to 842 MB. A clean like-for-like peak was not possible (Lambda reports the highest use since the function started, and the comparison ran on warm functions).
+
+## Hook-up steps (the plan that was followed)
 1. **Canvas** (`engine/canvas.py`, `Canvas.background`): where `anim` is handled today, accept a `bg_loops.LoopSpec` as well: `arr = bg_loops.render(anim, self.W, self.H, t) if isinstance(anim, bg_loops.LoopSpec) else bg_animated.render(anim, self.W, self.H, t)`; the rest (enlarge to the supersampled canvas) stays. Wrap the loop call in `try/except` and fall through to the static glow: a missing file must never fail a render.
 2. **Renderer** (`engine/renderer.py`, where `bg_anim` is settled from `timeline["background"]`): if the cleaned background carries `"loop": "<id>"`, use `bg_loops.sanitize(bg, bg_loops.load_index())`; None falls back to the procedural spec. Call `bg_loops.release()` where the picture caches are emptied. Text colour: the loop's `mode` must equal the theme's mode (dark themes take dark loops, `paper` takes the light one), which keeps every text colour as it is; `spec.text` is there for a caption drawn outside a theme.
 3. **Timeline** (`engine/timeline.py`): nothing new. `bg_t0 = start mod loop` is already written per scene from `background["loop_seconds"]`; set `loop_seconds` to the loop's `seconds` (10) when a loop is chosen, so the picture flows across scene and chunk boundaries.
@@ -89,11 +108,11 @@ Measured on 11 frames of each file (`first`, `last`, and nine in between), nothi
 8. **Production:** the files are in the QA bucket only. Before the flag goes on in prod: `aws s3 sync s3://videomk-qa-552357225438/backgrounds/loops/ s3://<prod assets bucket>/backgrounds/loops/`.
 
 ## Not verified
-* No render has used a loop yet: the module is tested on its own (synthetic loop file, real ffmpeg), not inside `Renderer`, and not in Lambda (the layer's ffmpeg decoding H.264 High at 1080p is assumed from the clip scenes, which do the same).
-* Per-frame cost inside the engine is not measured; expect one ffmpeg start per second of video (about 0.1 to 0.2 s) plus the enlargement at 4K.
-* The loops were checked by numbers and by still frames; nobody has watched ember, aurora and light in motion yet. Only the brand loop has the owner's eye on it.
-* Portrait crops were checked by construction and by the centre measurements, not by rendering a 9:16 video.
-* The exact bill is not in Cost Explorer yet (it lags about a day); the spend above is computed from launch and termination times and the list price.
+* `gas-aurora-dark` (video `9df5de7a`, 16:9, 61 s) and `gas-brand-light` (video `65eaa9b9`, 9:16, Spanish, 30 s; the loop shows in its first 9 s only) were each chosen by the director in a later QA video and looked at on a contact sheet (text readable, the look fits); their seams and banding were not measured again.
+* Nobody has watched the QA videos in motion with sound; the checks are numbers and still frames.
+* 4K with a loop was not rendered on Lambda (the canvas makes the background at 1080p and enlarges it, as for the procedural one).
+* The 130 ms a frame is mostly the enlargement to the 2x canvas and one ffmpeg start per second of video; decoding straight to the canvas size would likely recover part of it (not done).
+* The exact GPU bill is not in Cost Explorer yet (it lags about a day); the spend above is computed from launch and termination times and the list price.
 
 ## Make another loop
 ```
