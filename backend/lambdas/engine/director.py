@@ -3,6 +3,7 @@
 Pure of storage and billing so the production handler and the evaluation script run exactly the same code:
   detect language -> research (queries written by a small model) -> director LLM -> validate, cast voices, keep only sources used.
 """
+import os
 import threading
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
@@ -10,8 +11,13 @@ from datetime import date
 
 import logging
 
-from . import background, engagement, language as lang_mod, plan as plan_mod, quality, research, researcher, skills as skills_mod, staged as staged_mod, vector_policy, voices
+from . import background, engagement, language as lang_mod, length as length_mod, plan as plan_mod, quality, research, researcher, skills as skills_mod, staged as staged_mod, vector_policy, voices
 from .netsafe import quality_fixes
+
+def fit_to_target() -> bool:
+    """The deterministic length steps (engine/length.py) are on unless FIT_TO_TARGET=0."""
+    return os.environ.get("FIT_TO_TARGET", "1") != "0"
+
 
 SHORT_PHOTO_INTRO_S, SHORT_PHOTO_OUTRO_S = 1.0, 1.5   # the same under a minute (15, 30, 45 s): the music-only frame is 2.5 s, not 6 (plan.SHORT_PHOTO_FRAME_S)
 PHOTO_INTRO_S = 2.5   # seconds of music and pictures before the first word of a video made from the user's photos
@@ -156,6 +162,12 @@ def direct(prompt: str, *, minutes: float, ask_small: Ask, ask_big: Callable[[st
         info["background"] = {k: plan["background"][k] for k in ("style", "palette", "by", "loop") if k in plan["background"]}
     if photos:   # the music has the first seconds and the last seconds to itself: the pictures arrive before the voice does, and the ending is held
         plan["intro_s"], plan["outro_s"] = (SHORT_PHOTO_INTRO_S, SHORT_PHOTO_OUTRO_S) if plan_mod.is_short(minutes) else (PHOTO_INTRO_S, PHOTO_OUTRO_S)
+    if fit_to_target():   # the length is kept by arithmetic (engine/length.py): a script estimated past the length asked loses whole sentences, then a surplus beat; never the opening or the last line
+        fit = length_mod.fit_script(plan, minutes * 60.0, min_beat_words=plan_mod.MIN_BEAT_WORDS, min_beats=plan_mod.expected_beats(minutes, len(photos or [])), drop_beats=not photos)
+        if fit["cut_words"] or not fit["fits"]:   # recorded only when the step acted (or could not): a script that fits leaves no trace
+            info["length"] = fit
+        if fit["cut_words"]:
+            warnings.append(f"length: estimated {fit['before']:.0f} s for {fit['target']:.0f} s asked, cut {fit['cut_sentences']} sentences and {fit['cut_beats']} beats ({fit['cut_words']} words) to {fit['after']:.0f} s")
     if region:
         plan["region"] = region
     if photos:  # the beats that show these photos find them here (the clean copies live in the video's own assets)

@@ -1,227 +1,251 @@
+"""The length of a video kept by arithmetic (engine/length.py): the estimate of the speaking time, the cut of a script that would run long (whole sentences,
+then a surplus beat; never the opening or the last line), the shortened silences once the audio is measured, the pace remembered for edits, and the window
+[asked, asked + 5 percent] from 15 seconds to 5 minutes in English and Spanish."""
+import copy
 import json
 
 import pytest
 
-from engine import plan as plan_mod
-from engine.handlers import plan_handler
+from engine import awsio, director, length as L, plan as plan_mod, timeline as T
+from engine.handlers import timeline_handler
+from engine.timeline import build_timeline
+from tests.test_skills import _ask_small
+
+EN = ["The tide follows the moon across the sky.", "Water piles up on the side that faces it.", "A second bulge forms on the far side of the planet.",
+      "Twice a day the coast meets one of them.", "The sun adds its own, smaller pull.", "When both line up the tides run highest.",
+      "Bays and channels can double the height.", "Sailors have timed their trips by it for 3,000 years."]
+ES = ["La marea sigue a la luna por el cielo.", "El agua se acumula en la cara que la mira.", "Un segundo abultamiento aparece al otro lado del planeta.",
+      "Dos veces al día la costa se encuentra con uno.", "El sol añade su propia fuerza, más pequeña.", "Cuando ambos se alinean las mareas son más altas.",
+      "Las bahías y los canales pueden duplicar la altura.", "Los marineros llevan 3.000 años navegando con ella."]
 
 
-def beats_json(n, words_each):
-    text = " ".join(["word"] * words_each)
-    return json.dumps({"legit": True, "title": "All about Paris", "description": "d", "voices": {"narrator": "Ruth"},
-                       "beats": [{"narration": f"Beat {i} " + text, "scene": {"type": "title", "props": {"title": f"T{i}"}}} for i in range(n)]})
+def _beat(i, text, **extra):
+    return {"id": f"b{i}", "narration": text, "scene": {"type": "title", "props": {"title": "Tides", "subtitle": ""}}, **extra}
 
 
-def test_the_targets_come_from_the_measured_speaking_rate():
-    assert plan_mod.expected_beats(5) == 30 and plan_mod.expected_beats(1) == 6 and plan_mod.expected_beats(1, 9) == 9 and plan_mod.expected_beats(5, 3) == 21   # a beat per 10 s (was 14); videos of the person's photos keep 14
-    w5 = plan_mod.expected_words(5)
-    assert 640 <= w5 <= 700                                                                  # (300 s - 30 beats x 0.95 s) x 2.4 words per second
-    assert plan_mod.expected_words(1) < 140 < plan_mod.expected_words(2) < plan_mod.expected_words(3)
-    # the real case: 326 words in 15 beats made 150 s (136 s of speech) = 2.4 words per second
-    assert 326 / 2.4 + 15 * 0.95 == pytest.approx(150, abs=1)
+def _plan(texts, language="en", voice=None, **extra):
+    return {"title": "Tides", "language": language, "voices": {"narrator": voice or ("Ruth" if language == "en" else "Lupe")}, "theme": "midnight",
+            "beats": [_beat(i, t) for i, t in enumerate(texts)], **extra}
 
 
-def test_the_prompt_makes_the_length_a_hard_requirement_with_numbers():
-    p = plan_mod.build_user_prompt("All about Paris", "", 5)
-    assert "hard requirement" in p and "5 minute" in p and ("at least 30 beats" in p or "30 to 32 beats" in p) and "pays per minute" in p
-    lo, hi = int(plan_mod.expected_words(5) * plan_mod.TARGET_LOW), int(plan_mod.expected_words(5) * plan_mod.TARGET_HIGH)   # QUALITY_FIXES range; 0.9 to 1.1 with QUALITY_FIXES=0 (tests/test_quality_fixes.py)
-    assert f"between {lo} and {hi} words" in p
+def _script(seconds, language="en", share=1.0, beats=None):
+    """A plan whose ESTIMATED length is about `share` of `seconds`: beats of whole sentences, about 10 s each."""
+    pool = EN if language == "en" else ES
+    n = beats or plan_mod.expected_beats(seconds / 60.0)
+    plan = _plan([""] * n, language)
+    i = 0
+    while L.estimate_total(plan) < seconds * share:
+        b = plan["beats"][i % n]
+        b["narration"] = (b["narration"] + " " + pool[i % len(pool)]).strip()
+        i += 1
+    assert all(b["narration"] for b in plan["beats"])
+    return plan
 
 
-def test_a_script_far_too_short_for_the_length_asked_is_found():
-    short = {"beats": [{"narration": " ".join(["w"] * 22)} for _ in range(15)]}                 # the real Paris plan: 330 words for 5 minutes
-    msg = plan_mod.length_problem(short, 5)
-    assert msg and "330 words" in msg and "5-minute" in msg and "at least 30 beats" in msg
-    ok = {"beats": [{"narration": " ".join(["w"] * 33)} for _ in range(21)]}
-    assert plan_mod.length_problem(ok, 5) is None
-    assert plan_mod.length_problem({"beats": [{"narration": "a b c"}]}, 1) is None                # a one-minute plan is not policed
-    silent = {"beats": ok["beats"] + [{"narration": "", "silent": True, "hold": 4}]}
-    assert plan_mod.spoken_words(silent["beats"]) == 21 * 33                                      # pauses add no words and are not counted
+def _speech(plan, factor=1.0):
+    """What the voice 'really' took: the estimate times a factor (the voice is never exactly the estimate)."""
+    return [{"duration": round(L.estimate_speech(b["narration"], plan["language"], plan["voices"]["narrator"]) * factor, 3)} for b in plan["beats"]]
 
 
-def test_the_planner_gets_up_to_two_repairs_for_a_short_long_video_and_stops_when_it_is_long_enough():
-    seen = []
-    answers = iter([beats_json(15, 22), beats_json(18, 28), beats_json(30, 20)])
-    plan, warns = plan_mod.generate_plan("All about Paris", "", 5, lambda s, u: (seen.append(u), next(answers))[1])
-    assert len(seen) == 3 and "words but a 5-minute video needs about" in seen[1]
-    assert plan_mod.spoken_words(plan["beats"]) >= 0.85 * plan_mod.expected_words(5) and not any(w.startswith("length:") for w in warns)
-    seen.clear()
-    plan, warns = plan_mod.generate_plan("All about Paris", "", 5, lambda s, u: (seen.append(u), beats_json(30, 20))[1])
-    assert len(seen) == 1                                                                         # long enough the first time: no extra call
+# ------------------------------------------------------------------ the estimate
+def test_the_estimate_follows_the_text_and_the_voice():
+    s = "Sunlight enters a raindrop, bends, reflects off the back, and bends again as it leaves."
+    assert L.estimate_speech("") == 0.0 and L.estimate_speech("   ") == 0.0
+    assert 5.5 < L.estimate_speech(s, "en", "Ruth") < 7.0                                  # about 15 words at 2.6 words a second, plus four pauses
+    assert L.estimate_speech(s + " " + s, "en", "Amy") == pytest.approx(2 * L.estimate_speech(s, "en", "Amy") + L.RATES["Amy"][0], abs=1e-6)
+    assert L.estimate_speech("In 1969 it landed.", "en") > L.estimate_speech("In that it landed.", "en")   # a number is spoken long
+    assert L.rate_for("es", "Lucia") == L.RATES["Lucia"] and L.rate_for("es-MX", "Nobody") == L.LANG_RATES["es"] and L.rate_for(None, None) == L.LANG_RATES["en"]
+    assert L.estimate_speech("uno, dos, tres.", "es", "Lucia") != L.estimate_speech("uno, dos, tres.", "es", "Lupe")
 
 
-def test_a_script_that_stays_short_is_accepted_with_a_logged_warning_not_looped_forever():
-    seen = []
-    plan, warns = plan_mod.generate_plan("All about Paris", "", 5, lambda s, u: (seen.append(u), beats_json(15, 22))[1])
-    assert len(seen) == 3 and plan["beats"] and any(w.startswith("length:") for w in warns)
+def test_sentences_are_whole_and_short_pieces_stay_with_a_neighbour():
+    assert L.sentences("One two three four. Five six seven eight! Nine ten eleven?") == ["One two three four.", "Five six seven eight!", "Nine ten eleven?"]
+    assert L.sentences("It costs 3.5 million. That is a lot of money.") == ["It costs 3.5 million.", "That is a lot of money."]
+    assert L.sentences("Dr. Smith found it first. Nobody believed her.") == ["Dr. Smith found it first.", "Nobody believed her."]
+    assert L.sentences("They waited for hours. No.") == ["They waited for hours. No."]
+    assert L.sentences("¿Por qué sube el mar? ¡Por la luna, claro que sí! Así de simple es.") == ["¿Por qué sube el mar?", "¡Por la luna, claro que sí!", "Así de simple es."]
+    assert L.sentences('He said "it moves." Then he left the room.') == ['He said "it moves."', "Then he left the room."]
+    assert L.sentences("") == [] and L.sentences("one") == ["one"]
 
 
-def test_the_planner_has_room_for_a_long_script():
-    assert plan_handler.plan_max_tokens(1) == 8600 and plan_handler.plan_max_tokens(5) == 19000 and plan_handler.plan_max_tokens(12) == 32000
-    assert plan_handler.plan_max_tokens(5) > 8000                                                  # the old cap that a 5-minute plan plus its thinking could hit
+def test_the_estimated_total_is_what_the_timeline_builds():
+    plan = _script(60)
+    tl = build_timeline(plan, _speech(plan), video_id="v")
+    assert L.estimate_total(plan) == pytest.approx(tl["duration"], abs=0.05)
+    photo = dict(plan, intro_s=2.5, outro_s=3.5)
+    assert L.estimate_total(photo) == pytest.approx(build_timeline(photo, _speech(photo), video_id="v")["duration"], abs=0.05)
+    pause = copy.deepcopy(plan)
+    pause["beats"].insert(2, _beat(99, "", silent=True, hold=4.0))
+    assert L.estimate_total(pause) == pytest.approx(L.estimate_total(plan) + 4.0, abs=0.01)
+    assert L.estimate_total({"beats": []}) == 0.0
 
 
-# ---------------------------------------------------------------- a video is never shorter than the length asked
-from engine import timeline as tl_mod
+# ------------------------------------------------------------------ the cut before the voice is made
+def test_a_script_that_fits_is_never_touched():
+    for share in (0.5, 0.9, 1.0):
+        plan = _script(60, share=share)
+        before = copy.deepcopy(plan)
+        rep = L.fit_script(plan, 60)
+        assert plan == before and rep["cut_words"] == 0 and rep["fits"] and rep["before"] == rep["after"]
+    assert L.fit_script({"beats": []}, 60)["fits"] and L.fit_script(_script(60, share=1.5), 0)["cut_words"] == 0   # no length asked: nothing to keep
 
 
-def _plan(n=10, silent_at=()):
-    beats = [{"id": f"b{i}", "narration": "" if i in silent_at else "word " * 20, "silent": i in silent_at, "hold": 4 if i in silent_at else None,
-              "scene": {"type": "image" if i in silent_at else "title", "props": {"image_query": "x", "title": "t"}}} for i in range(n)]
-    return {"beats": beats, "mood": "calm", "theme": "paper"}
+@pytest.mark.parametrize("language", ["en", "es"])
+@pytest.mark.parametrize("seconds", [15, 30, 45, 60, 120, 180, 300])
+@pytest.mark.parametrize("share", [1.08, 1.2, 1.45])
+def test_a_long_script_is_cut_to_the_length_by_whole_sentences(language, seconds, share):
+    plan = _script(seconds, language, share)
+    before = copy.deepcopy(plan)
+    rep = L.fit_script(plan, seconds, min_beats=plan_mod.expected_beats(seconds / 60.0))
+    assert rep["cut_sentences"] >= 1 and rep["cut_beats"] == 0 and rep["fits"]
+    assert rep["after"] == pytest.approx(L.estimate_total(plan), abs=0.06) and rep["after"] < rep["before"]
+    assert abs(rep["after"] - seconds) <= max(0.03 * seconds, 2.6)                       # as near the length as one sentence allows (a sentence is about 4 s)
+    assert rep["after"] <= seconds * 1.05 + 0.48 * len(plan["beats"])                    # and always within what the pauses can still give back
+    first, last = L.sentences(before["beats"][0]["narration"])[0], L.sentences(before["beats"][-1]["narration"])[-1]
+    assert plan["beats"][0]["narration"].startswith(first) and plan["beats"][-1]["narration"].endswith(last)   # the hook and the last line stay
+    for b, o in zip(plan["beats"], before["beats"]):
+        kept, had = L.sentences(b["narration"]), iter(L.sentences(o["narration"]))
+        assert len(b["narration"].split()) >= 6 and all(any(s == h for h in had) for s in kept)   # only whole sentences went, the rest in their order, nothing added
+    assert rep["cut_words"] == sum(len(o["narration"].split()) - len(b["narration"].split()) for b, o in zip(plan["beats"], before["beats"]))
+    again = copy.deepcopy(before)
+    assert L.fit_script(again, seconds, min_beats=plan_mod.expected_beats(seconds / 60.0)) == rep and again == plan   # the same script is always cut the same way
 
 
-def _infos(plan, speech=8.0):
-    return [{"duration": (4.0 if b.get("silent") else speech)} for b in plan["beats"]]
+def test_the_cut_prefers_the_middle_and_stops_at_the_nearest_point():
+    a, b, c = "The tide follows the moon across the sky.", "The tide follows the moon across the sea.", "The tide follows the moon across the bay."   # equal length: only the place differs
+    plan = _plan([f"{a} {b} {c}"] * 3)
+    total = L.estimate_total(plan)
+    rep = L.fit_script(plan, total / 1.1)                                    # ten percent long: one sentence of nine is the nearest cut
+    assert rep["cut_sentences"] == 1 and rep["cut_words"] == 8 and rep["after"] == pytest.approx(L.estimate_total(plan), abs=0.06)
+    assert [b_["narration"] for b_ in plan["beats"]] == [f"{a} {b} {c}", f"{a} {c}", f"{a} {b} {c}"]   # the middle sentence of the middle beat
+    plan = _plan([f"{a} {b} {c}"] * 3)
+    rep = L.fit_script(plan, total / 1.6)                                    # far too long: sentences go until one more would overshoot
+    assert rep["cut_sentences"] in (3, 4) and abs(rep["after"] - total / 1.6) < 2.0
+    assert plan["beats"][0]["narration"].startswith(a) and plan["beats"][2]["narration"].endswith(c)
 
 
-def test_a_short_video_is_stretched_to_the_length_asked_and_never_past_a_few_seconds_over():
-    plan = _plan(10)
-    base = tl_mod.build_timeline(plan, _infos(plan), video_id="v")["duration"]                    # 10 x (0.4 + 8 + 0.55) + 1.4 = 90.9
-    want = base + 14
-    t = tl_mod.build_timeline(plan, _infos(plan), video_id="v", min_seconds=want)
-    assert want <= t["duration"] <= want + tl_mod.MIN_VIDEO_MARGIN + 0.01
-    assert sum(s["duration"] for s in t["scenes"]) == pytest.approx(t["duration"], abs=0.01)
-    assert all(a["start"] < b["start"] for a, b in zip(t["scenes"], t["scenes"][1:]))              # scenes stay contiguous and in order
-    # nothing already tied to a word moves: only the tail of each scene grows
-    plain = tl_mod.build_timeline(plan, _infos(plan), video_id="v")
-    assert t["scenes"][0]["words"] == plain["scenes"][0]["words"]
+def test_a_surplus_beat_goes_when_no_sentence_can():
+    one = "The tide follows the moon across the whole sky and piles the water up on the side of the planet that faces it."   # one sentence a beat: nothing to trim
+    plan = _plan([one] * 4)
+    plan["beats"][2]["chapter"] = "Why"
+    rep = L.fit_script(plan, 24, min_beats=3)                                                # about 31 s of script in 4 beats, and room for 3
+    assert rep["cut_sentences"] == 0 and rep["cut_beats"] == 1 and [b["id"] for b in plan["beats"]] in (["b0", "b2", "b3"], ["b0", "b1", "b3"]) and rep["cut_words"] == len(one.split())
+    assert any(b.get("chapter") == "Why" for b in plan["beats"])                             # a chapter that started on the beat that went starts on the next one
+    kept = _plan([one] * 4)
+    assert L.fit_script(kept, 24, min_beats=4)["cut_beats"] == 0 and len(kept["beats"]) == 4  # never below the beats the length should have
+    photos = _plan([one] * 4)
+    rep = L.fit_script(photos, 24, min_beats=3, drop_beats=False)                            # a beat that carries the person's photo is never dropped
+    assert rep["cut_beats"] == 0 and len(photos["beats"]) == 4 and rep["fits"] is False       # and the report says the script does not fit
+    talk = _plan([one] * 4)
+    for b in talk["beats"][1:3]:
+        b["speaker"] = "maya"
+    assert L.fit_script(talk, 24, min_beats=3)["cut_beats"] == 0                             # a dialogue line is somebody's turn
+    pause = _plan([one, one, one])
+    pause["beats"].insert(1, _beat(9, "", silent=True, hold=5.0))
+    assert L.fit_script(pause, 22, min_beats=2)["cut_beats"] == 1
+    assert any(b.get("silent") for b in pause["beats"])                                      # a pause is never the beat that goes
 
 
-def test_a_video_already_long_enough_is_left_alone():
-    plan = _plan(10)
-    base = tl_mod.build_timeline(plan, _infos(plan), video_id="v")["duration"]
-    assert tl_mod.build_timeline(plan, _infos(plan), video_id="v", min_seconds=base - 5)["duration"] == base
+def test_a_beat_is_never_left_with_too_few_words():
+    plan = _plan(["A long opening line that sets the whole scene for the viewer. No way.", "Tides rise. " + " ".join(EN[:4]), EN[7] + " " + EN[6]])
+    L.fit_script(plan, 15, min_beat_words=6)
+    assert all(len(b["narration"].split()) >= 6 for b in plan["beats"])
 
 
-def test_stretching_spreads_first_over_speech_then_pauses_then_the_last_scene():
-    d = [10.0, 10.0, 4.0, 10.0]
-    s = [False, False, True, False]
-    small = tl_mod.stretch_to(d, s, sum(d) + 3 - tl_mod.SHORT_VIDEO_MARGIN)   # 37 s asked: under a minute the margin is the short one
-    assert small == [11.0, 11.0, 4.0, 11.0]                                                         # 1 s on each spoken scene
-    big = tl_mod.stretch_to(d, s, sum(d) + 10)
-    assert big[0] == big[1] == 11.6 and big[2] > 4.0 and sum(big) >= sum(d) + 10                   # speech capped at +1.6, then the pause is held longer
-    huge = tl_mod.stretch_to(d, s, sum(d) + 60)
-    assert sum(huge) >= sum(d) + 60 and huge[2] == 8.0                                              # pauses stop at the hold limit; the rest goes to the end
+# ------------------------------------------------------------------ the pauses, with the measured audio
+def test_tighten_leaves_a_video_inside_the_window_alone_and_never_goes_under_the_floors():
+    assert L.tighten(6, 61.0, 60, 0.40, 0.55) == (0.40, 0.55) and L.tighten(6, 61.8, 60, 0.40, 0.55) == (0.40, 0.55)
+    lead, tail = L.tighten(6, 63.0, 60, 0.40, 0.55)                       # 1.2 s to give back over 6 beats
+    assert L.LEAD_FLOOR < lead < 0.40 and L.TAIL_FLOOR < tail < 0.55 and 6 * ((0.40 - lead) + (0.55 - tail)) == pytest.approx(1.2, abs=0.02)
+    assert L.tighten(6, 80.0, 60, 0.40, 0.55) == (L.LEAD_FLOOR, L.TAIL_FLOOR)
+    assert L.tighten(0, 80.0, 60, 0.40, 0.55) == (0.40, 0.55) and L.tighten(6, 80.0, 0, 0.40, 0.55) == (0.40, 0.55)
+    assert L.clean_pace({"lead": 0.3, "tail": 0.4}, 0.40, 0.55) == (0.3, 0.4) and L.clean_pace({"lead": 0.01, "tail": 9}, 0.40, 0.55) == (L.LEAD_FLOOR, 0.55)
+    assert L.clean_pace(None, 0.40, 0.55) == (0.40, 0.55) and L.clean_pace({"lead": "x"}, 0.40, 0.55) == (0.40, 0.55)
 
 
-def test_the_plan_handler_records_the_length_asked_and_only_a_first_render_is_stretched():
-    import inspect
-    from engine.handlers import plan_handler, timeline_handler
-    assert 'plan["target_seconds"] = round(minutes * 60)' in inspect.getsource(plan_handler)
-    src = inspect.getsource(timeline_handler)
-    assert "min_seconds=" in src and "if rev == 1 and" in src                                  # an edit may legitimately make the video shorter
+def test_the_timeline_shortens_the_silences_and_the_words_move_with_them():
+    plan = _script(60, share=1.0)
+    slow = _speech(plan, 1.07)                                             # the voice took 7 percent longer than estimated
+    plain = build_timeline(plan, slow, video_id="v")
+    tl = build_timeline(plan, slow, video_id="v", fit_seconds=60, min_seconds=60)
+    assert plain["duration"] > 63.0 and "pace" not in plain
+    assert 60.0 <= tl["duration"] <= 63.0 and tl["pace"]["lead"] < T.LEAD and tl["pace"]["tail"] < T.TAIL
+    for sc, p, info in zip(tl["scenes"], plain["scenes"], slow):
+        assert sc["narration_offset"] == pytest.approx(tl["pace"]["lead"]) and sc["words"][0][1] == pytest.approx(tl["pace"]["lead"], abs=0.01)   # the voice and its captions start together, earlier
+        assert sc["duration"] < p["duration"] and sc["duration"] >= tl["pace"]["lead"] + info["duration"] + tl["pace"]["tail"] - 0.001              # never into the words
+    fast = build_timeline(plan, _speech(plan, 0.9), video_id="v", fit_seconds=60, min_seconds=60)
+    assert 60.0 <= fast["duration"] <= 63.0 and "pace" not in fast          # a short video is held longer instead (the step that was already there)
 
 
-# ---------------------------------------------------------------- the big word is about the subject, never the pause
-def test_a_big_word_that_names_the_pause_is_dropped_in_any_language():
-    for w in ("Silence", "SILENCE", "silence.", "Breathe", "Quiet", "Silencio", "Pausa", "Stille", "Silêncio", "Silenzio", "Take a breath"):
-        assert plan_mod._word_prop({"word": w}) == {}, w
-    assert plan_mod._word_prop({"word": "Paris"}) == {"word": "Paris"}
-    assert plan_mod._word_prop({"word": "1889"}) == {"word": "1889"}
-    assert plan_mod._word_prop({"word": "Seine"}) == {"word": "Seine"}
+def test_an_edit_keeps_the_pace_of_its_video():
+    plan = _script(60, share=1.0)
+    slow = _speech(plan, 1.07)
+    first = build_timeline(plan, slow, video_id="v", fit_seconds=60, min_seconds=60)
+    edited = build_timeline(dict(plan, pace=first["pace"]), slow, video_id="v")           # a later render: no fitting, the stored pace
+    assert edited["pace"] == first["pace"] and [s["narration_offset"] for s in edited["scenes"]] == [s["narration_offset"] for s in first["scenes"]]
+    assert build_timeline(dict(plan, pace={"lead": -5, "tail": "x"}), slow, video_id="v").get("pace") is None   # nonsense in the plan: the normal silences
 
 
-def test_the_prompt_does_not_invite_a_title_about_silence():
-    s = plan_mod.system_prompt("en", None)
-    assert "SILENT" not in s and "Never a word about the pause or sound" in s and '"silence"' in s
+def _run(monkeypatch, plan, speech, rev=1):
+    store = {"generation/v2/v1/plan.json": copy.deepcopy(plan)}
+    monkeypatch.setattr(awsio, "get_json", lambda k: copy.deepcopy(store[k]))
+    monkeypatch.setattr(awsio, "put_json", lambda k, o: store.__setitem__(k, copy.deepcopy(o)))
+    beats = [{"id": b["id"], "media": {"duration": s["duration"], "audio_key": f"generation/v2/v1/audio/{b['id']}.mp3"}} for b, s in zip(plan["beats"], speech)]
+    out = timeline_handler.handler({"video_id": "v1", "user_id": "u1", "plan_key": "generation/v2/v1/plan.json", "rev": rev, "mode": "final", "beats": beats}, None)
+    return store[out["timeline_key"]], store["generation/v2/v1/plan.json"]
 
 
-def test_a_silent_beat_with_a_meta_word_keeps_its_picture_but_loses_the_word():
-    raw = {"legit": True, "title": "T", "description": "d", "voices": {"narrator": "Ruth"}, "beats": [
-        {"narration": "A first idea about rivers and bridges.", "scene": {"type": "title", "props": {"title": "Rivers"}}},
-        {"narration": "", "hold": 4, "scene": {"type": "image", "props": {"image_query": "river at dawn", "word": "Silence"}}},
-        {"narration": "And a closing thought on the whole.", "scene": {"type": "title", "props": {"title": "End"}}}]}
-    plan, warns = plan_mod.validate_plan(raw)
-    silent = [b for b in plan["beats"] if b.get("silent")]
-    assert len(silent) == 1 and "word" not in silent[0]["scene"]["props"] and silent[0]["scene"]["type"] == "image"
+def test_the_first_render_stores_the_pace_in_the_plan_and_later_renders_use_it(monkeypatch):
+    plan = dict(_script(60, share=1.0), target_seconds=60)
+    slow = _speech(plan, 1.07)
+    tl, saved = _run(monkeypatch, plan, slow)
+    assert 60.0 <= tl["duration"] <= 63.0 and saved["pace"] == tl["pace"] and saved["pace"]["lead"] < T.LEAD
+    tl2, saved2 = _run(monkeypatch, saved, slow, rev=2)
+    assert tl2["pace"] == tl["pace"] and saved2["pace"] == saved["pace"] and tl2["duration"] == pytest.approx(tl["duration"], abs=0.01)
+    ok, kept = _run(monkeypatch, plan, _speech(plan, 1.0))                  # nothing to tighten: nothing stored
+    assert "pace" not in ok and "pace" not in kept
+    monkeypatch.setenv("FIT_TO_TARGET", "0")
+    off, _ = _run(monkeypatch, plan, slow)
+    assert "pace" not in off and off["duration"] > 63.0                    # the switch: the timeline as it was
 
 
-def test_a_reply_with_text_or_a_second_object_after_the_json_is_still_read():
-    good = '{"legit": true, "beats": [{"narration": "hello there"}]}'
-    for raw in (good + "\n\nNote: I kept it short.", good + '\n{"extra": 1}', "Here is the plan:\n" + good + "\nHope that helps {really}", "```json\n" + good + "\n```\nThanks"):
-        assert plan_mod.parse_plan_json(raw)["legit"] is True, raw
-    with pytest.raises(ValueError):
-        plan_mod.parse_plan_json("I cannot help with that {not json")
+# ------------------------------------------------------------------ the window, end to end
+@pytest.mark.parametrize("language", ["en", "es"])
+@pytest.mark.parametrize("seconds", [15, 30, 45, 60, 90, 120, 180, 300])
+@pytest.mark.parametrize("share", [0.75, 0.95, 1.1, 1.3])
+@pytest.mark.parametrize("voice", [0.92, 1.0, 1.06])
+def test_from_15_seconds_to_5_minutes_the_video_lands_in_the_window(language, seconds, share, voice):
+    """Whatever the writer delivered (25 percent short to 30 percent long) and with a voice 8 percent faster to 6 percent slower than the estimate, the video is
+    never shorter than asked and at most 5 percent longer."""
+    plan = _script(seconds, language, share)
+    L.fit_script(plan, seconds, min_beats=plan_mod.expected_beats(seconds / 60.0))
+    tl = build_timeline(plan, _speech(plan, voice), video_id="v", fit_seconds=seconds, min_seconds=seconds)
+    assert seconds <= tl["duration"] <= seconds * 1.05 + 0.01, (tl["duration"], tl.get("pace"))
 
 
-# ---------------------------------------------------------------- the director decides pauses and has a reason for each
-def test_the_director_prompt_has_the_craft_rules_and_makes_pauses_and_big_words_optional():
-    s = plan_mod.system_prompt("en", None)
-    for needle in ("hook in the first beat", "Never greet", "One idea per beat", "not decoration", "name its reason", "usually zero in videos under 2 minutes", "optional and rare", "never the narrated sentence"):
-        assert needle in s, needle
-    assert "include a few" not in s and "SILENT" not in s                                             # nothing tells the model to add pauses to be seasoned
+# ------------------------------------------------------------------ the director
+def _big(texts):
+    def big(system, user):
+        return json.dumps({"legit": True, "title": "How tides work", "description": "d", "mood": "calm", "theme": "midnight", "voices": {"narrator": "Ruth"},
+                           "beats": [{"narration": t, "scene": {"type": "title", "props": {"title": "x"}}} for t in texts]})
+    return big
 
 
-def test_a_pause_keeps_the_directors_reason_and_a_missing_reason_is_fine():
-    raw = {"legit": True, "title": "T", "description": "d", "voices": {"narrator": "Ruth"}, "beats": [
-        {"narration": "A first idea about rivers and bridges in the city.", "scene": {"type": "title", "props": {"title": "Rivers"}}},
-        {"narration": "", "hold": 4, "why": "lets the aerial shot of the old town land", "scene": {"type": "image", "props": {"image_query": "old town from above"}}},
-        {"narration": "And a second idea about the markets and the food.", "scene": {"type": "title", "props": {"title": "Markets"}}},
-        {"narration": "", "hold": 3, "scene": {"type": "image", "props": {"image_query": "market at dawn"}}},
-        {"narration": "A closing thought on the whole city and its people.", "scene": {"type": "title", "props": {"title": "End"}}}]}
-    plan, _ = plan_mod.validate_plan(raw)
-    pauses = [b for b in plan["beats"] if b.get("silent")]
-    assert pauses and pauses[0].get("why") == "lets the aerial shot of the old town land"
-    assert all("word" not in b["scene"]["props"] for b in pauses)                                      # no word unless the director chose one
+def test_the_director_cuts_a_long_script_and_says_so(monkeypatch):
+    long = [" ".join(EN[:4]), " ".join(EN[2:6]), " ".join(EN[4:8])]          # about 38 s of script for a 30 s video, whatever the repair asks
+    out = director.direct("how tides work", minutes=0.5, ask_small=_ask_small(["explainer-education"]), ask_big=_big(long), language="en")
+    rep = out["research"]["length"]
+    assert rep["target"] == 30.0 and rep["before"] > 36 and rep["after"] <= 31.5 and rep["cut_sentences"] >= 2 and rep["fits"]
+    assert any(w.startswith("length: estimated") for w in out["warnings"])
+    assert L.estimate_total(out["plan"]) == pytest.approx(rep["after"], abs=0.06)
+    assert out["plan"]["beats"][-1]["narration"].endswith(EN[7])
+    monkeypatch.setenv("FIT_TO_TARGET", "0")
+    off = director.direct("how tides work", minutes=0.5, ask_small=_ask_small(["explainer-education"]), ask_big=_big(long), language="en")
+    assert "length" not in off["research"] and sum(len(b["narration"].split()) for b in off["plan"]["beats"]) > sum(len(b["narration"].split()) for b in out["plan"]["beats"])
 
 
-def test_the_staged_prompts_carry_the_arc_hook_and_pause_rules():
-    from engine import staged
-    assert "never a greeting or an agenda" in staged.outline_system("en", None) and "arc" in staged.outline_system("en", None)
-    assert "at most one pause in it" in staged.SECTION_ADDENDUM
-
-
-# ---------------------------------------------------------------- pauses depend on the kind of video; photo videos open and end on music
-def test_the_pause_rule_is_different_for_explanations_and_for_picture_videos():
-    s = plan_mod.system_prompt("en", None)
-    assert "usually zero in videos under 2 minutes" in s and "Videos built on pictures and mood" in s and "never talk over every picture" in s and "one beat in three" in s
-
-
-def test_photo_videos_may_spend_one_beat_in_three_on_pauses_others_one_in_four():
-    def beats(n):
-        out = []
-        for i in range(n):
-            silent = i % 2 == 1 and 0 < i < n - 1
-            out.append({"narration": "" if silent else "words " * 12, "silent": silent, "hold": 4.0 if silent else None, "scene": {"type": "image", "props": {"image_query": "x"}}})
-        return out
-    a, b = beats(13), beats(13)
-    plan_mod.enforce_silence(a, 0.25)
-    plan_mod.enforce_silence(b, 0.34)
-    assert sum(x.get("silent", False) for x in a) == 3 and sum(x.get("silent", False) for x in b) == 4
-
-
-def test_a_photo_video_starts_with_music_and_a_picture_before_the_first_word_and_ends_on_music():
-    from engine import timeline as tl_mod
-    plan = {"beats": [{"id": "aaaaaaa1", "narration": "words " * 20, "scene": {"type": "title", "props": {"title": "t"}}}, {"id": "aaaaaaa2", "narration": "words " * 20, "scene": {"type": "title", "props": {"title": "u"}}}],
-            "mood": "calm", "theme": "paper"}
-    infos = [{"duration": 6.0, "words": [["hello", 0.0, 0.4], ["there", 0.5, 0.9]]}, {"duration": 6.0}]
-    plain = tl_mod.build_timeline(plan, infos, video_id="v")
-    with_music = tl_mod.build_timeline({**plan, "intro_s": 2.5, "outro_s": 3.5}, infos, video_id="v")
-    assert plain["intro_s"] == 0.0 and plain["outro_s"] == tl_mod.END_HOLD
-    assert with_music["intro_s"] == 2.5 and with_music["outro_s"] == 3.5
-    s0, p0 = with_music["scenes"][0], plain["scenes"][0]
-    assert s0["narration_offset"] == pytest.approx(p0["narration_offset"] + 2.5) and s0["duration"] == pytest.approx(p0["duration"] + 2.5)
-    assert s0["words"][0][1] == pytest.approx(p0["words"][0][1] + 2.5)                                      # the first word waits for the intro
-    assert with_music["scenes"][1]["duration"] == pytest.approx(plain["scenes"][1]["duration"] + 3.5 - tl_mod.END_HOLD)
-    assert with_music["duration"] == pytest.approx(plain["duration"] + 2.5 + 3.5 - tl_mod.END_HOLD)
-
-
-def test_the_music_comes_up_over_the_opening_and_the_ending_of_a_photo_video(tmp_path, monkeypatch):
-    import numpy as np
-    from engine import pipeline, media
-    seen = {}
-    monkeypatch.setattr(media, "mix_audio", lambda *a, **k: seen.update(k))
-    tl = {"duration": 30.0, "intro_s": 2.5, "outro_s": 3.5, "scenes": [{"start": 0.0, "duration": 15.0, "narration_offset": 2.9, "type": "title"}, {"start": 15.0, "duration": 15.0, "narration_offset": 0.4, "type": "title"}]}
-    pipeline.make_audio(tl, [np.zeros(24000, np.float32)] * 2, str(tmp_path / "o.m4a"))
-    assert (0.2, 2.8) in seen["swells"] and (26.8, 29.8) in [(round(a, 1), round(b, 1)) for a, b in seen["swells"]]
-    seen.clear()
-    pipeline.make_audio({**tl, "intro_s": 0.0, "outro_s": 1.4}, [np.zeros(24000, np.float32)] * 2, str(tmp_path / "p.m4a"))
-    assert seen["swells"] == []                                                                          # other videos are unchanged
-
-
-def test_a_video_of_the_persons_photos_leaves_room_for_the_music_only_opening_and_ending():
-    plain, photos = plan_mod.expected_words(2.0, 0), plan_mod.expected_words(2.0, 12)
-    beats_p, beats_f = plan_mod.expected_beats(2.0, 0), plan_mod.expected_beats(2.0, 12)
-    assert photos == int((120 - plan_mod.PHOTO_FRAME_S - beats_f * plan_mod.BEAT_OVERHEAD_S) * plan_mod.SPOKEN_WORDS_PER_S)
-    assert plan_mod.PHOTO_FRAME_S == 6.0 and plain == int((120 - beats_p * plan_mod.BEAT_OVERHEAD_S) * plan_mod.SPOKEN_WORDS_PER_S)
+def test_the_director_leaves_a_script_of_the_right_length_alone():
+    texts = [" ".join(EN[:2]), " ".join(EN[2:4]), " ".join(EN[6:8])]
+    out = director.direct("how tides work", minutes=0.5, ask_small=_ask_small(["explainer-education"]), ask_big=_big(texts), language="en")
+    assert "length" not in out["research"] and [b["narration"] for b in out["plan"]["beats"]] == texts
+    assert not any(w.startswith("length:") for w in out["warnings"])

@@ -3,6 +3,7 @@ import hashlib
 import json
 from typing import Any, Dict, List, Sequence
 
+from . import length as length_mod
 from . import sync as sync_mod
 from . import watermark_spec
 from .align import estimate_words
@@ -56,16 +57,29 @@ def build_timeline(
     width: int = 1920,
     height: int = 1080,
     min_seconds: float = 0.0,
+    fit_seconds: float = 0.0,
 ) -> Dict[str, Any]:
-    """beat_info[i] = {'duration': speech seconds, 'asset': optional key for image scenes}."""
+    """beat_info[i] = {'duration': speech seconds, 'asset': optional key for image scenes}.
+    `min_seconds`: the video is never shorter than this (scenes are held longer). `fit_seconds`: the length asked for; when the measured narration would run
+    more than a few percent past it, the silences around every spoken beat are shortened (engine/length.py). Without `fit_seconds` the silences are the ones
+    stored in the plan (`pace`, written by the first render) or the normal ones."""
     intro = max(0.0, min(6.0, float(plan.get("intro_s") or 0.0)))                    # music and pictures before the first word
     outro = max(END_HOLD, min(8.0, float(plan.get("outro_s") or END_HOLD)))          # music alone after the last word
-    base = []
-    for i, beat in enumerate(plan["beats"]):
-        speech, silent = float(beat_info[i]["duration"]), bool(beat.get("silent"))
-        base.append(max(MIN_SCENE, speech) if silent else max(MIN_SCENE, LEAD + speech + TAIL))
-    base[0] += intro if not plan["beats"][0].get("silent") else 0.0
-    base[-1] += outro
+
+    def lengths(ld: float, tl: float) -> List[float]:
+        out = []
+        for i, beat in enumerate(plan["beats"]):
+            speech, silent = float(beat_info[i]["duration"]), bool(beat.get("silent"))
+            out.append(max(MIN_SCENE, speech) if silent else max(MIN_SCENE, ld + speech + tl))
+        out[0] += intro if not plan["beats"][0].get("silent") else 0.0
+        out[-1] += outro
+        return out
+
+    if fit_seconds:   # a first render: the pace is worked out from the measured audio
+        LEAD_S, TAIL_S = length_mod.tighten(sum(1 for b in plan["beats"] if not b.get("silent")), sum(lengths(LEAD, TAIL)), fit_seconds, LEAD, TAIL)
+    else:             # an edit keeps the pace its video was made with
+        LEAD_S, TAIL_S = length_mod.clean_pace(plan.get("pace"), LEAD, TAIL)
+    base = lengths(LEAD_S, TAIL_S)
     durs = stretch_to(base, [bool(b.get("silent")) for b in plan["beats"]], min_seconds) if min_seconds else base
     scenes: List[Dict[str, Any]] = []
     sync_items = sync_anchored = 0
@@ -75,7 +89,7 @@ def build_timeline(
         info = beat_info[i]
         speech = float(info["duration"])
         silent = bool(beat.get("silent"))
-        lead = LEAD + (intro if i == 0 and not silent else 0.0)   # the first beat starts speaking after the intro
+        lead = LEAD_S + (intro if i == 0 and not silent else 0.0)   # the first beat starts speaking after the intro
         dur = durs[i]   # the narration's length (+ lead and tail), a silent beat exactly as long as it is held, stretched at the end if the video would be shorter than asked
         stype = beat["scene"]["type"]
         props = dict(beat["scene"]["props"])
@@ -182,6 +196,7 @@ def build_timeline(
         "title": plan.get("title", ""),
         **({"watermark": wm} if wm else {}),
         **({"background": bg} if bg else {}),
+        **({"pace": {"lead": LEAD_S, "tail": TAIL_S}} if (LEAD_S, TAIL_S) != (LEAD, TAIL) else {}),   # only when the silences were shortened to keep the length (engine/length.py)
     }
 
 
