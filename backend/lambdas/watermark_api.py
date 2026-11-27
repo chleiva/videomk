@@ -10,7 +10,7 @@ import base64
 import binascii
 import json
 import logging
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 from botocore.exceptions import ClientError
 
@@ -45,7 +45,7 @@ def _body(event: Dict[str, Any]) -> Dict[str, Any]:
     return body
 
 
-def _clean(body: Dict[str, Any], *, premium: bool) -> Dict[str, Any]:
+def _clean(body: Dict[str, Any], *, premium: bool, forced: Optional[bool] = None, modes: Optional[list] = None) -> Dict[str, Any]:
     if "mode" not in body:   # saving settings always says which mode
         raise store.WatermarkError(400, "wm.invalid", "invalid")
     try:
@@ -54,10 +54,13 @@ def _clean(body: Dict[str, Any], *, premium: bool) -> Dict[str, Any]:
         raise store.WatermarkError(400, "wm.invalid", "invalid") from None
     if spec is None:
         raise store.WatermarkError(400, "wm.invalid", "invalid")
+    by_plan = modes is not None   # plans on (docs/PLANS.md): the refusal also names the plan that unlocks the mode
     if spec["mode"] == "custom" and not premium:
-        raise store.WatermarkError(403, "wm.premium", "watermark_premium")
-    if spec["mode"] == "none" and store.force_policy() and not premium:
-        raise store.WatermarkError(403, "wm.premium", "watermark_required")   # the owner's policy: a free account's videos carry the mark
+        raise store.WatermarkError(403, "wm.premium", "watermark_premium", extra={"requires_plan": store._plan_for_mode("custom")} if by_plan else None)
+    if spec["mode"] == "none" and (store.force_policy() and not premium if forced is None else forced):
+        raise store.WatermarkError(403, "wm.premium", "watermark_required", extra={"requires_plan": store._plan_for_mode("none")} if by_plan else None)   # the owner's policy: a free account's videos carry the mark
+    if by_plan and spec["mode"] not in modes and spec["mode"] != "custom":
+        raise store.WatermarkError(403, "plan.watermark", "plan_watermark", extra={"requires_plan": store._plan_for_mode(spec["mode"])})
     return spec
 
 
@@ -71,7 +74,8 @@ def route(event: Dict[str, Any], user: str, loc: str) -> Dict[str, Any]:
     if res == base and method == "GET":
         return view(user, loc)
     if res == base and method == "PUT":
-        spec = _clean(_body(event), premium=store.is_premium(user))
+        wr = store.rights(user)
+        spec = _clean(_body(event), premium=wr["premium"], forced=wr["forced"], modes=wr["modes"])
         if spec["mode"] == "custom" and not store.has_logo(user):
             raise store.WatermarkError(400, "wm.logo_missing", "watermark_logo_missing")
         store.put_profile(user, spec)
@@ -81,8 +85,8 @@ def route(event: Dict[str, Any], user: str, loc: str) -> Dict[str, Any]:
         store.delete_logo(user)
         return view(user, loc)
     if res == f"{base}/logo" and method == "PUT":
-        if not store.is_premium(user):
-            raise store.WatermarkError(403, "wm.premium", "watermark_premium")
+        if not store.rights(user)["premium"]:
+            raise store.WatermarkError(403, "wm.premium", "watermark_premium", extra={"requires_plan": "max"})
         try:
             usage.consume(f"wmlogo:{user}", limit=LOGO_UPLOADS_PER_DAY)
         except usage.QuotaExceeded:
@@ -119,7 +123,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         store.check_user(user)
         return json_response(200, route(event, user, loc), {**_HEADERS, "Cache-Control": "no-store"})
     except store.WatermarkError as e:
-        extra = {"code": e.code} if e.code else {}
+        extra = {**({"code": e.code} if e.code else {}), **e.extra}
         return json_response(e.status, {"message": i18n.t(e.key, loc, **e.params), **extra}, {**_HEADERS, **({"Retry-After": "3600"} if e.status == 429 else {})})
     except ClientError:
         logger.exception("WATERMARK_FAILED (AWS)")

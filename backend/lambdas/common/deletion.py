@@ -45,7 +45,7 @@ STEPS = ["begin", "executions", "media", "videos", "wallet", "usage", "flags", "
 DATA_STEPS = ["media", "videos", "wallet", "usage", "flags", "safety", "feedback"]
 
 # every usage-table partition a person can have (code: usage.consume(f"<prefix>:{user}") and the plain `user` of the daily video quota)
-USAGE_PREFIXES = ("", "upload:", "libup:", "libsearch:", "brief:", "unlimited:", "dup:", "edit:", "deck:", "deckproc:", "feedback:", "feedbackh:", "wmlogo:")
+USAGE_PREFIXES = ("", "upload:", "libup:", "libsearch:", "brief:", "unlimited:", "dup:", "edit:", "deck:", "deckproc:", "feedback:", "feedbackh:", "wmlogo:", "freemonth:", "devch:")
 FLAG_KEYS = ("{u}", "safety:{u}")
 ASSET_USER_PREFIXES = ("videos/{u}/", "uploads/{u}/", "watermark/{u}/")   # watermark/: the saved watermark settings and logo (docs/WATERMARK.md)
 ASSET_VIDEO_PREFIXES = ("generation/v2/{v}/", "generation/assets/{v}/")
@@ -457,6 +457,9 @@ def step_flags(user: str, budget: Budget) -> Dict[str, int]:
     for k in FLAG_KEYS:
         table.delete_item(Key={"user_id": k.format(u=user)})   # an absent item is not an error
         n += 1
+    if os.environ.get("ENTITLEMENTS_TABLE"):   # the plan record (docs/PLANS.md). The free-allowance claim (a salted hash with no account id) is NOT deleted: that is its purpose
+        ddb().Table(os.environ["ENTITLEMENTS_TABLE"]).delete_item(Key={"user_id": user})
+        n += 1
     return {"keys": n}
 
 
@@ -631,6 +634,8 @@ def inventory(user: str, budget: Optional[Budget] = None) -> Dict[str, int]:
         out[name] = sum(1 for _ in _query_all(ddb().Table(_env(env)), budget, KeyConditionExpression=Key("user_id").eq(user)))
     out["usage_rows"] = sum(1 for p in USAGE_PREFIXES for _ in _query_all(ddb().Table(_env("USAGE_TABLE")), budget, KeyConditionExpression=Key("user_id").eq(f"{p}{user}")))
     out["flags_rows"] = sum(1 for k in FLAG_KEYS if ddb().Table(_env("FLAGS_TABLE")).get_item(Key={"user_id": k.format(u=user)}).get("Item"))
+    if os.environ.get("ENTITLEMENTS_TABLE"):
+        out["entitlement_rows"] = 1 if ddb().Table(os.environ["ENTITLEMENTS_TABLE"]).get_item(Key={"user_id": user}).get("Item") else 0
     if os.environ.get("SAFETY_TABLE"):
         out["safety_rows"] = sum(1 for _ in _query_all(ddb().Table(_env("SAFETY_TABLE")), budget, KeyConditionExpression=Key("user_id").eq(user)))
     if os.environ.get("MEDIA_TABLE"):

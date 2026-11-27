@@ -5,7 +5,9 @@ Credits live in *buckets* so each kind can expire on its own and the soonest-exp
   signup  5 welcome credits, expire after 30 days
   paid    bought through the stores, never expire (one bucket per user, increased per purchase)
   refund  a make-good when a refund finds its original bucket already expired (valid 24 h)
-The amounts are server config (env), so they change without an app update.
+  plan    the monthly credits of a paid plan (docs/PLANS.md): granted once per monthly date, Pro's end at the next date, Max's live one month longer (balance capped at 240)
+The amounts are server config (env), so they change without an app update. Where plans are on (common/plans.enabled()) the free amounts come from the owner's knobs
+(common/plans.config()) and a free credit is granted only after the eligibility step (common/free_grants.py); off, everything below behaves as it always did.
 
 Table (WALLET_TABLE): HASH user_id, RANGE sk.  META item `sk="META"`; bucket items `sk="B#<expiry>#<kind>#<id>"` so a query returns
 them in spending order; `REF#<id>` items make purchase grants idempotent.
@@ -23,6 +25,8 @@ import boto3
 from boto3.dynamodb.conditions import Key
 from botocore.exceptions import ClientError
 
+from common import entitlements, free_grants, plans
+
 NEVER = 9_999_999_999
 MAX_MINUTES = 12
 UNLIMITED_DISPLAY = 999  # what an unlimited account's balance reads as, so older app builds still let it send
@@ -34,6 +38,14 @@ class InsufficientCredits(Exception):
         self.balance, self.needed = balance, needed
 
 
+class FreeNotAvailable(InsufficientCredits):
+    """The account has enough credits only by counting free ones, and free credits may not be spent on this request (`reason`: web, no_device, denied, no_context)."""
+
+    def __init__(self, balance: int, needed: int, reason: str):
+        super().__init__(balance, needed)
+        self.reason = reason
+
+
 def _int(name: str, default: int) -> int:
     try:
         return int(os.environ.get(name, default))
@@ -42,6 +54,10 @@ def _int(name: str, default: int) -> int:
 
 
 def rules() -> Dict[str, int]:
+    if plans.enabled():   # the owner's knobs decide (docs/PLANS.md)
+        cfg = plans.config()
+        return {"credit_unit_seconds": 60, "max_minutes": MAX_MINUTES, "signup": int(cfg["welcome_credits"]), "daily": int(cfg["free_daily_credits"]),
+                "signup_valid_days": int(cfg["welcome_valid_days"])}
     return {"credit_unit_seconds": 60, "max_minutes": MAX_MINUTES, "signup": _int("WALLET_SIGNUP_CREDITS", 5), "daily": _int("WALLET_DAILY_CREDITS", 1),
             "signup_valid_days": _int("WALLET_SIGNUP_VALID_DAYS", 30)}
 
@@ -91,9 +107,95 @@ def _signup_block(user_id: str, now: float) -> Optional[str]:
     return deletion.signup_block(user_id, now=now)
 
 
-def ensure_grants(user_id: str, *, now: Optional[float] = None, tz: Optional[str] = None) -> None:
-    """Welcome credits the first time we see a user; then the day's free credits once per local day. Race-safe (conditional writes)."""
+def _ensure_grants_plans(user_id: str, *, now: float, tz: Optional[str], ctx: Optional[Dict[str, Any]], ent: Optional[Dict[str, Any]]) -> Tuple[Dict[str, Any], Dict[str, Any]]:
+    """Where plans are on: the wallet row (created without any credit), the plan's monthly credits, then the free grants behind their eligibility step.
+    Returns (the META row, the effective entitlement); ({}, ent) for an account that is being deleted."""
+    t = _table()
+    unlimited = is_unlimited(user_id)
+    ent = entitlements.effective(user_id, now=now, unlimited=unlimited) if ent is None else ent
+    meta = t.get_item(Key={"user_id": user_id, "sk": "META"}, ConsistentRead=True).get("Item")
+    if meta is None:
+        block = _signup_block(user_id, now)
+        if block == "deleting":
+            return {}, ent
+        day, _ = local_day(now, tz)
+        meta = {"user_id": user_id, "sk": "META", "signup_at": int(now), "last_daily_key": day, "last_daily_utc_day": int(now // 86400),
+                "welcome_state": "denied" if block else "pending", **({"signup_denied": block} if block else {})}
+        try:
+            t.put_item(Item=meta, ConditionExpression="attribute_not_exists(user_id)")
+            if not unlimited:
+                free_grants.note_first_seen(ctx, now)
+        except ClientError as e:
+            if not _cancelled(e):
+                raise
+            meta = t.get_item(Key={"user_id": user_id, "sk": "META"}, ConsistentRead=True).get("Item") or meta
+    ensure_plan_grants(user_id, ent, now=now)
+    meta = free_grants.ensure(user_id, meta, ctx=ctx, plan=ent["plan"], unlimited=unlimited, now=now, tz=tz)
+    return meta, ent
+
+
+def ensure_plan_grants(user_id: str, ent: Dict[str, Any], *, now: Optional[float] = None) -> int:
+    """The monthly credits of a paid plan, once per monthly date counted from the subscription's anchor (so a yearly plan gets twelve grants, and a wallet that was not
+    opened for a while catches up on what is still valid). Pro: 30 that end at the next date. Max: 120 that live one date longer; the plan balance never exceeds the plan's
+    cap (240). A grant is keyed by plan, anchor and month (PLAN#...), so it happens once whatever the concurrency. No active paid plan: any plan credit left is removed
+    (a plan that ended, was refunded or was downgraded to Free takes its credits with it). Returns the credits granted now."""
     now = time.time() if now is None else now
+    if not ent.get("grants_credits"):
+        if ent.get("record_plan"):   # there was a plan: its credits end with it
+            revoke_plan_credits(user_id, now=now)
+        return 0
+    p, anchor, tn = plans.PLANS[ent["plan"]], int(ent["anchor"] or ent["period_start"] or now), _table().name
+    if now < anchor:
+        return 0
+    k_now = 0
+    while entitlements.add_months(anchor, k_now + 1) <= now:
+        k_now += 1
+    granted = 0
+    for k in range(max(0, k_now - int(p["rollover_months"])), k_now + 1):
+        start, expires = entitlements.add_months(anchor, k), entitlements.add_months(anchor, k + 1 + int(p["rollover_months"]))
+        if expires <= now or (ent.get("period_end") is not None and start >= int(ent["period_end"])):   # nothing to give: already over, or a month that was not paid for
+            continue
+        ref = {"user_id": user_id, "sk": f"PLAN#{p['id']}#{anchor}#{k:04d}"}
+        if _table().get_item(Key=ref, ConsistentRead=True).get("Item"):
+            continue
+        have = sum(int(b["remaining"]) for b in _live_buckets(user_id, now) if b["kind"] == "plan")
+        amount = max(0, min(int(p["credits_per_month"]), int(p["credits_cap"]) - have))
+        items: List[Dict[str, Any]] = [{"Put": {"TableName": tn, "Item": {**ref, "credits": amount, "at": int(now)}, "ConditionExpression": "attribute_not_exists(user_id)"}}]
+        if amount > 0:
+            items.append({"Put": {"TableName": tn, "Item": {**_bucket(user_id, "plan", amount, expires, now, name=f"{p['id']}-{anchor}-{k:04d}"), "plan": p["id"]}}})
+        try:
+            _tx(items)
+            granted += amount
+        except ClientError as e:
+            if not _cancelled(e):
+                raise
+    return granted
+
+
+def revoke_plan_credits(user_id: str, *, now: Optional[float] = None) -> int:
+    """Remove the unused plan credits (a refund, or a plan that ended). Only what is still there is taken: a balance never goes below zero. Returns how many were removed."""
+    now = time.time() if now is None else now
+    removed = 0
+    for b in _live_buckets(user_id, now):
+        if b["kind"] != "plan":
+            continue
+        try:
+            res = _table().update_item(Key={"user_id": user_id, "sk": b["sk"]}, UpdateExpression="SET remaining = :z, revoked = :n", ConditionExpression="remaining > :z",
+                                       ExpressionAttributeValues={":z": 0, ":n": int(b["remaining"])}, ReturnValues="UPDATED_OLD")
+            removed += int((res.get("Attributes") or {}).get("remaining") or 0)
+        except ClientError as e:
+            if e.response.get("Error", {}).get("Code") != "ConditionalCheckFailedException":
+                raise
+    return removed
+
+
+def ensure_grants(user_id: str, *, now: Optional[float] = None, tz: Optional[str] = None, ctx: Optional[Dict[str, Any]] = None) -> None:
+    """Welcome credits the first time we see a user; then the day's free credits once per local day. Race-safe (conditional writes).
+    Where plans are on, see _ensure_grants_plans (`ctx` = free_grants.context(event): without it no free credit is granted)."""
+    now = time.time() if now is None else now
+    if plans.enabled():
+        _ensure_grants_plans(user_id, now=now, tz=tz, ctx=ctx, ent=None)
+        return
     r, t = rules(), _table()
     day, midnight = local_day(now, tz)
     meta = t.get_item(Key={"user_id": user_id, "sk": "META"}, ConsistentRead=True).get("Item")
@@ -185,26 +287,67 @@ def next_free_credit(user_id: str, *, now: Optional[float] = None, tz: Optional[
     return {"next_daily_at": at, "next_free_credit_at": _iso(at), "next_free_credits": r["daily"]}
 
 
-def balance(user_id: str, *, now: Optional[float] = None, tz: Optional[str] = None) -> Dict[str, Any]:
+def _bucket_view(b: Dict[str, Any]) -> Dict[str, Any]:
+    return {"kind": b["kind"], "remaining": int(b["remaining"]), "expires_at": int(b["expires_at"]) if int(b["expires_at"]) < NEVER else None}
+
+
+def _balance_plans(user_id: str, *, now: float, tz: Optional[str], ctx: Optional[Dict[str, Any]], grant: bool = True) -> Dict[str, Any]:
+    """The wallet where plans are on: the same fields as before plus `plan` (which plan, its limits, what is locked and which plan unlocks it, whether upgrading can be
+    bought yet) and `free` (what the Free plan offers and whether this account can make a free video now). `grant=False` only reads (GET capabilities)."""
+    cfg = plans.config()
+    if grant:
+        meta, ent = _ensure_grants_plans(user_id, now=now, tz=tz, ctx=ctx, ent=None)
+    else:
+        ent = entitlements.effective(user_id, now=now)
+        meta = _table().get_item(Key={"user_id": user_id, "sk": "META"}).get("Item") or {"welcome_state": "pending"}
+    live = _live_buckets(user_id, now)
+    unlimited = bool(ent["unlimited"])
+    r = plans.rights(ent["plan"], cfg)
+    free = free_grants.summary(user_id, plan=ent["plan"], unlimited=unlimited, meta=meta, buckets=live, ctx=ctx, cfg=cfg, now=now)
+    spendable = [b for b in live if not (ent["plan"] == "free" and not unlimited and b["kind"] in free_grants.FREE_KINDS and free["reason"] in ("app_only", "not_available"))]
+    return {"balance": UNLIMITED_DISPLAY if unlimited else sum(int(b["remaining"]) for b in spendable), "unlimited": unlimited, "buckets": [_bucket_view(b) for b in live],
+            **free_grants.next_credit(meta, cfg, now, tz), "rules": rules(),
+            "plan": {**entitlements.public(ent), "limits": plans.public_limits(r), "locked": plans.locked(ent["plan"], cfg),
+                     "plan_credits": sum(int(b["remaining"]) for b in live if b["kind"] == "plan")},
+            "free_creation": free["mode"], "free": free, "can_upgrade": plans.PURCHASES_LIVE}
+
+
+def balance(user_id: str, *, now: Optional[float] = None, tz: Optional[str] = None, ctx: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
     now = time.time() if now is None else now
+    if plans.enabled():
+        return _balance_plans(user_id, now=now, tz=tz, ctx=ctx)
     ensure_grants(user_id, now=now, tz=tz)
     live = _live_buckets(user_id, now)
     meta = _table().get_item(Key={"user_id": user_id, "sk": "META"}).get("Item") or {}
     unlimited = is_unlimited(user_id)
     return {"balance": UNLIMITED_DISPLAY if unlimited else sum(int(b["remaining"]) for b in live), "unlimited": unlimited,
-            "buckets": [{"kind": b["kind"], "remaining": int(b["remaining"]), "expires_at": int(b["expires_at"]) if int(b["expires_at"]) < NEVER else None} for b in live],
+            "buckets": [_bucket_view(b) for b in live],
             **next_free_credit(user_id, now=now, tz=tz, meta=meta), "rules": rules()}
 
 
-def charge(user_id: str, credits: int, *, now: Optional[float] = None, tz: Optional[str] = None) -> List[Dict[str, Any]]:
+def charge(user_id: str, credits: int, *, now: Optional[float] = None, tz: Optional[str] = None, ctx: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
     """Take `credits`, soonest-expiring first. Returns the breakdown (needed to refund exactly what was taken).
-    Raises InsufficientCredits. Concurrent requests can never overspend: every bucket update is conditional on what it still holds."""
+    Raises InsufficientCredits. Concurrent requests can never overspend: every bucket update is conditional on what it still holds.
+    Where plans are on, a Free account's free credits are only spendable when the request passes free_grants.spend_gate (FreeNotAvailable otherwise)."""
     now = time.time() if now is None else now
-    ensure_grants(user_id, now=now, tz=tz)
-    if is_unlimited(user_id):
-        return []  # nothing taken, so a failed video has nothing to refund
+    gate = None
+    if plans.enabled():
+        meta, ent = _ensure_grants_plans(user_id, now=now, tz=tz, ctx=ctx, ent=None)
+        if ent["unlimited"]:
+            return []
+        if ent["plan"] == "free":
+            gate = free_grants.spend_gate(ctx, meta, plans.config(), now)
+    else:
+        ensure_grants(user_id, now=now, tz=tz)
+        if is_unlimited(user_id):
+            return []  # nothing taken, so a failed video has nothing to refund
     for _ in range(5):
         live = _live_buckets(user_id, now)
+        if gate is not None:
+            every = sum(int(b["remaining"]) for b in live)
+            live = [b for b in live if b["kind"] not in free_grants.FREE_KINDS]
+            if sum(int(b["remaining"]) for b in live) < credits <= every:
+                raise FreeNotAvailable(sum(int(b["remaining"]) for b in live), credits, gate)
         have = sum(int(b["remaining"]) for b in live)
         if have < credits:
             raise InsufficientCredits(have, credits)
