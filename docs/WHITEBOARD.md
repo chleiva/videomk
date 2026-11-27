@@ -1,5 +1,8 @@
 # The whiteboard look (phase 1b, 2026-11-27)
 
+**Since 2026-11-28** the look of a video is one decision (`docs/ART_DIRECTION.md`): on `auto` the whiteboard is one of the directions an art-direction step chooses from (it no longer has its own yes/no call), a chosen whiteboard look is enforced (at least 80 % boards, a real picture at most once per 30 s), and the board renderer is also the content panel beside cartoon characters (the `board` extra).
+
+
 A whole video drawn and written by a marker on a whiteboard, in time with the narration. Library, handwriting and the standalone prototype are in `docs/WHITEBOARD_PHASE_1A_2026-11-27.md`; this page is how the look lives in the product engine. **Measured** = run on 2026-11-27, on QA Lambda where it says so, else on the owner's Mac. QA: on (commit 4beeb09). Production: off.
 
 ## How to ask for it

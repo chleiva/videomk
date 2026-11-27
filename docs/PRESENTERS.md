@@ -1,5 +1,8 @@
 # Presenters: cartoon characters in real videos (2026-11-27)
 
+**Since 2026-11-28** a video's look is one decision (`docs/ART_DIRECTION.md`): a presenter is no longer added to a third of the scenes of an ordinary video. A video with characters is a cartoon-look video (the character in every scene, or a conversation of two or three on screen together, optionally beside a hand-drawn board); "How often" and "Dialogues" below describe the behaviour before that.
+
+
 Status: built behind the server switch `PRESENTERS` (QA on in `stages.json`, production off). Not deployed. Ten characters: four people, Inés (teacher), David (engineer), Priya (doctor), Mateo (chef), and six animals, Fox (guide for children), Hugo (owl professor), Bruno (bear), Mika (cat), Paco (parrot), Tula (turtle): see "Animal presenters" below. The rig and the gestures are the ones the owner reviewed (`docs/CHARACTER_ANIMATION_PROOF.md`, `docs/CHARACTER_LIBRARY.md`); this note is how they get into a video.
 
 ## What a person gets

@@ -1,5 +1,8 @@
 # When the director may use the cartoon scenes (2026-11-27)
 
+**Since 2026-11-28** (`docs/ART_DIRECTION.md`): cartoon scenes are no longer sprinkled into `auto` videos. They are the world of a cartoon-look video: the backdrop behind its characters, and at most one scene in five without them. The shares and topic rules below describe the behaviour before that.
+
+
 Owner rule: the cartoon vector scenes (docs/VECTOR_CATALOG.md, scene type `vector_scene`, docs/VECTOR_SCENES.md) are a **special, peculiar style**. They must NOT appear in every video: the director selects them carefully, for particular kinds of video only, and we must be able to tell exactly **which videos show them**.
 
 Code: `backend/lambdas/engine/vector_policy.py` (policy, prompt block, plan cleaning), wired in `engine/director.py` and `engine/plan.py`; tests `backend/tests/test_vector_policy.py` (59); evidence `backend/scripts/vector_policy_eval.py` and the table at the end.
