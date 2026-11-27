@@ -406,6 +406,9 @@ class BackendStack(Stack):
             # animated backgrounds chosen by the director (docs/BACKGROUNDS_ANIMATED.md): on where the stage says so in stages.json (QA) or with -c bgAnimated=1; off everywhere else
             if str(self.node.try_get_context("bgAnimated") or ("1" if stage_cfg.get("bgAnimated") else "")).lower() in ("1", "true"):
                 engine_env["BG_ANIMATED"] = "1"
+            # the pre-rendered 3D background loops (docs/HERO_LOOPS_3D.md), the premium look the director may choose: same switch pattern (stages.json "bgLoops" or -c bgLoops=1)
+            if str(self.node.try_get_context("bgLoops") or ("1" if stage_cfg.get("bgLoops") else "")).lower() in ("1", "true"):
+                engine_env["BG_LOOPS"] = "1"
             for ctx_key, env_key in (("editDailyLimit", "EDIT_DAILY_LIMIT"), ("planModelId", "PLAN_MODEL_ID"), ("reviewModelId", "REVIEW_MODEL_ID"), ("unsplashAppName", "UNSPLASH_APP_NAME"), ("httpUserAgent", "HTTP_USER_AGENT"), ("ttsVoice", "TTS_VOICE"), ("pollyEngine", "POLLY_ENGINE"), ("pollyRegion", "POLLY_REGION")):
                 if self.node.try_get_context(ctx_key):
                     engine_env[env_key] = str(self.node.try_get_context(ctx_key))

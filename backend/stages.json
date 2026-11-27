@@ -4,7 +4,8 @@
     "region": "eu-west-1",
     "profile": "qa",
     "domain": null,
-    "bgAnimated": true
+    "bgAnimated": true,
+    "bgLoops": true
   },
   "prod": {
     "account": "464863885161",

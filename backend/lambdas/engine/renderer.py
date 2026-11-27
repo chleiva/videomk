@@ -20,11 +20,20 @@ from .theme import get_theme
 
 
 def _bg_anim(timeline: Dict[str, Any], theme: str):
-    """The animated background the timeline asks for (`timeline["background"]`, cleaned), or None. Off unless BG_ANIMATED=1 (prototype, docs/BACKGROUNDS_ANIMATED.md)."""
-    if os.environ.get("BG_ANIMATED", "0") != "1" or not isinstance(timeline.get("background"), dict):
+    """The moving background the timeline asks for (`timeline["background"]`, cleaned), or None: a pre-rendered 3D loop (bg_loops.LoopSpec; BG_LOOPS=1, the id is in
+    the index and the loop fits the theme, docs/HERO_LOOPS_3D.md), else the procedural one (bg_animated.BgSpec; BG_ANIMATED=1, docs/BACKGROUNDS_ANIMATED.md)."""
+    bg = timeline.get("background")
+    if not isinstance(bg, dict):
+        return None
+    if os.environ.get("BG_LOOPS", "0") == "1" and bg.get("loop"):
+        from . import background as background_mod, bg_loops
+        spec = bg_loops.sanitize(bg, bg_loops.load_index())
+        if background_mod.loop_fits(spec, theme):   # the mode decides the text colour: a dark loop never sits under the paper theme
+            return spec
+    if os.environ.get("BG_ANIMATED", "0") != "1":
         return None
     from . import bg_animated
-    return bg_animated.sanitize(timeline["background"], theme)
+    return bg_animated.sanitize(bg, theme)
 
 TRANSITION_S = 0.4
 OUTRO_FADE_S = 0.7
@@ -50,6 +59,10 @@ def release_caches() -> int:
             if callable(params) and callable(getattr(v, "cache_clear", None)) and params().get("maxsize") not in (None, 1):
                 v.cache_clear()
                 n += 1
+    loops_mod = sys.modules.get(f"{pkg}.bg_loops")
+    if loops_mod is not None:   # the decoded frames of a background loop (up to 192 MB)
+        loops_mod.release()
+        n += 1
     for mod_name, attr in _PICTURE_DICTS:
         d = getattr(sys.modules.get(f"{pkg}.{mod_name}"), attr, None)
         if isinstance(d, dict):

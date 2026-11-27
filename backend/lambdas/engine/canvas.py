@@ -55,6 +55,25 @@ _BG_CACHE: dict = {}
 AMBIENT_DOWNSCALE = 8  # ambient layer is composed at 1/8 of the supersampled canvas, then upscaled
 
 
+_LOOP_FAILED: set = set()   # loop ids whose file could not be used in this container: not tried again for every frame
+
+
+def _moving_background(anim, w: int, h: int, t: float):
+    """(h, w, 3) uint8 for a background spec at time t, or None when a pre-rendered loop cannot be played."""
+    from . import bg_loops
+    if isinstance(anim, bg_loops.LoopSpec):
+        if anim.id in _LOOP_FAILED:
+            return None
+        try:
+            return bg_loops.render(anim, w, h, t)
+        except Exception as e:  # noqa: BLE001 - a missing or unreadable loop must never fail a render
+            _LOOP_FAILED.add(anim.id)
+            print(f"BG_LOOP_FAILED {anim.id} {type(e).__name__}: {str(e)[:200]}")
+            return None
+    from . import bg_animated
+    return bg_animated.render(anim, w, h, t)
+
+
 class Canvas:
     def __init__(self, width: int = 1920, height: int = 1080, ss: int = 2):
         self.W, self.H, self.ss = width, height, ss   # W, H: DESIGN units (see frame.py); the pixel size is W*ss x H*ss
@@ -78,15 +97,16 @@ class Canvas:
         import math
 
         full = (self.W * self.ss, self.H * self.ss)
-        if anim is not None and ambience:   # an animated procedural background (engine/bg_animated.py), opt-in: computed at design size, enlarged smoothly (no detail to lose)
-            from . import bg_animated
-            img = Image.fromarray(bg_animated.render(anim, self.W, self.H, t), "RGB")
-            if self.ss >= 4:   # 4K: half the canvas, then doubled (after the final 2x reduce this is the smooth image, like the glow below)
-                img = img.resize((full[0] // 2, full[1] // 2), Image.BILINEAR).resize(full, Image.NEAREST)
-            elif img.size != full:
-                img = img.resize(full, Image.BILINEAR)
-            self.im.paste(img)
-            return
+        if anim is not None and ambience:   # a moving background, opt-in: a pre-rendered 3D loop (engine/bg_loops.py) or a procedural one (engine/bg_animated.py), made at design size and enlarged smoothly (no detail to lose)
+            arr = _moving_background(anim, self.W, self.H, t)
+            if arr is not None:   # None: the loop's file could not be fetched or decoded; the static glow below is drawn instead (a background never fails a render)
+                img = Image.fromarray(arr, "RGB")
+                if self.ss >= 4:   # 4K: half the canvas, then doubled (after the final 2x reduce this is the smooth image, like the glow below)
+                    img = img.resize((full[0] // 2, full[1] // 2), Image.BILINEAR).resize(full, Image.NEAREST)
+                elif img.size != full:
+                    img = img.resize(full, Image.BILINEAR)
+                self.im.paste(img)
+                return
         if not ambience:
             self.im.paste(_gradient(full[0], full[1], theme.bg_top, theme.bg_bottom))
             return

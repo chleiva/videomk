@@ -147,9 +147,13 @@ def direct(prompt: str, *, minutes: float, ask_small: Ask, ask_big: Callable[[st
     if used is not None:  # cite only the pages the script actually drew on, not everything the research happened to fetch
         sources = [s for s in sources if s["title"] in set(used)]
     plan["skills"] = skill_ids   # which craft guides shaped this video (for review)
-    if background.enabled() and not photos:   # the moving background, chosen by the topic's mood (BG_ANIMATED, QA only; docs/BACKGROUNDS_ANIMATED.md): one small call, never a failure
-        plan["background"] = background.choose(prompt, plan, lambda s, u: ask_small(s, u, 300))   # the answer is about 20 tokens, but the model's own thinking counts against the limit (60 came back empty on QA)
-        info["background"] = {k: plan["background"][k] for k in ("style", "palette", "by")}
+    if background.enabled() and not photos and not background.data_heavy(plan):   # the moving background, chosen by the topic's mood (BG_ANIMATED / BG_LOOPS, QA only; docs/BACKGROUNDS_ANIMATED.md, docs/HERO_LOOPS_3D.md): one small call, never a failure. Photo videos and data-heavy videos keep the static look
+        bg_menu = None
+        if background.loops_enabled():   # the pre-rendered 3D loops in the assets bucket: the premium look, offered when the flag is on and the index can be read
+            from . import bg_loops
+            bg_menu = bg_loops.load_index()
+        plan["background"] = background.choose(prompt, plan, lambda s, u: ask_small(s, u, 300), loops=bg_menu)   # the answer is about 20 tokens, but the model's own thinking counts against the limit (60 came back empty on QA)
+        info["background"] = {k: plan["background"][k] for k in ("style", "palette", "by", "loop") if k in plan["background"]}
     if photos:   # the music has the first seconds and the last seconds to itself: the pictures arrive before the voice does, and the ending is held
         plan["intro_s"], plan["outro_s"] = (SHORT_PHOTO_INTRO_S, SHORT_PHOTO_OUTRO_S) if plan_mod.is_short(minutes) else (PHOTO_INTRO_S, PHOTO_OUTRO_S)
     if region:

@@ -17,7 +17,7 @@ import re
 import zlib
 from typing import Any, Callable, Dict, Optional, Tuple
 
-from . import bg_animated
+from . import bg_animated, bg_loops
 
 log = logging.getLogger(__name__)
 
@@ -34,6 +34,18 @@ MOOD_SPEED = {"calm": 0.7, "bright": 1.0, "tense": 1.15}
 LOOP_SECONDS = 12.0
 INTENSITY = 0.8   # a little under the showreel's 1.0: in the first real 4K video the smoke's ribbons were bright enough to compete with a diagram
 
+# The pre-rendered 3D loops (engine/bg_loops.py, docs/HERO_LOOPS_3D.md; flag BG_LOOPS): the premium look. Which loop palettes sit well under each theme's text and
+# card colours (the loop's light/dark mode must also equal the theme's: it decides the text colour).
+LOOP_PALETTES: Dict[str, Tuple[str, ...]] = {"midnight": ("brand", "aurora"), "sunrise": ("ember",), "paper": ("brand",)}
+# Scenes that are read, not watched: when they make up half of a video or more a moving background distracts, so the video keeps the static look.
+DATA_SCENES = frozenset({"chart", "area", "bar_race", "pie", "scatter", "stacked", "table", "matrix", "funnel", "pictogram", "ranking", "scale_compare", "map", "code", "equation"})
+DATA_HEAVY_SHARE = 0.5
+
+LOOPS_MENU = """
+Premium 3D loops (pre-rendered volumetric gas, the best-looking backgrounds we have). Prefer one of these whenever its mood fits the topic; answer "none" only when none fits and a style above is clearly closer:
+{loops}
+Answer with ONLY this JSON: {{"style": "<one style>", "palette": "<one palette>", "loop": "<one loop id, or none>"}}"""
+
 SYSTEM = """You choose the moving background that sits quietly behind the text scenes of a short explainer video. Pick by the MOOD of the topic, not by its literal subject.
 Styles:
 - gas: slow satin nebula. Calm science, space, technology, AI, ideas.
@@ -47,7 +59,29 @@ Answer with ONLY this JSON: {{"style": "<one style>", "palette": "<one palette>"
 
 
 def enabled() -> bool:
-    return os.environ.get("BG_ANIMATED", "0") == "1"
+    return os.environ.get("BG_ANIMATED", "0") == "1" or loops_enabled()
+
+
+def loops_enabled() -> bool:
+    return os.environ.get("BG_LOOPS", "0") == "1"
+
+
+def loop_fits(spec: Any, theme: str) -> bool:
+    """True when this loop may sit behind this theme: same light/dark mode (the text colour) and a palette that suits the theme's cards and accents."""
+    return isinstance(spec, bg_loops.LoopSpec) and spec.mode == mode_of(theme) and spec.palette in LOOP_PALETTES.get(theme, ())
+
+
+def loops_for(theme: str, loops: Any) -> list:
+    return [lp for lp in (loops or []) if loop_fits(lp, theme)]
+
+
+def data_heavy(plan: Dict[str, Any]) -> bool:
+    """Half or more of the beats are charts, tables, maps or code: the viewer is reading values, and a moving background would compete with them."""
+    beats = [b for b in (plan.get("beats") or []) if isinstance(b, dict)]
+    if not beats:
+        return False
+    n = sum(1 for b in beats if isinstance(b.get("scene"), dict) and b["scene"].get("type") in DATA_SCENES)
+    return n / len(beats) >= DATA_HEAVY_SHARE
 
 
 def mode_of(theme: str) -> str:
@@ -98,24 +132,49 @@ def settle(style: Any, palette: Any, mood: str, theme: str) -> Tuple[str, str]:
     return "gas", pals[0]
 
 
-def choose(prompt: str, plan: Dict[str, Any], ask: Optional[Callable[[str, str], str]] = None) -> Dict[str, Any]:
-    """The `background` entry of a plan: {style, palette, mode, speed, intensity, seed, loop_seconds, by}. Never raises; `by` says who chose ('director' or 'mood')."""
+def choose(prompt: str, plan: Dict[str, Any], ask: Optional[Callable[[str, str], str]] = None, loops: Any = None) -> Dict[str, Any]:
+    """The `background` entry of a plan: {style, palette, mode, speed, intensity, seed, loop_seconds, by} and, when a pre-rendered loop was chosen (only from `loops`,
+    the index entries; pass them only with BG_LOOPS on), also {loop, loop_palette} with loop_seconds = the loop's own length. The procedural style is always there too:
+    it is what plays if the loop cannot be used. Never raises; `by` says who chose ('director' or 'mood')."""
     theme = plan.get("theme") if plan.get("theme") in THEME_PALETTES else "midnight"
     mood = plan.get("mood") if plan.get("mood") in MOOD_STYLE else "calm"
+    menu = loops_for(theme, loops)
     wish: Dict[str, Any] = {}
     if ask is not None:
         try:
             user = f"Request: {str(prompt or '')[:400]}\nTitle: {str(plan.get('title') or '')[:80]}\nMood: {mood}\nTheme: {theme}"
-            wish = _parse(ask(SYSTEM.format(palettes=", ".join(THEME_PALETTES[theme])), user))
+            system = SYSTEM.format(palettes=", ".join(THEME_PALETTES[theme]))
+            if menu:   # the JSON line of the plain menu is replaced by the one that also asks for a loop
+                system = system.rsplit("\n", 1)[0] + LOOPS_MENU.format(loops=bg_loops.prompt_list(menu))
+            wish = _parse(ask(system, user))
         except Exception as e:  # noqa: BLE001 - a background is never worth a failed video
             log.warning("BACKGROUND_CHOICE_FAILED %s", type(e).__name__)
             wish = {}
-    if ask is not None and str(wish.get("style") or "").strip().lower() not in STYLES:
+    answered = str(wish.get("style") or "").strip().lower() in STYLES
+    spec = bg_loops.sanitize(str(wish.get("loop") or "").strip().lower(), menu) if menu else None
+    if ask is not None and not answered and spec is None:
         log.warning("BACKGROUND_CHOICE_UNUSABLE keys=%s", sorted(wish)[:4])   # never the text itself
-    by = "director" if str(wish.get("style") or "").strip().lower() in STYLES else "mood"
+    by = "director" if answered or spec is not None else "mood"
+    if menu and spec is None and by == "mood":   # no usable answer: the loop whose tags name the video's mood, if there is one (else the procedural style of the mood)
+        spec = next((lp for lp in menu if mood in lp.mood), None)
     style, palette = settle(wish.get("style"), wish.get("palette"), mood, theme)
     seed = zlib.crc32(str(plan.get("title") or prompt or "").encode("utf-8")) % 9973 + 1
-    return {"style": style, "palette": palette, "mode": mode_of(theme), "speed": MOOD_SPEED[mood], "intensity": INTENSITY, "seed": seed, "loop_seconds": LOOP_SECONDS, "by": by}
+    out = {"style": style, "palette": palette, "mode": mode_of(theme), "speed": MOOD_SPEED[mood], "intensity": INTENSITY, "seed": seed, "loop_seconds": LOOP_SECONDS, "by": by}
+    if spec is not None:
+        out.update(loop=spec.id, loop_palette=spec.palette, loop_seconds=min(20.0, max(6.0, float(spec.seconds))))
+    return out
+
+
+def retheme(background: Dict[str, Any], theme: str, mood: str = "calm") -> Dict[str, Any]:
+    """The background after the video's theme changed (an edit): the procedural style moves to a palette of the new theme, and a pre-rendered loop is kept only if it
+    still fits (same light/dark mode, a palette of the theme); otherwise it is dropped and the procedural style plays."""
+    st, pal = settle(background.get("style"), None, mood, theme)
+    new = {**background, "style": st, "palette": pal, "mode": mode_of(theme)}
+    if "loop" in new and (background.get("mode") != new["mode"] or new.get("loop_palette") not in LOOP_PALETTES.get(theme, ())):
+        new.pop("loop", None)
+        new.pop("loop_palette", None)
+        new["loop_seconds"] = LOOP_SECONDS
+    return new
 
 
 def phase(start: float, background: Dict[str, Any]) -> float:
