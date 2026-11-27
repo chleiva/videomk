@@ -24,7 +24,7 @@ class E2ETest {
     @Test fun a_makeAVideoFromFourPhotos() {
         Ui.launch(signedIn = true, minutes = "1", photoFiles = photos())
         Ui.openCreate()
-        Ui.require("length-1").click()   // Create starts from the remembered length, so pick one minute
+        Ui.pickLength("1 min")   // Create starts from the remembered length, so pick one minute
         Ui.require("photosNote", 30_000)
         assertEquals(4, device.findObjects(Ui.res("attachedPhoto")).size)
         Ui.require("composerField").apply { click(); text = "A short video about these four photos and what they show." }
@@ -57,6 +57,7 @@ class E2ETest {
         val ready = device.wait(Until.findObject(By.res("videoRow").hasDescendant(By.text("Ready"))), 30_000) ?: error("needs a Ready video in the library (run a_makeAVideoFromFourPhotos first)")
         ready.click()
         Ui.require("player", 30_000)
+        Ui.showPlayerControls()
         Ui.require("fullScreenButton", 30_000)
     }
 
@@ -64,6 +65,7 @@ class E2ETest {
         openReadyVideo()
         Thread.sleep(4000)
         Ui.shot("24-player")
+        Ui.showPlayerControls()
         Ui.require("fullScreenButton").click()
         Ui.require("closeFullScreenButton", 15_000)
         val t = System.currentTimeMillis() + 10_000
@@ -72,6 +74,7 @@ class E2ETest {
         assertTrue("full screen is landscape", device.displayWidth > device.displayHeight)
         Ui.shot("25-fullscreen")
         Ui.require("closeFullScreenButton").click()
+        Ui.showPlayerControls()
         Ui.require("fullScreenButton", 15_000)
         val t2 = System.currentTimeMillis() + 10_000
         while (device.displayWidth > device.displayHeight && System.currentTimeMillis() < t2) Thread.sleep(300)

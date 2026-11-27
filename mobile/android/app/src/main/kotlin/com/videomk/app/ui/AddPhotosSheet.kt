@@ -269,8 +269,8 @@ private fun NumberBadge(n: Int, modifier: Modifier = Modifier) {
 
 @Composable
 private fun Snack(text: String, modifier: Modifier = Modifier) {
-    Surface(modifier, shape = RoundedCornerShape(16.dp), color = if (Vmk.colors.dark) Color(0xFFE9EAF6) else Color(0xFF23263F)) {
-        Text(text, style = MaterialTheme.typography.bodyMedium, color = if (Vmk.colors.dark) Color(0xFF23263F) else Color.White, modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp).testTag("addPhotosNote"))
+    Surface(modifier, shape = RoundedCornerShape(16.dp), color = Vmk.colors.inverseSurface) {
+        Text(text, style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.inverseOnSurface, modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp).testTag("addPhotosNote"))
     }
 }
 

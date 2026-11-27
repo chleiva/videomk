@@ -43,10 +43,10 @@ class QuickUiTest {
         val field = Ui.require("composerField")
         field.click(); field.text = "Why is the sky blue? A short explanation."
         Ui.require("sendButton")
-        assertTrue(Ui.require("costLine").text.startsWith("1 credit"))   // the first-time length is 30 seconds (owner decision, docs/UX_REVIEW.md)
-        Ui.require("length-1").click()
-        assertTrue(Ui.require("costLine").text.startsWith("1 credit"))
-        Ui.require("optionsMenu").click(); Ui.shot("03-more-options")   // More options expands in place
+        assertTrue(device.hasObject(By.text("30 s")))   // the first-time length is 30 seconds (owner decision, docs/UX_REVIEW.md), shown in the Length pill
+        Ui.pickLength("1 min")
+        assertTrue(device.wait(Until.hasObject(By.text("1 min")), 5_000))
+        Ui.require("optionsMenu").click(); Ui.shot("03-more-options")   // Options is one sheet
         Ui.require("look-paper").click()
         Ui.shot("04-create-filled")
     }

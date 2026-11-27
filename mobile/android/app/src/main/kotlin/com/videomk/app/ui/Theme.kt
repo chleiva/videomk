@@ -45,6 +45,8 @@ data class VmkColors(
     val gradientStart: Color, val gradientEnd: Color, val successContainer: Color, val warningContainer: Color, val dangerContainer: Color,
     /** The one "it is alive" accent: live progress only. */
     val live: Color,
+    /** Toasts and snackbars: the inverse of the page (dark on light, light on dark). */
+    val inverseSurface: Color, val inverseOnSurface: Color,
     val dark: Boolean,
 )
 
@@ -56,7 +58,8 @@ private fun tokenColors(dark: Boolean): VmkColors {
         surface3 = c(DesignTokens.surface3), outline = c(DesignTokens.outline), textTertiary = c(DesignTokens.textTertiary), primaryContainer = c(DesignTokens.primaryContainer), onPrimary = c(DesignTokens.onPrimary),
         gradientStart = c(DesignTokens.gradientStart), gradientEnd = c(DesignTokens.gradientEnd),
         successContainer = c(DesignTokens.successContainer), warningContainer = c(DesignTokens.warningContainer), dangerContainer = c(DesignTokens.dangerContainer),
-        live = Color(0xFF000000L or DesignTokens.live.toLong()), dark = dark,
+        live = Color(0xFF000000L or DesignTokens.live.toLong()),
+        inverseSurface = if (dark) Color(0xFFE9EAF6) else Color(0xFF23263F), inverseOnSurface = if (dark) Color(0xFF23263F) else Color.White, dark = dark,
     )
 }
 
@@ -82,7 +85,9 @@ object VmkType {
         labelSmall = TextStyle(fontSize = 12.sp, lineHeight = 16.sp, fontWeight = FontWeight.Medium),
     )
     /** Roles outside M3: the prompt field, the question title, the big balance and the sign-in wordmark. */
-    val prompt = TextStyle(fontSize = 19.sp, lineHeight = 26.sp)
+    val prompt = TextStyle(fontSize = 24.sp, lineHeight = 32.sp)
+    /** The title on the Making card (a little larger than titleMedium). */
+    val makingTitle = TextStyle(fontSize = 19.sp, lineHeight = 26.sp, fontWeight = FontWeight.SemiBold)
     val question = TextStyle(fontSize = 27.sp, lineHeight = 33.sp, fontWeight = FontWeight.Bold)
     val cta = TextStyle(fontSize = 19.sp, lineHeight = 24.sp, fontWeight = FontWeight.Bold)
     val hero = TextStyle(fontSize = 56.sp, lineHeight = 60.sp, fontWeight = FontWeight.Bold, fontFeatureSettings = "tnum")
@@ -130,7 +135,7 @@ fun VideoMkTheme(dark: Boolean = isSystemInDarkTheme(), content: @Composable () 
 /** A filled gradient button with a 52dp touch target (at least 48dp everywhere). */
 @Composable
 fun PrimaryButton(text: String, onClick: () -> Unit, modifier: Modifier = Modifier, enabled: Boolean = true, content: (@Composable RowScope.() -> Unit)? = null) {
-    val shape = RoundedCornerShape(Vmk.radius)
+    val shape = androidx.compose.foundation.shape.CircleShape   // primary actions are pills everywhere (Create, Share, Continue)
     Box(
         modifier = modifier
             .fillMaxWidth()

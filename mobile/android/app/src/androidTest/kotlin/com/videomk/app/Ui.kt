@@ -50,6 +50,12 @@ object Ui {
         require("composerField", 15_000)
     }
 
+    /** Picks a length from the Length pill's menu (the menu is a popup window: its rows are found by their text, like any menu). */
+    fun pickLength(text: String) { require("pillLength").click(); clickText(text) }
+
+    /** The player hides its controls (and our full screen icon) after 3 seconds: a tap on the picture brings them back. */
+    fun showPlayerControls() { if (!has("fullScreenButton")) find("player")?.click() }
+
     fun refreshTokenOrSkip(): String = requireTokens().second
 
     /** An unsigned token that looks expired (the app only reads claims; the server is what validates). */

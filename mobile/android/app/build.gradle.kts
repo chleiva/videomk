@@ -26,7 +26,10 @@ fun backend(prop: String, qa: String, prod: String): String {
 }
 // Social sign-in buttons (Google, Apple) through the Cognito hosted UI. OFF unless the owner passes -PvmkAuthGoogle=true / -PvmkAuthApple=true
 // (or sets them in ~/.gradle/gradle.properties): the identity providers must exist on the Cognito app client first (docs/AUTH_SOCIAL.md).
-val authGoogle = providers.gradleProperty("vmkAuthGoogle").orElse("false").get().toBoolean()
+// Default: ON for a build that points at the production backend (prod has the Google identity provider, docs/AUTH_SOCIAL.md), OFF for the QA backend (QA has no Google client yet).
+// Turning either on or off is configuration only: -PvmkAuthGoogle=true / -PvmkAuthApple=true, or gradle.properties.
+val againstQa = providers.gradleProperty("vmkReleaseBackend").orNull == "qa"
+val authGoogle = providers.gradleProperty("vmkAuthGoogle").orElse(if (againstQa) "false" else providers.gradleProperty("vmkProdApiBase").map { "true" }.orElse("false").get()).get().toBoolean()
 val authApple = providers.gradleProperty("vmkAuthApple").orElse("false").get().toBoolean()
 val qaApi = "https://rj1uhfqld0.execute-api.eu-west-1.amazonaws.com/prod"
 val qaAuth = "https://videomk-qa-225438.auth.eu-west-1.amazoncognito.com"

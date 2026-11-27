@@ -139,7 +139,7 @@ private fun RowText(video: VideoItem, meta: String?) {
 fun Poster(video: VideoItem, modifier: Modifier = Modifier, grey: Boolean = false) {
     val shape = RoundedCornerShape(Vmk.radii.thumb)
     val filter = if (grey) ColorFilter.colorMatrix(ColorMatrix().apply { setToSaturation(0f) }) else null
-    Box(modifier.clip(shape).background(Brush.linearGradient(listOf(Color(0xFF3A3F7A), Color(0xFF7A5BC4)))).clearAndSetSemantics { }, contentAlignment = Alignment.Center) {
+    Box(modifier.clip(shape).background(Brush.linearGradient(listOf(Vmk.colors.gradientStart, Vmk.colors.gradientEnd))).clearAndSetSemantics { }, contentAlignment = Alignment.Center) {
         if (video.previewGifUrl != null) StableImage(video.previewGifUrl!!, ContentScale.Crop, Modifier.fillMaxSize(), filter)
         if (!grey) Box(Modifier.size(32.dp).clip(CircleShape).background(Color.Black.copy(alpha = 0.38f)), contentAlignment = Alignment.Center) {
             Icon(Icons.Filled.PlayArrow, null, tint = Color.White, modifier = Modifier.size(22.dp))
@@ -220,7 +220,7 @@ fun MakingCard(snapshot: MakingSnapshot, modifier: Modifier = Modifier, layout: 
         Box(Modifier.matchParentSize().background(Vmk.makingGradient))
         MakingShimmer(Modifier.matchParentSize())
         Column(Modifier.fillMaxWidth().padding(if (detail) Vmk.space.xl else 16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            Text(snapshot.title, style = MaterialTheme.typography.titleMedium.copy(fontSize = MaterialTheme.typography.titleMedium.fontSize * 1.12f, lineHeight = MaterialTheme.typography.titleMedium.lineHeight * 1.1f),
+            Text(snapshot.title, style = VmkType.makingTitle,
                 color = Color.White, maxLines = if (isLargeText() || detail) 4 else 2, overflow = TextOverflow.Ellipsis)
             // one live line: the stage as a verb, then the scene counter (and the time left in the roomier layout)
             val scene = snapshot.scene?.let { stringResource(R.string.making_scene_counter, it.index, it.total) }

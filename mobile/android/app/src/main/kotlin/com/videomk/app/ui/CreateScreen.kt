@@ -448,11 +448,11 @@ private fun LanguageDialog(composer: ComposerViewModel, o: CreateOptions, caps: 
 private fun PromptField(composer: ComposerViewModel, listening: Boolean, focus: FocusRequester, deck: Boolean = false) {
     BasicTextField(
         value = composer.text, onValueChange = { composer.text = it }, readOnly = listening,
-        textStyle = VmkType.prompt.copy(fontSize = 24.sp, lineHeight = 32.sp, color = if (listening) Vmk.colors.textSecondary else Vmk.colors.text),
+        textStyle = VmkType.prompt.copy(color = if (listening) Vmk.colors.textSecondary else Vmk.colors.text),
         cursorBrush = SolidColor(Vmk.colors.primary), keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
         modifier = Modifier.fillMaxWidth().heightIn(min = 120.dp).focusRequester(focus).padding(top = 8.dp).testTag("composerField"),
         decorationBox = { inner ->
-            Box { if (composer.text.isEmpty()) Text(stringResource(if (deck) R.string.deck_prompt_hint else R.string.create_prompt_hint), style = VmkType.prompt.copy(fontSize = 24.sp, lineHeight = 32.sp), color = Vmk.colors.textTertiary); inner() }
+            Box { if (composer.text.isEmpty()) Text(stringResource(if (deck) R.string.deck_prompt_hint else R.string.create_prompt_hint), style = VmkType.prompt, color = Vmk.colors.textTertiary); inner() }
         },
     )
 }

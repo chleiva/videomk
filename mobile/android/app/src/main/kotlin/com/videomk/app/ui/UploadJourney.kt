@@ -359,8 +359,8 @@ private fun Stat(value: String, label: String, modifier: Modifier, danger: Boole
 /** The one completion message ("120 photos added. 12 were already there.") as a dark toast with an action. */
 @Composable
 fun MediaToast(message: String, action: String?, onAction: () -> Unit, modifier: Modifier = Modifier) {
-    Surface(modifier.padding(horizontal = 12.dp).fillMaxWidth().testTag("mediaToast"), shape = RoundedCornerShape(16.dp), color = if (Vmk.colors.dark) Color(0xFFE9EAF6) else Color(0xFF23263F)) {
-        val fg = if (Vmk.colors.dark) Color(0xFF23263F) else Color.White
+    Surface(modifier.padding(horizontal = 12.dp).fillMaxWidth().testTag("mediaToast"), shape = RoundedCornerShape(16.dp), color = Vmk.colors.inverseSurface) {
+        val fg = Vmk.colors.inverseOnSurface
         Row(Modifier.heightIn(min = 52.dp).padding(start = 14.dp, end = 4.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             Icon(Icons.Filled.CheckCircle, null, tint = Color(0xFF4ADE80), modifier = Modifier.size(22.dp))
             Text(message, style = MaterialTheme.typography.bodyMedium, color = fg, modifier = Modifier.weight(1f).padding(vertical = 10.dp))

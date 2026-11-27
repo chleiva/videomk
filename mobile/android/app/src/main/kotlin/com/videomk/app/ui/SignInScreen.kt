@@ -1,5 +1,6 @@
 package com.videomk.app.ui
 
+import androidx.compose.foundation.shape.CircleShape
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
@@ -94,7 +95,15 @@ fun SignInScreen(state: AppState, social: SocialSwitches = SocialSwitches(), onS
                 when (option) {
                     SignInProvider.Google -> SocialButton(label, R.drawable.ic_google_g, SocialStyle.google(Vmk.colors.dark), !busy, spinning, "googleButton") { onSignIn(option) }
                     SignInProvider.Apple -> SocialButton(label, R.drawable.ic_apple_logo, SocialStyle.apple(Vmk.colors.dark), !busy, spinning, "appleButton") { onSignIn(option) }
-                    SignInProvider.Email -> PrimaryButton(
+                    // alone it is the one primary button; beside the provider buttons it steps back to a tonal pill so there is one clear hierarchy
+                    SignInProvider.Email -> if (social.anySocial) Box(
+                        Modifier.fillMaxWidth().heightIn(min = 52.dp).alpha(if (busy && !spinning) 0.4f else 1f).clip(CircleShape).background(Vmk.colors.surfaceRaised)
+                            .clickable(enabled = !busy, role = Role.Button) { onSignIn(option) }.padding(horizontal = 16.dp, vertical = 12.dp).testTag("signInButton"),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        if (spinning || (state.isSigningIn && state.signInProvider == null)) CircularProgressIndicator(Modifier.size(24.dp).semantics { contentDescription = signingInText }, strokeWidth = 2.dp)
+                        else Text(label, style = MaterialTheme.typography.titleMedium, color = Vmk.colors.text, textAlign = TextAlign.Center)
+                    } else PrimaryButton(
                         label, onClick = { onSignIn(option) }, enabled = !busy,
                         modifier = Modifier.fillMaxWidth().testTag("signInButton"),
                     ) {
@@ -121,7 +130,7 @@ data class SocialStyle(val fill: Color, val outline: Color?, val text: Color, va
 @Composable
 fun SocialButton(label: String, @DrawableRes logo: Int, style: SocialStyle, enabled: Boolean, spinning: Boolean, tag: String, onClick: () -> Unit) {
     val signingInText = stringResource(R.string.auth_signing_in)
-    val shape = RoundedCornerShape(Vmk.radius)
+    val shape = CircleShape
     Row(
         Modifier.fillMaxWidth().heightIn(min = 52.dp).alpha(if (enabled || spinning) 1f else 0.4f)
             .clip(shape).background(style.fill, shape).let { m -> style.outline?.let { m.border(1.dp, it, shape) } ?: m }
