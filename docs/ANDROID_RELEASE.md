@@ -38,6 +38,11 @@ it); losing an app-signing key is not, which is why Google holds it.
    Choose a long random password and store it in your password manager. **Back the file and the password up** (two places).
    A throwaway keystore of this kind was created for local release testing on the development machine (`~/.videomk-secrets/videomk-upload.jks`). Make the real one
    yourself, do not upload with the throwaway.
+
+   **Which key Play accepts (checked 2026-11-27):** the registered Play upload key is `~/.videomk-secrets/videomk-play-upload.jks` (alias `videomk-upload`, password in
+   `~/.videomk-secrets/play-upload-keystore.pw`; certificate SHA1 `29:D5:E6:37:05:9F:E9:95:86:C2:16:60:9A:7A:C1:26:B5:62:F3:53`). `~/.videomk-secrets/release-env.sh` still points at
+   the older `videomk-upload.jks`, whose bundles Play rejects ("signed with the wrong key"). Sign Play uploads with `videomk-play-upload.jks`, verify the AAB certificate
+   SHA1 before uploading, and keep the version code above the last upload (475200 on 2026-11-27; minutes since 2026-01-01 works).
 2. The build reads the signing details from the environment (or `~/.gradle/gradle.properties`), never from files in the repo:
    ```
    export VMK_KEYSTORE_PATH=~/.videomk-secrets/videomk-upload.jks
