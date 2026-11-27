@@ -59,11 +59,8 @@ function readHandoff(): LibPick[] {
 function PlanTag({ plan, t }: { plan: string | null; t: (k: string, p?: Record<string, string | number>) => string }) {
   return <span className="plan-tag"><Icon name="lock" size={14} />{plan && <span aria-hidden="true">{plan}</span>}<span className="sr-only-vmk">{plan ? t("create.plan_needs", { plan }) : t("create.plan_locked")}</span></span>;
 }
-/** "Landscape or Square": the shapes a look suits best, in the server's words. */
-function shapeList(ids: string[], c: Capabilities, locale: string): string {
-  const names = ids.map((id) => c.aspects.find((a) => a.id === id)?.label ?? id);
-  try { return new Intl.ListFormat(locale, { type: "disjunction" }).format(names); } catch { return names.join(", "); }
-}
+/** "Landscape": a shape in the server's words. */
+const shapeName = (id: string, c: Capabilities): string => c.aspects.find((a) => a.id === id)?.label ?? id;
 
 export default function Composer() {
   const { t, locale } = useLocale();
@@ -142,7 +139,7 @@ export default function Composer() {
     if (!c.looks) return;
     const n = normalizeChoice(pick, c.looks, lookCtx);
     if (!n.reset) return;
-    setLookLine(t(n.reset === "deck" ? "create.pick_reset_deck" : "create.pick_reset_photos", { look: optionOf(c.looks, pick.look)?.label ?? "", auto: optionOf(c.looks, "auto")?.label ?? t("create.look_auto") }));
+    setLookLine(t(n.reset === "deck" ? "create.pick_reset_deck" : "create.pick_reset_photos", { look: optionOf(c.looks, pick.look)?.label ?? "", auto: t("create.look_auto") }));
     setForm((x) => (x ? { ...x, pick: AUTO } : x));
   }, [lookCtx, pick, c.looks]); // eslint-disable-line react-hooks/exhaustive-deps
   const choosePick = (next: LookChoice) => { setLookLine(null); saveLook(next); set({ pick: next }); };
@@ -319,6 +316,7 @@ export default function Composer() {
 
         {deckActive && c.deck && live && <DeckPicker caps={c.deck} deck={deck} />}
 
+        {lookLine && <p className="look-reset" role="status">{lookLine}</p>}{/* right above the pill it explains; it goes with the next choice */}
         <div className="composer-bar">
           <div className="composer-tools">
             <Menu label={t("create.add_photos")} className="tool" triggerClass="icon-btn tool-btn" trigger={<Icon name="image" size={22} />} align="start"
@@ -383,10 +381,9 @@ export default function Composer() {
         {limit != null && platform && <p className="hint">{t("create.max_length", { platform: platform.label, length: lengthLabel(limit) })}</p>}
         {fitHint && <p className="hint">{fitHint}</p>}
         {advice && <p className="hint">{advice}</p>}
-        {lookLine && <p className="hint" role="status">{lookLine}</p>}
         {lh?.minSeconds != null && <p className="hint">{t("create.pick_min", { look: lookName, length: lengthLabel(lh.minSeconds / 60) })}{longer != null && <> <button type="button" className="cost-link" onClick={() => set({ minutes: longer })}>{t("create.pick_use", { length: lengthLabel(longer) })}</button></>}</p>}
         {lh?.minSeconds == null && lh?.conversationSeconds != null && <p className="hint">{t("create.pick_talk_min", { length: lengthLabel(lh.conversationSeconds / 60) })}{longer != null && <> <button type="button" className="cost-link" onClick={() => set({ minutes: longer })}>{t("create.pick_use", { length: lengthLabel(longer) })}</button></>}</p>}
-        {lh?.bestAspects && <p className="hint">{t("create.pick_best", { look: lookName, shapes: shapeList(lh.bestAspects, c, locale) })}</p>}
+        {lh?.bestAspects && <p className="hint">{t("create.pick_best", { look: lookName, shape: shapeName(lh.bestAspects[0], c) })} <button type="button" className="cost-link" onClick={() => set({ aspect: lh.bestAspects![0] })}>{t("create.pick_use_shape", { shape: shapeName(lh.bestAspects[0], c) })}</button></p>}
         {ready && deckAspectWarning(f.aspect) && <p className="hint">{t("deck.vertical_warn")} <button type="button" className="cost-link" onClick={() => set({ aspect: DECK_ASPECT })}>{t("deck.use_landscape")}</button></p>}
       </div>
 

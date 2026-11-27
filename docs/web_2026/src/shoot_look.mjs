@@ -19,6 +19,10 @@ const T = (i) => `https://thumbs.test/${i % PICS.length}.jpg`;
 
 const caps = (loc, s) => {
   const looks = JSON.parse(JSON.stringify(LOOKS[loc]));
+  // the tile notes and the Spanish name the design review asked the server for (one line, no full stop; "Animado"): the server change is in flight, so the mock
+  // carries them unless OLD_STRINGS=1. The web renders whatever arrives.
+  if (!process.env.OLD_STRINGS) { const N = { en: { auto: "Picked for your topic", real: "Photos and footage", whiteboard: "Drawn by hand", cartoon: "Characters explain it" }, es: { auto: "Elegido según tu tema", real: "Fotos y video", whiteboard: "Dibujado a mano", cartoon: "Personajes lo explican" } };
+    for (const o of looks.look.options) { o.note = N[loc][o.id] ?? o.note; if (loc === "es" && o.id === "cartoon") o.label = "Animado"; if (o.id === "auto") o.label = "Auto"; } }
   for (const [id, patch] of Object.entries(s.tiles || {})) Object.assign(looks.look.options.find((o) => o.id === id), patch);
   const plan = s.plan ? { plan: { id: "free", name: "Free", limits: { max_seconds: 30, resolutions: ["720p", "1080p"] }, plans: [{ id: "free", name: "Free" }, { id: "pro", name: "Pro" }, { id: "max", name: "Max" }] }, free_creation: s.freeCreation || "welcome", free: s.free || { available: true }, can_upgrade: false } : {};
   const ALL = ["16:9", "9:16", "1:1", "4:5"];
@@ -119,15 +123,15 @@ if (REVIEW) {
     ["02_look_auto", "Picker open, Auto selected (the default)", "/new/", { actions: [...fill, ...open] }],
     ["03_look_real", "Picker open, Real selected", "/new/", { actions: [...fill, ...open, ...pick("real"), ...reopen] }],
     ["04_look_whiteboard", "Picker open, Whiteboard selected", "/new/", { actions: [...fill, ...open, ...pick("whiteboard"), ...reopen] }],
-    ["05_look_cartoon_cast_0", "Cartoon selected: the cast appears in the same surface, none chosen (Auto cast), board off", "/new/", { actions: [...fill, ...open, ...pick("cartoon")] }],
-    ["06_cast_1", "Cast: one character chosen (its role and topic underneath)", "/new/", { actions: [...fill, ...open, ...pick("cartoon"), ...face("fox")] }],
-    ["07_cast_2_conversation", "Cast: two chosen, the conversation note, numbered in the order picked", "/new/", { actions: [...fill, ...open, ...pick("cartoon"), ...face("fox", "bear")] }],
+    ["05_look_cartoon_cast_0", "Cartoon selected: the cast appears in the same surface, none chosen (we cast it), board off", "/new/", { actions: [...fill, ...open, ...pick("cartoon")] }],
+    ["06_cast_1", "Cast: one character chosen", "/new/", { actions: [...fill, ...open, ...pick("cartoon"), ...face("fox")] }],
+    ["07_cast_2_conversation", "Cast: two chosen (a conversation), board off", "/new/", { actions: [...fill, ...open, ...pick("cartoon"), ...face("fox", "bear")] }],
     ["08_cast_3_full", "Cast: three chosen (the maximum), the others dimmed", "/new/", { actions: [...fill, ...open, ...pick("cartoon"), ...face("ines", "fox", "owl")] }],
     ["09_board_on", "Hand-drawn board switch on (two characters)", "/new/", { actions: [...fill, ...open, ...pick("cartoon"), ...face("fox", "bear"), { click: "#look-extra-board" }, { wait: 200 }] }],
     ["10_pill_cartoon_chosen", "Create after choosing Cartoon with two characters: the pill shows the look and the faces", "/new/", { actions: [...fill, ...open, ...pick("cartoon"), ...face("fox", "bear"), { key: "Escape" }, { wait: 250 }] }],
-    ["11_not_allowed_and_unavailable", "Cartoon not allowed on the plan (locked, plan name), Whiteboard not available on this stage (hidden)", "/new/", { s: { plan: true, tiles: { cartoon: { allowed: false, requires_plan: "pro" }, whiteboard: { available: false } } }, actions: [...fill, ...open] }],
-    ["12_with_photos", "Photos attached: only the looks made from photos are offered, one line says why", "/new/", { actions: [...fill, ...photos(3), ...open] }],
-    ["13_reset_after_photos", "Photos attached after choosing Cartoon: back to Auto with one line", "/new/", { actions: [...fill, ...open, ...pick("cartoon"), ...face("fox"), { key: "Escape" }, ...photos(2)] }],
+    ["11_not_allowed_and_unavailable", "Cartoon not allowed on the plan (dimmed in place, the plan where the note was), Whiteboard not available on this stage (hidden)", "/new/", { s: { plan: true, tiles: { cartoon: { allowed: false, requires_plan: "pro" }, whiteboard: { available: false } } }, actions: [...fill, ...open] }],
+    ["12_with_photos", "Photos attached: the looks not made from photos stay in place, dimmed, with the reason", "/new/", { actions: [...fill, ...photos(3), ...open] }],
+    ["13_reset_after_photos", "Photos attached after choosing Cartoon: back to Auto, one line right above the pills", "/new/", { actions: [...fill, ...open, ...pick("cartoon"), ...face("fox"), { key: "Escape" }, ...photos(2)] }],
     ["14_keyboard_focus_tile", "Keyboard: opened with Enter, two presses of the right arrow, focus ring on Whiteboard (Auto still chosen)", "/new/", { actions: [...fill, { focus: ".look-pill" }, { key: "Enter" }, { wait: 300 }, { key: "ArrowRight" }, { key: "ArrowRight" }, { wait: 200 }] }],
     ["15_keyboard_focus_cast", "Keyboard: Cartoon chosen with Space, Tab to the cast, arrows to a face (focus ring)", "/new/", { actions: [...fill, { focus: ".look-pill" }, { key: "Enter" }, { wait: 300 }, { key: "End" }, { key: " " }, { wait: 300 }, { key: "Tab" }, { key: "ArrowRight" }, { key: "ArrowRight" }, { key: " " }, { key: "ArrowRight" }, { wait: 200 }] }],
     ["16_making_note", "Videos while making: the server's note that the look was adapted, and Cancel", "/generations/", { s: WITH_NOTE }],
@@ -177,7 +181,7 @@ for (const j of jobs) {
       await page.waitForTimeout(150);
       // nothing truncated, nothing wider than the screen
       const bad = await page.evaluate(() => {
-        const cut = [...document.querySelectorAll(".look-name, .look-note, .face-name, .look-pill span, .look-line, .look-extra-name, .look-extra-note, .plan-tag, .locked-msg, .locked-plan, .mkb-note, .composer-pills .pill > span")].filter((e) => e.offsetParent && e.scrollWidth > e.clientWidth + 1 && getComputedStyle(e).overflow !== "visible").map((e) => e.className + ":" + e.textContent.slice(0, 24));
+        const cut = [...document.querySelectorAll(".look-name, .look-note, .look-reset, .face-name, .look-pill span, .look-line, .look-extra-name, .look-extra-note, .plan-tag, .locked-msg, .locked-plan, .mkb-note, .composer-pills .pill > span")].filter((e) => e.offsetParent && e.scrollWidth > e.clientWidth + 1 && getComputedStyle(e).overflow !== "visible").map((e) => e.className + ":" + e.textContent.slice(0, 24));
         // no control of the composer bar over another, none outside the card
         const card = document.querySelector(".composer-card:not(.create-locked)")?.getBoundingClientRect();
         const ctl = [...document.querySelectorAll(".composer-tools > *, .composer-pills > *, .compose-go")].map((e) => [e.className.split(" ")[0] || e.tagName, e.getBoundingClientRect()]).filter(([, r]) => r.width > 0);
@@ -215,8 +219,8 @@ await run("auto", {}, async (page, log) => {
 });
 await run("cartoon", {}, async (page, log) => {
   await go(page); await page.locator("#create-text").fill(TEXT.en);
-  for (const a of [...open, ...pick("cartoon"), ...face("fox", "bear"), { click: "#look-extra-board" }, { click: ".look-panel .btn" }]) await act(page, a, "en");
-  check("Done closes the surface and gives the focus back to the pill", (await page.locator(".look-pop").count()) === 0 && (await page.evaluate(() => document.activeElement?.classList.contains("look-pill"))));
+  for (const a of [...open, ...pick("cartoon"), ...face("fox", "bear"), { click: "#look-extra-board" }, { click: ".look-close" }]) await act(page, a, "en");
+  check("Close closes the surface and gives the focus back to the pill", (await page.locator(".look-pop").count()) === 0 && (await page.evaluate(() => document.activeElement?.classList.contains("look-pill"))));
   await send(page);
   const b = gen(log), brief = log.find((x) => x.u.endsWith("/videos/brief"))?.body;
   check("Cartoon + Fox + Bruno + board: look, cast (ids in order), extras in generate", b?.look === "cartoon" && JSON.stringify(b.cast) === '["fox","bear"]' && JSON.stringify(b.extras) === '["board"]', JSON.stringify(b));
@@ -236,8 +240,8 @@ await run("keyboard", {}, async (page, log) => {
   await page.keyboard.press(" "); await page.waitForTimeout(250);
   check("Space chooses Cartoon and the cast appears in the same surface", (await page.locator(".look-cast").count()) === 1 && (await page.locator('[data-look="cartoon"]').getAttribute("aria-checked")) === "true");
   await page.keyboard.press("Tab");
-  check("Tab goes from the tiles to the cast (one stop each)", await page.evaluate(() => document.activeElement?.classList.contains("face-auto")));
-  for (let i = 0; i < 5; i++) await page.keyboard.press("ArrowRight");
+  check("Tab goes from the tiles to the cast (one stop each)", await page.evaluate(() => document.activeElement?.getAttribute("data-face") === "ines"));
+  for (let i = 0; i < 4; i++) await page.keyboard.press("ArrowRight");
   await page.keyboard.press("Enter"); await page.waitForTimeout(150);
   check("arrows walk the faces and Enter ticks one", (await page.locator('[data-face="fox"]').getAttribute("aria-pressed")) === "true");
   await page.keyboard.press("Tab");
@@ -254,9 +258,9 @@ await run("keyboard", {}, async (page, log) => {
 await run("photos", { note: true }, async (page, log) => {
   await go(page); await page.locator("#create-text").fill(TEXT.en);
   for (const a of [...open, ...pick("cartoon"), ...face("fox"), { key: "Escape" }, ...photos(2)]) await act(page, a, "en");
-  check("attaching photos after choosing Cartoon resets the look to Auto, with one line", (await page.locator(".look-pill-v").textContent()) === "Auto" && (await page.locator("text=The look is back to Auto.").count()) === 1);
+  check("attaching photos after choosing Cartoon resets the look to Auto, with one line", (await page.locator(".look-pill-v").textContent()) === "Auto" && (await page.locator(".look-reset", { hasText: "Look set to Auto. Cartoon can’t use your photos." }).count()) === 1);
   await act(page, { click: ".look-pill" }, "en"); await page.waitForTimeout(250);
-  check("with photos only Auto and Real are offered", (await page.locator(".look-tile").count()) === 2);
+  check("with photos the four tiles stay; only Auto and Real can be chosen, the others say Not with photos", (await page.locator(".look-tile").count()) === 4 && (await page.locator(".look-tile:not(.is-off)").count()) === 2 && (await page.locator("text=Not with photos").count()) === 2);
   await page.keyboard.press("Escape"); await send(page);
   const b = gen(log);
   check("the request then has the photos and no look", Array.isArray(b?.media) && b.media.length === 2 && !("look" in b) && !("cast" in b), JSON.stringify(b));

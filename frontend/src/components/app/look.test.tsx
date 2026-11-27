@@ -18,39 +18,42 @@ const panel = (choice: LookChoice = AUTO, c: LooksCaps = caps, ctx: LookContext 
 const count = (m: string, re: RegExp) => (m.match(re) ?? []).length;
 
 describe("Look picker: the tiles", () => {
-  it("four picture tiles in the server's order, a radio group, Auto chosen, each with its picture, label and one-line note", () => {
+  it("four tiles in the server's order, a radio group, Auto chosen; Auto is a plain tile, the others carry the server's picture, label and note", () => {
     const m = panel();
     expect(count(m, /role="radio"/g)).toBe(4);
     expect(m).toContain('role="radiogroup"');
-    expect(m.indexOf("Auto")).toBeLessThan(m.indexOf("Real")); expect(m.indexOf("Real")).toBeLessThan(m.indexOf("Whiteboard")); expect(m.indexOf("Whiteboard")).toBeLessThan(m.indexOf("Cartoon"));
-    expect(m).toMatch(/data-look="auto" aria-checked="true"/);
+    expect(m.indexOf('data-look="auto"')).toBeLessThan(m.indexOf('data-look="real"')); expect(m.indexOf('data-look="whiteboard"')).toBeLessThan(m.indexOf('data-look="cartoon"'));
+    expect(m).toMatch(/data-look="auto" data-state="ok" aria-checked="true"/);
     expect(count(m, /aria-checked="true"/g)).toBe(1);
-    expect(count(m, /<img src="data:image\/jpeg/g)).toBe(4);
-    for (const note of ["We pick one look that suits your topic.", "Photos and video footage.", "Drawn by hand as it is explained.", "Cartoon characters explain it."]) expect(m).toContain(note);
+    expect(count(m, /<img src="data:image\/jpeg/g)).toBe(3);   // Auto is not a photo
+    for (const note of ["We pick one look that suits your topic", "Photos and video footage", "Drawn by hand as it is explained", "Cartoon characters explain it"]) expect(m).toContain(`${note}<`);   // as sent, without the full stop
     expect(m).toContain('aria-describedby="look-note-whiteboard"');
+  });
+  it("selection is shown one way (the ring): no tick on the picture", () => {
+    const m = panel({ look: "whiteboard", cast: "auto", extras: [] });
+    expect(m).not.toContain("look-check"); expect(count(m, /is-on/g)).toBe(1);
   });
   it("one tab stop in the group (arrow keys move inside it): the chosen tile", () => {
     const m = panel({ look: "whiteboard", cast: "auto", extras: [] });
     expect(count(m, /data-look="[a-z]+"[^>]*tabindex="0"/g)).toBe(1);
-    expect(m).toMatch(/data-look="whiteboard" aria-checked="true" tabindex="0"/);
+    expect(m).toMatch(/data-look="whiteboard"[^>]*aria-checked="true" tabindex="0"/);
   });
   it("a look this stage does not have is not drawn", () => {
     const m = panel(AUTO, parseLooks(looksWith("whiteboard", { available: false }))!);
     expect(count(m, /role="radio"/g)).toBe(3); expect(m).not.toContain("Whiteboard"); expect(m).toContain('data-count="3"');
   });
-  it("a look the plan does not allow is shown locked, quietly, with the plan's name, and cannot be chosen", () => {
+  it("a look the plan does not allow stays in place, dimmed, with the plan where the note was, and cannot be chosen", () => {
     const m = panel(AUTO, parseLooks(looksWith("cartoon", { allowed: false, requires_plan: "pro" }))!);
-    expect(m).toMatch(/data-look="cartoon" aria-checked="false" aria-disabled="true"/);
-    expect(m).toContain("is-locked"); expect(m).toContain("Needs Pro"); expect(m).toContain(">Pro<");
+    expect(m).toMatch(/data-look="cartoon" data-state="locked" aria-checked="false" aria-disabled="true"/);
+    expect(m).toContain("Pro plan"); expect(m).not.toContain("Cartoon characters explain it");
     expect(m).not.toMatch(/upgrade|buy/i);   // nothing can be bought yet: no button
     expect(panel(AUTO, parseLooks(looksWith("cartoon", { allowed: false }))!)).toContain("Not on your plan");
   });
-  it("with the person's photos (or a deck) the looks that are not made from them are not offered, and one line says why", () => {
+  it("with the person's photos (or a deck) the looks not made from them stay in place, dimmed, and say why", () => {
     const m = panel(AUTO, caps, { photos: true, deck: false });
-    expect(count(m, /role="radio"/g)).toBe(2); expect(m).not.toContain("Cartoon"); expect(m).not.toContain("Whiteboard");
-    expect(m).toContain("Made from your photos, so only these looks apply.");
-    expect(panel(AUTO, caps, { photos: false, deck: true })).toContain("Made from your slides, so only these looks apply.");
-    expect(panel()).not.toContain("only these looks apply");
+    expect(count(m, /role="radio"/g)).toBe(4); expect(count(m, /aria-disabled="true"/g)).toBe(2); expect(count(m, /Not with photos/g)).toBe(2);
+    expect(count(panel(AUTO, caps, { photos: false, deck: true }), /Not with slides/g)).toBe(2);
+    expect(panel()).not.toContain("Not with");
   });
 });
 
@@ -59,28 +62,29 @@ describe("Look picker: the cast, in the same surface", () => {
   it("is not there for Auto, Real or Whiteboard", () => {
     for (const look of ["auto", "real", "whiteboard"]) { const m = panel({ look, cast: "auto", extras: [] }); expect(m).not.toContain("look-cast"); expect(m).not.toContain('role="switch"'); }
   });
-  it("Cartoon reveals Auto (chosen) and ten round faces with their names, people then animals", () => {
+  it("Cartoon reveals the ten faces with their names, people then animals; none chosen means we cast it (there is no Auto face)", () => {
     const m = panel(cartoon());
     expect(m).toContain('role="group" aria-label="Cast"');
-    expect(count(m, /data-face="/g)).toBe(10);
-    expect(m).toMatch(/aria-pressed="true"[^>]*class="face face-auto is-on/);
+    expect(count(m, /data-face="/g)).toBe(10); expect(m).not.toContain("face-auto"); expect(count(m, /aria-pressed="true"/g)).toBe(0);
     expect(count(m, /<img class="face-img" src="data:image\/png/g)).toBe(10);
     expect(m).toContain('aria-label="Fox, Guide for children"'); expect(m).toContain(">Inés<");
-    expect(m.indexOf('data-face="mateo"')).toBeLessThan(m.indexOf("cast-sep")); expect(m.indexOf("cast-sep")).toBeLessThan(m.indexOf('data-face="fox"'));
-    expect(m).toContain("We pick characters that suit the topic.");
+    expect(m.indexOf('data-face="mateo"')).toBeLessThan(m.indexOf('data-face="fox"'));
+    expect(m).toContain("We pick for you. Or choose up to 3.");
+    expect(count(m, /data-face="[a-z]+"[^>]*tabindex="0"/g)).toBe(1);
   });
-  it("one face: who it is; two or three: the server's conversation note, numbered in the order picked", () => {
-    expect(panel(cartoon(["fox"]))).toContain("Guide for children · For children");
+  it("one text slot: who presents, or who talks it through", () => {
+    expect(panel(cartoon(["fox"]))).toContain("Fox presents.");
     const two = panel(cartoon(["bear", "fox"]));
-    expect(two).toContain("Pick 2 or 3 and they talk it through together.");
+    expect(two).toContain("Bear and Fox talk it through.");
     expect(count(two, /data-face="[a-z]+" aria-pressed="true"/g)).toBe(2);
-    expect(two).toMatch(/data-face="bear"[\s\S]*?class="face-n"[^>]*>1</); expect(two).toMatch(/data-face="fox"[\s\S]*?class="face-n"[^>]*>2</);
-    expect(two).not.toContain("is-dim");
+    expect(two).not.toContain("is-dim"); expect(two).not.toContain('class="face-n"');
+    expect(panel(cartoon(["bear", "fox"]), caps, { photos: false, deck: false }, es)).toContain("lo conversan.");
   });
-  it("at three the others are dimmed: no fourth", () => {
+  it("at three the others are dimmed and inert: no fourth", () => {
     const m = panel(cartoon(["fox", "bear", "ines"]));
     expect(count(m, /data-face="[a-z]+" aria-pressed="true"/g)).toBe(3);
     expect(count(m, /aria-pressed="false" aria-disabled="true"/g)).toBe(7);
+    expect(m).toContain("Fox, Bear, and Inés talk it through.");
   });
   it("the Hand-drawn board switch only when the look lists it as available", () => {
     const m = panel(cartoon("auto", ["board"]));
@@ -91,13 +95,13 @@ describe("Look picker: the cast, in the same surface", () => {
   });
   it("a server without a cast still offers Cartoon, with nothing to pick", () => {
     const m = panel(cartoon(), parseLooks({ look: LOOKS_FIXTURE.look })!);
-    expect(m).toMatch(/data-look="cartoon" aria-checked="true"/); expect(m).not.toContain("look-cast");
+    expect(m).toMatch(/data-look="cartoon"[^>]*aria-checked="true"/); expect(m).not.toContain("look-cast");
   });
 });
 
 describe("words: few, and in both languages", () => {
   const words = (s: string) => s.trim().split(/\s+/).filter(Boolean).length;
-  const KEYS = ["create.pick_a11y", "create.pick_cast", "create.pick_from_photos", "create.pick_from_deck", "create.pick_reset_photos", "create.pick_reset_deck", "create.pick_min", "create.pick_use", "create.pick_talk_min", "create.pick_best",
+  const KEYS = ["create.pick_a11y", "create.pick_cast", "create.pick_cast_none", "create.pick_not_photos", "create.pick_not_deck", "create.pick_plan", "create.pick_use_shape", "create.pick_reset_photos", "create.pick_reset_deck", "create.pick_min", "create.pick_use", "create.pick_talk_min", "create.pick_best",
     "create.plan_needs", "create.plan_locked", "create.colors", "create.locked_fallback", "create.locked_plan", "create.locked_soon", "create.showcase", "making.cancel", "making.cancel_title", "making.cancel_body", "making.cancel_keep", "making.cancel_stop",
     "making.cancelled", "making.cancel_done", "making.cancel_error", "making.cancel_unsupported", "gen.cancelled_detail", "gen.delete", "gen.deleted", "gen.undo", "gen.delete_error", "watch.look", "watch.look_auto", "watch.delete", "wallet.plan", "wallet.plan_length", "wallet.bucket.plan"];
   it("every new line exists in English and in Spanish", () => {
@@ -106,13 +110,14 @@ describe("words: few, and in both languages", () => {
     expect(en("making.cancelled_refund", { n: 1 })).toBe("Cancelled. 1 credit is back."); expect(en("making.cancelled_refund", { n: 2 })).toBe("Cancelled. 2 credits are back.");
     expect(es("making.cancelled_refund", { n: 2 })).toBe("Cancelado. 2 créditos recuperados.");
   });
-  it("the picker itself adds at most 3 fixed words (the title, Done, Cast): the rest is the server's", () => {
-    for (const t of [en, es]) expect(words(t("create.pill_look")) + words(t("create.done")) + words(t("create.pick_cast"))).toBeLessThanOrEqual(3);
+  it("the picker itself shows 2 fixed words (the title, Cast) and one short line under the faces", () => {
+    for (const t of [en, es]) { expect(words(t("create.pill_look")) + words(t("create.pick_cast"))).toBe(2); expect(words(t("create.pick_cast_none", { max: 3 }))).toBeLessThanOrEqual(9); }
+    expect(es("create.look_auto")).toBe("Auto");   // "Auto" in both languages, everywhere
   });
   it("draws in Spanish with the server's Spanish labels", () => {
     const c = parseLooks({ ...LOOKS_FIXTURE, look: { ...LOOKS_FIXTURE.look, options: LOOKS_FIXTURE.look.options.map((o) => (o.id === "cartoon" ? { ...o, label: "Dibujos animados", note: "Personajes de dibujos lo explican." } : o)) } })!;
     const m = panel({ look: "cartoon", cast: "auto", extras: [] }, c, { photos: false, deck: false }, es);
-    expect(m).toContain("Dibujos animados"); expect(m).toContain('aria-label="Personajes"'); expect(m).toContain(">Listo<");
+    expect(m).toContain("Dibujos animados"); expect(m).toContain('aria-label="Personajes"'); expect(m).toContain("Elegimos por ti. O elige hasta 3.");
   });
 });
 

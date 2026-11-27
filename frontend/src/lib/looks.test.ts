@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
-  AUTO, castGroups, chooseLook, isConversation, lookHints, lookRequest, narrowed, normalizeChoice, optionOf, parseLookAnswer, parseLooks, parseSavedLook, parseVideoLook, pillOf, presetFor,
+  AUTO, castGroups, chooseLook, isConversation, lookHints, lookRequest, normalizeChoice, optionOf, parseLookAnswer, parseLooks, parseSavedLook, parseVideoLook, pillOf, presetFor,
   safeImage, tiles, toggleCast, toggleExtra, withNote,
 } from "./looks";
 import type { LookChoice } from "./looks";
@@ -51,21 +51,20 @@ describe("capabilities.looks is decoded leniently", () => {
 describe("what the picker offers", () => {
   it("all four when nothing is attached", () => {
     expect(tiles(caps, none).map((t) => [t.option.id, t.state])).toEqual([["auto", "ok"], ["real", "ok"], ["whiteboard", "ok"], ["cartoon", "ok"]]);
-    expect(narrowed(caps, none)).toBe(false);
   });
   it("a look this stage does not have is hidden", () => {
     const c = parseLooks(looksWith("whiteboard", { available: false }))!;
     expect(tiles(c, none).map((t) => t.option.id)).toEqual(["auto", "real", "cartoon"]);
-    expect(narrowed(c, { photos: true, deck: false })).toBe(true);   // cartoon was taken away by the photos; whiteboard was never there
   });
   it("a look the plan does not allow is shown locked, with the plan it needs", () => {
     const t = tiles(parseLooks(looksWith("cartoon", { allowed: false, requires_plan: "pro" }))!, none).find((x) => x.option.id === "cartoon")!;
     expect(t.state).toBe("locked"); expect(t.option.requires_plan).toBe("pro");
   });
-  it("with the person's own photos, or a deck, only the looks made from them are offered", () => {
-    expect(tiles(caps, { photos: true, deck: false }).map((t) => t.option.id)).toEqual(["auto", "real"]);
-    expect(tiles(caps, { photos: false, deck: true }).map((t) => t.option.id)).toEqual(["auto", "real"]);
-    expect(narrowed(caps, { photos: true, deck: false })).toBe(true);
+  it("with the person's own photos, or a deck, the looks not made from them stay in place and say why; the grid never changes shape", () => {
+    expect(tiles(caps, { photos: true, deck: false }).map((t) => [t.option.id, t.state])).toEqual([["auto", "ok"], ["real", "ok"], ["whiteboard", "photos"], ["cartoon", "photos"]]);
+    expect(tiles(caps, { photos: false, deck: true }).map((t) => t.state)).toEqual(["ok", "ok", "deck", "deck"]);
+    const locked = parseLooks(looksWith("cartoon", { allowed: false, requires_plan: "pro" }))!;
+    expect(tiles(locked, { photos: true, deck: false })[3].state).toBe("photos");   // what is attached is the nearer reason
   });
 });
 

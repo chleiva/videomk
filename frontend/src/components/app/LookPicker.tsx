@@ -4,7 +4,7 @@
 // Keyboard: arrow keys move between tiles (and between faces), Space or Enter chooses, Escape closes and gives the focus back to the pill.
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { AIcon as Icon } from "./icons";
-import { castFull, castGroups, chooseLook, isConversation, narrowed, optionOf, pillOf, tiles, toggleCast, toggleExtra } from "../../lib/looks";
+import { castFull, castGroups, chooseLook, isConversation, optionOf, pillOf, tiles, toggleCast, toggleExtra } from "../../lib/looks";
 import type { CastMember, LookChoice, LookContext, LooksCaps } from "../../lib/looks";
 import { useLocale } from "../../lib/useLocale";
 
@@ -29,17 +29,27 @@ function Face({ m, size }: { m: CastMember; size: number }) {
     : <span className="face-img face-ph" aria-hidden="true">{m.name.slice(0, 1)}</span>;
 }
 
-/** The surface itself (no trigger): used by the pill below and drawn on its own in the tests. */
-export function LookPanel({ caps, choice, ctx, planName, onChange, onDone, t }: LookPickerProps & { onDone: () => void; t: T }) {
+/** "Fox and Bruno": the names in the reader's language. */
+function listOf(names: string[], locale: string): string {
+  try { return new Intl.ListFormat(locale, { type: "conjunction" }).format(names); } catch { return names.join(", "); }
+}
+/** The server's note as one quiet line: no full stop at the end. */
+const oneLine = (note: string) => note.replace(/\.\s*$/, "");
+
+/** The surface itself (no trigger): used by the pill below and drawn on its own in the tests. Selection is shown ONE way: the ring. */
+export function LookPanel({ caps, choice, ctx, planName, onChange, onDone, t, locale = "en" }: LookPickerProps & { onDone: () => void; t: T; locale?: string }) {
   const list = tiles(caps, ctx);
   const chosen = optionOf(caps, choice.look) ?? list[0].option;
-  const [tileFocus, setTileFocus] = useState(chosen.id);
-  const [faceFocus, setFaceFocus] = useState<string>(Array.isArray(choice.cast) ? choice.cast[0] : "auto");
-  const cast = chosen.cast ? caps.cast : null;
-  const full = castFull(choice, caps);
   const picked = Array.isArray(choice.cast) ? choice.cast : [];
-  const one = picked.length === 1 ? cast?.members.find((m) => m.id === picked[0]) : undefined;
-  const castLine = !cast ? null : isConversation(choice, caps) ? cast.conversation?.note : one ? [one.role, one.topic].filter(Boolean).join(" · ") : cast.auto.note;
+  const cast = chosen.cast ? caps.cast : null;
+  const members = cast ? castGroups(cast).flat() : [];
+  const [tileFocus, setTileFocus] = useState(chosen.id);
+  const [faceFocus, setFaceFocus] = useState<string>(picked[0] ?? members[0]?.id ?? "");
+  const tabFace = members.some((m) => m.id === faceFocus) ? faceFocus : picked[0] ?? members[0]?.id;   // the cast's one tab stop
+  const full = castFull(choice, caps);
+  const names = picked.flatMap((id) => cast?.members.find((m) => m.id === id)?.name ?? []);
+  // one text slot under the faces: none chosen means we cast it
+  const castLine = !cast ? null : names.length === 0 ? t("create.pick_cast_none", { max: cast.max }) : names.length === 1 || !isConversation(choice, caps) ? t("create.pick_cast_one", { name: listOf(names, locale) }) : t("create.pick_cast_talk", { names: listOf(names, locale) });
   const extras = chosen.extras.filter((x) => x.available);
   const pick = (id: string) => {
     const next = chooseLook(choice, id, caps, ctx);
@@ -49,53 +59,44 @@ export function LookPanel({ caps, choice, ctx, planName, onChange, onDone, t }: 
   };
   return (
     <div className="look-panel">
-      <div className="opts-head"><h2 className="h2" id="look-title">{t("create.pill_look")}</h2><button type="button" className="btn btn-tonal btn-sm" onClick={onDone}>{t("create.done")}</button></div>
+      <div className="opts-head"><h2 className="h2" id="look-title">{t("create.pill_look")}</h2><button type="button" className="icon-btn look-close" aria-label={t("gen.close")} onClick={onDone}><Icon name="close" size={20} /></button></div>
       <div className="look-tiles" role="radiogroup" aria-labelledby="look-title" data-count={list.length} onKeyDown={rove}>
         {list.map(({ option: o, state }) => {
-          const on = o.id === chosen.id, locked = state === "locked", plan = locked ? planName(o.requires_plan) : null;
+          const on = o.id === chosen.id, off = state !== "ok", plan = state === "locked" ? planName(o.requires_plan) : null;
+          // why it cannot be chosen takes the note's place: the plan it needs, or what is attached
+          const reason = state === "photos" ? t("create.pick_not_photos") : state === "deck" ? t("create.pick_not_deck") : state === "locked" ? (plan ? t("create.pick_plan", { plan }) : t("create.plan_locked")) : null;
+          const note = reason ?? (o.note ? oneLine(o.note) : null);
           return (
-            <button key={o.id} type="button" role="radio" data-rove data-look={o.id} aria-checked={on} aria-disabled={locked || undefined} tabIndex={o.id === tileFocus ? 0 : -1}
-              className={`look-tile ${on ? "is-on" : ""} ${locked ? "is-locked" : ""}`} aria-describedby={o.note ? `look-note-${o.id}` : undefined}
-              onFocus={() => setTileFocus(o.id)} onClick={() => { if (!locked) pick(o.id); }}>
+            <button key={o.id} type="button" role="radio" data-rove data-look={o.id} data-state={state} aria-checked={on} aria-disabled={off || undefined} tabIndex={o.id === tileFocus ? 0 : -1}
+              className={`look-tile ${on ? "is-on" : ""} ${off ? "is-off" : ""}`} aria-describedby={note ? `look-note-${o.id}` : undefined}
+              onFocus={() => setTileFocus(o.id)} onClick={() => { if (!off) pick(o.id); }}>
               <span className="look-pic">
-                {o.preview ? <img src={o.preview} alt="" decoding="async" /> : <span className={`look-ph look-ph-${o.id}`} aria-hidden="true" />}
-                {on && <span className="look-check" aria-hidden="true"><Icon name="check" size={14} /></span>}
-                {locked && <span className="look-lock"><Icon name="lock" size={14} />{plan && <span aria-hidden="true">{plan}</span>}<span className="sr-only-vmk">{plan ? t("create.plan_needs", { plan }) : t("create.plan_locked")}</span></span>}
+                {o.id === "auto" || !o.preview ? <span className="look-ph" aria-hidden="true">{o.id === "auto" && <Icon name="sparkle" size={28} />}</span> : <img src={o.preview} alt="" decoding="async" />}
               </span>
-              <span className="look-name">{o.label}</span>
-              {o.note && <span className="look-note" id={`look-note-${o.id}`}>{o.note}</span>}
+              <span className="look-name">{o.id === "auto" ? t("create.look_auto") : o.label}</span>
+              {note && <span className="look-note" id={`look-note-${o.id}`}>{state === "locked" && <Icon name="lock" size={12} />}{note}</span>}
             </button>
           );
         })}
       </div>
-      {narrowed(caps, ctx) && <p className="look-line">{t(ctx.deck ? "create.pick_from_deck" : "create.pick_from_photos")}</p>}
 
       {cast && (
         <div className="look-cast" role="group" aria-label={t("create.pick_cast")} onKeyDown={rove}>
           <p className="label" aria-hidden="true">{t("create.pick_cast")}</p>
           <div className="cast-row">
-            <button type="button" data-rove aria-pressed={picked.length === 0} tabIndex={faceFocus === "auto" ? 0 : -1} className={`face face-auto ${picked.length === 0 ? "is-on" : ""} ${(cast.auto.label || t("create.look_auto")).length > 7 ? "is-wide" : ""}`}
-              onFocus={() => setFaceFocus("auto")} onClick={() => onChange(toggleCast(choice, "auto", caps))}>
-              <span className="face-img face-ph"><Icon name="sparkle" size={22} /></span><span className="face-name">{cast.auto.label || t("create.look_auto")}</span>
-            </button>
-            {castGroups(cast).map((group, gi) => (
-              <div key={gi} className="cast-group" role="presentation">
-                {gi > 0 && <span className="cast-sep" aria-hidden="true" />}
-                {group.map((m) => {
-                  const on = picked.includes(m.id), dim = !on && full;
-                  return (
-                    <button key={m.id} type="button" data-rove data-face={m.id} aria-pressed={on} aria-disabled={dim || undefined} tabIndex={faceFocus === m.id ? 0 : -1} title={[m.role, m.topic].filter(Boolean).join(" · ") || undefined}
-                      aria-label={[m.name, m.role].filter(Boolean).join(", ")} className={`face ${on ? "is-on" : ""} ${dim ? "is-dim" : ""}`}
-                      onFocus={() => setFaceFocus(m.id)} onClick={() => { if (!dim) onChange(toggleCast(choice, m.id, caps)); }}>
-                      <span className="face-wrap"><Face m={m} size={56} />{on && <span className="face-n" aria-hidden="true">{picked.indexOf(m.id) + 1}</span>}</span>
-                      <span className="face-name">{m.name}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            ))}
+            {members.map((m) => {
+              const on = picked.includes(m.id), dim = !on && full;
+              return (
+                <button key={m.id} type="button" data-rove data-face={m.id} aria-pressed={on} aria-disabled={dim || undefined} tabIndex={tabFace === m.id ? 0 : -1}
+                  aria-label={[m.name, m.role].filter(Boolean).join(", ")} className={`face ${on ? "is-on" : ""} ${dim ? "is-dim" : ""}`}
+                  onFocus={() => setFaceFocus(m.id)} onClick={() => { if (!dim) onChange(toggleCast(choice, m.id, caps)); }}>
+                  <Face m={m} size={56} />
+                  <span className="face-name">{m.name}</span>
+                </button>
+              );
+            })}
           </div>
-          <p className="look-line" role="status">{castLine || " "}</p>
+          <p className="look-line" role="status">{castLine}</p>
         </div>
       )}
       {extras.map((x) => (
@@ -111,7 +112,7 @@ export function LookPanel({ caps, choice, ctx, planName, onChange, onDone, t }: 
 /** The pill and its surface. The pill says the choice compactly: the look's name and the faces picked. */
 export default function LookPicker(props: LookPickerProps) {
   const { caps, choice } = props;
-  const { t } = useLocale();
+  const { t, locale } = useLocale();
   const [open, setOpen] = useState(false);
   const root = useRef<HTMLDivElement>(null);
   const btn = useRef<HTMLButtonElement>(null);
@@ -133,19 +134,20 @@ export default function LookPicker(props: LookPickerProps) {
     panel.current?.scrollIntoView?.({ block: "nearest", behavior: still ? "auto" : "smooth" });
   }, [open, choice.look]);
   const pill = pillOf(choice, caps);
-  const thumb = optionOf(caps, choice.look)?.preview;
-  const said = [pill.label, pill.names, ...choice.extras.flatMap((x) => optionOf(caps, choice.look)?.extras.find((e) => e.id === x)?.label ?? [])].filter(Boolean).join(", ");
+  const thumb = choice.look === "auto" ? undefined : optionOf(caps, choice.look)?.preview;
+  const label = choice.look === "auto" ? t("create.look_auto") : pill.label;
+  const said = [label, pill.names, ...choice.extras.flatMap((x) => optionOf(caps, choice.look)?.extras.find((e) => e.id === x)?.label ?? [])].filter(Boolean).join(", ");
   return (
     <div className="look-root" ref={root}>
       <button ref={btn} type="button" className="pill look-pill" aria-haspopup="dialog" aria-expanded={open} aria-controls={open ? id : undefined} aria-label={t("create.pick_a11y", { look: said })} onClick={() => setOpen((v) => !v)}>
         {choice.look === "auto" && <span className="pill-k">{t("create.pill_look_k")}</span>}{/* a named look says what it is; "Auto" alone would not */}
-        {thumb && <img className="look-pill-thumb" src={thumb} alt="" />}
-        <span className="look-pill-v">{pill.label}</span>
+        {thumb ? <img className="look-pill-thumb" src={thumb} alt="" /> : choice.look === "auto" && <span className="look-pill-thumb look-pill-auto"><Icon name="sparkle" size={18} /></span>}
+        <span className="look-pill-v">{label}</span>
         {pill.faces.length > 0 && <span className="look-pill-faces" aria-hidden="true">{pill.faces.map((m) => <Face key={m.id} m={m} size={22} />)}</span>}
         <Icon name="chevdown" size={16} />
       </button>
       {open && <div className="vm-pop-scrim" aria-hidden="true" onClick={close} />}
-      {open && <div id={id} ref={panel} role="dialog" aria-label={t("create.pill_look")} className="vm-pop look-pop"><LookPanel {...props} onDone={close} t={t} /></div>}
+      {open && <div id={id} ref={panel} role="dialog" aria-label={t("create.pill_look")} className="vm-pop look-pop"><LookPanel {...props} onDone={close} t={t} locale={locale} /></div>}
     </div>
   );
 }

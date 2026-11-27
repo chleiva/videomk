@@ -85,18 +85,15 @@ export function castGroups(cast: CastCaps | null): CastMember[][] {
 
 // ---------------------------------------------------------------- what the picker offers
 export interface LookContext { photos: boolean; deck: boolean }
-export type TileState = "ok" | "locked";
+export type TileState = "ok" | "locked" | "photos" | "deck";   // locked: the plan; photos / deck: not made from what is attached
 export interface Tile { option: LookOption; state: TileState }
-/** The tiles to draw, in the server's order: a look this stage does not have is hidden, one that cannot go with the attached photos or deck is not offered,
- *  one the plan does not allow is shown locked (with the plan's name). Auto is always there. */
+/** The tiles to draw, in the server's order. Only a look this stage does not have is hidden. One the plan does not allow, or that is not made from the attached
+ *  photos or deck, STAYS in its place, dimmed, with the reason where its note was: the grid never changes shape. Auto can always be chosen. */
 export function tiles(caps: LooksCaps, ctx: LookContext): Tile[] {
-  return caps.options
-    .filter((o) => o.id === "auto" || (o.available && (!ctx.photos || o.with_photos) && (!ctx.deck || o.with_deck)))
-    .map((o) => ({ option: o, state: o.allowed || o.id === "auto" ? "ok" : "locked" }));
-}
-/** True when attached photos or a deck took some looks away (the picker then says so in one line). */
-export function narrowed(caps: LooksCaps, ctx: LookContext): boolean {
-  return caps.options.some((o) => o.id !== "auto" && o.available && ((ctx.photos && !o.with_photos) || (ctx.deck && !o.with_deck)));
+  return caps.options.filter((o) => o.id === "auto" || o.available).map((o) => ({
+    option: o,
+    state: o.id === "auto" ? "ok" : ctx.photos && !o.with_photos ? "photos" : ctx.deck && !o.with_deck ? "deck" : o.allowed ? "ok" : "locked",
+  }));
 }
 
 /** Keeps a choice inside what the server lists right now. `reset` says why a chosen look fell back to Auto (photos or a deck were attached afterwards). */
