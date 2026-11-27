@@ -1,2 +1,117 @@
-/* Marketing site look (videomk.com). Owned by package A (marketing): add landing sections, hero, gallery, pricing teaser and FAQ styles here.
-   Reads tokens.css only. The shell (shell.css) and the layout files are not edited by the package. */
+/* Marketing site look (videomk.com). Owned by package A (marketing). Reads tokens.css only: no raw colours, sizes from the token scale.
+   Budget: one CSS file, <= 20 KB gzip together with the shared sheets. Apple-like: big type, one idea per band, content (video) gets the pixels. */
+html.marketing { scroll-padding-top: 4.5rem; scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html.marketing { scroll-behavior: auto; } }
+
+/* ---- header additions (the shell owns .site-header; this adds the section links) */
+.mk-nav { display: none; margin-left: auto; align-items: center; gap: var(--space-1); }
+.mk-nav a { display: inline-flex; align-items: center; min-height: var(--min-touch); padding: 0 var(--space-3); border-radius: var(--radius-pill); color: var(--text-secondary); font-weight: 600; font-size: var(--fs-subhead); text-decoration: none; }
+.mk-nav a:hover { color: var(--text); background: var(--surface-2); }
+@media (min-width: 48rem) { .mk-nav { display: flex; } .mk-nav + .site-cta { margin-left: var(--space-2); } }
+
+/* ---- layout helpers */
+.mk-wrap { max-width: var(--page-width); margin-inline: auto; padding-inline: var(--gutter); }
+.mk-narrow { max-width: 46rem; }
+.mk-center { text-align: center; }
+.mk-section { padding-block: var(--section-pad); }
+.mk-alt { background: var(--surface-2); }
+.mk-h1 { font-size: var(--fs-hero); line-height: 1.04; font-weight: 800; letter-spacing: -0.03em; word-spacing: 0.07em; text-wrap: balance; }
+.mk-h2 { font-size: var(--fs-h2); line-height: 1.1; font-weight: 800; letter-spacing: -0.03em; word-spacing: 0.05em; text-wrap: balance; }
+.mk-h3 { font-size: var(--fs-title3); line-height: var(--lh-snug); font-weight: 700; letter-spacing: var(--track-title); }
+.mk-lead, .mk-sub { font-size: var(--fs-lead); line-height: 1.4; color: var(--text-secondary); max-width: 40rem; margin: var(--space-4) auto 0; text-wrap: pretty; }
+.mk-sub { margin-top: var(--space-3); }
+.mk-body { color: var(--text-secondary); margin-top: var(--space-2); }
+.mk-meta { font-size: var(--fs-footnote); color: var(--text-secondary); line-height: 1.35; }
+.mk-fine { margin-top: var(--space-3); font-size: var(--fs-footnote); color: var(--text-secondary); }
+
+/* ---- hero */
+.mk-hero { padding: calc(var(--section-pad) * 0.7) 0 var(--section-pad); background: radial-gradient(60rem 26rem at 50% -6rem, var(--primary-container), transparent 70%); }
+.mk-ask { display: flex; align-items: center; gap: var(--space-2); max-width: 34rem; margin: var(--space-8) auto 0; padding: var(--space-1); background: var(--surface); border-radius: var(--radius-pill); box-shadow: var(--elev-2); }
+.mk-ask:focus-within { box-shadow: var(--elev-2), 0 0 0 3px var(--focus); }
+.mk-ask-input { flex: 1; min-width: 0; min-height: var(--min-touch); padding: 0 var(--space-4); font: inherit; font-size: 1.0625rem; color: var(--text); background: transparent; border: 0; border-radius: var(--radius-pill); }
+.mk-ask-input::placeholder { color: var(--text-tertiary); opacity: 1; }
+.mk-ask-input:focus-visible { outline: none; }
+.mk-ask-btn { flex: none; }
+.mk-hero-stage { margin-top: var(--space-12); }
+.mk-sample-hero { max-width: 60rem; margin-inline: auto; }
+.mk-sample-hero .mk-frame { width: 100%; }
+.mk-prompt { max-width: 44rem; margin: var(--space-8) auto 0; text-align: center; display: flex; flex-direction: column; align-items: center; gap: var(--space-3); }
+.mk-prompt-text { margin: 0; font-size: 1.0625rem; line-height: 1.55; color: var(--text-secondary); quotes: "\201C" "\201D"; text-wrap: pretty; }
+.mk-prompt-text::before { content: open-quote; }
+.mk-prompt-text::after { content: close-quote; }
+
+/* ---- sample videos */
+.mk-frame { position: relative; overflow: hidden; border-radius: var(--radius-video); background: var(--stage); box-shadow: var(--elev-3); }
+.mk-video { display: block; width: 100%; height: 100%; object-fit: cover; background: var(--stage); }
+.mk-hint { display: none; position: absolute; top: var(--space-3); right: var(--space-3); align-items: center; justify-content: center; width: 2.5rem; height: 2.5rem; border-radius: var(--radius-pill); background: var(--scrim); color: var(--on-scrim); pointer-events: none; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+.mk-js .mk-hint { display: inline-flex; }
+.mk-frame:has(video[data-sound]) .mk-hint { display: none; }
+.mk-js .mk-video { cursor: pointer; }
+.mk-cap { display: flex; flex-direction: column; gap: 2px; margin-top: var(--space-3); }
+.mk-cap-title { font-size: var(--fs-subhead); line-height: 1.3; font-weight: 700; letter-spacing: var(--track-title); }
+
+/* ---- gallery: a snap rail on phones, wrapped rows on desktop; every card is as wide as its video (the aspect decides) */
+.mk-rail { list-style: none; margin: var(--space-10) 0 0; padding: 0 var(--gutter) var(--space-4); display: flex; align-items: flex-start; gap: var(--space-5); overflow-x: auto; scroll-snap-type: x mandatory; overscroll-behavior-x: contain; scrollbar-width: none; }
+.mk-rail::-webkit-scrollbar { display: none; }
+.mk-rail-item { flex: none; scroll-snap-align: center; }
+.mk-rail .mk-sample { width: min(calc(100vw - 3rem), calc(18rem * var(--w) / var(--h))); }
+.mk-rail .mk-frame { width: 100%; }
+.mk-own-card { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--space-3); width: 11rem; height: 18rem; border-radius: var(--radius-video); background: linear-gradient(135deg, var(--making-start), var(--making-end)); color: var(--on-making); text-decoration: none; text-align: center; padding: var(--space-4); box-shadow: var(--elev-2); transition: transform var(--dur-select) var(--ease); }
+.mk-own-card:hover { transform: translateY(-2px); }
+.mk-own-mark { width: 3.5rem; height: 3.5rem; border-radius: 1rem; overflow: hidden; display: inline-flex; }
+.mk-own-mark img { width: 100%; height: 100%; }
+.mk-own-go { font-size: var(--fs-title2); }
+@media (min-width: 64rem) {
+	.mk-rail { flex-wrap: wrap; justify-content: center; overflow: visible; max-width: var(--page-width); margin-inline: auto; row-gap: var(--space-8); }
+	.mk-rail .mk-sample { width: calc(19rem * var(--w) / var(--h)); }
+	.mk-own-card { height: 19rem; }
+}
+
+/* ---- formats */
+.mk-formats { list-style: none; display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-8) var(--space-8); margin: var(--space-10) 0 0; padding: 0; }
+@media (min-width: 48rem) { .mk-formats { column-gap: var(--space-12); } }
+.mk-format { display: flex; flex-direction: column; align-items: center; gap: var(--space-1); width: calc(50% - var(--space-4)); text-align: center; }
+@media (min-width: 48rem) { .mk-format { width: 10rem; } }
+.mk-shape-box { display: flex; align-items: flex-end; justify-content: center; height: 8rem; margin-bottom: var(--space-3); }
+.mk-shape { display: block; border-radius: 0.9rem; background: linear-gradient(135deg, var(--making-start), var(--making-end)); box-shadow: var(--elev-2); }
+.mk-4k { margin-top: var(--space-8); }
+
+/* ---- steps, features */
+.mk-steps { list-style: none; display: grid; gap: var(--space-4); margin: var(--space-10) 0 0; padding: 0; }
+.mk-step { background: var(--surface); border-radius: var(--radius-video); padding: var(--space-8) var(--space-6); box-shadow: var(--elev-1); }
+.mk-step-icon { display: inline-flex; align-items: center; justify-content: center; width: 3.5rem; height: 3.5rem; border-radius: 1.1rem; margin-bottom: var(--space-4); color: var(--on-making); background: linear-gradient(135deg, var(--making-start), var(--making-end)); }
+.mk-step-n { display: inline-flex; align-items: center; justify-content: center; width: 1.5rem; height: 1.5rem; margin-right: var(--space-2); border-radius: 50%; font-size: var(--fs-caption); color: var(--primary); background: var(--primary-container); }
+.mk-feats { list-style: none; display: grid; gap: var(--space-8) var(--space-6); margin: var(--space-10) 0 0; padding: 0; }
+.mk-feat-icon { display: inline-flex; color: var(--primary); margin-bottom: var(--space-3); }
+@media (min-width: 40rem) { .mk-feats { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 48rem) { .mk-steps { grid-template-columns: repeat(3, 1fr); } }
+@media (min-width: 64rem) { .mk-feats { grid-template-columns: repeat(3, 1fr); } }
+
+/* ---- credits, FAQ, final call */
+.mk-credits { max-width: 40rem; margin-inline: auto; padding: var(--space-12) var(--space-6); border-radius: var(--radius-sheet); background: var(--surface); box-shadow: var(--elev-2); display: flex; flex-direction: column; align-items: center; gap: var(--space-3); }
+.mk-credits .btn { margin-top: var(--space-4); }
+.mk-faq { margin-top: var(--space-8); border-top: 1px solid var(--outline); }
+.mk-faq details { border-bottom: 1px solid var(--outline); }
+.mk-faq summary { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); min-height: 3.5rem; padding: var(--space-3) 0; font-weight: 600; font-size: 1.0625rem; cursor: pointer; list-style: none; }
+.mk-faq summary::-webkit-details-marker { display: none; }
+.mk-faq summary::after { content: "+"; flex: none; font-size: var(--fs-title2); line-height: 1; color: var(--text-secondary); transition: transform var(--dur-select) var(--ease); }
+.mk-faq details[open] summary::after { transform: rotate(45deg); }
+.mk-faq details p { margin: 0 0 var(--space-4); color: var(--text-secondary); max-width: 38rem; }
+.mk-final { display: flex; flex-direction: column; align-items: center; gap: var(--space-6); padding: var(--space-16) var(--space-6); border-radius: var(--radius-sheet); text-align: center; color: var(--on-making); background: linear-gradient(135deg, var(--making-start), var(--making-end)); }
+.mk-final-mark { width: 4.5rem; height: 4.5rem; border-radius: 1.25rem; }
+.mk-final-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-3); }
+.mk-btn-light { background: var(--on-making); color: var(--making-start); }
+.mk-btn-light:hover { filter: brightness(0.96); }
+.mk-btn-ghost { color: var(--on-making); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--on-making) 55%, transparent); }
+.mk-btn-ghost:hover { background: color-mix(in srgb, var(--on-making) 12%, transparent); }
+.mk-company { margin-top: var(--space-4); color: var(--text-tertiary); max-width: 36rem; margin-inline: auto; }
+
+/* ---- legal and support pages (same tokens, calmer type) */
+.legal .h1 { font-size: var(--fs-h2); letter-spacing: var(--track-display); font-weight: 800; line-height: 1.1; }
+.legal section h2 { letter-spacing: var(--track-title); }
+.legal a { text-underline-offset: 3px; }
+.legal-meta { list-style: none; margin: var(--space-4) 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: var(--space-1) var(--space-4); font-size: var(--fs-footnote); line-height: 1.5; color: var(--text-secondary); }
+.legal-meta li + li::before { content: "·"; margin-right: var(--space-4); color: var(--text-tertiary); }
+@media (max-width: 39.99rem) { .legal-meta { flex-direction: column; } .legal-meta li + li::before { content: none; } }
+
+@media (prefers-reduced-motion: reduce) { .mk-own-card, .mk-faq summary::after { transition: none; } .mk-own-card:hover { transform: none; } }

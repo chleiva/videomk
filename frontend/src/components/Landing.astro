@@ -1,42 +1,173 @@
 ---
-// The app's landing page, written once for both languages (/ and /es/).
+// The public home page of videomk.com, written once for both languages (/ and /es/). Static HTML: the only script is a ~1.5 KB inline block (kept by
+// backend/scripts/site.sh through data-keep) that plays the sample videos muted while they are on screen; without it the native video controls work.
+// Google brand verification (docs/WEB_REDESIGN_2026.md section 10): the app name, the logo, what the app does and the links to the Privacy Policy and Terms
+// are in the HTML, above and below the fold, with no sign-in wall and no redirect.
 import MarketingLayout from "../layouts/MarketingLayout.astro";
-import PromptForm from "./PromptForm";
-import ConsentToast from "./ConsentToast";
-import { translate } from "../lib/i18n";
+import SampleCard from "./SampleCard.astro";
+import MIcon from "./MIcon.astro";
+import { COMPANY, COMPANY_NUMBER, CONTACT_EMAIL } from "../data/legal";
+import { HERO, galleryFor, SAMPLES } from "../data/samples";
+import { pathForLocale, translate } from "../lib/i18n";
 import type { Locale } from "../lib/i18n";
+import { APP_PATHS, appUrl, siteUrl, tryPromptUrl } from "../lib/links";
 const { locale } = Astro.props as { locale: Locale };
-const tr = (k: string) => translate(k, locale);
+const tr = (k: string, p?: Record<string, string | number>) => translate(k, locale, p);
+const iosUrl = (import.meta.env.PUBLIC_APP_STORE_URL as string | undefined) || "";
+const androidUrl = (import.meta.env.PUBLIC_PLAY_STORE_URL as string | undefined) || "";
+const heroPrompt = HERO.prompt ?? "";
+const gallery = galleryFor(locale);
+const url = siteUrl("/", locale);
+const ld = [
+	{ "@context": "https://schema.org", "@type": "SoftwareApplication", name: "videomk", applicationCategory: "MultimediaApplication", operatingSystem: "Web, iOS, Android", description: tr("landing.meta_desc"), url, image: "https://videomk.com/og.jpg", inLanguage: ["en", "es"], offers: { "@type": "Offer", price: "0", priceCurrency: "USD" }, publisher: { "@type": "Organization", name: COMPANY, url: "https://videomk.com/", logo: "https://videomk.com/icon-512.png", email: CONTACT_EMAIL } },
+	{ "@context": "https://schema.org", "@type": "VideoObject", name: HERO.title[locale], description: HERO.description[locale], thumbnailUrl: `https://videomk.com${HERO.poster}`, uploadDate: "2026-11-26", duration: `PT${HERO.seconds}S`, contentUrl: `https://videomk.com${HERO.file}` },
+];
+const formats = [["wide", 16, 9], ["tall", 9, 16], ["square", 1, 1], ["portrait", 4, 5]] as const;
+const features = [["voice", "voice"], ["media", "media"], ["clips", "clips"], ["edit", "edit"], ["captions", "cap"], ["devices", "apps"]] as const;
+const faq = ["own", "lang", "photos", "google", "cost"] as const;
 ---
-<MarketingLayout title="videomk" description={tr("meta.description")} locale={locale} alternates={true}>
-	<script define:vars={{ here: locale }}>window.__vmkLanding = here;</script>
-	<script>
-		import { getTokensIfAvailable } from "../lib/auth";
-		import { getLocale } from "../lib/i18n";
-		const here = (window as unknown as { __vmkLanding?: string }).__vmkLanding;
-		// A Spanish browser (or a saved Spanish choice) lands on /es/; the switcher in the footer remembers the opposite choice.
-		if (here === "en" && getLocale() === "es") location.replace("/es/");
-		else getTokensIfAvailable().then((t) => { if (t) location.replace("/generations"); }).catch(() => {});
-	</script>
-	<section class="hero">
-		<div class="hero-in">
-			<h1 class="hero-title">{tr("landing.heading")} <span class="hero-brand">video</span><span class="hero-brand hero-brand-bold">mk</span></h1>
-			<p class="hero-sub">{tr("landing.sub")}</p>
-			<div class="mt-8 w-full">
-				<PromptForm locale={locale} client:idle />
+<MarketingLayout title={tr("landing.meta_title")} description={tr("landing.meta_desc")} locale={locale} alternates={true}>
+	<Fragment slot="head">
+		<script type="application/ld+json" data-keep set:html={JSON.stringify(ld)} />
+		<link rel="preload" as="image" href={HERO.poster} type="image/webp" fetchpriority="high" />
+	</Fragment>
+	<nav slot="nav" class="mk-nav" aria-label="videomk">
+		<a href="#gallery">{tr("landing.nav_gallery")}</a>
+		<a href="#formats">{tr("landing.nav_formats")}</a>
+		<a href="#pricing">{tr("landing.nav_pricing")}</a>
+		<a href={pathForLocale("/support", locale)}>{tr("landing.nav_help")}</a>
+	</nav>
+
+	<section class="mk-hero" aria-labelledby="hero-title">
+		<div class="mk-wrap mk-center">
+			<h1 id="hero-title" class="mk-h1">{tr("hero.title")}</h1>
+			<p class="mk-lead">{tr("hero.lead")}</p>
+			<form class="mk-ask" action={appUrl(APP_PATHS.videos)} method="get">
+				<input type="hidden" name="new" value="1" />
+				<label for="hero-prompt" class="sr-only-vmk">{tr("hero.field")}</label>
+				<input id="hero-prompt" class="mk-ask-input" type="text" name="prompt" maxlength="500" placeholder={tr("hero.placeholder")} autocomplete="off" enterkeyhint="go" />
+				<button class="btn btn-primary mk-ask-btn" type="submit">{tr("hero.cta")}</button>
+			</form>
+			<p class="mk-fine">{tr("hero.fine")}</p>
+		</div>
+		<div class="mk-wrap mk-hero-stage">
+			<SampleCard sample={HERO} locale={locale} hero />
+			<div class="mk-prompt">
+				<p class="eyebrow">{tr("hero.prompt_label")}</p>
+				<blockquote class="mk-prompt-text" lang="en">{heroPrompt}</blockquote>
+				<a class="btn btn-tonal" href={tryPromptUrl(heroPrompt)}>{tr("hero.try")}</a>
 			</div>
 		</div>
 	</section>
-	<section class="page" aria-labelledby="how-title">
-		<h2 id="how-title" class="h2 text-center">{tr("landing.how_title")}</h2>
-		<ol class="steps">
-			{[1, 2, 3].map((n) => (
-				<li class="card step">
-					<span class="step-n" aria-hidden="true">{n}</span>
-					<h3 class="font-bold">{tr(`landing.step${n}_title`)}</h3>
-					<p class="muted">{tr(`landing.step${n}_body`)}</p>
-				</li>
+
+	<section id="gallery" class="mk-section" aria-labelledby="gallery-title">
+		<div class="mk-wrap">
+			<h2 id="gallery-title" class="mk-h2 mk-center">{tr("gallery.title")}</h2>
+			<p class="mk-sub mk-center">{tr("gallery.sub")}</p>
+		</div>
+		<ul class="mk-rail" role="list">
+			{gallery.map((s) => (
+				<li class="mk-rail-item"><SampleCard sample={s} locale={locale} /></li>
 			))}
-		</ol>
+			<li class="mk-rail-item mk-own">
+				<a class="mk-own-card" href={appUrl("/")}>
+					<span class="mk-own-mark" aria-hidden="true"><img src="/favicon.svg" alt="" width="56" height="56" loading="lazy" /></span>
+					<strong>{tr("gallery.make_own")}</strong>
+					<span class="mk-own-go" aria-hidden="true">→</span>
+				</a>
+			</li>
+		</ul>
 	</section>
-	<ConsentToast locale={locale} client:idle />
+
+	<section id="formats" class="mk-section mk-alt" aria-labelledby="formats-title">
+		<div class="mk-wrap mk-center">
+			<h2 id="formats-title" class="mk-h2">{tr("landing.formats_title")}</h2>
+			<p class="mk-sub">{tr("landing.formats_body")}</p>
+			<ul class="mk-formats" role="list">
+				{formats.map(([k, w, h]) => (
+					<li class="mk-format">
+						<span class="mk-shape-box" aria-hidden="true"><span class="mk-shape" style={`aspect-ratio:${w}/${h};${w >= h ? (w === h ? "width:6rem" : "width:8rem") : "height:8rem"}`}></span></span>
+						<strong>{tr(`landing.fmt_${k}`)}</strong>
+						<span class="mk-meta">{tr(`landing.fmt_${k}_for`)}</span>
+					</li>
+				))}
+			</ul>
+			<p class="mk-meta mk-4k">{tr("landing.fmt_4k")}</p>
+		</div>
+	</section>
+
+	<section class="mk-section" aria-labelledby="how-title">
+		<div class="mk-wrap">
+			<h2 id="how-title" class="mk-h2 mk-center">{tr("landing.how_title")}</h2>
+			<ol class="mk-steps" role="list">
+				{(["say", "make", "share"] as const).map((icon, i) => (
+					<li class="mk-step">
+						<span class="mk-step-icon"><MIcon name={icon} size={28} /></span>
+						<h3 class="mk-h3"><span class="mk-step-n" aria-hidden="true">{i + 1}</span>{tr(`landing.step${i + 1}_title`)}</h3>
+						<p class="mk-body">{tr(`landing.step${i + 1}_body`)}</p>
+					</li>
+				))}
+			</ol>
+		</div>
+	</section>
+
+	<section class="mk-section mk-alt" aria-labelledby="feat-title">
+		<div class="mk-wrap">
+			<h2 id="feat-title" class="mk-h2 mk-center">{tr("landing.feat_title")}</h2>
+			<ul class="mk-feats" role="list">
+				{features.map(([icon, key]) => (
+					<li class="mk-feat">
+						<span class="mk-feat-icon"><MIcon name={icon} /></span>
+						<h3 class="mk-h3">{tr(`landing.feat_${key}_t`)}</h3>
+						<p class="mk-body">{tr(`landing.feat_${key}_b`)}</p>
+					</li>
+				))}
+			</ul>
+		</div>
+	</section>
+
+	<section id="pricing" class="mk-section" aria-labelledby="pricing-title">
+		<div class="mk-wrap mk-center">
+			<div class="mk-credits">
+				<h2 id="pricing-title" class="mk-h2">{tr("pricing.title")}</h2>
+				<p class="mk-sub">{tr("pricing.body")}</p>
+				<a class="btn btn-primary" href={appUrl(APP_PATHS.signin)}>{tr("pricing.cta")}</a>
+			</div>
+		</div>
+	</section>
+
+	<section class="mk-section mk-alt" aria-labelledby="faq-title">
+		<div class="mk-wrap mk-narrow">
+			<h2 id="faq-title" class="mk-h2 mk-center">{tr("faq.title")}</h2>
+			<div class="mk-faq">
+				{faq.map((q) => (
+					<details>
+						<summary>{tr(`faq.q_${q}`)}</summary>
+						<p>{tr(`faq.a_${q}`)}{q === "google" && <> <a href={pathForLocale("/privacy", locale)}>{tr("footer.privacy")}</a></>}</p>
+					</details>
+				))}
+			</div>
+		</div>
+	</section>
+
+	<section class="mk-section" aria-labelledby="final-title">
+		<div class="mk-wrap">
+			<div class="mk-final">
+				<img class="mk-final-mark" src="/icon-192.png" alt={tr("landing.logo_alt")} width="72" height="72" loading="lazy" />
+				<h2 id="final-title" class="mk-h2">{tr("landing.final_title")}</h2>
+				<div class="mk-final-actions">
+					<a class="btn mk-btn-light" href={appUrl("/")}>{tr("landing.final_cta")}</a>
+					{iosUrl && <a class="btn mk-btn-ghost" href={iosUrl}><MIcon name="apple" size={20} /> {tr("landing.get_ios")}</a>}
+					{androidUrl && <a class="btn mk-btn-ghost" href={androidUrl}><MIcon name="android" size={20} /> {tr("landing.get_android")}</a>}
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<p slot="footer-extra" class="footer-row mk-company">{tr("landing.company", { company: COMPANY, number: COMPANY_NUMBER })}</p>
+
+	<script is:inline data-keep>(function(){var d=document,m=matchMedia,rm=m("(prefers-reduced-motion: reduce)").matches,c=navigator.connection,sd=c&&c.saveData;var vs=[].slice.call(d.querySelectorAll("video[data-sample]"));if(!vs.length||rm||sd||!("IntersectionObserver" in window))return;d.documentElement.classList.add("mk-js");
+function stop(except){vs.forEach(function(v){if(v!==except&&v.dataset.sound){v.pause();v.muted=true;v.controls=false;delete v.dataset.sound}})}
+var io=new IntersectionObserver(function(es){es.forEach(function(e){var v=e.target;if(v.dataset.sound)return;if(e.isIntersecting){v.preload="auto";var p=v.play();if(p&&p.catch)p.catch(function(){v.controls=true})}else v.pause()})},{threshold:.5});
+vs.forEach(function(v){v.controls=false;v.muted=true;v.loop=true;io.observe(v);v.addEventListener("click",function(){if(v.dataset.sound){v.paused?v.play():v.pause();return}stop(v);v.dataset.sound="1";v.muted=false;v.controls=true;v.currentTime=0;v.play()})})})();</script>
+</MarketingLayout>

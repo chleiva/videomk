@@ -1,0 +1,29 @@
+---
+// One sample video: poster first, lazy, muted loop that the page script starts when it is on screen (and never when reduced motion or data saver is on);
+// without JavaScript the native controls stay, so the video still plays. The sound button is added by the script.
+import { translate } from "../lib/i18n";
+import type { Locale } from "../lib/i18n";
+import MIcon from "./MIcon.astro";
+import { ASPECT_KEY } from "../data/samples";
+import type { Sample } from "../data/samples";
+interface Props { sample: Sample; locale: Locale; hero?: boolean }
+const { sample: s, locale, hero = false } = Astro.props;
+const tr = (k: string, p?: Record<string, string | number>) => translate(k, locale, p);
+const title = s.title[locale];
+const style = `aspect-ratio:${s.width}/${s.height}`;
+---
+<figure class={`mk-sample${hero ? " mk-sample-hero" : ""}`} style={`--w:${s.width};--h:${s.height}`}>
+	<div class="mk-frame" style={style}>
+		<video class="mk-video" data-sample={s.id} poster={s.poster} width={s.width} height={s.height} preload="none" playsinline loop controls title={tr("hero.sound")} aria-label={tr("landing.sample_alt", { title })}>
+			<source src={s.file} type="video/mp4" />
+			<a href={s.file}>{tr("hero.open_file")}</a>
+		</video>
+		<span class="mk-hint" aria-hidden="true"><MIcon name="sound" size={18} /></span>
+	</div>
+	{!hero && (
+		<figcaption class="mk-cap">
+			<strong class="mk-cap-title">{title}</strong>
+			<span class="mk-meta">{tr(ASPECT_KEY[s.aspect])} · {tr("gallery.seconds", { n: s.seconds })} · {tr(s.lang === "es" ? "gallery.lang_es" : "gallery.lang_en")}</span>
+		</figcaption>
+	)}
+</figure>

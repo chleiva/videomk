@@ -10,7 +10,7 @@ import { pathForLocale, translate } from "../lib/i18n";
 import type { Locale } from "../lib/i18n";
 import { appUrl } from "../lib/links";
 // `locale`: marketing pages are written in one language (at / and at /es/). `alternates`: this page exists in both languages (hreflang + canonical).
-const { title = "videomk", description, locale = "en", alternates = true } = Astro.props as { title?: string; description?: string; locale?: Locale; alternates?: boolean };
+const { title = "videomk", description, locale = "en", alternates = true, ogImage = "/og.jpg" } = Astro.props as { title?: string; description?: string; locale?: Locale; alternates?: boolean; ogImage?: string };
 const L: Locale = locale;
 const tr = (k: string) => translate(k, L);
 const here = (Astro.url.pathname || "/").replace(/index\.html$/, "");
@@ -18,7 +18,8 @@ const footer = [["/privacy", "footer.privacy"], ["/terms", "footer.terms"], ["/s
 ---
 <html lang={L} class="marketing">
 	<head>
-		<Head title={title} description={description} locale={L} alternates={alternates} />
+		<Head title={title} description={description} locale={L} alternates={alternates} ogImage={ogImage} />
+		<slot name="head" />
 		<script define:vars={{ staticLocale: L }}>window.__vmkStaticLocale = staticLocale;</script>
 		<script>
 			import { initLocale } from "../lib/i18nDom";
@@ -36,6 +37,7 @@ const footer = [["/privacy", "footer.privacy"], ["/terms", "footer.terms"], ["/s
 					<span class="brand-mark" aria-hidden="true"><img src="/favicon.svg" alt="" width="32" height="32" /></span>
 					<span>videomk</span>
 				</a>
+				<slot name="nav" />
 				<a href={appUrl("/")} class="btn btn-primary btn-sm site-cta">{tr("home.open_app")}</a>
 			</div>
 		</header>
@@ -57,6 +59,7 @@ const footer = [["/privacy", "footer.privacy"], ["/terms", "footer.terms"], ["/s
 				<span aria-hidden="true">·</span>
 				<a href={pathForLocale(here, "es")} lang="es" hreflang="es" data-lang-option="es" aria-current={L === "es" ? "true" : "false"}>Español</a>
 			</p>
+			<slot name="footer-extra" />
 			<div class="footer-row" data-theme-switch hidden>
 				<span class="sr-only-vmk">{tr("theme.label")}</span>
 				<div class="theme-switch" role="group" aria-label={tr("theme.label")}>

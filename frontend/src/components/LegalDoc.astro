@@ -14,13 +14,13 @@ const tr = (key: string, params?: Record<string, string | number>) => translate(
 		<a href={pathForLocale("/", locale)} class="caption underline underline-offset-4">{tr("legal.back")}</a>
 		<h1 class="h1 mt-6">{title}</h1>
 		<p class="mt-3 text-fg leading-7">{intro}</p>
-		<p class="mt-3 flex flex-wrap gap-2 text-sm text-fg2">
-			<span class="badge badge-neutral !whitespace-normal">{tr("legal.updated", { date: effective })}</span>
-			<span class="badge badge-neutral !whitespace-normal">{COMPANY_NUMBER ? tr("legal.provider_number", { company: COMPANY, number: COMPANY_NUMBER }) : tr("legal.provider", { company: COMPANY })}</span>
-			<span class="badge badge-neutral !whitespace-normal">ICO: {ICO_REFERENCE}</span>
-			{COMPANY_ADDRESS && <span class="badge badge-neutral !whitespace-normal">{COMPANY_ADDRESS}</span>}
-			<span class="badge badge-neutral !whitespace-normal">{tr("legal.contact", { email: CONTACT_EMAIL })}</span>
-		</p>
+		<ul class="legal-meta" role="list">
+			<li>{tr("legal.updated", { date: effective })}</li>
+			<li>{COMPANY_NUMBER ? tr("legal.provider_number", { company: COMPANY, number: COMPANY_NUMBER }) : tr("legal.provider", { company: COMPANY })}</li>
+			<li>ICO: {ICO_REFERENCE}</li>
+			{COMPANY_ADDRESS && <li>{COMPANY_ADDRESS}</li>}
+			<li>{tr("legal.contact", { email: CONTACT_EMAIL })}</li>
+		</ul>
 		<section class="mt-8 card px-6 py-5">
 			<h2 class="text-base font-semibold text-fg">{tr("legal.glance")}</h2>
 			<ul class="mt-3 list-disc space-y-2 pl-5 text-fg">{glance.map((g) => <li>{g}</li>)}</ul>

@@ -51,18 +51,48 @@ def test_hreflang_pairs_are_reciprocal(site):
 def test_spanish_pages_are_spanish_and_have_the_switcher(site):
     for p in PAGES:
         es = read(site, f"es/{p}/index.html")
-        assert "Ir al contenido" in es and "Eliminar cuenta" in es and 'data-lang-option="en"' in es and 'href="/%s/"' % p in es   # the switcher points back to the English page
+        assert "Saltar al contenido" in es and "Eliminar cuenta" in es and 'data-lang-option="en"' in es and 'href="/%s/"' % p in es   # the switcher points back to the English page
         assert "prevalece la versión en inglés" in es
         en = read(site, f"{p}/index.html")
         assert "Skip to content" in en and 'data-lang-option="es"' in en and 'href="/es/%s/"' % p in en and "the English version prevails" in en
-    assert "Privacidad" in read(site, "es/index.html") and 'href="/es/privacy/"' in read(site, "es/index.html")
+    assert "Privacidad" in read(site, "es/index.html") and re.search(r'href="/es/privacy/?"', read(site, "es/index.html"))
 
 
 def test_no_app_script_on_public_pages(site):
+    """No sign-in or app code on the public pages. The only scripts left are the home page's two inline blocks marked data-keep (JSON-LD and the video player)."""
     for root, _dirs, files in os.walk(site):
         for f in files:
             if f.endswith(".html"):
-                assert "<script" not in open(os.path.join(root, f), encoding="utf-8").read(), os.path.join(root, f)
+                html = open(os.path.join(root, f), encoding="utf-8").read()
+                for tag in re.findall(r"<script[^>]*>", html):
+                    assert "data-keep" in tag, (os.path.join(root, f), tag)
+                    assert "src=" not in tag and 'type="module"' not in tag
+                for body in re.findall(r"<script[^>]*data-keep[^>]*>(.*?)</script>", html, flags=re.S):
+                    assert "import " not in body and "localStorage" not in body and "oauth" not in body.lower()
+
+
+def test_home_page_meets_the_google_brand_checks_and_the_budget(site):
+    """docs/WEB_REDESIGN_2026.md section 10: the app name, the logo, what it does, and visible links to the Privacy Policy and Terms, in the HTML itself."""
+    for prefix, lang in (("", "en"), ("es/", "es")):
+        html = read(site, f"{prefix}index.html")
+        assert html.count("<h1") == 1 and "videomk" in html and 'alt="' in html
+        assert 'rel="icon"' in html and "icon-192.png" in html          # the logo is on the page
+        assert re.search(rf'href="/{prefix}privacy/?"', html) and re.search(rf'href="/{prefix}terms/?"', html)   # visible links to the policy and the terms
+        assert 'property="og:image" content="https://videomk.com/og.jpg"' in html and "application/ld+json" in html and '"SoftwareApplication"' in html
+        assert len(re.findall(r"<script", html)) == 2 and html.count("data-keep") == 2     # JSON-LD + player, nothing else
+        assert "location.replace" not in html and 'http-equiv="refresh"' not in html        # no redirect away from the home page
+        assert "Agilegency Ltd" in html and "16838077" in html
+        videos = re.findall(r"<video[^>]*>", html)
+        assert len(videos) >= 4
+        for v in videos:   # poster first, nothing downloaded until it is on screen, a name for screen readers
+            assert "poster=" in v and 'preload="none"' in v and "aria-label=" in v and "autoplay" not in v
+        for src in re.findall(r'(?:src|poster)="(/samples/[^"]+)"', html):
+            assert os.path.isfile(os.path.join(site, src.lstrip("/"))), src
+        for img in re.findall(r"<img[^>]*>", html):
+            assert "alt=" in img
+        assert len(html.encode()) < 60_000   # the page itself stays light; the media loads lazily
+    assert "Descríbelo. Recibe el video." in read(site, "es/index.html") and "Describe it. Get the video." in read(site, "index.html")
+    assert os.path.isfile(os.path.join(site, "og.jpg")) and os.path.isdir(os.path.join(site, "samples"))
 
 
 def _resolves(site, href):

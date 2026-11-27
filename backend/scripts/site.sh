@@ -20,9 +20,13 @@ build() {
   done
   mkdir -p "$OUT/_astro"; cp "$ASTRO_OUT"/_astro/*.css "$OUT/_astro/"; cp "$ASTRO_OUT/favicon.svg" "$OUT/"
   for f in apple-touch-icon.png icon-192.png icon-512.png site.webmanifest; do [ -f "$ASTRO_OUT/$f" ] && cp "$ASTRO_OUT/$f" "$OUT/$f"; done   # linked from every page head
-  cp ../frontend/site-pages/index.html "$OUT/index.html"; cp ../frontend/site-pages/es/index.html "$OUT/es/index.html"; cp ../frontend/site-pages/404.html "$OUT/404.html"
-  # the shared layout loads the app's sign-in script; the public pages must not: keep only the styles
-  find "$OUT" -name '*.html' -exec python3 -c "import re,sys;f=sys.argv[1];s=open(f).read();s=re.sub(r'<script[^>]*>.*?</script>','',s,flags=re.S);open(f,'w').write(s)" {} \;
+  # the home pages come from the Astro build (components/Landing.astro, both languages); only the 404 page is still hand-written
+  cp "$ASTRO_OUT/index.html" "$OUT/index.html"; cp "$ASTRO_OUT/es/index.html" "$OUT/es/index.html"; cp ../frontend/site-pages/404.html "$OUT/404.html"
+  # the home page's sample videos, posters and share image (frontend/public/samples, og.jpg)
+  mkdir -p "$OUT/samples"; cp "$ASTRO_OUT"/samples/* "$OUT/samples/"; cp "$ASTRO_OUT/og.jpg" "$OUT/og.jpg"
+  # the shared layout loads the app's sign-in script; the public pages must not: keep only the styles. The one exception is an inline block marked `data-keep`
+  # (the home page's ~1.5 KB video player script and its JSON-LD): it imports nothing and touches no sign-in code.
+  find "$OUT" -name '*.html' -exec python3 -c "import re,sys;f=sys.argv[1];s=open(f).read();s=re.sub(r'<script[^>]*>.*?</script>',lambda m:m.group(0) if 'data-keep' in m.group(0).split('>')[0] else '',s,flags=re.S);open(f,'w').write(s)" {} \;
   # sitemap with the language alternates, so search engines pair each page with its translation
   python3 - "$OUT" <<'PY'
 import sys
