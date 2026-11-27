@@ -6,12 +6,28 @@ import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 
 /** Debug only: capabilities with every format ready and a request check whose answer is picked by a mode, so each sheet can be looked at without a server. */
-class FakeIntakeApi(private val deck: Boolean = false, private val mode: () -> String) : IntakeApi {
+class FakeIntakeApi(private val deck: Boolean = false, private val looksJson: ((String) -> String?)? = null, private val mode: () -> String) : IntakeApi {
+    /**
+     * `files/fake_looks`: the server's look picker (`looks.look` and `looks.cast`), read from the backend's own capabilities answer (debug assets `looks_en.json` / `looks_es.json`,
+     * made by `mobile/ios/scripts/gen_look_fixtures.py`). Its content picks a variant: "plan" (Cartoon needs the Pro plan), "hidden" (this stage has no Whiteboard), "minlen" (Whiteboard needs 30 s). Absent: an older server.
+     */
+    private fun lookPicker(): LookCaps? {
+        val variant = runCatching { java.io.File("/data/data/com.videomk.app/files/fake_looks").takeIf { it.exists() }?.readText()?.trim() }.getOrNull() ?: return null
+        val caps = runCatching { LookCaps.fromJson(parseObject(looksJson?.invoke(Txt.localeTag) ?: return null).obj("looks")) }.getOrNull() ?: return null
+        return when (variant) {
+            "plan" -> caps.copy(options = caps.options.map { if (it.id == "cartoon") it.copy(allowed = false, requiresPlan = "pro") else it })
+            "minlen" -> caps.copy(options = caps.options.map { if (it.id == "whiteboard") it.copy(minSeconds = 30.0) else it })
+            "hidden" -> caps.copy(options = caps.options.map { if (it.id == "whiteboard") it.copy(available = false) else it })
+            else -> caps
+        }
+    }
+
     /** The same `files/fake_plan` as the fake backend: "free" and "locked" cap the lengths at 30 s, lock 4K and fix the watermark; "pro" offers the watermark choices. */
     private val planMode: String get() = runCatching { java.io.File("/data/data/com.videomk.app/files/fake_plan").readText().trim() }.getOrDefault("")
     override suspend fun capabilities(): Capabilities {
         val free = planMode == "free" || planMode == "locked"
         return base().copy(
+            lookPicker = lookPicker(),
             resolutions = listOf(ResolutionInfo("720p", "720p"), ResolutionInfo("1080p", "1080p"), ResolutionInfo("2160p", "4K", 2, !free && planMode != "pro" && planMode.isNotEmpty() || planMode.isEmpty(), if (planMode.isEmpty()) null else "max")),
             looks = LooksCaps(
                 listOf(StyleOption("auto", "Auto", "We choose: photos and footage, with cartoon scenes only where they suit the topic."), StyleOption("cartoon", "Illustrated", "Adds animated cartoon scenes. Good for children's topics and simple ideas."),

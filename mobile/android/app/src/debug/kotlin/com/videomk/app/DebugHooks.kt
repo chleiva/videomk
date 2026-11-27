@@ -55,7 +55,7 @@ object DebugHooks {
     /** `files/fake_intake` holds a mode ("questions", "unsupported", "blocked", "paused", "slow", "ok"): fake capabilities (all formats ready) and a fake request check. */
     fun fakeIntake(context: android.content.Context): com.videomk.app.core.IntakeApi? {
         val f = java.io.File(context.filesDir, "fake_intake")
-        return if (f.exists()) FakeIntakeApi(deck = java.io.File(context.filesDir, "fake_deck").exists()) { runCatching { f.readText().trim() }.getOrDefault("ok") } else null
+        return if (f.exists()) FakeIntakeApi(deck = java.io.File(context.filesDir, "fake_deck").exists(), looksJson = { tag -> runCatching { context.assets.open("looks_$tag.json").use { it.readBytes().decodeToString() } }.getOrNull() }) { runCatching { f.readText().trim() }.getOrDefault("ok") } else null
     }
 
     /**

@@ -165,6 +165,8 @@ fun MakingBody(snapshot: MakingSnapshot, videoId: String?, ratio: Float, notifie
         Column(verticalArrangement = Arrangement.spacedBy(Vmk.space.s)) {
             Text(snapshot.title, style = MaterialTheme.typography.titleLarge, color = Vmk.colors.text, maxLines = 4, overflow = TextOverflow.Ellipsis, modifier = Modifier.semantics { heading() }.testTag("makingTitle"))
             LiveLine(snapshot.stageLine.trimEnd('.'), Vmk.colors.textSecondary, Vmk.colors.primary, style = MaterialTheme.typography.bodyLarge, announce = true)
+            // the chosen look was adapted: the server's one sentence, as sent, quietly
+            snapshot.note?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary, modifier = Modifier.testTag("lookNote")) }
         }
         if (snapshot.tiles.isNotEmpty()) {
             val scroll = rememberScrollState()
