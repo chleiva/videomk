@@ -17,7 +17,7 @@ def _chapters_text(chapters: List[Dict[str, Any]], language: str = "en") -> str:
     """YouTube needs the first chapter at 0:00, 3+ chapters, each >= 10 s."""
     ch = list(chapters)
     if ch and ch[0]["start"] > 0.5:
-        ch.insert(0, {"start": 0.0, "title": assets.LABELS.get(language, assets.LABELS["en"])["intro"]})
+        ch.insert(0, {"start": 0.0, "title": assets.labels(language)["intro"]})
     ch = [c for i, c in enumerate(ch) if i == 0 or c["start"] - ch[i - 1]["start"] >= 10]
     if len(ch) < 3:
         return ""

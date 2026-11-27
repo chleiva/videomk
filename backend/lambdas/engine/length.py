@@ -8,7 +8,11 @@ Three deterministic steps, in the order they run:
      writer delivered more beats than the length has room for. Nothing is ever added here.
   2. `tighten` (in the timeline, with the MEASURED audio): if the video would still run past the window, the silences around every spoken beat (0.40 s before,
      0.55 s after) are shortened evenly, down to a floor. The pace found is stored in the plan (`plan["pace"]`) so an edit keeps it.
-  3. `timeline.stretch_to` (already there): if the video would be shorter than asked, scenes are held a little longer.
+  3. `timeline.stretch_to` (already there): if the video would be shorter than asked, scenes are held a little longer: every spoken scene by the same amount,
+     never one long freeze on the last scene.
+  0. `extend_script` (before step 1, since 2026-11-27): a script estimated so short that step 3 would have to hold every scene longer than a moment is sent back
+     to the writer once to be lengthened, its existing sentences kept. The one step with a model call; it exists because a video is never shorter than asked,
+     and a video that reaches its length by standing still is not what was asked for either.
 The window is [asked, asked + 5 percent]: steps 1 and 2 aim inside it, step 3 guarantees its lower edge.
 """
 import re
@@ -18,7 +22,15 @@ from typing import Any, Dict, List, Optional, Tuple
 # 174 finished QA videos (Amy 1032 beats, Ruth 293, Lucia 414, Lupe 18). Mean error of the estimate per video: +1 percent, standard deviation 3 to 5 percent.
 RATES: Dict[str, Tuple[float, float, float]] = {
     "Amy": (0.0558, 0.309, 0.23), "Ruth": (0.0547, 0.351, 0.16), "Lucia": (0.0495, 0.378, 0.14), "Lupe": (0.0570, 0.311, 0.14),
+    # The default voice of each newer language (2026-11-27): the English shape scaled to what the voice really took for an explainer passage of about 70 words
+    # and, where a QA video exists, its four finished beats (fr, de, it, pt, pl: 51 to 58 s of speech each; nl, fi: the passage alone, 23 and 24 s). Before, one
+    # sentence a voice: the estimate was 4 percent long for Léa and 6 to 8 percent short for Vicki, Camila and Laura.
+    "Lea": (0.0482, 0.287, 0.17), "Vicki": (0.0548, 0.326, 0.20), "Bianca": (0.0584, 0.347, 0.21), "Camila": (0.0546, 0.325, 0.20),
+    "Laura": (0.0548, 0.326, 0.20), "Ola": (0.0559, 0.333, 0.20), "Suvi": (0.0578, 0.344, 0.21),
 }
+# WORDS a second of speech, per language (the default voice; the same passage and videos as above; English: the median of 174 QA videos). Characters predict
+# the time, words do not: French says 3.0 words a second and Finnish 1.9, so a budget counted in words must follow the language (engine/plan.words_per_s).
+WORDS_PER_S: Dict[str, float] = {"en": 2.63, "fr": 3.03, "de": 2.66, "it": 2.59, "pt": 3.09, "nl": 2.79, "pl": 2.37, "fi": 1.95}
 LANG_RATES: Dict[str, Tuple[float, float, float]] = {"en": (0.0555, 0.33, 0.20), "es": (0.0530, 0.345, 0.14)}   # a voice without its own fit
 # The four fitted voices say the catalogue's sentence 4 to 10 percent faster than their fits predict (Ruth 11.6 s against 12.3, Amy 12.0 / 12.5, Lucia 10.7 / 11.2,
 # Lupe 11.2 / 12.3: finished beats carry a little more silence than one clean sentence), so a rate derived from that sentence is raised by the median of the four.
@@ -46,6 +58,12 @@ def _measured(voice: str, lang: str) -> Optional[Tuple[float, float, float]]:
     text = voice_data.SAMPLE.get(v["language"]) if v else None
     if not v or not text or not v.get("sample_s"):
         return None
+    if v["language"] not in LANG_RATES:   # a newer language: its default voice has a fit; another voice of it is that fit, as much faster or slower as it said the catalogue's sentence
+        from . import voices
+        base = next((x for x in voice_data.VOICES if x["id"] == voices.default_voice(v["language"])), None)
+        if base and base["id"] in RATES and base.get("sample_s") and base["id"] != voice:
+            k = float(v["sample_s"]) / float(base["sample_s"])
+            return tuple(round(x * k, 5) for x in RATES[base["id"]])   # type: ignore[return-value]
     c, p, d = LANG_RATES.get(v["language"], LANG_RATES["en"])
     predicted = len(text) * c + len(_PUNCT.findall(text)) * p + len(_DIGIT.findall(text)) * d
     k = SAMPLE_CALIBRATION * float(v["sample_s"]) / predicted
@@ -198,6 +216,85 @@ def fit_script(plan: Dict[str, Any], target_seconds: float, *, min_beat_words: i
     room = spoken * ((lead - LEAD_FLOOR) + (tail - TAIL_FLOOR))   # what the pauses can still give back once the real audio is known
     rep["after"] = round(est, 1)
     rep["fits"] = est <= target * (1.0 + OVER) + room
+    return rep
+
+
+EXTEND_SYSTEM = (
+    "You lengthen the narration of a short explainer video that came out too short for the length its viewer asked for. You are given some of its beats, each with "
+    "the number of words to ADD. For each, return the narration with its existing sentences word for word, in the same order, and new sentences between or after "
+    "them (never before the first sentence of beat 1): an explanation, an example, a consequence or a comparison that follows from what the script already says. "
+    "No new numbers, names, dates or claims that the script does not already support; no filler, no recap, no greeting, no 'in this video'. Same language, same "
+    'tone, same reading level. Answer ONLY JSON: {"beats": [{"beat": <the number given>, "narration": "<the longer narration>"}]} with exactly the beats given.')
+EXTEND_FITTED = ("en", "es")   # not lengthened: their word budget and its repair in the plan step are fitted on 174 finished videos and they come out a little short by design (held 1 to 1.6 s a scene)
+EXTEND_AIM = 0.97        # a script lengthened by the model aims at this share of the length asked (the writer lands over what it is asked; `fit_script` cuts what is too much)
+
+
+def absorbable(plan: Dict[str, Any]) -> float:
+    """Seconds the timeline makes up by holding every spoken scene a little longer (timeline.MAX_SPOKEN_STRETCH each): a video short by no more than this
+    never shows a freeze. What is short beyond it was held on the last scene: the dead tail of the first French and Portuguese videos."""
+    from . import timeline
+
+    return timeline.MAX_SPOKEN_STRETCH * sum(1 for b in (plan.get("beats") or []) if isinstance(b, dict) and not b.get("silent"))
+
+
+def extend_script(plan: Dict[str, Any], target_seconds: float, ask: Any, *, max_beat_words: int = 70) -> Dict[str, Any]:
+    """The counterpart of `fit_script`, for every language whose word budget is not fitted on finished videos (all but EXTEND_FITTED): when the script is estimated so short that holding every scene a little longer cannot
+    reach the length asked (`absorbable`), the writer is asked ONCE to lengthen the beats, each by its share of the missing words; the existing sentences
+    stay word for word (what is tied to them, a board's items, stays tied). A beat's answer is taken only if it keeps every existing sentence, is longer and
+    within the beat's limit. IN PLACE. -> {"target", "before", "after", "short_by", "asked": beats sent, "extended": beats taken, "added_words"}; `asked` 0
+    when the script was long enough. Never raises: a failed call leaves the script as it was (the timeline then spreads the wait over the scenes)."""
+    import json
+
+    target = float(target_seconds or 0.0)
+    beats: List[Dict[str, Any]] = [b for b in (plan.get("beats") or []) if isinstance(b, dict)]
+    before = estimate_total(plan)
+    rep: Dict[str, Any] = {"target": round(target, 1), "before": round(before, 1), "after": round(before, 1), "short_by": round(max(0.0, target - before), 1), "asked": 0, "extended": 0, "added_words": 0}
+    spoken = [(i, b) for i, b in enumerate(beats) if not b.get("silent") and str(b.get("narration") or "").strip()]
+    lang = plan.get("language", "en")
+    if target <= 0 or not spoken or ask is None or target - before <= absorbable(plan) or str(lang or "en").lower()[:2] in EXTEND_FITTED:
+        return rep
+    need_s = target * EXTEND_AIM - before
+    total_s = sum(estimate_speech(b["narration"], lang, _voice_of(plan, b)) for _, b in spoken) or 1.0
+    rows, want = [], {}
+    for i, b in spoken:
+        words = len(b["narration"].split())
+        secs = estimate_speech(b["narration"], lang, _voice_of(plan, b))
+        add = min(int(round(need_s * (secs / total_s) * words / max(secs, 0.1))), max(0, max_beat_words - words))     # its share of the time, at its own words a second
+        if add >= 3:
+            want[i] = add
+            rows.append(f"Beat {i + 1}: add about {add} words (now {words}). Narration: {json.dumps(b['narration'], ensure_ascii=False)}")
+    if not rows:
+        return rep
+    rep["asked"] = len(rows)
+    try:
+        from . import voices
+
+        raw = ask(EXTEND_SYSTEM + f" The language is {voices.LANGUAGES.get(str(lang)[:2], 'English')}.",
+                  f"The video is asked to be {target:.0f} s long and its narration is about {target - before:.0f} s short.\n\n" + "\n\n".join(rows))
+        data = json.loads(raw[raw.index("{"): raw.rindex("}") + 1])
+        norm = lambda t: " ".join(str(t).split())      # noqa: E731
+        for row in data.get("beats") or []:
+            i = int(row.get("beat", 0)) - 1
+            new = norm(row.get("narration") or "")
+            if i not in want:
+                continue
+            old = norm(beats[i]["narration"])
+            pos, kept = 0, True
+            for sent in sentences(old):                 # every existing sentence, word for word, in order
+                at = new.find(sent, pos)
+                if at < 0:
+                    kept = False
+                    break
+                pos = at + len(sent)
+            n_old, n_new = len(old.split()), len(new.split())
+            if not kept or n_new <= n_old or n_new > max(max_beat_words, n_old) or n_new > n_old + int(1.5 * want[i]) + 4 or (i == 0 and not new.startswith(sentences(old)[0])):
+                continue
+            beats[i]["narration"] = new
+            rep["extended"] += 1
+            rep["added_words"] += n_new - n_old
+    except Exception as e:  # noqa: BLE001 - the script stands as it was
+        rep["error"] = f"{type(e).__name__}: {str(e)[:120]}"
+    rep["after"] = round(estimate_total(plan), 1)
     return rep
 
 

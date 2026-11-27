@@ -449,13 +449,28 @@ def _place(p: Dict[str, Any], used: Dict[Any, int], dry: bool = False) -> Tuple[
     return mine, moved, stuck
 
 
-def compose(beats: List[Dict[str, Any]]) -> Dict[str, int]:
+def _spoils(props_list: List[Dict[str, Any]], aspect: str, captions: bool) -> bool:
+    """Would the LAST beat of this shared board, laid out as the renderer will, overlap something or leave the board? (A board that cannot be laid out: yes.)"""
+    from .whiteboard import score
+
+    try:
+        d = score.defects(props_list, aspect, captions)
+    except Exception:  # noqa: BLE001 - the beat then gets its own board, which the renderer can always show
+        return True
+    mine = f"{len(props_list) - 1}:"
+    return any(str(a).startswith(mine) or str(c).startswith(mine) for a, c in d["overlaps"]) or any(str(j).startswith(mine) for j in d["off_board"])
+
+
+def compose(beats: List[Dict[str, Any]], aspect: Optional[str] = None, captions: bool = True) -> Dict[str, int]:
     """Which beats share a BOARD, decided when the script is final. The director marks a beat that goes on drawing on the previous beat's board ("board": "same");
     the engine keeps that when the board has room (BOARD_MAX_*), and ALSO keeps a beat on the board when the director started a new one although the board
     is not full yet (fewer than BOARD_FULL_SOLID things or BOARD_FULL_WORDS words): sparse boards were the main flaw of the first videos. Then, on each
     board, a drawing, text or chart whose zone an earlier item of the board already has moves to a free zone of the same shape (or a free single zone).
-    Deterministic, no model. -> {"boards", "shared": beats that continue a board, "merged": of those, decided by the engine, "rezoned": items moved}."""
-    stats = {"boards": 0, "shared": 0, "merged": 0, "rezoned": 0}
+    A free ZONE is not yet room: with `aspect` given the board is laid out as the renderer will (engine/whiteboard/score.defects), and a beat whose things
+    would overlap what is there, or leave the board, in the zones left for it gets its own board with the zones its author gave it (`split`).
+    Deterministic, no model. -> {"boards", "shared": beats that continue a board, "merged": of those, decided by the engine, "rezoned": items moved,
+    "split": beats given their own board because they did not fit the shared one}."""
+    stats = {"boards": 0, "shared": 0, "merged": 0, "rezoned": 0, "split": 0}
     cur: List[Dict[str, Any]] = []           # the props of the beats on the current board
     words = solid = 0
     used: Dict[Any, int] = {}
@@ -482,14 +497,27 @@ def compose(beats: List[Dict[str, Any]]) -> Dict[str, int]:
             cur, words, solid, used = [], 0, 0, {}
             stats["boards"] += 1
         # zones: one drawing or text per zone on the whole board (two drawings of the SAME beat may share one: they are laid side by side)
-        mine, moved, stuck = _place(p, used, dry=True)
-        if stuck and cur and p.get("board") == "same":            # the board has no free zone left for what this beat adds: the board is full, whatever its counts say
-            p.pop("board", None)
-            stats["shared"] -= 1
-            stats["merged"] -= 0 if asked else 1
-            cur, words, solid, used = [], 0, 0, {}
-            stats["boards"] += 1
-        mine, moved, stuck = _place(p, used)
+        placed = None
+        if cur and p.get("board") == "same":
+            zones0 = [(it, it.get("zone")) for it in p.get("items") or []]
+            _, _, stuck = _place(p, used, dry=True)
+            full = bool(stuck)                                    # no free zone left for what this beat adds: the board is full, whatever its counts say
+            if not full:
+                placed = _place(p, used)
+                if aspect and _spoils(cur + [p], aspect, captions):       # the zones were free, the room was not (a list in a corner, a title squeezed into one zone)
+                    full = True
+                    stats["split"] += 1
+                    for it, z in zones0:                          # on its own board it keeps the places its author gave it
+                        if z is not None:
+                            it["zone"] = z
+            if full:
+                placed = None
+                p.pop("board", None)
+                stats["shared"] -= 1
+                stats["merged"] -= 0 if asked else 1
+                cur, words, solid, used = [], 0, 0, {}
+                stats["boards"] += 1
+        mine, moved, stuck = placed if placed is not None else _place(p, used)
         stats["rezoned"] += moved
         for c, v in mine.items():
             used[c] = used.get(c, 0) + v
@@ -498,6 +526,142 @@ def compose(beats: List[Dict[str, Any]]) -> Dict[str, int]:
         solid += n_solid
         prev_i = i
     return stats
+
+
+_SMALLER = {"xl": "l", "l": "m", "m": "s", "s": "xs"}
+
+
+def untangle(props_list: List[Dict[str, Any]], aspect: str = "16:9", captions: bool = True) -> Dict[str, int]:
+    """The last resort for ONE board (the props of the beats that share it) whose drawings, texts or charts still overlap or leave the board after everything
+    else: it is never shown like that. Until the renderer's own layout (score.defects) finds nothing, one thing at a time, the later of two that overlap or
+    the one that leaves the board: (1) it moves to a zone nothing on the board has (a text of several lines or words to a free wide zone first), at most
+    twice; (2) it is made one size smaller, down to the smallest; (3) it is taken off the board with its label, arrows and marks (never a beat's last thing:
+    then its partner goes, and a thing alone that still does not fit is given the whole board). Every step removes room for a clash and the steps are
+    finite, so this ends. The narration is not touched. -> {"moved", "smaller", "dropped", "left": defects it could not undo (0 unless the layout fails)}."""
+    from .scenes.elements import whiteboard as wbe
+    from .whiteboard import score
+
+    out = {"moved": 0, "smaller": 0, "dropped": 0, "left": 0}
+    multi = len(props_list) > 1
+    moves: Dict[str, int] = {}
+    tried: Dict[str, set] = {}
+
+    def find(name: str) -> Tuple[Dict[str, Any], Optional[Dict[str, Any]]]:
+        j, iid = (int(name.split(":", 1)[0]), name.split(":", 1)[1]) if multi and ":" in name else (0, name)
+        return props_list[j], next((it for it in props_list[j].get("items") or [] if it.get("id") == iid), None)
+
+    def drop(p: Dict[str, Any], iid: str) -> None:
+        gone = {iid}
+        while True:
+            more = {it["id"] for it in p["items"] if it["id"] not in gone and (it.get("near") in gone or it.get("on") in gone or it.get("from") in gone or it.get("to") in gone)}
+            if not more:
+                break
+            gone |= more
+        p["items"] = [it for it in p["items"] if it["id"] not in gone]
+
+    for _ in range(80):
+        try:
+            d = score.defects(props_list, aspect, captions)
+        except Exception:  # noqa: BLE001 - a board that cannot be laid out is shown as a plain card by the renderer
+            break
+        out["left"] = len(d["overlaps"]) + len(d["off_board"])
+        if not out["left"]:
+            break
+        pair = [d["off_board"][0]] if d["off_board"] else list(reversed(d["overlaps"][0]))       # the later thing first
+        done = False
+        for name in pair:                                                                         # gentle steps: move, then smaller
+            p, it = find(name)
+            if it is None:
+                continue
+            if it.get("zone") and not it.get("near") and moves.get(name, 0) < 2:
+                taken = {c for q in props_list for o in q.get("items") or [] if o is not it and o.get("zone") and not o.get("near") for c in _cells(o["zone"])}
+                wide = bool(it.get("write")) and ("\n" in it["write"] or len(it["write"]) > 12)
+                order = (wbe.SPANS + wbe.ZONES) if wide else wbe.ZONES
+                z = next((z for z in order if len(_cells(z)) <= (2 if wide else 1) and z != it["zone"] and z not in tried.get(name, set()) and not any(c in taken for c in _cells(z))), None)
+                if z is not None:
+                    tried.setdefault(name, set()).add(z)
+                    moves[name] = moves.get(name, 0) + 1
+                    it["zone"] = z
+                    out["moved"] += 1
+                    done = True
+                    break
+            size = it.get("size") or ("l" if it.get("draw") and not it.get("near") else "m")
+            if size in _SMALLER and not it.get("chart"):
+                it["size"] = _SMALLER[size]
+                out["smaller"] += 1
+                done = True
+                break
+        if done:
+            continue
+        for name in pair:                                                                         # then it goes
+            p, it = find(name)
+            if it is not None and sum(1 for o in p["items"] if _solid(o) and not o.get("near")) > 1 or (it is not None and it.get("near")):
+                drop(p, it["id"])
+                out["dropped"] += 1
+                done = True
+                break
+        if done:
+            continue
+        p, it = find(pair[0])                                                                     # a thing alone on its beat that still does not fit
+        if it is None or it.get("zone") == "full":
+            break
+        it.pop("near", None)
+        it.pop("side", None)
+        it["zone"] = "full"
+        out["moved"] += 1
+    else:
+        return out
+    try:
+        d = score.defects(props_list, aspect, captions)
+        out["left"] = len(d["overlaps"]) + len(d["off_board"])
+    except Exception:  # noqa: BLE001
+        pass
+    return out
+
+
+def make_safe(plan: Dict[str, Any], aspect: str = "16:9") -> Dict[str, Any]:
+    """Every board of the plan whose things overlap or leave the board is made safe. A SHARED board first loses the last beat involved, which gets a board of
+    its own (`split`: a fresh board is the room it lacked, and nothing is lost); a board that is one beat's, or whose first beat is the trouble, goes through
+    `untangle`. -> the totals, and `boards`: the numbers (as scored before) of the boards changed."""
+    from .whiteboard import score
+
+    beats = plan.get("beats") or []
+    captions = bool(plan.get("captions", True))
+    tot: Dict[str, Any] = {"split": 0, "moved": 0, "smaller": 0, "dropped": 0, "left": 0, "boards": []}
+    first_of = {g[0]: bi + 1 for bi, g in enumerate(score.boards_of(beats)) for _ in g}
+    number = lambda g: max(n for i0, n in first_of.items() if i0 <= g[0])      # noqa: E731 - the board this group was part of when the plan was scored
+    given_up: set = set()
+    for _ in range(4 * max(1, len(beats))):
+        changed = False
+        for g in score.boards_of(beats):
+            if g[0] in given_up:
+                continue
+            props_list = [beats[i]["scene"]["props"] for i in g]
+            try:
+                d = score.defects(props_list, aspect, captions)
+            except Exception:  # noqa: BLE001 - shown as a plain card by the renderer
+                continue
+            names = [str(x) for pair in d["overlaps"] for x in pair] + [str(x) for x in d["off_board"]]
+            if not names:
+                continue
+            if number(g) not in tot["boards"]:
+                tot["boards"].append(number(g))
+            j = max(int(n.split(":", 1)[0]) for n in names) if len(g) > 1 else 0
+            if j >= 1:
+                props_list[j].pop("board", None)
+                tot["split"] += 1
+            else:
+                r = untangle(props_list, aspect, captions)
+                for k in ("moved", "smaller", "dropped"):
+                    tot[k] += r[k]
+                if r["left"]:
+                    tot["left"] += r["left"]
+                    given_up.add(g[0])
+            changed = True
+            break
+        if not changed:
+            break
+    return tot
 
 
 def _renamed(items: List[Dict[str, Any]], j: int, ties: bool = True) -> List[Dict[str, Any]]:
@@ -672,7 +836,7 @@ def settle(plan: Dict[str, Any], policy: Optional[Policy]) -> List[str]:
     if policy is None or not policy.allowed:
         return []
     tot = {"moved": 0, "retied": 0, "untied": 0, "marks_added": 0}
-    boards = compose(plan.get("beats") or [])
+    boards = compose(plan.get("beats") or [], policy.aspect, bool(plan.get("captions", True)))
     for b in plan.get("beats") or []:
         sc = b.get("scene") or {}
         if sc.get("type") != "whiteboard" or not isinstance(sc.get("props"), dict):
@@ -680,8 +844,9 @@ def settle(plan: Dict[str, Any], policy: Optional[Policy]) -> List[str]:
         for k, v in retie(sc["props"], str(b.get("narration") or "")).items():
             tot[k] += v
         tot["marks_added"] += keep_busy(sc["props"], str(b.get("narration") or ""))
-    plan.setdefault("whiteboard", policy.summary()).update(tot, panels=boards["boards"], beats_sharing_a_board=boards["shared"], rezoned=boards["rezoned"])
-    return [f"whiteboard: {boards['boards']} board(s) for {boards['boards'] + boards['shared']} beats ({boards['merged']} kept on a board by the engine, {boards['rezoned']} item(s) moved to a free zone); "
+    plan.setdefault("whiteboard", policy.summary()).update(tot, panels=boards["boards"], beats_sharing_a_board=boards["shared"], rezoned=boards["rezoned"], split_for_room=boards["split"])
+    return [f"whiteboard: {boards['boards']} board(s) for {boards['boards'] + boards['shared']} beats ({boards['merged']} kept on a board by the engine, {boards['rezoned']} item(s) moved to a free zone, "
+            f"{boards['split']} beat(s) given a board of their own for lack of room); "
             f"{tot['retied']} tie(s) moved to words still said, {tot['untied']} dropped, {tot['marks_added']} emphasis mark(s) added"]
 
 
@@ -740,7 +905,7 @@ def review(plan: Dict[str, Any], policy: Optional[Policy], ask: Optional[Callabl
                     trial["beats"][i]["scene"]["props"] = {**props, **{f: old[f] for f in ("hand", "tool") if f in old and f not in props}}
                     done += 1
                 if done:
-                    compose(trial["beats"])
+                    compose(trial["beats"], policy.aspect, bool(plan.get("captions", True)))
                     for i in want:
                         b = trial["beats"][i]
                         retie(b["scene"]["props"], str(b.get("narration") or ""))
@@ -751,20 +916,27 @@ def review(plan: Dict[str, Any], policy: Optional[Policy], ask: Optional[Callabl
                     info.update(replanned=True, beats=[i + 1 for i in want], second=second, kept="new" if took else "first")
                     print("WHITEBOARD_SCORE " + json.dumps({"pass": 2, **second, "kept": info["kept"], "complaints": [c for s in again if not s["ok"] for c in s["complaints"]][:12]}, ensure_ascii=False))
                     if took:
-                        for i, b in enumerate(beats):                     # `compose` may have regrouped: the flags of the trial are the truth
-                            if (b.get("scene") or {}).get("type") != "whiteboard":
-                                continue
-                            same = trial["beats"][i]["scene"]["props"].get("board") == "same"
-                            if i in want:
+                        # `compose` regrouped the trial AND moved things of beats that were not written again (a beat now sharing a rewritten board got
+                        # free zones on it). The whole trial board is what was scored, so the whole of it is taken: taking only the flag put a beat on a
+                        # board with the zones it had on its own one, on top of what was there (the first Polish video, 19 to 32 s).
+                        for i, b in enumerate(beats):
+                            if (b.get("scene") or {}).get("type") == "whiteboard" and (trial["beats"][i].get("scene") or {}).get("type") == "whiteboard":
                                 b["scene"] = trial["beats"][i]["scene"]
-                            b["scene"]["props"].pop("board", None)
-                            if same:
-                                b["scene"]["props"]["board"] = "same"
                         scores = again
                     notes.append(f"whiteboard self-check: {len(failed)} board(s) failed, written again once; kept the {'new' if took else 'first'} boards ({second['failed']} failing now)")
             except Exception as e:  # noqa: BLE001 - the repair is a bonus: the first boards stand
                 logging.warning("whiteboard review: repair failed (%s: %s)", type(e).__name__, str(e)[:200])
                 info["error"] = f"{type(e).__name__}: {str(e)[:120]}"
+        # Whatever happened above (no repair, a repair kept or thrown away, a repair that broke): a board whose things overlap or leave the board is never
+        # shipped as it is. What is recorded below is the score of the boards that ship.
+        if any(s.get("overlaps") or s.get("off_board") for s in scores):
+            safe = make_safe(plan, policy.aspect)
+            if safe["boards"]:
+                scores = score.score_plan(plan, policy.aspect)
+                info["made_safe"] = safe
+                print("WHITEBOARD_SCORE " + json.dumps({"pass": "safe", **score.summary(scores), **{k: safe[k] for k in ("split", "moved", "smaller", "dropped", "left")}}, ensure_ascii=False))
+                notes.append(f"whiteboard self-check: board(s) {', '.join(map(str, safe['boards']))} still had things overlapping or off the board: {safe['split']} beat(s) given a board of "
+                             f"their own, {safe['moved']} thing(s) moved to a free zone, {safe['smaller']} made smaller, {safe['dropped']} taken off")
         final = score.summary(scores)
         plan.setdefault("whiteboard", policy.summary())["score"] = {**final, **{k: v for k, v in info.items() if k != "first"}, "first": first,
                                                                     "boards_detail": [{k: v for k, v in s.items() if k not in ("overlaps", "crossed", "off_board", "late")} for s in scores]}

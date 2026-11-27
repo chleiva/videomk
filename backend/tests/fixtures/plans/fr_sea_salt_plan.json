@@ -1,0 +1,62 @@
+{
+ "_note": "The plan of the first fr QA video (2026-11-27, c5e1ee3), asked for 45 s: its narration and the measured speech of each beat (`_speech_s`). The narration ended 34.8 s into a 45.4 s video; the last scene was held 18.7 s. Used by tests/test_length_fit.py.",
+ "language": "fr",
+ "voices": {
+  "narrator": "Lea"
+ },
+ "target_seconds": 45,
+ "_speech_s": [
+  6.69,
+  6.25,
+  6.08,
+  7.71
+ ],
+ "_scene_s": [
+  9.24,
+  8.8,
+  8.63,
+  18.73
+ ],
+ "beats": [
+  {
+   "id": "a3433a96",
+   "narration": "Pourquoi la mer est-elle salée, alors que l'eau des rivières ne l'est pas ? Tout commence par la pluie, qui tombe sur les roches.",
+   "scene": {
+    "type": "title",
+    "props": {
+     "title": "x"
+    }
+   }
+  },
+  {
+   "id": "aafd0310",
+   "narration": "Elle dissout peu à peu les minéraux. Les rivières emportent ces sels, très dilués, jusqu'à l'océan.",
+   "scene": {
+    "type": "title",
+    "props": {
+     "title": "x"
+    }
+   }
+  },
+  {
+   "id": "c513e637",
+   "narration": "Là, le soleil évapore l'eau, mais le sel reste. Année après année, il s'accumule.",
+   "scene": {
+    "type": "title",
+    "props": {
+     "title": "x"
+    }
+   }
+  },
+  {
+   "id": "85564821",
+   "narration": "Résultat : 30 à 40 grammes de sel par kilo d'eau. La mer est salée parce que les rivières lui apportent du sel depuis des millions d'années.",
+   "scene": {
+    "type": "title",
+    "props": {
+     "title": "x"
+    }
+   }
+  }
+ ]
+}

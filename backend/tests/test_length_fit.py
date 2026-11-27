@@ -249,3 +249,116 @@ def test_the_director_leaves_a_script_of_the_right_length_alone():
     out = director.direct("how tides work", minutes=0.5, ask_small=_ask_small(["explainer-education"]), ask_big=_big(texts), language="en")
     assert "length" not in out["research"] and [b["narration"] for b in out["plan"]["beats"]] == texts
     assert not any(w.startswith("length:") for w in out["warnings"])
+
+
+# ------------------------------------------------------------------ other languages: the dead tail of the first French and Portuguese videos (2026-11-27)
+import os  # noqa: E402
+
+PLANS = os.path.join(os.path.dirname(__file__), "fixtures", "plans")
+MORE = {"fr": "Et c'est exactement ce que l'on observe encore aujourd'hui, partout sur la planète, année après année.",
+        "pt": "E é exatamente isso que ainda observamos hoje, em todo o planeta, ano após ano, sem exceção."}
+
+
+def _writer(lang, texts, seen=None):
+    """A writer that does what it is asked: every beat keeps its sentences and gets one more, of about the number of words asked for."""
+    import re
+
+    def ask(system, user):
+        if seen is not None:
+            seen.append((system, user))
+        want = {int(i): int(n) for i, n in re.findall(r"Beat (\d+): add about (\d+) words", user)}
+        return json.dumps({"beats": [{"beat": i, "narration": texts[i - 1] + " " + " ".join(MORE[lang].rstrip(".").split()[:n]) + "."} for i, n in want.items()]}, ensure_ascii=False)
+    return ask
+
+
+def _qa(name):
+    with open(os.path.join(PLANS, f"{name}_plan.json"), encoding="utf-8") as f:
+        return json.load(f)
+
+
+def _narration_end(tl, plan, speech):
+    last = len(plan["beats"]) - 1
+    return tl["scenes"][last]["start"] + tl["scenes"][last]["narration_offset"] + speech[last]["duration"]
+
+
+def test_the_word_budget_follows_the_language():
+    """89 words make 45 s in English. Léa says 3.03 words a second and Suvi 1.95: the same 89 words are 29 s of French and 46 s of Finnish."""
+    en = plan_mod.expected_words(0.75)
+    assert en == plan_mod.expected_words(0.75, 0, "en") == plan_mod.expected_words(0.75, 0, "es") == 89 and plan_mod.words_per_s("es") == plan_mod.SPOKEN_WORDS_PER_S   # as they were
+    w = {lang: plan_mod.expected_words(0.75, 0, lang) for lang in ("fr", "de", "it", "pt", "nl", "pl", "fi")}
+    assert w["pt"] > w["fr"] >= 100 and w["fi"] < w["pl"] < en <= w["de"] <= en + 3 and w["nl"] > en
+    assert all(plan_mod.expected_words(m, 0, "fr") > plan_mod.expected_words(m) > plan_mod.expected_words(m, 0, "fi") for m in (0.25, 0.5, 1, 2, 5))
+    fr = _qa("fr_sea_salt")
+    assert plan_mod.spoken_words(fr["beats"]) == 81
+    assert plan_mod.length_problem(fr, 0.75) is None                                              # counted as English it passed: 81 of 89 words
+    assert "needs about %d words" % w["fr"] in plan_mod.length_problem(fr, 0.75, 0, "fr")         # counted as French it is sent back to the writer
+    assert f"(about {w['fr']})" in plan_mod.build_user_prompt("Pourquoi la mer est salée", "", 0.75, language="fr") and "(about 89)" in plan_mod.build_user_prompt("Why is the sea salty", "", 0.75)
+
+
+@pytest.mark.parametrize("name", ["fr_sea_salt", "pt_moon_phases"])
+def test_the_estimate_of_a_new_voice_is_within_five_percent_of_the_real_video(name):
+    plan = _qa(name)
+    est = sum(L.estimate_speech(b["narration"], plan["language"], plan["voices"]["narrator"]) for b in plan["beats"])
+    assert est == pytest.approx(sum(plan["_speech_s"]), rel=0.05)
+    assert L.estimate_total(plan) < 45 - L.absorbable(plan) - 2.5                                 # and it says, before any voice is made, that this script is far too short
+
+
+@pytest.mark.parametrize("name", ["fr_sea_salt", "pt_moon_phases"])
+def test_a_script_too_short_is_lengthened_once_and_the_narration_then_fills_the_video(name):
+    plan = _qa(name)
+    lang = plan["language"]
+    old = [b["narration"] for b in plan["beats"]]
+    asked = []
+    rep = L.extend_script(plan, 45, _writer(lang, old, asked), max_beat_words=plan_mod.MAX_BEAT_WORDS)
+    assert len(asked) == 1 and asked[0][0].startswith("You lengthen") and ("French" if lang == "fr" else "Portuguese") in asked[0][0] and "add about" in asked[0][1]
+    assert rep["asked"] == 4 and rep["extended"] == 4 and rep["added_words"] >= 25 and rep["before"] < 35 and 45 - L.absorbable(plan) <= rep["after"] <= 45 * 1.05
+    assert all(b["narration"].startswith(o) for b, o in zip(plan["beats"], old))                  # nothing said before is lost or moved
+    speech = _speech(plan)
+    tl = build_timeline(plan, speech, video_id="v", fit_seconds=45, min_seconds=45)
+    assert 45 <= tl["duration"] <= 45 * 1.05 + 0.01 and tl["duration"] - _narration_end(tl, plan, speech) <= 1.4 + 0.55 + T.MAX_SPOKEN_STRETCH + 0.01   # ends as an English video does
+    assert L.extend_script(plan, 45, lambda s, u: (_ for _ in ()).throw(AssertionError("long enough now")))["asked"] == 0
+    # an answer that rewrites what was said, or says nothing usable, or fails: the script stays as it was
+    for bad in (json.dumps({"beats": [{"beat": 1, "narration": "Tout autre chose, sans rapport avec le texte d'origine, bien plus long que lui."}]}), "non", None):
+        again = _qa(name)
+        r = L.extend_script(again, 45, (lambda s, u: bad) if bad is not None else (lambda s, u: (_ for _ in ()).throw(RuntimeError("down"))))
+        assert r["asked"] == 4 and r["extended"] == 0 and [b["narration"] for b in again["beats"]] == old
+    english = dict(_qa(name), language="en", voices={"narrator": "Ruth"})                         # English and Spanish keep the behaviour their tests describe
+    assert L.extend_script(english, 45, lambda s, u: (_ for _ in ()).throw(AssertionError("not asked")))["asked"] == 0
+
+
+@pytest.mark.parametrize("name", ["fr_sea_salt", "pt_moon_phases"])
+def test_a_video_that_is_still_short_never_freezes_on_its_last_scene(name):
+    """The guard for any language, with the measured audio: the real speech of the two QA videos, script as it was. Never shorter than asked (the promise);
+    the wait is shared by every scene instead of 8 to 11 s on the last picture."""
+    plan = _qa(name)
+    speech = [{"duration": s} for s in plan["_speech_s"]]
+    tl = build_timeline(plan, speech, video_id="v", fit_seconds=45, min_seconds=45)
+    assert 45 <= tl["duration"] <= 45 * 1.05 + 0.01
+    held = [sc["duration"] - (T.LEAD + s["duration"] + T.TAIL) - (T.END_HOLD if i == 3 else 0.0) for i, (sc, s) in enumerate(zip(tl["scenes"], speech))]
+    was = plan["_scene_s"][3] - (T.LEAD + speech[3]["duration"] + T.TAIL + T.END_HOLD)
+    assert was > 5.5 and max(held) - min(held) < 0.01 and max(held) < was - 3.5                    # 8.7 s (fr) and 6.0 s (pt) on the last scene before; the same on every scene now
+    assert _narration_end(tl, plan, speech) > sum(plan["_scene_s"][:3]) + T.LEAD + speech[3]["duration"] + 3.5      # the voice ends that much later in the video
+    d, s = [10.0, 10.0, 10.0], [False, False, False]
+    assert T.stretch_to(d, s, 36.5) == pytest.approx([11.6, 11.6, 10.0 + 1.6 + 2.1])                  # a moment at the end (2.5 s or less) stays at the end, as before
+    even = T.stretch_to(d, s, 40)
+    assert even[0] == even[1] == even[2] and sum(even) == pytest.approx(40.4)                      # more than a moment is shared
+
+
+def test_the_director_lengthens_a_short_french_script(monkeypatch):
+    monkeypatch.setenv("VIDEO_LANGUAGES", "en,es,fr")
+    fr = _qa("fr_sea_salt")
+    texts = [b["narration"] for b in fr["beats"]]
+    calls = []
+
+    def big(system, user):
+        calls.append(system[:12])
+        if system.startswith("You lengthen"):
+            return _writer("fr", texts)(system, user)
+        return json.dumps({"legit": True, "title": "Pourquoi la mer est salée", "description": "d", "mood": "calm", "theme": "midnight", "voices": {"narrator": {}},
+                           "beats": [{"narration": t, "scene": {"type": "title", "props": {"title": "x"}}} for t in texts]}, ensure_ascii=False)
+
+    out = director.direct("Pourquoi la mer est-elle salée ?", minutes=0.75, ask_small=_ask_small(["explainer-education"]), ask_big=big, language="fr")
+    ext = out["research"]["length_extended"]
+    assert calls.count("You lengthen") == 1 and ext["extended"] >= 3 and ext["before"] < 34 and ext["after"] >= 45 - 6.4
+    assert any(w.startswith("length: estimated") and "lengthened" in w for w in out["warnings"])
+    assert L.estimate_total(out["plan"]) >= 45 - L.absorbable(out["plan"]) - 0.1 and all(t.split(".")[0] in " ".join(b["narration"] for b in out["plan"]["beats"]) for t in texts)

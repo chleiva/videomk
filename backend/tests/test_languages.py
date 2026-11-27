@@ -196,7 +196,12 @@ def test_every_voice_has_a_measured_pace_and_the_fitted_voices_keep_their_fit():
         if v["id"] in length.RATES:
             continue
         est = length.estimate_speech(voice_data.SAMPLE[v["language"]], v["language"], v["id"])
-        assert est == pytest.approx(v["sample_s"] * length.SAMPLE_CALIBRATION, rel=0.01), v["id"]         # the estimate reproduces the one sentence the voice was heard saying
+        if v["language"] in ("en", "es", "ko"):
+            assert est == pytest.approx(v["sample_s"] * length.SAMPLE_CALIBRATION, rel=0.01), v["id"]     # the estimate reproduces the one sentence the voice was heard saying
+        else:   # a newer language: its default voice is fitted on a long passage and real beats (length.RATES); the others are that fit, as much faster or slower as they said the sentence
+            base = next(x for x in voice_data.VOICES if x["id"] == voices.default_voice(v["language"]))
+            assert base["id"] in length.RATES
+            assert est == pytest.approx(length.estimate_speech(voice_data.SAMPLE[v["language"]], v["language"], base["id"]) * v["sample_s"] / base["sample_s"], rel=0.01), v["id"]
     assert length.rate_for("fr") == length.rate_for("fr", "Lea") and length.rate_for("xx") == length.LANG_RATES["en"]
     assert length.estimate_speech("Bonjour à tous.", "fr", "Florian") < length.estimate_speech("Bonjour à tous.", "fr", "Lea")   # Florian speaks faster than Léa
     # sentences are cut at capitals of every Latin alphabet (a Polish sentence opening with Ś or Ł is a sentence)
@@ -224,6 +229,26 @@ def test_research_and_the_closing_card_follow_the_language():
     assert tl["scenes"][-1]["props"]["title"] == "Erstellt mit VideoMK"
 
 
+def test_the_description_labels_are_in_the_language_of_the_video():
+    """"Sources:" stood in English under a French description. Every language a video can be made in has its three fixed words."""
+    from engine import assets
+    from engine.handlers import finalize_handler
+
+    assert set(voices.LANGUAGES) <= set(assets.LABELS) and all(set(v) == {"credits", "sources", "intro"} and all(v.values()) for v in assets.LABELS.values())
+    want = {"en": "Sources:", "es": "Fuentes:", "fr": "Sources :", "de": "Quellen:", "it": "Fonti:", "pt": "Fontes:", "nl": "Bronnen:", "pl": "Źródła:", "fi": "Lähteet:"}
+    assert set(want) == set(voices.READY)
+    ledger = [{"attribution": "Photo by Ana on Unsplash", "landing_url": "https://unsplash.com/x"}]
+    sources = [{"title": "Tide", "publisher": "Wikipedia", "url": "https://en.wikipedia.org/wiki/Tide"}]
+    chapters = [{"start": 4.0, "title": "A"}, {"start": 20.0, "title": "B"}, {"start": 40.0, "title": "C"}]
+    for lang, word in want.items():
+        block = assets.credits_block(ledger, sources, lang).splitlines()
+        assert block[0] == assets.LABELS[lang]["credits"] and block[2] == word and "Photo by Ana on Unsplash" in block[1], lang
+        assert finalize_handler._chapters_text(chapters, lang).splitlines()[0] == "0:00 " + assets.LABELS[lang]["intro"]
+        assert lang == "en" or (assets.LABELS[lang]["sources"] != "Sources:" and assets.LABELS[lang]["credits"] != "Image credits:"), lang
+    assert len({v["sources"] for v in assets.LABELS.values()}) == len(assets.LABELS)              # no language shows another's word
+    assert assets.labels("pt-BR") == assets.LABELS["pt"] and assets.labels(None) == assets.labels("xx") == assets.LABELS["en"]
+
+
 # ================================================================= fonts: every letter of every language, in every bundled font
 def _missing(font, text):
     """The characters this font has no glyph for: they draw as the font's own "missing" box."""
@@ -243,6 +268,47 @@ def test_every_font_draws_every_letter_of_the_language(lang):
         font = ImageFont.truetype(os.path.join(ASSETS, rel), 48)
         assert _missing(font, "☃") or True                                               # (the check itself is proved below)
         assert _missing(font, PANGRAM[lang] + voice_data.SAMPLE[lang] + PANGRAM[lang].upper() + language.made_with(lang)) == "", (lang, rel)
+
+
+def _letters(lang):
+    """Everything the language writes: its pangram in both cases, its sample sentence, its closing-card line."""
+    return sorted({c for c in PANGRAM[lang] + PANGRAM[lang].upper() + voice_data.SAMPLE[lang] + language.made_with(lang) if not c.isspace()})
+
+
+@pytest.mark.parametrize("lang", voices.READY)
+@pytest.mark.parametrize("hand_name", ["neat", "casual"])
+def test_the_pen_has_strokes_for_every_letter_of_the_language(lang, hand_name):
+    """The font having a letter is not enough on a whiteboard: the pen writes from the STROKE tables (assets/whiteboard/glyphs_*.json). A letter missing there
+    was a gap of the wrong width that the pen never traced ("sł ońce")."""
+    from engine.whiteboard import hand
+
+    table = hand._table(hand_name)["glyphs"]
+    font = ImageFont.truetype(hand.HANDS[hand_name]["font"], 1000)
+    lacking = "".join(c for c in _letters(lang) if c not in table or not table[c]["strokes"])
+    assert lacking == "", (lang, hand_name, lacking)
+    for c in _letters(lang):
+        g = hand.glyph(c, hand_name)
+        assert not g.get("missing") and abs(g["adv"] - font.getlength(c) / 1000) < 0.01, (lang, hand_name, c)            # the font's own advance: no gap
+
+
+@pytest.mark.parametrize("hand_name", ["neat", "casual"])
+def test_a_letter_without_strokes_is_still_written_at_its_own_width(hand_name, monkeypatch):
+    """Whatever the tables lack (a sign, a letter of a language added later): the font's advance, a pen path over its ink, and the word is drawn."""
+    from engine.whiteboard import hand
+
+    table = hand._table(hand_name)
+    full = hand.layout("słońce", hand_name, 120.0)
+    monkeypatch.setitem(hand._TABLES, hand_name, dict(table, glyphs={k: v for k, v in table["glyphs"].items() if k not in "łńĄŻ"}))
+    hand._FALLBACK.clear()
+    g = hand.glyph("ł", hand_name)
+    assert g["missing"] and abs(g["adv"] - table["glyphs"]["ł"]["adv"]) < 0.01 and g["strokes"]
+    xs = np.concatenate(g["strokes"])[:, 0]
+    assert xs.min() > -0.2 and xs.max() < g["adv"] + 0.2                                    # the pen stays on the letter
+    cut = hand.layout("słońce", hand_name, 120.0)
+    assert abs(cut["w"] - full["w"]) < 0.02 * full["w"]                                     # the word is as wide as with the table: no "sł ońce"
+    only = hand.layout("ĄŻ", hand_name, 120.0)["words"][0]                                  # a word made only of such letters
+    r = hand.raster_word(only, (0.0, 0.0), hand_name, "marker", 120.0, 1.0)
+    assert r is not None and (r["alpha"] > 0.5).sum() > 500 and ((r["T"] <= 1.0) & (r["alpha"] > 0.5)).sum() > 0.6 * (r["alpha"] > 0.5).sum()   # drawn, and the pen uncovers it
 
 
 def test_the_glyph_check_sees_a_missing_letter_and_korean_is_why_it_is_not_ready():
