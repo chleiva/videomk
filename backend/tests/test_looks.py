@@ -136,7 +136,7 @@ def test_square_videos_take_landscape_scenes_and_4_5_takes_tall_ones_and_turbine
 
 # ---------------------------------------------------------------- capabilities
 def _caps(monkeypatch, locale="en", **env):
-    for k in ("VECTOR_SCENES", "BG_ANIMATED", "BG_LOOPS", "WATERMARK_ENABLED"):
+    for k in ("VECTOR_SCENES", "BG_ANIMATED", "BG_LOOPS", "WATERMARK_ENABLED", "WHITEBOARD"):
         monkeypatch.delenv(k, raising=False)
     for k, v in env.items():
         monkeypatch.setenv(k, v)
@@ -148,22 +148,27 @@ def _caps(monkeypatch, locale="en", **env):
 
 def test_capabilities_lists_the_looks_of_this_stage(monkeypatch):
     off = _caps(monkeypatch)
-    assert off["style"]["param"] == "style" and off["style"]["default"] == "auto" and [o["id"] for o in off["style"]["options"]] == ["auto", "cartoon", "real"]
-    assert [o["available"] for o in off["style"]["options"]] == [True, False, True] and off["backgrounds"] == {"animated": False, "loops_3d": False, "chosen_by": "director", "note": off["backgrounds"]["note"], "ask": []}
+    assert off["style"]["param"] == "style" and off["style"]["default"] == "auto" and [o["id"] for o in off["style"]["options"]] == ["auto", "cartoon", "real", "whiteboard"]
+    assert [o["available"] for o in off["style"]["options"]] == [True, False, True, False] and off["backgrounds"] == {"animated": False, "loops_3d": False, "chosen_by": "director", "note": off["backgrounds"]["note"], "ask": []}
     assert "cartoon" not in off["style"]["options"][0]["note"].lower()                         # with the cartoon scenes off, Auto does not promise them
     on = _caps(monkeypatch, VECTOR_SCENES="1", BG_ANIMATED="1", BG_LOOPS="1")
-    assert [o["available"] for o in on["style"]["options"]] == [True, True, True] and on["backgrounds"]["animated"] is True and on["backgrounds"]["loops_3d"] is True
-    assert [o["label"] for o in on["style"]["options"]] == ["Auto", "Illustrated", "Real"] and "cartoon" in on["style"]["options"][0]["note"]
+    assert [o["available"] for o in on["style"]["options"]] == [True, True, True, False] and on["backgrounds"]["animated"] is True and on["backgrounds"]["loops_3d"] is True
+    assert [o["label"] for o in on["style"]["options"]] == ["Auto", "Illustrated", "Real", "Whiteboard"] and "cartoon" in on["style"]["options"][0]["note"]
     es = _caps(monkeypatch, "es", VECTOR_SCENES="1")
-    assert [o["label"] for o in es["style"]["options"]] == ["Automático", "Ilustradas", "Reales"] and es["backgrounds"]["note"] != on["backgrounds"]["note"]
+    assert [o["label"] for o in es["style"]["options"]] == ["Automático", "Ilustradas", "Reales", "Pizarra"] and es["backgrounds"]["note"] != on["backgrounds"]["note"]
     assert all(o["note"] and o["note"] != e["note"] for o, e in zip(on["style"]["options"], es["style"]["options"]))
+    wb = _caps(monkeypatch, WHITEBOARD="1")["style"]["options"][3]                             # the whiteboard look (docs/WHITEBOARD.md): by its own switch, with the words to ask for it
+    assert wb["id"] == "whiteboard" and wb["available"] is True and wb["say"] == "as a whiteboard video" and es["style"]["options"][3]["say"] == "estilo pizarra"
 
 
 def test_the_launcher_accepts_exactly_the_styles_capabilities_lists(monkeypatch):
     import sf_launcher
     src = open(sf_launcher.__file__, encoding="utf-8").read()
-    assert 'body["style"] not in ("auto", "cartoon", "real")' in src
-    assert [o["id"] for o in _caps(monkeypatch)["style"]["options"]] == ["auto", "cartoon", "real"]
+    assert 'body["style"] not in ("auto", "cartoon", "real", "whiteboard")' in src
+    assert [o["id"] for o in _caps(monkeypatch)["style"]["options"]] == ["auto", "cartoon", "real", "whiteboard"]
+    assert sf_launcher.validate_options({"style": "whiteboard"})["style"] == "whiteboard"
+    with pytest.raises(sf_launcher.BadRequest):
+        sf_launcher.validate_options({"style": "chalk"})
 
 
 # ---------------------------------------------------------------- the stack
@@ -218,6 +223,27 @@ def test_the_stack_switches_the_cartoon_scenes_on_only_where_asked_and_only_with
 def test_stages_json_turns_the_cartoon_scenes_on_in_qa_only():
     stages = json.load(open(os.path.join(ROOT, "stages.json")))
     assert stages["qa"].get("vectorScenes") is True and "vectorScenes" not in stages["prod"]
+    assert stages["qa"].get("whiteboard") is True and "whiteboard" not in stages["prod"]
+
+
+def test_the_stack_switches_the_whiteboard_look_on_with_a_variable_and_one_read_right_and_no_new_resource(synth):
+    off = synth(3, imageCatalog="1")
+    on = synth(4, {"whiteboard": True}, imageCatalog="1")
+    for fn in ("V2PlanFn", "V2RenderChunkFn", "CapabilitiesFunction"):
+        assert "WHITEBOARD" not in _env(off, fn) and _env(on, fn)["WHITEBOARD"] == "1"
+    assert "CATALOG_BUCKET" in _env(on, "V2RenderChunkFn") and "CATALOG_BUCKET" in _env(on, "V2SelfTestFn")
+    got = {}
+    for k, v in on["Resources"].items():
+        if v["Type"] == "AWS::IAM::Policy":
+            for st in v["Properties"]["PolicyDocument"]["Statement"]:
+                if "/w/*" in json.dumps(st.get("Resource")):
+                    assert st["Effect"] == "Allow" and st["Action"] == "s3:GetObject"           # read one prefix: no listing, no write
+                    got[k] = st
+    assert sorted(k[:10] for k in got) == ["V2RenderCh", "V2SelfTest"] and "/w/*" not in json.dumps(off)
+    kinds = lambda t: sorted(v["Type"] for v in t["Resources"].values())      # noqa: E731
+    assert kinds(on) == kinds(off)                                                             # the stack is near the 500-resource limit: nothing new, only a variable and a statement
+    with pytest.raises(ValueError, match="imageCatalog"):
+        synth(5, {"whiteboard": True})
 
 
 # ---------------------------------------------------------------- a background asked for in the request text

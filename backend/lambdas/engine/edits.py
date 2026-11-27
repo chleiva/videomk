@@ -79,6 +79,10 @@ def apply_ops(plan: Dict[str, Any], ops: Any, *, max_beats: int = plan_mod.MAX_B
             beats[i]["narration"] = _narration(op.get("text"))
             beats[i].pop("silent", None)   # words given to a silent beat make it a spoken one
             beats[i].pop("hold", None)
+            if (beats[i].get("scene") or {}).get("type") == "whiteboard":   # a board follows its words: tie it again to the narration as it now is (engine/whiteboard_policy.retie)
+                from . import whiteboard_policy
+
+                whiteboard_policy.retie(beats[i]["scene"]["props"], beats[i]["narration"])
             touch(beats[i]["id"])
         elif kind == "set_hold":
             i = F(op.get("id"))

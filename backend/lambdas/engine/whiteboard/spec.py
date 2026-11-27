@@ -165,7 +165,8 @@ def compile_board(items_in: List[Dict[str, Any]], anchors: Dict[str, float], dur
                         cells = L.cells(it["zone"])
                         x0, y0, x1, y1 = L.rect(cells)
                         align = it.get("align") or ("left" if "\n" in it["write"] else "center")
-                        blk = wr.layout(it["write"], hand, size, max_width=x1 - x0, max_height=y1 - y0, align=align, seed=_seed(it["id"]))
+                        roomy = 1.3 if it["write"].count("\n") >= 2 else 1.0      # a list of three lines or more may use the margins between zones, or it is shrunk too small to read
+                        blk = wr.layout(it["write"], hand, size, max_width=x1 - x0, max_height=(y1 - y0) * roomy, align=align, seed=_seed(it["id"]))
                         x = x0 if align == "left" else x0 + (x1 - x0 - blk["w"]) / 2
                         va = it.get("valign", "middle")
                         y = y0 if va == "top" else (y1 - blk["h"] if va == "bottom" else y0 + (y1 - y0 - blk["h"]) / 2)
@@ -392,8 +393,13 @@ def compile_board(items_in: List[Dict[str, Any]], anchors: Dict[str, float], dur
         else:
             look = [c for _, c in seq[i:i + 7]]
             nxt = max(cands, key=lambda w: (sum(inside(c, w) for c in look), -abs(w[0] - (cur[0] if isinstance(cur, tuple) else w[0])) - abs(w[1] - (cur[1] if isinstance(cur, tuple) else w[1]))))
-            if cur == "all" and (len(look) < 2 or sum(inside(c, nxt) for c in look[:3]) < min(3, len(look))):   # (nor zoom in for one last mark, only to pull back again)
-                continue                           # stay wide while the next items jump around
+            hold = sum(inside(c, nxt) for c in look[:3])
+            if cur == "all" and (len(look) < 2 or hold < min(3, len(look))):   # stay wide while the next items jump around (nor zoom in for one last mark, only to pull back again)
+                continue
+            if hold < min(2, len(look)):                   # a close view that the very next item would leave again: the whole board instead (seen on the first local video: a drawing finished as the camera left it)
+                if cur == "all":
+                    continue
+                nxt = "all"
         if nxt != cur:
             moves.append((ts, nxt))
             cur = nxt

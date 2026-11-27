@@ -222,8 +222,9 @@ def apply(stype: str, props: Dict[str, Any], words: Sequence[Word], scene_dur: f
         if not texts:
             return {}
         cues, idx = anchor_times(texts, words, scene_dur)
-        if cues and cues[0] > FIRST_REVEAL_S and stype != "whiteboard":   # (a board draws each thing so that it ENDS on its word, starting earlier by itself: its times stay on the words)   # a scene must never sit empty: if the narrator names the first part late in a long beat, it still appears at the start, and the rest follows at a steady pace
-            cues = lead_in(cues)
+        if cues and cues[0] > FIRST_REVEAL_S:   # a scene must never sit empty: if the narrator names the first part late in a long beat, it still appears at the start, and the rest follows at a steady pace
+            # (a whiteboard draws each thing so that it ENDS on its word: only its first thing is brought forward, the others stay on their words)
+            cues = [FIRST_REVEAL_S] + list(cues[1:]) if stype == "whiteboard" else lead_in(cues)
         props["cues"] = cues
         return {"items": len(texts), "anchored": sum(i is not None for i in idx)}
     if stype == "stat":

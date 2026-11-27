@@ -86,7 +86,7 @@ class Policy:
             "with its own `say` word: an arrow between two things, or a mark (underline, circle, box, tick) on something already there. A board whose pen rests for seconds looks dead.\n"
             "  * Consecutive beats are panels of ONE big board: the camera travels from one to the next and ends on all of them. So each beat is a self-contained panel; do not repeat the previous panel's drawings.\n"
             "  * Writing is for titles, key terms, numbers and short formulas, never whole sentences. Numbers and results are WRITTEN big (size l or xl) and then circled or underlined; a comparison is two written numbers; "
-            "a list is one `write` with a line per point (\"1. ...\\n2. ...\"), tool pen. Markup: ^{2} for a power, _{2} for a subscript, \\frac{a}{b}, -> for an arrow.\n"
+            "a list is one `write` with a line per point (\"1. ...\\n2. ...\", at most 4 short lines) in a wide zone, size m, tool marker; the pen is only for small labels beside drawings. Markup: ^{2} for a power, _{2} for a subscript, \\frac{a}{b}, -> for an arrow.\n"
             "  * Use ONLY drawing ids from the list. If nothing in the list shows the idea, WRITE the word instead (a written label is always fine); never invent an id.\n"
             "  * People are the simple figures of the list (person_*, doctor, teacher...); never a real, named person.\n"
             "  * The first beat is a board with the video's question or title written (zone top or centre) and one drawing. The last beat sums up: the key term written large, underlined twice.\n"
@@ -182,7 +182,7 @@ def board_for(scene: Dict[str, Any], narration: str) -> Optional[Dict[str, Any]]
         if not lines:
             return None
         items = ([{"id": "head", "write": str(p["heading"])[:50], "zone": "top", "size": "m"}] if p.get("heading") else []) + \
-                [{"id": "list", "write": "\n".join(f"{i + 1}. {x}" for i, x in enumerate(lines)), "zone": "left-wide", "tool": "pen", "size": "m"}]
+                [{"id": "list", "write": "\n".join(f"{i + 1}. {x}" for i, x in enumerate(lines)), "zone": "left-wide", "size": "m"}]
     elif t in ("stat", "counter"):
         value = " ".join(str(p.get(k) or "") for k in ("prefix", "value", "unit")).strip() or str(p.get("value") or "")
         if not value:
