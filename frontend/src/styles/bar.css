@@ -144,6 +144,10 @@
   .app-shell .pill { padding: 0 0.625rem; gap: 0.25rem; }
   .composer-tools:has(.tool-listening) .tool-options-label { display: none; }
   .composer-tools:has(.tool-listening) .tool-options { padding: 0; width: var(--min-touch); justify-content: center; }
+  .composer-tools:has(.tool-listening) { gap: 0.25rem; }
+  .composer-tools:has(.tool-listening) .tool-cluster { flex: 1 1 0; flex-wrap: nowrap; }
+  .tool-listening { margin-left: 0; font-size: 0.8125rem; }
+  .tool-listening .live-dot { display: none; }   /* the red Stop already says it; the dot would push Create to its own row at 390 */
   .app-shell .compose-examples { justify-content: flex-start; }
 }
 @media (max-height: 40rem) { .app-shell .compose-examples .chip:nth-child(n + 3) { display: none; } }   /* a short window: two chips, not three */
