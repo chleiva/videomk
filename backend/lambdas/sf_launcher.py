@@ -21,7 +21,7 @@ from common.http import json_response
 from common.identity import extract_cognito_sub
 import plan_gate
 import video_retry
-from common import deck_limits, dictation, i18n, intake, library, look_choice, looks, ops_switches, safety, usage, wallet, watermark_store
+from common import deck_limits, dictation, i18n, vidup, intake, library, look_choice, looks, ops_switches, safety, usage, wallet, watermark_store
 from engine import format_options, presenter_policy, watermark_spec
 from common.photo_ids import MAX_PHOTOS, PhotoError, upload_key, valid_media_ids, valid_media_meta
 
@@ -123,6 +123,15 @@ def validate_options(body: Dict[str, Any]) -> Dict[str, Any]:
         if not isinstance(ids, list) or len(ids) > dictation.MAX_IDS_PER_VIDEO or not all(isinstance(i, str) and dictation.ID_RE.match(i) for i in ids):
             raise BadRequest(f"'dictation_ids' must be a list of at most {dictation.MAX_IDS_PER_VIDEO} dictation ids")
         out["dictation_ids"] = ids
+    if body.get("video_assets") is not None:   # the person's own video clips (POST .../video-uploads, ready): ids only; resolved, copied and charged in the handler (docs/VIDEO_UPLOAD_2026-11-28.md)
+        ids = body["video_assets"]
+        if not isinstance(ids, list) or len(ids) > vidup.MAX_IDS_PER_VIDEO or not all(isinstance(i, str) and vidup.ID_RE.match(i) for i in ids) or len(set(ids)) != len(ids):
+            raise BadRequest(f"'video_assets' must be a list of at most {vidup.MAX_IDS_PER_VIDEO} different clip ids")
+        if ids and os.environ.get("VIDUP_BUCKET", "") == "":
+            raise BadRequest("video clips are not available yet")
+        if ids and body.get("deck") is not None:
+            raise BadRequest(i18n.Localized("deck.with_photos"))
+        out["video_assets"] = ids
     if "captions" in body and body["captions"] is not None:
         if not isinstance(body["captions"], bool):
             raise BadRequest("'captions' must be true or false")
@@ -226,6 +235,37 @@ def bring_library_photos(user_id: str, options: Dict[str, Any]) -> bool:
     if meta:
         options["media_meta"] = meta
     return True
+
+
+def bring_video_clips(user_id: str, video_id: str, options: Dict[str, Any], loc: str) -> Tuple[Optional[Dict[str, Any]], Dict[str, Any]]:
+    """(an error response or None, the cost fields for the video record). Every id must be a READY clip of THIS account; its normalised copy (and sound, when it is used) is copied
+    into the video's own assets, so the engine reads only its own bucket. `options['video_assets']` becomes what the planner is given (ids V1.., size, length, description). The
+    clips' analysis cost (c_vidup) is charged to the first video that uses each clip."""
+    ids = options.pop("video_assets", None) or []
+    if not ids:
+        return None, {}
+    recs = []
+    for cid in ids:
+        rec = vidup.get_record(user_id, cid)
+        if not vidup.usable(rec):
+            return json_response(400, {"code": "clip_not_ready", "message": i18n.t("vidup.not_ready", loc)}), {}
+        recs.append({**rec, "clip_id": cid})
+    pfx = f"generation/v2/{video_id}/assets/"
+    usd = 0.0
+    for n, rec in enumerate(recs, start=1):
+        try:
+            _s3.copy_object(CopySource={"Bucket": os.environ["VIDUP_BUCKET"], "Key": rec["mezz_key"]}, Bucket=os.environ["ASSETS_BUCKET"], Key=f"{pfx}uclip_V{n}.mp4", ContentType="video/mp4", MetadataDirective="REPLACE")
+            rec["asset_key"] = f"{pfx}uclip_V{n}.mp4"
+            if rec.get("audio_used") and rec.get("audio_key"):
+                _s3.copy_object(CopySource={"Bucket": os.environ["VIDUP_BUCKET"], "Key": rec["audio_key"]}, Bucket=os.environ["ASSETS_BUCKET"], Key=f"{pfx}uclip_V{n}.m4a", ContentType="audio/mp4", MetadataDirective="REPLACE")
+                rec["asset_audio_key"] = f"{pfx}uclip_V{n}.m4a"
+        except ClientError:
+            logger.exception("could not copy video clips")
+            return json_response(400, {"code": "clip_not_ready", "message": i18n.t("vidup.not_ready", loc)}), {}
+        if vidup.claim_cost(user_id, rec["clip_id"], video_id):
+            usd += vidup.clip_cost(rec)
+    options["video_assets"] = vidup.assets_for_plan(recs)
+    return None, {"c_vidup": Decimal(str(round(usd, 6))), "vidup_ids": ids, "cost_usd": Decimal(str(round(usd, 6)))}
 
 
 def check_deck(user_id: str, options: Dict[str, Any], loc: str) -> Optional[Dict[str, Any]]:
@@ -424,6 +464,13 @@ def handler(event: Dict[str, Any], context: Any):
     if first and first != video_id:
         logger.warning("duplicate request from %s returned the video already started (%s)", user_id, first)
         return json_response(202, {"message": "workflow already started", "video_id": first})
+
+    bad_clip, vid_extra = bring_video_clips(user_id, video_id, options, loc)   # after the duplicate claim: the copies' keys name this video
+    if bad_clip:
+        usage.release_recent(user_id, fingerprint)
+        return bad_clip
+    if vid_extra:   # one cost_usd on the record: dictation + clips
+        stt_extra = {**stt_extra, **{k: v for k, v in vid_extra.items() if k != "cost_usd"}, "cost_usd": Decimal(str(stt_extra.get("cost_usd", 0))) + vid_extra["cost_usd"]}
 
     # Quote, then charge exactly the quote: the length that is billed is the length that is made.
     minutes = options.get("target_minutes") or float(os.environ.get("DEFAULT_TARGET_MINUTES", "3"))

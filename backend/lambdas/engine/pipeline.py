@@ -9,7 +9,7 @@ from PIL import Image
 
 from . import media
 from . import music as music_mod
-from .audio import MIX_SR, SFX_KINDS, SR, build_narration, build_sfx_track, level_speech, write_wav
+from .audio import MIX_SR, SFX_KINDS, SR, build_clip_audio_track, build_narration, build_sfx_track, level_speech, write_wav
 from .renderer import Renderer
 from .timeline import GOP_SECONDS
 
@@ -68,8 +68,9 @@ def make_audio(
     music_path: Optional[str] = None,
     music_volume: float = 0.2,
     track_loader: Optional[Callable[[str], Any]] = None,
+    clip_audio_loader: Optional[Callable[[str], Any]] = None,
 ) -> None:
-    """Narration (placed per scene) + music (a library recording, if any) + sfx -> AAC."""
+    """Narration (placed per scene) + music (a library recording, if any) + sfx + the person's own clips' sound (ducked under the narration) -> AAC."""
     duration = float(timeline["duration"])
     with tempfile.TemporaryDirectory() as tmp:
         beats = [
@@ -92,7 +93,18 @@ def make_audio(
                 write_wav(music_path, samples, MIX_SR, channels=2)
         sfx = os.path.join(tmp, "sfx.wav")
         write_wav(sfx, build_sfx_track(sfx_events(timeline), duration), MIX_SR, channels=2)
-        media.mix_audio(nar, music_path, sfx, out_path, duration=duration, music_volume=music_volume, swells=swells, loudness_lufs=TARGET_LUFS)
+        clip_wav = None
+        if clip_audio_loader is not None:
+            items = []
+            for sc in timeline["scenes"]:
+                key = (sc.get("props") or {}).get("clip_audio")
+                s = clip_audio_loader(key) if key else None
+                if s is not None:
+                    items.append((float(sc["start"]), float(sc["duration"]), s))
+            if items:
+                clip_wav = os.path.join(tmp, "clipaudio.wav")
+                write_wav(clip_wav, build_clip_audio_track(items, duration), MIX_SR, channels=2)
+        media.mix_audio(nar, music_path, sfx, out_path, duration=duration, music_volume=music_volume, swells=swells, loudness_lufs=TARGET_LUFS, clip_wav=clip_wav)
 
 
 def preview_gif(video_path: str, out_gif: str, duration: float, width: int = 320) -> bool:

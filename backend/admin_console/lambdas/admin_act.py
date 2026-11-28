@@ -1,4 +1,4 @@
-"""POST /api/switches  {"switch": "stop_new_videos" | "stop_free_videos" | "stop_dictation", "stopped": true | false}
+"""POST /api/switches  {"switch": "stop_new_videos" | "stop_free_videos" | "stop_dictation" | "stop_video_upload", "stopped": true | false}
 
 The ONLY thing the console can change. API Gateway has already checked the token (signature, the admin pool, this app client, expiry) before this code runs.
 Here, first of all: the sign-in must be at most 5 minutes old (step-up: the page asks for the passkey again). Then the event is written to the locked audit
@@ -54,7 +54,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                  % (words, "OFF" if stopped else "back ON", c.hhmm(),
                     {"stop_new_videos": "While it is off, nobody can start or retry a video; watching, the library and sign-in keep working.",
                      "stop_free_videos": "While it is off, free credits cannot be spent; paid credits work.",
-                     "stop_dictation": "While it is off, paid dictation (speech to text) is unavailable; typing and everything else keep working."}[name], c.lock_command(username=who.get("username") or who.get("sub"))))
+                     "stop_dictation": "While it is off, paid dictation (speech to text) is unavailable; typing and everything else keep working.",
+                     "stop_video_upload": "While it is off, nobody can add a video clip; clips already ready and photos keep working."}[name], c.lock_command(username=who.get("username") or who.get("sub"))))
     except Exception:   # noqa: BLE001 - the change is made and recorded; a failed email must not undo it
         logger.exception("ADMIN_NOTIFY_FAILED")
     logger.info("ADMIN_SWITCH %s stopped=%s", name, stopped)

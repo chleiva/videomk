@@ -695,7 +695,14 @@ def draw_clip(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, th: Them
     t = max(0.0, min(lt, dur))  # an outgoing scene holds its final frame during the crossfade; footage shorter than the scene holds its last frame (never loops)
     src = frames.frame(int(t * frames.fps))
     p = ease_in_out_cubic(progress(t, 0.0, max(dur, 0.5)))
-    if clip_is_framed(fr, src.size):   # 4K video, footage too small to fill the frame without a visible enlargement: a native-size window (docs/FOUR_K.md)
+    if props.get("user_clip") and props.get("fit") == "card":   # the person's own small clip: at its own size in a card, never enlarged (common/vidup.placement_rule)
+        _draw_clip_framed(cv, props, src, lt, dur, p, th, ctx)
+        return
+    if props.get("user_clip") and props.get("fit") == "fit":    # shaped unlike the frame: shown whole over a blurred copy of itself
+        _draw_contained(cv, src, tw, tht, lerp(1.0, 1.03, p))
+        _draw_word(cv, props, lt, dur, ctx)
+        return
+    if clip_is_framed(fr, src.size) and not props.get("user_clip"):   # 4K video, footage too small to fill the frame without a visible enlargement: a native-size window (docs/FOUR_K.md)
         _draw_clip_framed(cv, props, src, lt, dur, p, th, ctx)
         return
     z = lerp(1.0, 1.06, p)  # a slow push-in hides the modest source resolution and keeps the frame alive

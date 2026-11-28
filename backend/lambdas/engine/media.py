@@ -125,13 +125,17 @@ def mix_audio(
     swells: Sequence[Tuple[float, float]] = (),
     swell_gain: float = 2.2,
     loudness_lufs: Optional[float] = None,
+    clip_wav: Optional[str] = None,
+    clip_volume: float = 0.85,
 ) -> None:
-    """Narration + (ducked) music + sfx -> AAC. Music is faded in/out and ducked under speech. With `loudness_lufs` the whole mix is levelled to that integrated
+    """(`clip_wav`: the person's own clips' sound, already placed on the timeline, ducked under the narration like the music; docs/VIDEO_UPLOAD_2026-11-28.md.)
+    Narration + (ducked) music + sfx -> AAC. Music is faded in/out and ducked under speech. With `loudness_lufs` the whole mix is levelled to that integrated
     loudness (EBU R128, true peak -1.5 dB): -14 is what YouTube plays at, so a video neither jumps nor gets turned down when it is published."""
     inputs = ["-i", narration_wav]
     graph: List[str] = []
     labels = ["[nar]"]
-    graph.append("[0:a]aresample=44100,aformat=channel_layouts=stereo,asplit=2[nar][nar_sc]" if (music_wav and duck) else "[0:a]aresample=44100,aformat=channel_layouts=stereo[nar]")
+    taps = (["[nar_sc]"] if (music_wav and duck) else []) + (["[nar_sc2]"] if clip_wav else [])   # copies of the narration that the music and the clip sound listen to
+    graph.append(f"[0:a]aresample=44100,aformat=channel_layouts=stereo,asplit={1 + len(taps)}[nar]{''.join(taps)}" if taps else "[0:a]aresample=44100,aformat=channel_layouts=stereo[nar]")
     idx = 1
     if music_wav:
         inputs += ["-stream_loop", "-1", "-i", music_wav]
@@ -152,6 +156,12 @@ def mix_audio(
         inputs += ["-i", sfx_wav]
         graph.append(f"[{idx}:a]aresample=44100,aformat=channel_layouts=stereo[sfx]")
         labels.append("[sfx]")
+        idx += 1
+    if clip_wav:
+        inputs += ["-i", clip_wav]
+        graph.append(f"[{idx}:a]aresample=44100,aformat=channel_layouts=stereo,volume={clip_volume}[clp]")
+        graph.append("[clp][nar_sc2]sidechaincompress=threshold=0.02:ratio=6:attack=15:release=300:makeup=1[clpd]")
+        labels.append("[clpd]")
         idx += 1
     level = f",loudnorm=I={loudness_lufs:g}:TP=-1.5:LRA=11,aresample=44100" if loudness_lufs is not None else ""
     graph.append(f"{''.join(labels)}amix=inputs={len(labels)}:duration=first:normalize=0{level},alimiter=limit=0.95,atrim=0:{duration:.3f}[out]")

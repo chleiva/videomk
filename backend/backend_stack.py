@@ -658,6 +658,16 @@ class BackendStack(Stack):
                                     capabilities_fn=req_options.fn, user_resource=user_id, auth=cognito_auth, cors_headers=["Content-Type", "Authorization", "X-Region", "X-Timezone", "X-Locale"],
                                     memory_mb=min(MEM_CAP, 3008), concurrency=int(self.node.try_get_context("deckConcurrency")) if self.node.try_get_context("deckConcurrency") else None)
 
+        # Video upload (docs/VIDEO_UPLOAD_2026-11-28.md): only with `-c videoUpload=1` (default off). The feature lives in the stack videomk-<stage>-vidup (backend/vidup_stack.py);
+        # here the launcher only learns the bucket's NAME and may read the kept copies of the account's clips: no resource, one variable, one statement, no cross-stack reference.
+        if str(self.node.try_get_context("videoUpload") or "").lower() in ("1", "true"):
+            from vidup_stack import bucket_name as vidup_bucket_name
+            vidup_bucket = vidup_bucket_name(stage, self.account)
+            launcher_fn.add_environment("VIDUP_BUCKET", vidup_bucket)
+            launcher_fn.add_to_role_policy(iam.PolicyStatement(actions=["s3:GetObject"], resources=[f"arn:aws:s3:::{vidup_bucket}/clips/*"]))
+            if self.node.try_get_context("vidupApiUrl"):   # the apps learn where to send clips from GET .../capabilities (`video_upload.api_url`)
+                req_options.fn.add_environment("VIDUP_API_URL", str(self.node.try_get_context("vidupApiUrl")))
+
         # ----------------------------
         # The private photo library: storage, search and its routes (docs/MEDIA_LIBRARY.md). Needs the engine layer (Pillow, numpy).
         # ----------------------------
@@ -776,6 +786,8 @@ class BackendStack(Stack):
                                               items=apigw.JsonSchema(type=apigw.JsonSchemaType.STRING, pattern="^[0-9a-f]{16}$")),
                     "library_media": apigw.JsonSchema(type=apigw.JsonSchemaType.ARRAY, min_items=1, max_items=100,
                                                       items=apigw.JsonSchema(type=apigw.JsonSchemaType.STRING, pattern="^[0-9a-f]{16}$")),
+                    "video_assets": apigw.JsonSchema(type=apigw.JsonSchemaType.ARRAY, min_items=1, max_items=6,   # the person's own clips (docs/VIDEO_UPLOAD_2026-11-28.md): ready ids; ownership and readiness: the launcher
+                                                     items=apigw.JsonSchema(type=apigw.JsonSchemaType.STRING, pattern="^[0-9a-f]{32}$")),
                 },
             ),
         )

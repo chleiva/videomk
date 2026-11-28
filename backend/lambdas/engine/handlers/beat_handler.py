@@ -234,6 +234,14 @@ def make_clip(plan: Dict[str, Any], beat: Dict[str, Any], video_id: str, cost_fi
     """A short licensed stock clip (or a montage of 2-4 short clips in sequence, `clip_queries`) for the beat. If none is found or usable, a still photo of the same subject, so the video never has a hole."""
     pfx = awsio.prefix(video_id)
     props = beat["scene"]["props"]
+    if props.get("user_clip"):   # the person's own clip: already normalised, checked and copied into this video's assets; nothing is searched, nothing is paid
+        a = next((x for x in plan.get("video_assets") or [] if x.get("id") == props["user_clip"]), None)
+        ok = a and str(a.get("key") or "").startswith(pfx + "assets/uclip_") and ".." not in a["key"]
+        if ok:
+            audio = a.get("audio_key") if a.get("audio") and str(a.get("audio_key") or "").startswith(pfx + "assets/uclip_") and ".." not in a["audio_key"] else None
+            return {"query": plan_mod.clip_signature(props), "pick": None, "clip_asset": a["key"], "user_clip": {"fit": props.get("fit") or "fill", **({"audio_key": audio} if audio else {})}}
+        logging.warning("user clip %s is not available for beat %s", props.get("user_clip"), beat.get("id"))
+        props = {**props, "clip_query": str(props.get("alt") or "scene")}   # never a hole: stock footage of what the alt says
     queries = plan_mod.clip_queries(props)
     query = queries[0]
     out: Dict[str, Any] = {"query": plan_mod.clip_signature(props), "pick": None}
