@@ -665,6 +665,7 @@ class BackendStack(Stack):
             vidup_bucket = vidup_bucket_name(stage, self.account)
             launcher_fn.add_environment("VIDUP_BUCKET", vidup_bucket)
             launcher_fn.add_to_role_policy(iam.PolicyStatement(actions=["s3:GetObject"], resources=[f"arn:aws:s3:::{vidup_bucket}/clips/*"]))
+            launcher_fn.add_to_role_policy(iam.PolicyStatement(actions=["s3:PutObject"], resources=[f"arn:aws:s3:::{ASSETS_BUCKET}/generation/v2/*/assets/uclip_*"]))   # the copy of each clip (and its sound) into the video's own assets
             if self.node.try_get_context("vidupApiUrl"):   # the apps learn where to send clips from GET .../capabilities (`video_upload.api_url`)
                 req_options.fn.add_environment("VIDUP_API_URL", str(self.node.try_get_context("vidupApiUrl")))
 
