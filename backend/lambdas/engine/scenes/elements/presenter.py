@@ -282,9 +282,9 @@ def rooms(lay: Dict[str, Any], fig: Optional[Dict[str, Any]], geom: Any, size: f
 
 
 # ----------------------------------------------------------------------------- layout
-CARD_TOP = {"9:16": 310.0, "1:1": 150.0, "4:5": 150.0}   # design units: the card (and so its title) never starts above this line in the shapes whose corner mark sits at the top.
+CARD_TOP = {"9:16": 320.0, "1:1": 160.0, "4:5": 160.0}   # design units: the card (and so its title) never starts above this line in the shapes whose corner mark sits at the top.
 # A CONSTANT of the shape, the same for every account and every video (no watermark input: the mark is a final layer, docs/WATERMARK_DECOUPLED_2026-11-28.md); it is
-# just below the lowest place the mark can take there (9:16 lockup y 200 to 286, square and 4:5 y 38 to 146), so a corner logo never lands on a title.
+# just below the lowest place the mark can take there (9:16 y 200 to 308, square and 4:5 y 38 to 146); since the frame's own top margin (310 / 150) now clears it for every scene, this is margin_top + 10, so a corner logo never lands on a title.
 
 
 def layout(props: Dict[str, Any], ctx: SceneCtx) -> Dict[str, Any]:

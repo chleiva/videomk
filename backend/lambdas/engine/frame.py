@@ -23,10 +23,13 @@ _CAPTION = {
     "1:1": dict(bottom=1020, size=50, max_w=920, x0=0, x1=1080, words=8),
     "4:5": dict(bottom=1290, size=52, max_w=920, x0=0, x1=1080, words=8),
 }
-# Safe margins (left/right, top) in design units
-_MARGIN = {"16:9": (140, 70), "9:16": (72, 150), "1:1": (80, 70), "4:5": (80, 80)}
+# Safe margins (left/right, top) in design units. The top of the shapes whose corner mark sits at the top-left (9:16 under the platform header, 1:1, 4:5) is just below the lowest the mark
+# can reach there (the largest custom logo, 9:16 y 200 to 308, square and 4:5 y 38 to 146), so no title or card of ANY scene template starts under it.
+# A constant of the shape, the same for every account (the mark is a final layer: docs/WATERMARK_DECOUPLED_2026-11-28.md, docs/TITLES_AND_CLIP_NARRATION_2026-11-28.md).
+_MARGIN = {"16:9": (140, 70), "9:16": (72, 310), "1:1": (80, 150), "4:5": (80, 150)}
+_CREDIT_Y = {"16:9": 40, "9:16": 120, "1:1": 40, "4:5": 50}   # the clip / photo credit line (top right): where it always was, it is not under the mark (top left)
 # Bottom of the content box when captions are ON: just above the caption box (2 lines) with a gap; None -> computed
-_CONTENT_BOTTOM_CAP = {"16:9": 800, "9:16": 1385, "1:1": 780, "4:5": 1040}
+_CONTENT_BOTTOM_CAP = {"16:9": 800, "9:16": 1385, "1:1": 840, "4:5": 1080}   # 1:1 and 4:5 raised when their top margin moved down (150): the box shrinks by 20 and 30 and not by 80 and 70
 _CONTENT_BOTTOM_NOCAP = {"16:9": 1000, "9:16": 1670, "1:1": 1010, "4:5": 1280}
 _RIGHT_RESERVE = {"16:9": 0, "9:16": 130, "1:1": 0, "4:5": 0}   # platform buttons column (vertical formats): keep key text out of it near the bottom
 
@@ -112,6 +115,10 @@ class Frame:
     @property
     def margin_top(self) -> int:
         return _MARGIN[self.aspect][1]   # the same for every video: a watermark never moves content (docs/WATERMARK.md, the final stage)
+
+    @property
+    def credit_y(self) -> int:
+        return _CREDIT_Y[self.aspect]
 
     @property
     def right_reserve(self) -> int:

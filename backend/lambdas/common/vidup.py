@@ -402,8 +402,84 @@ def planner_block(assets: List[Dict[str, Any]], aspect: str = "16:9", resolution
                 "(no clip_query). fill = the clip covers the frame, fit = the whole clip over a blurred copy, card = the clip at its own size inside a card; "
                 "follow the suggested placement unless the picture clearly needs another, and never use fill for a small or very differently shaped clip. "
                 "Put each clip where the story is about what it shows. A clip lasts at most its length: give its beat narration of about that many seconds, or a pause beat "
-                "(narration empty, hold about its length) when the clip's own sound is used so it can be heard.")
+                "(narration empty, hold about its length) when the clip's own sound is used so it can be heard. "
+                "THE DESCRIPTION IS FOR YOU ONLY, to choose where the clip goes and what story it fits. NEVER read, quote, paraphrase or translate it in the narration or the captions "
+                "(not 'the clip opens on...', 'we see...', 'this clip shows...'): the viewer sees the picture, so the narration tells the story AROUND it (what it means, why it matters, what comes next). "
+                "The speech transcript is what the people IN the clip say, in their own voice and sound: the narrator must never say those words as if the narrator had said them; if the clip's sound is "
+                "used, let it be heard (a pause beat) or talk about what was said in your own words, never the words themselves. A sentence that copies the description is removed from the narration.")
     return "\n".join(rows)
+
+
+# ----------------------------------------------------------------------------- the description is context, never narration
+# The description of a clip (the overall line, the second-by-second lines, the transcript of its sound) is data for the planner. It must never be spoken or captioned: the narrator tells
+# the story, the viewer sees the picture, and the clip's own sound plays by itself. The prompt says so; `scrub_narration` is the model-free check that removes a sentence that copies
+# the description (or the transcript) verbatim or nearly, so a model that ignores the prompt still cannot make the narrator read it (docs/TITLES_AND_CLIP_NARRATION_2026-11-28.md).
+_WORD = re.compile(r"[^\W_]+", re.UNICODE)
+_SENT = re.compile(r"(?<=[.!?\u2026])\s+")
+MIN_COPY_WORDS = 4         # a sentence shorter than this is never judged a copy (a name, a short phrase)
+COPY_RUN_FRAC = 0.6        # a run of consecutive shared words covering this much of the sentence (and at least MIN_COPY_WORDS words)
+COPY_SET_FRAC = 0.75       # or this share of the sentence's words found in one description line, covering half of that line
+
+
+def _words(text: Any) -> List[str]:
+    return [w.lower() for w in _WORD.findall(str(text or ""))]
+
+
+def _longest_run(a: List[str], b: List[str]) -> int:
+    best = 0
+    prev = [0] * (len(b) + 1)
+    for x in a:
+        cur = [0] * (len(b) + 1)
+        for j, y in enumerate(b, start=1):
+            if x == y:
+                cur[j] = prev[j - 1] + 1
+                best = max(best, cur[j])
+        prev = cur
+    return best
+
+
+def description_units(assets: List[Dict[str, Any]]) -> List[List[str]]:
+    """Every piece of what the model was told about the clips, as word lists: the overall line, each second's line, each sentence of the transcript."""
+    units: List[List[str]] = []
+    for a in assets or []:
+        parts = [a.get("summary")] + list(a.get("lines") or []) + _SENT.split(str(a.get("speech") or ""))
+        for p in parts:
+            w = _words(p)
+            if len(w) >= MIN_COPY_WORDS:
+                units.append(w)
+    return units
+
+
+def copies_description(sentence: str, units: List[List[str]]) -> bool:
+    t = _words(sentence)
+    if len(t) < MIN_COPY_WORDS:
+        return False
+    ts = set(t)
+    for u in units:
+        run = _longest_run(t, u)
+        if run >= max(MIN_COPY_WORDS, COPY_RUN_FRAC * len(t)):
+            return True
+        shared = len(ts & set(u))
+        if len(t) >= 5 and shared >= COPY_SET_FRAC * len(ts) and shared >= 0.5 * len(set(u)):
+            return True
+    return False
+
+
+def scrub_narration(narration: str, assets: List[Dict[str, Any]], user_text: str = "") -> Tuple[str, List[str]]:
+    """(the narration without the sentences that copy a clip's description or transcript, the removed sentences). A sentence the person wrote themselves (it is inside `user_text`,
+    their request and notes) is theirs to have quoted and stays."""
+    units = description_units(assets)
+    if not units or not str(narration or "").strip():
+        return narration, []
+    mine = " ".join(_words(user_text))
+    kept, dropped = [], []
+    for sent in _SENT.split(str(narration).strip()):
+        w = " ".join(_words(sent))
+        if sent.strip() and copies_description(sent, units) and not (w and w in mine):
+            dropped.append(sent.strip())
+        else:
+            kept.append(sent)
+    return " ".join(kept).strip(), dropped
 
 
 SCENE_DOC = ('- clip with the PERSON\'S OWN video: {user_clip ("V1"... one of the clips listed in the request), fit ("fill", "fit" or "card"), alt (<=70 chars)}. '

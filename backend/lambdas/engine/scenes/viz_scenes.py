@@ -468,7 +468,7 @@ def draw_image(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, th: The
 
 
 def _credit_y(fr) -> float:
-    return 40 if fr.landscape else max(40, fr.margin_top - 30)
+    return fr.credit_y
 
 
 def _draw_word(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, ctx: Optional[SceneCtx] = None, over: Optional[Tuple[float, float, float]] = None) -> None:

@@ -223,7 +223,7 @@ def caption_rect(frame: Frame) -> Rect:
 
 def credit_rect(frame: Frame) -> Rect:
     """The clip / photo credit line (top right, up to 90 characters)."""
-    y = 40 if frame.landscape else max(40, frame.margin_top - 30)
+    y = frame.credit_y
     size = 22 if frame.landscape else 26
     return (frame.W - 40 - 720.0, y - 8.0, frame.W - 40.0, y + size + 8.0)
 
