@@ -190,5 +190,12 @@
  "create.state_listening": "No está listo: deja de dictar primero.",
  "create.state_wait": "No está listo: un momento.",
  "create.need_text": "Describe tu video para crearlo.",
- "create.first_caption": "{credits}. Tienes {balance}."
+ "create.first_caption": "{credits}. Tienes {balance}.",
+ "create.better_title": "Dictado mejorado",
+ "create.better_hint": "Graba tu voz y la convierte en texto más preciso. La grabación se envía a nuestro servicio de voz solo para transcribirla; no guardamos el audio.",
+ "create.better_pro": "Dictado mejorado con Pro",
+ "create.better_working": "Mejorando el texto…",
+ "create.better_quota": "Hoy llegaste al límite de dictado mejorado. Se usó el dictado de tu dispositivo.",
+ "create.better_failed": "El dictado mejorado no está disponible ahora. Se usó el dictado de tu dispositivo.",
+ "create.better_limit": "La grabación se detuvo a los 6 minutos."
 }

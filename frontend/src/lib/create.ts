@@ -7,6 +7,8 @@ import { AUTO, lookRequest, normalizeChoice, parseLooks } from "./looks";
 import type { LookChoice, LookContext, LooksCaps } from "./looks";
 import { lengthLock, parseLengthLimits, parsePlanState } from "./plan";
 import type { LengthLimits, PlanState } from "./plan";
+import { parseDictationCaps } from "./betterDictation";
+import type { DictationCaps } from "./betterDictation";
 
 export interface Aspect { id: string; label: string; ready: boolean; beta?: boolean }
 export interface Resolution { id: string; label: string; credits_multiplier: number; aspects: string[]; note?: string; available?: boolean; requires_plan?: string | null }   // available false: the plan does not make it (shown locked with the plan's name)
@@ -17,6 +19,7 @@ export interface Capabilities {
   looks?: LooksCaps;        // the chosen, enforced look (docs/CREATE_API.md "Video look"); absent on a server without it: the Look pill is then the colour theme, as before
   limits?: LengthLimits;    // the plan's longest video and the lengths over it (docs/PLANS.md); absent: no plan limit
   plans?: PlanState;        // plan, free, can_upgrade
+  dictation?: DictationCaps;   // Better dictation (Pro, Max): docs/BETTER_DICTATION_CLIENTS_2026-11-28.md
 }
 
 /** `capabilities.watermark` (docs/WATERMARK.md): present only where the stack has the feature on. Modes carry `available` (false: locked or hidden) and `requires`. */
@@ -223,7 +226,7 @@ export function parseCapabilities(b: any): Capabilities | null {
   return {
     aspects: b.aspects, resolutions: b.resolutions, platforms: Array.isArray(b.platforms) ? b.platforms : [], languages: Array.isArray(b.languages) ? b.languages : [], lengths: b.lengths,
     max_photos: b.max_photos, intake: b.intake !== false, deck: parseDeckCaps(b.deck), watermark: parseWatermarkCaps(b.watermark),
-    looks: parseLooks(b.looks), ...(limits.planMaxSeconds != null || limits.locked.length ? { limits } : {}), ...(plans.plan || plans.free ? { plans } : {}),
+    looks: parseLooks(b.looks), ...(limits.planMaxSeconds != null || limits.locked.length ? { limits } : {}), ...(plans.plan || plans.free ? { plans } : {}), dictation: parseDictationCaps(b.dictation),
   };
 }
 

@@ -190,5 +190,12 @@
  "create.state_listening": "Not ready: stop dictating first.",
  "create.state_wait": "Not ready: one moment.",
  "create.need_text": "Describe your video to create it.",
- "create.first_caption": "{credits}. You have {balance}."
+ "create.first_caption": "{credits}. You have {balance}.",
+ "create.better_title": "Better dictation",
+ "create.better_hint": "Records your voice and turns it into more accurate text. The recording is sent to our speech service only to transcribe it; we do not keep the audio.",
+ "create.better_pro": "Better dictation with Pro",
+ "create.better_working": "Improving the text…",
+ "create.better_quota": "Today's better dictation limit is reached. Your device's dictation was used.",
+ "create.better_failed": "Better dictation isn't available right now. Your device's dictation was used.",
+ "create.better_limit": "Recording stopped at 6 minutes."
 }
