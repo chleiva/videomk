@@ -18,3 +18,10 @@ Speech is about $0.03 per minute of narration (Polly generative, $30 per million
 
 ## Not counted
 Bedrock and Polly prices are list prices in the code (`llm.DEFAULT_PRICES`, `tts.PollyProvider.PER_CHAR`); Tavily is $0.008 per search by assumption; Unsplash, Pixabay and Wikimedia calls are free. Data transfer to phones and storage (see `docs/STORAGE.md`) are not in the table.
+
+## Paid dictation (speech-to-text), planned 2026-11-28
+Details and evidence: `docs/SPEECH_TO_TEXT_2026-11-28.md`. For Pro and Max the dictated video request would go to OpenAI `gpt-transcribe`, **$0.0045 per minute of speech** (OpenAI's pricing page, read 2026-11-28; Free keeps the phone's own engine at no cost to us).
+- Per video: **1 minute $0.0045, 3 minutes $0.0135, 5 minutes $0.0225** (about 3 to 15 % of a $0.15 credit). New cost field `c_stt` next to `c_speech`, added to `cost_usd`; every dictation attached to the video is charged to it, retries included.
+- 1,000 paying users, 20 videos a month, 70 % dictated, 1.3 retries: $82 (1 min), $246 (3 min), $410 (5 min) a month, 0.4 to 2 % of about $20,000 revenue.
+- Live (streaming) words would cost 3.8 times as much ($0.017 a minute); not planned. Caps (proposal): Pro 900 s, Max 3,600 s a day.
+- Tested 2026-11-28 on 5 languages (clips from Polly): about $0.03 of API calls in total.
