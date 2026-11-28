@@ -18,6 +18,7 @@ export const apiGateway = {
   listVideos: (userId: string) => `${API_BASE}/users/${u(userId)}/videos`,
   getVideo: (userId: string, videoId: string) => `${API_BASE}/users/${u(userId)}/videos/${u(videoId)}`,
   plan: (userId: string, videoId: string) => `${API_BASE}/users/${u(userId)}/videos/${u(videoId)}/plan`,
+  dictation: (userId: string) => `${API_BASE}/users/${u(userId)}/dictation`,
   capabilities: (userId: string) => `${API_BASE}/users/${u(userId)}/capabilities`,
   brief: (userId: string) => `${API_BASE}/users/${u(userId)}/videos/brief`,
   decks: (userId: string) => `${API_BASE}/users/${u(userId)}/decks`,

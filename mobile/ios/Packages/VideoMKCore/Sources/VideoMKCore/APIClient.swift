@@ -105,12 +105,12 @@ public struct APIClient: Sendable {
     }
 
     /// `clientRequestID` makes a retry of the same attempt idempotent (no double charge, no second video).
-    public func startGeneration(prompt: String, clientRequestID: String, options: CreateOptions = CreateOptions(), media: [String] = [], mediaMeta: [String: PhotoMeta] = [:], libraryMedia: [String] = [], brief: [String: String]? = nil, deck: String? = nil, sendMinutes: Bool = true) async throws -> String {
-        try await startVideo(prompt: prompt, clientRequestID: clientRequestID, options: options, media: media, mediaMeta: mediaMeta, libraryMedia: libraryMedia, brief: brief, deck: deck, sendMinutes: sendMinutes).videoID
+    public func startGeneration(prompt: String, clientRequestID: String, options: CreateOptions = CreateOptions(), media: [String] = [], mediaMeta: [String: PhotoMeta] = [:], libraryMedia: [String] = [], brief: [String: String]? = nil, deck: String? = nil, sendMinutes: Bool = true, dictationIDs: [String] = []) async throws -> String {
+        try await startVideo(prompt: prompt, clientRequestID: clientRequestID, options: options, media: media, mediaMeta: mediaMeta, libraryMedia: libraryMedia, brief: brief, deck: deck, sendMinutes: sendMinutes, dictationIDs: dictationIDs).videoID
     }
 
     /// The same request, with what the answer says about the look: `look` (what the video gets) and `note` (one sentence when the chosen look had to be adapted).
-    public func startVideo(prompt: String, clientRequestID: String, options: CreateOptions = CreateOptions(), media: [String] = [], mediaMeta: [String: PhotoMeta] = [:], libraryMedia: [String] = [], brief: [String: String]? = nil, deck: String? = nil, sendMinutes: Bool = true) async throws -> StartedVideo {
+    public func startVideo(prompt: String, clientRequestID: String, options: CreateOptions = CreateOptions(), media: [String] = [], mediaMeta: [String: PhotoMeta] = [:], libraryMedia: [String] = [], brief: [String: String]? = nil, deck: String? = nil, sendMinutes: Bool = true, dictationIDs: [String] = []) async throws -> StartedVideo {
         var fields: [String: Any] = ["client_request_id": clientRequestID]
         // a presentation: the prompt is optional (who it is for) and the length is only sent when the person chose one (absent: the deck's own, charged exactly that)
         if deck == nil || Brief.isValid(prompt) { fields["prompt"] = Brief.normalized(prompt) }
@@ -126,6 +126,7 @@ public struct APIClient: Sendable {
         fields["platform"] = options.platform; fields["aspect"] = options.aspect; fields["resolution"] = options.resolution
         if options.language != "auto" { fields["language"] = options.language }
         if let brief, !brief.isEmpty { fields["brief"] = brief }
+        if !dictationIDs.isEmpty { fields["dictation_ids"] = Array(dictationIDs.suffix(DictationIDs.maximum)) }   // the Better dictation clips behind this prompt: their cost is recorded on the video
         let body = try JSONSerialization.data(withJSONObject: fields)
         let (data, _) = try await send("POST", ["videos", "generate"], body: body)
         guard let started = StartedVideo.decode(data) else { throw APIError.server }

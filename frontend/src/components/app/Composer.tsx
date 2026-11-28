@@ -26,6 +26,7 @@ import { createLock, planName } from "../../lib/plan";
 import { DECK_ASPECT, deckAspectWarning, deckCredits, deckGenerateExtras, deckMinutes } from "../../lib/deck";
 import { dictationSupported, speechLang, startDictation } from "../../lib/dictation";
 import type { Dictation } from "../../lib/dictation";
+import { betterAvailable, betterErrorKey, betterPreferred, DictationIds, recordingSupported, setBetterPreferred, showUpgradeHint, startBetter } from "../../lib/betterDictation";
 import { APP_PATHS } from "../../lib/links";
 import { rememberPrompt } from "../../lib/prompts";
 import { pictureFiles } from "../../lib/upload";
@@ -82,6 +83,10 @@ export default function Composer() {
   const [previews, setPreviews] = useState<Record<string, string>>({});
   const [listening, setListening] = useState(false);
   const [micError, setMicError] = useState<null | "denied" | "language">(null);
+  const [better, setBetter] = useState(() => betterPreferred());   // the person's choice in Options (default on)
+  const [working, setWorking] = useState(false);                    // Better dictation: the clip is being turned into text
+  const [micNote, setMicNote] = useState<string | null>(null);      // a short line after a fallback or the 6 minute stop
+  const dictIds = useRef(new DictationIds());
   const [picked, setPicked] = useState<number | null>(null);   // the length chosen for a deck video (null: the deck's suggestion)
   const req = useRef<{ key: string; id: string }>({ key: "", id: "" });
   const area = useRef<HTMLTextAreaElement>(null);
@@ -166,9 +171,30 @@ export default function Composer() {
 
   // ---- dictation (only where the browser has it)
   const canDictate = useMemo(() => dictationSupported(), []);
-  function toggleDictation() {
+  const useBetter = better && betterAvailable(caps?.dictation) && recordingSupported();
+  async function toggleDictation() {
+    if (working) return;
     if (listening) { dict.current?.stop(); return; }
-    setMicError(null);
+    setMicError(null); setMicNote(null);
+    if (useBetter && caps?.dictation) {
+      const dc = caps.dictation;
+      setListening(true);
+      const h = await startBetter({
+        lang: speechLang(locale), languages: [locale === "es" ? "es" : "en"], getText: () => textNow.current,
+        setText: (text) => setForm((x) => (x ? { ...x, text } : x)), maxLength: 1500, maxSeconds: dc.maxClipSeconds, maxBytes: dc.maxClipBytes,
+        onWorking: () => { setListening(false); setWorking(true); },
+        onResult: (r) => {
+          setWorking(false); setListening(false); dict.current = null;
+          if (r.denied) setMicError("denied");
+          else if (r.id) { dictIds.current.add(r.id); if (r.limit) setMicNote(t("create.better_limit")); }
+          else { const k = r.kind ? betterErrorKey(r.kind) : null; setMicNote(r.limit ? t("create.better_limit") : k ? t(k) : null); }
+          area.current?.focus();
+          if (r.kind === "quota" || r.kind === "plan" || r.kind === "paused") void getCapabilities().then((x) => { if (x) setCaps(x); });
+        },
+      });
+      if (h) dict.current = h; else setListening(false);
+      return;
+    }
     const d = startDictation({
       lang: speechLang(locale),
       getText: () => textNow.current,
@@ -219,7 +245,7 @@ export default function Composer() {
     const text = f.text.trim();
     const { target_minutes: _len, ...rest } = options();
     const base = ready ? { ...rest, ...deckGenerateExtras(ready.id, picked) } : options();
-    const sent = { ...base, ...(ready ? {} : mediaExtras(directReady, libPicks.map((p) => p.id), photos.queue.metaById())) };
+    const sent = { ...base, ...(ready ? {} : mediaExtras(directReady, libPicks.map((p) => p.id), photos.queue.metaById())), ...dictIds.current.extra() };
     const key = JSON.stringify([text, sent, brief ?? null]);
     if (req.current.key !== key) req.current = { key, id: newRequestId() };   // same request, same id: a retry cannot bill twice
     try {
@@ -231,6 +257,7 @@ export default function Composer() {
         else setHint({ text: r.message, credits: r.kind === "credits" });   // a plan refusal (403 plan_*, 429 free_budget_spent) is the server's own sentence, shown here; the draft stays as it is
         return;
       }
+      dictIds.current.clear();   // those dictations now belong to this video
       if (!ready) saveChoices(f);
       rememberPrompt(r.videoId, text);   // the video page shows the sentence that made it
       rememberNote(r.videoId, r.look?.note ?? briefNote.current);   // "Made from your photos: the Cartoon look is not used..." is shown while the video is made
@@ -360,6 +387,7 @@ export default function Composer() {
 
         {/* status: only what there is to say (nothing persistent: the placeholder says what to do) */}
         <div className="compose-notes" aria-live="polite">
+          {micNote && !micError && <p className="hint" role="status">{micNote}</p>}
           {micError && <p className="hint hint-bad" role="status">{t(micError === "language" ? "create.dictate_language" : "create.dictate_denied")}</p>}
           {hint && <p id="create-hint" className="hint hint-bad" role="status">{hint.text}{hint.credits && <> <a href={APP_PATHS.credits}>{t("create.see_credits")}</a></>}</p>}
           {!hint && <p id="create-hint" className="sr-only-vmk" />}
@@ -401,7 +429,7 @@ export default function Composer() {
                       ...(c.deck && live ? [{ id: "deck", label: t("deck.add_title"), disabled: totalPhotos > 0 || busyDeck }] : [])]}
                     onPick={(id) => { if (id === "device") files.current?.click(); else if (id === "media") setPicker(true); else deckInput.current?.click(); }} />
                 )}
-                {canDictate && <button type="button" className={`icon-btn tool-btn ${listening ? "is-live" : ""}`} aria-label={listening ? t("create.dictate_stop") : t("create.dictate")} title={listening ? t("create.dictate_stop") : t("create.dictate")} onClick={toggleDictation}><Icon name={listening ? "stop" : "mic"} size={22} /></button>}
+                {(canDictate || useBetter) && <button type="button" className={`icon-btn tool-btn ${listening ? "is-live" : ""}`} aria-label={listening ? t("create.dictate_stop") : t("create.dictate")} title={listening ? t("create.dictate_stop") : t("create.dictate")} onClick={() => void toggleDictation()} disabled={working}><Icon name={listening ? "stop" : "mic"} size={22} /></button>}
                 {live && (
                   <Popover label={t("create.options")} className="opts-root" triggerClass="tool-btn tool-options" disabled={listening} trigger={<><Icon name="sliders" size={22} /><span className="tool-options-label">{t("create.options")}</span></>}>
                     {(close) => (
@@ -419,11 +447,14 @@ export default function Composer() {
                             ...wm.modes.map((m) => ({ id: m.id, label: t(m.id === "none" ? "create.wm_none" : m.id === "videomk" ? "create.wm_videomk" : m.available ? "create.wm_custom" : "create.wm_custom_locked"), disabled: !m.available })),
                           ]} onChange={(v) => set({ watermark: v === "saved" ? null : (v as Form["watermark"]) })} />
                           {wm.forced && <p className="hint">{t("create.wm_forced")}</p>}</div>}
+                        {betterAvailable(c.dictation) && recordingSupported() && <div className="opt"><label className="opt-row" htmlFor="o-better"><span>{t("create.better_title")}</span><input id="o-better" type="checkbox" role="switch" className="vm-switch" checked={better} onChange={(e) => { setBetter(e.target.checked); setBetterPreferred(e.target.checked); }} /></label><p className="hint">{t("create.better_hint")}</p></div>}
+                        {showUpgradeHint(c.dictation) && <p className="hint">{t("create.better_pro")}</p>}
                         <p className="hint">{t("create.options_note")}</p>
                       </div>
                     )}
                   </Popover>
                 )}
+                {working && <span className="tool-listening" role="status">{t("create.better_working")}</span>}
                 {listening && <span className="tool-listening"><span className="live-dot" aria-hidden="true" />{t("create.dictating")}</span>}
               </div>
 
