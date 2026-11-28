@@ -95,7 +95,7 @@ class ApiClient(
         startVideo(prompt, clientRequestId, options, media, mediaMeta, libraryMedia, brief, deck).videoId
 
     /** The same call with everything its answer says: the video, and (optional) the look it gets and one sentence when the look had to be adapted. */
-    suspend fun startVideo(prompt: String, clientRequestId: String, options: CreateOptions = CreateOptions(), media: List<String> = emptyList(), mediaMeta: JsonObject? = null, libraryMedia: List<String> = emptyList(), brief: JsonObject? = null, deck: String? = null, dictationIds: List<String> = emptyList()): StartedVideo {
+    suspend fun startVideo(prompt: String, clientRequestId: String, options: CreateOptions = CreateOptions(), media: List<String> = emptyList(), mediaMeta: JsonObject? = null, libraryMedia: List<String> = emptyList(), brief: JsonObject? = null, deck: String? = null, dictationIds: List<String> = emptyList(), clipIds: List<String> = emptyList()): StartedVideo {
         val body = buildJsonObject {
             // a presentation needs no description: an empty one is simply not sent (the server then uses its short default)
             // a background wish is asked for in words: the server's own phrase goes at the end of the description (docs/CREATE_API.md "Looks")
@@ -120,6 +120,8 @@ class ApiClient(
             options.watermarkMode?.let { mode -> put("watermark", buildJsonObject { put("mode", mode); if (mode == "videomk") options.watermarkPresence?.let { put("presence", it) } }) }
             brief?.let { put("brief", it) }
             // every better dictation that produced text for this brief: the server adds its cost to the video (docs/SPEECH_TO_TEXT_2026-11-28.md section 10)
+            // the person's own ready video clips (docs/VIDEO_UPLOAD_2026-11-28.md): ids only, ready ones only, never more than the plan's clips per video (the server checks)
+            if (clipIds.isNotEmpty()) put("video_assets", ClipRequests.assetsJson(clipIds))
             if (dictationIds.isNotEmpty()) put("dictation_ids", JsonArray(dictationIds.take(DictationIds.MAXIMUM).map { JsonPrimitive(it) }))
         }
         return StartedVideo.fromJson(send("POST", listOf("videos", "generate"), body = body, deck = deck != null))
@@ -285,6 +287,12 @@ class ApiClient(
     suspend fun library(method: String, path: List<String>, body: JsonObject? = null, query: List<Pair<String, String>> = emptyList()): JsonObject =
         send(method, listOf("library") + path, body, query = query, library = true)
 
+    /** The same client, pointed at another API base (the video clips live in their own API: `capabilities.video_upload.api_url`). Same token, same headers. */
+    fun forBase(base: HttpUrl): ApiClient = ApiClient(config.copy(apiBase = base), auth, http, appVersion, region, timeZone, locale)
+
+    /** A video clip call: `/users/{me}/...` on this base; every refusal is a [ClipRefusal] with the server's stable `code`. */
+    suspend fun clips(method: String, path: List<String>, body: JsonObject? = null): JsonObject = send(method, path, body, clip = true)
+
     /** The server said 401 to the first try of a call: the token is refreshed once and the call sent again before the session is given up. */
     private class TokenRejected : Exception()
 
@@ -292,15 +300,15 @@ class ApiClient(
      * Every JSON call. A 401 does not end the session at once: a phone back from sleep can hold a token its own clock still believes in, so the token is
      * refreshed (forced) and the call tried once more; only a second 401 is [ApiError.Unauthorized].
      */
-    private suspend fun send(method: String, path: List<String>, body: JsonObject? = null, conflictIsEdit: Boolean = false, query: List<Pair<String, String>> = emptyList(), library: Boolean = false, soft: Boolean = false, deck: Boolean = false): JsonObject {
+    private suspend fun send(method: String, path: List<String>, body: JsonObject? = null, conflictIsEdit: Boolean = false, query: List<Pair<String, String>> = emptyList(), library: Boolean = false, soft: Boolean = false, deck: Boolean = false, clip: Boolean = false): JsonObject {
         val a = auth.authorization()
-        return try { sendOnce(a, true, method, path, body, conflictIsEdit, query, library, soft, deck) } catch (e: TokenRejected) {
+        return try { sendOnce(a, true, method, path, body, conflictIsEdit, query, library, soft, deck, clip) } catch (e: TokenRejected) {
             val fresh = auth.reauthorized(a) ?: throw ApiError.Unauthorized
-            sendOnce(fresh, false, method, path, body, conflictIsEdit, query, library, soft, deck)
+            sendOnce(fresh, false, method, path, body, conflictIsEdit, query, library, soft, deck, clip)
         }
     }
 
-    private suspend fun sendOnce(a: Authorization, first: Boolean, method: String, path: List<String>, body: JsonObject?, conflictIsEdit: Boolean, query: List<Pair<String, String>>, library: Boolean, soft: Boolean, deck: Boolean): JsonObject {
+    private suspend fun sendOnce(a: Authorization, first: Boolean, method: String, path: List<String>, body: JsonObject?, conflictIsEdit: Boolean, query: List<Pair<String, String>>, library: Boolean, soft: Boolean, deck: Boolean, clip: Boolean = false): JsonObject {
         val url: HttpUrl = config.apiBase.newBuilder().addPathSegment("users").addPathSegment(a.userId).also { b -> path.forEach { b.addPathSegment(it) }; query.forEach { (k, v) -> b.addQueryParameter(k, v) } }.build()
         val rb = Request.Builder().url(url)
             .header("Authorization", "Bearer ${a.idToken}")
@@ -317,6 +325,11 @@ class ApiClient(
         } catch (e: CancellationException) { throw e } catch (e: IOException) { throw ApiError.Network }
         response.use { r ->
             val text = try { r.body.string() } catch (e: IOException) { throw ApiError.Network }
+            if (clip && r.code !in 200..299 && r.code != 401) {
+                val o = runCatching { parseObject(text) }.getOrNull()
+                // the account's safety pause carries `status: paused` (same answer as video creation); every other refusal carries a `code`
+                throw ClipRefusal(r.code, o?.str("code"), o?.str("message")?.takeIf { it.isNotBlank() }, o?.bool("can_upgrade") ?: false, o?.str("status") == "paused")
+            }
             when (r.code) {
                 in 200..299 -> return if (text.isBlank()) JsonObject(emptyMap()) else parseObject(text)
                 401 -> if (first) throw TokenRejected() else throw ApiError.Unauthorized

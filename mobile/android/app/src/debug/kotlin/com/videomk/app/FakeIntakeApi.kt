@@ -27,6 +27,7 @@ class FakeIntakeApi(private val deck: Boolean = false, private val looksJson: ((
     override suspend fun capabilities(): Capabilities {
         val free = planMode == "free" || planMode == "locked"
         return base().copy(
+            videoUpload = videoCaps(),
             lookPicker = lookPicker(),
             resolutions = listOf(ResolutionInfo("720p", "720p"), ResolutionInfo("1080p", "1080p"), ResolutionInfo("2160p", "4K", 2, !free && planMode != "pro" && planMode.isNotEmpty() || planMode.isEmpty(), if (planMode.isEmpty()) null else "max")),
             looks = LooksCaps(
@@ -40,6 +41,19 @@ class FakeIntakeApi(private val deck: Boolean = false, private val looksJson: ((
             plans = if (planMode.isEmpty()) PlanState.NONE else PlanState(PlanInfo(if (free) "free" else "pro", if (free) "Free" else "Pro", if (free) 30 else 300), null, "welcome"),
             planMaxSeconds = when { free -> 30; planMode == "pro" -> 300; else -> null }, longerPlan = when { free -> "pro"; planMode == "pro" -> "max"; else -> null },
         )
+    }
+
+    /** `files/fake_video`: "paused" (kill switch), "daily" (none left today), "plan" (needs Pro), "off" (feature absent); anything else: available, 3 a day, 2 per video. */
+    private fun videoCaps(): VideoUploadCaps? {
+        val m = runCatching { java.io.File("/data/data/com.videomk.app/files/fake_video").readText().trim() }.getOrDefault("")
+        val formats = listOf("video/mp4", "video/quicktime", "video/webm")
+        return when (m) {
+            "off" -> null
+            "paused" -> VideoUploadCaps(true, false, true, 3, 3, 2, 25L * 1024 * 1024, 5, formats, "https://fake.invalid", null)
+            "daily" -> VideoUploadCaps(true, true, false, 3, 0, 2, 25L * 1024 * 1024, 5, formats, "https://fake.invalid", null)
+            "plan" -> VideoUploadCaps(true, false, false, 0, 0, 2, 25L * 1024 * 1024, 5, formats, "https://fake.invalid", "pro")
+            else -> VideoUploadCaps(true, true, false, 3, 3, 2, 25L * 1024 * 1024, 5, formats, "https://fake.invalid", null)
+        }
     }
 
     private fun base() = Capabilities(

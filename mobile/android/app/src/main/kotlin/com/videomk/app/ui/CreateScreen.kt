@@ -105,6 +105,7 @@ import com.videomk.app.core.CreateOptions
 import com.videomk.app.core.CreatePlatforms
 import com.videomk.app.core.CreatePrefs
 import com.videomk.app.core.DeckState
+import com.videomk.app.core.ClipPhase
 import com.videomk.app.core.DictationPlan
 import com.videomk.app.core.PhotoCapacity
 import com.videomk.app.core.Lengths
@@ -161,6 +162,8 @@ fun CreateScreen(app: AppViewModel, composer: ComposerViewModel, onClose: () -> 
         composer.applyCapabilities(runCatching { api.capabilities() }.getOrDefault(com.videomk.app.core.Capabilities.FALLBACK))
     }
     composer.attachDeckApi(container?.deckApi, container?.deckUploader)
+    val clipUrl = caps.videoUpload?.apiUrl
+    composer.attachClipApi(remember(clipUrl, container) { container?.clipApi(clipUrl) }, container?.clipUploader)
     composer.attachDictationService(container?.dictationApi)
     val improving by composer.better.working.collectAsState()
     // dictation feedback (docs/DICTATION_FEEDBACK_2026-11-28.md): the panel replaces the dock while the mic works; TalkBack hears thresholds only; haptics at the moments that matter
@@ -204,6 +207,12 @@ fun CreateScreen(app: AppViewModel, composer: ComposerViewModel, onClose: () -> 
     val replacedText = stringResource(R.string.deck_replaced_photos)
     fun addDeck() { if (composer.totalPhotos > 0) container?.undo?.say(replacedText); launchDeckPicker() }
     val pickFromPhone = rememberPhonePhotoPicker(composer)
+    // the person's own video clips: the system photo picker, videos only (no permission needed); the answer is the sound question, then the upload
+    val videoFullText = androidx.compose.ui.res.pluralStringResource(R.plurals.vclip_reason_full, caps.videoUpload?.clipsPerVideo ?: 2, caps.videoUpload?.clipsPerVideo ?: 2)
+    val videoPicker = androidx.activity.compose.rememberLauncherForActivityResult(androidx.activity.result.contract.ActivityResultContracts.PickVisualMedia()) { uri ->
+        if (uri != null && !composer.addVideo(com.videomk.app.data.VideoPicker.pickOf(context.contentResolver, uri))) container?.undo?.say(videoFullText)
+    }
+    fun launchVideoPicker() { videoPicker.launch(androidx.activity.result.PickVisualMediaRequest(androidx.activity.result.contract.ActivityResultContracts.PickVisualMedia.VideoOnly)) }
     LaunchedEffect(composer.focusRequests) { if (composer.focusRequests > 0) { runCatching { focus.requestFocus() }; keyboard?.show() } }
     LaunchedEffect(tip) { if (tip != null) { delay(2500); tip = null } }
     LaunchedEffect(pulse) {
@@ -258,7 +267,7 @@ fun CreateScreen(app: AppViewModel, composer: ComposerViewModel, onClose: () -> 
     suspend fun send(brief: kotlinx.serialization.json.JsonObject?): com.videomk.app.core.SubmitOutcome {
         val o = composer.options
         val out = composer.peekForSend()
-        return app.submitAwait(out.brief, o, out.photos, out.meta, out.libraryIds, brief, out.deckId, out.deckTitle, out.dictationIds)
+        return app.submitAwait(out.brief, o, out.photos, out.meta, out.libraryIds, brief, out.deckId, out.deckTitle, out.dictationIds, out.clipIds)
     }
     /** Accepted: the library shows the Making card, Create closes. */
     fun accepted() {
@@ -398,6 +407,7 @@ fun CreateScreen(app: AppViewModel, composer: ComposerViewModel, onClose: () -> 
                             VmkMenu(photoMenu, { photoMenu = false }) {
                                 VmkMenuItem(stringResource(R.string.photo_menu_library), Sym.Image, Modifier.testTag("photoMenuLibrary")) { photoMenu = false; pickFromPhone() }
                                 if (container?.mediaApi != null) VmkMenuItem(stringResource(R.string.nav_tab_media), Sym.PhotoLibrary, Modifier.testTag("photoMenuMedia")) { photoMenu = false; composer.openAddPhotos(1) }
+                                VideoMenuRow(com.videomk.app.core.VideoRules.entry(caps.videoUpload, composer.clipper.leftToday, composer.clips.count { it.phase !is com.videomk.app.core.ClipPhase.Failed }), caps.videoUpload) { photoMenu = false; launchVideoPicker() }
                                 if (caps.deck != null) VmkMenuItem(stringResource(R.string.photo_menu_presentation), Sym.Slideshow, Modifier.testTag("addDeck")) { photoMenu = false; addDeck() }
                             }
                         }
@@ -430,7 +440,7 @@ fun CreateScreen(app: AppViewModel, composer: ComposerViewModel, onClose: () -> 
                     betterNote?.let { n -> betterNoteHint(n) }
                     if (deckState.attached) DeckCard(
                         deckState, caps.deck, onRemove = { composer.removeDeck() }, onPickAgain = { composer.removeDeck(); launchDeckPicker() }, onRetry = { composer.deck.retry() }, onKeepWaiting = { composer.deck.keepWaiting() },
-                    ) else if (photoTotal > 0) PhotoStrip(composer, locked) { photoMenu = true }
+                    ) else if (photoTotal > 0 || composer.clips.isNotEmpty()) PhotoStrip(composer, locked) { photoMenu = true }
                     tip?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary, modifier = Modifier.semantics { contentDescription = it }) }
                     // only when there is something to say: slides are wide, a platform's limit, what the photos can fill
                     if (composer.deckVerticalWarning) Column(Modifier.fillMaxWidth().testTag("deckVerticalWarning")) {
@@ -492,6 +502,7 @@ fun CreateScreen(app: AppViewModel, composer: ComposerViewModel, onClose: () -> 
 
     if (lookSheet) LookSheet(composer) { lookSheet = false }
     if (castSheet) CharactersSheet(composer) { castSheet = false }
+    composer.askingClip?.let { asking -> ClipSoundSheet(asking, onAnswer = { composer.clipper.answer(asking.id, it) }, onDismiss = { composer.clipper.dismissSheet(asking.id) }) }
     if (optionsOpen) CreateOptionsSheet(composer, caps, options, photoTotal > 0 || deckState.attached, onCostInfo = { costInfo = true }, onDismiss = { optionsOpen = false })
 
     if (composer.addPhotosRequest != null && container?.mediaApi != null) AddPhotosSheet(composer, container.mediaApi, container.mediaUploads?.arrivals, onDismiss = { composer.closeAddPhotos() })
@@ -633,6 +644,11 @@ private fun PhotoStrip(composer: ComposerViewModel, locked: Boolean, onAdd: () -
                 val photo = stripLibrary[i]
                 RemovableThumb({ composer.removeLibrary(photo.id) }) { PhotoThumb(photo, Modifier.fillMaxSize().testTag("attachedLibraryPhoto")) }
             }
+            val stripClips = composer.clips
+            items(stripClips.size, key = { stripClips[it].id }) { i ->
+                val clip = stripClips[i]
+                ClipTile(clip, onRemove = { composer.clipper.remove(clip.id) }, onTap = { if (clip.phase is ClipPhase.Failed) composer.clipper.retry(clip.id) else composer.clipper.askAgain(clip.id) })
+            }
             if (!locked) item {
                 val add = stringResource(R.string.create_add_photos)
                 Box(Modifier.size(64.dp).clip(RoundedCornerShape(12.dp)).background(Vmk.colors.surfaceRaised).clickable(role = Role.Button, onClickLabel = add, onClick = onAdd).semantics { contentDescription = add }, contentAlignment = Alignment.Center) {
@@ -643,7 +659,11 @@ private fun PhotoStrip(composer: ComposerViewModel, locked: Boolean, onAdd: () -
         // only when something needs saying: still preparing, or a notice
         if (composer.loading > 0) Text(composer.preparingText, style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary, modifier = Modifier.testTag("photosPreparing"))
         composer.notice?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = Vmk.colors.warning, modifier = Modifier.testTag("photosNotice")) }
-        Text(pluralStringResource(R.plurals.create_photos_count, total, total), style = MaterialTheme.typography.labelMedium, color = Vmk.colors.textTertiary, modifier = Modifier.testTag("photosNote"))
+        if (total > 0) Text(pluralStringResource(R.plurals.create_photos_count, total, total), style = MaterialTheme.typography.labelMedium, color = Vmk.colors.textTertiary, modifier = Modifier.testTag("photosNote"))
+        if (composer.clips.isNotEmpty()) {
+            ClipStatus(composer.clips, composer.caps.videoUpload, onRetry = { composer.clipper.retry(it) }, onKeepWaiting = { composer.clipper.keepWaiting(it) }, onRemove = { composer.clipper.remove(it) })
+            ClipCaption(composer.caps.videoUpload)
+        }
     }
 }
 

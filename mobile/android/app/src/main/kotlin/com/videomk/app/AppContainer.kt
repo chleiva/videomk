@@ -2,6 +2,7 @@ package com.videomk.app
 
 import android.content.Context
 import com.videomk.app.core.ApiBackend
+import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import com.videomk.app.core.ApiClient
 import com.videomk.app.core.AppConfig
 import com.videomk.app.core.AuthService
@@ -57,6 +58,13 @@ class AppContainer(
         val a = auth
         if (config != null && a != null) DebugHooks.fakeDeck(appContext) ?: com.videomk.app.core.ApiDeckApi(ApiClient(config, a, http, appVersion = BuildConfig.VERSION_NAME)) else null
     }
+    /** The person's own video clips live in their own API (`capabilities.video_upload.api_url`): same token, another base. Null without a server address or a usable URL. */
+    fun clipApi(url: String?): com.videomk.app.core.ClipApi? {
+        val a = auth
+        val base = url?.let { it.toHttpUrlOrNull() } ?: return null
+        return if (config != null && a != null) com.videomk.app.core.ApiClipApi(ApiClient(config, a, http, appVersion = BuildConfig.VERSION_NAME), base) else null
+    }
+    val clipUploader: com.videomk.app.core.ClipUploader by lazy { com.videomk.app.core.HttpClipUploader(http) }
     val deckUploader: com.videomk.app.core.DeckUploader? by lazy { DebugHooks.fakeDeckUploader(appContext) ?: com.videomk.app.core.HttpDeckUploader(http) }
     /** The paid "Better dictation" call (the API client itself). Null when the app has no server address or runs on fake data: the mic is then the phone's own. */
     val dictationApi: com.videomk.app.core.DictationService? by lazy {

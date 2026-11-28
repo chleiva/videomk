@@ -125,6 +125,7 @@ class AppViewModel(
 
     private val photoData = HashMap<String, List<ByteArray>>()   // photos waiting to be uploaded, kept until the video is accepted (a retry needs no new selection)
     private val libraryData = HashMap<String, List<String>>()   // My media photos of a pending request (ids only: nothing to upload)
+    private val clipData = HashMap<String, List<String>>()   // the ready video clips of a Create, kept for a retry
     private val dictationData = HashMap<String, List<String>>()   // the better dictations behind the brief, kept for a retry
     private val briefData = HashMap<String, kotlinx.serialization.json.JsonObject>()   // the answers of the request check, kept for a retry
     private val deckData = HashMap<String, String>()   // the ready presentation's id of a pending request (the file is already on the server)
@@ -212,7 +213,7 @@ class AppViewModel(
         auth?.signOut()
         // a removal still waiting is dropped with the session (nothing was sent: the video is simply still there at the next sign-in)
         undo.undo()
-        photoData.clear(); photoMeta.clear(); libraryData.clear(); briefData.clear(); deckData.clear(); dictationData.clear()
+        photoData.clear(); photoMeta.clear(); libraryData.clear(); briefData.clear(); deckData.clear(); dictationData.clear(); clipData.clear()
         update { AppState(phase = Phase.SignedOut) }
     }
 
@@ -332,7 +333,7 @@ class AppViewModel(
     // ask for a video without leaving the home screen
 
     /** Adds a placeholder row immediately and sends the request in the background; the user can keep browsing or ask for more. */
-    private fun register(brief: String, options: CreateOptions, photos: List<ByteArray>, meta: List<PhotoMeta?>, libraryMedia: List<String>, intake: kotlinx.serialization.json.JsonObject?, deck: String? = null, title: String? = null, dictationIds: List<String> = emptyList(), requestId: String? = null): PendingVideo {
+    private fun register(brief: String, options: CreateOptions, photos: List<ByteArray>, meta: List<PhotoMeta?>, libraryMedia: List<String>, intake: kotlinx.serialization.json.JsonObject?, deck: String? = null, title: String? = null, dictationIds: List<String> = emptyList(), requestId: String? = null, clipIds: List<String> = emptyList()): PendingVideo {
         val p = PendingVideo(
             id = requestId ?: java.util.UUID.randomUUID().toString(),
             brief = Brief.normalized(brief), options = options, photoCount = photos.size, createdAtMillis = clock(), title = title,
@@ -343,6 +344,7 @@ class AppViewModel(
         if (intake != null) briefData[p.id] = intake
         if (deck != null) deckData[p.id] = deck
         if (dictationIds.isNotEmpty()) dictationData[p.id] = dictationIds
+        if (clipIds.isNotEmpty()) clipData[p.id] = clipIds
         update { it.copy(pending = listOf(p) + it.pending) }
         return p
     }
@@ -356,12 +358,12 @@ class AppViewModel(
      * The Create screen's send: waits for generate's answer. Blocked, paused and network errors leave no card behind
      * (the caller keeps the draft and shows the sheet or a message); anything else ends on the Making card as before.
      */
-    suspend fun submitAwait(brief: String, options: CreateOptions, photos: List<ByteArray> = emptyList(), meta: List<PhotoMeta?> = emptyList(), libraryMedia: List<String> = emptyList(), intake: kotlinx.serialization.json.JsonObject? = null, deck: String? = null, deckTitle: String? = null, dictationIds: List<String> = emptyList()): SubmitOutcome {
+    suspend fun submitAwait(brief: String, options: CreateOptions, photos: List<ByteArray> = emptyList(), meta: List<PhotoMeta?> = emptyList(), libraryMedia: List<String> = emptyList(), intake: kotlinx.serialization.json.JsonObject? = null, deck: String? = null, deckTitle: String? = null, dictationIds: List<String> = emptyList(), clipIds: List<String> = emptyList()): SubmitOutcome {
         // The same Create (same text, options, photos) tapped again after a network failure keeps its request id: the server then returns the video
         // it already started instead of making and charging a second one (the answer may have been lost on the way back).
-        val fingerprint = attemptFingerprint(brief, options, photos, libraryMedia, deck, dictationIds)
+        val fingerprint = attemptFingerprint(brief, options, photos, libraryMedia, deck, dictationIds, clipIds)
         val reuse = lostAnswer?.takeIf { it.first == fingerprint }?.second
-        val p = register(brief, options, photos, meta, libraryMedia, intake, deck, deckTitle, dictationIds, requestId = reuse)
+        val p = register(brief, options, photos, meta, libraryMedia, intake, deck, deckTitle, dictationIds, requestId = reuse, clipIds = clipIds)
         val outcome = send(p.id, interactive = true)
         lostAnswer = if (outcome is SubmitOutcome.Offline) fingerprint to p.id else null
         return outcome
@@ -370,9 +372,9 @@ class AppViewModel(
     /** (what was asked, its request id) after a create whose answer never arrived; cleared by any other end. */
     private var lostAnswer: Pair<String, String>? = null
 
-    private fun attemptFingerprint(brief: String, options: CreateOptions, photos: List<ByteArray>, libraryMedia: List<String>, deck: String?, dictationIds: List<String>): String {
+    private fun attemptFingerprint(brief: String, options: CreateOptions, photos: List<ByteArray>, libraryMedia: List<String>, deck: String?, dictationIds: List<String>, clipIds: List<String> = emptyList()): String {
         val md = java.security.MessageDigest.getInstance("SHA-256")
-        md.update(listOf(Brief.normalized(brief), options.toString(), libraryMedia.joinToString(","), deck.orEmpty(), dictationIds.joinToString(",")).joinToString("\u0000").toByteArray())
+        md.update(listOf(Brief.normalized(brief), options.toString(), libraryMedia.joinToString(","), deck.orEmpty(), dictationIds.joinToString(","), clipIds.joinToString(",")).joinToString("\u0000").toByteArray())
         photos.forEach { md.update(it) }
         return md.digest().joinToString("") { "%02x".format(it) }
     }
@@ -496,7 +498,7 @@ class AppViewModel(
     fun dismissRetryNotice() = update { it.copy(retryNotice = null) }
 
     fun dismissPending(id: String) {
-        photoData.remove(id); photoMeta.remove(id); libraryData.remove(id); briefData.remove(id); deckData.remove(id); dictationData.remove(id)
+        photoData.remove(id); photoMeta.remove(id); libraryData.remove(id); briefData.remove(id); deckData.remove(id); dictationData.remove(id); clipData.remove(id)
         update { s -> s.copy(pending = s.pending.filterNot { it.id == id }) }
     }
 
@@ -515,13 +517,13 @@ class AppViewModel(
                 media = b.uploadPhotos(photos) { done, total -> setProgress(id, done, total) }
                 if (_state.value.pending.any { it.id == id }) setPendingState(id, PendingVideo.State.Sending)
             }
-            val start = suspend { b.startVideo(p.brief, p.id, p.options, media, PhotoMeta.requestJson(media, photoMeta[id].orEmpty()), libraryData[id].orEmpty(), briefData[id], deckData[id], dictationData[id].orEmpty()) }
+            val start = suspend { b.startVideo(p.brief, p.id, p.options, media, PhotoMeta.requestJson(media, photoMeta[id].orEmpty()), libraryData[id].orEmpty(), briefData[id], deckData[id], dictationData[id].orEmpty(), clipData[id].orEmpty()) }
             // A dropped answer does not mean a dropped request: ask once more with the SAME request id (safe: the server returns the video it already started).
             val started = try { start() } catch (e: ApiError.Network) { if (!interactive) throw e; kotlinx.coroutines.delay(REPLAY_DELAY_MILLIS); start() }
             val videoId = started.videoId
             val wasDeck = deckData[id] != null
             attachments[videoId] = media.size + libraryData[id].orEmpty().size + (if (wasDeck) 1 else 0)
-            photoData.remove(id); photoMeta.remove(id); libraryData.remove(id); briefData.remove(id); deckData.remove(id); dictationData.remove(id)
+            photoData.remove(id); photoMeta.remove(id); libraryData.remove(id); briefData.remove(id); deckData.remove(id); dictationData.remove(id); clipData.remove(id)
             update { s ->
                 s.copy(
                     briefs = s.briefs + (videoId to p.shownTitle), minutes = s.minutes + (videoId to p.options.minutes),

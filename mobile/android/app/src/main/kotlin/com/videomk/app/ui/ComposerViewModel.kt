@@ -18,6 +18,13 @@ import com.videomk.app.core.CreateCapsule
 import com.videomk.app.core.CreateCapsule.Event as E
 import com.videomk.app.core.CreateSubmit
 import com.videomk.app.core.DeckApi
+import com.videomk.app.core.ClipApi
+import com.videomk.app.core.ClipController
+import com.videomk.app.core.ClipEntry
+import com.videomk.app.core.ClipPhase
+import com.videomk.app.core.ClipUploader
+import com.videomk.app.core.VideoPick
+import com.videomk.app.data.AndroidClipMedia
 import com.videomk.app.core.DeckAttachment
 import com.videomk.app.core.DeckJourney
 import com.videomk.app.core.DeckOptions
@@ -67,7 +74,7 @@ import java.util.UUID
 class AttachedPhoto(val id: String = UUID.randomUUID().toString(), val data: ByteArray, val thumbnail: Bitmap?, val meta: PhotoMeta? = null)
 
 /** What the composer hands over when the user sends: the text, the prepared photos and (parallel to them) what was read from each original. */
-class Outgoing(val brief: String, val photos: List<ByteArray>, val meta: List<PhotoMeta?>, val libraryIds: List<String> = emptyList(), val deckId: String? = null, val deckTitle: String? = null, val dictationIds: List<String> = emptyList())
+class Outgoing(val brief: String, val photos: List<ByteArray>, val meta: List<PhotoMeta?>, val libraryIds: List<String> = emptyList(), val deckId: String? = null, val deckTitle: String? = null, val dictationIds: List<String> = emptyList(), val clipIds: List<String> = emptyList())
 
 /**
  * Everything about the video being composed: the text, the length and look, the attached photos (up to 100) and dictation.
@@ -222,14 +229,14 @@ class ComposerViewModel(app: Application) : AndroidViewModel(app) {
         return Outgoing(
             text, photos.map { it.data }, photos.map { it.meta?.limitedTo(policy)?.takeIf { m -> !m.isEmpty } }, library.map { it.id },
             deckId = ready?.id, deckTitle = ready?.let { DeckOptions.title((deckState as? DeckState.Ready)?.name) ?: Txt.s(R.string.deck_title_fallback) },
-            dictationIds = better.ids.list,
+            dictationIds = better.ids.list, clipIds = if (ready != null) emptyList() else clipper.readyIds,
         )
     }
 
     fun clearAfterSend() {
         lookNotice = null
         better.abandon(); better.clearIds()   // the video took the dictations: they count once, and nothing lands in the emptied field
-        photos.clear(); library.clear(); deck.cancel()
+        photos.clear(); library.clear(); deck.cancel(); clipper.clearAfterSend()
         cleanupIfIdle()
         notice = null
         text = ""
@@ -301,7 +308,7 @@ class ComposerViewModel(app: Application) : AndroidViewModel(app) {
     var lookNotice by mutableStateOf<String?>(null)
         private set
     /** What is attached decides which looks can be made (the person's own photos or slides are the pictures of the video). */
-    val attached: com.videomk.app.core.LookRules.Attached get() = com.videomk.app.core.LookRules.Attached(photos = totalPhotos > 0, deck = deckState.attached)
+    val attached: com.videomk.app.core.LookRules.Attached get() = com.videomk.app.core.LookRules.Attached(photos = totalPhotos > 0 || clips.isNotEmpty(), deck = deckState.attached)
     val lookHasCast: Boolean get() = com.videomk.app.core.LookRules.hasCast(options.lookChoice, caps.lookPicker)
 
     /** A tap on a look tile; the length moves when the look needs a longer video, and the line above the pills says so (the returned line is also read out). */
@@ -352,6 +359,7 @@ class ComposerViewModel(app: Application) : AndroidViewModel(app) {
     private fun cancelCheck() { checkJob?.cancel(); fire(E.Cancel) }
 
     fun applyCapabilities(c: Capabilities) {
+        if (clipper.caps != c.videoUpload) clipper.setCaps(c.videoUpload)
         caps = c; capsLoaded = true
         if (!touched) options = CreateDefaults.resolve(storedPrefs, c)
         else options = CreateDefaults.priced(options.copy(minutes = if (options.useSuggestedLength) options.minutes else CreateDefaults.withinPlan(options.minutes, c), style = if (c.lookPicker != null) "auto" else options.style), c)
@@ -359,9 +367,9 @@ class ComposerViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     /** Anything entered that Cancel should ask about. */
-    val hasDraft: Boolean get() = text.isNotBlank() || totalPhotos > 0 || deckState.attached
+    val hasDraft: Boolean get() = text.isNotBlank() || totalPhotos > 0 || deckState.attached || clips.isNotEmpty()
 
-    fun discardDraft() { better.abandon(); text = ""; photos.clear(); library.clear(); deck.cancel(); notice = null; cleanupIfIdle(); sheetKind = CreateSheetKind.None; cancelCheck() }
+    fun discardDraft() { better.abandon(); text = ""; photos.clear(); library.clear(); deck.cancel(); clipper.discard(); notice = null; cleanupIfIdle(); sheetKind = CreateSheetKind.None; cancelCheck() }
 
     private fun request(answers: List<Answer>) = IntakeRequest(text, options, totalPhotos, answers)
 
@@ -373,6 +381,7 @@ class ComposerViewModel(app: Application) : AndroidViewModel(app) {
         if (run.phase != CreateSubmit.Phase.Idle) return
         dictation.stop()
         intakeApi = intake; submitFn = submitter; acceptedFn = onAccepted; inlineError = null
+        if (clipper.busy) { inlineError = Txt.s(R.string.vclip_wait_to_create); return }   // a clip still being checked cannot be used: Create waits, nothing is lost
         if (intake == null || !caps.intake || deckState.attached) { finish(null); return }   // the request check is about a description and photos: a presentation brings its own story
         fire(E.Tap(willCheck = true))
         checkJob = viewModelScope.launch {
@@ -468,6 +477,21 @@ class ComposerViewModel(app: Application) : AndroidViewModel(app) {
     private val attachment = DeckAttachment(deck, { totalPhotos }, { photos.clear(); library.clear(); cleanupIfIdle(); notice = null })
 
     /** The real calls (or the debug fakes); the Create screen hands them over when it opens. */
+    // ---- the person's own video clips (docs/VIDEO_UPLOAD_CLIENTS_2026-11-28.md)
+    /** Every clip on the screen, in the order added (the strip draws them after the photos). */
+    var clips by mutableStateOf<List<ClipEntry>>(emptyList())
+        private set
+    private val clipRoot = java.io.File(app.cacheDir, "clips").also { ClipController.cleanLeftovers(it) }   // an app start removes what a killed process left
+    val clipper = ClipController(viewModelScope, clipRoot, AndroidClipMedia(app), onState = { clips = it })
+    /** The clip sheet is open for this entry (the sound question). */
+    val askingClip: ClipEntry? get() = clips.firstOrNull { it.phase is ClipPhase.AskSound }
+    fun attachClipApi(api: ClipApi?, uploader: ClipUploader?) = clipper.attach(api, uploader)
+    /** Pick answered: false when the video already holds all its clips (the caller says so). */
+    fun addVideo(pick: VideoPick): Boolean = clipper.add(pick)
+    fun addVideoNote(): String? = null
+    /** Debug and tests only: puts entries on screen as the journey would. */
+    fun debugSetClips(list: List<ClipEntry>) { clips = list }
+
     fun attachDeckApi(api: DeckApi?, uploader: DeckUploader?) = deck.attach(api, uploader)
 
     val deckVerticalWarning: Boolean get() = DeckOptions.verticalWarning(options, deckState.attached)
@@ -502,6 +526,7 @@ class ComposerViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     override fun onCleared() {
+        clipper.release()
         deck.release()
         cache.endSession()
         dictation.release()

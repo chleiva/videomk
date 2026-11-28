@@ -73,6 +73,8 @@ data class Capabilities(
     val longerPlan: String? = null,
     /** `dictation`: the paid "Better dictation". Null where the server does not say (older servers): the mic is the phone's own, as before. */
     val dictation: DictationCaps? = null,
+    /** The person's own video clips: absent where the server does not have the feature (then nothing about it is drawn). */
+    val videoUpload: VideoUploadCaps? = null,
 ) {
     /** A length this plan can make (every length where the server names no cap). */
     fun lengthAllowed(minutes: Double): Boolean = planMaxSeconds == null || minutes * 60 <= planMaxSeconds + 0.5
@@ -104,6 +106,7 @@ data class Capabilities(
             plans = PlanState.fromJson(o), planMaxSeconds = o.obj("lengths")?.int("plan_max_seconds"), planMaxPhotos = o.int("plan_max_photos"),
             longerPlan = o.obj("lengths")?.arr("locked")?.firstNotNullOfOrNull { it.asObject()?.str("requires_plan") },
             dictation = DictationCaps.fromJson(o.obj("dictation")),
+            videoUpload = VideoUploadCaps.fromJson(o.obj("video_upload")),
         ).let { c -> if (c.readyAspects.isEmpty() || c.resolutions.isEmpty()) FALLBACK else c }
     }
 }

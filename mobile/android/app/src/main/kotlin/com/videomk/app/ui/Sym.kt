@@ -11,6 +11,8 @@ import com.videomk.app.R
  * [PlaySparkle] (New video: a play triangle with a sparkle, never a bare plus). Screens take icons from here only.
  */
 object Sym {
+    val Videocam: ImageVector @Composable get() = ImageVector.vectorResource(R.drawable.sym_videocam)
+    val VolumeUp: ImageVector @Composable get() = ImageVector.vectorResource(R.drawable.sym_volume_up)
     val Check: ImageVector @Composable get() = ImageVector.vectorResource(R.drawable.sym_check)
     val AutoAwesome: ImageVector @Composable get() = ImageVector.vectorResource(R.drawable.sym_auto_awesome_fill)
     val Warning: ImageVector @Composable get() = ImageVector.vectorResource(R.drawable.sym_warning)
