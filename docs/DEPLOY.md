@@ -75,3 +75,11 @@ Until then prod renders at 1080p and below with 3008 MB functions (measured fine
 
 ## Owner console (its own stack per stage, built 2026-11-27)
 `backend/scripts/admin_console.sh qa diff|deploy` deploys `videomk-admin-<stage>` and nothing else (design: docs/ADMIN_CONSOLE_DESIGN_2026-11-28.md; commands for emergencies, first sign-in and travel: docs/ADMIN_RUNBOOK.md). It reads the main stack's table, workflow and pool names from the deployed launcher's settings when it is synthesized: nothing is exported from, or added to, the main stack. The main stack carries two things for it: the day index `GSI_UsageDay` on the videos table and the launcher's read of the switches item (`ops:switches` in the account-flags table, `lambdas/common/ops_switches.py`); both go out with the usual `scripts/deploy.sh`. A new stage needs two deploys (the passkey is bound to the console's address: put the output `ConsoleHost` in `stages.json` as `adminHost`, deploy again). The `aws-cdk` client has been seen to hang after the stack reached CREATE_COMPLETE; check `aws cloudformation describe-stacks` before waiting longer.
+
+## Compliance: test evidence (R181)
+
+Every test run and verification that matters is kept as a permanent, hash-chained log in the repo (`test-evidence/`),
+as audit evidence (commit sha, who, what, counts, redacted raw output for failures and releases). Record with
+`scripts/record_test_run.py --by <who> --label <suite>`, verify with `scripts/verify_test_evidence.py`, summary in
+`test-evidence/INDEX.md`. Release and CI runs must set `VMK_EVIDENCE=1 VMK_RELEASE=1`, and the verifier must pass before
+a release. Details and retention: `test-evidence/README.md`.

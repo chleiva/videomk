@@ -5,6 +5,8 @@ import boto3
 import pytest
 from moto import mock_aws
 
+from tests.evidence_plugin import pytest_addoption, pytest_sessionstart, pytest_terminal_summary  # noqa: F401  (opt-in test-evidence record)
+
 ROOT = os.path.join(os.path.dirname(__file__), "..", "lambdas")
 sys.path.insert(0, os.path.abspath(ROOT))
 
