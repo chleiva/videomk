@@ -9,6 +9,7 @@ from backend_stack import BackendStack
 from social_auth import flag as social_flag, missing_values
 
 app = cdk.App()
+cdk.Tags.of(app).add("project", "videomk")   # cost allocation: lets the AWS bill be split per project (activate the tag in Billing)
 if app.node.try_get_context("site"):  # the public website (videomk.com): scripts/site.sh
     from site_stack import SiteStack
     SiteStack(app, "videomk-site", domain="videomk.com", phase=app.node.try_get_context("sitePhase") or "zone",
