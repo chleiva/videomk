@@ -45,5 +45,8 @@ class MediaRecorderClip(context: Context) : ClipRecorder {
 
     override fun abort() { stopQuietly() }
 
+    /** Peak amplitude since the last call, as 0..1: the same recorder that makes the clip, so there is no second microphone consumer. */
+    override fun level(): Double = try { com.videomk.app.core.DictationFeedback.level(recorder?.maxAmplitude ?: 0) } catch (e: Throwable) { 0.0 }
+
     private fun stopQuietly() { val r = recorder ?: return; recorder = null; runCatching { r.stop() }; runCatching { r.release() } }
 }

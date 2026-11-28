@@ -199,6 +199,8 @@ class BetterDictationTest {
         override fun start(file: File): Boolean { if (!canStart) return false; this.file = file; return true }
         override fun stop(): Boolean { file!!.writeBytes(ByteArray(bytes) { 1 }); return usable }
         override fun abort() { aborted = true }
+        var level = 0.0
+        override fun level(): Double = level
     }
 
     private class FakeService(var result: DictateResult) : DictationService {
@@ -263,6 +265,7 @@ class BetterDictationTest {
             BetterFailure.TooLong to BetterNote.Limit, BetterFailure.Plan to null, BetterFailure.Paused to null, BetterFailure.Auth to null)) {
             val r = rig(service = FakeService(DictateResult.Failure(failure)))
             r.dictate(); r.engine.stop()
+            if (failure.isRetryable) { assertEquals("$failure", com.videomk.app.core.VoicePhase.Failed, r.engine.voice.value.phase); r.engine.useDeviceDictation() }   // a hiccup offers Retry first; the line comes when the person gives up
             assertEquals("$failure", "worse wordz", r.field.text); assertEquals("$failure", note, r.engine.note.value); assertTrue(r.engine.ids.list.isEmpty())
             r.engine.clearNote(); assertNull(r.engine.note.value)
         }
@@ -350,5 +353,48 @@ class BetterDictationTest {
 
     companion object {
         private const val CAPS = """{"aspects":[{"id":"16:9","label":"Landscape","ready":true}],"resolutions":[{"id":"1080p","label":"1080p"}],"dictation": %D, "lengths":{"min_minutes":1,"max_minutes":5}}"""
+    }
+
+    // ---- visible feedback: cancel, retry, timeout, level, allowance
+    @Test fun `cancel while recording discards the clip, restores the field and uploads nothing`() {
+        val r = rig(); r.dictate("Hi.", "heard words")
+        r.engine.discard()
+        assertEquals("Hi.", r.field.text); assertTrue(r.svc.clips.isEmpty()); assertTrue(r.rec.aborted)
+        assertEquals(com.videomk.app.core.VoicePhase.Idle, r.engine.voice.value.phase); assertFalse(r.engine.isListening)
+    }
+    @Test fun `cancel while transcribing stops waiting and the phone's words stay`() {
+        val svc = FakeService(DictateResult.Success(DictationAnswer(ID1, "late"))).also { it.gate = kotlinx.coroutines.CompletableDeferred() }
+        val r = rig(service = svc); r.dictate()
+        r.engine.stop(); assertEquals(com.videomk.app.core.VoicePhase.Transcribing, r.engine.voice.value.phase)
+        r.engine.discard(); svc.gate!!.complete(Unit)
+        assertEquals("worse wordz", r.field.text); assertTrue(r.engine.ids.list.isEmpty()); assertEquals(com.videomk.app.core.VoicePhase.Idle, r.engine.voice.value.phase)
+    }
+    @Test fun `a hiccup keeps the clip, retry sends it again and the better text lands`() {
+        val svc = FakeService(DictateResult.Failure(BetterFailure.Network))
+        val r = rig(service = svc); r.dictate()
+        r.engine.stop()
+        assertEquals(com.videomk.app.core.VoicePhase.Failed, r.engine.voice.value.phase); assertEquals(1, svc.clips.size)
+        svc.result = DictateResult.Success(DictationAnswer(ID1, "Better words"))
+        r.engine.retry()
+        assertEquals(2, svc.clips.size); assertEquals("Better words", r.field.text); assertEquals(com.videomk.app.core.VoicePhase.Inserted, r.engine.voice.value.phase)
+        assertTrue(r.engine.inserted.value); assertEquals(listOf(ID1), r.engine.ids.list)
+    }
+    @Test fun `an upload that never answers times out into a retryable failure`() {
+        val svc = FakeService(DictateResult.Success(DictationAnswer(ID1, "x"))).also { it.gate = kotlinx.coroutines.CompletableDeferred() }
+        val r = rig(service = svc); r.dictate(); r.engine.stop()
+        r.scope.testScheduler.advanceTimeBy(60_001); r.scope.testScheduler.runCurrent()
+        assertEquals(com.videomk.app.core.VoicePhase.Failed, r.engine.voice.value.phase)
+    }
+    @Test fun `the live bars follow the recorder level`() {
+        val r = rig(); r.rec.level = 0.3; r.dictate()
+        r.scope.testScheduler.advanceTimeBy(500); r.scope.testScheduler.runCurrent()
+        assertTrue(r.engine.bars.value.last() > 0.5)
+        r.rec.level = 0.0
+        r.scope.testScheduler.advanceTimeBy(1000); r.scope.testScheduler.runCurrent()
+        assertTrue(r.engine.bars.value.last() < 0.5)
+    }
+    @Test fun `the daily allowance can stop the recording before the clip limit`() {
+        val r = rig(caps = DictationCaps(premium = true, available = true, secondsLeft = 45)); r.dictate()
+        assertEquals(45, r.engine.voice.value.limit)
     }
 }

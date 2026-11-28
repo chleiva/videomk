@@ -263,4 +263,22 @@
     <string name="better_quota">Hoy llegaste al límite de dictado mejorado. Se usó el dictado de tu teléfono.</string>
     <string name="better_failed">El dictado mejorado no está disponible ahora. Se usó el dictado de tu teléfono.</string>
     <string name="better_limit">La grabación se detuvo a los 6 minutos.</string>
+    <string name="voice_listening">Escuchando…</string>
+    <string name="voice_transcribing">Transcribiendo…</string>
+    <string name="voice_slow">Tarda más de lo normal…</string>
+    <string name="voice_stop">Detener y transcribir</string>
+    <string name="voice_stop_native">Detener el dictado</string>
+    <string name="voice_left">quedan %1$d s</string>
+    <string name="voice_cancel">Cancelar</string>
+    <string name="voice_failed">No se pudo transcribir</string>
+    <string name="voice_retry">Reintentar</string>
+    <string name="voice_device">Usar el dictado del teléfono</string>
+    <string name="voice_rec_a11y">Grabando, %1$s</string>
+    <string name="voice_wait_a11y">Transcribiendo tu grabación</string>
+    <string name="voice_slow_a11y">Sigue transcribiendo, tarda más de lo normal</string>
+    <string name="voice_soon_a11y">La grabación se detiene en %1$d segundos</string>
+    <string name="voice_final_a11y">La grabación se detiene muy pronto</string>
+    <string name="voice_failed_a11y">No se pudo transcribir. Reintenta o usa el dictado del teléfono.</string>
+    <string name="voice_inserted_a11y">Texto agregado</string>
+    <string name="voice_cancelled_a11y">Grabación descartada</string>
 </resources>
