@@ -1082,10 +1082,18 @@ REVIEW_SYSTEM = (
     "Every `say` must be a word that this beat's narration really says, and the items of a beat are in the order the narration says their words.")
 
 
-def _repair(plan: Dict[str, Any], policy: Policy, scores: List[Dict[str, Any]], info: Dict[str, Any], notes: List[str], tag: str = "") -> List[Dict[str, Any]]:
+def mend_enabled() -> bool:
+    """Server setting WB_MEND (docs/WHITEBOARD_REVIEW_COST_2026-11-28.md): the model-free moves of `whiteboard/mend.py` (a word tie earlier, a text one size larger, a label
+    on another side, one end of a blocked arrow in another zone) are tried, each kept only if the video scores strictly better, BEFORE the director is asked. Default ON:
+    a board that passes after them is never sent to the director, and one that does not is sent with fewer complaints. 0/false/off switches it off."""
+    return os.environ.get("WB_MEND", "1").strip().lower() not in ("0", "false", "off", "no")
+
+
+def _repair(plan: Dict[str, Any], policy: Policy, scores: List[Dict[str, Any]], info: Dict[str, Any], notes: List[str], tag: str = "", mend_too: bool = False) -> List[Dict[str, Any]]:
     """What is repaired WITHOUT a model, in this order, whatever the director did or did not do: things that overlap or leave the board (`make_safe`), marks and
-    arrows that touch something (`make_clean`), a board that "looks empty" (`fill_out`). -> the scores of the boards as they now are."""
-    from .whiteboard import score
+    arrows that touch something (`make_clean`), a board that "looks empty" (`fill_out`), then (`mend_too`, setting WB_MEND) the small moves of `whiteboard/mend.py` for the
+    complaints that used to be the director's. -> the scores of the boards as they now are."""
+    from .whiteboard import mend, score
 
     import json
     beats = plan.get("beats") or []
@@ -1115,16 +1123,55 @@ def _repair(plan: Dict[str, Any], policy: Policy, scores: List[Dict[str, Any]], 
         info["filled_out"] = grown
         print("WHITEBOARD_SCORE " + json.dumps({"pass": "fill" + tag, **score.summary(scores), "boards": grown}, ensure_ascii=False))
         notes.append("whiteboard self-check: " + "; ".join(f"board {x['board']} looked empty, {x['larger']} thing(s) made larger ({x['coverage'][0] * 100:.0f} % -> {x['coverage'][1] * 100:.0f} % covered)" for x in grown))
+    if mend_too and mend_enabled() and any(not s["ok"] and set(s["kinds"]) & set(mend.MENDS) for s in scores):
+        try:
+            m = mend.mend(plan, policy.aspect, scores)
+            if m["kept"]:
+                scores = m["scores"]
+                info["mended" + tag] = {"kept": m["kept"], "tries": m["tries"]}
+                print("WHITEBOARD_SCORE " + json.dumps({"pass": "mend" + tag, **score.summary(scores), "kept": len(m["kept"]), "tries": m["tries"]}, ensure_ascii=False))
+                notes.append(f"whiteboard self-check: {len(m['kept'])} small move(s) without the director kept ({', '.join(sorted({k['kind'] for k in m['kept']}))})")
+        except Exception as e:  # noqa: BLE001 - a mend never breaks a plan
+            logging.warning("whiteboard mend failed (%s: %s)", type(e).__name__, str(e)[:200])
+    if mend_too and os.environ.get("WB_MEND_COUNT", "0").strip().lower() in ("1", "true", "on", "yes") and any("count" in s["kinds"] for s in scores):
+        try:
+            m = mend.fill_count(plan, policy.aspect, scores)       # OPTION, default OFF: words of the narration written to reach the count (numbers in the document)
+            if m["kept"]:
+                scores = m["scores"]
+                info["counted" + tag] = m["kept"]
+                notes.append(f"whiteboard self-check: {len(m['kept'])} key word(s) of the narration written to reach the count without the director")
+        except Exception as e:  # noqa: BLE001
+            logging.warning("whiteboard count fill failed (%s: %s)", type(e).__name__, str(e)[:200])
     return scores
 
 
-def _ask_director(ask: Callable[[str, str], str], system: str, user: str, attempts: int = 2) -> Dict[str, Any]:
+def director_budget(boards: int) -> int:
+    """Output tokens to ask for when `boards` failing boards go to the director (docs/WHITEBOARD_REVIEW_COST_2026-11-28.md). The answer itself is about 0.5 token per
+    character, 600 tokens or so per board; what varies is the model's thinking, measured 0 to over 14,000 tokens (on QA: 1 board 1.2k, 2 boards 4.7k to 6k, 3 boards 1k to 5.5k,
+    5 boards 14k to 16k and once more than 16k). A cap lower than that is paid in full and gives no answer. A cap is only what MAY be used, so a high one costs nothing more
+    when the thinking is short. The caller never goes below its own limit."""
+    return min(32000, 6000 + 3200 * max(1, boards))
+
+
+def _takes_budget(ask: Callable[..., str]) -> bool:
+    import inspect
+
+    try:
+        ps = inspect.signature(ask).parameters
+    except (TypeError, ValueError):
+        return False
+    return "max_tokens" in ps or any(p.kind == p.VAR_KEYWORD for p in ps.values())
+
+
+def _ask_director(ask: Callable[..., str], system: str, user: str, attempts: int = 2, budget: Optional[int] = None) -> Dict[str, Any]:
     """The director's answer as a dict. A second try (with what was wrong said plainly) when the first is not JSON even after the tolerant reading of `loose_json`:
-    one retry, never more. Raises the last error when both fail."""
+    one retry, never more. Raises the last error when both fail. `budget` (output tokens) is passed to an `ask` that takes `max_tokens`, 1.5 times higher on the retry:
+    an answer cut off at the limit before any JSON (the model thought all of it away) is asked again with room, not with the same limit."""
     err: Optional[Exception] = None
     note = ""
+    wide = budget is not None and _takes_budget(ask)
     for k in range(max(1, attempts)):
-        raw = ask(system, user + note)
+        raw = ask(system, user + note, max_tokens=min(32000, int(budget * 1.5 ** k))) if wide else ask(system, user + note)
         try:
             data = loose_json(raw)
             if isinstance(data, dict):
@@ -1158,7 +1205,7 @@ def review(plan: Dict[str, Any], policy: Optional[Policy], ask: Optional[Callabl
         first = score.summary(scores)
         info: Dict[str, Any] = {"first": first, "replanned": False, "director_calls": 0}
         print("WHITEBOARD_SCORE " + json.dumps({"pass": 1, **first, "complaints": [c for s in scores if not s["ok"] for c in s["complaints"]][:12]}, ensure_ascii=False))
-        scores = _repair(plan, policy, scores, info, notes)
+        scores = _repair(plan, policy, scores, info, notes, mend_too=True)
         asked = [s for s in scores if not s["ok"] and s.get("needs_director")]
         info["failed_before_director"] = sum(1 for s in scores if not s["ok"])
         if asked and ask is not None:
@@ -1172,7 +1219,7 @@ def review(plan: Dict[str, Any], policy: Optional[Policy], ask: Optional[Callabl
                                  f"Its board now: {json.dumps({'board': pr.get('board', 'new'), 'items': pr.get('items')}, ensure_ascii=False)}")
             try:
                 info["director_calls"] = 1
-                data = _ask_director(lambda sy, us: ask(sy, us), REVIEW_SYSTEM + policy.prompt_block(language), "\n\n".join(parts))
+                data = _ask_director(ask, REVIEW_SYSTEM + policy.prompt_block(language), "\n\n".join(parts), budget=director_budget(len(asked)) if os.environ.get("WB_REVIEW_BUDGET", "1").strip().lower() not in ("0", "false", "off", "no") else None)
                 from .scenes import ELEMENTS
 
                 trial = copy.deepcopy(plan)
@@ -1196,7 +1243,7 @@ def review(plan: Dict[str, Any], policy: Optional[Policy], ask: Optional[Callabl
                         retie(b["scene"]["props"], str(b.get("narration") or ""))
                         keep_busy(b["scene"]["props"], str(b.get("narration") or ""))
                     again = score.score_plan(trial, policy.aspect)
-                    again = _repair(trial, policy, again, {}, [], tag="-2")      # the new boards get the same repairs as the first ones before they are compared
+                    again = _repair(trial, policy, again, {}, [], tag="-2", mend_too=True)      # the new boards get the same repairs as the first ones before they are compared
                     second = score.summary(again)
                     took = score.better(scores, again)
                     info.update(replanned=True, beats=[i + 1 for i in want], second=second, kept="new" if took else "first")

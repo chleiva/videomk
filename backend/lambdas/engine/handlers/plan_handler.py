@@ -169,9 +169,12 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         note_tokens(meta)
         return text
 
-    def ask_review(system: str, user: str) -> str:
-        # the whiteboard self-check's rewrite of failing boards: the model and effort are settings (llm.WB_REVIEW_MODEL / WB_REVIEW_EFFORT)
-        text, meta = llm.complete(system, user, max_tokens=plan_max_tokens(minutes), model=llm.WB_REVIEW_MODEL or None, effort=llm.WB_REVIEW_EFFORT)
+    def ask_review(system: str, user: str, max_tokens: Optional[int] = None) -> str:
+        # the whiteboard self-check's rewrite of failing boards: the model and effort are settings (llm.WB_REVIEW_MODEL / WB_REVIEW_EFFORT). The output limit is the
+        # script's own or the director's (whiteboard_policy.director_budget, by number of boards sent), whichever is higher: the thinking of 5 boards took 14k+ tokens on QA
+        text, meta = llm.complete(system, user, max_tokens=min(32000, max(plan_max_tokens(minutes), max_tokens or 0)), model=llm.WB_REVIEW_MODEL or None, effort=llm.WB_REVIEW_EFFORT)
+        if meta.get("stop_reason") == "max_tokens":
+            logging.warning("WB_REVIEW_CUT_OFF tokens_out=%s", meta.get("tokens_out"))
         spent["script"] = spent.get("script", 0.0) + meta["cost_usd"]
         note_tokens(meta)
         return text
