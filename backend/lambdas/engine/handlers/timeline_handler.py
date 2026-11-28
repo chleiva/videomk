@@ -159,6 +159,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     tl["language"] = plan.get("language", "en")
     key = f"{pfx}timeline_r{rev}.json"
     awsio.put_json(key, tl)
+    big = bool(format_options.is_4k(frame["resolution"]) and mode != "preview")   # the final render of a 4K video: the 10 GB render function; everything else may use the HD one (engine_v2.py)
     return {
         "video_id": video_id,
         "user_id": event.get("user_id"),
@@ -168,7 +169,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         "mode": mode,
         "timeline_key": key,
         "duration": tl["duration"],
-        "chunks": [{**c, "video_id": video_id, "timeline_key": key} for c in (
-            chunk_plan(tl, CHUNK_SECONDS_4K, draft=False, max_frames=CHUNK_MAX_FRAMES_4K) if format_options.is_4k(frame["resolution"]) and mode != "preview"
+        "chunks": [{**c, "video_id": video_id, "timeline_key": key, "big": big} for c in (
+            chunk_plan(tl, CHUNK_SECONDS_4K, draft=False, max_frames=CHUNK_MAX_FRAMES_4K) if big
             else chunk_plan(tl, CHUNK_SECONDS, draft=(mode == "preview"), max_frames=CHUNK_MAX_FRAMES_VECTOR if any(sc.get("type") == "vector_scene" or (sc.get("type") == "presenter" and (sc.get("props") or {}).get("backdrop")) for sc in tl["scenes"]) else 0))],   # a character in front of a cartoon scene draws that scene too
     }

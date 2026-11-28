@@ -8,7 +8,7 @@ from generate_video.db import set_attributes, update_status
 
 from common import making
 
-from .. import assets, awsio, making_progress, media, pipeline
+from .. import assets, awsio, costs, making_progress, media, pipeline
 
 OUTPUT_BUCKET = os.environ.get("ASSETS_BUCKET", "videomk.com")
 
@@ -32,6 +32,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     if rev == 1 and mode != "preview":
         making_progress.finishing(video_id)   # the Making screen: "Adding the finishing touches" (only while the video is being made; never raises)
     segs = sorted(event["render"]["segments"], key=lambda s: int(s["k"]))
+    costs.add_render(video_id, sum(float(s.get("gbs") or 0) for s in segs))   # what the render chunks of this run cost (estimate; information, never fails a video)
     with tempfile.TemporaryDirectory() as tmp:
         paths = []
         for s in segs:

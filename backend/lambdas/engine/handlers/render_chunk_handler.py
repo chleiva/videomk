@@ -3,6 +3,7 @@ import io
 import os
 import re
 import tempfile
+import time
 from typing import Any, Dict, Optional
 
 from PIL import Image
@@ -48,6 +49,7 @@ def segment_key(video_id: str, h: str, draft: bool) -> str:
 
 
 def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
+    t_start = time.time()
     video_id, k = str(event["video_id"]), int(event["k"])
     draft = bool(event.get("draft"))
     key = segment_key(video_id, str(event["hash"]), draft)
@@ -62,4 +64,6 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         f0 = int(event.get("f0") or 0)   # a piece of a long chunk (4K, timeline.chunk_plan max_frames) starts part-way in; every other chunk at its first frame
         info = pipeline.render_chunk(ct, f0, f0 + int(event["frames"]), out, make_image_loader(video_id), draft=draft, clip_loader=make_clip_loader(video_id, tmp))
         awsio.upload(out, key, "video/mp2t", working=True)
-    return {"k": k, "key": key, "cached": False, **info}
+    # GB-seconds this chunk will be billed for (wall time x the function's memory): the finalize step adds them up into the video's `c_render` (costs.render_cost)
+    gbs = round((time.time() - t_start) * float(getattr(context, "memory_limit_in_mb", 0) or 0) / 1024.0, 2)
+    return {"k": k, "key": key, "cached": False, **info, **({"gbs": gbs} if gbs > 0 else {})}

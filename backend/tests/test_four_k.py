@@ -223,13 +223,14 @@ def test_the_timeline_step_uses_short_chunks_for_4k_only(monkeypatch):
     plan4 = _plan(fo.frame_dict("16:9", "2160p"))
     tl, out = _run_timeline(monkeypatch, plan4)
     assert (tl["width"], tl["height"]) == (3840, 2160)
-    assert [{k: c[k] for k in c if k not in ("video_id", "timeline_key")} for c in out["chunks"]] == chunk_plan(tl, timeline_handler.CHUNK_SECONDS_4K, max_frames=timeline_handler.CHUNK_MAX_FRAMES_4K)
+    assert [{k: c[k] for k in c if k not in ("video_id", "timeline_key", "big")} for c in out["chunks"]] == chunk_plan(tl, timeline_handler.CHUNK_SECONDS_4K, max_frames=timeline_handler.CHUNK_MAX_FRAMES_4K)
     assert max(c["frames"] for c in out["chunks"]) <= timeline_handler.CHUNK_MAX_FRAMES_4K == 180 and timeline_handler.CHUNK_SECONDS_4K == 6
     tl2, prev = _run_timeline(monkeypatch, plan4, mode="preview")       # a preview of a 4K video: ordinary draft chunks
     assert all(c["draft"] and "f0" not in c for c in prev["chunks"]) and [c["hash"] for c in prev["chunks"]] == [c["hash"] for c in chunk_plan(tl2, timeline_handler.CHUNK_SECONDS, draft=True)]
     tl3, hd = _run_timeline(monkeypatch, _plan(fo.frame_dict("16:9", "1080p")))
-    assert [{k: c[k] for k in c if k not in ("video_id", "timeline_key")} for c in hd["chunks"]] == chunk_plan(tl3, timeline_handler.CHUNK_SECONDS)   # 1080p: as always
+    assert [{k: c[k] for k in c if k not in ("video_id", "timeline_key", "big")} for c in hd["chunks"]] == chunk_plan(tl3, timeline_handler.CHUNK_SECONDS)   # 1080p: as always
     assert not {c["hash"] for c in out["chunks"]} & {c["hash"] for c in hd["chunks"]}
+    assert all(c["big"] is True for c in out["chunks"]) and all(c["big"] is False for c in hd["chunks"]) and all(c["big"] is False for c in prev["chunks"])   # 4K final: the 10 GB render function; HD and every draft: the small one
 
 
 def test_the_render_function_renders_its_piece(monkeypatch):

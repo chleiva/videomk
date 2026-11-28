@@ -25,3 +25,9 @@ Details and evidence: `docs/SPEECH_TO_TEXT_2026-11-28.md`. For Pro and Max the d
 - 1,000 paying users, 20 videos a month, 70 % dictated, 1.3 retries: $82 (1 min), $246 (3 min), $410 (5 min) a month, 0.4 to 2 % of about $20,000 revenue.
 - Live (streaming) words would cost 3.8 times as much ($0.017 a minute); not planned. Caps (decided 2026-11-28, `docs/SPEECH_TO_TEXT_2026-11-28.md` section 8): Pro 600 s, Max 1,200 s a day; worst case a user maxes every day for 30 days: Pro $1.35 (9 % of $14.99), Max $2.70 (7 % of $39.99). Built on branch `paid-dictation` (not deployed): `c_stt`/`stt_seconds` on the video row via the create request's `dictation_ids`.
 - Tested 2026-11-28 on 5 languages (clips from Polly): about $0.03 of API calls in total.
+
+## Cost levers, 28 Nov 2026 (docs/COST_LEVERS_2026-11-28.md, not deployed)
+- **Whiteboard plans cost $0.14 to $0.33** (measured): a script call of $0.064, a trim retry that thinks to the output limit and is thrown away ($0.12, in 2 of 3 plans), a board review ($0.04 to $0.10). Normal 60 s plan: one script call of $0.043 (two with a retry).
+- **Prompt caching** of the first 8,239 tokens of the script prompt (same in every language and look) on Bedrock for Sonnet 5.5: a cache read saves $0.0157 a call, a write costs $0.0041 extra. Normal 60 s plan: $0.086 off, $0.073 on (cold, with a retry), $0.049 on (warm). Switch `PROMPT_CACHE=off`; falls back by itself if a model rejects it. `cache_read_tokens` / `cache_write_tokens` on the video; `c_script` includes the cached-token prices.
+- **`c_render` / `render_gbs`** on the video: the render chunks' GB-seconds x $0.0000166667, estimated; not in `cost_usd` (its cap would trip on long 4K videos); the plans economics should use `cost_usd + c_render`.
+- **HD render on a 4,096 MB function** (4K stays 10,240 MB): estimated $0.07 -> $0.028 a minute, to be proven on QA first (`-c hdRenderMemoryMb=0` turns it off).

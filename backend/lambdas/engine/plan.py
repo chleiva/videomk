@@ -20,6 +20,7 @@ from . import whiteboard_policy
 from . import presenter_policy
 from . import voices as voice_mod
 from .audio import PLANNER_SFX
+from .llm import CACHE_BREAK
 from .netsafe import quality_fixes
 from .usermedia import PHOTO_ID_RE
 
@@ -178,7 +179,7 @@ Otherwise return ONLY JSON (no markdown, no code fences):
             "scene": {{"type": "<type>", "props": {{...}}}}, "sfx": "<optional>"}}],
  "music": {{"style": "<id>", "energy": 3}}}}
 
-{scene_docs(images=max_images_per_minute > 0, clips=allow_clips)}
+{scene_docs(images=max_images_per_minute > 0, clips=allow_clips)}{CACHE_BREAK}
 
 Language: write EVERYTHING viewers read or hear (title, description, narration, scene text) in {voice_mod.LANGUAGES.get(language, "English")}.{search_language_rule(language)}
 Voices: never a voice name of your own choosing. For each speaker say what you WANT and the studio casts the closest voice it has:
@@ -1007,6 +1008,21 @@ def validate_plan(plan: Dict[str, Any], **kw: Any) -> Tuple[Dict[str, Any], List
         return _validate_plan(plan, **kw)
 
 
+RETRY_EFFORT = os.environ.get("PLAN_RETRY_EFFORT", "")   # OFF by default (not proven quality-neutral): "low" would stop the trim retry spending 8,600 tokens thinking (QA 2026-11-28, docs/COST_LEVERS_2026-11-28.md)
+
+
+def ask_with_effort(ask: Callable[..., str], system: str, user: str, effort: Optional[str]) -> str:
+    """ask(system, user), with `effort=` only when asked for and when the callable takes it (the planning callables of tests and scripts take two arguments)."""
+    if effort:
+        import inspect
+        try:
+            if "effort" in inspect.signature(ask).parameters:
+                return ask(system, user, effort=effort)
+        except (TypeError, ValueError):
+            pass
+    return ask(system, user)
+
+
 def generate_plan(topic: str, notes: str, target_minutes: float, llm: Callable[[str, str], str], *, retries: int = 1, language: str = "en", region: Optional[str] = None, today: Optional[str] = None,
                   photos: Optional[List[Dict[str, Any]]] = None, max_images_per_minute: float = DEFAULT_MAX_IMAGES_PER_MINUTE,
                   allow_clips: bool = True, music_tracks: Optional[List[Dict[str, Any]]] = None, craft: str = "", story: Optional[Dict[str, Any]] = None) -> Tuple[Dict[str, Any], List[str]]:
@@ -1019,7 +1035,7 @@ def generate_plan(topic: str, notes: str, target_minutes: float, llm: Callable[[
     last_err: Optional[Exception] = None
     over: Optional[Tuple[Dict[str, Any], List[str], List[Dict[str, Any]]]] = None   # QUALITY_FIXES: a valid script that was only too long (kept if the trimmed one is worse)
     for attempt in range(retries + 1):
-        text = llm(system_prompt(language, region, max_images_per_minute, allow_clips, music_tracks) + craft, user)
+        text = ask_with_effort(llm, system_prompt(language, region, max_images_per_minute, allow_clips, music_tracks) + craft, user, (RETRY_EFFORT or None) if attempt else None)
         rejects: List[Dict[str, Any]] = []
         try:
             plan, warns = validate_plan(parse_plan_json(text), language=language, region=region, photo_ids=[p["id"] for p in photos or []], photo_captions={p["id"]: p.get("caption") or "" for p in photos or []}, silence_share=0.34 if photos else 0.25,
