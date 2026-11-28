@@ -54,6 +54,10 @@ final class AppModel {
     private(set) var retrying: Set<String> = []            // failed videos whose Try again is on its way
     private var attachments: [String: Int] = [:]           // videos made in this session: how many photos and presentations they were made with (an older server's fallback never drops them)
     struct RetryNotice: Identifiable, Equatable { let id = UUID(); var title: String = tr("retry.notice_title"); let message: String }
+    /// The Better dictation clips behind a start that is under way (sent as `dictation_ids`).
+    private var dictationIDsByStart: [String: [String]] = [:]
+    /// The call that turns a recording into text (nil when signed out or not configured).
+    var dictationService: (any DictationServing)? { api }
     var composerLibrary: [LibraryPhoto] = []               // library photos chosen for the next video
     var mediaSelection: [LibraryPhoto] = []                // what is ticked on the Media tab right now (the round (+) attaches it to a new video)
     var mediaPushed = false                                // a collection page is open in Media: the tab bar steps aside there too
@@ -372,12 +376,13 @@ final class AppModel {
 
     /// Adds a placeholder row immediately and sends the request in the background; the user can keep browsing or ask for more.
     /// `held`: the Create screen stays open on "Starting your video" until the outcome is known (`startOutcome`), then calls `releaseStart` or `abandonStart`.
-    @discardableResult func submit(brief: String, options: CreateOptions, photos: [Data] = [], meta: [PhotoMeta?] = [], libraryMedia: [String] = [], intake: [String: String]? = nil, deckID: String? = nil, deckName: String? = nil, sendsMinutes: Bool = true, held: Bool = false) -> String {
+    @discardableResult func submit(brief: String, options: CreateOptions, photos: [Data] = [], meta: [PhotoMeta?] = [], libraryMedia: [String] = [], intake: [String: String]? = nil, deckID: String? = nil, deckName: String? = nil, sendsMinutes: Bool = true, held: Bool = false, dictationIDs: [String] = []) -> String {
         let title = Brief.normalized(brief).isEmpty && deckID != nil ? tr("deck.video_title", deckName ?? "") : Brief.normalized(brief)
         let p = PendingVideo(brief: title, options: options, photoCount: photos.count, state: photos.isEmpty ? .sending : .uploading(done: 0, total: photos.count))
         if !photos.isEmpty { photoData[p.id] = photos; photoMeta[p.id] = meta }
         if !libraryMedia.isEmpty { libraryIDs[p.id] = libraryMedia }
         if let intake, !intake.isEmpty { intakeBriefs[p.id] = intake }
+        if !dictationIDs.isEmpty { dictationIDsByStart[p.id] = dictationIDs }
         if let deckID { deckIDs[p.id] = deckID; deckMinutes[p.id] = sendsMinutes; deckPrompts[p.id] = Brief.normalized(brief) }
         pending.insert(p, at: 0)
         if held { heldStarts.insert(p.id) } else { submitted += 1; selectedTab = 0 }      // the new video is on the Videos tab: go and see it making
@@ -580,7 +585,8 @@ final class AppModel {
             if self.media?.isFake == true, deckIDs[id] != nil { acceptFakeDeck(p); return }        // fake runs never reach the backend
             if self.media?.isFake == true { try await acceptFake(p); return }
             #endif
-            let started = try await create(brief: deckIDs[id] != nil ? (deckPrompts[id] ?? "") : p.brief, requestID: p.id, options: p.options, media: media, mediaMeta: PhotoMetaReader.mediaMeta(ids: media, metas: photoMeta[id] ?? []), libraryMedia: libraryIDs[id] ?? [], intake: intakeBriefs[id], deck: deckIDs[id], sendMinutes: deckMinutes[id] ?? true)
+            let started = try await create(brief: deckIDs[id] != nil ? (deckPrompts[id] ?? "") : p.brief, requestID: p.id, options: p.options, media: media, mediaMeta: PhotoMetaReader.mediaMeta(ids: media, metas: photoMeta[id] ?? []), libraryMedia: libraryIDs[id] ?? [], intake: intakeBriefs[id], deck: deckIDs[id], sendMinutes: deckMinutes[id] ?? true, dictationIDs: dictationIDsByStart[id] ?? [])
+            dictationIDsByStart[id] = nil
             let videoID = started.videoID
             remember(started)
             if deckIDs[id] != nil { deckVideos.insert(videoID) }
@@ -619,9 +625,9 @@ final class AppModel {
 
     // MARK: create / play
 
-    func create(brief: String, requestID: String, options: CreateOptions, media: [String] = [], mediaMeta: [String: PhotoMeta] = [:], libraryMedia: [String] = [], intake: [String: String]? = nil, deck: String? = nil, sendMinutes: Bool = true) async throws -> StartedVideo {
+    func create(brief: String, requestID: String, options: CreateOptions, media: [String] = [], mediaMeta: [String: PhotoMeta] = [:], libraryMedia: [String] = [], intake: [String: String]? = nil, deck: String? = nil, sendMinutes: Bool = true, dictationIDs: [String] = []) async throws -> StartedVideo {
         guard let api else { throw APIError.server }
-        do { return try await api.startVideo(prompt: brief, clientRequestID: requestID, options: options, media: media, mediaMeta: mediaMeta, libraryMedia: libraryMedia, brief: intake, deck: deck, sendMinutes: sendMinutes) }
+        do { return try await api.startVideo(prompt: brief, clientRequestID: requestID, options: options, media: media, mediaMeta: mediaMeta, libraryMedia: libraryMedia, brief: intake, deck: deck, sendMinutes: sendMinutes, dictationIDs: dictationIDs) }
         catch let e as AuthError where e == .signedOut { await signOut(); throw APIError.unauthorized }
     }
 

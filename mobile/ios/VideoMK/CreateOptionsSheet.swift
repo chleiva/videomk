@@ -20,8 +20,23 @@ struct CreateOptionsSheet: View {
                     Divider().overlay(Theme.outline)
                     languageRow
                 }
+                betterDictationRow
                 if readyFormats.count > 1 { group(tr("create.format")) { formatTiles }.id("format") }
             }
+        }
+    }
+
+    /// "Better dictation" on or off (on by default where the plan has it); a small line about Pro where it does not. Never a nag: no button, no badge.
+    @AppStorage(BetterDictationPreference.key) private var betterOn = true
+    @ViewBuilder private var betterDictationRow: some View {
+        if let d = create.caps.dictation, d.isUsable {
+            VStack(alignment: .leading, spacing: Theme.Space.xs) {
+                Toggle(isOn: $betterOn) { Label(tr("better.title"), systemImage: "waveform").font(.role(.body)).foregroundStyle(Theme.text) }
+                    .tint(Theme.primary).frame(minHeight: 52).accessibilityIdentifier("betterDictationToggle")
+                Text(tr("better.hint")).font(.role(.footnote)).foregroundStyle(Theme.textSecondary).fixedSize(horizontal: false, vertical: true)
+            }
+        } else if let d = create.caps.dictation, d.showsUpgradeHint {
+            Text(tr("better.pro")).font(.role(.footnote)).foregroundStyle(Theme.textSecondary).accessibilityIdentifier("betterDictationPro")
         }
     }
 

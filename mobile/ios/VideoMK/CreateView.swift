@@ -14,7 +14,7 @@ struct CreateView: View {
     @Environment(\.dynamicTypeSize) private var typeSize
     @Environment(\.colorScheme) private var scheme
     @Bindable var create: CreateModel
-    @State private var dictation = Dictation()
+    @State private var dictation = BetterDictation()
     @State private var showingLibrary = false          // "Media": the person's own library, as a picker
     @State private var showingPhonePicker = false      // "Photo library": the system picker, directly
     @State private var phoneItems: [PhotosPickerItem] = []
@@ -93,7 +93,8 @@ struct CreateView: View {
                 try? await Task.sleep(for: .milliseconds(450)); if !create.form.hasContent, typingTarget == nil { focused = true }
             }
         }
-        .onAppear { dictation.onText = { create.form.text = $0 }; dictation.textProvider = { create.form.text }; dictation.onKeyboardFallback = { focused = true } }
+        .onAppear { dictation.onText = { create.form.text = $0 }; dictation.textProvider = { create.form.text }; dictation.onKeyboardFallback = { focused = true }; dictation.configure(service: model.dictationService, caps: create.caps.dictation) }
+        .onChange(of: create.caps.dictation) { _, d in dictation.configure(service: model.dictationService, caps: d) }
         .onDisappear { dictation.stop(); typing?.cancel() }
         .onChange(of: focused) { _, f in if f { finishTyping() } }
         .sheet(isPresented: $showingLibrary) {
@@ -202,6 +203,11 @@ struct CreateView: View {
             Label(notice, systemImage: "globe").font(.role(.footnote)).foregroundStyle(Theme.textSecondary).padding(Theme.Space.m)
                 .background(Theme.surface, in: RoundedRectangle(cornerRadius: Theme.Radii.field, style: .continuous)).offset(y: -52)
                 .accessibilityIdentifier("dictationLanguageNotice")
+        } else if let note = dictation.note {
+            Label(note, systemImage: "waveform").font(.role(.footnote)).foregroundStyle(Theme.textSecondary).padding(Theme.Space.m)
+                .background(Theme.surface, in: RoundedRectangle(cornerRadius: Theme.Radii.field, style: .continuous)).offset(y: -52)
+                .accessibilityIdentifier("betterDictationNote")
+                .task(id: note) { try? await Task.sleep(for: .seconds(8)); dictation.clearNote() }
         }
     }
 
@@ -216,7 +222,7 @@ struct CreateView: View {
                     .frame(minWidth: Theme.minTouch, minHeight: Theme.minTouch).contentShape(Circle())
             } else { IconButtonFace(symbol: "mic") }
         }
-        .buttonStyle(.plain)
+        .buttonStyle(.plain).disabled(dictation.isWorking)
         .accessibilityLabel(dictation.isListening ? tr("create.stop_dictation") : tr("create.dictate")).accessibilityHint(tr("create.say_what_video_you_want"))
         .accessibilityAddTraits(.isToggle).accessibilityIdentifier("micButton")
     }
@@ -491,7 +497,10 @@ struct CreateView: View {
     /// The flexible middle of the tool row: empty, or "Listening…" centred between the tools and Create.
     @ViewBuilder private var middle: some View {
         Spacer(minLength: Theme.Space.xs)
-        if dictation.isListening {
+        if dictation.isWorking {
+            Text(tr("better.working")).font(.role(.footnote)).foregroundStyle(Theme.textSecondary).lineLimit(1).minimumScaleFactor(0.8).layoutPriority(-1).accessibilityIdentifier("betterWorkingHint").transition(.opacity)
+            Spacer(minLength: Theme.Space.xs)
+        } else if dictation.isListening {
             Text(tr("composer.listening")).font(.role(.footnote)).foregroundStyle(Theme.textSecondary).lineLimit(1).minimumScaleFactor(0.8).layoutPriority(-1).accessibilityIdentifier("listeningHint").transition(.opacity)
             Spacer(minLength: Theme.Space.xs)
         }
@@ -667,11 +676,11 @@ struct CreateView: View {
         UIAccessibility.post(notification: .announcement, argument: tr("create.starting_your_video"))
         let uploads = !create.photos.items.isEmpty
         let id = model.submit(brief: form.text, options: form.options, photos: create.photos.items.map(\.data), meta: create.photos.items.map(\.meta), libraryMedia: model.composerLibrary.map(\.id), intake: brief,
-                              deckID: create.deck.ready == nil ? nil : create.deck.deckID, deckName: create.deck.fileName, sendsMinutes: form.sendsDeckMinutes, held: true)
+                              deckID: create.deck.ready == nil ? nil : create.deck.deckID, deckName: create.deck.fileName, sendsMinutes: form.sendsDeckMinutes, held: true, dictationIDs: dictation.ids.list)
         Task {
             switch await model.startOutcome(id, wait: uploads ? .milliseconds(900) : .seconds(8), minimum: .milliseconds(900)) {
             case .accepted, .handedOff:
-                model.releaseStart(id)
+                model.releaseStart(id); dictation.clearIDs()      // those clips now belong to this video
                 create.started(); create.remember()
                 create.photos.clear(); model.composerLibrary = []
                 create.deck.consume(); create.form.clearDeck()

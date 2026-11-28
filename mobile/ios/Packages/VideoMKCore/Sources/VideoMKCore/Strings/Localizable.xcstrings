@@ -13429,6 +13429,125 @@
           }
         }
       }
+    },
+    "better.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Better dictation"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dictado mejorado"
+          }
+        }
+      }
+    },
+    "better.hint" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Records your voice and turns it into more accurate text. The recording is sent to our speech service only to transcribe it; we do not keep the audio."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Graba tu voz y la convierte en texto más preciso. La grabación se envía a nuestro servicio de voz solo para transcribirla; no guardamos el audio."
+          }
+        }
+      }
+    },
+    "better.pro" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Better dictation with Pro"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dictado mejorado con Pro"
+          }
+        }
+      }
+    },
+    "better.working" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Improving the text…"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mejorando el texto…"
+          }
+        }
+      }
+    },
+    "better.quota" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Today's better dictation limit is reached. Your iPhone's dictation was used."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hoy llegaste al límite de dictado mejorado. Se usó el dictado de tu iPhone."
+          }
+        }
+      }
+    },
+    "better.failed" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Better dictation isn't available right now. Your iPhone's dictation was used."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El dictado mejorado no está disponible ahora. Se usó el dictado de tu iPhone."
+          }
+        }
+      }
+    },
+    "better.limit" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recording stopped at 6 minutes."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La grabación se detuvo a los 6 minutos."
+          }
+        }
+      }
     }
   },
   "version" : "1.0"

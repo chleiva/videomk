@@ -70,8 +70,10 @@ public struct CreateCapabilities: Codable, Sendable, Equatable {
     public var deck: DeckCapabilities?
     /// The chosen, enforced look (`looks.look` and `looks.cast`). nil from a server that does not have it: Create then keeps its older Look menu and sends nothing new.
     public var looks: LookCapabilities?
+    /// Better dictation (Pro, Max). nil from a server without it.
+    public var dictation: DictationCapabilities?
 
-    private enum LenientKeys: String, CodingKey { case looks }
+    private enum LenientKeys: String, CodingKey { case looks, dictation }
 
     enum CodingKeys: String, CodingKey { case aspects, resolutions, platforms, languages, lengths, maxPhotos = "max_photos", intake, deck }
 
@@ -85,6 +87,7 @@ public struct CreateCapabilities: Codable, Sendable, Equatable {
         maxPhotos = (try? c.decode(Int.self, forKey: .maxPhotos)) ?? 100; intake = (try? c.decode(Bool.self, forKey: .intake)) ?? false
         lengths = (try? c.decode(Lengths.self, forKey: .lengths)) ?? Lengths()
         deck = try? c.decode(DeckCapabilities.self, forKey: .deck)
+        dictation = DictationCapabilities(json: try? d.container(keyedBy: LenientKeys.self).decode(AnyJSON.self, forKey: .dictation))
         looks = LookCapabilities(json: try? d.container(keyedBy: LenientKeys.self).decode(AnyJSON.self, forKey: .looks))      // lenient: a malformed "looks" never fails the capabilities
     }
 
