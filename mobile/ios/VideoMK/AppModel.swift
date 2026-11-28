@@ -627,7 +627,9 @@ final class AppModel {
 
     func create(brief: String, requestID: String, options: CreateOptions, media: [String] = [], mediaMeta: [String: PhotoMeta] = [:], libraryMedia: [String] = [], intake: [String: String]? = nil, deck: String? = nil, sendMinutes: Bool = true, dictationIDs: [String] = []) async throws -> StartedVideo {
         guard let api else { throw APIError.server }
-        do { return try await api.startVideo(prompt: brief, clientRequestID: requestID, options: options, media: media, mediaMeta: mediaMeta, libraryMedia: libraryMedia, brief: intake, deck: deck, sendMinutes: sendMinutes, dictationIDs: dictationIDs) }
+        do {
+            return try await StartReplay.once { try await api.startVideo(prompt: brief, clientRequestID: requestID, options: options, media: media, mediaMeta: mediaMeta, libraryMedia: libraryMedia, brief: intake, deck: deck, sendMinutes: sendMinutes, dictationIDs: dictationIDs) }
+        }
         catch let e as AuthError where e == .signedOut { await signOut(); throw APIError.unauthorized }
     }
 

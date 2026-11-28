@@ -405,7 +405,7 @@ class ComposerViewModel(app: Application) : AndroidViewModel(app) {
         if (submitting) return
         fire(if (checking) E.CheckDone else E.Tap(willCheck = false)); inlineError = null
         viewModelScope.launch {
-            val r = try { send(brief) } catch (e: kotlinx.coroutines.CancellationException) { fire(E.SendFailed); throw e } catch (e: Exception) { SubmitOutcome.Offline(ApiError.Network.message) }
+            val r = try { send(brief) } catch (e: kotlinx.coroutines.CancellationException) { fire(E.SendFailed); throw e } catch (e: Exception) { SubmitOutcome.Offline(com.videomk.app.core.Txt.s(com.videomk.app.R.string.err_network_create)) }
             when (r) {
                 is SubmitOutcome.Accepted -> { fire(E.Accepted); clearAfterSend(); sheetKind = CreateSheetKind.None; stop = null; acceptedFn?.invoke() }
                 // every other end restores the form exactly as it was: the prompt, the photos and the options are untouched

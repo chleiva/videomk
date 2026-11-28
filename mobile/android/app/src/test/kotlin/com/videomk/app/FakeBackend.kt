@@ -16,6 +16,7 @@ class FakeBackend : Backend {
     var wallet = WalletInfo(balance = 5)
     var listError: Exception? = null
     var startError: Exception? = null
+    var startErrorOnce = false
     var uploadError: Exception? = null
     var startCalls = mutableListOf<Triple<String, String, List<String>>>()   // brief, request id, media
     var listCalls = 0
@@ -49,7 +50,7 @@ class FakeBackend : Backend {
         startLibrary += libraryMedia
         startCalls += Triple(prompt, clientRequestId, media)
         startMeta += mediaMeta
-        startError?.let { throw it }
+        startError?.let { e -> if (startErrorOnce) { startError = null; startErrorOnce = false }; throw e }
         return newVideoId
     }
     override suspend fun uploadPhotos(photos: List<ByteArray>, progress: (Int, Int) -> Unit): List<String> {

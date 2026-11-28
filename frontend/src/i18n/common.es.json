@@ -8,6 +8,7 @@
  "footer.language": "Idioma",
  "api.signin_required": "Debes iniciar sesión para crear un video.",
  "api.network": "Problema de conexión. Inténtalo de nuevo.",
+ "api.network_create": "Problema de conexión. Revisa tu conexión y pulsa Crear de nuevo. No se cobrará dos veces.",
  "api.invalid": "No podemos usar esa descripción.",
  "api.quota": "Alcanzaste el límite de hoy. Inténtalo de nuevo mañana.",
  "api.session_expired": "Tu sesión caducó. Inicia sesión de nuevo.",

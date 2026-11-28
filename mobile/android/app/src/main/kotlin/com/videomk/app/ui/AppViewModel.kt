@@ -332,8 +332,9 @@ class AppViewModel(
     // ask for a video without leaving the home screen
 
     /** Adds a placeholder row immediately and sends the request in the background; the user can keep browsing or ask for more. */
-    private fun register(brief: String, options: CreateOptions, photos: List<ByteArray>, meta: List<PhotoMeta?>, libraryMedia: List<String>, intake: kotlinx.serialization.json.JsonObject?, deck: String? = null, title: String? = null, dictationIds: List<String> = emptyList()): PendingVideo {
+    private fun register(brief: String, options: CreateOptions, photos: List<ByteArray>, meta: List<PhotoMeta?>, libraryMedia: List<String>, intake: kotlinx.serialization.json.JsonObject?, deck: String? = null, title: String? = null, dictationIds: List<String> = emptyList(), requestId: String? = null): PendingVideo {
         val p = PendingVideo(
+            id = requestId ?: java.util.UUID.randomUUID().toString(),
             brief = Brief.normalized(brief), options = options, photoCount = photos.size, createdAtMillis = clock(), title = title,
             state = if (photos.isEmpty()) PendingVideo.State.Sending else PendingVideo.State.Uploading(0, photos.size),
         )
@@ -356,8 +357,24 @@ class AppViewModel(
      * (the caller keeps the draft and shows the sheet or a message); anything else ends on the Making card as before.
      */
     suspend fun submitAwait(brief: String, options: CreateOptions, photos: List<ByteArray> = emptyList(), meta: List<PhotoMeta?> = emptyList(), libraryMedia: List<String> = emptyList(), intake: kotlinx.serialization.json.JsonObject? = null, deck: String? = null, deckTitle: String? = null, dictationIds: List<String> = emptyList()): SubmitOutcome {
-        val p = register(brief, options, photos, meta, libraryMedia, intake, deck, deckTitle, dictationIds)
-        return send(p.id, interactive = true)
+        // The same Create (same text, options, photos) tapped again after a network failure keeps its request id: the server then returns the video
+        // it already started instead of making and charging a second one (the answer may have been lost on the way back).
+        val fingerprint = attemptFingerprint(brief, options, photos, libraryMedia, deck, dictationIds)
+        val reuse = lostAnswer?.takeIf { it.first == fingerprint }?.second
+        val p = register(brief, options, photos, meta, libraryMedia, intake, deck, deckTitle, dictationIds, requestId = reuse)
+        val outcome = send(p.id, interactive = true)
+        lostAnswer = if (outcome is SubmitOutcome.Offline) fingerprint to p.id else null
+        return outcome
+    }
+
+    /** (what was asked, its request id) after a create whose answer never arrived; cleared by any other end. */
+    private var lostAnswer: Pair<String, String>? = null
+
+    private fun attemptFingerprint(brief: String, options: CreateOptions, photos: List<ByteArray>, libraryMedia: List<String>, deck: String?, dictationIds: List<String>): String {
+        val md = java.security.MessageDigest.getInstance("SHA-256")
+        md.update(listOf(Brief.normalized(brief), options.toString(), libraryMedia.joinToString(","), deck.orEmpty(), dictationIds.joinToString(",")).joinToString("\u0000").toByteArray())
+        photos.forEach { md.update(it) }
+        return md.digest().joinToString("") { "%02x".format(it) }
     }
 
     fun retry(id: String) {
@@ -498,7 +515,9 @@ class AppViewModel(
                 media = b.uploadPhotos(photos) { done, total -> setProgress(id, done, total) }
                 if (_state.value.pending.any { it.id == id }) setPendingState(id, PendingVideo.State.Sending)
             }
-            val started = b.startVideo(p.brief, p.id, p.options, media, PhotoMeta.requestJson(media, photoMeta[id].orEmpty()), libraryData[id].orEmpty(), briefData[id], deckData[id], dictationData[id].orEmpty())
+            val start = suspend { b.startVideo(p.brief, p.id, p.options, media, PhotoMeta.requestJson(media, photoMeta[id].orEmpty()), libraryData[id].orEmpty(), briefData[id], deckData[id], dictationData[id].orEmpty()) }
+            // A dropped answer does not mean a dropped request: ask once more with the SAME request id (safe: the server returns the video it already started).
+            val started = try { start() } catch (e: ApiError.Network) { if (!interactive) throw e; kotlinx.coroutines.delay(REPLAY_DELAY_MILLIS); start() }
             val videoId = started.videoId
             val wasDeck = deckData[id] != null
             attachments[videoId] = media.size + libraryData[id].orEmpty().size + (if (wasDeck) 1 else 0)
@@ -517,7 +536,7 @@ class AppViewModel(
             throw e
         } catch (e: ApiError) {
             if (interactive && (e is ApiError.Blocked || e is ApiError.Paused || e is ApiError.Plan)) { dismissPending(id); return SubmitOutcome.Stopped(e) }   // a plan refusal is read on Create, with the draft intact
-            if (interactive && e is ApiError.Network) { dismissPending(id); return SubmitOutcome.Offline(e.message) }
+            if (interactive && e is ApiError.Network) { dismissPending(id); return SubmitOutcome.Offline(Txt.s(R.string.err_network_create)) }
             if (e is ApiError.InsufficientCredits) refreshWallet()
             if (e !is ApiError.Unauthorized) setPendingState(id, PendingVideo.State.Failed(e.message))
         } catch (e: Exception) {
@@ -534,6 +553,8 @@ class AppViewModel(
 
     companion object {
         const val POLL_MILLIS = 4000L
+        /** Wait before the one same-key replay of a create whose answer was lost. */
+        const val REPLAY_DELAY_MILLIS = 1500L
         /** A read this recent answers a screen that has just become visible. */
         const val FRESH_MILLIS = 1500L
         const val BACKGROUND_POLL_MILLIS = 15_000L

@@ -27,6 +27,7 @@
     <string name="err_video_not_ready">This video isn\'t ready yet.</string>
     <string name="err_storage_full">Your media storage is full. Delete some photos or see your storage options.</string>
     <string name="err_not_found">That photo or collection isn\'t there any more.</string>
+    <string name="err_network_create">Network problem. Check your connection, then tap Create again. You won\'t be charged twice.</string>
     <string name="err_network">Network problem. Check your connection and try again.</string>
     <string name="err_server">Something went wrong on our side. Please try again.</string>
     <string name="err_photo_too_large">That photo is too large.</string>

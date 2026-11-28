@@ -27,20 +27,24 @@ export function startOutcome(status: number, body: any): StartResult {
   return { ok: false, kind: "error", message: t("api.start_failed") };
 }
 
+/** Wait before the one same-key replay of a start whose answer was lost. */
+export const START_REPLAY_MS = 1500;
+
 /** Start a generation. Returns a typed result so the UI can say what actually went wrong. */
 export async function startGeneration(prompt: string, clientRequestId: string, extra: Record<string, unknown> = {}): Promise<StartResult> {
   const { Authorization, userId } = await getAuthorizationHeader();
   if (!userId) return { ok: false, kind: "auth", message: t("api.signin_required") };
-  let res: Response;
-  try {
-    res = await fetch(apiGateway.generateVideo(userId), {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Authorization, ...currentLocaleHeaders() },
-      body: JSON.stringify({ ...extra, ...(prompt || !extra.deck ? { prompt } : {}), client_request_id: clientRequestId }), // a deck video may have no prompt: it is optional there
-    });
-  } catch {
-    return { ok: false, kind: "error", message: t("api.network") };
+  let res: Response | undefined;
+  const post = () => fetch(apiGateway.generateVideo(userId), {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization, ...currentLocaleHeaders() },
+    body: JSON.stringify({ ...extra, ...(prompt || !extra.deck ? { prompt } : {}), client_request_id: clientRequestId }), // a deck video may have no prompt: it is optional there
+  });
+  // A dropped answer does not mean a dropped request: ask once more with the SAME request id. Safe, the server returns the video it already started instead of making or charging another.
+  for (let attempt = 0; attempt < 2 && !res; attempt++) {
+    try { res = await post(); } catch { if (attempt === 0) await new Promise((r) => setTimeout(r, START_REPLAY_MS)); }
   }
+  if (!res) return { ok: false, kind: "error", message: t("api.network_create") };
   let body: any = {};
   try {
     body = await res.json();

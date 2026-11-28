@@ -27,6 +27,7 @@
     <string name="err_video_not_ready">Este video aún no está listo.</string>
     <string name="err_storage_full">Tu espacio de biblioteca está lleno. Elimina algunas fotos o consulta tus opciones de almacenamiento.</string>
     <string name="err_not_found">Esa foto o colección ya no existe.</string>
+    <string name="err_network_create">Problema de conexión. Revisa tu conexión y toca Crear de nuevo. No se cobrará dos veces.</string>
     <string name="err_network">Problema de conexión. Revisa tu conexión e inténtalo de nuevo.</string>
     <string name="err_server">Algo salió mal por nuestra parte. Inténtalo de nuevo.</string>
     <string name="err_photo_too_large">Esa foto es demasiado grande.</string>

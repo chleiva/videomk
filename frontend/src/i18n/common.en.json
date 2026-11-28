@@ -8,6 +8,7 @@
  "footer.language": "Language",
  "api.signin_required": "You must be signed in to create a video.",
  "api.network": "Network problem. Please try again.",
+ "api.network_create": "Network problem. Check your connection, then press Create again. You won't be charged twice.",
  "api.invalid": "That prompt can't be used.",
  "api.quota": "You've reached today's limit. Try again tomorrow.",
  "api.session_expired": "Your session expired. Please sign in again.",

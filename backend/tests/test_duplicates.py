@@ -66,3 +66,22 @@ def test_a_replay_with_the_same_request_id_still_returns_the_existing_video(laun
     a = launcher.handler(ev(PROMPT, "aaaa-1111-aaaa"), None)
     b = launcher.handler(ev(PROMPT, "aaaa-1111-aaaa"), None)
     assert json.loads(a["body"])["video_id"] == json.loads(b["body"])["video_id"] and len(launcher.fake.calls) == 1 and wallet.balance("u1")["balance"] == 4
+
+
+def test_lost_response_replay_long_after_the_window_with_changed_photo_ids_is_still_one_video_and_one_charge(launcher, monkeypatch):
+    """The answer was lost on cellular and the app re-uploaded its photos (new media ids, so a different fingerprint) minutes later: the request id alone must return the first video."""
+    first = launcher.handler(ev(PROMPT, "aaaa-1111-aaaa", language="en"), None)
+    real = time.time
+    monkeypatch.setattr(usage.time, "time", lambda: real() + 3600)          # far outside the 2-minute duplicate window
+    again = launcher.handler(ev(PROMPT, "aaaa-1111-aaaa", language="es"), None)   # different options, same key
+    assert json.loads(again["body"])["video_id"] == json.loads(first["body"])["video_id"] and "already started" in json.loads(again["body"])["message"]
+    assert len(launcher.fake.calls) == 1 and wallet.balance("u1")["balance"] == 4
+
+
+def test_a_new_request_id_after_the_window_is_a_new_video_so_the_client_must_reuse_its_key(launcher, monkeypatch):
+    """Documents why the apps keep one request id per Create attempt: a fresh id with changed photos is a second, charged video."""
+    launcher.handler(ev(PROMPT, "aaaa-1111-aaaa", language="en"), None)
+    real = time.time
+    monkeypatch.setattr(usage.time, "time", lambda: real() + 3600)
+    launcher.handler(ev(PROMPT, "bbbb-2222-bbbb", language="es"), None)
+    assert len(launcher.fake.calls) == 2 and wallet.balance("u1")["balance"] == 3

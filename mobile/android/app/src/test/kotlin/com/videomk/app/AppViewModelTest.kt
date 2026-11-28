@@ -153,15 +153,37 @@ class AppViewModelTest {
         assertTrue(a.state.value.pending.isEmpty())
     }
 
-    @Test fun `offline at create keeps the draft with an offline outcome, no failed card, and tapping again works`() = runBlocking {
+    @Test fun `offline at create keeps the draft with an offline outcome, no failed card, and tapping again reuses the request id`() = runBlocking {
         val a = vm(); a.start(); a.await { it.phase is Phase.SignedIn }
         backend.startError = ApiError.Network
         val r = a.submitAwait("Explain rainbows please", CreateOptions(), listOf(byteArrayOf(1)))
-        assertEquals(com.videomk.app.core.SubmitOutcome.Offline(ApiError.Network.message), r)
+        assertEquals(com.videomk.app.core.SubmitOutcome.Offline(com.videomk.app.core.Txt.s(com.videomk.app.R.string.err_network_create)), r)
         assertTrue(a.state.value.pending.isEmpty())
+        // the first try was replayed once with the same key (the answer may have been lost, the server then returns the same video)
+        assertEquals(2, backend.startCalls.size)
+        assertEquals(1, backend.startCalls.map { it.second }.toSet().size)
         backend.startError = null
         assertEquals(com.videomk.app.core.SubmitOutcome.Accepted, a.submitAwait("Explain rainbows please", CreateOptions(), listOf(byteArrayOf(1))))
+        assertEquals(3, backend.startCalls.size)
+        assertEquals("a manual retry of the same create must reuse the request id", 1, backend.startCalls.map { it.second }.toSet().size)
+    }
+
+    @Test fun `a lost answer is recovered by the same-key replay without telling the user`() = runBlocking {
+        val a = vm(); a.start(); a.await { it.phase is Phase.SignedIn }
+        backend.startError = ApiError.Network
+        backend.startErrorOnce = true   // only the first call fails: the request got through, the answer did not
+        assertEquals(com.videomk.app.core.SubmitOutcome.Accepted, a.submitAwait("Explain rainbows please", CreateOptions()))
         assertEquals(2, backend.startCalls.size)
+        assertEquals(1, backend.startCalls.map { it.second }.toSet().size)
+    }
+
+    @Test fun `a different create after a network failure gets a new request id`() = runBlocking {
+        val a = vm(); a.start(); a.await { it.phase is Phase.SignedIn }
+        backend.startError = ApiError.Network
+        a.submitAwait("Explain rainbows please", CreateOptions())
+        backend.startError = null
+        a.submitAwait("Explain clouds please", CreateOptions())
+        assertEquals(2, backend.startCalls.map { it.second }.toSet().size)
     }
 
     @Test fun `an accepted create returns Accepted and other errors still end on a failed card`() = runBlocking {

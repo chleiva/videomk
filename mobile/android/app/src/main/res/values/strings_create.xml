@@ -10,7 +10,7 @@
     <string name="create_over_max">%1$s allows up to %2$s</string>
     <string name="create_over_max_use">Use %1$s</string>
     <string name="create_over_max_use_desc">Use %1$s instead</string>
-    <string name="create_error_retry">%1$s Tap Create to try again.</string>
+    <string name="create_error_retry">%1$s</string>
     <string name="create_discard_title">Discard this video?</string>
     <string name="create_discard_text">What you entered will be lost.</string>
     <string name="create_discard">Discard</string>
