@@ -213,3 +213,16 @@ def test_cover_card_shapes_and_sizes(aspect, size):
     own = Image.open(io.BytesIO(out["own"]))
     assert abs(own.width / own.height - size[0] / size[1]) < 0.01 and max(own.size) <= cover.OWN_LONG_SIDE and len(out["own"]) <= cover.OWN_MAX_BYTES
     assert og.convert("L").getextrema()[0] < 120   # the title's ink is on the card: it is not a blank page any more
+
+
+def test_the_cdn_invalidation_quantity_matches_its_items(monkeypatch):
+    """A real deploy failed with InconsistentQuantities: Quantity must equal the number of paths (the link and everything under it)."""
+    import importlib
+    from unittest import mock
+    mod = importlib.import_module("share.share_api") if importlib.util.find_spec("share.share_api") else importlib.import_module("share_api")
+    monkeypatch.setenv("DISTRIBUTION_ID", "EDIST")
+    fake = mock.Mock()
+    with mock.patch.object(mod.boto3, "client", return_value=fake):
+        mod._invalidate("tok")
+    paths = fake.create_invalidation.call_args.kwargs["InvalidationBatch"]["Paths"]
+    assert paths["Quantity"] == len(paths["Items"]) == 2

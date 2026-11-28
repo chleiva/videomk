@@ -67,7 +67,7 @@ def _invalidate(token: str) -> None:
     if not dist:
         return
     try:
-        boto3.client("cloudfront").create_invalidation(DistributionId=dist, InvalidationBatch={"Paths": {"Quantity": 1, "Items": [f"/{token}", f"/{token}/*"]}, "CallerReference": f"{token}-{time.time_ns()}"})
+        boto3.client("cloudfront").create_invalidation(DistributionId=dist, InvalidationBatch={"Paths": {"Quantity": 2, "Items": [f"/{token}", f"/{token}/*"]}, "CallerReference": f"{token}-{time.time_ns()}"})
     except Exception:   # noqa: BLE001 - the objects are already gone; the cache expires on its own (short TTL)
         logger.exception("SHARE_INVALIDATE_FAILED")
 
