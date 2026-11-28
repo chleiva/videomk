@@ -1,0 +1,408 @@
+{
+ "sundial-en": {
+  "prompt": "How does a sundial tell the time?",
+  "lang": "en",
+  "full": {
+   "draws": [
+    "sun",
+    "sundial",
+    "clock",
+    "earth_globe",
+    "sundial"
+   ],
+   "in_library": 3,
+   "asked": [
+    "sundial",
+    "sundial"
+   ],
+   "written": 9,
+   "tokens_in": 11197,
+   "cost": 0.0995,
+   "legit": true
+  },
+  "retrieved": {
+   "draws": [
+    "sundial",
+    "sun",
+    "clock",
+    "sun",
+    "sundial",
+    "check_mark"
+   ],
+   "in_library": 4,
+   "asked": [
+    "sundial",
+    "sundial"
+   ],
+   "written": 9,
+   "tokens_in": 10101,
+   "cost": 0.0687,
+   "legit": true
+  },
+  "notes": "## Sundial\nA sundial is a horological device that tells the time of day (referred to as civil time in modern usage) when direct sunlight shines by the apparent position of the Sun in the sky. In the narrowest sense of the word, it consists of a flat plate (the dial) and a gnomon, which casts a shadow onto the dial. As the Sun appears to move through the sky, the shadow aligns with different hour-lines, which are marked on the dial to indicate the time of day. The style is the time-telling edge of the gnomon, though a single point or nodus may be used. The gnomon casts a broad shadow; the shadow of the style shows the time. The gnomon may be a rod, wire, or elaborately decorated metal casting. The style must be parallel to the axis of the Earth's rotation for the sundial to be accurate throughout the year. The style's angle from horizontal is equal to the sundial's geographical latitude.\nThe term sundial can refer to any device that uses the Sun's altitude or azimuth (or both) to show the time. Sundials are valued as decorative objects, metaphors, and objects of intrigue and mathematical study.\nThe passing of time can be observed by placing a stick in the sand or a nail in a board and placing markers...\n\n## Sundial (weapon)\nSundial was the codename of one of two massive nuclear weapons proposed for testing by the University of California Radiation Laboratory, Livermore Branch as part of a classified American weapons project in the early 1950s. Announced in 1954 by Hungarian–Am"
+ },
+ "windmill-es": {
+  "prompt": "Explica cómo funciona un molino de viento",
+  "lang": "es",
+  "full": {
+   "draws": [
+    "wind",
+    "windmill",
+    "two_gears",
+    "bread",
+    "water_drop",
+    "light_bulb"
+   ],
+   "in_library": 6,
+   "asked": [],
+   "written": 10,
+   "tokens_in": 18612,
+   "cost": 0.0704,
+   "legit": true
+  },
+  "retrieved": {
+   "draws": [
+    "windmill",
+    "wind",
+    "seedling_hands",
+    "globe_grid",
+    "windmill"
+   ],
+   "in_library": 5,
+   "asked": [],
+   "written": 9,
+   "tokens_in": 17783,
+   "cost": 0.0699,
+   "legit": true
+  },
+  "notes": "## Molino de viento\nEl molino de viento es una estructura que convierte la energía eólica en energía rotacional con el fin principal de moler granos. Es un tipo particular de molino que opera por medio de paletas llamadas «aspas».​ Aunque la locución se ha extendido a dispositivos con otros fines, tales como extraer agua del subsuelo (bomba de agua eólica) o producir electricidad (aerogenerador). A veces se los describe con el término «aeromotor».\nLos molinos de viento se utilizaron a lo largo de la Alta Edad Media y períodos modernos tempranos; el molino de viento horizontal o panemone apareció por primera vez en el Gran Irán durante el siglo IX, y el molino de viento vertical apareció por primera vez en el noroeste de Europa en el siglo XII.​​ Considerado como un icono de la cultura holandesa,​ hay aproximadamente 1000 molinos de viento en los Países Bajos en la actualidad.​"
+ },
+ "vaccine-en": {
+  "prompt": "How do vaccines train the immune system?",
+  "lang": "en",
+  "full": {
+   "draws": [
+    "person_question",
+    "virus",
+    "syringe",
+    "puzzle_piece",
+    "cell",
+    "antibody",
+    "brain",
+    "shield_check",
+    "calendar",
+    "virus",
+    "person_cheering"
+   ],
+   "in_library": 11,
+   "asked": [],
+   "written": 12,
+   "tokens_in": 18650,
+   "cost": 0.1015,
+   "legit": true
+  },
+  "retrieved": {
+   "draws": [
+    "person_standing",
+    "virus",
+    "syringe",
+    "brain",
+    "antibody",
+    "shield_check",
+    "thought_bubble",
+    "virus",
+    "stopwatch"
+   ],
+   "in_library": 9,
+   "asked": [],
+   "written": 11,
+   "tokens_in": 17531,
+   "cost": 0.0694,
+   "legit": true
+  },
+  "notes": ""
+ },
+ "sea-salt-fr": {
+  "prompt": "Comment fait-on du sel de mer dans les marais salants ?",
+  "lang": "fr",
+  "full": {
+   "draws": [
+    "sea_waves",
+    "sun",
+    "wind",
+    "river",
+    "water_drop",
+    "farmer",
+    "broom",
+    "snowflake"
+   ],
+   "in_library": 8,
+   "asked": [],
+   "written": 8,
+   "tokens_in": 19219,
+   "cost": 0.0891,
+   "legit": true
+  },
+  "retrieved": {
+   "draws": [
+    "sun",
+    "sea_waves",
+    "water_drop",
+    "petri_dish",
+    "sun",
+    "water_drop",
+    "worker"
+   ],
+   "in_library": 7,
+   "asked": [],
+   "written": 10,
+   "tokens_in": 18113,
+   "cost": 0.0716,
+   "legit": true
+  },
+  "notes": "## Marais salant\nLes marais salants correspondent à des installations d'origine anthropique dont le but est de favoriser l'extraction et la collecte de sel marin à partir de l'entrée d'une ressource, l'eau de mer. Il s'agit le plus souvent d'un dispositif de barrages, de vannes, de canaux et de différents bassins de rétention menant finalement à des bassins de faible profondeur appelés carreaux, dans lesquels est récolté le sel, obtenu par l'évaporation de l'eau de mer, sous l'action combinée du soleil et du vent.\nIls constituent une exploitation de type agricole, dont l'activité se nomme saliculture, ou sous sa forme ancienne, la saunerie. Les personnes qui récoltent le sel des marais salants sont appelées des saliculteurs, sauniers ou paludiers, voire marin-salants. Sous l'Ancien Régime, les paludiers étaient ceux qui récoltaient le sel, le terme de sauniers désignant ceux qui le transportent pour le vendre.\nSauner (latin populaire salinare, du latin classique salinae, saline) est l'action de produire du sel à partir de la saumure.\n\n## Marais salants de Guérande\nLes marais salants de Guérande sont une zone de marais salants française située sur le territoire des communes de Guérande, Batz-sur-Mer, Le Croisic et La Turballe, dans l'ouest du département de la Loire-Atlantique.\nÀ une vingtaine de kilomètres au nord se trouve un autre bassin salicole, les marais du Mès, qui sont associés à ceux de Guérande dans le cadre du « bassin salicole de la presqu'île guérandaise ».\n\n## F"
+ },
+ "compound-interest-en": {
+  "prompt": "Explain compound interest",
+  "lang": "en",
+  "full": {
+   "draws": [
+    "money_bag",
+    "bank",
+    "coin_stack",
+    "calendar",
+    "growth_plant",
+    "mountain",
+    "stopwatch"
+   ],
+   "in_library": 7,
+   "asked": [],
+   "written": 10,
+   "tokens_in": 18596,
+   "cost": 0.0826,
+   "legit": true
+  },
+  "retrieved": {
+   "draws": [
+    "piggy_bank",
+    "coin_stack",
+    "percent",
+    "seed",
+    "plant_sprout",
+    "growth_plant",
+    "sand_timer",
+    "gold_bars"
+   ],
+   "in_library": 8,
+   "asked": [],
+   "written": 8,
+   "tokens_in": 17468,
+   "cost": 0.0861,
+   "legit": true
+  },
+  "notes": ""
+ },
+ "water-cycle-de": {
+  "prompt": "Erkläre den Wasserkreislauf",
+  "lang": "de",
+  "full": {
+   "draws": [
+    "sun",
+    "sea_waves",
+    "cloud",
+    "rain_cloud",
+    "snowflake",
+    "mountain",
+    "river"
+   ],
+   "in_library": 7,
+   "asked": [],
+   "written": 8,
+   "tokens_in": 19780,
+   "cost": 0.1081,
+   "legit": true
+  },
+  "retrieved": {
+   "draws": [
+    "sun",
+    "sea_waves",
+    "cloud",
+    "rain_cloud",
+    "water_drop",
+    "mountain",
+    "river",
+    "earth_globe"
+   ],
+   "in_library": 8,
+   "asked": [],
+   "written": 6,
+   "tokens_in": 18676,
+   "cost": 0.1034,
+   "legit": true
+  },
+  "notes": "## Wasserkreislauf\nUnter dem Begriff Wasserkreislauf versteht man den Transport und die Speicherung von Wasser auf globaler wie regionaler Ebene. Hierbei wechselt das Wasser mehrmals seinen Aggregatzustand und durchläuft die einzelnen Sphären wie Hydrosphäre, Lithosphäre, Biosphäre und Atmosphäre der Erde. Die Zirkulation des Wassers vollzieht sich in der Regel zwischen Meer und Festland. Im Wasserkreislauf geht kein Wasser verloren, es ändert nur seinen Zustand. Diese Zustände werden durch die Wasserhaushaltsgrößen vertreten und folglich im Wasserhaushalt bilanziert.\n\n## Wasser\nWasser (lateinisch Aqua; altgriechisch hydor) ist die chemische Verbindung H2O, bestehend aus den Elementen Sauerstoff (O) und Wasserstoff (H).\nDie Bezeichnung Wasser wird dabei für den flüssigen Aggregatzustand verwendet. Im festen Zustand spricht man von Eis, im gasförmigen Zustand von Wasserdampf. In der Natur kommt Wasser selten rein vor, sondern enthält meist gelöste Anteile von Salzen, Gasen und organischen Verbindungen.\nWasser ist die Grundlage allen Lebens auf der Erde. Als die wichtigste Flüssigkeit wird es auch als das Blaue Gold bezeichnet. Die international anerkannte Hydrologin Malin Falkenmark bezeichnete den Wasserkreislauf als den „Blutkreislauf der Biosphäre“.\nBiologische Vorgänge laufen nur dank Wasser ab. Der Mensch als biologisches Wesen (Wasseranteil ca. 70 %) nutzt das Wasser zur Sicherung seines eigenen Überlebens und für seine kulturelle und wirtschaftliche Entwicklung. Da Wass"
+ },
+ "compass-it": {
+  "prompt": "Come funziona una bussola?",
+  "lang": "it",
+  "full": {
+   "draws": [
+    "compass",
+    "magnet",
+    "earth_globe",
+    "magnet_attract",
+    "person_walking"
+   ],
+   "in_library": 5,
+   "asked": [],
+   "written": 6,
+   "tokens_in": 19622,
+   "cost": 0.0745,
+   "legit": true
+  },
+  "retrieved": {
+   "draws": [
+    "compass",
+    "question_mark",
+    "magnet",
+    "earth_globe",
+    "magnet_attract",
+    "compass_rose",
+    "planet"
+   ],
+   "in_library": 7,
+   "asked": [],
+   "written": 7,
+   "tokens_in": 18505,
+   "cost": 0.0667,
+   "legit": true
+  },
+  "notes": "## Campo geomagnetico\nIl magnetismo terrestre è un fenomeno fisico naturale presente sul pianeta Terra,  assimilabile al campo magnetico generato da un dipolo magnetico con poli magnetici non coincidenti con quelli geografici e non statici, e con asse inclinato di 9,34° rispetto all'asse di rotazione terrestre. L'intensità del campo geomagnetico sulla superficie terrestre varia da 25 a 65 microtesla (o da 0.25 a 0.65 gauss). Anche altri corpi celesti, come il Sole o Giove, generano un loro campo magnetico. Le ipotesi sulle origini di questo campo sono numerose, ma oggi le teorie sono orientate verso un modello analogo a quello di una dinamo ad autoeccitazione.\nPrimo campo terrestre ad essere teorizzato e descritto, la sua scoperta è attribuita alle osservazioni di Pierre de Maricourt, riportate nella sua Epistola de magnete (Lettera sul magnete) del 1269. La sua formazione viene datata a 4 miliardi di anni fa. Causa numerosi effetti facilmente sperimentabili, ad esempio l'aurora polare è generata dall'interazione tra il vento solare e la magnetosfera. Il magnetismo terrestre ha inoltre una notevole importanza per la vita sulla Terra: esso si estende per svariate decine di migliaia di chilometri nello spazio...\n\n## Magnetismo\nIn fisica il magnetismo è quel fenomeno per cui alcuni materiali sono in grado di attrarre il ferro nonché trasmettere tale capacità ad altri materiali.\nPer estensione semantica, il magnetismo è anche la branca della fisica concernente il suddetto fenomen"
+ },
+ "bread-es": {
+  "prompt": "Cómo se hace el pan en casa",
+  "lang": "es",
+  "full": {
+   "draws": [
+    "bread",
+    "water_drop",
+    "hand",
+    "clock",
+    "bacteria",
+    "balloon",
+    "bread",
+    "fire",
+    "fork_knife",
+    "sun"
+   ],
+   "in_library": 10,
+   "asked": [],
+   "written": 11,
+   "tokens_in": 19275,
+   "cost": 0.0779,
+   "legit": true
+  },
+  "retrieved": {
+   "draws": [
+    "bread",
+    "glass_water",
+    "pot",
+    "stopwatch",
+    "cloud",
+    "pot",
+    "bread",
+    "face_happy"
+   ],
+   "in_library": 8,
+   "asked": [],
+   "written": 9,
+   "tokens_in": 18163,
+   "cost": 0.0338,
+   "legit": true
+  },
+  "notes": "## Ibán Yarza\nIbán Yarza Herrero (Zaragoza, 1974) es un autor, periodista y traductor, así como panadero, reconocido por sus divulgación sobre la panadería casera y la cultura del pan en España. Ha publicado en libros, en periódicos y en la web.​ En la actualidad se dedica también a dar cursos sobre el arte de hacer pan. También ha traducido la edición española del libro Hecho a mano (2010) de Dan Lepard,​​ uno de los panaderos más reconocidos de Europa.​\nSe considera parte de la nueva ola española de panadería moderna, junto con Xavier Barriga, Anna Bellsolà,  Beatriz Echeverría, Xevi Ramon, etc., todos ellos panaderos y divulgadores que en la última década han redescubierto a España su propia tradición panadera.​​​​\n\n## Pan\nEl pan, del latín panis, es una comida que se suele preparar mediante el horneado de una masa elaborada fundamentalmente con cereal, agua y sal. La mezcla, en la mayoría de las ocasiones, suele contener levaduras para que se fermente la masa y sea más esponjosa y tierna.​\nEl cereal más utilizado para la elaboración del pan es la harina de trigo, aunque también se utiliza el centeno, la cebada, el maíz y el arroz. La adición de la levadura provoca la fermentación de la masa antes del horneado, y como consecuencia, le proporciona un volumen y una esponjosidad debido a la producción de pequeñas burbujas de dióxido de carbono (CO2) que se quedan inmersas entre la masa húmeda de la harina.\nExisten muchos tipos de pan que pueden contener otros ingredientes; si"
+ },
+ "fridge-de": {
+  "prompt": "Wie funktioniert ein Kühlschrank?",
+  "lang": "de",
+  "full": {
+   "draws": [
+    "fridge",
+    "fire",
+    "thermometer",
+    "two_gears",
+    "wind",
+    "funnel",
+    "snowflake",
+    "fridge",
+    "recycle"
+   ],
+   "in_library": 9,
+   "asked": [],
+   "written": 9,
+   "tokens_in": 18386,
+   "cost": 0.096,
+   "legit": true
+  },
+  "retrieved": {
+   "draws": [
+    "fridge",
+    "gear",
+    "thermometer",
+    "snowflake"
+   ],
+   "in_library": 4,
+   "asked": [],
+   "written": 7,
+   "tokens_in": 17296,
+   "cost": 0.1,
+   "legit": true
+  },
+  "notes": ""
+ },
+ "beehive-en": {
+  "prompt": "How do bees make honey in a beehive?",
+  "lang": "en",
+  "full": {
+   "draws": [
+    "flower",
+    "bee",
+    "stomach",
+    "house",
+    "bee",
+    "bee",
+    "water_drop",
+    "cheese",
+    "bee",
+    "wind",
+    "water_drop",
+    "lock",
+    "group_three"
+   ],
+   "in_library": 13,
+   "asked": [],
+   "written": 9,
+   "tokens_in": 19363,
+   "cost": 0.105,
+   "legit": true
+  },
+  "retrieved": {
+   "draws": [
+    "flower",
+    "bee",
+    "house",
+    "two_talking",
+    "gear",
+    "wifi",
+    "cheese"
+   ],
+   "in_library": 7,
+   "asked": [],
+   "written": 8,
+   "tokens_in": 18228,
+   "cost": 0.0733,
+   "legit": true
+  },
+  "notes": "## Western honey bee\nThe western honey bee (Apis mellifera) is the most common of the 7–12 species of honey bees worldwide. The genus name Apis is Latin for 'bee', and mellifera is the Latin for 'honey-bearing' or 'honey-carrying', referring to the species' production of honey.\nLike all honey bee species, the western honey bee is eusocial, creating colonies with a single fertile female (or \"queen\"), many normally non-reproductive females or \"workers\", and a small proportion of fertile males or \"drones\". Individual colonies can house tens of thousands of bees. Colony activities are organized by complex communication between individuals, through both pheromones and the waggle dance.\nThe western honey bee was one of the first domesticated insects, and it is the primary species maintained by beekeepers to this day for both its honey production and pollination activities. With human assistance, the western honey bee now occupies every continent except Antarctica. Western honey bees are threatened by pests and diseases, especially the Varroa mite and colony collapse disorder. As of 2025, the western honey bee was assessed as \"Data Deficient\" on the IUCN Red List.\nWestern honey bees are an important model organism...\n\n## Swarming (honey bee)\nSwarming is a honey bee colony's natural means of reproduction. In the process of swarming, a single colony splits into two or more distinct colonies.\nSwarming is mainly a spring phenomenon, usually within a two- or three-week period depending o"
+ }
+}

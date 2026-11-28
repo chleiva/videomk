@@ -90,10 +90,18 @@ class Policy:
             return ""
         from .whiteboard import library
 
-        cats: Dict[str, List[str]] = {}
-        for it in library.index()["items"]:
-            cats.setdefault(it.get("category") or "other", []).append(it["id"])
-        menu = "\n".join(f"    {c}: {', '.join(v)}" for c, v in cats.items())[:MAX_MENU_CHARS]
+        from .whiteboard import retrieval
+
+        items = library.index()["items"]
+        menu = retrieval.menu(items)       # WB_SEARCH on: only the drawings that fit this video (engine/whiteboard/retrieval.py), no cut; None: the whole list as before
+        if menu is None:
+            cats: Dict[str, List[str]] = {}
+            for it in items:
+                cats.setdefault(it.get("category") or "other", []).append(it["id"])
+            menu = "\n".join(f"    {c}: {', '.join(v)}" for c, v in cats.items())
+            if len(menu) > MAX_MENU_CHARS:
+                logging.warning("whiteboard menu cut at %s of %s characters: drawings are hidden from the planner (turn WB_SEARCH on)", MAX_MENU_CHARS, len(menu))
+                menu = menu[:MAX_MENU_CHARS]
         tall = self.aspect in ("9:16", "4:5")
         shape = ("  THIS VIDEO IS TALL (" + self.aspect + "): the board is narrow. Titles and lists go in a full-width zone (top-row, middle-row, bottom-row); every written text is 1 to 3 words per line; "
                  "arrange the flow from top to bottom (top row, then middle, then bottom), not left to right.\n") if tall else \

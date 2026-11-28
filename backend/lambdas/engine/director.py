@@ -104,6 +104,9 @@ def direct(prompt: str, *, minutes: float, ask_small: Ask, ask_big: Callable[[st
     if poly is not None:
         polyglot_mod.bind(poly, direction, minutes=minutes, photos=bool(photos))   # fills poly.speakers (empty when the look cannot hold it)
     poly_notes = polyglot_mod.note_texts(poly) if poly is not None and not poly.speakers else []   # asked for, not made (one look cannot hold it): said, never silent
+    if wpolicy.allowed:
+        from .whiteboard import retrieval as wb_retrieval
+        wb_retrieval.set_context(prompt, notes)      # the drawings shown to the planner are searched with the request and the research notes (WB_SEARCH)
     craft += vpolicy.prompt_block(language) + wpolicy.prompt_block(language) + art_direction.prompt_block(direction, language, minutes, (options or {}).get("aspect") or "16:9")
     craft += polyglot_mod.block(poly, direction, language, minutes)
     written_from = [notes]   # everything the writer was shown (the grounding check compares the narration with it)
