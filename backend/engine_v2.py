@@ -32,6 +32,7 @@ class EngineV2(Construct):
         region: str,
         render_concurrency: int = 32,
         beat_concurrency: int = 12,
+        hd_render_memory: int = 4096,
     ) -> None:
         super().__init__(scope, construct_id)
         layers = [engine_layer]
@@ -48,6 +49,11 @@ class EngineV2(Construct):
         finalize_fn = make_fn("V2FinalizeFn", "v2_finalize", f"{base}.finalize_handler.handler", timeout=Duration.minutes(10), memory=10240, env=env, layers=layers, ephemeral_mb=8192)
         edit_prep_fn = make_fn("V2EditPrepFn", "v2_edit_prep", f"{base}.edit_prep_handler.handler", timeout=Duration.seconds(30), memory=512, env=env, layers=layers)
         edit_failed_fn = make_fn("V2EditFailedFn", "v2_edit_failed", f"{base}.edit_failed_handler.handler", timeout=Duration.seconds(10), memory=256, env=env, layers=layers)
+        # A second render function for HD (720p, 1080p): the same code on less memory, because a render keeps about 1.4 cores busy and peaks at 1.4 GB (docs/COST_LEVERS_2026-11-28.md),
+        # while a function of 10,240 MB bills 2.5 times the GB-seconds for the same seconds. 4K (chunks marked `big` by the timeline step) stays on the 10 GB function.
+        # 0 (cdk context hdRenderMemoryMb=0) = one function for everything, as before.
+        chunk_hd_fn = make_fn("V2RenderChunkHdFn", "v2_render_chunk_hd", f"{base}.render_chunk_handler.handler", timeout=Duration.minutes(10), memory=hd_render_memory, env=env, layers=layers, ephemeral_mb=1024) if 0 < hd_render_memory < 10240 else None
+        self.chunk_fns = [f for f in (chunk_fn, chunk_hd_fn) if f is not None]   # every grant that chunk_fn has, the HD one has too
         self.chunk_fn = chunk_fn   # the cartoon scenes (backend_stack, `vectorScenes`) let it read scene packages from the catalog bucket
         self.plan_fn = plan_fn   # the deck path (deck.py) switches it on
         self.beat_fn = beat_fn   # the image catalog (catalog.py) gives it read rights when `-c imageCatalog=1`
@@ -66,21 +72,21 @@ class EngineV2(Construct):
         for fn in (plan_fn, audio_fn, self.editor_get_fn):  # the curated music library: the planner reads the catalogue, the audio step the tracks
             fn.add_to_role_policy(iam.PolicyStatement(actions=["s3:GetObject"], resources=[f"arn:aws:s3:::{assets_bucket}/music/*"]))
         # the pre-rendered 3D background loops (docs/HERO_LOOPS_3D.md): the functions that draw frames read the loop files, the planner only the index. Read only, no listing.
-        for fn in (chunk_fn, self.selftest_fn):
+        for fn in (*self.chunk_fns, self.selftest_fn):
             fn.add_to_role_policy(iam.PolicyStatement(actions=["s3:GetObject"], resources=[f"arn:aws:s3:::{assets_bucket}/backgrounds/loops/*"]))
         plan_fn.add_to_role_policy(iam.PolicyStatement(actions=["s3:GetObject"], resources=[f"arn:aws:s3:::{assets_bucket}/backgrounds/loops/index.json"]))
         beat_fn.add_to_role_policy(iam.PolicyStatement(actions=["polly:SynthesizeSpeech"], resources=["*"]))
         beat_fn.add_to_role_policy(iam.PolicyStatement(actions=["ssm:GetParameter"], resources=[f"arn:aws:ssm:{region}:{account}:parameter/videomk/*_api_key", f"arn:aws:ssm:{region}:{account}:parameter/videomk/unsplash_access_key"]))
         for fn in (plan_fn, beat_fn, timeline_fn):
             fn.add_to_role_policy(iam.PolicyStatement(actions=["s3:GetObject", "s3:PutObject"], resources=[v2_objects]))
-        for fn in (chunk_fn, audio_fn, beat_fn):  # they write segments, mixes and stock clips, which carry the "working" tag
+        for fn in (*self.chunk_fns, audio_fn, beat_fn):  # they write segments, mixes and stock clips, which carry the "working" tag
             fn.add_to_role_policy(iam.PolicyStatement(actions=["s3:GetObject", "s3:PutObject", "s3:PutObjectTagging"], resources=[v2_objects]))
         finalize_fn.add_to_role_policy(iam.PolicyStatement(actions=["s3:GetObject", "s3:PutObject", "s3:DeleteObject"], resources=[v2_objects]))
         finalize_fn.add_to_role_policy(iam.PolicyStatement(actions=["s3:PutObject"], resources=[videos_objects]))
 
         # HeadObject (the content-addressed cache lookups) answers 403 instead of 404 for a missing key unless the role may
         # list the prefix: grant exactly that, no more.
-        for fn in (beat_fn, chunk_fn):
+        for fn in (beat_fn, *self.chunk_fns):
             fn.add_to_role_policy(iam.PolicyStatement(
                 actions=["s3:ListBucket"], resources=[f"arn:aws:s3:::{assets_bucket}"],
                 conditions={"StringLike": {"s3:prefix": ["generation/v2/*"]}},
@@ -111,7 +117,14 @@ class EngineV2(Construct):
             chunk_t = invoke(f"{p}RenderChunk", chunk_fn)
             chunk_t.add_retry(errors=["States.TaskFailed"], interval=Duration.seconds(3), max_attempts=2, backoff_rate=2.0)
             chunks_map = sfn.Map(self, f"{p}Chunks", items_path="$.chunks", max_concurrency=render_concurrency)
-            chunks_map.item_processor(chunk_t)
+            if chunk_hd_fn is None:
+                chunks_map.item_processor(chunk_t)
+            else:   # the timeline step marks every chunk `big` (4K final render) or not: HD chunks go to the smaller function
+                chunk_hd_t = invoke(f"{p}RenderChunkHd", chunk_hd_fn)
+                chunk_hd_t.add_retry(errors=["States.TaskFailed"], interval=Duration.seconds(3), max_attempts=2, backoff_rate=2.0)
+                pick = sfn.Choice(self, f"{p}ChunkSize?")
+                pick.when(sfn.Condition.boolean_equals("$.big", True), chunk_t).otherwise(chunk_hd_t)
+                chunks_map.item_processor(pick)
             audio_t = tasks.LambdaInvoke(
                 self, f"{p}Audio", lambda_function=audio_fn, payload_response_only=True,
                 payload=sfn.TaskInput.from_object({"video_id.$": "$.video_id", "timeline_key.$": "$.timeline_key", "rev.$": "$.rev", "mode.$": "$.mode"}),

@@ -35,7 +35,8 @@ def direct(prompt: str, *, minutes: float, ask_small: Ask, ask_big: Callable[[st
            web_provider: Any = None, ask_tools: Optional[researcher.AskTools] = None, today: Optional[str] = None,
            budget: Optional[researcher.Budget] = None, photos: Optional[List[Dict[str, Any]]] = None,
            max_images_per_minute: Optional[float] = None, music_tracks: Optional[List[Dict[str, Any]]] = None, story: Optional[Dict[str, Any]] = None,
-           options: Optional[Dict[str, Any]] = None, vector_search: Optional[Callable[..., List[Dict[str, Any]]]] = None) -> Dict[str, Any]:
+           options: Optional[Dict[str, Any]] = None, vector_search: Optional[Callable[..., List[Dict[str, Any]]]] = None,
+           ask_review: Optional[Callable[[str, str], str]] = None) -> Dict[str, Any]:
     """Returns {"legit": False, "reason": ...} or {"legit": True, "plan": ..., "warnings": [...], "fetched": [titles], "research": {...}}.
     With a `web_provider` the brief is first classified: time-sensitive briefs get a web research agent, the rest the cheap encyclopedia path."""
     region = voices.clean_region(region)
@@ -227,5 +228,5 @@ def direct(prompt: str, *, minutes: float, ask_small: Ask, ask_big: Callable[[st
         art_direction.settle_boards(plan)
     if wpolicy.allowed:   # the narration is final now: every board is tied to the words really said and gets emphasis marks where its pen would rest
         warnings = [w for w in warnings if "whiteboard twice in a row" not in w] + whiteboard_policy.settle(plan, wpolicy)
-        warnings += whiteboard_policy.review(plan, wpolicy, ask_big, language)   # the self-check: boards that fail (sparse, overlapping, pen resting) are written again once, with the complaint
+        warnings += whiteboard_policy.review(plan, wpolicy, ask_review or ask_big, language)   # the self-check: boards that fail (sparse, overlapping, pen resting) are written again once, with the complaint
     return {"legit": True, "plan": plan, "warnings": warnings, "fetched": fetched, "research": info}

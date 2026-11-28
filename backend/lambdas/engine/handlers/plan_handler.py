@@ -148,18 +148,32 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     update_status(video_id, "PLOT_CREATION")
     making_progress.begin(video_id)   # the Making status of an earlier attempt is forgotten (docs/CREATE_API.md "Making status")
     spent: Dict[str, float] = {}   # what was spent, by what it paid for (costs.PARTS)
+    tokens: Dict[str, int] = {}    # prompt-cache tokens read and written by the script calls
 
     def ask_small(system: str, user: str, max_tokens: int = 120) -> str:
         text, meta = llm.complete(system, user, max_tokens=max_tokens, model=llm.REVIEW_MODEL, effort="low")
         spent["script"] = spent.get("script", 0.0) + meta["cost_usd"]
         return text
 
-    def ask_big(system: str, user: str) -> str:
+    def note_tokens(meta: Dict[str, Any]) -> None:
+        for k in ("cache_read_tokens", "cache_write_tokens"):   # prompt caching (docs/COST_LEVERS_2026-11-28.md): kept on the video next to its cost
+            if meta.get(k):
+                tokens[k] = tokens.get(k, 0) + int(meta[k])
+
+    def ask_big(system: str, user: str, effort: Optional[str] = None) -> str:
         # room for the whole script: a long video is about 100 tokens per spoken beat plus its scene, and the model's own thinking counts against the limit too
-        text, meta = llm.complete(system, user, max_tokens=plan_max_tokens(minutes))
+        text, meta = llm.complete(system, user, max_tokens=plan_max_tokens(minutes), effort=effort)
         if meta.get("stop_reason") == "max_tokens":
             logging.warning("the plan was cut off at the output limit (%s tokens) for a %s-minute video", meta.get("tokens_out"), minutes)
         spent["script"] = spent.get("script", 0.0) + meta["cost_usd"]
+        note_tokens(meta)
+        return text
+
+    def ask_review(system: str, user: str) -> str:
+        # the whiteboard self-check's rewrite of failing boards: the model and effort are settings (llm.WB_REVIEW_MODEL / WB_REVIEW_EFFORT)
+        text, meta = llm.complete(system, user, max_tokens=plan_max_tokens(minutes), model=llm.WB_REVIEW_MODEL or None, effort=llm.WB_REVIEW_EFFORT)
+        spent["script"] = spent.get("script", 0.0) + meta["cost_usd"]
+        note_tokens(meta)
         return text
 
     photos, skipped, story = [], [], None
@@ -177,7 +191,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     if event.get("deck") and os.environ.get("DECK_TO_VIDEO") == "1":
         result = _deck_result(event, video_id, user_id, prompt, minutes, spent, ask_small, ask_big, catalog)
     else:
-        result = director.direct(prompt, minutes=minutes, ask_small=ask_small, ask_big=ask_big, language=None if event.get("language") in (None, "auto") else event.get("language"),   # auto: detected from the description
+        result = director.direct(prompt, minutes=minutes, ask_small=ask_small, ask_big=ask_big, ask_review=ask_review, language=None if event.get("language") in (None, "auto") else event.get("language"),   # auto: detected from the description
                                  options={**{k: event.get(k) for k in ("platform", "aspect", "brief", "style", "presenter", "look", "cast", "extras")}, "end_card": bool(isinstance(event.get("watermark"), dict) and event["watermark"].get("mode") == "videomk" and event["watermark"].get("end_card"))},   # end_card: the closing card is part of the length asked (engine/length.py)
                                  region=event.get("region"), theme=event.get("theme"), web_provider=provider, ask_tools=ask_tools, photos=photos, story=story,
                                  max_images_per_minute=event.get("max_images_per_minute", float(os.environ.get("MAX_IMAGES_PER_MINUTE", "10"))),
@@ -186,6 +200,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     spent["research"] = spent.get("research", 0.0) + float(r.get("searches", 0)) * WEB_SEARCH_COST_USD  # the search provider's own price per search
     for part, usd in spent.items():
         costs.add_cost(video_id, usd, part=part)
+    if tokens:
+        costs.add_tokens(video_id, tokens)
     if r.get("mode") == "web" or r.get("fallback") or r.get("escalated") or r.get("fetch_errors_n"):
         logging.warning("research: %s", {k: r.get(k) for k in ("mode", "decided", "searches", "reads", "iterations", "seconds", "error", "fallback", "escalated", "fetch_errors_n", "grounding")})
     if result.get("warnings"):

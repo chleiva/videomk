@@ -456,6 +456,7 @@ class BackendStack(Stack):
                 make_fn=make_fn, engine_layer=engine_layer, videos_table=videos_table, assets_bucket=ASSETS_BUCKET,
                 mark_failed_fn=mark_failed_fn, mark_rejected_fn=mark_rejected_fn, usage_table=usage_table, env=engine_env,
                 account=self.account, region=self.region,
+                hd_render_memory=int(self.node.try_get_context("hdRenderMemoryMb") if self.node.try_get_context("hdRenderMemoryMb") is not None else 4096),   # HD renders on a smaller function (docs/COST_LEVERS_2026-11-28.md); 0 = off
                 render_concurrency=int(self.node.try_get_context("renderConcurrency") or 32),   # Step Functions inline Map allows at most 40; the account needs the Lambda concurrency
             )
             active_machine = v2.state_machine
@@ -496,11 +497,11 @@ class BackendStack(Stack):
                 v2.plan_fn.add_to_role_policy(iam.PolicyStatement(actions=["s3:PutObject"], resources=[f"{self.catalog.bucket.bucket_arn}/w/*"]))   # a new whiteboard drawing's package
                 v2.plan_fn.add_environment("CATALOG_BUCKET", self.catalog.bucket.bucket_name)   # where that package goes (object_ondemand._put_package reads it; without it every drawing was paid for and never stored)
             if vector_scenes:   # the functions that draw frames read one scene package at a time: v/<scene id>/* of the catalog bucket, nothing else, no listing, no write
-                for fn in (v2.chunk_fn, v2.selftest_fn):
+                for fn in (*v2.chunk_fns, v2.selftest_fn):
                     fn.add_to_role_policy(iam.PolicyStatement(actions=["s3:GetObject"], resources=[f"{self.catalog.bucket.bucket_arn}/v/*"]))
                     fn.add_environment("CATALOG_BUCKET", self.catalog.bucket.bucket_name)
             if whiteboard:   # the functions that draw frames read one drawing package at a time: w/<id>.json of the catalog bucket, nothing else, no listing, no write
-                for fn in (v2.chunk_fn, v2.selftest_fn):
+                for fn in (*v2.chunk_fns, v2.selftest_fn):
                     fn.add_to_role_policy(iam.PolicyStatement(actions=["s3:GetObject"], resources=[f"{self.catalog.bucket.bucket_arn}/w/*"]))
                     fn.add_environment("CATALOG_BUCKET", self.catalog.bucket.bucket_name)
 
