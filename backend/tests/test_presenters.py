@@ -302,7 +302,7 @@ def test_capabilities_lists_the_cast_with_labels_in_both_languages(monkeypatch):
     en, es = capabilities_api.presenter("en", True), capabilities_api.presenter("es", True)
     assert en["param"] == "presenter" and en["default"] == "auto" and en["available"] is True and [o["id"] for o in en["options"]] == ["auto", "none"]
     assert [c["id"] for c in en["cast"]] == list(pp.ORDER) and [c["id"] for c in en["cast"]][:5] == ["ines", "david", "priya", "mateo", "fox"]
-    assert [c["name"] for c in en["cast"]] == ["Inés", "David", "Priya", "Mateo", "Fox", "Hugo", "Bruno", "Mika", "Paco", "Tula"]
+    assert [c["name"] for c in en["cast"]] == ["Inés", "David", "Priya", "Mateo", "Fox", "Otto", "Bruno", "Mika", "Paco", "Tula"]
     assert [c["role"] for c in en["cast"]] == ["Teacher", "Engineer", "Doctor", "Chef", "Guide for children", "Owl professor", "Caring bear", "Curious cat", "Travelling parrot", "Wise turtle"]
     assert [c["role"] for c in es["cast"]] == ["Profesora", "Ingeniero", "Doctora", "Chef", "Guía para niños", "Búho profesor", "Oso cariñoso", "Gata curiosa", "Loro viajero", "Tortuga sabia"]
     assert all(c["thumbnail"].startswith("data:image/png;base64,") and len(c["thumbnail"]) < 8000 for c in en["cast"])

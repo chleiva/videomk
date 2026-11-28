@@ -2,7 +2,7 @@
 
 **2026-11-27, later: the five are wired into real videos behind the switch `PRESENTERS` (QA on, production off): see `docs/PRESENTERS.md`.**
 
-**2026-11-27, evening: five animal presenters joined the Fox (owl Hugo, bear Bruno, cat Mika, parrot Paco, turtle Tula), branch `animal-cast`: see "The animal cast" at the end of this note and `docs/PRESENTERS.md` "Animal presenters".**
+**2026-11-27, evening: five animal presenters joined the Fox (owl Otto, bear Bruno, cat Mika, parrot Paco, turtle Tula), branch `animal-cast`: see "The animal cast" at the end of this note and `docs/PRESENTERS.md` "Animal presenters".**
 
 Owner decision: generate only **5** new characters, animate them, look at the videos, and only then decide whether to build more. This note is that test. Nothing is deployed and the characters are not wired into the planner.
 
@@ -102,7 +102,7 @@ New: `backend/scripts/vector_character_sheet5.py`, `vector_character_build5.py`,
 
 | id | Name | Role | Look (house-v2 flat cartoon, the Fox's rig) | EN voice | ES voice |
 |---|---|---|---|---|---|
-| `owl` | Hugo | owl professor | chestnut feathers, cream face disc, ear tufts, round gold glasses, olive tweed waistcoat, dark-red bow tie, brown trousers; small tail fan | Brian, Matthew | Sergio, Pedro |
+| `owl` | Otto | owl professor | chestnut feathers, cream face disc, ear tufts, round gold glasses, olive tweed waistcoat, dark-red bow tie, brown trousers; small tail fan | Brian, Matthew | Sergio, Pedro |
 | `bear` | Bruno | wellbeing friend | honey-brown fur, tan muzzle, teal knitted jumper with a cream zigzag, blue trousers, brown boots; no tail | Stephen, Matthew | Andres, Pedro |
 | `cat` | Mika | tech explorer | grey tabby, white muzzle and paws, orange hoodie, navy trousers, sneakers; striped tail | Olivia, Salli | Mia, Lucia |
 | `parrot` | Paco | language and travel guide (Spanish first) | scarlet macaw, white face patch, crest, yellow neckerchief, blue feathered hands, grey boots; long tail feathers | Nate, Matthew | Pedro, Sergio |
@@ -114,4 +114,4 @@ What an animal sheet must say (learned here): limbs as long and slim as a person
 
 Checked for each: the pose sheet next to the Fox (rest, wave, one, two, three, present, open palms, shrug, thumb up), the talk clip's gesture peaks, `tests/test_vector_presenter.py` (pieces, limbs attached in pixels, hand shapes, rest pose and thumb sides) and `tests/test_vector_character_cast.py` (assets, metadata, under 1 MB: 0.70 to 0.92 MB).
 
-Rating as speakers: Bruno SHIP, Mika SHIP, Hugo SHIP (glove-like hands; busy tail fan when small), Paco SHIP (plain red legs), Tula NEEDS WORK in close shots (plain head, thin arms, the shell hides behind the arms at rest). A second sheet for Tula with a wider shell and thicker arms (about USD 0.07) is the first thing to try.
+Rating as speakers: Bruno SHIP, Mika SHIP, Otto SHIP (glove-like hands; busy tail fan when small), Paco SHIP (plain red legs), Tula NEEDS WORK in close shots (plain head, thin arms, the shell hides behind the arms at rest). A second sheet for Tula with a wider shell and thicker arms (about USD 0.07) is the first thing to try.

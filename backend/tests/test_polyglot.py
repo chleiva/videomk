@@ -205,7 +205,7 @@ def test_the_writer_is_told_every_character_s_language_and_a_line_length_per_lan
     p = pg.bind(pg.extract(fx.SEA_REQUEST, {}, main="en"), conv(["fox", "bear", "owl"]), minutes=1.0)
     b = pg.block(p, conv(["fox", "bear", "owl"]), "en", 1.0)
     assert "MULTILINGUAL CONVERSATION" in b and "replaces the Language rule" in b
-    assert '"fox" (Fox) speaks ONLY French' in b and '"bear" (Bruno) speaks ONLY German' in b and '"owl" (Hugo) speaks ONLY Italian' in b
+    assert '"fox" (Fox) speaks ONLY French' in b and '"bear" (Bruno) speaks ONLY German' in b and '"owl" (Otto) speaks ONLY Italian' in b
     assert '"translation"' in b and "in English" in b and "no word of the other languages" in b and "answers the line before it" in b
     fi = pg.block(pg.bind(pg.Polyglot(languages=["fr", "fi"], main="en"), conv(["fox", "owl"]), minutes=1.0), conv(["fox", "owl"]), "en", 1.0)
     n_fr = int(b.split('"fox" (Fox) speaks ONLY French: lines of about ')[1].split()[0])

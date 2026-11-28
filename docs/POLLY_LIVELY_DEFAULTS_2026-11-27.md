@@ -191,7 +191,7 @@ Dutch could be the Flemish Lisa (4.8 / 5.0) for everyone, and Belgian French cou
 | Priya (priya, doctor, female) | Kiara (was Kajal) | Lupe (was Mia) | Lucia (was Mia) | Ambre | Tina (was Vicki) | Beatrice | Camila | Laura | Ola | Suvi |
 | Mateo (mateo, chef, male) | Stephen | Carlos (was Andrés) | Sergio (was Andrés) | Florian | Lennart | Lorenzo | Leo | Laura | Ola | Suvi |
 | Fox (fox, guide for children, female) | Joanna | Lupe (was Lucia) | Lucia | Ambre | Vicki | Beatrice | Carolina (was Camila) | Laura | Ola | Suvi |
-| Hugo (owl, owl professor, male) | Brian | Carlos (was Sergio) | Sergio | Florian | Lennart | Lorenzo | Leo | Laura | Ola | Suvi |
+| Otto (owl, owl professor, male) | Brian | Carlos (was Sergio) | Sergio | Florian | Lennart | Lorenzo | Leo | Laura | Ola | Suvi |
 | Bruno (bear, caring bear, male) | Stephen | Carlos (was Andrés) | Sergio (was Andrés) | Florian | Lennart | Lorenzo | Leo | Laura | Ola | Suvi |
 | Mika (cat, curious cat, female) | Olivia | Lupe (was Mia) | Lucia (was Mia) | Ambre | Vicki | Beatrice | Carolina (was Camila) | Laura | Ola | Suvi |
 | Paco (parrot, travelling parrot, male) | Nate | Carlos (was Pedro) | Sergio (was Pedro) | Florian | Lennart | Lorenzo | Leo | Laura | Ola | Suvi |

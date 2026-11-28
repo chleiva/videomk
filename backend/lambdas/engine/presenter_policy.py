@@ -57,7 +57,7 @@ CAST: Dict[str, Dict[str, Any]] = {
             "skills": {"kids-family", "funny-light"}, "words": r"kids?\b|children|child\b|toddlers?|preschool|\d-year-olds?|ni[ñn]os|ni[ñn]as|infantil|peques"},
     # The animal cast. They are cast by themselves only in children's and fun videos (the fox's kinds of video), by the topic `words`; anywhere when asked for by name.
     # the owl is older and calm: a man's voice, the lowest and slowest lively one there is (English Brian; one lively man per language elsewhere: Carlos, Florian, Lennart, Lorenzo, Leo)
-    "owl": {"name": "Hugo", "role": {"en": "Owl professor", "es": "Búho profesor"}, "voices": {"en": ["Brian", "Matthew"], "es": _ES_M}, "skills": set(),
+    "owl": {"name": "Otto", "role": {"en": "Owl professor", "es": "Búho profesor"}, "voices": {"en": ["Brian", "Matthew"], "es": _ES_M}, "skills": set(),
             "words": r"learn\w*|school|homework|lessons?|science|scientists?|experiments?|history|ancient|maths?|numbers|planets?|space|stars?|dinosaurs?|"
                      r"aprend\w*|escuela|colegio|deberes|lecci[oó]n|ciencias?|experimentos?|historia|antigu[oa]s?|matem[aá]ticas|n[uú]meros|planetas?|espacio|estrellas?|dinosaurios?"},
     "bear": {"name": "Bruno", "role": {"en": "Caring bear", "es": "Oso cariñoso"}, "voices": {"en": ["Stephen", "Matthew"], "es": _ES_M}, "skills": set(),

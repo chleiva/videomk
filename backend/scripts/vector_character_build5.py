@@ -145,7 +145,7 @@ vb.PIECE_POST[("turtle", "head")] = plain_face
 vb.PIECE_POST[("parrot", "upper_arm")] = one_colour
 _RIG = "biped front-facing cut-out (head, torso, upper/lower arm, upper/lower leg, 2 eye sets, 3 mouths)"
 ANIMAL_META = {
-    "owl": {"name": "Hugo", "role": "professor", "species": "owl (bipedal mascot)", "age_group": "ageless", "tags": ["mascot", "animal", "professor", "calm", "learning", "kids", "explainer"],
+    "owl": {"name": "Otto", "role": "professor", "species": "owl (bipedal mascot)", "age_group": "ageless", "tags": ["mascot", "animal", "professor", "calm", "learning", "kids", "explainer"],
             "voice_hint": {"en": ["Brian", "Matthew"], "es": ["Sergio", "Pedro"]}, "personality": "calm, wise, patient", "suitable_topics": ["learning", "science", "history", "how it works"],
             "outfit": "round gold glasses, olive tweed waistcoat, dark-red bow tie, brown trousers, tan shoes", "skin": "chestnut-brown feathers, cream face and hands", "hair": "n/a"},
     "bear": {"name": "Bruno", "role": "wellbeing friend", "species": "bear (bipedal mascot)", "age_group": "ageless", "tags": ["mascot", "animal", "warm", "gentle", "health", "feelings", "kids", "bedtime"],

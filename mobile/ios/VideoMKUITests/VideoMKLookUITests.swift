@@ -105,7 +105,7 @@ final class VideoMKLookUITests: XCTestCase {
         for id in ids { XCTAssertTrue(el(app, "cast-\(id)").isHittable, "\(id) is on screen without scrolling") }
         XCTAssertEqual(el(app, "cast-fox").frame.minY, el(app, "cast-ines").frame.minY, accuracy: 1, "five across: the fifth face is in the first row")
         XCTAssertEqual(el(app, "cast-owl").frame.minX, el(app, "cast-ines").frame.minX, accuracy: 1, "two even rows")
-        XCTAssertEqual(el(app, "cast-owl").label, "Hugo")
+        XCTAssertEqual(el(app, "cast-owl").label, "Otto")
         XCTAssertGreaterThanOrEqual(el(app, "cast-fox").frame.width, 44); XCTAssertGreaterThanOrEqual(el(app, "cast-fox").frame.height, 44)
         let size = el(app, "cast-fox").frame.size
         el(app, "cast-fox").tap()

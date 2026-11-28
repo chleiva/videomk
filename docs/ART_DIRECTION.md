@@ -46,7 +46,7 @@ What it shows, honestly:
 | File | Request | Result | Share in look | Repaired |
 |---|---|---|---|---|
 | look_a_whiteboard_eiffel | look whiteboard, "The history of the Eiffel Tower" (auto never picks the whiteboard for history) | every scene a board | 100 % | 0 |
-| look_b_cartoon_owl_volcanoes | look cartoon, cast [owl] | Hugo in every scene, one backdrop, cards | 100 % | 1 |
+| look_b_cartoon_owl_volcanoes | look cartoon, cast [owl] | Otto in every scene, one backdrop, cards | 100 % | 1 |
 | look_c_conversation_fox_bear_sleep | look cartoon, cast [fox, bear], for children | both on screen throughout, a dialogue in two voices | 100 % | 0 |
 | look_d_turtle_board_plants | look cartoon, cast [turtle], extras [board] | Tula beside a board drawn as she speaks | 100 % | 0 |
 | look_e_auto_japan_footage | auto, "Top 5 places to visit in Japan" | footage | 100 % | 0 |
