@@ -24,9 +24,9 @@ DEFAULTS = {
     ("en", "IN"): ("Kiara", "Arjun"), ("en", "IE"): ("Niamh", "Matthew"), ("en", "NZ"): ("Aria", "Matthew"), ("en", "SG"): ("Jasmine", "Matthew"), ("en", "ZA"): ("Ayanda", "Matthew"),
     ("es", "ES"): ("Sergio", "Lucia"), ("es", None): ("Lupe", "Carlos"), ("es", "MX"): ("Lupe", "Carlos"), ("es", "AR"): ("Lupe", "Carlos"), ("es", "US"): ("Lupe", "Carlos"),
     ("es", "GB"): ("Lupe", "Carlos"), ("es", "FR"): ("Lupe", "Carlos"), ("es", "PH"): ("Lupe", "Carlos"),
-    ("fr", None): ("Ambre", "Florian"), ("fr", "FR"): ("Ambre", "Florian"), ("fr", "CH"): ("Ambre", "Florian"), ("fr", "CA"): ("Gabrielle", "Liam"), ("fr", "BE"): ("Isabelle", "Florian"),
+    ("fr", None): ("Ambre", "Florian"), ("fr", "FR"): ("Ambre", "Florian"), ("fr", "CH"): ("Ambre", "Florian"), ("fr", "CA"): ("Gabrielle", "Liam"), ("fr", "BE"): ("Ambre", "Florian"),
     ("de", "DE"): ("Vicki", "Lennart"), ("de", "AT"): ("Hannah", "Lennart"), ("de", "CH"): ("Sabrina", "Lennart"), ("it", "IT"): ("Beatrice", "Lorenzo"),
-    ("pt", "BR"): ("Camila", "Leo"), ("pt", "PT"): ("Camila", "Leo"), ("nl", "NL"): ("Laura", None), ("nl", "BE"): ("Lisa", None), ("pl", "PL"): ("Ola", None), ("fi", "FI"): ("Suvi", None),
+    ("pt", "BR"): ("Camila", "Leo"), ("pt", "PT"): ("Camila", "Leo"), ("nl", "NL"): ("Lisa", None), ("nl", "BE"): ("Lisa", None), ("pl", "PL"): ("Ola", None), ("fi", "FI"): ("Suvi", None),
     ("ko", "KR"): ("Seoyeon", "Hyunduk"),
 }
 # the accents Polly has no lively voice for: their default stays a steady voice of that accent
@@ -97,7 +97,7 @@ def test_the_resolver_prefers_a_lively_voice_inside_the_accent_asked():
     # never another accent because it is livelier: the viewer's own accent, or the one asked, comes first
     assert r({"gender": "female"}, "fr", "CA") == ("Gabrielle", "") and r({"gender": "male"}, "fr", "CA") == ("Liam", "")
     assert r({"accent": "Canadian", "gender": "male"}, "fr", "FR") == ("Liam", "") and r({"accent": "Belgian"}, "fr", "FR") == ("Isabelle", "")
-    assert r({"gender": "female"}, "nl", "NL") == ("Laura", "") and r({}, "pl", "PL") == ("Ola", "") and r({"accent": "South African"}, "en", "US") == ("Ayanda", "")
+    assert r({"gender": "female"}, "nl", "NL") == ("Lisa", "") and r({}, "pl", "PL") == ("Ola", "") and r({"accent": "South African"}, "en", "US") == ("Ayanda", "")
 
 
 def test_a_steady_voice_asked_for_by_name_is_given():
@@ -212,6 +212,7 @@ def test_every_default_and_second_voice_has_a_fit_of_its_own_where_it_changed():
     for (lang, region), (first, _) in DEFAULTS.items():
         if lang in voices.READY and lang not in ("en", "es"):
             assert first in length.RATES or length._base_voice(voices.INFO[first])["id"] in length.RATES, first
+    assert length.RATES["Lisa"] == (0.0515, 0.307, 0.19) and voices.cast_voices({"a": {}, "b": {}}, "nl", "NL")[0] == {"a": "Lisa", "b": "Laura"}   # Dutch default since 2026-11-28
     assert length.RATES["Ruth"] == (0.0547, 0.351, 0.16) and length.RATES["Amy"] == (0.0558, 0.309, 0.23) and length.RATES["Lucia"] == (0.0495, 0.378, 0.14)   # untouched
     # a steady French voice is still estimated from Léa (a steady voice), not from the lively default
     assert length._base_voice(voices.INFO["Gabrielle"])["id"] == "Lea" and length._base_voice(voices.INFO["Tina"])["id"] == "Vicki"
