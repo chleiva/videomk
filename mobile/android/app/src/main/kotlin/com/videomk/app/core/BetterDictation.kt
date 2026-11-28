@@ -76,6 +76,9 @@ enum class BetterNote { Quota, Limit, Failed }
 enum class BetterFailure {
     Plan, Quota, TooLong, Failed, Paused, BadAudio, Auth, Network;
 
+    /** Worth offering Retry (the clip is kept in memory): a hiccup, not a rule. Quota, plan, paused, too long, bad audio and auth cannot be fixed by sending again. */
+    val isRetryable: Boolean get() = this == Failed || this == Network
+
     /** What the app says: nothing for plan, paused and auth (the person did nothing wrong and nothing useful can be said). */
     val note: BetterNote? get() = when (this) {
         Quota -> BetterNote.Quota

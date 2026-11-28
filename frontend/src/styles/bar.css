@@ -223,3 +223,47 @@
 .credits-plan { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: var(--space-2) var(--space-3); }
 .plan-chip { display: inline-flex; align-items: center; height: 1.75rem; padding: 0 var(--space-3); border-radius: var(--radius-pill); background: var(--primary-container); color: var(--primary); font-weight: 700; }
 @media (max-width: 47.99rem) { .app-shell .toast-host { bottom: calc(var(--tabbar-height) + var(--space-4) + env(safe-area-inset-bottom)); } }   /* a toast with an action (Undo) never sits on the tab bar */
+
+/* ---- dictation feedback (docs/DICTATION_FEEDBACK_2026-11-28.md): replaces the dock while the mic works; same capsule family as .create-capsule ---- */
+.voice-panel { display: flex; align-items: center; gap: var(--space-3); min-height: 4.5rem; margin-top: var(--space-4); padding: var(--space-2) var(--space-2) var(--space-2) var(--space-3); border-radius: 2.25rem; background: var(--surface-2); box-shadow: inset 0 0 0 1px var(--outline); transform-origin: left bottom; animation: vmk-voice-in var(--dur-sheet) var(--ease); }
+@keyframes vmk-voice-in { from { opacity: 0; transform: scale(0.96, 0.8); } }
+.voice-cancel { flex: none; min-height: var(--min-touch); padding: 0 var(--space-3); border: 0; border-radius: var(--radius-pill); background: transparent; color: var(--text-secondary); font: inherit; font-size: var(--fs-subhead); font-weight: 600; cursor: pointer; }
+.voice-cancel-x { display: none; }
+@media (max-width: 22.5rem) { .voice-cancel-t { display: none; } .voice-cancel-x { display: block; } .voice-cancel { width: var(--min-touch); padding: 0; display: grid; place-items: center; } .voice-panel { gap: var(--space-2); } }
+.voice-cancel:hover { background: var(--surface-3); color: var(--text); }
+.voice-mid { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 0.25rem; }
+.voice-wave { display: flex; align-items: center; justify-content: space-between; height: 1.75rem; overflow: hidden; }
+.voice-wave > span { flex: 0 1 3px; min-width: 1px; width: 3px; height: 100%; border-radius: 2px; background: var(--danger); transform: scaleY(0.1); transition: transform 80ms linear, background-color var(--dur-sheet) var(--ease); will-change: transform; }
+/* transcribing: the same bars, same place, settle and sweep gently in the brand colour: it cannot be mistaken for recording */
+.voice-wave.is-wait > span { background: var(--primary); transform: scaleY(0.22); animation: vmk-voice-sweep var(--dur-shimmer) var(--ease) infinite; animation-delay: calc(var(--i) * 60ms); transition: transform var(--dur-sheet) var(--ease), background-color var(--dur-sheet) var(--ease); }
+@keyframes vmk-voice-sweep { 0%, 100% { transform: scaleY(0.22); opacity: 0.55; } 30% { transform: scaleY(0.6); opacity: 1; } 60% { transform: scaleY(0.22); opacity: 0.55; } }
+.voice-pulse { display: grid; place-items: center; align-self: flex-start; width: 1.75rem; height: 1.75rem; color: var(--danger); border-radius: 50%; animation: vmk-voice-ring 1.6s var(--ease) infinite; }
+@keyframes vmk-voice-ring { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--danger) 40%, transparent); } 100% { box-shadow: 0 0 0 0.75rem transparent; } }
+.voice-meta { display: flex; align-items: center; gap: var(--space-2); min-width: 0; font-size: var(--fs-subhead); font-weight: 600; color: var(--text); }
+.voice-dot { flex: none; width: 0.5rem; height: 0.5rem; border-radius: 50%; background: var(--danger); animation: vmk-pulse 1.6s ease-in-out infinite; }
+.voice-panel[data-phase="transcribing"] .voice-dot { background: var(--primary); animation: none; }
+.voice-label { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-secondary); }
+.voice-panel[data-warn="soon"] .voice-label { color: var(--warning); }
+.voice-panel[data-warn="final"] .voice-label { color: var(--danger); }
+.voice-time { flex: none; font-variant-numeric: tabular-nums; color: var(--text); }
+.voice-stop { flex: none; display: grid; place-items: center; width: 3.25rem; height: 3.25rem; border: 0; border-radius: 50%; background: var(--danger); color: var(--background); cursor: pointer; transition: transform var(--dur-press) var(--ease); }
+.voice-stop:active { transform: scale(0.94); }
+.voice-busy { flex: none; display: grid; place-items: center; width: 3.25rem; height: 3.25rem; }
+.voice-busy > i { width: 1.5rem; height: 1.5rem; border-radius: 50%; border: 2.5px solid var(--primary-container); border-top-color: var(--primary); animation: vmk-spin 1.2s linear infinite; }
+.voice-panel[data-phase="failed"] { padding: var(--space-3) var(--space-4); border-radius: 1.75rem; }
+.voice-panel[data-phase="failed"] .voice-mid { gap: var(--space-2); }
+.voice-panel[data-phase="failed"] .voice-label { white-space: normal; }
+.voice-panel[data-phase="failed"] .voice-meta .voice-label { color: var(--text); }
+.voice-warn-ic { flex: none; color: var(--warning); }
+.voice-actions { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.voice-actions .btn { flex: 1 1 auto; white-space: normal; text-align: center; line-height: 1.25; padding-block: var(--space-2); }
+.composer-card textarea.is-inserted { animation: vmk-inserted 1.2s var(--ease); }
+@keyframes vmk-inserted { 0% { background-color: var(--primary-container); } 100% { background-color: transparent; } }
+@media (prefers-reduced-motion: reduce) {
+  .voice-panel { animation: vmk-fade var(--dur-reduced) linear; }
+  .voice-wave > span { transition: none; }
+  .voice-wave.is-wait > span { animation: none; opacity: 0.8; transform: scaleY(calc(0.2 + 0.25 * var(--i) / 28)); }   /* a still, rising ramp: clearly "waiting", no motion */
+  .voice-pulse, .voice-dot { animation: none; }
+  .voice-busy > i { animation-duration: 3s; }
+  .composer-card textarea.is-inserted { animation-duration: var(--dur-reduced); }
+}

@@ -68,6 +68,8 @@ public func placeBetterText(base: String, native: String, field: String, better:
 
 public enum BetterDictationFailure: Error, Sendable, Equatable {
     case plan, quota, tooLong, failed, paused, badAudio, auth, network
+    /// Worth offering Retry (the clip is kept in memory): a hiccup, not a rule. Quota, plan, paused, too long, bad audio and auth cannot be fixed by sending again.
+    public var isRetryable: Bool { self == .failed || self == .network }
 
     /// What the server answered (pure).
     public static func from(status: Int, body: Data?) -> BetterDictationFailure {

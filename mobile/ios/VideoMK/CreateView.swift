@@ -93,7 +93,8 @@ struct CreateView: View {
                 try? await Task.sleep(for: .milliseconds(450)); if !create.form.hasContent, typingTarget == nil { focused = true }
             }
         }
-        .onAppear { dictation.onText = { create.form.text = $0 }; dictation.textProvider = { create.form.text }; dictation.onKeyboardFallback = { focused = true }; dictation.configure(service: model.dictationService, caps: create.caps.dictation) }
+        .onAppear { dictation.onText = { create.form.text = $0 }; dictation.textProvider = { create.form.text }; dictation.onKeyboardFallback = { focused = true }; dictation.announce = { UIAccessibility.post(notification: .announcement, argument: $0) }; dictation.configure(service: model.dictationService, caps: create.caps.dictation) }
+        .task { debugDictation() }
         .onChange(of: create.caps.dictation) { _, d in dictation.configure(service: model.dictationService, caps: d) }
         .onDisappear { dictation.stop(); typing?.cancel() }
         .onChange(of: focused) { _, f in if f { finishTyping() } }
@@ -140,6 +141,12 @@ struct CreateView: View {
         .onChange(of: capsule.ending) { _, ending in if ending == .refusal { Haptics.play(.warning) } }
     }
 
+    private func debugDictation() {
+        #if DEBUG
+        if let name = ProcessInfo.processInfo.environment["VMK_DEBUG_DICTATION"] { dictation.debugShow(name) }
+        #endif
+    }
+
     // MARK: the sentence
 
     /// The prompt: a caret and "A video about…", large and borderless. Nothing else competes with it.
@@ -149,6 +156,8 @@ struct CreateView: View {
             .textInputAutocapitalization(.sentences)
             .foregroundStyle(dictation.isListening ? Theme.textSecondary : Theme.text)
             .frame(maxWidth: .infinity, minHeight: 44, alignment: .topLeading)
+            .background(dictation.inserted ? Theme.primaryContainer : Color.clear, in: RoundedRectangle(cornerRadius: 8, style: .continuous))      // the text that just arrived, for a moment
+            .animation(reduceMotion ? Theme.Motion.fade : Theme.Motion.select, value: dictation.inserted)
             .accessibilityIdentifier("composerField")
             .overlay(alignment: .top) { dictationHint }
     }
@@ -441,6 +450,7 @@ struct CreateView: View {
         let s = status
         return VStack(spacing: 0) {
             if locked { waiting.transition(.opacity) }
+            else if dictation.showsPanel { DictationPanelView(dictation: dictation).transition(.opacity.combined(with: .scale(scale: 0.96, anchor: .bottomLeading))) }
             else {
                 VStack(spacing: Theme.Space.s) {
                     statusLine(s)
@@ -464,6 +474,7 @@ struct CreateView: View {
         .dynamicTypeSize(...DynamicTypeSize.accessibility1)      // the bar that is always visible stays compact; the sentence above scrolls at full size
         .background { if !locked { Theme.background.ignoresSafeArea(edges: .bottom) } }
         .animation(reduceMotion ? Theme.Motion.fade : Theme.Motion.spring, value: capsule.phase)
+        .animation(reduceMotion ? Theme.Motion.fade : Theme.Motion.spring, value: dictation.showsPanel)
         .animation(reduceMotion ? nil : Theme.Motion.select, value: statusText(s))
     }
 

@@ -163,6 +163,35 @@ fun CreateScreen(app: AppViewModel, composer: ComposerViewModel, onClose: () -> 
     composer.attachDeckApi(container?.deckApi, container?.deckUploader)
     composer.attachDictationService(container?.dictationApi)
     val improving by composer.better.working.collectAsState()
+    // dictation feedback (docs/DICTATION_FEEDBACK_2026-11-28.md): the panel replaces the dock while the mic works; TalkBack hears thresholds only; haptics at the moments that matter
+    val voice by composer.better.voice.collectAsState()
+    val barsState = composer.better.bars.collectAsState()
+    val voiceVisible = voice.phase == com.videomk.app.core.VoicePhase.Recording || voice.phase == com.videomk.app.core.VoicePhase.Transcribing || voice.phase == com.videomk.app.core.VoicePhase.Failed
+    val voiceHaptics = rememberHaptics()
+    LaunchedEffect(voice.phase) {
+        when (voice.phase) {
+            com.videomk.app.core.VoicePhase.Recording -> voiceHaptics.play(DesignTokens.Haptic.Selection)
+            com.videomk.app.core.VoicePhase.Failed -> voiceHaptics.play(DesignTokens.Haptic.Warning)
+            com.videomk.app.core.VoicePhase.Inserted -> voiceHaptics.play(DesignTokens.Haptic.UploadDone)
+            else -> Unit
+        }
+    }
+    androidx.compose.runtime.DisposableEffect(composer) {
+        composer.better.announce = { key, v ->
+            val text = when (key) {
+                "listening" -> context.getString(R.string.voice_listening)
+                "warn_soon" -> context.getString(R.string.voice_soon_a11y, v.warning.second)
+                "warn_final" -> context.getString(R.string.voice_final_a11y)
+                "transcribing" -> context.getString(R.string.voice_wait_a11y)
+                "slow" -> context.getString(R.string.voice_slow_a11y)
+                "failed" -> context.getString(R.string.voice_failed_a11y)
+                "inserted" -> context.getString(R.string.voice_inserted_a11y)
+                else -> null
+            }
+            if (text != null) view.announceForAccessibility(text)
+        }
+        onDispose { composer.better.announce = null }
+    }
     val betterNote by composer.better.note.collectAsState()
     // one line after a fallback or the 6 minute stop, for a few seconds
     LaunchedEffect(betterNote) { if (betterNote != null) { delay(6000); composer.better.clearNote() } }
@@ -438,8 +467,10 @@ fun CreateScreen(app: AppViewModel, composer: ComposerViewModel, onClose: () -> 
                         Text(stringResource(R.string.create_error_retry, m), style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.text)
                     }
                 }
-                androidx.compose.animation.AnimatedContent(creating, transitionSpec = { androidx.compose.animation.fadeIn(tween(if (still) DesignTokens.Motion.reducedFade else 220)) togetherWith androidx.compose.animation.fadeOut(tween(DesignTokens.Motion.reducedFade)) }, label = "capsule") { live ->
+                androidx.compose.animation.AnimatedContent(if (creating) 2 else if (voiceVisible) 1 else 0, transitionSpec = { androidx.compose.animation.fadeIn(tween(if (still) DesignTokens.Motion.reducedFade else 220)) togetherWith androidx.compose.animation.fadeOut(tween(DesignTokens.Motion.reducedFade)) }, label = "capsule") { mode ->
+                    val live = mode == 2
                     if (live) (capsule as? CreateCapsule.View.Live ?: CreateCapsule.View.Live(CreateCapsule.Step.Starting, false)).let { LiveCapsule(it, onCancel = { haptics.play(DesignTokens.Haptic.Selection); composer.dismissSheet() }) }
+                    else if (mode == 1) DictationPanel(voice, barsState, composer.better.usesClip, onStop = { composer.dictation.stop() }, onCancel = { composer.better.discard() }, onRetry = { composer.better.retry() }, onDevice = { composer.better.useDeviceDictation() })
                     else Column(verticalArrangement = Arrangement.spacedBy(Vmk.space.s)) {
                         // calm: nothing is wrong, so the sentence stays away and (maybe) the caption speaks
                         val calm = status.kind == StatusKind.Ready || status.kind == StatusKind.PhotoHint || status.kind == StatusKind.Listening || status.kind == StatusKind.Idle ||
@@ -571,11 +602,14 @@ private fun Modifier.lockTouches(): Modifier = this.pointerInput(Unit) {
 /** The prompt: large borderless text on the page (no card, no outline); the short hint is the only words around it. */
 @Composable
 private fun PromptField(composer: ComposerViewModel, listening: Boolean, focus: FocusRequester, deck: Boolean = false) {
+    // the text that just arrived from Better dictation is tinted for a moment (a plain fade with reduced motion)
+    val inserted by composer.better.inserted.collectAsState()
+    val tint by androidx.compose.animation.animateColorAsState(if (inserted) Vmk.colors.primaryContainer else Color.Transparent, tween(if (reduceMotion(LocalContext.current)) DesignTokens.Motion.reducedFade else 600), label = "inserted")
     BasicTextField(
         value = composer.text, onValueChange = { composer.text = it }, readOnly = listening,
         textStyle = VmkType.prompt.copy(color = if (listening) Vmk.colors.textSecondary else Vmk.colors.text),
         cursorBrush = SolidColor(Vmk.colors.primary), keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
-        modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp).focusRequester(focus).padding(top = Vmk.space.s).testTag("composerField"),
+        modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp).focusRequester(focus).background(tint, RoundedCornerShape(8.dp)).padding(top = Vmk.space.s).testTag("composerField"),
         decorationBox = { inner ->
             Box { if (composer.text.isEmpty()) Text(stringResource(if (deck) R.string.deck_prompt_hint else R.string.create_prompt_hint), style = VmkType.prompt, color = Vmk.colors.textTertiary); inner() }
         },
