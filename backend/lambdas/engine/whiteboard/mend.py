@@ -108,11 +108,11 @@ def _arrow_moves(plan: Dict[str, Any], score: Dict[str, Any]) -> List[Any]:
     from ..scenes.elements import whiteboard as wbe
 
     moves = []
-    names = list(score.get("crossed") or []) + [x for x in score.get("blocked") or [] if x not in (score.get("arrows_readable") or [])]
+    names = list(score.get("crossed") or []) + [x for pair in score.get("arrow_cross") or [] for x in pair] + [x for x in score.get("blocked") or [] if x not in (score.get("arrows_readable") or [])]
     props_list = [plan["beats"][i - 1]["scene"]["props"] for i in score["beats"]]
     free = wp.free_zones(props_list)
     solid = [x for p in props_list for x in p.get("items") or [] if x.get("zone") in wbe.ZONES and not x.get("near") and wp._solid(x)]
-    for name in names[:2]:
+    for name in names[:3]:
         arrow, _bi, props = _find(plan, score, name)
         if not arrow:
             continue
@@ -240,4 +240,151 @@ def fill_count(plan: Dict[str, Any], aspect: str, scores: List[Dict[str, Any]], 
                     break
             if not done:
                 break
+    return {"kept": kept, "scores": cur}
+
+
+# --------------------------------------------------------------------------------------------------------------------------------------------------------------
+# What the director left thin (docs/WHITEBOARD_VACCINE_REGRESSION_2026-11-28.md): the LAST model-free steps, after the director has had its one chance.
+WORD_KINDS = ("count", "rest", "busy")
+MIN_WORD = 5                  # a narration word shorter than this is never matched to a drawing ('te' is not a cup)
+_DRAWINGS: Dict[str, Any] = {}
+
+
+def _named_drawings() -> Dict[str, List[Tuple[int, str]]]:
+    """Folded name (English or Spanish title or synonym of a library drawing) -> [(rank, drawing id)]; rank 0 when it is the drawing's title or first synonym."""
+    if not _DRAWINGS:
+        from . import library
+        from .retrieval import fold
+
+        for it in library.index()["items"]:
+            for lang in ("en", "es"):
+                names = [it.get("title" if lang == "en" else "title_es")] + list(it.get("synonyms_" + lang) or [])
+                for r, n in enumerate(names):
+                    f = fold(n)
+                    if f and len(f) >= MIN_WORD:
+                        _DRAWINGS.setdefault(f, []).append((0 if r <= 1 else 1, it["id"]))
+    return _DRAWINGS
+
+
+def _drawing_for(word: str) -> Optional[str]:
+    """The ONE library drawing that is what this word names (title or synonym, English or Spanish, unique at its best rank), else None: never a guess."""
+    from .retrieval import fold
+
+    hits = _named_drawings().get(fold(word)) or []
+    if not hits:
+        return None
+    best = min(r for r, _ in hits)
+    ids = {i for r, i in hits if r == best}
+    return next(iter(ids)) if len(ids) == 1 else None
+
+
+MAX_WORDS = 2                 # at most this many written key words are added to one board (the drawings that words name come first)
+KEY_WORD_MIN = 7              # a written key word has at least this many letters
+_NOT_KEY = ("mente", "ment", "lich", "mente", "zione", "ement")      # adverbs read as filler on a board (rapidamente, simplement, schnellstens ...)
+
+
+def _candidates(narration: str, drawn: set, at: Optional[float], words: bool = False) -> List[Tuple[int, str, str, str]]:
+    """Words of this narration that NAME a drawing of the library: (index, as spoken, the token tied to, the drawing id), a drawing the board does not already
+    have; for a rest the words inside the stretch that rests first (`at`: 0.0 the start of the beat, a time for its end, None anywhere). With `words`, then the
+    longest plain words (a written key word: at least KEY_WORD_MIN letters, not an adverb, not the first word of a sentence), id ''."""
+    import re
+
+    from .. import whiteboard_policy as wp
+
+    raw = [re.sub(r"[^\w'-]", "", w) for w in narration.split()]
+    toks = wp._words(narration)
+    if len(raw) != len(toks):
+        return []
+    out = []
+    for k, w in enumerate(raw):
+        if len(w) < MIN_WORD or not toks[k] or toks[k] in toks[:k]:
+            continue
+        d = _drawing_for(w)
+        if d and d not in drawn:
+            out.append((k, w, toks[k], d))
+    plain = []
+    if words:
+        for k, w in enumerate(raw):
+            starts = k == 0 or str(narration.split()[k - 1]).rstrip().endswith((".", "!", "?", ":", "¿", "¡"))
+            if len(w) >= KEY_WORD_MIN and toks[k] and toks[k] not in toks[:k] and not starts and not w.lower().endswith(_NOT_KEY) and not any(k == o[0] for o in out):
+                plain.append((k, w, toks[k], ""))
+    plain.sort(key=lambda x: -len(x[1]))
+    if at is None:
+        return out + plain
+    return sorted(out, key=lambda x: x[0] if at == 0.0 else -x[0]) + sorted(plain, key=lambda x: x[0] if at == 0.0 else -x[0])
+
+
+def rest_long(s: Dict[str, Any]) -> bool:
+    return any(g >= 3.5 for g, _i, _a in (s.get("rests") or []))
+
+
+def fill_words(plan: Dict[str, Any], aspect: str, scores: List[Dict[str, Any]], max_add: int = 3) -> Dict[str, Any]:
+    """A board still thin after the director (too few drawings and phrases for its length, a pen that rests) gets the drawing that a word of its own narration NAMES
+    (the library drawing whose title or synonym is exactly that word, unique: `_drawing_for`), tied to that word, in a free zone, one at a time. Nothing is
+    written that is not said, no drawing is a guess. For `count` the additions stay only if some wanted complaint is then gone, and each is kept only if no board gets
+    a kind of complaint it did not have (but those of WORD_KINDS) and none that passed now fails. A board that cannot be helped is left exactly as it was.
+    -> {"kept": [...], "scores": the scores now}."""
+    from .. import whiteboard_policy as wp
+    from . import score as sc
+
+    kept: List[Dict[str, Any]] = []
+    cur = scores
+    t0 = time.time()
+    for s0 in list(scores):
+        want = [k for k in WORD_KINDS if k in s0["kinds"]]
+        if s0["ok"] or not want or time.time() - t0 > MAX_SECONDS * 2:
+            continue
+        board = s0["board"]
+        added: List[Tuple[Dict[str, Any], Dict[str, Any]]] = []
+        base = cur
+        for _ in range(max_add):
+            s = next((x for x in cur if x["board"] == board), None)
+            if not s or not set(s["kinds"]) & set(WORD_KINDS):
+                break
+            props_list = [plan["beats"][i - 1]["scene"]["props"] for i in s["beats"]]
+            free = wp.free_zones(props_list)
+            drawn = {it.get("draw") for p in props_list for it in p.get("items") or []}
+            sparse = s["solid"] <= 3 or bool(rest_long(s))     # key words only on a board that has almost nothing, or whose pen rests a long time: the drawings that words name come first anywhere
+            rest = next(iter(s.get("rests") or []), None) if "rest" in s["kinds"] else None
+            at = None if not rest else (0.0 if rest[2] == 0.0 else rest[2] if rest[2] > 0 else None)
+            beats = [rest[1] - 1] if rest else [i - 1 for i in s["beats"]][::-1]
+            done = False
+            for bi in beats:
+                props = plan["beats"][bi]["scene"]["props"]
+                narration = str(plan["beats"][bi].get("narration") or "")
+                ties = _ties(props, narration)
+                for k, word, tok, did in _candidates(narration, drawn, at, words=sparse and sum(1 for _, it_ in added if it_.get("write")) < MAX_WORDS)[:5]:
+                    for z in free[:4]:
+                        for size in ("l", "m"):
+                            pos = next((i for i, t in enumerate(ties) if t is not None and t > k), len(props["items"]))
+                            item = ({"id": f"kd{k}", "draw": did} if did else {"id": f"kw{k}", "write": word}) | {"zone": z, "size": size, "say": tok}
+                            props["items"].insert(pos, item)
+                            try:
+                                new = sc.score_plan(plan, aspect)
+                            except Exception:  # noqa: BLE001
+                                new = None
+                            nb = next((x for x in new or [] if x["board"] == board), None)
+                            ok_ = new is not None and len(new) == len(cur) and nb is not None and nb["solid"] > s["solid"] and _key(new) <= _key(cur) and not any(
+                                (set(b["kinds"]) - set(a["kinds"]) - set(WORD_KINDS)) or (a["ok"] and not b["ok"]) for a, b in zip(cur, new))
+                            if ok_:
+                                added.append((props, item))
+                                cur = new
+                                done = True
+                                break
+                            props["items"].remove(item)
+                        if done:
+                            break
+                    if done:
+                        break
+                if done:
+                    break
+            if not done:
+                break
+        final = next((x for x in cur if x["board"] == board), None)
+        if added and final and set(want) <= set(final["kinds"]):      # nothing wanted was cleared: the board is left as it was
+            for props, item in added:
+                props["items"].remove(item)
+            cur = base
+        elif added:
+            kept += [{"board": board, "word": it["say"], "drawing": it.get("draw") or it.get("write"), "zone": it["zone"], "size": it["size"]} for _, it in added]
     return {"kept": kept, "scores": cur}

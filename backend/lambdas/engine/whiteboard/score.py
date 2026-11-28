@@ -178,10 +178,10 @@ def score_plan(plan: Dict[str, Any], aspect: str = "16:9") -> List[Dict[str, Any
             draws = [max(boxes[j][2] - boxes[j][0], boxes[j][3] - boxes[j][1]) * px for j in solid if kinds[j] == "draw"]
             off = _off_board(rep)
             sc.update(seconds=round(total, 1), items=len(kinds), solid=len(solid), coverage=rep["coverage"], min_text=round(min(texts), 3) if texts else None,
-                      min_drawing=round(min(draws), 3) if draws else None, overlaps=rep["overlaps"], crossed=rep["crossed"], off_board=off,
+                      min_drawing=round(min(draws), 3) if draws else None, overlaps=rep["overlaps"], crossed=rep["crossed"], arrow_cross=rep.get("arrow_cross") or [], off_board=off,
                       collisions=rep["collisions"], close_texts=rep["close_texts"], blocked=[x for x in rep["arrows"]["stub"]] + [x[0] for x in rep["arrows"]["dropped"]],
                       marks={k_: len(v) for k_, v in rep["marks"].items()},
-                      pen_busy=round(busy / max(total, 1e-6), 2), longest_idle_s=round(idle, 2), late=late)
+                      pen_busy=round(busy / max(total, 1e-6), 2), longest_idle_s=round(idle, 2), late=late, rests=[(round(g_, 1), i_ + 1, at_) for g_, i_, at_ in rests[:2]])
             need = max(MIN_SOLID if total >= 10 else 2, int(total / 10.0 * MIN_SOLID_PER_10S))
             name = lambda j: j.split(":", 1)[-1]      # noqa: E731
             free = whiteboard_policy.free_zones([beats[i]["scene"]["props"] for i in g])
@@ -202,6 +202,8 @@ def score_plan(plan: Dict[str, Any], aspect: str = "16:9") -> List[Dict[str, Any
                 add("off", f"'{name(j)}' does not fit the board: shorten it or give it a wide zone")
             for j in rep["crossed"][:2]:
                 add("crossed", f"the arrow '{name(j)}' runs across another drawing or text: connect neighbours, or move one end to a zone next to the other")
+            for a, c in sc["arrow_cross"][:1]:
+                add("crossed", f"the arrows '{name(a)}' and '{name(c)}' cross each other and read as a tangle: connect neighbours so that the arrows do not meet in the middle, or move one end to a zone next to the other")
             lost_ok = [j for j in sc["blocked"] if _readable_without(j, [beats[i]["scene"]["props"] for i in g], len(g) > 1)]
             sc["arrows_readable"] = lost_ok
             for j in lost_ok:

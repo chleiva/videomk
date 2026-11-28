@@ -848,7 +848,7 @@ def compile_board(items_in: List[Dict[str, Any]], anchors: Dict[str, float], dur
               "late": [[o["g"]["id"], round(o["end"] - (o["anchor"] + 0.15), 2)] for o in live if o["how"] == "late"], "camera_moves": 0, "warnings": warnings,
               "boxes": {g["id"]: [round(v, 1) for v in g["box"]] for g in geo}, "kinds": {g["id"]: g["kind"] for g in geo},
               "text_sizes": {g["id"]: round(g["blk"]["size"], 1) for g in geo if g["kind"] == "write"}, "text_lines": {g["id"]: g["blk"]["lines"] for g in geo if g["kind"] == "write"}, "view": [round(v, 1) for v in final_view], "view_h": round(view_h, 1),
-              "coverage": round(float(mask.mean()), 3), "overlaps": overlaps, "close_texts": close_texts, "arrow_ends": {g["id"]: [[round(float(g["strokes"][0][0][0]), 1), round(float(g["strokes"][0][0][1]), 1)], [round(float(g["strokes"][-1][-1][0]), 1), round(float(g["strokes"][-1][-1][1]), 1)]] for g in geo if g["kind"] == "connect"}, "crossed": crossed, "collisions": collisions, "marks": marks, "arrows": arrows,
+              "coverage": round(float(mask.mean()), 3), "overlaps": overlaps, "close_texts": close_texts, "arrow_ends": {g["id"]: [[round(float(g["strokes"][0][0][0]), 1), round(float(g["strokes"][0][0][1]), 1)], [round(float(g["strokes"][-1][-1][0]), 1), round(float(g["strokes"][-1][-1][1]), 1)]] for g in geo if g["kind"] == "connect"}, "crossed": crossed, "arrow_cross": _arrow_crossings(geo), "collisions": collisions, "marks": marks, "arrows": arrows,
               "times": {i_: [round(min(o["start"] for o in live if o["g"]["id"] == i_), 2), round(max(o["end"] for o in live if o["g"]["id"] == i_), 2)] for i_ in {o["g"]["id"] for o in live}}}
     return b, cam, report
 
@@ -937,6 +937,42 @@ def _apart(p: np.ndarray, q: np.ndarray) -> float:
         return gap
     d = p[:, None, :] - q[None, :, :]
     return float(np.sqrt((d * d).sum(-1).min()))
+
+
+def _segments_cross(p: np.ndarray, q: np.ndarray, clear: float) -> bool:
+    """Do two polylines cross each other (a proper crossing of one segment of each) somewhere farther than `clear` from every one of their four end points? Arrows that
+    meet at the thing they both point to are not a crossing; two arrows that make an X over the paper are."""
+    if len(p) < 2 or len(q) < 2:
+        return False
+    a, b = p[:-1], p[1:]
+    c, d = q[:-1], q[1:]
+    r = (b - a)[:, None, :]
+    s_ = (d - c)[None, :, :]
+    den = r[..., 0] * s_[..., 1] - r[..., 1] * s_[..., 0]
+    ca = (c[None, :, :] - a[:, None, :])
+    with np.errstate(divide="ignore", invalid="ignore"):
+        t = (ca[..., 0] * s_[..., 1] - ca[..., 1] * s_[..., 0]) / den
+        u = (ca[..., 0] * r[..., 1] - ca[..., 1] * r[..., 0]) / den
+    hit = (np.abs(den) > 1e-9) & (t > 0) & (t < 1) & (u > 0) & (u < 1)
+    if not hit.any():
+        return False
+    ends = np.array([p[0], p[-1], q[0], q[-1]])
+    for i, j in zip(*np.nonzero(hit)):
+        x = a[i] + t[i, j] * (b[i] - a[i])
+        if float(np.sqrt(((ends - x) ** 2).sum(-1)).min()) > clear:
+            return True
+    return False
+
+
+ARROW_CROSS_CLEAR = 40.0      # board units: a crossing this close to an arrow's end is two arrows meeting at a thing, not an X
+
+
+def _arrow_crossings(gs: List[Dict[str, Any]]) -> List[List[str]]:
+    """Pairs of arrows that cross each other on the geometry as it will be drawn ([[arrow, arrow]]). `_collisions` lets two arrows cross (they may); a viewer reads an X of two
+    arrows as a tangle (seen on the QA Spanish vaccine board, 2026-11-28), so the score reports it."""
+    pens = [g for g in gs if g["kind"] == "connect" and g.get("strokes")]
+    lines = {g["id"]: [np.asarray(s_, np.float64) for s_ in g["strokes"]] for g in pens}      # stroke by stroke: the shaft and the head are separate pen strokes
+    return [[g["id"], h["id"]] for i, g in enumerate(pens) for h in pens[:i] if any(_segments_cross(a, b, ARROW_CROSS_CLEAR) for a in lines[h["id"]] for b in lines[g["id"]])]
 
 
 def _collisions(gs: List[Dict[str, Any]]) -> List[List[str]]:

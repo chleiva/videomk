@@ -1089,7 +1089,13 @@ def mend_enabled() -> bool:
     return os.environ.get("WB_MEND", "1").strip().lower() not in ("0", "false", "off", "no")
 
 
-def _repair(plan: Dict[str, Any], policy: Policy, scores: List[Dict[str, Any]], info: Dict[str, Any], notes: List[str], tag: str = "", mend_too: bool = False) -> List[Dict[str, Any]]:
+def fill_words_enabled() -> bool:
+    """Server setting WB_FILL_WORDS (docs/WHITEBOARD_VACCINE_REGRESSION_2026-11-28.md): after the director has had its one chance, a board that is still thin (too few
+    drawings and phrases, a pen that rests) gets words of its own narration written and tied (`whiteboard/mend.fill_words`). 0/false/off switches it off."""
+    return os.environ.get("WB_FILL_WORDS", "1").strip().lower() not in ("0", "false", "off", "no")
+
+
+def _repair(plan: Dict[str, Any], policy: Policy, scores: List[Dict[str, Any]], info: Dict[str, Any], notes: List[str], tag: str = "", mend_too: bool = False, words: bool = False) -> List[Dict[str, Any]]:
     """What is repaired WITHOUT a model, in this order, whatever the director did or did not do: things that overlap or leave the board (`make_safe`), marks and
     arrows that touch something (`make_clean`), a board that "looks empty" (`fill_out`), then (`mend_too`, setting WB_MEND) the small moves of `whiteboard/mend.py` for the
     complaints that used to be the director's. -> the scores of the boards as they now are."""
@@ -1142,6 +1148,16 @@ def _repair(plan: Dict[str, Any], policy: Policy, scores: List[Dict[str, Any]], 
                 notes.append(f"whiteboard self-check: {len(m['kept'])} key word(s) of the narration written to reach the count without the director")
         except Exception as e:  # noqa: BLE001
             logging.warning("whiteboard count fill failed (%s: %s)", type(e).__name__, str(e)[:200])
+    if words and fill_words_enabled() and any(not s["ok"] and set(s["kinds"]) & set(mend.WORD_KINDS) for s in scores):
+        try:
+            m = mend.fill_words(plan, policy.aspect, scores)
+            if m["kept"]:
+                scores = m["scores"]
+                info["worded" + tag] = m["kept"]
+                print("WHITEBOARD_SCORE " + json.dumps({"pass": "words" + tag, **score.summary(scores), "kept": m["kept"]}, ensure_ascii=False))
+                notes.append(f"whiteboard self-check: {len(m['kept'])} word(s) of the narration written on thin boards, tied to the word said")
+        except Exception as e:  # noqa: BLE001 - never breaks a plan
+            logging.warning("whiteboard fill words failed (%s: %s)", type(e).__name__, str(e)[:200])
     return scores
 
 
@@ -1263,7 +1279,7 @@ def review(plan: Dict[str, Any], policy: Optional[Policy], ask: Optional[Callabl
                 info["kept"] = "first (the director's answer could not be used)"
                 notes.append("whiteboard self-check: the director's rewrite could not be read; the boards stand as they were, with the model-free repairs")
         # Whatever happened above, the same guarantees hold for what ships (idempotent: they find nothing when the repairs above already ran)
-        scores = _repair(plan, policy, score.score_plan(plan, policy.aspect), info, notes, tag="-final")
+        scores = _repair(plan, policy, score.score_plan(plan, policy.aspect), info, notes, tag="-final", words=True)
         final = score.summary(scores)
         plan.setdefault("whiteboard", policy.summary())["score"] = {**final, **{k: v for k, v in info.items() if k != "first"}, "first": first,
                                                                     "boards_detail": [{k: v for k, v in s.items() if k not in ("overlaps", "crossed", "off_board", "late", "collisions", "blocked")} for s in scores]}
