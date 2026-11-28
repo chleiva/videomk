@@ -25,7 +25,8 @@ from PIL import Image, ImageDraw, ImageFilter
 ZONES_PATH = os.environ.get("STAND_ZONES_PATH") or os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "common", "vector_stand_zones.json")
 ASPECT_RATIO = {"16:9": 16 / 9, "9:16": 9 / 16, "1:1": 1.0, "4:5": 0.8}
 NATIVE_RATIO = {"16:9": 16 / 9, "9:16": 9 / 16}
-SERVED = {"16:9": ("16:9", "1:1"), "9:16": ("9:16", "4:5")}   # the video shapes a backdrop is offered for (engine/vector_policy.SCENE_SHAPE): a scene is never stretched to another shape
+PROC_ID = "ground_floor"     # the DRAWN ground (engine/procedural_ground.py): a backdrop type of its own whose zone is stored like any other (native "any": drawn for every shape)
+SERVED = {"16:9": ("16:9", "1:1"), "9:16": ("9:16", "4:5"), "any": ("16:9", "9:16", "1:1", "4:5")}   # the video shapes a backdrop is offered for (engine/vector_policy.SCENE_SHAPE): a scene is never stretched to another shape
 MASK_W = 192                  # the mask is drawn this wide (the other side follows the shape): 0.5 percent of the width per cell
 SNAP_BOTTOM = 0.07           # the same at the bottom: outlines of a model end a little short of the picture edge
 SNAP = 0.04                  # ground within this share of the picture edge is taken to reach the edge
@@ -52,6 +53,7 @@ def _data() -> Dict[str, Any]:
 def reload() -> None:
     _data.cache_clear()
     _mask.cache_clear()
+    holds.cache_clear()
 
 
 def entry(scene_id: str) -> Optional[Dict[str, Any]]:
@@ -69,6 +71,13 @@ def disabled(scene_id: str) -> bool:
 def usable(scene_id: str) -> bool:
     e = entry(scene_id)
     return bool(e and e.get("usable") and not e.get("disabled") and e.get("ground"))
+
+
+def horizon(aspect: str) -> Optional[float]:
+    """Where the drawn ground (PROC_ID) begins in a frame of this shape, as a share of the height; None for a catalog backdrop."""
+    e = entry(PROC_ID)
+    h = (e or {}).get("horizon")
+    return float(h[aspect]) if isinstance(h, dict) and aspect in h else None
 
 
 def has_line(scene_id: str) -> bool:
@@ -96,6 +105,8 @@ def line(scene_id: str, aspect: str) -> Optional[Dict[str, Any]]:
 # ----------------------------------------------------------------------------- from the picture's coordinates to the frame's
 def _crop(native: str, aspect: str) -> Tuple[float, float, float, float]:
     """The share of the picture a frame shows: (x0, y0, x1, y1), the centre crop that covers the frame."""
+    if native == "any":
+        return (0.0, 0.0, 1.0, 1.0)
     an, af = NATIVE_RATIO.get(native, 16 / 9), ASPECT_RATIO[aspect]
     if af < an:
         vw = af / an
@@ -110,7 +121,7 @@ def _mask(scene_id: str, aspect: str) -> Optional[np.ndarray]:
     e = entry(scene_id)
     if not usable(scene_id) or aspect not in ASPECT_RATIO:
         return None
-    native = e.get("native") if e.get("native") in NATIVE_RATIO else "16:9"
+    native = e.get("native") if e.get("native") in NATIVE_RATIO or e.get("native") == "any" else "16:9"
     x0, y0, x1, y1 = _crop(native, aspect)
     mw = MASK_W
     mh = max(8, int(round(mw / ASPECT_RATIO[aspect])))
@@ -123,7 +134,7 @@ def _mask(scene_id: str, aspect: str) -> Optional[np.ndarray]:
     def snap(poly: Sequence[Sequence[float]]) -> List[Tuple[float, float]]:   # ground that ends a hair short of the picture edge goes on to it (a model outline is never exact there)
         return [(0.0 if p[0] < SNAP else 1.0 if p[0] > 1 - SNAP else float(p[0]), 1.0 if p[1] > 1 - SNAP_BOTTOM else float(p[1])) for p in poly]
 
-    for poly in e.get("ground") or []:
+    for poly in (e.get("ground_by_aspect") or {}).get(aspect) or e.get("ground") or []:   # a drawn ground has its own outline per shape
         if len(poly) >= 3:
             dr.polygon(pts(snap(poly)), fill=255)
     for poly in e.get("hazards") or []:
@@ -287,6 +298,7 @@ def layout_for(props: Dict[str, Any], aspect: str, captions: bool = True) -> Dic
     return pe.layout(props, ctx)
 
 
+@lru_cache(maxsize=4096)
 def holds(scene_id: str, aspect: str, n: int, captions: bool = True) -> bool:
     """May `n` characters (1 to 3) stand on this backdrop in a video of this shape? Uses the layout the renderer uses, so the answer cannot drift from what is drawn."""
     if not usable(scene_id) or aspect not in ASPECT_RATIO:
@@ -371,6 +383,12 @@ def derive_lines(scene_id: str) -> Dict[str, Dict[str, Any]]:
 
 def max_cast(scene_id: str, aspect: str) -> int:
     return max([n for n in (1, 2, 3) if holds(scene_id, aspect, n)] or [0])
+
+
+def capable(aspect: str, n: int, ids: Optional[Sequence[str]] = None) -> List[str]:
+    """Every catalog backdrop (or those of `ids`) that can hold a cast of `n` in this shape, sorted by id; the drawn ground is not among them (it is the last resort, never a pick)."""
+    pool = list(ids) if ids is not None else sorted((_data().get("zones") or {}))
+    return [s for s in pool if s != PROC_ID and holds(s, aspect, n)]
 
 
 def eligible(scene_ids: Sequence[str], aspect: str, n: int) -> List[str]:

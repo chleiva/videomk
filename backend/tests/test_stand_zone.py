@@ -88,7 +88,8 @@ def test_the_sea_conversation_that_floated_on_the_lighthouse_cliff_now_stands_on
     assert sz.violations(plan, "9:16") == []
     plan2 = json.load(open(os.path.join(FIX, "cartoon_sea_lighthouse_9x16.json")))
     ad.enforce(plan2, ad.Direction("conversation", by="you", chosen="cartoon", cast=["fox", "bear", "owl"]), backdrops=["tall_lighthouse_cliff"], aspect="9:16")
-    assert not any(b["scene"]["props"].get("backdrop") for b in plan2["beats"])   # nothing holds the cast: the plain background stays
+    assert {b["scene"]["props"].get("backdrop") for b in plan2["beats"]} == {sz.PROC_ID}   # nothing offered holds the cast: the drawn ground, never the empty background
+    assert sz.violations(plan2, "9:16") == []
 
 
 @pytest.mark.parametrize("path", sorted(glob.glob(os.path.join(FIX, "*.json"))))
@@ -111,3 +112,108 @@ def test_no_plan_fixture_has_a_character_off_the_ground_after_the_art_direction_
 def test_every_catalog_item_has_a_stand_record_so_a_new_backdrop_must_bring_one():
     missing = [i["id"] for i in vc.load_index()["items"] if i["id"] not in ZONES]
     assert missing == []
+
+
+# ----------------------------------------------------------------------------- ground 2: the drawn ground, cast-first selection, whole figures in 16:9
+SHAPES = ("16:9", "9:16", "1:1", "4:5")
+SEA = "a French fox, a German bear and an Italian owl explain why the sea is salty"
+
+
+def _policy(search=None, candidates=None):
+    from engine import vector_policy as vp
+
+    p = vp.Policy(bool(candidates), "cartoon", "style_cartoon" if candidates else "no_catalog_match", candidates=candidates or [], aspect="9:16", search=search)
+    return p
+
+
+def test_the_drawn_ground_has_a_stored_zone_and_a_ground_line_in_every_shape_for_every_cast():
+    assert sz.usable(sz.PROC_ID) and not sz.disabled(sz.PROC_ID)
+    e = ZONES[sz.PROC_ID]
+    assert set(e["ground_line"]) == set(SHAPES) and e["native"] == "any"
+    for asp in SHAPES:
+        ln = sz.line(sz.PROC_ID, asp)
+        assert ln and ln["casts"] == [1, 2, 3] and 0.0 <= ln["band"][0] <= ln["y"] <= ln["band"][1] <= 1.0, (asp, ln)
+        assert sz.horizon(asp) is not None and sz.horizon(asp) < ln["band"][0]   # the floor begins above every foot
+        for n in (1, 2, 3):
+            assert sz.holds(sz.PROC_ID, asp, n)
+            assert sz.violations(_plan(sz.PROC_ID, n, asp), asp) == [], (asp, n)
+            for x, y in sz.foot_points(_plan(sz.PROC_ID, n, asp)["beats"][0]["scene"]["props"], asp):
+                assert sz.feet_on_ground(sz.PROC_ID, asp, x, y, 0.01)
+
+
+def test_the_drawn_ground_renders_in_every_shape_and_the_lower_part_of_the_frame_is_floor_not_void():
+    import sys
+
+    from PIL import ImageStat
+
+    sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "scripts"))
+    from ground2_stills import still
+
+    for asp in SHAPES:
+        im = still(sz.PROC_ID, asp, 3, "midnight", marks=False)
+        w, h = im.size
+        low = im.crop((0, int(h * 0.94), int(w * 0.2), h))   # bottom left corner: no card, no captions
+        r, g, b = ImageStat.Stat(low).mean[:3]
+        assert g > r and g > 40, (asp, (r, g, b))              # a green floor, not the dark gradient of the plain background
+
+
+@pytest.mark.parametrize("asp", SHAPES)
+def test_a_three_character_conversation_always_gets_a_backdrop_with_a_valid_ground_line(asp):
+    # nothing offered, nothing found: the drawn ground
+    v = _policy(search=lambda q, a, k: [])
+    ids = ad.stand_backdrops(v, SEA, asp, 3, None)
+    assert ids and all(sz.holds(i, asp, 3) for i in ids)
+    for bd in ids:
+        plan = _plan(bd, 3, asp)
+        assert sz.line(bd, asp) is not None and sz.violations(plan, asp) == []
+    # a search that fails altogether
+    def boom(q, a, k):
+        raise RuntimeError("down")
+    assert ad.stand_backdrops(_policy(search=boom), SEA, asp, 3, None) == [sz.PROC_ID]
+
+
+def test_selection_is_cast_first_the_sea_in_9x16_gets_the_beach_not_nothing():
+    def search(q, asp, k):   # the real scores of the sea request (QA catalog, Cohere Embed v4): the full prompt matches no backdrop well, the neighbouring words match the beach
+        sc = {"tall_space_vertical": 0.236, "tall_sunset_beach_vertical": 0.1863, "tall_ocean_lighthouse_night": 0.1829}
+        if "beach" in q:
+            sc = {"tall_sunset_beach_vertical": 0.3045, "tall_ocean_lighthouse_night": 0.2489, "tall_space_vertical": 0.2358}
+        return [{"id": i, "score": s} for i, s in sc.items()]
+    v = _policy(search=search)
+    ids = ad.stand_backdrops(v, SEA, "9:16", 3, None)
+    assert ids[0] == "tall_sunset_beach_vertical" and all(sz.holds(i, "9:16", 3) for i in ids)
+    assert not any(i in ids for i in ("tall_space_vertical", "tall_ocean_lighthouse_night"))   # those cannot hold three characters
+
+
+def test_a_topic_without_a_credible_capable_match_gets_a_neutral_capable_backdrop_not_none():
+    def search(q, asp, k):
+        if "quiet outdoor" in q:
+            return [{"id": "tall_rainbow_vertical", "score": 0.30}, {"id": "tall_castle_tower", "score": 0.2}]
+        return [{"id": "tall_castle_tower", "score": 0.05}]
+    ids = ad.stand_backdrops(_policy(search=search), "quarterly tax filing for freelancers", "9:16", 3, None)
+    assert ids[0] == "tall_rainbow_vertical"
+
+
+def test_neighbour_words_widen_the_search_for_the_topic():
+    assert any("beach" in q for q in ad._neighbour_queries(SEA))
+    assert any("moon" in q for q in ad._neighbour_queries("how far is the Moon"))
+    assert ad._neighbour_queries("quarterly tax filing") == []
+
+
+@pytest.mark.parametrize("asp", SHAPES)
+@pytest.mark.parametrize("n", (1, 2, 3))
+def test_no_conversation_plan_ends_with_an_empty_backdrop(asp, n):
+    cast = ["fox", "bear", "owl"][:n]
+    plan = {"title": "t", "voices": {}, "beats": [{"narration": "Hello there, this is the first line.", "speaker": cast[i % n], "scene": {"type": "presenter", "props": {"heading": "x", "character": cast[i % n]}}} for i in range(4)]}
+    ad.enforce(plan, ad.Direction("conversation" if n > 1 else "presenter", by="you", chosen="cartoon", cast=cast), backdrops=[], aspect=asp)
+    bds = [b["scene"]["props"].get("backdrop") for b in plan["beats"]]
+    assert all(bds), bds
+    assert sz.violations(plan, asp) == []
+
+
+def test_16x9_shows_whole_figures_with_their_feet_on_the_ground_and_many_more_backdrops_hold_three():
+    sid = next(s for s in USABLE if sz.holds(s, "16:9", 3))
+    lay = sz.layout_for({"character": "fox", "side": "left", "backdrop": sid, "cast": ["fox", "bear", "owl"]}, "16:9")
+    assert lay["floor"] is not None and lay["figures"] and all(f["ground"] == lay["floor"] for f in lay["figures"])   # whole figures, not cut at the waist
+    assert lay["floor"] <= 1080 * 0.9
+    assert sum(sz.holds(s, "16:9", 3) for s in ZONES) >= 40      # was 3 with the figures cut at the waist
+    assert sum(sz.holds(s, "16:9", 1) for s in ZONES) >= 60      # was 33

@@ -291,15 +291,33 @@ def layout(props: Dict[str, Any], ctx: SceneCtx) -> Dict[str, Any]:
 
 def _stand(props: Dict[str, Any], ctx: SceneCtx, lay: Dict[str, Any]) -> Dict[str, Any]:
     side = props.get("side") if props.get("side") in SIDES else "left"
-    tries = [(side, lay)]
+    tries = [(side, _stage(ctx, lay))]
     if len(props.get("cast") or []) < 2:   # one character: the other side of the picture may have the ground
         other = "right" if side == "left" else "left"
-        tries.append((other, _layout_plain({**props, "side": other}, ctx)))
+        tries.append((other, _stage(ctx, _layout_plain({**props, "side": other}, ctx))))
     for _, l in tries:
         out = _stand_one(props["backdrop"], ctx, l)
         if out is not None:
             return out
     return {**lay, "unplaced": True}
+
+
+STAGE_FIGURE = {1: 0.60, 2: 0.54, 3: 0.50}   # 16:9 over a backdrop: the whole figure as a share of the frame height
+
+
+def _stage(ctx: SceneCtx, lay: Dict[str, Any]) -> Dict[str, Any]:
+    """16:9 over a backdrop: the figures are shown WHOLE with their feet on the ground, standing just over the caption band, the card beside them as before (the waist-cut
+    figure of the plain background has its feet below the frame, where no backdrop's ground can be seen or checked). Other shapes keep their layout."""
+    fr = ctx.frame
+    if not fr.landscape or lay.get("floor") is not None:
+        return lay
+    floor = float(ctx.bottom) - (0 if ctx.captions else 40)
+    figs = lay.get("figures")
+    ppu = STAGE_FIGURE[len(figs) if figs else 1] * fr.H / 290.0
+    out = {**lay, "ppu": ppu, "ground": floor, "floor": floor, "lift": 0.0, "preset": "full"}
+    if figs:
+        out["figures"] = [{**f, "ppu": ppu, "ground": floor, "lift": 0.0} for f in figs]
+    return out
 
 
 def _stand_one(bd: str, ctx: SceneCtx, l: Dict[str, Any]) -> Optional[Dict[str, Any]]:
@@ -315,6 +333,8 @@ def _stand_one(bd: str, ctx: SceneCtx, l: Dict[str, Any]) -> Optional[Dict[str, 
 
     def accept(y: float, p: float) -> bool:   # the head stays in the picture and the card above keeps room
         fh, yy = 290.0 * p, y * H
+        if fr.landscape:   # the card is beside the figures: only the head must stay in the picture
+            return yy - fh >= top + 10
         return yy - fh >= top + 10 and (yy - fh * 1.05 - 20) - (top + 10) >= sz.MIN_CONTENT * H
 
     shift = 0.25 if (full or not fr.landscape) else 0.07
@@ -327,7 +347,8 @@ def _stand_one(bd: str, ctx: SceneCtx, l: Dict[str, Any]) -> Optional[Dict[str, 
     if full:
         figure = 290.0 * ppu2
         out["floor"] = ground
-        out["content"] = (fr.margin_x * 0.8, ctx.top + 10, fr.W - fr.margin_x * 0.8, ground - figure * 1.05 - 20)
+        if not fr.landscape:
+            out["content"] = (fr.margin_x * 0.8, ctx.top + 10, fr.W - fr.margin_x * 0.8, ground - figure * 1.05 - 20)
     if not figs:
         out["x"], out["ppu"] = pl.xs[0] * W, ppu2
         return out
@@ -657,6 +678,8 @@ def _draw_board(cv: Canvas, props: Dict[str, Any], rect: Tuple[float, float, flo
 
 
 def _draw(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, th: Theme, ctx: SceneCtx) -> None:
+    from ... import stand_zone as sz_mod
+
     fr = ctx.frame
     lay = layout(props, ctx)
     figures = lay.get("figures") or [None]
@@ -664,7 +687,11 @@ def _draw(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, th: Theme, c
     backdrop = False
     if props.get("backdrop") and not lay.get("unplaced"):   # a cartoon scene of the catalog behind the presenter (its own element draws it; no package, or no ground for the cast -> the plain background stays)
         from . import vector_scene as vse
-        if vse.package_folder(props["backdrop"]) is not None:
+        if props["backdrop"] == sz_mod.PROC_ID:   # the drawn ground: no package, nothing to fetch
+            from ... import procedural_ground
+            procedural_ground.draw(cv, th, ctx, lt)
+            backdrop = True
+        elif vse.package_folder(props["backdrop"]) is not None:
             vse._draw(cv, {"catalog_id": props["backdrop"]}, lt, dur, th, ctx)
             backdrop = True
     for fig in figures:

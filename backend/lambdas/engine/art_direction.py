@@ -254,25 +254,77 @@ def policies(d: Direction, prompt: str, *, options: Optional[Dict[str, Any]] = N
         if vector_policy.enabled():   # the backdrops: cartoon scenes of the catalog that fit the topic (the person's look, so a loose match is fine)
             v = vector_policy.decide(prompt, options={**o, "style": "cartoon"}, skill_ids=skill_ids, minutes=minutes, expected_beats=expected_beats, search=vector_search, ask=ask)
             v.share, v.first_ok = BACKDROP_ONLY_SHARE, False
-            v.stand_ids = stand_backdrops(v, prompt, aspect, len(d.cast))
+            v.stand_ids = stand_backdrops(v, prompt, aspect, len(d.cast), vector_search)
     return v, w, p
 
 
-def stand_backdrops(v: vector_policy.Policy, prompt: str, aspect: str, n_cast: int) -> List[str]:
-    """The backdrops characters may stand on in this video: the cartoon scenes the policy offered whose stand zone holds the cast in this shape (engine/stand_zone.py); when none of
-    them does, the catalog is searched wider for the topic and the first backdrops that do are taken. Empty = the plain background (a backdrop is never one the cast would float on)."""
-    if not v.allowed:
-        return []
-    ids = stand_zone.eligible(v.ids(), aspect, n_cast)
-    if ids or v.search is None:
-        return ids
+CREDIBLE = vector_policy.MIN_SCORE_SOFT   # a topic match at least this good makes a backdrop the topic's own place; below it the place is a neutral one
+NEUTRAL_QUERY = "a quiet outdoor place with open ground: a meadow, a park, a garden, a square"
+NEIGHBOURS = (   # topic stems -> neighbouring places a cartoon backdrop may show instead (the catalog is searched for these too, among the backdrops that can hold the cast)
+    (("sea", "ocean", "salt", "wave", "tide", "fish", "marine", "coast", "shore", "water", "whale", "dolphin"), "the sea, ocean, beach, coast, shore, sunset by the sea"),
+    (("space", "planet", "star", "moon", "galax", "universe", "rocket", "astronaut", "solar system"), "space, planets, stars, moon surface, night sky"),
+    (("forest", "tree", "wood", "bird", "animal", "wildlife", "jungle", "nature", "plant"), "forest, trees, meadow, nature trail"),
+    (("mountain", "snow", "glacier", "ice", "volcano", "river", "lake"), "mountains, valley, lake shore, hills, meadow"),
+    (("desert", "sand", "dune", "camel", "egypt"), "desert, sand dunes, oasis"),
+    (("farm", "food", "crop", "harvest", "agricultur", "milk", "cow", "bread", "cook"), "farm, fields, countryside, garden"),
+    (("city", "urban", "traffic", "street", "building", "bridge", "money", "bank", "econom", "shop"), "city street, plaza, town square, buildings"),
+    (("school", "learn", "study", "class", "math", "book", "histor", "king", "castle", "medieval", "ancient", "roman", "greek"), "school, library, castle, old town, campus lawn"),
+    (("energy", "power", "solar", "wind", "electric", "climate", "recycl"), "wind turbines, solar field, power lines, fields"),
+    (("health", "body", "medic", "doctor", "hospital", "sleep", "heart", "brain", "sport", "exercise"), "garden, clinic, park, sports field"),
+    (("weather", "rain", "cloud", "storm", "season", "sun", "rainbow"), "sky, clouds, rainbow, sunset, meadow"),
+)
+
+
+def _neighbour_queries(prompt: str) -> List[str]:
+    low = " " + (prompt or "").lower()
+    return [q for stems, q in NEIGHBOURS if any((" " + st) in low or ("-" + st) in low for st in stems)]
+
+
+def stand_backdrops(v: vector_policy.Policy, prompt: str, aspect: str, n_cast: int, search: Any = None) -> List[str]:
+    """The backdrops this cast stands on in this video, best first (never empty): FIRST the catalog backdrops whose stand zone holds the cast in this shape are taken (the search
+    is over those only, so it cannot end with a topic's backdrops that all refuse the cast), THEN they are ranked by the topic (the request, the director's setting, and neighbouring
+    places: the sea also searches beach and coast). A topic-near one (score >= CREDIBLE) wins; else the neutral one that fits the open-ground query best (a meadow, a park); when
+    nothing can be scored (no search), or no catalog backdrop holds the cast, the drawn ground (stand_zone.PROC_ID) stays: characters always stand on something."""
+    cap = stand_zone.capable(aspect, n_cast, _catalog_ids())
+    if not cap:
+        return [stand_zone.PROC_ID]
+    run = v.search or search
+    if run is vector_policy._default_search:   # its floor (a score of 0.30) is for the menu of scenes; here every score is wanted
+        run = None
+
+    def scores(q: str) -> Dict[str, float]:
+        try:
+            if run is None:
+                from common import vector_catalog as vc
+                found = vc.search(q, aspect=vector_policy.SCENE_SHAPE.get(aspect, "16:9"), k=400, min_score=0.0)
+            else:
+                found = run(q, aspect, 400) or []
+        except Exception:  # noqa: BLE001 - the catalog is an improvement, never a requirement
+            logging.exception("stand backdrop search failed")
+            return {}
+        return {c["id"]: float(c.get("score", 0)) for c in found if isinstance(c, dict) and c.get("id") in cap}
+
+    topic: Dict[str, float] = {c["id"]: float(c.get("score", 0)) for c in (v.candidates or []) if isinstance(c, dict) and c.get("id") in cap}
+    queries = [vector_policy._search_query(prompt)] + ([v.judged["scene"]] if v.judged and v.judged.get("scene") else []) + _neighbour_queries(prompt)
+    for q in queries:
+        for i, sc in scores(q).items():
+            topic[i] = max(topic.get(i, 0.0), sc)
+    near = [i for i in sorted(topic, key=lambda i: -topic[i]) if topic[i] >= CREDIBLE][:3]
+    if near:
+        return near
+    neutral = scores(NEUTRAL_QUERY)
+    return [i for i in sorted(neutral, key=lambda i: -neutral[i])][:3] or [stand_zone.PROC_ID]
+
+
+def _catalog_ids() -> List[str]:
+    """The catalog's scenes that may be offered (not retired, not held back for their motion)."""
     try:
-        found = v.search(vector_policy._search_query(prompt), aspect, 60) or []
-    except Exception:  # noqa: BLE001 - the catalog is an improvement, never a requirement
-        logging.exception("stand backdrop search failed")
+        from common import vector_catalog as vc
+
+        return [it["id"] for it in vc.load_index()["items"] if not it.get("disabled") and not (vector_policy.HELD_BACK_MOTION & set(it.get("motion") or []))]
+    except Exception:  # noqa: BLE001
+        logging.exception("vector catalog index unreadable")
         return []
-    ranked = [c["id"] for c in sorted(found, key=lambda c: -float(c.get("score", 0))) if isinstance(c, dict) and c.get("id") and float(c.get("score", 0)) >= vector_policy.MIN_SCORE_SOFT]
-    return stand_zone.eligible(ranked, aspect, n_cast)[:3]
 
 
 def conversation_beats(minutes: float) -> int:
@@ -581,6 +633,9 @@ def _enforce_cartoon(plan: Dict[str, Any], d: Direction, repairs: List[Dict[str,
     stand = stand_zone.eligible(backdrops, aspect, len(cast))
     if len(stand) < len(backdrops):
         repairs.append({"beat": -1, "from": "backdrops " + ",".join(b for b in backdrops if b not in stand), "to": "none", "why": "no ground for the cast on those backdrops"})
+    if not stand and pres:   # no catalog backdrop holds this cast here (or none was offered): the drawn ground, so the characters always stand on something
+        stand = [stand_zone.PROC_ID]
+        repairs.append({"beat": -1, "from": "no backdrop", "to": stand_zone.PROC_ID, "why": "the characters stand on the drawn ground"})
     backdrops = stand
     for b in pres:   # a backdrop an earlier step set that cannot hold the cast is replaced, or taken off (the plain background stays)
         p0 = b["scene"]["props"]

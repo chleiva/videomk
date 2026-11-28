@@ -220,3 +220,45 @@ at fixed shares of the frame (9:16: x at 0.18 / 0.50 / 0.82 of the width, feet o
 * A "plain floor backdrop" is the existing plain background with glow and contact shadow, not a new drawn floor.
 * Haiku cross-check agreed with the final verdict on 120 of 131 backdrops it reached (the rest differ mainly where Sonnet was stricter); only the first model's polygons are used.
 * Tests run: test_stand_zone, test_art_direction, test_presenters, test_vector_policy, test_vector_catalog, test_el_vector_scene, test_vector_character_cast, test_vector_presenter (all pass). The full suite was not run.
+
+
+## Ground 2 (2026-11-28, branch cartoon-ground-2): never an empty backdrop, whole figures in 16:9
+Problem found on QA: the owner's sea request (fox, bear, owl; 60 s) passed the ground check only because NO backdrop was used (9:16: `vector.reason = no_catalog_match`, 16:9: every offered backdrop refused three
+characters), so the cast stood on the plain bokeh/aurora background: lower third empty in 9:16, characters cut at the waist in 16:9. The owner wants characters on the ground in a fitting place, never floating, never in a void.
+
+1. **Selection is cast-first** (`art_direction.stand_backdrops`, works also when the cartoon-scene policy offered nothing). First `stand_zone.capable(aspect, n)` keeps only the catalog backdrops whose zone holds the cast
+   in this shape (retired and held-back-motion ones out), THEN those are ranked by topic: the request, the director's setting (`judged.scene`) and neighbouring places (`NEIGHBOURS`: sea also searches beach, coast and
+   shore; space, forest, farm, city, history, energy, health, weather). A score >= `CREDIBLE` (0.24) makes a backdrop the topic's own place; otherwise the capable backdrop that best fits an open-ground query
+   (meadow, park, garden, square) is the neutral place; if nothing can be scored, or nothing holds the cast, the drawn ground (below). Result with the real QA embeddings for the sea request:
+   9:16 (3, 2 or 1 characters) `tall_sunset_beach_vertical`; 16:9 `tropical_beach` (first), then `container_port_cranes`, `abstract_dunes_minimal`; 1:1 `coast_cliffs`, `tropical_beach`; 4:5 `tall_sunset_beach_vertical`.
+   Cost of the check: a few Cohere embedding calls on QA (pennies; no model spend for the generation).
+2. **Drawn ground** (`stand_zone.PROC_ID = "ground_floor"`, `engine/procedural_ground.py`, record written by `backend/scripts/procedural_ground_build.py`): a backdrop type of its own with a stored zone
+   (`native: "any"`, ground outline per shape from the horizon to the bottom edge, full width) and a ground line for all four shapes holding 1 to 3 characters, in the same format, so `holds`, `place` and
+   `violations` treat it like any backdrop. Drawn flat like the catalogue: theme sky, sun or moon, clouds, two rows of hills, a grass floor reaching the bottom edge with a light rim at the horizon, soft stripes
+   and tufts; light theme is a day, dark theme a dusk. The contact shadow under each whole figure is the presenter's own. `_enforce_cartoon` uses it whenever no offered backdrop holds the cast (repair
+   `no backdrop -> ground_floor`), so **a conversation or presenter plan never ends with the empty background**.
+3. **16:9 whole figures** (`presenter._stage`): over a backdrop in 16:9 the figures are shown whole (single 0.60, two 0.54, three 0.50 of the frame height) with their feet on the ground just over the caption
+   band, the card beside them, instead of cut at the waist with the feet below the frame where no ground exists. Ground lines of all backdrops were re-derived from the stored ground polygons
+   (`vector_stand_build.lines_and_shapes`, no model call; the ground polygons are unchanged). Backdrops that hold a cast, `holds(n)` for n = 1 / 2 / 3:
+
+   | shape | before | after |
+   |---|---|---|
+   | 16:9 | 33 / 3 / 3 | 78 / 61 / 60 (of 157, plus the drawn ground) |
+   | 9:16 | 6 / 6 / 4 | 6 / 6 / 4 (unchanged) |
+   | 1:1 | 107 / 103 / 99 | 107 / 103 / 99 (unchanged) |
+   | 4:5 | 12 / 9 / 6 | 12 / 9 / 6 (unchanged) |
+
+   A placement is only accepted when every foot is on the ground mask (never water, sky, hazards or the frame edge) and inside the ground-line band.
+4. **Tests** (`backend/tests/test_stand_zone.py`, all earlier assertions kept except the one that expected the plain background when nothing holds the cast: it now expects the drawn ground): the drawn ground
+   has a zone and line in every shape for casts 1 to 3; it renders in every shape with a floor in the lower corner; a three-character conversation always gets a backdrop with a valid line in all four shapes
+   (also when the search is empty or fails); the sea request picks the beach in 9:16 (real scores); a neutral capable backdrop beats none; no enforced conversation plan (1 to 3 characters, 4 shapes) has an
+   empty backdrop and the hard check passes; 16:9 figures are whole and the eligible counts are at least 40 / 60.
+5. **Looked at** (~/Downloads/videomk-looks/web/ground2/index.html, 31 stills): sea request in 9:16 on the sunset beach and in 16:9 on the tropical beach with 3, 2 and 1 characters; the drawn ground in the four
+   shapes, 1 to 3 characters, midnight and paper themes; `camping_lake_night` 16:9 with three whole figures.
+
+### Not verified
+* QA is not redeployed: the zones file (new 16:9 lines, the drawn ground) and the code ship with the Lambda; the per-item `stand` in the catalog bucket `meta.json` still holds the old 16:9 lines (nothing reads it at run time).
+* Looks checked on stills of the first frame, not frame by frame; I did not look at every one of the 78 newly eligible 16:9 backdrops (placement is checked by the hard check, not by eye on each).
+* The third theme (sunrise) was not looked at; the drawn ground uses the same palette code.
+* 1:1 and 4:5 keep their rows (feet partly under the caption band); only 16:9 changed to whole figures. 9:16 and 4:5 counts are unchanged: only 6 of 18 tall backdrops hold characters.
+* Neighbour words are a small hand-made table; a topic with no neighbour entry relies on the request's own score, then the neutral place.

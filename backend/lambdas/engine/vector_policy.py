@@ -117,7 +117,9 @@ class Policy:
 
     def backdrop_ids(self) -> List[str]:
         """The backdrops behind characters: those with ground for the cast when that was worked out, else every candidate."""
-        return [] if not self.allowed else (list(self.stand_ids) if self.stand_ids is not None else self.ids())
+        if self.stand_ids is not None:   # worked out for the cast (also when no cartoon SCENE is offered: a conversation needs a place to stand)
+            return list(self.stand_ids)
+        return [] if not self.allowed else self.ids()
 
     def cap(self, n_beats: int) -> int:
         """How many beats of a video of `n_beats` may be cartoon scenes."""
