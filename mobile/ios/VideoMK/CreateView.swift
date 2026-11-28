@@ -93,7 +93,7 @@ struct CreateView: View {
                 try? await Task.sleep(for: .milliseconds(450)); if !create.form.hasContent, typingTarget == nil { focused = true }
             }
         }
-        .onAppear { dictation.onText = { create.form.text = $0 }; dictation.onKeyboardFallback = { focused = true } }
+        .onAppear { dictation.onText = { create.form.text = $0 }; dictation.textProvider = { create.form.text }; dictation.onKeyboardFallback = { focused = true } }
         .onDisappear { dictation.stop(); typing?.cancel() }
         .onChange(of: focused) { _, f in if f { finishTyping() } }
         .sheet(isPresented: $showingLibrary) {
@@ -198,6 +198,10 @@ struct CreateView: View {
                 .background(Theme.surface, in: RoundedRectangle(cornerRadius: Theme.Radii.field, style: .continuous)).offset(y: -52)
                 .accessibilityIdentifier("dictationKeyboardHint")
                 .task { try? await Task.sleep(for: .seconds(8)); dictation.clearHint() }
+        } else if let notice = dictation.notice, dictation.isListening {
+            Label(notice, systemImage: "globe").font(.role(.footnote)).foregroundStyle(Theme.textSecondary).padding(Theme.Space.m)
+                .background(Theme.surface, in: RoundedRectangle(cornerRadius: Theme.Radii.field, style: .continuous)).offset(y: -52)
+                .accessibilityIdentifier("dictationLanguageNotice")
         }
     }
 

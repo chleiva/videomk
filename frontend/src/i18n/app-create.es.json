@@ -123,6 +123,7 @@
  "create.from_media": "De Mi biblioteca",
  "create.dictate": "Dictar",
  "create.dictating": "Escuchando…",
+ "create.dictate_language": "El dictado no está disponible en español en este navegador.",
  "create.dictate_denied": "El navegador tiene bloqueado el micrófono.",
  "create.photos_n": "{n, plural, one {# foto} other {# fotos}}",
  "create.photo_remove": "Quitar foto",

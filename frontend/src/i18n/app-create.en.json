@@ -123,6 +123,7 @@
  "create.from_media": "From My media",
  "create.dictate": "Dictate",
  "create.dictating": "Listening…",
+ "create.dictate_language": "Dictation isn't available in English in this browser.",
  "create.dictate_denied": "Microphone access is blocked in your browser.",
  "create.photos_n": "{n, plural, one {# photo} other {# photos}}",
  "create.photo_remove": "Remove photo",
