@@ -1,5 +1,10 @@
 # Paid plans proposal (2026-11-27)
 
+> **Status, 2026-11-28 (added later; the text below is unchanged).** Decisions made after this proposal, in `docs/REQUIREMENTS_TRACKER.csv`:
+> - **R177**: the Free plan is kept as decided (daily credit, 1-minute cap, forced mark) and reviewed after 30 days of use; plans stay OFF on PROD until the owner says.
+> - **R178** (idea, analysis open): a **weekly allowance** instead of the daily credit, renewing on a day the person can see; paid plans keep the monthly bundle but release it weekly. Numbers not decided; the cost comparison against section 1 is still to be written.
+> - **Dictation rights** (R176/R177, `docs/SPEECH_TO_TEXT_2026-11-28.md`): **Pro and Max both get paid dictation** (OpenAI gpt-transcribe); Free keeps the phone's own engine. Daily caps are the `stt_seconds_per_day` plan right in `backend/lambdas/common/plans.py` (Pro 600 s, Max 1200 s in the code today; R177 had written 900 and 3600, so check the code before quoting). The owner can pause it from the admin console ("Dictation" switch).
+
 Research and a proposal, no product code. Every number is marked **measured** (read from QA or from a vendor's page today) or **assumed**.
 
 ## 0. Summary
