@@ -143,3 +143,52 @@ describe("recording flow (fake MediaRecorder, fake fetch)", () => {
     expect(r.field()).toBe("start Better words");
   });
 });
+
+describe("feedback controls: cancel, retry, timeout", () => {
+  it("cancel while recording discards the clip, restores the box and uploads nothing", async () => {
+    const r = rig();
+    const h = await startBetter(r.opts as any);
+    r.native().setText("start heard words");
+    h!.cancel(); await settle();
+    expect(r.send).not.toHaveBeenCalled(); expect(r.field()).toBe("start"); expect(r.results).toEqual([{ cancelled: true }]); expect(r.stops).toContain("track");
+  });
+  it("cancel while transcribing stops waiting; a late answer is ignored and the phone's words stay", async () => {
+    let resolve!: (v: any) => void;
+    const r = rig({ send: () => new Promise((x) => { resolve = x; }) });
+    const h = await startBetter(r.opts as any);
+    r.native().setText("start native"); h!.stop(); await settle();
+    h!.cancel(); resolve({ ok: true, id: hex(7), text: "late", seconds: 1, secondsLeft: 1 }); await settle();
+    expect(r.field()).toBe("start native"); expect(r.results).toEqual([{ cancelled: true }]);
+  });
+  it("a retryable failure keeps the clip; retry resends it and succeeds", async () => {
+    const answers: any[] = [{ ok: false, kind: "network" }, { ok: true, id: hex(7), text: "Better words", seconds: 4, secondsLeft: 1 }];
+    const sendSpy = vi.fn(async () => answers.shift()); const r = rig({ send: sendSpy });
+    const failed: string[] = []; (r.opts as any).onRetryable = (k: string) => failed.push(k);
+    const h = await startBetter(r.opts as any);
+    h!.stop(); await settle();
+    expect(failed).toEqual(["network"]); expect(r.results).toEqual([]);
+    h!.retry(); await settle();
+    expect(sendSpy).toHaveBeenCalledTimes(2); expect(r.opts.onWorking).toHaveBeenCalledTimes(2);
+    expect(r.field()).toBe("start Better words"); expect(r.results).toEqual([{ id: hex(7), limit: false }]);
+  });
+  it("dismiss after a failure ends with the phone's text and the error kind", async () => {
+    const r = rig({ send: async () => ({ ok: false, kind: "failed" }) });
+    (r.opts as any).onRetryable = () => {};
+    const h = await startBetter(r.opts as any);
+    r.native().setText("start native"); h!.stop(); await settle(); h!.dismiss();
+    expect(r.field()).toBe("start native"); expect(r.results).toEqual([{ kind: "failed", limit: false }]);
+  });
+  it("quota is never retryable, even with onRetryable", async () => {
+    const r = rig({ send: async () => ({ ok: false, kind: "quota" }) });
+    (r.opts as any).onRetryable = () => { throw new Error("no"); };
+    const h = await startBetter(r.opts as any); h!.stop(); await settle();
+    expect(r.results).toEqual([{ kind: "quota", limit: false }]);
+  });
+  it("an upload that never answers times out into a retryable failure", async () => {
+    const r = rig({ send: () => new Promise(() => {}) });
+    const failed: string[] = []; (r.opts as any).onRetryable = (k: string) => failed.push(k);
+    const h = await startBetter(r.opts as any); h!.stop(); await settle();
+    const t = r.timers.find((x) => x.ms === 60000)!; t.f();
+    expect(failed).toEqual(["network"]);
+  });
+});

@@ -2,7 +2,7 @@
 // popover for everything else, Create with its price. Everything the server offers comes from capabilities (docs/CREATE_API.md); the AI decides voice, music and pace.
 // Same flow as the apps: request check (kind questions, or a polite "we can't make this") then generate; a retry can never bill twice (same request id).
 import "../../styles/app-b.css";
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useReducer, useRef, useState } from "react";
 import { Sheet, Spinner } from "../ui";
 import { AIcon as Icon, shapeGlyph } from "./icons";
 import { hasFinishedVideo } from "./firstVideo";
@@ -27,6 +27,9 @@ import { DECK_ASPECT, deckAspectWarning, deckCredits, deckGenerateExtras, deckMi
 import { dictationSupported, speechLang, startDictation } from "../../lib/dictation";
 import type { Dictation } from "../../lib/dictation";
 import { betterAvailable, betterErrorKey, betterPreferred, DictationIds, recordingSupported, setBetterPreferred, showUpgradeHint, startBetter } from "../../lib/betterDictation";
+import type { BetterHandle } from "../../lib/betterDictation";
+import { announcementKey, effectiveLimitS, elapsedS, feedbackReduce, initialFeedback, LevelMeter, waitState, warningFor } from "../../lib/dictationFeedback";
+import DictationPanel from "./DictationPanel";
 import { APP_PATHS } from "../../lib/links";
 import { rememberPrompt } from "../../lib/prompts";
 import { pictureFiles } from "../../lib/upload";
@@ -87,13 +90,34 @@ export default function Composer() {
   const [working, setWorking] = useState(false);                    // Better dictation: the clip is being turned into text
   const [micNote, setMicNote] = useState<string | null>(null);      // a short line after a fallback or the 6 minute stop
   const dictIds = useRef(new DictationIds());
+  // dictation feedback: phase machine, real mic level, the handle for Cancel / Retry (docs/DICTATION_FEEDBACK_2026-11-28.md)
+  const [fb, fbDispatch] = useReducer(feedbackReduce, undefined, initialFeedback);
+  const meter = useRef(new LevelMeter(24));
+  const bh = useRef<BetterHandle | null>(null);
+  const voiceBase = useRef("");
+  const [voice, setVoice] = useState<"better" | "native">("better");
+  const [inserted, setInserted] = useState(false);
+  const [announce, setAnnounce] = useState("");
   const [picked, setPicked] = useState<number | null>(null);   // the length chosen for a deck video (null: the deck's suggestion)
   const req = useRef<{ key: string; id: string }>({ key: "", id: "" });
   const area = useRef<HTMLTextAreaElement>(null);
   const files = useRef<HTMLInputElement>(null);
   const deckInput = useRef<HTMLInputElement>(null);
   const dict = useRef<Dictation | null>(null);
-  const textNow = useRef("");   // what the box holds right now: dictation reads it to notice hand edits
+  const textNow = useRef("");
+  const voiceVisible = fb.phase === "recording" || fb.phase === "transcribing" || fb.phase === "failed";
+  useEffect(() => {   // clock for the timer and the wait hints (4 Hz is enough for a seconds display)
+    if (fb.phase !== "recording" && fb.phase !== "transcribing") return;
+    const id = setInterval(() => fbDispatch({ type: "tick", nowMs: Date.now() }), 250); return () => clearInterval(id);
+  }, [fb.phase]);
+  useEffect(() => { if (fb.phase === "inserted") { const id = setTimeout(() => fbDispatch({ type: "dismiss" }), 1300); return () => clearTimeout(id); } }, [fb.phase]);
+  const akey = announcementKey(fb);
+  useEffect(() => {   // screen-reader line: only when the state changes, never per tick
+    const w = warningFor(fb);
+    const text: Record<string, string> = { listening: t("create.voice_listening"), warn_soon: t("create.voice_soon_a11y", { s: w.remainingS }), warn_final: t("create.voice_final_a11y"), transcribing: t("create.voice_wait_a11y"), slow: t("create.voice_slow_a11y"), failed: t("create.voice_failed_a11y"), inserted: t("create.voice_inserted_a11y") };
+    if (akey) setAnnounce(text[akey] ?? "");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [akey]);   // what the box holds right now: dictation reads it to notice hand edits
   const urls = useRef<string[]>([]);
   const topEl = useRef<HTMLDivElement>(null);   // prompt, photos, notes: locked (inert, dimmed) while a request is checked or sent
   const toolRow = useRef<HTMLDivElement>(null);
@@ -172,37 +196,48 @@ export default function Composer() {
   // ---- dictation (only where the browser has it)
   const canDictate = useMemo(() => dictationSupported(), []);
   const useBetter = better && betterAvailable(caps?.dictation) && recordingSupported();
+  const buzz = (ms: number) => { try { navigator.vibrate?.(ms); } catch { /* not on this device */ } };   // a subtle tick where the browser has haptics
+  function cancelVoice() {
+    if (voice === "better") bh.current?.cancel();
+    else { dict.current?.stop(); setForm((x) => (x ? { ...x, text: voiceBase.current } : x)); }
+    setListening(false); setWorking(false); fbDispatch({ type: "cancel" }); setAnnounce(t("create.voice_cancelled_a11y")); area.current?.focus();
+  }
   async function toggleDictation() {
     if (working) return;
     if (listening) { dict.current?.stop(); return; }
     setMicError(null); setMicNote(null);
+    voiceBase.current = textNow.current; fbDispatch({ type: "request" }); meter.current.reset();
     if (useBetter && caps?.dictation) {
-      const dc = caps.dictation;
-      setListening(true);
+      const dc = caps.dictation, limitS = effectiveLimitS(dc.maxClipSeconds, dc.secondsLeft);
+      setListening(true); setVoice("better");
       const h = await startBetter({
         lang: speechLang(locale), languages: [locale === "es" ? "es" : "en"], getText: () => textNow.current,
-        setText: (text) => setForm((x) => (x ? { ...x, text } : x)), maxLength: 1500, maxSeconds: dc.maxClipSeconds, maxBytes: dc.maxClipBytes,
-        onWorking: () => { setListening(false); setWorking(true); },
+        setText: (text) => setForm((x) => (x ? { ...x, text } : x)), maxLength: 1500, maxSeconds: limitS || dc.maxClipSeconds, maxBytes: dc.maxClipBytes,
+        onLevel: (l) => meter.current.push(l),
+        onWorking: () => { setListening(false); setWorking(true); fbDispatch({ type: "stop", nowMs: Date.now() }); fbDispatch({ type: "retry", nowMs: Date.now() }); },
+        onRetryable: (kind) => { fbDispatch({ type: "fail", kind }); buzz(20); },
         onResult: (r) => {
-          setWorking(false); setListening(false); dict.current = null;
-          if (r.denied) setMicError("denied");
-          else if (r.id) { dictIds.current.add(r.id); if (r.limit) setMicNote(t("create.better_limit")); }
-          else { const k = r.kind ? betterErrorKey(r.kind) : null; setMicNote(r.limit ? t("create.better_limit") : k ? t(k) : null); }
+          setWorking(false); setListening(false); dict.current = null; bh.current = null;
+          if (r.denied) { setMicError("denied"); fbDispatch({ type: "denied" }); }
+          else if (r.cancelled) fbDispatch({ type: "cancel" });
+          else if (r.id) { dictIds.current.add(r.id); fbDispatch({ type: "ok" }); setInserted(true); setTimeout(() => setInserted(false), 1300); buzz(10); if (r.limit) setMicNote(t("create.better_limit")); }
+          else { fbDispatch({ type: "cancel" }); const k = r.kind ? betterErrorKey(r.kind) : null; setMicNote(r.limit ? t("create.better_limit") : k ? t(k) : null); }
           area.current?.focus();
           if (r.kind === "quota" || r.kind === "plan" || r.kind === "paused") void getCapabilities().then((x) => { if (x) setCaps(x); });
         },
       });
-      if (h) dict.current = h; else setListening(false);
+      if (h) { dict.current = h; bh.current = h; fbDispatch({ type: "granted", nowMs: Date.now(), limitS: limitS || dc.maxClipSeconds }); buzz(10); } else { setListening(false); fbDispatch({ type: "denied" }); }
       return;
     }
+    setVoice("native");
     const d = startDictation({
       lang: speechLang(locale),
       getText: () => textNow.current,
       setText: (text) => setForm((x) => (x ? { ...x, text } : x)),
       maxLength: 1500,
-      onEnd: (why) => { setListening(false); if (why === "denied") setMicError("denied"); else if (why === "language") setMicError("language"); area.current?.focus(); },
+      onEnd: (why) => { setListening(false); fbDispatch({ type: "cancel" }); if (why === "denied") setMicError("denied"); else if (why === "language") setMicError("language"); area.current?.focus(); },
     });
-    if (d) { dict.current = d; setListening(true); } else setMicError("denied");
+    if (d) { dict.current = d; setListening(true); fbDispatch({ type: "granted", nowMs: Date.now(), limitS: 300 }); buzz(10); } else { setMicError("denied"); fbDispatch({ type: "denied" }); }
   }
 
   // ---- price
@@ -356,7 +391,7 @@ export default function Composer() {
       <form className={`composer-card ${locked ? "is-locked" : ""}`} aria-busy={locked} onSubmit={submit} onDragOver={(e) => { if (e.dataTransfer.types.includes("Files")) e.preventDefault(); }} onDrop={(e) => { if (e.dataTransfer.files.length) { e.preventDefault(); addFiles(e.dataTransfer.files); } }}>
         <div className="composer-top" ref={topEl}>
         <label htmlFor="create-text" className="sr-only-vmk">{t("create.prompt_label")}</label>
-        <textarea id="create-text" ref={area} data-autofocus autoFocus rows={3} className="compose-text" value={f.text} readOnly={listening} maxLength={1500} placeholder={ready ? t("deck.placeholder") : t("create.placeholder")} aria-describedby="create-hint"
+        <textarea id="create-text" ref={area} data-autofocus autoFocus rows={3} className={`compose-text ${inserted ? "is-inserted" : ""}`} value={f.text} readOnly={listening} maxLength={1500} placeholder={ready ? t("deck.placeholder") : t("create.placeholder")} aria-describedby="create-hint"
           onChange={(e) => { setHint(null); set({ text: e.target.value }); }}
           onKeyDown={(e) => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); void submit(); } }}
           onPaste={(e) => { const pics = pictureFiles(Array.from(e.clipboardData.files)); if (pics.length) { e.preventDefault(); addFiles(pics); } }} />
@@ -386,6 +421,7 @@ export default function Composer() {
         {deckActive && c.deck && live && <DeckPicker caps={c.deck} deck={deck} />}
 
         {/* status: only what there is to say (nothing persistent: the placeholder says what to do) */}
+        <div className="sr-only-vmk" role="status" aria-live="polite">{announce}</div>
         <div className="compose-notes" aria-live="polite">
           {micNote && !micError && <p className="hint" role="status">{micNote}</p>}
           {micError && <p className="hint hint-bad" role="status">{t(micError === "language" ? "create.dictate_language" : "create.dictate_denied")}</p>}
@@ -409,6 +445,9 @@ export default function Composer() {
             <Spinner /><span>{sending ? t("create.starting") : t("create.checking")}</span>
             {!sending && <button type="button" className="btn btn-line btn-sm" onClick={cancelCheck}>{t("create.cancel")}</button>}
           </div>
+        ) : voiceVisible ? (
+          <DictationPanel phase={fb.phase as "recording" | "transcribing" | "failed"} engine={voice} meter={meter.current} elapsedS={elapsedS(fb)} remainingS={warningFor(fb).remainingS} warning={warningFor(fb).level} slow={waitState(fb) !== "normal"} t={t}
+            onStop={() => dict.current?.stop()} onCancel={cancelVoice} onRetry={() => bh.current?.retry()} onDevice={() => bh.current?.dismiss()} />
         ) : (
           <div className="composer-bar">
             {/* ONE row of pills (made for, length, look; the Characters pill only when the look has a cast). A fifth control never goes here: extras live in Options. */}

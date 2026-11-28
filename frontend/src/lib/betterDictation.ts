@@ -6,6 +6,7 @@ import { apiGateway } from "./config";
 import { currentLocaleHeaders } from "./i18n";
 import { appendDictation, startDictation } from "./dictation";
 import type { Dictation, DictationOptions } from "./dictation";
+import { METER_FPS, rmsOfBytes } from "./dictationFeedback";
 
 export const MAX_DICTATION_IDS = 20;
 export const HARD_MAX_SECONDS = 360;
@@ -111,8 +112,12 @@ export interface BetterOptions {
   maxLength?: number;
   maxSeconds: number;
   maxBytes: number;
-  onWorking: () => void;               // recording ended, the upload started
-  onResult: (r: { id?: string; kind?: BetterError; limit?: boolean; denied?: boolean }) => void;   // exactly once, after everything ended
+  onWorking: () => void;               // recording ended, the upload started (again after retry())
+  onLevel?: (level: number) => void;   // real mic level 0..1, about 25 times a second while recording
+  /** The upload failed in a way worth retrying (network, server): the clip is kept in memory; retry() sends it again, dismiss() gives up (onResult then fires). Without this callback a failure ends at once. */
+  onRetryable?: (kind: BetterError) => void;
+  sendTimeoutMs?: number;              // an upload that takes longer counts as failed (default 60 s)
+  onResult: (r: { id?: string; kind?: BetterError; limit?: boolean; denied?: boolean; cancelled?: boolean }) => void;   // exactly once, after everything ended
   deps?: Partial<BetterDeps>;
 }
 export interface BetterDeps {
@@ -120,6 +125,7 @@ export interface BetterDeps {
   Recorder: any;
   native: (o: DictationOptions) => Dictation | null;
   send: (c: ClipRequest) => Promise<BetterResult>;
+  AudioCtx: any;   // AudioContext (level meter); absent = no levels
   setTimer: (f: () => void, ms: number) => any;
   clearTimer: (h: any) => void;
   now: () => number;
@@ -130,17 +136,21 @@ const defaults = (): BetterDeps => ({
   Recorder: typeof MediaRecorder !== "undefined" ? MediaRecorder : null,
   native: startDictation,
   send: (c) => sendDictation(c),
+  AudioCtx: typeof AudioContext !== "undefined" ? AudioContext : (globalThis as any).webkitAudioContext ?? null,
   setTimer: (f, ms) => setTimeout(f, ms), clearTimer: (h) => clearTimeout(h), now: () => Date.now(),
 });
 export const recordingSupported = (): boolean => typeof MediaRecorder !== "undefined" && !!globalThis.navigator?.mediaDevices?.getUserMedia;
 
-/** Records and, on stop, uploads. Resolves to a handle with stop(); returns null when the microphone cannot be opened (the caller then uses the native engine alone). */
-export async function startBetter(o: BetterOptions): Promise<Dictation | null> {
+export interface BetterHandle extends Dictation { cancel(): void; retry(): void; dismiss(): void }
+const noop = (): BetterHandle => ({ stop() {}, cancel() {}, retry() {}, dismiss() {} });
+
+/** Records and, on stop, uploads. Resolves to a handle (stop uploads, cancel discards, retry/dismiss after a retryable failure); returns null when the microphone cannot be opened (the caller then uses the native engine alone). */
+export async function startBetter(o: BetterOptions): Promise<BetterHandle | null> {
   const d = { ...defaults(), ...o.deps };
   if (!d.Recorder) return null;
   let stream: MediaStream;
   try { stream = await d.getUserMedia({ audio: { channelCount: 1, sampleRate: 16000, echoCancellation: true, noiseSuppression: true } }); }
-  catch { o.onResult({ denied: true }); return { stop() {} }; }
+  catch { o.onResult({ denied: true }); return noop(); }
   const base = o.getText();
   let nativeWrote = base;   // what the preview last put in the box
   const nativeEnded = { done: false }; let nativeResolve: () => void = () => {}; const nativeP = new Promise<void>((r) => { nativeResolve = r; });
@@ -155,30 +165,62 @@ export async function startBetter(o: BetterOptions): Promise<Dictation | null> {
   let rec: any;
   const chunks: Blob[] = [];
   try { rec = new d.Recorder(stream, { ...(mime ? { mimeType: mime } : {}), audioBitsPerSecond: 32000 }); }
-  catch { stream.getTracks().forEach((t) => t.stop()); native?.stop(); o.onResult({ denied: true }); return { stop() {} }; }
-  const t0 = d.now(); let stopped = false, limit = false, timer: any;
+  catch { stream.getTracks().forEach((t) => t.stop()); native?.stop(); o.onResult({ denied: true }); return noop(); }
+  const t0 = d.now(); let stopped = false, limit = false, timer: any, cancelled = false, finished = false, token = 0, sendTimer: any, meterTimer: any, ctx: any;
   const recordingDone = new Promise<void>((resolve) => { rec.onstop = () => resolve(); });
   rec.ondataavailable = (e: any) => { if (e?.data?.size) chunks.push(e.data); };
   rec.start(1000);
+  const finish = (r: Parameters<BetterOptions["onResult"]>[0]) => { if (finished) return; finished = true; d.clearTimer(sendTimer); o.onResult(r); };
+  // the level meter: an AnalyserNode on the same stream, sampled at METER_FPS (cheap: 256 samples, one RMS)
+  const stopMeter = () => { if (meterTimer) { clearInterval(meterTimer); meterTimer = null; } try { ctx?.close?.(); } catch { /* closed */ } ctx = null; };
+  if (o.onLevel && d.AudioCtx) {
+    try {
+      ctx = new d.AudioCtx(); const an = ctx.createAnalyser(); an.fftSize = 256; an.smoothingTimeConstant = 0; ctx.createMediaStreamSource(stream).connect(an);
+      const buf = new Uint8Array(an.fftSize);
+      meterTimer = setInterval(() => { an.getByteTimeDomainData(buf); o.onLevel?.(rmsOfBytes(buf)); }, Math.round(1000 / METER_FPS));
+    } catch { stopMeter(); }
+  }
+  let clip: { blob: Blob; seconds: number } | null = null;
+  const upload = async (again = false) => {
+    if (!clip) return;
+    const my = ++token; if (again) o.onWorking();
+    const fail = (kind: BetterError) => { if (o.onRetryable && (kind === "failed" || kind === "network")) { d.clearTimer(sendTimer); o.onRetryable(kind); } else finish({ kind, limit }); };
+    sendTimer = d.setTimer(() => { if (my !== token || cancelled || finished) return; token++; fail("network"); }, o.sendTimeoutMs ?? 60000);
+    const r = await d.send({ blob: clip.blob, mime: clip.blob.type || "audio/webm", seconds: Math.min(clip.seconds, o.maxSeconds), languages: o.languages, prompt: base.trim() || undefined });
+    if (my !== token || cancelled || finished) return;
+    d.clearTimer(sendTimer);
+    if (!r.ok) return fail(r.kind);
+    const next = placeBetterText(base, nativeWrote, o.getText(), r.text);
+    if (next !== null) o.setText(o.maxLength ? next.slice(0, o.maxLength) : next);
+    clip = null; finish({ id: r.id, limit });
+  };
   const halt = () => {
-    if (stopped) return; stopped = true; d.clearTimer(timer);
-    o.onWorking();
+    if (stopped) return; stopped = true; d.clearTimer(timer); stopMeter();
+    if (!cancelled) o.onWorking();
     try { rec.state !== "inactive" && rec.stop(); } catch { /* already stopped */ }
     native?.stop();
     void (async () => {
       await Promise.all([recordingDone, nativeP]);
       stream.getTracks().forEach((t) => t.stop());
+      if (cancelled) { chunks.length = 0; return; }
       const seconds = (d.now() - t0) / 1000;
       const blob = new Blob(chunks, { type: rec.mimeType || mime || "audio/webm" }); chunks.length = 0;
-      if (blob.size === 0) return o.onResult({ limit });
-      if (blob.size > o.maxBytes || seconds > o.maxSeconds + 2) return o.onResult({ kind: "too_long", limit });
-      const r = await d.send({ blob, mime: blob.type || "audio/webm", seconds: Math.min(seconds, o.maxSeconds), languages: o.languages, prompt: base.trim() || undefined });
-      if (!r.ok) return o.onResult({ kind: r.kind, limit });
-      const next = placeBetterText(base, nativeWrote, o.getText(), r.text);
-      if (next !== null) o.setText(o.maxLength ? next.slice(0, o.maxLength) : next);
-      o.onResult({ id: r.id, limit });
+      if (blob.size === 0) return finish({ limit });
+      if (blob.size > o.maxBytes || seconds > o.maxSeconds + 2) return finish({ kind: "too_long", limit });
+      clip = { blob, seconds };
+      await upload();
     })();
   };
   timer = d.setTimer(() => { limit = true; halt(); }, o.maxSeconds * 1000);
-  return { stop: halt };
+  return {
+    stop: halt,
+    /** Recording: throw the clip away and put the box back as it was. Transcribing: stop waiting (the words the phone heard stay). */
+    cancel() {
+      if (finished || cancelled) return; cancelled = true; token++; clip = null;
+      if (!stopped) { o.setText(base); halt(); }
+      finish({ cancelled: true });
+    },
+    retry() { if (!finished && !cancelled && clip) void upload(true); },
+    dismiss() { if (finished) return; clip = null; finish({ kind: "failed", limit }); },
+  };
 }

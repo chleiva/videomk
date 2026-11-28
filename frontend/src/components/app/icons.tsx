@@ -9,6 +9,7 @@ const EXTRA: Record<string, ReactNode> = {
   sliders: <path {...P} d="M4 7h9M17 7h3M4 17h3M11 17h9M15 4v6M9 14v6" />,
   trash: <path {...P} d="M5 7h14M10 7V5h4v2M7 7l1 12h8l1-12M10 11v5M14 11v5" />,
   folder: <path {...P} d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />,
+  warning: <path {...P} d="M12 4 3 19h18zM12 10v4M12 16.5v.5" />,
   stop: <rect x="6" y="6" width="12" height="12" rx="2" fill="currentColor" />,
   chevdown: <path {...P} d="m6 9 6 6 6-6" />,
   left: <path {...P} d="M15 5l-7 7 7 7" />,
