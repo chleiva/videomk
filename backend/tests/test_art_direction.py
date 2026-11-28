@@ -161,7 +161,14 @@ def test_a_short_whiteboard_video_has_no_room_for_a_real_picture():
     assert types(plan) == ["whiteboard"] * 3 and plan["look"]["share"] == 1.0
 
 
-def test_cartoon_every_scene_shows_the_character_and_only_a_fifth_may_be_a_bare_cartoon_scene():
+def _any_ground(monkeypatch):
+    """These tests use made-up backdrop ids: every backdrop holds the cast here (the real zones are tested in test_stand_zone.py)."""
+    monkeypatch.setattr(ad.stand_zone, "eligible", lambda ids, aspect, n: list(ids))
+    monkeypatch.setattr(ad.stand_zone, "strip_violations", lambda plan, aspect: [])
+
+
+def test_cartoon_every_scene_shows_the_character_and_only_a_fifth_may_be_a_bare_cartoon_scene(monkeypatch):
+    _any_ground(monkeypatch)
     plan = mixed_plan()
     plan["beats"] = [beat("vector_scene", {"catalog_id": "lake_dawn"})] + plan["beats"][:2] + [beat("vector_scene", {"catalog_id": "lake_dawn"}), beat("vector_scene", {"catalog_id": "lake_dawn"})] + plan["beats"][3:]
     ad.enforce(plan, ad.Direction("presenter", by="you", chosen="cartoon", cast=["owl"]), backdrops=["lake_dawn", "forest_path"])
@@ -180,7 +187,8 @@ def test_cartoon_every_scene_shows_the_character_and_only_a_fifth_may_be_a_bare_
     assert sum(1 for p in pres if p.get("image_query")) == 3                                                         # a photograph or a clip becomes the picture on the card beside the character
 
 
-def test_a_conversation_gives_every_line_to_a_character_of_the_cast_with_its_own_voice():
+def test_a_conversation_gives_every_line_to_a_character_of_the_cast_with_its_own_voice(monkeypatch):
+    _any_ground(monkeypatch)
     plan = {"title": "Why is the sky blue?", "language": "en", "voices": {"narrator": "Ruth", "mia": "Joanna", "leo": "Matthew"}, "beats": [
         beat("presenter", {"heading": "Why is the sky blue?"}, speaker="mia"), beat("presenter", {"talk": True}, speaker="leo"), beat("bullets", {"heading": "Light", "items": ["Red", "Blue"]}, speaker="mia"),
         beat("presenter", {"talk": True}, speaker="leo"), beat("image", {"image_query": "blue sky"}), beat("presenter", {"heading": "Goodbye!"}, speaker="mia")]}

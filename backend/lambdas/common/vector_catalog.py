@@ -73,7 +73,7 @@ def search(query: str, aspect: str = "16:9", k: int = 5, *, embed: Optional[Call
         q = embed(query.strip())
         out = []
         for it in idx["items"]:
-            if aspect not in it.get("aspects", []):
+            if aspect not in it.get("aspects", []) or it.get("disabled"):   # `disabled`: retired from selection (docs/CARTOON_GROUND_2026-11-28.md), reversible
                 continue
             score = max(_cos(q, it["vi"]), _cos(q, it["vt"]))
             if score >= min_score:
