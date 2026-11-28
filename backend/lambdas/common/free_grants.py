@@ -30,7 +30,8 @@ from botocore.exceptions import ClientError
 from common import plans
 
 logger = logging.getLogger()
-FREE_KINDS = ("daily", "signup")
+FREE_KINDS = ("daily", "weekly", "signup")
+WEEK = 7 * 86400
 PERMANENT = ("duplicate_email", "duplicate_identity", "duplicate_device")
 NAMESPACE = "videomk/Plans"
 _ddb = None
@@ -376,9 +377,44 @@ def ensure(user: str, meta: Dict[str, Any], *, ctx: Optional[Dict[str, Any]], pl
             except ClientError as e:
                 if not wallet._cancelled(e):
                     raise   # lost a race (a second request, or the same identity claiming at this instant): the next read settles it
-    if int(cfg["free_daily_credits"]) > 0 and plan == "free" and meta.get("welcome_state", "granted") == "granted" and (unlimited or spend_gate(ctx, meta, cfg, now) is None):
-        meta = _daily(user, meta, cfg, now, tz, t, tn)
+    if plan == "free" and meta.get("welcome_state", "granted") == "granted" and (unlimited or spend_gate(ctx, meta, cfg, now) is None):
+        if weekly_on(cfg):
+            meta = _weekly(user, meta, cfg, now, t, tn)
+        elif int(cfg["free_daily_credits"]) > 0:
+            meta = _daily(user, meta, cfg, now, tz, t, tn)
     return meta
+
+
+def weekly_on(cfg: Dict[str, Any]) -> bool:
+    return bool(cfg.get("weekly_allowance")) and int(cfg.get("free_weekly_credits") or 0) > 0
+
+
+def week_window(meta: Dict[str, Any], now: float) -> Tuple[int, int, int]:
+    """(window number k, its start, its end) of the weekly allowance. Windows are 7 x 86400 s (UTC, so no daylight-saving shift and no timezone can move or repeat one),
+    counted from 00:00 UTC of the signup day. k = 0 is the signup week (the welcome credits cover it); k >= 1 each carry the allowance."""
+    anchor = (int(meta.get("signup_at") or now) // 86400) * 86400
+    k = max(0, int((now - anchor) // WEEK))
+    return k, anchor + k * WEEK, anchor + (k + 1) * WEEK
+
+
+def _weekly(user: str, meta: Dict[str, Any], cfg: Dict[str, Any], now: float, t: Any, tn: str) -> Dict[str, Any]:
+    """Grant this window's allowance once: META `weekly_k` moves forward in the same transaction as the bucket, conditional on it being behind, so concurrent reads
+    and retries grant it exactly once. The bucket ends with the window (nothing is carried); a window that was missed is simply gone (no back-fill)."""
+    from common import wallet
+    k, _, end = week_window(meta, now)
+    if k < 1 or int(meta.get("weekly_k") or 0) >= k:
+        return meta
+    try:
+        wallet._tx([
+            {"Update": {"TableName": tn, "Key": {"user_id": user, "sk": "META"}, "UpdateExpression": "SET weekly_k = :k",
+                        "ConditionExpression": "attribute_not_exists(weekly_k) OR weekly_k < :k", "ExpressionAttributeValues": {":k": k}}},
+            {"Put": {"TableName": tn, "Item": wallet._bucket(user, "weekly", int(cfg["free_weekly_credits"]), end, now, name=f"W{k:04d}"), "ConditionExpression": "attribute_not_exists(user_id)"}},
+        ])
+        return {**meta, "weekly_k": k}
+    except ClientError as e:
+        if not wallet._cancelled(e):
+            raise
+        return meta
 
 
 def _week(day: str) -> str:
@@ -413,6 +449,12 @@ def _daily(user: str, meta: Dict[str, Any], cfg: Dict[str, Any], now: float, tz:
 def next_credit(meta: Dict[str, Any], cfg: Dict[str, Any], now: float, tz: Optional[str]) -> Dict[str, Any]:
     """When the next recurring free credit can be claimed (the wallet's next_free_credit_at), by the same rules `_daily` applies."""
     from common import wallet
+    if weekly_on(cfg):
+        k, _, end = week_window(meta, now)
+        claimable = k >= 1 and int(meta.get("weekly_k") or 0) < k
+        at = now if claimable else end
+        return {"next_daily_at": int(at), "next_free_credit_at": wallet._iso(at), "next_free_credits": int(cfg["free_weekly_credits"]),
+                "next_renewal_at": wallet._iso(end), "renews_on": wallet._iso(end)[:10], "credits_per_week": int(cfg["free_weekly_credits"])}
     if int(cfg["free_daily_credits"]) <= 0:
         return {"next_daily_at": None, "next_free_credit_at": None, "next_free_credits": 0}
     day, midnight = wallet.local_day(now, tz)
@@ -430,7 +472,7 @@ def summary(user: str, *, plan: str, unlimited: bool, meta: Dict[str, Any], buck
     off (no free creation is offered: gallery and paywall), app_only (free videos are made in the mobile apps), not_available (not for this account), paused (today's free
     videos are used up for everyone), used (this account has no free credit left), monthly_cap. `mode` says what the Free plan offers at all: none | welcome | daily.
     `pending: true` = the welcome allowance has not been tried yet for this account (a read-only call such as capabilities came first): the wallet read settles it."""
-    mode = "daily" if int(cfg["free_daily_credits"]) > 0 else ("welcome" if int(cfg["welcome_credits"]) > 0 else "none")
+    mode = "weekly" if weekly_on(cfg) else "daily" if int(cfg["free_daily_credits"]) > 0 else ("welcome" if int(cfg["welcome_credits"]) > 0 else "none")
     left = sum(int(b["remaining"]) for b in buckets if b["kind"] in FREE_KINDS)
     budget = budget_state(cfg, now)
     out = {"mode": mode, "credits_left": left, "max_seconds": int(cfg["free_max_seconds"]), "budget_paused": bool(budget["paused"]), "resumes_at": budget["resumes_at"] if budget["paused"] else None,

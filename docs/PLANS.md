@@ -67,6 +67,9 @@ python backend/scripts/plans_admin.py gallery-only on|off                       
 | `free_daily_credits` | **0 (off)** | The recurring free credit. 1 switches the daily credit on (expires that night, as before). |
 | `free_credit_cadence` | `daily` | `weekly` = the credit can be claimed on at most `free_credits_per_week` days of a calendar week. |
 | `free_credits_per_week` | 3 | See above. |
+| `weekly_allowance` | **on** | R178 (docs/WEEKLY_ALLOWANCE_2026-11-28.md, docs/CREDITS.md "Weekly allowance"): Free gets `free_weekly_credits` per 7-day window counted from the signup day (UTC), not carried. On: replaces the recurring daily credit. Off: the daily/cadence knobs above apply again. Only read where plans are on (prod has plans off). |
+| `free_weekly_credits` | **4** | Credits per Free window (0 = none). |
+| `plan_weekly_release` | **on** | A paid plan's monthly bundle is released in four weekly parts (exact total, remainder in week 4). Off: the whole bundle at the start of the month, as before. |
 | `free_max_seconds` | **30** | Longest Free video. The plan definition says "up to 1 minute"; this is the active cap (15 to 720). |
 | `free_max_resolution` | `1080p` | Highest Free resolution (`720p` or `1080p`). |
 | `free_daily_budget_credits` | **15** | The GLOBAL budget: all free credits spent by all accounts in one UTC day. At $0.15 per credit that is **about $2.25 a day, about $70 a month at the very worst**. Reached: free creation pauses until 00:00 UTC. 0 = no free creation. |

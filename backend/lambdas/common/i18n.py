@@ -46,6 +46,7 @@ EN: Dict[str, str] = {
     "retry.not_deletable": "This video is still being made. Cancel it first, then remove it.",
     "retry.cancel_not_making": "This video is not being made, so there is nothing to cancel.",
     "retry.cancel_try_again": "The video moved to its next step. Try cancelling once more.",
+    "retry.delete_unavailable": "We could not remove this video's shared link just now, so the video was not deleted. Try again in a minute.",
     "retry.delete_busy": "An edit of this video is still rendering. Try again in a few minutes.",
     # ---- uploads, wallet, account
     "uploads.too_many": "Too many photos uploaded today. Try again tomorrow.",
@@ -275,6 +276,7 @@ ES: Dict[str, str] = {
     "retry.not_deletable": "Este video todavía se está creando. Cancélalo primero y luego quítalo.",
     "retry.cancel_not_making": "Este video no se está creando, así que no hay nada que cancelar.",
     "retry.cancel_try_again": "El video pasó a su siguiente paso. Intenta cancelarlo otra vez.",
+    "retry.delete_unavailable": "No pudimos quitar ahora el enlace compartido de este video, así que no se borró. Inténtalo de nuevo en un minuto.",
     "retry.delete_busy": "Todavía se está generando una edición de este video. Inténtalo de nuevo en unos minutos.",
     "uploads.too_many": "Subiste demasiadas fotos hoy. Inténtalo de nuevo mañana.",
     "deck.err.deck_too_large": "Este archivo es demasiado grande. Las presentaciones pueden pesar hasta {max_mb} MB.",

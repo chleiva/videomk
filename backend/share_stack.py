@@ -81,5 +81,6 @@ class ShareStack(Stack):
                        integration=integrations.HttpLambdaIntegration("ShareInt", func), authorizer=auth)
         self.api_url = api.api_endpoint
         CfnOutput(self, "ShareApiUrl", value=api.api_endpoint)
+        CfnOutput(self, "ShareBucketName", value=bucket.bucket_name, description="Pass to the main stack: -c shareBucket=<this> (account and video deletion take shared links back)")
         CfnOutput(self, "ShareHost", value=host)
         CfnOutput(self, "ShareDistributionId", value=dist.distribution_id)

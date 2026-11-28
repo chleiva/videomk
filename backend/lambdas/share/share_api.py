@@ -62,7 +62,8 @@ def url_for(host: str, token: str) -> str:
     return f"https://{host}/{token}"
 
 
-def _invalidate(token: str) -> None:
+def _invalidate(token: str, strict: bool = False) -> None:
+    """Drop the cached copy at the CDN. `strict` (the deletion paths): a failure is raised so the caller retries; otherwise it is logged and the short cache expires by itself."""
     dist = os.environ.get("DISTRIBUTION_ID")
     if not dist:
         return
@@ -70,6 +71,8 @@ def _invalidate(token: str) -> None:
         boto3.client("cloudfront").create_invalidation(DistributionId=dist, InvalidationBatch={"Paths": {"Quantity": 2, "Items": [f"/{token}", f"/{token}/*"]}, "CallerReference": f"{token}-{time.time_ns()}"})
     except Exception:   # noqa: BLE001 - the objects are already gone; the cache expires on its own (short TTL)
         logger.exception("SHARE_INVALIDATE_FAILED")
+        if strict:
+            raise
 
 
 def create(user: str, video: str, s3: Any = None, ddb: Any = None) -> Tuple[int, Dict[str, Any]]:
@@ -103,9 +106,12 @@ def create(user: str, video: str, s3: Any = None, ddb: Any = None) -> Tuple[int,
     return 200, {"shared": True, "token": token, "url": url_for(host, token)}
 
 
-def _revoke(token: str, share_bucket: str, s3: Any) -> None:
-    s3.delete_objects(Bucket=share_bucket, Delete={"Objects": [{"Key": f"{token}/{n}"} for n in share_page.FILES], "Quiet": True})
-    _invalidate(token)
+def _revoke(token: str, share_bucket: str, s3: Any, strict: bool = False) -> None:
+    """Delete the four files of a share (deleting a key that is not there is not an error, so this is safe to repeat) and invalidate the CDN. `strict` also raises on a failed key or invalidation."""
+    res = s3.delete_objects(Bucket=share_bucket, Delete={"Objects": [{"Key": f"{token}/{n}"} for n in share_page.FILES], "Quiet": True})
+    if strict and res.get("Errors"):
+        raise RuntimeError(f"S3 could not delete {len(res['Errors'])} shared files ({res['Errors'][0].get('Code')})")
+    _invalidate(token, strict)
 
 
 def revoke_for_video(user: str, video: str, s3: Any = None, ddb: Any = None) -> bool:

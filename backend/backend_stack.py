@@ -509,14 +509,15 @@ class BackendStack(Stack):
         launcher_fn.add_environment("STATE_MACHINE_ARN", active_machine.state_machine_arn)
         # "Try again" (lambdas/video_retry.py), as ONE separate policy (statements added one by one to the launcher's default policy made CDK drop the tombstone's ListUsers and secret rights):
         # give a video's photos back (read the kept originals and cleaned copies under generation/v2/, write the uploads), clear the failed attempt's working files, and read the first run's input
-        launcher_fn.role.attach_inline_policy(iam.Policy(self, "LauncherRetryPolicy", statements=[
+        launcher_retry_policy = iam.Policy(self, "LauncherRetryPolicy", statements=[
             iam.PolicyStatement(actions=["s3:GetObject", "s3:DeleteObject"], resources=[f"arn:aws:s3:::{ASSETS_BUCKET}/generation/v2/*"]),
             iam.PolicyStatement(actions=["s3:PutObject"], resources=[uploads_objects]),
             iam.PolicyStatement(actions=["states:DescribeExecution"], resources=[f"arn:aws:states:{self.region}:{self.account}:execution:{active_machine.state_machine_name}:*"]),   # older videos: the request they were started with
             iam.PolicyStatement(actions=["states:StopExecution"], resources=[f"arn:aws:states:{self.region}:{self.account}:execution:{active_machine.state_machine_name}:*"]),       # cancel a video that is being made (POST .../cancel)
             iam.PolicyStatement(actions=["s3:DeleteObject"], resources=[f"arn:aws:s3:::{ASSETS_BUCKET}/videos/*"]),                                                                   # delete a finished video: its MP4s, previews and GIF
             iam.PolicyStatement(actions=["s3:ListBucket"], resources=[f"arn:aws:s3:::{ASSETS_BUCKET}"], conditions={"StringLike": {"s3:prefix": ["videos/*"]}}),                      # ... found by listing that one video's folder
-        ]))
+        ])
+        launcher_fn.role.attach_inline_policy(launcher_retry_policy)
 
         # ============================
         # API Gateway + custom domain
@@ -669,6 +670,21 @@ class BackendStack(Stack):
             if self.node.try_get_context("vidupApiUrl"):   # the apps learn where to send clips from GET .../capabilities (`video_upload.api_url`)
                 req_options.fn.add_environment("VIDUP_API_URL", str(self.node.try_get_context("vidupApiUrl")))
 
+        # Share links (docs/SHARE_PREVIEWS_2026-11-28.md): only with `-c shareBucket=<ShareBucketName output> -c shareDistributionId=<ShareDistributionId output>` of the share stack (deploy that first).
+        # A deleted video must take its public link with it: the launcher (DELETE .../videos/{id}) learns the two names and may delete objects in that bucket and invalidate that one distribution,
+        # as two more statements of the launcher's existing retry policy (no new resource); the account deleter gets the same from AccountDeletion below. Absent: nothing is added and nothing is called.
+        share_bucket_ctx, share_dist_ctx = self.node.try_get_context("shareBucket"), self.node.try_get_context("shareDistributionId")
+        if bool(share_bucket_ctx) != bool(share_dist_ctx):
+            raise ValueError("Pass both -c shareBucket and -c shareDistributionId (the share stack's outputs ShareBucketName and ShareDistributionId), or neither.")
+        share_bucket_ctx, share_dist_ctx = (str(share_bucket_ctx), str(share_dist_ctx)) if share_bucket_ctx else (None, None)
+        if share_bucket_ctx:
+            launcher_fn.add_environment("SHARE_BUCKET", share_bucket_ctx)
+            launcher_fn.add_environment("DISTRIBUTION_ID", share_dist_ctx)
+            launcher_retry_policy.add_statements(
+                iam.PolicyStatement(actions=["s3:DeleteObject"], resources=[f"arn:aws:s3:::{share_bucket_ctx}/*"]),
+                iam.PolicyStatement(actions=["cloudfront:CreateInvalidation"], resources=[f"arn:aws:cloudfront::{self.account}:distribution/{share_dist_ctx}"]))
+        vidup_flag = str(self.node.try_get_context("videoUpload") or "").lower() in ("1", "true")
+
         # ----------------------------
         # The private photo library: storage, search and its routes (docs/MEDIA_LIBRARY.md). Needs the engine layer (Pillow, numpy).
         # ----------------------------
@@ -731,6 +747,8 @@ class BackendStack(Stack):
             flags_table=flags_table, safety_table=intake.table, feedback_table=feedback_loop.table if feedback_loop else None, assets_bucket_name=ASSETS_BUCKET, generate_machines=[active_machine], edit_machine=v2.edit_state_machine if v2 is not None else None,
             media=media, tombstone=tombstone, tombstone_days=int(self.node.try_get_context("tombstoneDays") or 90), domain=api_host,
             web_return_url=callback_urls[0].rsplit("/auth/callback", 1)[0].rstrip("/") + "/delete-account", apple=apple_revoke, apple_layer=apple_layer,
+            share_bucket=share_bucket_ctx, share_distribution_id=share_dist_ctx,
+            vidup_bucket=__import__("vidup_stack").bucket_name(stage, self.account) if vidup_flag else None,
         )
         for fn in (wallet_fn, launcher_fn):   # the wallet refuses a welcome credit to an account that is being deleted (and, with the tombstone on, to a returning one)
             deletion.table.grant_read_data(fn)

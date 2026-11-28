@@ -20,6 +20,15 @@ doubled amount; edits stay free. Render cost and reasoning: `docs/FOUR_K.md`.
 Spending order: soonest-expiring first (daily, welcome, returned, purchased). Daily credits can be claimed once per UTC day **and** local day, so
 sending different timezones earns nothing extra.
 
+## Weekly allowance (R178, 2026-11-28; where plans are on, QA only)
+Knobs `weekly_allowance` (on), `free_weekly_credits` (4), `plan_weekly_release` (on), switchable without a deploy; details and edge cases in `docs/WEEKLY_ALLOWANCE_2026-11-28.md`.
+| Credits | Amount | Expiry |
+|---|---|---|
+| Welcome | 5 (knob), once | 30 days |
+| Weekly (Free) | 4 per 7-day window counted from 00:00 UTC of the signup day; none in the signup week | the end of the window, not carried |
+| Plan (Pro, Max) | the monthly bundle in 4 weekly parts: floor(bundle/4) x 3, remainder in week 4 (Pro 7+7+7+9, Max 30 x 4), pro-rated first release when first read mid-cycle | as before (Pro: next monthly date; Max one date later, cap 240) |
+The wallet and capabilities answers carry `next_renewal_at` and `renews_on` so the apps can show the renewal day.
+
 ## Proposed packs (not yet in the stores)
 20 / 45 / 500 credits for $9.99 / $19.99 / $199.99 (about $0.50 / $0.44 / $0.40 per credit), relabelled from the earlier 100 / 220 / 2400 at 5
 credits per minute: same economics.

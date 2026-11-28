@@ -56,9 +56,9 @@ def test_a_failure_is_swallowed(monkeypatch, caplog):
 def test_video_delete_calls_it_before_the_row_goes(monkeypatch):
     import video_retry
     calls = []
-    monkeypatch.setattr(video_retry.share_revoke, "revoke_item", lambda item, s3=None: calls.append(item) or True)
+    monkeypatch.setattr(video_retry.share_revoke, "revoke_item", lambda item, s3=None, strict=False: calls.append(item) or True)
     src = open(video_retry.__file__).read()
-    assert src.index("share_revoke.revoke_item(item)") < src.index('_table().delete_item(Key={"video_id": video_id}, ConditionExpression="user_id = :u AND #s = :was"')
+    assert src.index("share_revoke.revoke_item(item, strict=True)") < src.index('_table().delete_item(Key={"video_id": video_id}, ConditionExpression="user_id = :u AND #s = :was"')
 
 
 def test_account_step_videos_revokes_every_shared_row(monkeypatch):
@@ -74,6 +74,6 @@ def test_account_step_videos_revokes_every_shared_row(monkeypatch):
         def Table(self, n):
             return None
     monkeypatch.setattr(deletion, "ddb", lambda: T())
-    monkeypatch.setattr(share_revoke, "revoke_item", lambda item, s3=None: seen.append(item["share_token"]) or True)
+    monkeypatch.setattr(share_revoke, "revoke_item", lambda item, s3=None, strict=False: seen.append(item["share_token"]) or True)
     deletion.step_videos("u1", deletion.Budget())
     assert seen == ["T1"]

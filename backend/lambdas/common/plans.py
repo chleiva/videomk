@@ -57,6 +57,9 @@ KNOBS: Dict[str, tuple] = {
     "free_daily_credits": (0, "int", 0, 10),                     # the recurring free credit (0 = off)
     "free_credit_cadence": ("daily", "cadence", None, None),     # 'daily', or 'weekly' = at most free_credits_per_week claim days in a calendar week
     "free_credits_per_week": (3, "int", 1, 7),
+    "weekly_allowance": (True, "bool", None, None),              # R178: Free gets `free_weekly_credits` per 7-day window counted from the signup day (UTC); unused ones are not carried. True replaces the recurring daily credit; False = the daily/cadence knobs above
+    "free_weekly_credits": (4, "int", 0, 50),
+    "plan_weekly_release": (True, "bool", None, None),           # R178: a paid plan's monthly bundle is released in four weekly parts (exact total, remainder in week 4); False = the whole bundle at the start of the month
     "free_daily_budget_credits": (15, "int", 0, 1_000_000),      # ALL free credits spent by ALL accounts in one UTC day; reached = free creation pauses until 00:00 UTC. 0 = no free creation at all
     "free_budget_unlimited": (False, "bool", None, None),        # True switches the global budget off (no ceiling)
     "cost_per_credit_usd": (0.15, "float", 0.0, 10.0),           # measured p50 (docs/PLANS_PROPOSAL_2026-11-27.md): only used to SHOW dollars next to credits
@@ -85,6 +88,11 @@ CADENCES = ("daily", "weekly")
 _cache: Dict[str, Any] = {"at": 0.0, "raw": None}
 _override: Optional[Dict[str, Any]] = None
 _ssm = None
+
+
+def unlimited_stt_seconds() -> int:
+    """The daily dictation ceiling of unlimited test accounts: ONE number for the dictation service and for what capabilities show."""
+    return int(os.environ.get("UNLIMITED_DAILY_STT_SECONDS", "7200"))
 
 
 def enabled() -> bool:

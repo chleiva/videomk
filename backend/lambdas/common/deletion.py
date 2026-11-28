@@ -4,7 +4,7 @@ How it runs: `POST /users/{user}/account/delete` (account_api.py) writes a JOB i
 steps in order, each one idempotent, and records every finished step on the job. A failing step is logged (`ACCOUNT_DELETION_FAILED`), counted and retried later; nothing is ever
 skipped. The Cognito user is deleted LAST, so a stuck run can always be resumed with the same identity (scripts/account_admin.py).
 
-Order (STEPS): begin (disable sign-in, revoke refresh tokens) -> executions (stop running video workflows) -> media -> videos -> wallet -> usage -> flags -> safety -> tombstone ->
+Order (STEPS): begin (disable sign-in, revoke refresh tokens) -> executions (stop running video workflows) -> media -> videos -> vidup -> wallet -> usage -> flags -> safety -> tombstone ->
 settle (wait until every token issued before `begin` has expired: a still-valid token could otherwise recreate a row) -> recheck (all data steps again) -> cognito -> finish.
 
 What belongs to a person (one place; tests/test_account_deletion.py checks it against the CDK stack and against the keys the code writes):
@@ -41,15 +41,17 @@ logger = logging.getLogger()
 USER_RE = re.compile(r"^[A-Za-z0-9-]{8,64}$")
 VIDEO_RE = re.compile(r"^[A-Za-z0-9_-]{8,80}$")
 
-STEPS = ["begin", "executions", "media", "videos", "wallet", "usage", "flags", "safety", "feedback", "tombstone", "settle", "recheck", "cognito", "finish"]
-DATA_STEPS = ["media", "videos", "wallet", "usage", "flags", "safety", "feedback"]
+STEPS = ["begin", "executions", "media", "videos", "vidup", "wallet", "usage", "flags", "safety", "feedback", "tombstone", "settle", "recheck", "cognito", "finish"]
+DATA_STEPS = ["media", "videos", "vidup", "wallet", "usage", "flags", "safety", "feedback"]
 
 # every usage-table partition a person can have (code: usage.consume(f"<prefix>:{user}") and the plain `user` of the daily video quota)
-USAGE_PREFIXES = ("", "upload:", "libup:", "libsearch:", "brief:", "unlimited:", "dup:", "edit:", "deck:", "deckproc:", "feedback:", "feedbackh:", "wmlogo:", "freemonth:", "devch:", "clipgen:acct:")
+USAGE_PREFIXES = ("", "upload:", "libup:", "libsearch:", "brief:", "unlimited:", "dup:", "edit:", "deck:", "deckproc:", "feedback:", "feedbackh:", "wmlogo:", "freemonth:", "devch:", "clipgen:acct:",
+                  "vidrec:", "vidup:", "vidhash:", "stt:", "sttrec:")   # video upload (docs/VIDEO_UPLOAD_2026-11-28.md): the clips, the daily count, the same-file hashes. `vidup:global` and `vidbad` hold no account; stt:/sttrec: = paid dictation seconds and records (docs/SPEECH_TO_TEXT_2026-11-28.md), found missing by the prefix scan test
 FLAG_KEYS = ("{u}", "safety:{u}")
 ASSET_USER_PREFIXES = ("videos/{u}/", "uploads/{u}/", "watermark/{u}/")   # watermark/: the saved watermark settings and logo (docs/WATERMARK.md)
 ASSET_VIDEO_PREFIXES = ("generation/v2/{v}/", "generation/assets/{v}/")
 MEDIA_PREFIXES = ("o/{u}/", "t/{u}/")
+VIDUP_PREFIXES = ("in/{u}/", "clips/{u}/")   # the video-upload bucket (vidup_stack.py): an original not yet read, and the kept normalised clips
 SHARED_PREFIXES = ("music/",)   # the shared music catalogue: belongs to nobody
 
 SAFETY_KEEP_DAYS = 90      # privacy policy: stops are kept 90 days
@@ -437,7 +439,7 @@ def step_videos(user: str, budget: Budget) -> Dict[str, int]:
     from common import share_revoke
     for r in rows:   # shared links first: the token lives on the row, which goes last
         if r.get("user_id") == user and r.get("share_token"):
-            share_revoke.revoke_item(r)
+            share_revoke.revoke_item(r, s3=s3(), strict=True)   # a failure raises: the step is retried (backoff, then stuck + alarm) and the rows, which hold the tokens, are still there
     for v in vids:
         for p in ASSET_VIDEO_PREFIXES:
             files += _s3_delete_prefix(bucket, p.format(v=v), budget)
@@ -446,6 +448,14 @@ def step_videos(user: str, budget: Budget) -> Dict[str, int]:
     table = ddb().Table(_env("VIDEOS_TABLE"))
     n = _delete_keys(table, ({"video_id": r["video_id"]} for r in rows if r.get("user_id") == user), budget)
     return {"videos": n, "files": files}
+
+
+def step_vidup(user: str, budget: Budget) -> Dict[str, int]:
+    """The account's video-upload files (the vidup stack's private bucket, only its own prefixes). The `vidrec:`/`vidhash:`/`vidup:` rows go with the usage step."""
+    bucket = os.environ.get("VIDUP_BUCKET")
+    if not bucket:
+        return {"skipped": 1}   # this stage has no video upload
+    return {"files": sum(_s3_delete_prefix(bucket, p.format(u=user), budget) for p in VIDUP_PREFIXES)}
 
 
 def step_wallet(user: str, budget: Budget) -> Dict[str, int]:
@@ -559,7 +569,7 @@ def _step_fn(name: str, user: str, username: Optional[str], budget: Budget, now:
     if name == "executions":
         return step_executions(user, budget)
     if name in DATA_STEPS:
-        return {"media": step_media, "videos": step_videos, "wallet": step_wallet, "usage": step_usage, "flags": step_flags, "safety": lambda u, b: step_safety(u, b, now), "feedback": step_feedback}[name](user, budget)
+        return {"media": step_media, "videos": step_videos, "vidup": step_vidup, "wallet": step_wallet, "usage": step_usage, "flags": step_flags, "safety": lambda u, b: step_safety(u, b, now), "feedback": step_feedback}[name](user, budget)
     if name == "tombstone":
         return step_tombstone(user, username, now)
     if name == "recheck":
@@ -642,6 +652,8 @@ def inventory(user: str, budget: Optional[Budget] = None) -> Dict[str, int]:
         out["entitlement_rows"] = 1 if ddb().Table(os.environ["ENTITLEMENTS_TABLE"]).get_item(Key={"user_id": user}).get("Item") else 0
     if os.environ.get("SAFETY_TABLE"):
         out["safety_rows"] = sum(1 for _ in _query_all(ddb().Table(_env("SAFETY_TABLE")), budget, KeyConditionExpression=Key("user_id").eq(user)))
+    if os.environ.get("VIDUP_BUCKET"):
+        out["vidup_files"] = sum(1 for p in VIDUP_PREFIXES for _ in _s3_keys(os.environ["VIDUP_BUCKET"], p.format(u=user), budget))
     if os.environ.get("MEDIA_TABLE"):
         out["media_rows"] = sum(1 for _ in _query_all(ddb().Table(_env("MEDIA_TABLE")), budget, KeyConditionExpression=Key("user_id").eq(user)))
         out["media_files"] = sum(1 for p in MEDIA_PREFIXES for _ in _s3_keys(_env("MEDIA_BUCKET"), p.format(u=user), budget))

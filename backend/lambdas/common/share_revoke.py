@@ -15,8 +15,9 @@ def enabled() -> bool:
     return bool(os.environ.get("SHARE_BUCKET"))
 
 
-def revoke_item(item: Dict[str, Any], s3: Any = None) -> bool:
-    """Delete the shared copy named by `item['share_token']` and invalidate the CDN. True when a copy was removed. Never raises."""
+def revoke_item(item: Dict[str, Any], s3: Any = None, strict: bool = False) -> bool:
+    """Delete the shared copy named by `item['share_token']` and invalidate the CDN. True when a copy was removed. Never raises, unless `strict`: the deletion paths
+    (video delete answers 503 and keeps the row; the account worker retries the step with its backoff, then its dead-letter queue) must not forget a live public link."""
     token = item.get("share_token") if isinstance(item, dict) else None
     bucket = os.environ.get("SHARE_BUCKET")
     if not token or not bucket:
@@ -31,8 +32,10 @@ def revoke_item(item: Dict[str, Any], s3: Any = None) -> bool:
         if s3 is None:
             import boto3
             s3 = boto3.client("s3")
-        share_api._revoke(token, bucket, s3)
+        share_api._revoke(token, bucket, s3, strict)
         return True
     except Exception:   # noqa: BLE001
         logger.exception("SHARE_REVOKE_FAILED")
+        if strict:
+            raise
         return False

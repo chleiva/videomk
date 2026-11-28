@@ -128,7 +128,8 @@ def test_the_prefixes_the_code_writes_are_all_covered(synth):
     for _, text in src:
         for m in re.finditer(r'f["\']((?:[a-z0-9_]+/)+)\{', text):
             found.add(m.group(1))
-    covered = {p.split("{")[0] for p in deletion.ASSET_USER_PREFIXES + deletion.ASSET_VIDEO_PREFIXES + deletion.MEDIA_PREFIXES} | set(deletion.SHARED_PREFIXES)
+    covered = {p.split("{")[0] for p in deletion.ASSET_USER_PREFIXES + deletion.ASSET_VIDEO_PREFIXES + deletion.MEDIA_PREFIXES + deletion.VIDUP_PREFIXES} | set(deletion.SHARED_PREFIXES)
+    covered |= {"m/", "p/", "v/", "w/", "speech/"}   # the image/clip catalogue (common/takedown.py, engine/clip_library.py, object_ondemand.py) and the speech arm check tool: videomk's own generated material, no user or video id (docs/IMAGE_CATALOG.md)
     assert found, "the scan found nothing: the pattern is stale"
     assert found <= covered, f"S3 prefixes written by the code but not removed by the account deletion: {sorted(found - covered)}"
     usage = set()

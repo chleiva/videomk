@@ -510,7 +510,10 @@ def delete_handler(event: Dict[str, Any], context: Any = None) -> Dict[str, Any]
             wallet.refund_video(item)   # exactly once; a failed, cancelled or rejected video costs nothing. A finished video was delivered: deleting it refunds nothing
         except Exception:   # noqa: BLE001
             logger.exception("VIDEO_DELETE_REFUND_FAILED video=%s", video_id)
-    share_revoke.revoke_item(item)   # the shared link dies with the video (no-op when sharing is not set up; never blocks the delete)
+    try:
+        share_revoke.revoke_item(item, strict=True)   # the shared link dies with the video (no-op when sharing is not set up). A failure keeps the video and its token: the same DELETE can be repeated
+    except Exception:   # noqa: BLE001 - logged by revoke_item (SHARE_REVOKE_FAILED)
+        return json_response(503, {"code": "share_revoke_failed", "message": i18n.t("retry.delete_unavailable", loc)})
     try:
         _table().delete_item(Key={"video_id": video_id}, ConditionExpression="user_id = :u AND #s = :was", ExpressionAttributeNames={"#s": "status"},
                              ExpressionAttributeValues={":u": user, ":was": status})

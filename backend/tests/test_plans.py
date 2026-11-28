@@ -31,6 +31,8 @@ def plans_on(aws, monkeypatch):
                  ("ASSETS_BUCKET", "assets-plans"), ("PLANS_REQUIRE_DEVICE_PROOF_DEFAULT", "0"), ("DUPLICATE_WINDOW_S", "0")):
         monkeypatch.setenv(k, v)
     monkeypatch.delenv("PLANS_CONFIG_PARAM", raising=False)
+    for knob in ("weekly_allowance", "plan_weekly_release"):   # R178 is ON by default; the scenarios of this file are the daily/monthly ones (tests/test_weekly_allowance.py covers the weekly rules)
+        monkeypatch.setitem(plans.KNOBS, knob, (False, "bool", None, None))
     s3 = boto3.client("s3", region_name="us-west-2")
     s3.create_bucket(Bucket="assets-plans", CreateBucketConfiguration={"LocationConstraint": "us-west-2"})
     store.set_clients(s3, aws)

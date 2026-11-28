@@ -1,6 +1,6 @@
 # Weekly allowance: cost comparison (R178)
 
-Status: analysis for the owner to confirm; nothing built, no setting changed. Inputs are the **measured** cost per credit from `docs/PLANS_PROPOSAL_2026-11-27.md` section 1 (**$0.15 at p50, $0.20 at p90**, one credit = one started minute of video) and the plan ladder in `backend/lambdas/common/plans.py`. Everything else below is arithmetic on those two numbers, or **assumed** (marked).
+Status: analysis for the owner to confirm. **Implemented 2026-11-28 on branch `weekly-and-deletion` (QA only; plans stay off in production), see "Implementation" at the end.** Inputs are the **measured** cost per credit from `docs/PLANS_PROPOSAL_2026-11-27.md` section 1 (**$0.15 at p50, $0.20 at p90**, one credit = one started minute of video) and the plan ladder in `backend/lambdas/common/plans.py`. Everything else below is arithmetic on those two numbers, or **assumed** (marked).
 
 ## Free: 1 credit a day (today) against a weekly allowance
 
@@ -45,3 +45,22 @@ The monthly bundle stays (Pro 30, Max 120 with one month of rollover). Releasing
 * Then it is server settings in the plans config (no release needed for the numbers; the renewal-day text in the apps is client work).
 
 Related: the sketch-only free video (R175) is not cheaper today (whiteboard $0.26 to $0.31 a minute), so it does not change these numbers.
+
+## Implementation (R178)
+
+Knobs (`common/plans.py`, `scripts/plans_admin.py config set <knob> <value>`; read only where plans are on): `weekly_allowance` (default on), `free_weekly_credits` (4), `plan_weekly_release` (default on). Setting a knob off returns to the earlier rules without a deploy.
+
+**Free.** Windows are 7 x 86400 s counted from 00:00 UTC of the signup day, so they have no daylight-saving shift and no `X-Timezone` can move or repeat one. Window 0 (the signup week) has no allowance: the welcome credits cover it, as the first day did before. From window 1 the first wallet read, or video start, of a window grants `free_weekly_credits` once (kind `weekly`, expires at the window end, nothing is carried; a missed window is not back-filled). Exactly once under concurrency: `weekly_k` on the wallet META row moves forward in the same transaction as the bucket, conditional on being behind. The welcome credits (knob `welcome_credits`, 5 in the plan, 30 days), the 1-minute cap (`free_max_seconds`) and the forced watermark are untouched. A weekly credit is a free credit for every gate (app only, device proof, global budget, monthly cap). Unlimited and paid accounts: no weekly free credit.
+
+**Paid.** The monthly bundle is split in four parts, `floor(bundle / 4)` for weeks 1 to 3 and the remainder in week 4 (Pro 30 = 7 + 7 + 7 + 9; Max 120 = 4 x 30), so a month always adds up exactly. Part j of cycle k is released at the cycle start (the subscription anchor plus k calendar months, as before) plus j x 7 days; part 4 starts on day 21, inside every month. Released credits keep the old expiry (Pro: the next monthly date; Max: one date later, balance cap 240), so unused credits carry from week to week inside the month. Each part has a marker row `PLAN#<plan>#<anchor>#<cycle>#w<j>` written in the same transaction as its bucket (idempotent under concurrency); the old monthly marker `PLAN#<plan>#<anchor>#<cycle>` still means "the whole cycle is done".
+
+Edge cases:
+* **First read mid-cycle** (a purchase recorded late, or an entitlement whose anchor is earlier than now): the parts whose start has passed are released at once, so the first release is pro-rated to the weeks that have begun (for example 15 days into a Pro cycle: 7 + 7 + 7 = 21 now, the last 9 on day 21), never more than the cycle's parts. The monthly total is unchanged.
+* **A plan that ends** (`period_end`): no part whose start is on or after the end is released; plan credits are removed with the plan, as before.
+* **Switch the knob back to monthly mid-cycle:** the parts not yet released are granted in one go and the cycle is marked done (no double grant); switching on again grants nothing more in that cycle.
+* **Max cap 240:** applied part by part against the live plan credits, as the whole bundle was.
+* **Upgrade/downgrade:** the plan id is in the marker, so a new plan starts its own parts; the old plan's credits follow the existing rules.
+
+What the apps get (`GET .../wallet`, and `GET .../capabilities`, `plan.allowance`): `free_creation: "weekly"`, `free.mode: "weekly"`, `next_renewal_at` (ISO 8601 UTC, when the next window starts), `renews_on` (its UTC date), `next_free_credits` and `credits_per_week` (Free) or `next_release_credits` and `release: "weekly"` (paid). The bucket kind `weekly` is new: clients should treat an unknown kind as a plain credit.
+
+Also fixed: capabilities showed Max's 1200 s/day dictation for unlimited test accounts while the dictation service allowed 7200; both now read `plans.unlimited_stt_seconds()` (env `UNLIMITED_DAILY_STT_SECONDS`, default 7200).

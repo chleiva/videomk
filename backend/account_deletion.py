@@ -42,6 +42,7 @@ class AccountDeletion(Construct):
         cognito_auth: Dict, cors_headers: List[str], common_env: Dict[str, str], videos_table: Any, usage_table: Any, wallet_table: Any, flags_table: Any, safety_table: Any, feedback_table: Optional[Any] = None,
         assets_bucket_name: str, generate_machines: List[Any], edit_machine: Optional[Any], media: Optional[Any], tombstone: bool, tombstone_days: int, domain: Optional[str],
         web_return_url: str, apple: bool, apple_layer: Optional[_lambda.ILayerVersion] = None,
+        share_bucket: Optional[str] = None, share_distribution_id: Optional[str] = None, vidup_bucket: Optional[str] = None,
     ) -> None:
         super().__init__(scope, construct_id)
         stack = Stack.of(self)
@@ -116,6 +117,18 @@ class AccountDeletion(Construct):
         if edit_machine is not None:
             worker.add_to_role_policy(iam.PolicyStatement(actions=["states:ListExecutions"], resources=[edit_machine.state_machine_arn]))
             worker.add_to_role_policy(iam.PolicyStatement(actions=["states:StopExecution"], resources=[f"arn:aws:states:{region}:{account}:execution:{edit_machine.state_machine_name}:*"]))
+
+        # ---- optional features that live in stacks of their own (names only: no cross-stack reference, no resource here; both are skipped when the flag is absent)
+        if share_bucket:   # share links (docs/SHARE_PREVIEWS_2026-11-28.md): delete the four shared files of each shared video, then invalidate the CDN. Nothing else in that bucket is reachable
+            worker.add_environment("SHARE_BUCKET", share_bucket)
+            worker.add_to_role_policy(iam.PolicyStatement(actions=["s3:DeleteObject"], resources=[f"arn:aws:s3:::{share_bucket}/*"]))
+            if share_distribution_id:
+                worker.add_environment("DISTRIBUTION_ID", share_distribution_id)
+                worker.add_to_role_policy(iam.PolicyStatement(actions=["cloudfront:CreateInvalidation"], resources=[f"arn:aws:cloudfront::{account}:distribution/{share_distribution_id}"]))
+        if vidup_bucket:   # video upload (docs/VIDEO_UPLOAD_2026-11-28.md): the account's `in/<user>/` and `clips/<user>/` (its `vidrec:`/`vidhash:`/`vidup:` rows are in the usage table, already covered)
+            worker.add_environment("VIDUP_BUCKET", vidup_bucket)
+            worker.add_to_role_policy(iam.PolicyStatement(actions=["s3:ListBucket"], resources=[f"arn:aws:s3:::{vidup_bucket}"], conditions={"StringLike": {"s3:prefix": ["in/*", "clips/*"]}}))
+            worker.add_to_role_policy(iam.PolicyStatement(actions=["s3:DeleteObject"], resources=[f"arn:aws:s3:::{vidup_bucket}/in/*", f"arn:aws:s3:::{vidup_bucket}/clips/*"]))
 
         # ---- alarms: a failing step logs ACCOUNT_DELETION_FAILED (a stuck job also ACCOUNT_DELETION_STUCK); no address is ever in these lines. No action is attached: the owner picks one (SNS, chat).
         mf = logs.MetricFilter(

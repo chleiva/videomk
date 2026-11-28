@@ -147,29 +147,74 @@ def ensure_plan_grants(user_id: str, ent: Dict[str, Any], *, now: Optional[float
     p, anchor, tn = plans.PLANS[ent["plan"]], int(ent["anchor"] or ent["period_start"] or now), _table().name
     if now < anchor:
         return 0
+    weekly = bool(plans.config()["plan_weekly_release"])
     k_now = 0
     while entitlements.add_months(anchor, k_now + 1) <= now:
         k_now += 1
+    base = f"PLAN#{p['id']}#{anchor}#"
+    done = {x["sk"] for x in _table().query(KeyConditionExpression=Key("user_id").eq(user_id) & Key("sk").begins_with(base), ConsistentRead=True)["Items"]}
     granted = 0
     for k in range(max(0, k_now - int(p["rollover_months"])), k_now + 1):
         start, expires = entitlements.add_months(anchor, k), entitlements.add_months(anchor, k + 1 + int(p["rollover_months"]))
         if expires <= now or (ent.get("period_end") is not None and start >= int(ent["period_end"])):   # nothing to give: already over, or a month that was not paid for
             continue
-        ref = {"user_id": user_id, "sk": f"PLAN#{p['id']}#{anchor}#{k:04d}"}
-        if _table().get_item(Key=ref, ConsistentRead=True).get("Item"):
+        month_ref = f"{base}{k:04d}"
+        if month_ref in done:   # the whole month was released at once (weekly release off, or before it existed)
             continue
-        have = sum(int(b["remaining"]) for b in _live_buckets(user_id, now) if b["kind"] == "plan")
-        amount = max(0, min(int(p["credits_per_month"]), int(p["credits_cap"]) - have))
-        items: List[Dict[str, Any]] = [{"Put": {"TableName": tn, "Item": {**ref, "credits": amount, "at": int(now)}, "ConditionExpression": "attribute_not_exists(user_id)"}}]
-        if amount > 0:
-            items.append({"Put": {"TableName": tn, "Item": {**_bucket(user_id, "plan", amount, expires, now, name=f"{p['id']}-{anchor}-{k:04d}"), "plan": p["id"]}}})
-        try:
-            _tx(items)
-            granted += amount
-        except ClientError as e:
-            if not _cancelled(e):
-                raise
+        amounts = tranches(int(p["credits_per_month"]))
+        todo = [j for j in range(TRANCHES) if f"{month_ref}#w{j}" not in done]
+        if weekly:   # only the weeks that have begun (and that were paid for): a wallet first read mid-cycle gets the elapsed weeks at once, the rest follow weekly
+            todo = [j for j in todo if tranche_start(anchor, k, j) <= now and not (ent.get("period_end") is not None and tranche_start(anchor, k, j) >= int(ent["period_end"]))]
+            groups = [([j], f"{month_ref}#w{j}") for j in todo]
+        else:       # switched back to the monthly bundle: what is left of this month, in one grant, and the month is marked done
+            groups = [(todo, month_ref)] if todo else []
+        for js, ref_sk in groups:
+            have = sum(int(b["remaining"]) for b in _live_buckets(user_id, now) if b["kind"] == "plan")
+            total = sum(amounts[j] for j in js)
+            amount = max(0, min(total, int(p["credits_cap"]) - have))
+            items: List[Dict[str, Any]] = [{"Put": {"TableName": tn, "Item": {"user_id": user_id, "sk": ref_sk, "credits": amount, "at": int(now)}, "ConditionExpression": "attribute_not_exists(user_id)"}}]
+            if amount > 0:
+                items.append({"Put": {"TableName": tn, "Item": {**_bucket(user_id, "plan", amount, expires, now, name=f"{p['id']}-{anchor}-{k:04d}-w{js[0]}"), "plan": p["id"]}}})
+            try:
+                _tx(items)
+                granted += amount
+            except ClientError as e:
+                if not _cancelled(e):
+                    raise
     return granted
+
+
+TRANCHES = 4
+WEEK_SECONDS = 7 * 86400
+
+
+def tranches(total: int) -> List[int]:
+    """A monthly bundle released in four weekly parts: floor(total / 4) in weeks 1 to 3 and the REST in week 4, so the parts always add up to the bundle (Pro 30 = 7 + 7 + 7 + 9, Max 120 = 4 x 30)."""
+    q = total // TRANCHES
+    return [q] * (TRANCHES - 1) + [total - q * (TRANCHES - 1)]
+
+
+def tranche_start(anchor: int, k: int, j: int) -> int:
+    """When part j (0 to 3) of cycle k is released: the cycle's start plus j x 7 days (UTC seconds, no daylight-saving shift). Part 3 starts on day 21, inside every month."""
+    return entitlements.add_months(anchor, k) + j * WEEK_SECONDS
+
+
+def next_plan_release(ent: Dict[str, Any], *, now: float) -> Dict[str, Any]:
+    """What the apps show for a paid plan: when the next part of the bundle arrives and how many credits it holds ({} when there is nothing coming: a plan that ends, or release off)."""
+    if not ent.get("grants_credits") or not plans.config()["plan_weekly_release"]:
+        return {}
+    p, anchor = plans.PLANS[ent["plan"]], int(ent["anchor"] or ent["period_start"] or now)
+    amounts, k = tranches(int(p["credits_per_month"])), 0
+    while entitlements.add_months(anchor, k + 1) <= now:
+        k += 1
+    for kk in (k, k + 1):
+        for j in range(TRANCHES):
+            at = tranche_start(anchor, kk, j)
+            if at > now:
+                if ent.get("period_end") is not None and at >= int(ent["period_end"]):
+                    return {}
+                return {"next_renewal_at": _iso(at), "renews_on": _iso(at)[:10], "next_release_credits": amounts[j], "release": "weekly"}
+    return {}
 
 
 def revoke_plan_credits(user_id: str, *, now: Optional[float] = None) -> int:
@@ -303,11 +348,15 @@ def _balance_plans(user_id: str, *, now: float, tz: Optional[str], ctx: Optional
     live = _live_buckets(user_id, now)
     unlimited = bool(ent["unlimited"])
     r = plans.rights(ent["plan"], cfg)
+    if unlimited:   # the same ceiling the dictation service applies, so what is shown is what is allowed
+        r["stt_seconds_per_day"] = plans.unlimited_stt_seconds()
     free = free_grants.summary(user_id, plan=ent["plan"], unlimited=unlimited, meta=meta, buckets=live, ctx=ctx, cfg=cfg, now=now)
+    paid = ent["plan"] != "free"   # a paid plan (or a test account on Max's rights) has no weekly FREE window: only its own next release is shown
+    allowance = {**free_grants.next_credit(meta, {**cfg, "weekly_allowance": False} if paid else cfg, now, tz), **(next_plan_release(ent, now=now) if paid else {})}
     spendable = [b for b in live if not (ent["plan"] == "free" and not unlimited and b["kind"] in free_grants.FREE_KINDS and free["reason"] in ("app_only", "not_available"))]
     return {"balance": UNLIMITED_DISPLAY if unlimited else sum(int(b["remaining"]) for b in spendable), "unlimited": unlimited, "buckets": [_bucket_view(b) for b in live],
-            **free_grants.next_credit(meta, cfg, now, tz), "rules": rules(),
-            "plan": {**entitlements.public(ent), "limits": plans.public_limits(r), "locked": plans.locked(ent["plan"], cfg),
+            **allowance, "rules": rules(),
+            "plan": {**entitlements.public(ent), "limits": plans.public_limits(r), "locked": plans.locked(ent["plan"], cfg), **({"allowance": allowance} if allowance.get("next_renewal_at") else {}),
                      "plan_credits": sum(int(b["remaining"]) for b in live if b["kind"] == "plan")},
             "free_creation": free["mode"], "free": free, "can_upgrade": plans.PURCHASES_LIVE}
 

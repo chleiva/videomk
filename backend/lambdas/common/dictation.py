@@ -60,7 +60,7 @@ def plan_rights(user: str, cfg: Optional[Dict[str, Any]] = None) -> Tuple[str, D
     ent = entitlements.effective(user)
     r = plans.rights(ent["plan"], cfg)
     if ent["unlimited"]:   # staff and test accounts (never in production): Max's rights, no plan cap, but a ceiling and a trail in case the token is ever stolen (like UNLIMITED_DAILY_VIDEOS)
-        r["stt_seconds_per_day"] = int(os.environ.get("UNLIMITED_DAILY_STT_SECONDS", "7200"))
+        r["stt_seconds_per_day"] = plans.unlimited_stt_seconds()
     return ent["plan"], r
 
 
