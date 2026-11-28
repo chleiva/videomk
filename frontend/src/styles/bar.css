@@ -86,7 +86,7 @@
 /* ---- Create: one centred card, a soft aura behind it */
 .app-shell .compose { position: relative; max-width: calc(51.25rem + 2 * var(--screen-margin)); margin: 0 auto; padding-top: clamp(var(--space-6), 9vh, 6.75rem); }
 .compose-aura { position: absolute; z-index: 0; inset: 3rem -4rem auto -4rem; height: 30rem; pointer-events: none; background: radial-gradient(closest-side at 30% 55%, rgba(122, 75, 230, 0.2), transparent), radial-gradient(closest-side at 74% 45%, rgba(34, 211, 238, 0.12), transparent); filter: blur(40px); }
-.app-shell .compose > :not(.compose-aura) { position: relative; z-index: 1; }
+.app-shell .compose > :not(.compose-aura):not(.sheet-root) { position: relative; z-index: 1; }   /* a sheet is fixed over the page and keeps its own position */
 .app-shell .compose-head { margin-bottom: var(--space-6); }
 .app-shell .compose-title { font-size: clamp(2rem, 3vw + 1.25rem, 3rem); line-height: 1.125; font-weight: 700; letter-spacing: -0.03em; }
 .app-shell .composer-card { padding: var(--space-5) var(--space-5) var(--space-4); border-radius: 1.75rem; background: var(--surface); box-shadow: var(--elev-3); }

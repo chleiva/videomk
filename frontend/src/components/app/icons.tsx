@@ -27,6 +27,9 @@ const EXTRA: Record<string, ReactNode> = {
   "shape-square": <rect {...P} x="5" y="5" width="14" height="14" rx="2.5" />,
   "shape-portrait": <rect {...P} x="6" y="4" width="12" height="16" rx="2.5" />,
   people: <path {...P} d="M9 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM3.5 19a5.5 5.5 0 0 1 11 0M16 5.2a3 3 0 0 1 0 5.6M17.5 14a5.5 5.5 0 0 1 3 5" />,
+  volume: <path {...P} d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5zM15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11" />,
+  volumeoff: <path {...P} d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5zM16 9.5l5 5M21 9.5l-5 5" />,
+  videoadd: <path {...P} d="M13 6H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h7a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2zM15 11l5-3v8l-5-3M8 10l3 2-3 2z" />,
   upload: <path {...P} d="M12 15V4m0 0L8 8m4-4 4 4M5 14v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4" />,
 };
 export function AIcon({ name, size = 20, className }: { name: string; size?: number; className?: string }) {
