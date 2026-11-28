@@ -34,6 +34,7 @@ import com.videomk.app.core.PickedCache
 import com.videomk.app.core.PickedSource
 import com.videomk.app.core.PhotoLimits
 import com.videomk.app.core.prepareInOrder
+import com.videomk.app.core.DictationEngine
 import com.videomk.app.data.DictationController
 import com.videomk.app.core.Answer
 import com.videomk.app.core.ApiError
@@ -76,8 +77,9 @@ class ComposerViewModel(app: Application) : AndroidViewModel(app) {
     var focusRequests by mutableIntStateOf(0)
         private set
 
-    val dictation = DictationController(app).also { d ->
+    val dictation: DictationEngine = DictationController(app).also { d ->
         d.onText = { text = it }
+        d.textProvider = { text }
         d.onKeyboardFallback = { focusRequests++ }
     }
 

@@ -5,13 +5,19 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.os.SystemClock
 import android.speech.RecognitionListener
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
 import android.util.Log
 import android.view.inputmethod.InputMethodManager
+import com.videomk.app.core.DictationEngine
+import com.videomk.app.core.DictationEngine.State
 import com.videomk.app.core.DictationLanguage
+import com.videomk.app.core.DictationLocale
 import com.videomk.app.core.DictationPlan
+import com.videomk.app.core.DictationRestartPolicy
+import com.videomk.app.core.DictationText
 import com.videomk.app.core.Txt
 import com.videomk.app.R
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,40 +29,40 @@ import kotlinx.coroutines.flow.asStateFlow
  * (permission denied, no recognition service on the phone, the microphone is busy) we fall back to the keyboard's own voice typing, or say how
  * to turn one on. Nothing in here may crash the app: every call into the platform is guarded and every failure ends in a message.
  *
+ * It keeps listening through pauses: the recognizer is asked for long silence lengths, and when it ends by itself (a result, NO_MATCH, SPEECH_TIMEOUT, busy)
+ * a new one is started after a short delay until the person taps Stop, 5 minutes pass, 90 seconds go by with nothing said, or it keeps failing at once.
+ * Each recognised segment is APPENDED to the text already in the field ([DictationText]); text typed meanwhile is never overwritten.
+ * The rules are pure and tested ([DictationText], [DictationRestartPolicy], [DictationLocale]).
+ *
  * Main thread only (SpeechRecognizer requires it).
  */
-class DictationController(context: Context) {
-    sealed interface State {
-        data object Idle : State
-        data object Starting : State
-        data object Listening : State
-        data class Unavailable(val message: String) : State
-        data class KeyboardHint(val message: String) : State
-    }
-
+class DictationController(context: Context) : DictationEngine {
     private val appContext = context.applicationContext
     private val handler = Handler(Looper.getMainLooper())
     private val _state = MutableStateFlow<State>(State.Idle)
-    val state: StateFlow<State> = _state.asStateFlow()
+    override val state: StateFlow<State> = _state.asStateFlow()
 
-    /** Called with the full text (what was already typed plus what was said) every time the recognizer updates. */
-    var onText: ((String) -> Unit)? = null
-    /** Called when we hand over to the keyboard's own dictation: the screen focuses the text field. */
-    var onKeyboardFallback: (() -> Unit)? = null
+    override var onText: ((String) -> Unit)? = null
+    override var textProvider: (() -> String)? = null
+    override var onKeyboardFallback: (() -> Unit)? = null
 
     private var recognizer: SpeechRecognizer? = null
-    private var base = ""
-    private var gotText = false
+    private var text = DictationText("")
+    private var policy = DictationRestartPolicy()
+    private var lastWritten = ""
+    private var segmentHadText = false  // the running recognizer has produced text
+    private var gotText = false         // any recognizer of this session has
+    private var language = DictationLanguage.English
+    private var generation = 0          // callbacks of a recognizer we already replaced are ignored
 
-    val isListening: Boolean get() = _state.value is State.Listening || _state.value is State.Starting
+    override val isListening: Boolean get() = _state.value is State.Listening || _state.value is State.Starting
 
-    /** No language menu: dictation follows the phone's first preferred language we support (English or Spanish). */
+    /** The app's language (what the Create screen is in and what requests say), not the phone's: a Spanish app on an English phone dictates in Spanish. */
     private fun languageTag(): String {
         val locales = androidx.core.os.LocaleListCompat.getAdjustedDefault()
         val tags = (0 until locales.size()).mapNotNull { locales[it]?.toLanguageTag() }
-        val language = DictationLanguage.initial(saved = null, preferred = tags)
-        val region = locales[0]?.country?.takeIf { it.isNotEmpty() }
-        return language.locale(region, tags.filter { it.lowercase().startsWith(language.code) })
+        language = DictationLanguage.fromCode(Txt.localeTag) ?: DictationLanguage.English
+        return DictationLocale.tag(Txt.localeTag, tags)
     }
 
     fun toggleOrStart(currentText: String, permission: DictationPlan.Permission) {
@@ -64,7 +70,7 @@ class DictationController(context: Context) {
     }
 
     /** [permission]: the microphone permission as the caller found it (Android has one runtime permission for dictation). */
-    fun start(currentText: String, permission: DictationPlan.Permission) {
+    override fun start(currentText: String, permission: DictationPlan.Permission) {
         if (isListening) return
         _state.value = State.Starting
         try {
@@ -74,8 +80,11 @@ class DictationController(context: Context) {
                 is DictationPlan.UseKeyboard -> { fallBackToKeyboard(plan.message); return }
                 DictationPlan.UseApp -> Unit
             }
-            base = if (currentText.isEmpty() || currentText.endsWith(" ")) currentText else "$currentText "
+            text = DictationText(currentText)
+            lastWritten = currentText
             gotText = false
+            policy = DictationRestartPolicy()
+            policy.sessionStarted(SystemClock.elapsedRealtime())
             listen()
         } catch (e: Throwable) {
             Log.w(TAG, "dictation start failed", e)
@@ -86,40 +95,53 @@ class DictationController(context: Context) {
 
     private fun listen() {
         val r = SpeechRecognizer.createSpeechRecognizer(appContext) ?: throw IllegalStateException("no recognizer")
+        generation++
+        val mine = generation
         recognizer = r
-        r.setRecognitionListener(listener)
+        segmentHadText = false
+        r.setRecognitionListener(listenerFor(mine))
         val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
             putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
             putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
             putExtra(RecognizerIntent.EXTRA_LANGUAGE, languageTag())
             putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, appContext.packageName)
             putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1)
+            // keep listening while the person thinks (the defaults end the session after about 1 to 2 seconds of quiet); some recognizers ignore these, hence the restart below
+            putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, COMPLETE_SILENCE_MS)
+            putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS, POSSIBLY_COMPLETE_SILENCE_MS)
+            putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_MINIMUM_LENGTH_MILLIS, MINIMUM_LENGTH_MS)
         }
+        policy.recognizerStarted(SystemClock.elapsedRealtime())
         r.startListening(intent)
         _state.value = State.Listening
     }
 
-    fun stop() {
+    override fun stop() {
         if (_state.value is State.Idle) return
-        try { recognizer?.stopListening() } catch (e: Throwable) { Log.w(TAG, "stopListening failed", e) }
-        // the recognizer delivers its final result and is then destroyed in the listener; make sure it does not linger if it never answers
-        handler.postDelayed({ if (recognizer != null && _state.value is State.Idle) teardown() }, 2000)
-        if (_state.value is State.Listening || _state.value is State.Starting) _state.value = State.Idle
+        handler.removeCallbacks(restart)
+        val r = recognizer
+        _state.value = State.Idle
+        if (r == null) return
+        try { r.stopListening() } catch (e: Throwable) { Log.w(TAG, "stopListening failed", e) }
+        // the recognizer delivers its final result (which still lands in the field) and is then destroyed in the listener; make sure it does not linger if it never answers
+        val mine = generation
+        handler.postDelayed({ if (generation == mine && recognizer != null) teardown() }, 2000)
     }
 
-    fun clearHint() {
+    override fun clearHint() {
         val s = _state.value
         if (s is State.Unavailable || s is State.KeyboardHint) _state.value = State.Idle
     }
 
     /** Ends everything (the screen is going away). */
-    fun release() {
+    override fun release() {
         handler.removeCallbacksAndMessages(null)
         teardown()
         _state.value = State.Idle
     }
 
     private fun teardown() {
+        generation++
         val r = recognizer
         recognizer = null
         if (r != null) {
@@ -138,7 +160,16 @@ class DictationController(context: Context) {
         if (keyboardDictationEnabled()) fallBackToKeyboard(keyboardMessage) else _state.value = State.Unavailable(plainMessage)
     }
 
-    private val listener = object : RecognitionListener {
+    private val restart = Runnable {
+        if (_state.value !is State.Listening) return@Runnable
+        try { listen() } catch (e: Throwable) {
+            Log.w(TAG, "dictation restart failed", e)
+            teardown()
+            if (gotText) _state.value = State.Idle else failOver(Txt.s(R.string.dictation_start_failed_keyboard), Txt.s(R.string.dictation_start_failed))
+        }
+    }
+
+    private fun listenerFor(mine: Int) = object : RecognitionListener {
         override fun onReadyForSpeech(params: Bundle?) {}
         override fun onBeginningOfSpeech() {}
         override fun onRmsChanged(rmsdB: Float) {}
@@ -146,40 +177,62 @@ class DictationController(context: Context) {
         override fun onEndOfSpeech() {}
         override fun onEvent(eventType: Int, params: Bundle?) {}
 
-        override fun onPartialResults(partialResults: Bundle?) = deliver(partialResults)
+        override fun onPartialResults(partialResults: Bundle?) { if (mine == generation) deliver(partialResults, final = false) }
 
         override fun onResults(results: Bundle?) {
-            deliver(results)
-            finish()
+            if (mine != generation) return
+            deliver(results, final = true)
+            if (mine == generation) ended(error = null)     // a hand edit already started a new recognizer
         }
 
         override fun onError(error: Int) {
+            if (mine != generation) return
             Log.i(TAG, "recognizer error $error")
-            val wasListening = _state.value is State.Listening
-            teardown()
-            if (!wasListening && _state.value is State.Idle) return   // the user already stopped it
-            when (error) {
-                SpeechRecognizer.ERROR_NO_MATCH, SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> _state.value = State.Idle   // the user said nothing: not an error
-                SpeechRecognizer.ERROR_RECOGNIZER_BUSY, SpeechRecognizer.ERROR_CLIENT -> _state.value = State.Idle
-                SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS ->
-                    failOver(Txt.s(R.string.dictation_mic_off_keyboard), Txt.s(R.string.dictation_allow_mic))
-                SpeechRecognizer.ERROR_NETWORK, SpeechRecognizer.ERROR_NETWORK_TIMEOUT, SpeechRecognizer.ERROR_SERVER ->
-                    if (wasListening && gotText) _state.value = State.Idle
-                    else failOver(Txt.s(R.string.dictation_network_keyboard), Txt.s(R.string.dictation_network))
-                else -> failOver(Txt.s(R.string.dictation_error_keyboard), Txt.s(R.string.dictation_error))
+            ended(error)
+        }
+    }
+
+    /** Puts base + segment in the field; folds the segment into the base when it is final. A hand edit rebases and restarts the recognizer instead of being overwritten. */
+    private fun deliver(bundle: Bundle?, final: Boolean) {
+        val heard = bundle?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)?.firstOrNull()?.takeIf { it.isNotBlank() } ?: return
+        gotText = true
+        segmentHadText = true
+        policy.textArrived(SystemClock.elapsedRealtime())
+        val field = textProvider?.invoke() ?: lastWritten
+        when (val step = if (final) text.fold(heard, field) else text.hear(heard, field)) {
+            is DictationText.Step.Write -> { lastWritten = step.text; onText?.invoke(step.text) }
+            DictationText.Step.Rebased -> {
+                lastWritten = field
+                // what was said so far is in the field the person edited: start again from nothing
+                if (_state.value is State.Listening) { teardown(); handler.removeCallbacks(restart); handler.postDelayed(restart, 100) }
             }
         }
     }
 
-    private fun deliver(bundle: Bundle?) {
-        val text = bundle?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)?.firstOrNull()?.takeIf { it.isNotBlank() } ?: return
-        gotText = true
-        onText?.invoke(base + text)
-    }
-
-    private fun finish() {
+    /** The recognizer session ended (a result or an error). Keep going until the person stops, unless this is a real failure or a limit. */
+    private fun ended(error: Int?) {
+        val userStopped = _state.value !is State.Listening
         teardown()
-        if (_state.value is State.Listening || _state.value is State.Starting) _state.value = State.Idle
+        if (userStopped) return                                              // Stop: the final text has landed
+        when (error) {
+            null -> Unit
+            SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS -> { failOver(Txt.s(R.string.dictation_mic_off_keyboard), Txt.s(R.string.dictation_allow_mic)); return }
+            DictationRestartPolicy.ERROR_LANGUAGE_NOT_SUPPORTED, DictationRestartPolicy.ERROR_LANGUAGE_UNAVAILABLE -> {
+                // never quietly listen in another language: say so
+                val name = language.title
+                failOver(Txt.s(R.string.dictation_language_unavailable_keyboard, name), Txt.s(R.string.dictation_language_unavailable, name)); return
+            }
+            SpeechRecognizer.ERROR_NETWORK, SpeechRecognizer.ERROR_NETWORK_TIMEOUT, SpeechRecognizer.ERROR_SERVER -> if (!gotText) {
+                failOver(Txt.s(R.string.dictation_network_keyboard), Txt.s(R.string.dictation_network)); return
+            }
+            else -> Unit    // NO_MATCH, SPEECH_TIMEOUT, RECOGNIZER_BUSY, CLIENT, an odd error after speech: the policy decides whether to go on
+        }
+        when (policy.ended(hadText = segmentHadText, now = SystemClock.elapsedRealtime())) {
+            DictationRestartPolicy.Action.Restart -> { handler.removeCallbacks(restart); handler.postDelayed(restart, DictationRestartPolicy.delayMillis(error)) }
+            DictationRestartPolicy.Action.StopTimeLimit, DictationRestartPolicy.Action.StopIdle -> _state.value = State.Idle
+            DictationRestartPolicy.Action.StopFailing ->
+                if (gotText) _state.value = State.Idle else failOver(Txt.s(R.string.dictation_error_keyboard), Txt.s(R.string.dictation_error))
+        }
     }
 
     /** True when some enabled keyboard offers voice typing (Gboard's microphone key, Samsung voice input...). */
@@ -191,5 +244,10 @@ class DictationController(context: Context) {
         } ?: false
     } catch (e: Throwable) { false }
 
-    companion object { private const val TAG = "Dictation" }
+    companion object {
+        private const val TAG = "Dictation"
+        private const val COMPLETE_SILENCE_MS = 8_000L
+        private const val POSSIBLY_COMPLETE_SILENCE_MS = 6_000L
+        private const val MINIMUM_LENGTH_MS = 15_000L
+    }
 }
