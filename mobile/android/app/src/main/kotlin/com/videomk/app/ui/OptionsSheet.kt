@@ -57,8 +57,7 @@ import com.videomk.app.core.CreateOptions
 import com.videomk.app.core.VideoLook
 
 /**
- * The one Options sheet: everything the three pills do not carry, on the shared kit (one header, one chip, one row, one switch). For (every platform in one place),
- * Look (the colour theme), Scenes and Background (only when the server offers them), Quality (what the plan locks carries the plan's name), Subtitles, Language and
+ * The one Options sheet: everything the pills do not carry, on the shared kit (one header, one chip, one row, one switch). Colours (the colour theme, only with the look picker), Scenes and Background (only when the server offers them), Quality (what the plan locks carries the plan's name), Subtitles, Language and
  * Watermark as rows, and Format as tiles that always say their ratio. Scrolls when it needs to.
  */
 @OptIn(ExperimentalMaterial3Api::class, androidx.compose.ui.ExperimentalComposeUiApi::class, androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
@@ -70,15 +69,8 @@ fun CreateOptionsSheet(composer: ComposerViewModel, caps: com.videomk.app.core.C
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false), shape = RoundedCornerShape(topStart = Vmk.radii.sheet, topEnd = Vmk.radii.sheet), containerColor = Vmk.colors.surface) {
         Column(Modifier.padding(horizontal = Vmk.space.sheet).verticalScroll(rememberScrollState()).navigationBarsPadding().semantics { if (com.videomk.app.BuildConfig.DEBUG) testTagsAsResourceId = true }.testTag("optionsSheet"), verticalArrangement = Arrangement.spacedBy(Vmk.space.xl)) {
             SheetHeader(stringResource(R.string.create_options), onDismiss, closeTag = "optionsDone", closeLabel = stringResource(R.string.common_done))
-            // FOR: the same list as the pill, so every choice is in one place
-            Section(stringResource(R.string.create_what_for)) {
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(Vmk.space.s), verticalArrangement = Arrangement.spacedBy(Vmk.space.s), modifier = Modifier.fillMaxWidth().testTag("platformChips")) {
-                    for (c in CreatePlatforms.chips(caps).filter { it.enabled }) ChoiceChip(c.label, c.id == o.platform && !CreatePlatforms.isCustom(o, caps), Modifier.testTag("platform-${c.id}")) { composer.selectPlatform(c) }
-                }
-            }
-            // LOOK: the colour theme; two rows of two at large text so no label shrinks
-            // with the look picker, "Look" is the pill's word: these are the colours
-            Section(stringResource(if (caps.lookPicker == null) R.string.create_look else R.string.looks_colours)) {
+            // the format and the look are pills on Create and are not repeated here; with the look picker, "Colours" is the colour theme (not the look)
+            if (caps.lookPicker != null) Section(stringResource(R.string.looks_colours)) {
                 val looks = listOf<VideoLook?>(null) + VideoLook.entries
                 for (row in if (isLargeText()) looks.chunked(2) else listOf(looks)) Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(Vmk.space.s)) {
                     for (l in row) LookSwatch(l?.displayName() ?: stringResource(R.string.create_look_auto), l?.displayName() ?: stringResource(R.string.create_look_auto_desc), l, o.look == l, Modifier.weight(1f).testTag("look-${l?.wire ?: "auto"}")) { composer.updateOptions(o.copy(look = l)) }

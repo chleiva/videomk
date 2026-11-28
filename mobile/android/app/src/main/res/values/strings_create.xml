@@ -250,4 +250,9 @@
         <item quantity="one">%1$d photo couldn\'t be read and was skipped.</item>
         <item quantity="other">%1$d photos couldn\'t be read and were skipped.</item>
     </plurals>
+    <plurals name="create_first_cost">
+        <item quantity="one">%1$d credit. You have %2$d.</item>
+        <item quantity="other">%1$d credits. You have %2$d.</item>
+    </plurals>
+    <string name="create_video_desc">Create video</string>
 </resources>
