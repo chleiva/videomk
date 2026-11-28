@@ -3248,6 +3248,23 @@
         }
       }
     },
+    "dictation.language_fallback" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dictation isn't available in %1$@ on this iPhone, so it is listening in %2$@."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El dictado no está disponible en %1$@ en este iPhone, así que escucha en %2$@."
+          }
+        }
+      }
+    },
     "dictation.mic_off_keyboard" : {
       "extractionState" : "manual",
       "localizations" : {

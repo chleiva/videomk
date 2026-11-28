@@ -120,14 +120,13 @@ Reading it:
 | Spanish, any other country or none known | Lucia | **Lupe** | lively | 5.0 / 5.2 | Lucia is steady (3.2 / 3.3); Lupe is lively (owner's decision: every viewer outside Spain) |
 | French, France and anywhere unlisted | Léa | **Ambre** | lively | 3.7 / 5.1 | Léa is steady (2.7 / 2.9); Ambre is lively |
 | French, Canada | Gabrielle | Gabrielle | steady | 3.5 / 3.7 | the accent has no lively voice: kept (Liam 3.5 / 3.8: no better) |
-| French, Belgium | Isabelle | Isabelle | steady | 2.5 / 2.7 | the accent has no lively voice: kept (its only voice) |
+| French, Belgium | Isabelle | **Ambre** (fr-FR) | lively | 3.7 / 5.1 | owner's decision 2026-11-28: Isabelle (steady, 2.5 / 2.7) gives way to Ambre; Isabelle stays available by name |
 | German, Germany and anywhere unlisted | Vicki | Vicki | lively | 3.6 / 5.6 | already lively; kept (the others of the accent measure alike) |
 | German, Austria | Hannah | Hannah | lively | 2.5 / 4.4 | already lively |
 | German, Switzerland | Sabrina | Sabrina | lively | 3.9 / 5.0 | already lively |
 | Italian | Beatrice | Beatrice | lively | 5.0 / 6.6 | already lively |
 | Portuguese | Camila | Camila | lively | 4.3 / 5.5 | already lively; kept (the others of the accent measure alike) |
-| Dutch, Netherlands and anywhere unlisted | Laura | Laura | steady | 2.9 / 3.3 | the accent has no lively voice: kept (its only voice) |
-| Dutch, Belgium | Lisa | Lisa | lively | 4.8 / 5.0 | already lively |
+| Dutch, everywhere (Netherlands, Belgium, unlisted) | Laura / Lisa | **Lisa** (nl-BE) | lively | 4.8 / 5.0 | owner's decision 2026-11-28: every Dutch video uses the lively Flemish Lisa; Laura (steady, 2.9 / 3.3) is the second voice of a conversation |
 | Polish | Ola | Ola | steady | 3.0 / 3.4 | the accent has no lively voice: kept (Ewa 2.9 / 3.3: no better) |
 | Finnish | Suvi | Suvi | lively | 3.2 / 3.8 | already lively |
 | Korean (not enabled) | Seoyeon | Seoyeon | lively | 4.2 / 4.5 | already lively |
@@ -163,7 +162,7 @@ The default second voice (what `voices.resolve` gives the other gender when noth
 
 **Accents with no lively voice (recorded in `voices.py` and tested):** es-ES (Lucia, Sergio), es-MX (Mia, Andrés), fr-CA (Gabrielle, Liam), fr-BE
 (Isabelle), nl-NL (Laura), pl-PL (Ola, Ewa), en-ZA (Ayanda). Their viewers keep their accent. Two the owner may want to decide by ear, neither done here:
-Dutch could be the Flemish Lisa (4.8 / 5.0) for everyone, and Belgian French could be Ambre.
+Both were decided by the owner on 2026-11-28: Dutch is Lisa for everyone and Belgian French is Ambre (the accents still have no lively voice of their own; the viewer hears a neighbouring accent by decision). Lisa's pace was measured on 5 Dutch beats: (0.0515, 0.307, 0.19), 2.83 words a second (`length.RATES`, one take, Polly generative in eu-central-1; eu-west-1 has no generative Lisa). Samples: `voices3/`. No native listener has heard either voice.
 
 **To hear before shipping:** the German man. Daniel is the steady voice the owner heard in a QA video and liked; by the rule he gives way to Lennart
 (equal on a plain explanation, 3.7 against 3.8; far livelier on a lively text, 6.3 against 4.3). Samples `polly_de-DE_old_Daniel` and

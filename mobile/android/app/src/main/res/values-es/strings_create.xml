@@ -144,6 +144,8 @@
     <string name="dictation_network">El dictado necesita conexión a internet ahora. Puedes escribir tu idea.</string>
     <string name="dictation_error_keyboard">El dictado no funciona ahora. Usa la tecla de micrófono de tu teclado.</string>
     <string name="dictation_error">El dictado no está disponible ahora. Puedes escribir tu idea.</string>
+    <string name="dictation_language_unavailable_keyboard">El dictado no está disponible en %1$s en este teléfono. Usa la tecla de micrófono de tu teclado.</string>
+    <string name="dictation_language_unavailable">El dictado no está disponible en %1$s en este teléfono. Puedes escribir tu idea.</string>
     <plurals name="create_add_photos_selected_desc">
         <item quantity="one">Agregar fotos. %1$d seleccionada</item>
         <item quantity="other">Agregar fotos. %1$d seleccionadas</item>

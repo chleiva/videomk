@@ -90,15 +90,15 @@ import com.videomk.app.core.DictationPlan
 import com.videomk.app.core.MediaLabels
 import com.videomk.app.core.PhotoLimits
 import com.videomk.app.core.StatusKind
-import com.videomk.app.data.DictationController
+import com.videomk.app.core.DictationEngine
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
-internal fun dictationHint(state: DictationController.State) {
+internal fun dictationHint(state: DictationEngine.State) {
     when (state) {
-        is DictationController.State.Unavailable -> HintRow(state.message, Vmk.colors.warning, "dictationUnavailable")
-        is DictationController.State.KeyboardHint -> HintRow(state.message, Vmk.colors.textSecondary, "dictationKeyboardHint")
+        is DictationEngine.State.Unavailable -> HintRow(state.message, Vmk.colors.warning, "dictationUnavailable")
+        is DictationEngine.State.KeyboardHint -> HintRow(state.message, Vmk.colors.textSecondary, "dictationKeyboardHint")
         else -> Unit
     }
 }

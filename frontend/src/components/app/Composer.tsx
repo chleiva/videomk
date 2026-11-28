@@ -24,7 +24,7 @@ import { AUTO, loadLook, lookHints, normalizeChoice, optionOf, presetFor, rememb
 import type { LookChoice } from "../../lib/looks";
 import { createLock, planName } from "../../lib/plan";
 import { DECK_ASPECT, deckAspectWarning, deckCredits, deckGenerateExtras, deckMinutes } from "../../lib/deck";
-import { appendDictation, dictationSupported, speechLang, startDictation } from "../../lib/dictation";
+import { dictationSupported, speechLang, startDictation } from "../../lib/dictation";
 import type { Dictation } from "../../lib/dictation";
 import { APP_PATHS } from "../../lib/links";
 import { rememberPrompt } from "../../lib/prompts";
@@ -81,14 +81,14 @@ export default function Composer() {
   const [libPicks, setLibPicks] = useState<LibPick[]>([]);
   const [previews, setPreviews] = useState<Record<string, string>>({});
   const [listening, setListening] = useState(false);
-  const [micError, setMicError] = useState(false);
+  const [micError, setMicError] = useState<null | "denied" | "language">(null);
   const [picked, setPicked] = useState<number | null>(null);   // the length chosen for a deck video (null: the deck's suggestion)
   const req = useRef<{ key: string; id: string }>({ key: "", id: "" });
   const area = useRef<HTMLTextAreaElement>(null);
   const files = useRef<HTMLInputElement>(null);
   const deckInput = useRef<HTMLInputElement>(null);
   const dict = useRef<Dictation | null>(null);
-  const dictBase = useRef("");
+  const textNow = useRef("");   // what the box holds right now: dictation reads it to notice hand edits
   const urls = useRef<string[]>([]);
   const topEl = useRef<HTMLDivElement>(null);   // prompt, photos, notes: locked (inert, dimmed) while a request is checked or sent
   const toolRow = useRef<HTMLDivElement>(null);
@@ -123,6 +123,7 @@ export default function Composer() {
 
   const c = caps ?? FALLBACK_CAPS;
   const f = form;
+  textNow.current = f?.text ?? "";
   const set = useCallback((patch: Partial<Form>) => setForm((x) => (x ? normalize({ ...x, ...patch }, c) : x)), [c]);
   const deck = useDeck(c.deck);
   const ready = deck.state.k === "ready" ? deck.state : null;
@@ -167,10 +168,15 @@ export default function Composer() {
   const canDictate = useMemo(() => dictationSupported(), []);
   function toggleDictation() {
     if (listening) { dict.current?.stop(); return; }
-    setMicError(false);
-    dictBase.current = f?.text ?? "";
-    const d = startDictation(speechLang(locale), (heard) => setForm((x) => (x ? { ...x, text: appendDictation(dictBase.current, heard).slice(0, 1500) } : x)), (why) => { setListening(false); if (why === "denied") setMicError(true); area.current?.focus(); });
-    if (d) { dict.current = d; setListening(true); } else setMicError(true);
+    setMicError(null);
+    const d = startDictation({
+      lang: speechLang(locale),
+      getText: () => textNow.current,
+      setText: (text) => setForm((x) => (x ? { ...x, text } : x)),
+      maxLength: 1500,
+      onEnd: (why) => { setListening(false); if (why === "denied") setMicError("denied"); else if (why === "language") setMicError("language"); area.current?.focus(); },
+    });
+    if (d) { dict.current = d; setListening(true); } else setMicError("denied");
   }
 
   // ---- price
@@ -354,7 +360,7 @@ export default function Composer() {
 
         {/* status: only what there is to say (nothing persistent: the placeholder says what to do) */}
         <div className="compose-notes" aria-live="polite">
-          {micError && <p className="hint hint-bad" role="status">{t("create.dictate_denied")}</p>}
+          {micError && <p className="hint hint-bad" role="status">{t(micError === "language" ? "create.dictate_language" : "create.dictate_denied")}</p>}
           {hint && <p id="create-hint" className="hint hint-bad" role="status">{hint.text}{hint.credits && <> <a href={APP_PATHS.credits}>{t("create.see_credits")}</a></>}</p>}
           {!hint && <p id="create-hint" className="sr-only-vmk" />}
           {!hint && wallet && !wallet.unlimited && !enough && <p className="hint">{t("create.not_enough", { needed: credits, balance: wallet.balance })} <a href={APP_PATHS.credits}>{t("create.see_credits")}</a></p>}

@@ -105,9 +105,9 @@ def test_the_request_check_names_the_languages_of_the_stage(monkeypatch):
 
 
 # ================================================================= casting: what is wanted -> the closest voice there is
-@pytest.mark.parametrize("lang,region,voice", [("fr", None, "Ambre"), ("fr", "FR", "Ambre"), ("fr", "CA", "Gabrielle"), ("fr", "BE", "Isabelle"), ("de", "DE", "Vicki"),
+@pytest.mark.parametrize("lang,region,voice", [("fr", None, "Ambre"), ("fr", "FR", "Ambre"), ("fr", "CA", "Gabrielle"), ("fr", "BE", "Ambre"), ("de", "DE", "Vicki"),
                                                ("de", "AT", "Hannah"), ("de", "CH", "Sabrina"), ("it", "IT", "Beatrice"), ("pt", "BR", "Camila"), ("pt", "PT", "Camila"),
-                                               ("nl", "NL", "Laura"), ("nl", "BE", "Lisa"), ("pl", "PL", "Ola"), ("fi", "FI", "Suvi"), ("ko", "KR", "Seoyeon")])
+                                               ("nl", "NL", "Lisa"), ("nl", "BE", "Lisa"), ("nl", None, "Lisa"), ("pl", "PL", "Ola"), ("fi", "FI", "Suvi"), ("ko", "KR", "Seoyeon")])
 def test_the_default_voice_of_every_language_follows_the_region(lang, region, voice):
     assert voices.default_voice(lang, region) == voice and voices.language_of(voice) == lang
     assert voices.cast_voices(None, lang, region) == ({"narrator": voice}, []) and voices.cast_voices({"narrator": {}}, lang, region) == ({"narrator": voice}, [])
@@ -130,7 +130,7 @@ def test_the_resolver_casts_what_was_asked_and_says_what_it_substituted():
     v, note = r({"accent": "Argentinian", "gender": "female"}, "es", "ES")
     assert v == "Lupe" and "no Argentinian voice" in note                                                # the Latin American voices stand in, the lively one first (it was Mia)
     v, note = r({"gender": "male"}, "nl", "NL")
-    assert v == "Laura" and note.startswith("no free male voice in Dutch")
+    assert v == "Lisa" and note.startswith("no free male voice in Dutch")
     v, note = r({"accent": "Portugal"}, "pt", "PT")
     assert v == "Camila" and "Brazilian" in note
     v, note = r({"name": "Lupe"}, "en", "US")

@@ -40,12 +40,15 @@ RATES: Dict[str, Tuple[float, float, float]] = {
     # deviation; Lorenzo 13), a whole video by up to 12 (Vicki 0.90 and 1.06 of her fit in two videos, Lupe 0.96 to 1.04 over five). Steady voices: 1 to 7 and
     # at most 4. So the estimate is the plan, and the measured audio decides (`tighten`, then `overrun`).
     "Beatrice": (0.0591, 0.351, 0.21), "Lorenzo": (0.0594, 0.353, 0.21), "Lupe": (0.0518, 0.337, 0.14), "Carlos": (0.0491, 0.320, 0.13), "Sergio": (0.0478, 0.311, 0.13),
-    "Ambre": (0.0455, 0.271, 0.16), "Florian": (0.0411, 0.245, 0.15), "Kiara": (0.0552, 0.328, 0.20), "Arjun": (0.0562, 0.334, 0.20), "Lennart": (0.0488, 0.290, 0.18),
+    "Ambre": (0.0455, 0.271, 0.16),
+    # Lisa (nl-BE, lively), the Dutch default since 2026-11-28: Laura's shape scaled to 5 real-style narration beats (1054 characters, 62.1 s of audio, one take,
+    # Polly generative, eu-central-1; beats off by 1 to 8 percent, 0.915 to 1.011 of Laura's fit), 2.83 words a second. A lively voice: expect the spread noted above.
+    "Lisa": (0.0515, 0.307, 0.19), "Florian": (0.0411, 0.245, 0.15), "Kiara": (0.0552, 0.328, 0.20), "Arjun": (0.0562, 0.334, 0.20), "Lennart": (0.0488, 0.290, 0.18),
 }
 # WORDS a second of speech, per language (the default voice; the same passage and videos as above; English: the median of 174 QA videos). Characters predict
 # the time, words do not: French says 3.0 words a second and Finnish 1.9, so a budget counted in words must follow the language (engine/plan.words_per_s).
 # French and Italian follow their defaults of 2026-11-27, on real beats: Ambre 3.41 (Léa was 3.03), Beatrice 2.54 (2.85 was her lab passages; Bianca was 2.59).
-WORDS_PER_S: Dict[str, float] = {"en": 2.63, "fr": 3.41, "de": 2.66, "it": 2.54, "pt": 3.09, "nl": 2.79, "pl": 2.37, "fi": 1.95}
+WORDS_PER_S: Dict[str, float] = {"en": 2.63, "fr": 3.41, "de": 2.66, "it": 2.54, "pt": 3.09, "nl": 2.83, "pl": 2.37, "fi": 1.95}
 LANG_RATES: Dict[str, Tuple[float, float, float]] = {"en": (0.0555, 0.33, 0.20), "es": (0.0530, 0.345, 0.14)}   # a voice without its own fit
 # The four fitted voices say the catalogue's sentence 4 to 10 percent faster than their fits predict (Ruth 11.6 s against 12.3, Amy 12.0 / 12.5, Lucia 10.7 / 11.2,
 # Lupe 11.2 / 12.3: finished beats carry a little more silence than one clean sentence), so a rate derived from that sentence is raised by the median of the four.
