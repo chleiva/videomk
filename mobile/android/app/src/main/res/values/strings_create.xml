@@ -255,4 +255,12 @@
         <item quantity="other">%1$d credits. You have %2$d.</item>
     </plurals>
     <string name="create_video_desc">Create video</string>
+    <!-- Better dictation (Pro and Max): docs/BETTER_DICTATION_CLIENTS_2026-11-28.md -->
+    <string name="better_title">Better dictation</string>
+    <string name="better_hint">Records your voice and turns it into more accurate text. The recording is sent to our speech service only to transcribe it; we do not keep the audio.</string>
+    <string name="better_pro">Better dictation with Pro</string>
+    <string name="better_working">Improving the text…</string>
+    <string name="better_quota">Today\'s better dictation limit is reached. Your phone\'s dictation was used.</string>
+    <string name="better_failed">Better dictation isn\'t available right now. Your phone\'s dictation was used.</string>
+    <string name="better_limit">Recording stopped at 6 minutes.</string>
 </resources>

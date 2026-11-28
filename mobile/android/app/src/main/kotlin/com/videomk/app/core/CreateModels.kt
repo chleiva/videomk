@@ -71,6 +71,8 @@ data class Capabilities(
     val plans: PlanState = PlanState.NONE, val planMaxSeconds: Int? = null, val planMaxPhotos: Int? = null,
     /** The plan that makes longer videos (`lengths.locked[].requires_plan`), for the badge on the lengths over the cap. */
     val longerPlan: String? = null,
+    /** `dictation`: the paid "Better dictation". Null where the server does not say (older servers): the mic is the phone's own, as before. */
+    val dictation: DictationCaps? = null,
 ) {
     /** A length this plan can make (every length where the server names no cap). */
     fun lengthAllowed(minutes: Double): Boolean = planMaxSeconds == null || minutes * 60 <= planMaxSeconds + 0.5
@@ -101,6 +103,7 @@ data class Capabilities(
             looks = LooksCaps.fromJson(o.obj("looks")), lookPicker = LookCaps.fromJson(o.obj("looks")), watermark = WatermarkCaps.fromJson(o.obj("watermark")),
             plans = PlanState.fromJson(o), planMaxSeconds = o.obj("lengths")?.int("plan_max_seconds"), planMaxPhotos = o.int("plan_max_photos"),
             longerPlan = o.obj("lengths")?.arr("locked")?.firstNotNullOfOrNull { it.asObject()?.str("requires_plan") },
+            dictation = DictationCaps.fromJson(o.obj("dictation")),
         ).let { c -> if (c.readyAspects.isEmpty() || c.resolutions.isEmpty()) FALLBACK else c }
     }
 }

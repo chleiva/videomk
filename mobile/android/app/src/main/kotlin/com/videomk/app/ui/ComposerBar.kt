@@ -103,6 +103,13 @@ internal fun dictationHint(state: DictationEngine.State) {
     }
 }
 
+/** The one line after Better dictation fell back to the phone's text, or stopped at 6 minutes. */
+@Composable
+internal fun betterNoteHint(note: com.videomk.app.core.BetterNote) {
+    val text = stringResource(when (note) { com.videomk.app.core.BetterNote.Quota -> R.string.better_quota; com.videomk.app.core.BetterNote.Limit -> R.string.better_limit; com.videomk.app.core.BetterNote.Failed -> R.string.better_failed })
+    HintRow(text, Vmk.colors.textSecondary, "betterNote")
+}
+
 @Composable
 private fun HintRow(message: String, color: Color, tag: String) {
     Row(Modifier.padding(top = 4.dp).testTag(tag), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {

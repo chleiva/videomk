@@ -96,7 +96,7 @@ class FakeDebugBackend(private val deckDemo: Boolean = false) : Backend {
      * The start as the real server answers it (docs/CREATE_API.md "Video look"): the new video is being made from now on, the answer says which look it gets, and a
      * conversation asked for in under 20 s comes back as one character with the server's sentence. [lastStart] is what was asked (instrumented tests read it).
      */
-    override suspend fun startVideo(prompt: String, clientRequestId: String, options: CreateOptions, media: List<String>, mediaMeta: kotlinx.serialization.json.JsonObject?, libraryMedia: List<String>, brief: kotlinx.serialization.json.JsonObject?, deck: String?): StartedVideo {
+    override suspend fun startVideo(prompt: String, clientRequestId: String, options: CreateOptions, media: List<String>, mediaMeta: kotlinx.serialization.json.JsonObject?, libraryMedia: List<String>, brief: kotlinx.serialization.json.JsonObject?, deck: String?, dictationIds: List<String>): StartedVideo {
         val id = startGeneration(prompt, clientRequestId, options, media, mediaMeta, libraryMedia, brief, deck)
         lastStart = options
         videos.removeAll { it.id == id }

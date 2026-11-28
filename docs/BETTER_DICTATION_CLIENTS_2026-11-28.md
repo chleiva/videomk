@@ -1,6 +1,6 @@
 # Better dictation, clients (web and iPhone) (2026-11-28; branch `better-dictation-clients`)
 
-Client side of the paid dictation in `docs/SPEECH_TO_TEXT_2026-11-28.md` sections 9 and 10. Backend is deployed on QA. Android is not part of this change (its Create screen is being rebuilt); it can reuse the same rules below.
+Client side of the paid dictation in `docs/SPEECH_TO_TEXT_2026-11-28.md` sections 9 and 10. Backend is deployed on QA. Android has it too (branch `android-better-dictation`, section "Android" at the end); same rules.
 
 ## Behaviour (same on both)
 - **When**: `capabilities.dictation.available` is true and not `paused`, and the person has "Better dictation" on (Options, default on; web `localStorage` `vmk.better_dictation`, iOS `UserDefaults` `vmk.better_dictation`). Free: the switch is not shown. `premium: false` with `requires_plan`: one small line "Better dictation with Pro" in Options, no button.
@@ -34,3 +34,23 @@ Real microphone, on both platforms: whether the phone allows the recorder and th
 6. Create the video after two dictations; on QA the video row should list both `dictation_ids` and `c_stt`.
 7. Free account: no Better dictation row; Options shows "Better dictation with Pro" only if capabilities say `requires_plan`.
 8. (Long) record 6+ minutes: it stops by itself with the notice.
+
+## Android (branch `android-better-dictation`)
+Same behaviour as above. Pieces (`mobile/android/app/src/main/kotlin/com/videomk/app/`):
+- `core/BetterDictation.kt` (pure): `DictationCaps` (parse of `capabilities.dictation`, `isUsable`, `showsUpgradeHint`, limits capped at 360 s / 3 MB), `BetterDictationRules`, `DictationIds` (20, newest, no repeats, 32 hex), `placeBetterText`, `BetterFailure.from(status, body)` and its line, `DictationClip.body()` (base64 JSON, last 400 characters of the draft), `BetterResolution`, `DictationService`.
+- `core/BetterDictationEngine.kt`: a `DictationEngine` wrapping the native one (no Android classes, JVM-tested): native stays the live preview and the fallback, a `ClipRecorder` records, Stop uploads, 6 minute auto stop, byte limit, temp file deleted when read, `abandon()` on send/discard.
+- `data/MediaRecorderClip.kt`: `MediaRecorder` AAC in MP4, mono, 16 kHz, 32 kbps, `audio/mp4`. If the phone refuses the second microphone client, `start` answers false and the native engine carries on alone (no crash); if the recognizer is the one that drops out, the clip is still recorded.
+- `ApiClient.dictate` (`POST /users/{id}/dictation`, 90 s call timeout, same token/headers as other calls; never throws), `startVideo(dictationIds)` -> `dictation_ids` (kept with the pending video for retries; cleared when the video is accepted), `Capabilities.dictation`, Options row "Better dictation" (switch, default on, `SharedPreferences` `better_dictation`/`vmk.better_dictation`, on the local wipe list) and the "Better dictation with Pro" line, "Improving the text..." in the dock while working, the note line for a few seconds. Strings `better_*` in English and Spanish.
+- Tests: `BetterDictationTest` (23: caps, preference rule, ids, text placement, errors, resolution, clip body, `dictate` against a fake server for success, every error and offline, `dictation_ids` in the create body, engine with fake native/recorder/service: replace preview, hand edit untouched, errors, 6 minute stop, byte limit, recorder cannot start or throws, no preview, not offered/off/denied, abandon, second start ignored, ids). Full JVM suite (499) passes.
+
+### Android not verified
+Real microphone: whether the phone lets `MediaRecorder` and `SpeechRecognizer` hold the microphone together (Android 10+ normally allows the foreground app a second client, but the recognizer runs in the Google app and a device can silence one of them), clip quality and start offset, the 6 minute stop on a real clock, interruptions (a call), the UI (no emulator was run), the Options row and the dock line on a device. No Play upload, no deploy.
+
+### Android phone test (Pro or Max account, English then Spanish)
+Steps 1 to 8 of the phone test above, with these Android notes:
+1. First use: allow the microphone. Options > "Better dictation" is on. Tap the mic, say "A video about how bees make honey", tap Stop: "Improving the text..." in the dock, then the corrected words replace the live ones.
+2. Watch the live words appear while recording. If none appear (the phone gave the microphone to the recorder) the better text still arrives after Stop; if the better text never arrives and the live words stay, the recorder was refused: note the phone model.
+3. Aeroplane mode: the phone's words stay and "Better dictation isn't available right now. Your phone's dictation was used." shows for a few seconds.
+4. Options > turn it off: the mic behaves as before. Free account: no row.
+5. Make a video after two dictations: the QA video row lists both `dictation_ids` and `c_stt`.
+6. Receive a phone call while recording, and lock the screen: the app must not crash; native text stays.

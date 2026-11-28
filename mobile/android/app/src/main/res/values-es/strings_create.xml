@@ -255,4 +255,12 @@
         <item quantity="other">%1$d créditos. Tienes %2$d.</item>
     </plurals>
     <string name="create_video_desc">Crear video</string>
+    <!-- Dictado mejorado (Pro y Max) -->
+    <string name="better_title">Dictado mejorado</string>
+    <string name="better_hint">Graba tu voz y la convierte en texto más preciso. La grabación se envía a nuestro servicio de voz solo para transcribirla; no guardamos el audio.</string>
+    <string name="better_pro">Dictado mejorado con Pro</string>
+    <string name="better_working">Mejorando el texto…</string>
+    <string name="better_quota">Hoy llegaste al límite de dictado mejorado. Se usó el dictado de tu teléfono.</string>
+    <string name="better_failed">El dictado mejorado no está disponible ahora. Se usó el dictado de tu teléfono.</string>
+    <string name="better_limit">La grabación se detuvo a los 6 minutos.</string>
 </resources>

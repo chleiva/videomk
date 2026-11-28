@@ -36,6 +36,10 @@ import com.videomk.app.core.PhotoLimits
 import com.videomk.app.core.prepareInOrder
 import com.videomk.app.core.DictationEngine
 import com.videomk.app.data.DictationController
+import com.videomk.app.data.MediaRecorderClip
+import com.videomk.app.core.BetterDictationEngine
+import com.videomk.app.core.BetterDictationRules
+import com.videomk.app.core.DictationService
 import com.videomk.app.core.Answer
 import com.videomk.app.core.ApiError
 import com.videomk.app.core.Capabilities
@@ -63,7 +67,7 @@ import java.util.UUID
 class AttachedPhoto(val id: String = UUID.randomUUID().toString(), val data: ByteArray, val thumbnail: Bitmap?, val meta: PhotoMeta? = null)
 
 /** What the composer hands over when the user sends: the text, the prepared photos and (parallel to them) what was read from each original. */
-class Outgoing(val brief: String, val photos: List<ByteArray>, val meta: List<PhotoMeta?>, val libraryIds: List<String> = emptyList(), val deckId: String? = null, val deckTitle: String? = null)
+class Outgoing(val brief: String, val photos: List<ByteArray>, val meta: List<PhotoMeta?>, val libraryIds: List<String> = emptyList(), val deckId: String? = null, val deckTitle: String? = null, val dictationIds: List<String> = emptyList())
 
 /**
  * Everything about the video being composed: the text, the length and look, the attached photos (up to 100) and dictation.
@@ -77,11 +81,26 @@ class ComposerViewModel(app: Application) : AndroidViewModel(app) {
     var focusRequests by mutableIntStateOf(0)
         private set
 
-    val dictation: DictationEngine = DictationController(app).also { d ->
+    /** "Better dictation" (Pro and Max) wraps the phone's own recognizer, which stays the live preview and the fallback. The Create screen talks to [dictation] only. */
+    private val dictationDir = java.io.File(app.cacheDir, "dictation").also { dir -> runCatching { dir.listFiles()?.forEach { it.delete() } } }   // an app start removes a clip a crashed session left
+    private val betterPrefs = app.getSharedPreferences("better_dictation", android.content.Context.MODE_PRIVATE)
+    private var dictationService: DictationService? = null
+    /** The switch in Options (default on): the paid dictation is used when the plan has it and this is on. */
+    var betterDictationOn by mutableStateOf(runCatching { betterPrefs.getBoolean(BetterDictationRules.PREFERENCE_KEY, true) }.getOrDefault(true))
+        private set
+    fun setBetterDictation(on: Boolean) { betterDictationOn = on; runCatching { betterPrefs.edit().putBoolean(BetterDictationRules.PREFERENCE_KEY, on).apply() } }
+    /** The real call (null in a build without a server): without it the mic is the phone's own. */
+    fun attachDictationService(service: DictationService?) { dictationService = service }
+
+    val better = BetterDictationEngine(
+        native = DictationController(app), recorder = MediaRecorderClip(app), scope = viewModelScope, tempDir = { dictationDir },
+        service = { dictationService }, caps = { caps.dictation }, preferred = { betterDictationOn }, language = { Txt.localeTag },
+    ).also { d ->
         d.onText = { text = it }
         d.textProvider = { text }
         d.onKeyboardFallback = { focusRequests++ }
     }
+    val dictation: DictationEngine get() = better
 
     /** Photos being prepared in the current batch (the "Preparing N of M" text) and how many of them are finished. */
     var preparing by mutableIntStateOf(0)
@@ -203,11 +222,13 @@ class ComposerViewModel(app: Application) : AndroidViewModel(app) {
         return Outgoing(
             text, photos.map { it.data }, photos.map { it.meta?.limitedTo(policy)?.takeIf { m -> !m.isEmpty } }, library.map { it.id },
             deckId = ready?.id, deckTitle = ready?.let { DeckOptions.title((deckState as? DeckState.Ready)?.name) ?: Txt.s(R.string.deck_title_fallback) },
+            dictationIds = better.ids.list,
         )
     }
 
     fun clearAfterSend() {
         lookNotice = null
+        better.abandon(); better.clearIds()   // the video took the dictations: they count once, and nothing lands in the emptied field
         photos.clear(); library.clear(); deck.cancel()
         cleanupIfIdle()
         notice = null
@@ -340,7 +361,7 @@ class ComposerViewModel(app: Application) : AndroidViewModel(app) {
     /** Anything entered that Cancel should ask about. */
     val hasDraft: Boolean get() = text.isNotBlank() || totalPhotos > 0 || deckState.attached
 
-    fun discardDraft() { dictation.stop(); text = ""; photos.clear(); library.clear(); deck.cancel(); notice = null; cleanupIfIdle(); sheetKind = CreateSheetKind.None; cancelCheck() }
+    fun discardDraft() { better.abandon(); text = ""; photos.clear(); library.clear(); deck.cancel(); notice = null; cleanupIfIdle(); sheetKind = CreateSheetKind.None; cancelCheck() }
 
     private fun request(answers: List<Answer>) = IntakeRequest(text, options, totalPhotos, answers)
 
