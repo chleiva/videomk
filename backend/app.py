@@ -50,6 +50,22 @@ if app.node.try_get_context("objectTracer"):  # the whiteboard tracer function (
                       env=cdk.Environment(account=_cfg["account"], region=_cfg["region"]))
     app.synth()
     raise SystemExit(0)
+if app.node.try_get_context("share"):  # share links for videos (docs/SHARE_PREVIEWS_2026-11-28.md): a small stack of its own, the main one is near 500 resources
+    from share_stack import ShareStack
+    _stage = str(app.node.try_get_context("stage") or "")
+    with open(os.path.join(os.path.dirname(__file__), "stages.json")) as f:
+        _cfg = json.load(f)[_stage]
+    _cli = os.getenv("CDK_DEFAULT_ACCOUNT")
+    if _cli and _cli != _cfg["account"]:
+        raise SystemExit(f"Refusing: stage '{_stage}' belongs to account {_cfg['account']} but credentials are for {_cli}.")
+    _pool, _clients = app.node.try_get_context("sharePoolId"), app.node.try_get_context("shareClientIds")
+    if not _pool or not _clients or not app.node.try_get_context("shareVideosTable"):
+        raise SystemExit("Pass -c sharePoolId=<Cognito user pool id> -c shareClientIds=<app client ids, comma separated> -c shareVideosTable=<the main stack's videos table name> (see the main stack's outputs and the doc).")
+    ShareStack(app, f"videomk-{_stage}-share", stage=_stage, videos_table_name=str(app.node.try_get_context("shareVideosTable") or ""), assets_bucket=f"videomk-{_stage}-{_cfg['account']}",
+               user_pool_id=str(_pool), client_ids=[c for c in str(_clients).split(",") if c], share_host=app.node.try_get_context("shareHost"), cert_arn=app.node.try_get_context("shareCertArn"),
+               env=cdk.Environment(account=_cfg["account"], region=_cfg["region"]))
+    app.synth()
+    raise SystemExit(0)
 stage = app.node.try_get_context("stage")
 with open(os.path.join(os.path.dirname(__file__), "stages.json")) as f:
     stages = json.load(f)

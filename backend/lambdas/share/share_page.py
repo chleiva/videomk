@@ -1,4 +1,4 @@
-"""The share page of one video (docs/SHARE_PREVIEWS_2026-11-27.md): the HTML a link-preview crawler reads (WhatsApp, LinkedIn, Facebook, X, Slack, Telegram, iMessage, Discord) and a visitor sees.
+"""The share page of one video (docs/SHARE_PREVIEWS_2026-11-28.md): the HTML a link-preview crawler reads (WhatsApp, LinkedIn, Facebook, X, Slack, Telegram, iMessage, Discord) and a visitor sees.
 
 Pure functions, no AWS and no JavaScript on the page: crawlers do not run scripts, so the tags are in the HTML as delivered, and the visitor's player is the browser's own <video>.
 Every value that came from a person's request (the title, the description) is escaped; nothing personal is ever written here: no user id, no email, no video id.

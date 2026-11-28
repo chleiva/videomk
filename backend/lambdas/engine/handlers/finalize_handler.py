@@ -86,7 +86,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         "aspect": (tl.get("frame") or {}).get("aspect", "16:9"), "resolution": (tl.get("frame") or {}).get("resolution", "1080p"),
         "youtube_description": description[:4800], "title": tl.get("title") or "Untitled", "last_rendered_at": int(time.time()),
         **({"preview_gif_uri": f"s3://{OUTPUT_BUCKET}/{gkey}"} if have_gif else {}),
-        **covers,   # the designed cover (docs/SHARE_PREVIEWS_2026-11-27.md): poster in the apps and the web, og:image of a share page
+        **covers,   # the designed cover (docs/SHARE_PREVIEWS_2026-11-28.md): poster in the apps and the web, og:image of a share page
     }
     update_status(video_id, "COMPLETE", extra_attributes=attrs)  # first render: flips status (no-op once COMPLETE)
     set_attributes(video_id, attrs, remove=["edit_error", *making.ATTRS])   # edits: refresh the playable video on an already-COMPLETE item; the Making status is over

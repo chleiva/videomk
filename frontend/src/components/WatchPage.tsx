@@ -19,6 +19,7 @@ import { apiGateway } from "../lib/config";
 import { currentLocaleHeaders } from "../lib/i18n";
 import { aspectLabel, metaLine, safeFileName } from "../lib/player";
 import { pickPrompt, promptFor } from "../lib/prompts";
+import { createShare, getShare, revokeShare, shareAvailable } from "../lib/share";
 import { parseMaking, sceneCounter, stableSceneThumbs, stripTiles } from "../lib/videos";
 import type { Making } from "../lib/videos";
 import { useLocale } from "../lib/useLocale";
@@ -130,6 +131,34 @@ export default function WatchPage() {
     }
   }, [url, shown, t, toast]);
 
+  // Share as a link with a preview (docs/SHARE_PREVIEWS_2026-11-28.md): opt-in per video, revocable; hidden when the share API is not configured or the video is not the person's.
+  const canLink = shareAvailable() && info.editable !== false;
+  const [linkUrl, setLinkUrl] = useState<string | null>(null);
+  useEffect(() => {
+    if (!canLink || view.state !== "ready") return;
+    let live = true;
+    getShare(id).then((r) => { if (live && r.ok) setLinkUrl(r.state.shared ? r.state.url : null); });
+    return () => { live = false; };
+  }, [canLink, id, view.state]);
+  const shareLink = useCallback(async () => {
+    setMenu(false);
+    const r = await createShare(id);
+    if (!r.ok || !r.state.shared) { toast.show(t(r.ok === false && r.kind === "not_ready" ? "watch.share_not_ready" : "watch.share_failed")); return; }
+    setLinkUrl(r.state.url);
+    try {
+      if (navigator.share) { await navigator.share({ title: shown, url: r.state.url }); return; }
+      await navigator.clipboard.writeText(r.state.url);
+      toast.show(t("watch.share_link_copied"));
+    } catch (e) {
+      if ((e as Error)?.name !== "AbortError") toast.show(t("watch.share_failed"));
+    }
+  }, [id, shown, t, toast]);
+  const stopLink = useCallback(async () => {
+    setMenu(false);
+    const r = await revokeShare(id);
+    if (r.ok) { setLinkUrl(null); toast.show(t("watch.share_stopped")); } else toast.show(t("watch.share_failed"));
+  }, [id, t, toast]);
+
   // Save: ask for the attachment link (the server names the file) and let the browser download it; the page stays.
   const [saving, setSaving] = useState(false);
   const save = useCallback(async () => {
@@ -217,6 +246,8 @@ export default function WatchPage() {
                 <button ref={moreRef} type="button" className="icon-btn action" onClick={() => setMenu((m) => !m)} aria-label={t("watch.more")} title={t("watch.more")} aria-haspopup="menu" aria-expanded={menu}><PIcon name="more" /></button>
                 {menu && (
                   <div ref={menuRef} className="menu" role="menu" aria-label={t("watch.more")}>
+                    {canLink && <button role="menuitem" type="button" onClick={shareLink} disabled={!url}><PIcon name="share" size={20} />{t("watch.share_link")}</button>}
+                    {canLink && linkUrl && <button role="menuitem" type="button" onClick={stopLink}><PIcon name="flag" size={20} />{t("watch.share_stop")}</button>}
                     <button role="menuitem" type="button" onClick={() => { setMenu(false); setSheet(true); }} disabled={!url}><PIcon name="info" size={20} />{t("watch.info")}</button>
                     <a role="menuitem" href={feedbackHref}><PIcon name="chat" size={20} />{t("watch.feedback")}</a>
                     <a role="menuitem" href={reportHref}><PIcon name="flag" size={20} />{t("watch.report")}</a>

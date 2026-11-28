@@ -237,7 +237,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                             except ClientError:
                                 pass
 
-                # the designed cover (engine/cover.py, docs/SHARE_PREVIEWS_2026-11-27.md): a JPEG in the video's own shape, the poster in the apps and the web player (absent: older videos)
+                # the designed cover (engine/cover.py, docs/SHARE_PREVIEWS_2026-11-28.md): a JPEG in the video's own shape, the poster in the apps and the web player (absent: older videos)
                 cover_uri = it.get("cover_uri")
                 if isinstance(cover_uri, str) and cover_uri.startswith("s3://"):
                     cb, ck = _parse_s3_uri(cover_uri)

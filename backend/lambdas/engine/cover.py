@@ -1,4 +1,4 @@
-"""The cover of a video: the one picture that stands for it everywhere it is not playing (docs/SHARE_PREVIEWS_2026-11-27.md).
+"""The cover of a video: the one picture that stands for it everywhere it is not playing (docs/SHARE_PREVIEWS_2026-11-28.md).
 
 Why it exists: the first frame of a video is often blank paper (a whiteboard starts empty and the pen draws) or a bare backdrop (the characters and the title
 come in after half a second), so every place that uses "a frame" as the preview (a link card, a chat thumbnail, a feed) showed white or nothing.
@@ -290,7 +290,7 @@ def in_frame(art: Image.Image, title: str, *, aspect: str, theme: str, layout: O
 
 def opening_needs_cover(timeline: Dict[str, Any]) -> bool:
     """True when frame 0 is likely not a picture worth showing: a scene that is drawn or built up over time (whiteboard, presenter, text, charts...). A photograph or footage
-    already opens on a real picture (measured on QA videos, docs/SHARE_PREVIEWS_2026-11-27.md), so it keeps its own first frame."""
+    already opens on a real picture (measured on QA videos, docs/SHARE_PREVIEWS_2026-11-28.md), so it keeps its own first frame."""
     return timeline["scenes"][0].get("type") not in PHOTO_SCENES
 
 

@@ -99,7 +99,7 @@ class Renderer:
         self.ctx = SceneCtx(resolve_image=self._load_image, resolve_clip=self._load_clip, captions=bool(timeline.get("captions", True)), frame=self.frame, language=numfmt.norm_lang(timeline.get("language")))
         self._clip_loader = clip_loader
         self._clips: Dict[str, Any] = {}
-        cv = timeline.get("cover")   # docs/SHARE_PREVIEWS_2026-11-27.md: the designed cover held over the first frames, dissolving into the real opening (first chunk of a final render only)
+        cv = timeline.get("cover")   # docs/SHARE_PREVIEWS_2026-11-28.md: the designed cover held over the first frames, dissolving into the real opening (first chunk of a final render only)
         self._cover_cfg: Optional[Dict[str, Any]] = cv if isinstance(cv, dict) and not draft and timeline.get("lead") is None else None
         self._cover_img: Optional[Image.Image] = None
         self._image_loader = image_loader
