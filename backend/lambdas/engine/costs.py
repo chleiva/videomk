@@ -18,7 +18,7 @@ class CostCapExceeded(RuntimeError):
     pass
 
 
-PARTS = ("speech", "script", "research", "photos", "stock", "deck")   # what a cost paid for: narration, the script's language models, web research, the user's photos, stock photo/clip reviews
+PARTS = ("speech", "script", "research", "photos", "stock", "deck", "stt")   # what a cost paid for: narration, the script's language models, web research, the user's photos, stock photo/clip reviews
 
 
 def add_cost(video_id: str, usd: float, table_name: str | None = None, field: str = "cost_usd", part: str | None = None) -> float:
