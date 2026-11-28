@@ -70,7 +70,7 @@ class ApiClient(
     private val timeZone: () -> String = { java.util.TimeZone.getDefault().id },
     /** `en` or `es`, the effective app language (docs/I18N.md): the server answers its messages, capability labels and notes in it. */
     private val locale: () -> String = { Txt.localeTag },
-) : AccountApi, FeedbackApi {
+) : AccountApi, FeedbackApi, DictationService {
     suspend fun requestUploads(count: Int): List<UploadSlot> {
         val body = buildJsonObject { put("count", count) }
         val o = send("POST", listOf("uploads"), body = body)
@@ -95,7 +95,7 @@ class ApiClient(
         startVideo(prompt, clientRequestId, options, media, mediaMeta, libraryMedia, brief, deck).videoId
 
     /** The same call with everything its answer says: the video, and (optional) the look it gets and one sentence when the look had to be adapted. */
-    suspend fun startVideo(prompt: String, clientRequestId: String, options: CreateOptions = CreateOptions(), media: List<String> = emptyList(), mediaMeta: JsonObject? = null, libraryMedia: List<String> = emptyList(), brief: JsonObject? = null, deck: String? = null): StartedVideo {
+    suspend fun startVideo(prompt: String, clientRequestId: String, options: CreateOptions = CreateOptions(), media: List<String> = emptyList(), mediaMeta: JsonObject? = null, libraryMedia: List<String> = emptyList(), brief: JsonObject? = null, deck: String? = null, dictationIds: List<String> = emptyList()): StartedVideo {
         val body = buildJsonObject {
             // a presentation needs no description: an empty one is simply not sent (the server then uses its short default)
             // a background wish is asked for in words: the server's own phrase goes at the end of the description (docs/CREATE_API.md "Looks")
@@ -119,8 +119,21 @@ class ApiClient(
             options.lookChoice.putInto(this)   // look, cast, extras (docs/CREATE_API.md "Video look"): nothing at all for Auto, so an older server sees no new key
             options.watermarkMode?.let { mode -> put("watermark", buildJsonObject { put("mode", mode); if (mode == "videomk") options.watermarkPresence?.let { put("presence", it) } }) }
             brief?.let { put("brief", it) }
+            // every better dictation that produced text for this brief: the server adds its cost to the video (docs/SPEECH_TO_TEXT_2026-11-28.md section 10)
+            if (dictationIds.isNotEmpty()) put("dictation_ids", JsonArray(dictationIds.take(DictationIds.MAXIMUM).map { JsonPrimitive(it) }))
         }
         return StartedVideo.fromJson(send("POST", listOf("videos", "generate"), body = body, deck = deck != null))
+    }
+
+    /** POST /users/{id}/dictation. Never throws (but for a cancelled coroutine): every failure is a typed result and the caller falls back to the native text. The audio is never logged. */
+    override suspend fun dictate(clip: DictationClip): DictateResult {
+        val (code, text) = try { authed("POST", listOf("dictation"), clip.body(), callTimeoutSeconds = 90) }
+        catch (e: CancellationException) { throw e }
+        catch (e: ApiError.Network) { return DictateResult.Failure(BetterFailure.Network) }
+        catch (e: AuthException) { return DictateResult.Failure(if (e.kind == AuthException.Kind.Network) BetterFailure.Network else BetterFailure.Auth) }
+        catch (e: Exception) { return DictateResult.Failure(BetterFailure.Failed) }
+        if (code in 200..299) DictationAnswer.fromJson(runCatching { parseObject(text) }.getOrNull())?.let { return DictateResult.Success(it) }
+        return DictateResult.Failure(BetterFailure.from(code, text))
     }
 
     /** "Try again": the same video starts again on the server with every photo, option, language and watermark it had. Nothing is resent from the phone. */
@@ -244,16 +257,16 @@ class ApiClient(
     }
 
     /** A call whose status the caller reads itself, with the session's token. A 401 gets one forced token refresh and one more try (see [send]). */
-    private suspend fun authed(method: String, path: List<String>, body: JsonObject = JsonObject(emptyMap())): Pair<Int, String> {
+    private suspend fun authed(method: String, path: List<String>, body: JsonObject = JsonObject(emptyMap()), callTimeoutSeconds: Long = 30): Pair<Int, String> {
         val a = auth.authorization()
-        val first = try { raw(method, path, a.idToken, a.userId, body) } catch (e: IOException) { throw ApiError.Network }
+        val first = try { raw(method, path, a.idToken, a.userId, body, callTimeoutSeconds) } catch (e: IOException) { throw ApiError.Network }
         if (first.first != 401) return first
         val fresh = auth.reauthorized(a) ?: return first
-        return try { raw(method, path, fresh.idToken, fresh.userId, body) } catch (e: IOException) { throw ApiError.Network }
+        return try { raw(method, path, fresh.idToken, fresh.userId, body, callTimeoutSeconds) } catch (e: IOException) { throw ApiError.Network }
     }
 
     /** One request with the caller's token. Never logs; throws [IOException] for any network problem (including a timeout). */
-    private suspend fun raw(method: String, path: List<String>, idToken: String, sub: String, body: JsonObject): Pair<Int, String> {
+    private suspend fun raw(method: String, path: List<String>, idToken: String, sub: String, body: JsonObject, callTimeoutSeconds: Long = 30): Pair<Int, String> {
         val url = config.apiBase.newBuilder().addPathSegment("users").addPathSegment(sub).also { b -> path.forEach { b.addPathSegment(it) } }.build()
         val rb = Request.Builder().url(url)
             .header("Authorization", "Bearer $idToken")
@@ -262,7 +275,7 @@ class ApiClient(
             .header("X-Locale", locale())
             .header("X-Timezone", timeZone())
             .method(method, body.toString().toRequestBody("application/json".toMediaType()))
-        val response = try { http.newBuilder().callTimeout(30, TimeUnit.SECONDS).build().newCall(rb.build()).await() } catch (e: CancellationException) { throw e }
+        val response = try { http.newBuilder().callTimeout(callTimeoutSeconds, TimeUnit.SECONDS).build().newCall(rb.build()).await() } catch (e: CancellationException) { throw e }
         return response.use { r -> r.code to r.body.string() }
     }
 

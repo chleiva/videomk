@@ -161,6 +161,11 @@ fun CreateScreen(app: AppViewModel, composer: ComposerViewModel, onClose: () -> 
         composer.applyCapabilities(runCatching { api.capabilities() }.getOrDefault(com.videomk.app.core.Capabilities.FALLBACK))
     }
     composer.attachDeckApi(container?.deckApi, container?.deckUploader)
+    composer.attachDictationService(container?.dictationApi)
+    val improving by composer.better.working.collectAsState()
+    val betterNote by composer.better.note.collectAsState()
+    // one line after a fallback or the 6 minute stop, for a few seconds
+    LaunchedEffect(betterNote) { if (betterNote != null) { delay(6000); composer.better.clearNote() } }
     // the system document picker: its one-time read grant is used at once and never kept (no persistable permission)
     val docPicker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         if (uri != null) composer.addDeck(com.videomk.app.data.DeckPicker.pickOf(context.contentResolver, uri), replacePhotos = true)
@@ -224,7 +229,7 @@ fun CreateScreen(app: AppViewModel, composer: ComposerViewModel, onClose: () -> 
     suspend fun send(brief: kotlinx.serialization.json.JsonObject?): com.videomk.app.core.SubmitOutcome {
         val o = composer.options
         val out = composer.peekForSend()
-        return app.submitAwait(out.brief, o, out.photos, out.meta, out.libraryIds, brief, out.deckId, out.deckTitle)
+        return app.submitAwait(out.brief, o, out.photos, out.meta, out.libraryIds, brief, out.deckId, out.deckTitle, out.dictationIds)
     }
     /** Accepted: the library shows the Making card, Create closes. */
     fun accepted() {
@@ -371,7 +376,7 @@ fun CreateScreen(app: AppViewModel, composer: ComposerViewModel, onClose: () -> 
                         OptionsButton(labelled = !listening, enabled = !listening, onClick = { focusManager.clearFocus(); optionsOpen = true }, modifier = Modifier.testTag("optionsMenu"))
                     }
                 },
-                middle = { if (listening) Text(stringResource(R.string.composer_listening), style = MaterialTheme.typography.bodySmall, color = Vmk.colors.danger, maxLines = 1, softWrap = false, modifier = Modifier.testTag("listeningHint")) },
+                middle = { if (improving) Text(stringResource(R.string.better_working), style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary, maxLines = 1, softWrap = false, modifier = Modifier.testTag("improvingHint")) else if (listening) Text(stringResource(R.string.composer_listening), style = MaterialTheme.typography.bodySmall, color = Vmk.colors.danger, maxLines = 1, softWrap = false, modifier = Modifier.testTag("listeningHint")) },
                 create = { CreatePill(createState, createLabel, spokenLabel, createCredits.takeIf { priceKnown }, stateText, if (createState == CreateDock.CreateState.Active) createLabel else stringResource(R.string.create_explain_not_ready), onClick = ::tapCreate) },
             )
         }
@@ -393,6 +398,7 @@ fun CreateScreen(app: AppViewModel, composer: ComposerViewModel, onClose: () -> 
                         }
                     }
                     dictationHint(dictationState)
+                    betterNote?.let { n -> betterNoteHint(n) }
                     if (deckState.attached) DeckCard(
                         deckState, caps.deck, onRemove = { composer.removeDeck() }, onPickAgain = { composer.removeDeck(); launchDeckPicker() }, onRetry = { composer.deck.retry() }, onKeepWaiting = { composer.deck.keepWaiting() },
                     ) else if (photoTotal > 0) PhotoStrip(composer, locked) { photoMenu = true }

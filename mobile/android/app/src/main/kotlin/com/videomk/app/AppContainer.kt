@@ -58,6 +58,11 @@ class AppContainer(
         if (config != null && a != null) DebugHooks.fakeDeck(appContext) ?: com.videomk.app.core.ApiDeckApi(ApiClient(config, a, http, appVersion = BuildConfig.VERSION_NAME)) else null
     }
     val deckUploader: com.videomk.app.core.DeckUploader? by lazy { DebugHooks.fakeDeckUploader(appContext) ?: com.videomk.app.core.HttpDeckUploader(http) }
+    /** The paid "Better dictation" call (the API client itself). Null when the app has no server address or runs on fake data: the mic is then the phone's own. */
+    val dictationApi: com.videomk.app.core.DictationService? by lazy {
+        val a = auth
+        if (config != null && a != null && DebugHooks.fakeBackend(appContext) == null) ApiClient(config, a, http, appVersion = BuildConfig.VERSION_NAME) else null
+    }
     val createPrefs: com.videomk.app.data.CreatePrefsStore by lazy { com.videomk.app.data.CreatePrefsStore(appContext) }
 
     val organize: com.videomk.app.data.OrganizeController? by lazy { mediaApi?.let { com.videomk.app.data.OrganizeController(appContext, it, appScope) } }

@@ -142,6 +142,12 @@ fun CreateOptionsSheet(composer: ComposerViewModel, caps: com.videomk.app.core.C
                     }
                 }
             }
+            // BETTER DICTATION: on by default where the plan has it; a small line about Pro where it does not (no button, no badge)
+            caps.dictation?.let { d ->
+                if (d.isUsable) VmkGroup(onSheet = true) {
+                    VmkRow(stringResource(R.string.better_title), Modifier.testTag("betterDictationRow"), icon = Sym.GraphicEq, subtitle = stringResource(R.string.better_hint), checked = composer.betterDictationOn, onCheckedChange = { composer.setBetterDictation(it) })
+                } else if (d.showsUpgradeHint) Text(stringResource(R.string.better_pro), style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary, modifier = Modifier.testTag("betterDictationPro"))
+            }
             // FORMAT: every tile says its ratio; a beta format says "Beta" in words; formats that are not ready for this account are not shown
             val formats = listOf("16:9", "9:16", "1:1", "4:5").filter { caps.aspect(it)?.ready == true }
             if (formats.size > 1) Section(stringResource(R.string.create_format)) {
