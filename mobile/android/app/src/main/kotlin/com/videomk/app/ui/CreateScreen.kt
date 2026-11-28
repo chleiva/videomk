@@ -115,7 +115,7 @@ import com.videomk.app.core.PhotoLimits
 import com.videomk.app.core.PlatformChip
 import com.videomk.app.core.StatusKind
 import com.videomk.app.core.VideoLook
-import com.videomk.app.data.DictationController
+import com.videomk.app.core.DictationEngine
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -136,7 +136,7 @@ fun CreateScreen(app: AppViewModel, composer: ComposerViewModel, onClose: () -> 
     val person = (state.phase as? Phase.SignedIn)?.email
     val balance = com.videomk.app.DebugHooks.balanceOverride(context) ?: state.wallet?.let { if (it.unlimited) null else it.balance }
     val dictationState by composer.dictation.state.collectAsState()
-    val listening = dictationState is DictationController.State.Listening || dictationState is DictationController.State.Starting
+    val listening = dictationState is DictationEngine.State.Listening || dictationState is DictationEngine.State.Starting
     val options = composer.options
     val caps = composer.caps
     val scroll = rememberScrollState()

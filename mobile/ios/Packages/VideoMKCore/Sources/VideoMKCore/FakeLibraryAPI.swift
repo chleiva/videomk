@@ -370,7 +370,7 @@ public extension LookCapabilities {
                    extras: [Extra(id: "board", label: "Characters explain at a board", note: "A board beside them is drawn by hand as they speak.")]),
         ], cast: Cast(min: 1, max: 3, autoLabel: "Auto", autoNote: "We pick for you. Or choose up to 3.", conversationFrom: 2, conversationMinSeconds: 20, conversationNote: "They talk it through.", members: [
             m("ines", "Inés", "Teacher", "person", "Learning"), m("david", "David", "Engineer", "person", "Technology"), m("priya", "Priya", "Doctor", "person", "Health"), m("mateo", "Mateo", "Chef", "person", "Food"),
-            m("fox", "Fox", "Guide for children", "animal", "For children"), m("owl", "Hugo", "Owl professor", "animal", "Science and history"), m("bear", "Bruno", "Caring bear", "animal", "Feelings and bedtime"),
+            m("fox", "Fox", "Guide for children", "animal", "For children"), m("owl", "Otto", "Owl professor", "animal", "Science and history"), m("bear", "Bruno", "Caring bear", "animal", "Feelings and bedtime"),
             m("cat", "Mika", "Curious cat", "animal", "How things work"), m("parrot", "Paco", "Travelling parrot", "animal", "Travel and languages"), m("turtle", "Tula", "Wise turtle", "animal", "Nature"),
         ]))
     }

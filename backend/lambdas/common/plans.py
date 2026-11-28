@@ -25,13 +25,13 @@ ORDER = ("free", "pro", "max")
 PLANS: Dict[str, Dict[str, Any]] = {
     "free": {"id": "free", "name": "Free", "rank": 0, "credits_per_month": 0, "rollover_months": 0, "credits_cap": 0, "max_seconds": 60,
              "resolutions": ["720p", "1080p"], "watermark_modes": ["videomk"], "watermark_forced": True, "storage_bytes": 2 * GB, "photos_per_video": 10,
-             "priority_queue": False, "premium_looks": False, "commercial_use": False},
+             "priority_queue": False, "premium_looks": False, "commercial_use": False, "stt_premium": False, "stt_seconds_per_day": 0},
     "pro": {"id": "pro", "name": "Pro", "rank": 1, "credits_per_month": 30, "rollover_months": 0, "credits_cap": 30, "max_seconds": 300,
             "resolutions": ["720p", "1080p"], "watermark_modes": ["none", "videomk", "moments"], "watermark_forced": False, "storage_bytes": 100 * GB, "photos_per_video": 30,
-            "priority_queue": False, "premium_looks": False, "commercial_use": True},
+            "priority_queue": False, "premium_looks": False, "commercial_use": True, "stt_premium": True, "stt_seconds_per_day": 600},
     "max": {"id": "max", "name": "Max", "rank": 2, "credits_per_month": 120, "rollover_months": 1, "credits_cap": 240, "max_seconds": 720,
             "resolutions": ["720p", "1080p", "2160p"], "watermark_modes": ["none", "videomk", "moments", "custom"], "watermark_forced": False, "storage_bytes": 300 * GB, "photos_per_video": 60,
-            "priority_queue": True, "premium_looks": True, "commercial_use": True},
+            "priority_queue": True, "premium_looks": True, "commercial_use": True, "stt_premium": True, "stt_seconds_per_day": 1200},
 }
 # What the apps need to show a paywall later (docs/PLANS_PROPOSAL_2026-11-27.md section 5.6). Prices are the US base; the stores are the source of truth once products exist.
 PRICES_USD = {"pro": {"monthly": 14.99, "yearly": 149.99}, "max": {"monthly": 39.99, "yearly": 399.99}}
@@ -70,6 +70,9 @@ KNOBS: Dict[str, tuple] = {
     "claims_per_ip_day": (3, "int", 0, 100000),                  # free allowances claimed from one IP address in a UTC day (0 = no limit)
     "claims_per_ip_block_day": (10, "int", 0, 100000),           # ... from one /24 (IPv4) or /48 (IPv6)
     "signups_per_ip_hour": (5, "int", 0, 100000),                # accounts first seen from one IP address in an hour
+    "stt_enabled": (True, "bool", None, None),                   # kill switch of paid dictation (docs/SPEECH_TO_TEXT_2026-11-28.md); False: POST .../dictation answers 503 `dictation_paused` and the apps use the phone's engine
+    "stt_max_clip_seconds": (360, "int", 5, 900),                # longest single dictation clip (the app's limit too)
+    "stt_global_daily_seconds": (100000, "int", 0, 100_000_000), # ALL paid dictation of ALL accounts in one UTC day (100000 s = about $7.50); reached = paused until 00:00 UTC. 0 = none
     "claim_retention_days": (730, "int", 30, 3650),              # how long a free-allowance claim (a salted hash, nothing else) is kept
 }
 CADENCES = ("daily", "weekly")
@@ -253,7 +256,7 @@ def public_limits(r: Dict[str, Any]) -> Dict[str, Any]:
     return {"max_seconds": r["max_seconds"], "max_minutes": round(r["max_seconds"] / 60.0, 4), "resolutions": r["resolutions"], "watermark_modes": r["watermark_modes"],
             "watermark_forced": r["watermark_forced"], "storage_bytes": r["storage_bytes"], "photos_per_video": r["photos_per_video"], "priority_queue": r["priority_queue"],
             "premium_looks": r["premium_looks"], "commercial_use": r["commercial_use"], "credits_per_month": r["credits_per_month"], "rollover_months": r["rollover_months"],
-            "credits_cap": r["credits_cap"]}
+            "credits_cap": r["credits_cap"], "stt_premium": r["stt_premium"], "stt_seconds_per_day": r["stt_seconds_per_day"]}
 
 
 def locked(plan: str, cfg: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
@@ -281,7 +284,7 @@ def locked(plan: str, cfg: Optional[Dict[str, Any]] = None) -> List[Dict[str, An
             add("storage", theirs["storage_bytes"])
         if theirs["photos_per_video"] > mine["photos_per_video"]:
             add("photos", theirs["photos_per_video"])
-        for flag in ("priority_queue", "premium_looks", "commercial_use"):
+        for flag in ("priority_queue", "premium_looks", "commercial_use", "stt_premium"):
             if theirs[flag] and not mine[flag]:
                 add(flag, True)
     return out

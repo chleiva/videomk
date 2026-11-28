@@ -64,7 +64,7 @@ try {
   await page.goto(`${BASE}/new/`, { waitUntil: "networkidle" });
   await page.fill("#create-text", "My weekend away, warm and relaxed");
   await page.setInputFiles("input[type=file][accept='image/*']", origs.slice(0, 3).map((p, i) => ({ name: `a${i}.jpg`, mimeType: "image/jpeg", buffer: fs.readFileSync(p) })));
-  await page.waitForFunction(() => !document.querySelector(".compose-go")?.textContent?.includes("Adding"), null, { timeout: 15000 });
+  await page.waitForFunction(() => document.querySelector(".compose-go")?.getAttribute("aria-disabled") !== "true"   /* Create is inactive (aria-disabled) while photos are added */, null, { timeout: 15000 });
   await page.click(".compose-go"); await page.waitForURL(/generations/, { timeout: 8000 });
   ok("three uploaded photos go as media ids", Array.isArray(gen[0]?.media) && gen[0].media.length === 3 && gen[0].media.every((x) => /^d\d+$/.test(x)), JSON.stringify(gen[0]?.media));
   await ctx.close();

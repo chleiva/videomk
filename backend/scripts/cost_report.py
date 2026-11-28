@@ -4,7 +4,7 @@
   python scripts/cost_report.py [--profile qa] [--region eu-west-1] [--since 2026-11-24] [--user <id prefix>] [--hours 24]
 
 Per video the table keeps `cost_usd`: language models (script, research, reviews, checks), Polly speech, web searches. Newer videos also carry the breakdown
-(c_speech, c_script, c_research, c_photos, c_stock). The Lambda compute (mostly the render chunks) is read from CloudWatch for the last --hours and divided
+(c_speech, c_script, c_research, c_photos, c_stock, c_stt). The Lambda compute (mostly the render chunks) is read from CloudWatch for the last --hours and divided
 by the videos made in that window. Step Functions, S3 and DynamoDB are well under a tenth of a cent per video and are not counted.
 """
 import argparse
@@ -17,7 +17,7 @@ import boto3
 
 LAMBDA_GBS_PRICE, LAMBDA_REQ_PRICE = 0.0000166667, 0.0000002   # x86, per GB-second and per request
 GROUPS = ["v2_plan", "v2_beat", "v2_timeline", "v2_render_chunk", "v2_audio", "v2_finalize"]
-PARTS = ("speech", "script", "research", "photos", "stock")
+PARTS = ("speech", "script", "research", "photos", "stock", "stt")
 
 
 def main() -> int:

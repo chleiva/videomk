@@ -249,29 +249,30 @@ def test_rest_pose_and_hand_sides_per_character(cid):
 def test_presenting_hand_is_thumb_up_and_raised_hand_is_thumb_to_the_head():
     """Follow the thumb side of the stored piece through the pose: it must end up on top of a presenting hand and on the head side of a raised hand, on both arms."""
     ch = vp.load("david", 2.0)
-    A = ch.g.arm
     for i, (s, side) in enumerate((("l", -1), ("r", 1))):
         for kind, want in (("present", (0.0, 1.0)), ("count", (-side * 1.0, 0.0)), ("wave", (-side * 1.0, 0.0))):
-            hands = [None, None]
-            hands[i] = (cg.KEY[kind][0][0] * A, cg.KEY[kind][0][1] * A)
-            sk = vp.solve(ch.g, {"hands": tuple(hands)})
+            arms = [None, None]
+            key, _ = cg.fit_key(kind, True, ch.g)
+            arms[i] = (key[0], key[1])
+            sk = vp.solve(ch.g, {"arms": tuple(arms)})
             d = sk["hand_dir"][i]                               # the fingers point along d; the piece's +x axis (as stored, hanging) is d turned a quarter turn
             thumb = (-d[1] * ch.thumb_x[("open", s)], d[0] * ch.thumb_x[("open", s)])
             assert thumb[0] * want[0] + thumb[1] * want[1] > 0.5, (s, kind, thumb)
 
 
-def test_leaving_home_is_continuous_and_far_from_home_is_plain_ik():
+def test_leaving_home_is_continuous_and_the_elbow_never_tucks_in():
+    """The older wrist-target way to pose an arm: the elbow still glides (no jump), and whatever the target, the result is inside the joint limits."""
     g = vp.Geom()
     rt = vp.rest_target(g)
-    for kind in ("present", "wave", "count", "open"):
-        key = (cg.KEY[kind][0][0] * g.arm, cg.KEY[kind][0][1] * g.arm)
+    for key in ((0.90 * g.arm, -0.24 * g.arm), (0.50 * g.arm, 0.50 * g.arm), (0.47 * g.arm, 0.13 * g.arm), (0.62 * g.arm, -0.50 * g.arm)):
         prev = None
         for n in range(0, 201):
-            h = cg._arc(rt, key, n / 200)
+            h = (rt[0] + (key[0] - rt[0]) * n / 200, rt[1] + (key[1] - rt[1]) * n / 200)
             sk = vp.solve(g, {"hands": (h, h)})
             if prev is not None:
-                assert dist(sk["elbows"][1], prev) < 0.035 * g.arm      # the elbow glides from "out" to the gesture's bend: no jump
+                assert dist(sk["elbows"][1], prev) < 0.035 * g.arm
             prev = sk["elbows"][1]
-        s = sk["shoulders"][1]
-        e, w = vp.arm_ik(s, (s[0] + key[0], s[1] + key[1]), g.upper, g.fore, 1)
-        assert dist(e, sk["elbows"][1]) < 1e-6 and dist(w, sk["wrists"][1]) < 1e-6
+            for i, side in enumerate((-1, 1)):
+                s, e = sk["shoulders"][i], sk["elbows"][i]
+                assert math.degrees(math.atan2(side * (e[0] - s[0]), -(e[1] - s[1]))) >= vp.UPPER_MIN - 1e-6      # the upper arm never crosses the chest
+                assert abs(dist(s, e) - g.upper) < 1e-6 and abs(dist(e, sk["wrists"][i]) - g.fore) < 1e-6

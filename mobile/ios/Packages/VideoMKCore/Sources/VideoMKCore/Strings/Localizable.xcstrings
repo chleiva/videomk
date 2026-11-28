@@ -1728,23 +1728,6 @@
         }
       }
     },
-    "create.listening_tap_to_stop" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Listening… tap to stop"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Escuchando… toca para detener"
-          }
-        }
-      }
-    },
     "create.look" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1775,23 +1758,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Auto"
-          }
-        }
-      }
-    },
-    "create.look_auto_a11y" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Auto, the producer decides the look"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Automático, el productor decide el estilo"
           }
         }
       }
@@ -3278,6 +3244,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "No escuché nada. Toca el micrófono y empieza a hablar."
+          }
+        }
+      }
+    },
+    "dictation.language_fallback" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dictation isn't available in %1$@ on this iPhone, so it is listening in %2$@."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El dictado no está disponible en %1$@ en este iPhone, así que escucha en %2$@."
           }
         }
       }
@@ -13345,23 +13328,6 @@
         }
       }
     },
-    "create.colours" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Colors"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Colores"
-          }
-        }
-      }
-    },
     "looks.cast_none" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -13443,6 +13409,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "No con fotos"
+          }
+        }
+      }
+    },
+    "create.first_cost" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@. You have %2$lld."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@. Tienes %2$lld."
           }
         }
       }

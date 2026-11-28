@@ -23,6 +23,7 @@ from aws_cdk import aws_iam as iam, aws_lambda as _lambda
 from constructs import Construct
 
 NAMESPACE = "videomk/Plans"
+OPENAI_SSM_PARAM = "/videomk/openai_api_key"   # the same standard parameter the engine reads; the app never holds a key
 APP_ATTEST_APP_IDS = "39ANXJNUTL.com.videomk.app"   # <Apple team id>.<bundle id>
 
 
@@ -102,6 +103,17 @@ class Plans(Construct):
         user_id_resource.add_resource("purchases").add_resource("{store}").add_method("POST", integration, **cognito_auth)   # store = apple | google (the mobile apps: no CORS preflight needed)
         # public on purpose (the stores call it): store = apple | google | web; answers 501 until phase 2 verifies the signed payload
         api.root.add_resource("purchases").add_resource("webhooks").add_resource("{store}").add_method("POST", integration)
+
+        # ---- POST /users/{user}/dictation: paid dictation (docs/SPEECH_TO_TEXT_2026-11-28.md). Counters live in the existing usage table (no new table); the audio is never stored.
+        dictation_fn = make_fn("DictationFunction", "dictation_api", "dictation_api.handler", timeout=Duration.seconds(30), env=env)
+        attach(dictation_fn, "Dictation", [read_ent, read_cfg, read_flags, rw_usage, iam.PolicyStatement(actions=["ssm:GetParameter"], resources=[f"arn:aws:ssm:{stack.region}:{stack.account}:parameter{OPENAI_SSM_PARAM}"])], {})
+        dictation_fn.add_environment("FLAGS_TABLE", flags_table.table_name)
+        dictation_fn.add_environment("OPENAI_SSM_PARAM", OPENAI_SSM_PARAM)
+        dict_res = user_id_resource.add_resource("dictation")
+        dict_res.add_method("POST", integration_of(dictation_fn), **cognito_auth)
+        dict_res.add_cors_preflight(allow_origins=apigw.Cors.ALL_ORIGINS, allow_methods=["POST", "OPTIONS"], allow_headers=cors_headers)
+        cw.Alarm(self, "DictationErrorsAlarm", metric=dictation_fn.metric_errors(period=Duration.hours(1)), threshold=5, evaluation_periods=1, comparison_operator=cw.ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
+                 treat_missing_data=cw.TreatMissingData.NOT_BREACHING, alarm_description="Paid dictation function failed 5 or more times in an hour (not provider refusals: those are answered). No action attached.")
 
         # ---- GET /gallery: the showcase (public, read-only)
         gallery_fn = make_fn("GalleryFunction", "gallery_api", "gallery_api.handler", timeout=Duration.seconds(10))

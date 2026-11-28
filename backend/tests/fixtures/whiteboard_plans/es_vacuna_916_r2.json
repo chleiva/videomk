@@ -1,0 +1,284 @@
+{
+ "beats": [
+  {
+   "narration": "Tu cuerpo puede aprender a vencer un virus antes de conocerlo. Una vacuna es un entrenamiento, y se hace sin enfermarte.",
+   "scene": {
+    "type": "whiteboard",
+    "props": {
+     "items": [
+      {
+       "id": "p",
+       "draw": "person_standing",
+       "zone": "left",
+       "size": "l",
+       "say": "cuerpo"
+      },
+      {
+       "id": "em0_p",
+       "mark": "circle",
+       "on": "p",
+       "color": "red",
+       "say": "aprender"
+      },
+      {
+       "id": "t",
+       "write": "¿Cómo funciona una vacuna?",
+       "tool": "marker",
+       "ink": "blue",
+       "zone": "top-row",
+       "size": "xl",
+       "say": "virus"
+      },
+      {
+       "id": "v",
+       "draw": "virus",
+       "zone": "right",
+       "size": "l",
+       "say": "ante"
+      },
+      {
+       "id": "lp",
+       "write": "Tú",
+       "tool": "pen",
+       "near": "p",
+       "side": "below",
+       "size": "s",
+       "say": "conocerlo"
+      },
+      {
+       "id": "lv",
+       "write": "Virus",
+       "tool": "pen",
+       "near": "v",
+       "side": "below",
+       "size": "s"
+      },
+      {
+       "id": "s",
+       "draw": "syringe",
+       "zone": "centre",
+       "size": "l",
+       "say": "vacuna"
+      },
+      {
+       "id": "a1",
+       "connect": "arrow",
+       "from": "s",
+       "to": "p",
+       "color": "blue",
+       "say": "entrenamiento"
+      },
+      {
+       "id": "m1",
+       "mark": "circle",
+       "on": "s",
+       "color": "red",
+       "say": "enfermarte"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "narration": "Contiene una señal inofensiva del patógeno. En las vacunas de ARN mensajero, son instrucciones para que tus células fabriquen una pieza del virus.",
+   "scene": {
+    "type": "whiteboard",
+    "props": {
+     "items": [
+      {
+       "id": "arn",
+       "write": "ARN\nmensajero",
+       "tool": "marker",
+       "ink": "orange",
+       "zone": "middle-row",
+       "size": "m",
+       "say": "inofensiva"
+      },
+      {
+       "id": "c",
+       "draw": "cell",
+       "zone": "bottom-left",
+       "size": "l",
+       "say": "células"
+      },
+      {
+       "id": "a2",
+       "connect": "arrow",
+       "from": "arn",
+       "to": "c",
+       "color": "orange"
+      },
+      {
+       "id": "pc",
+       "write": "Pieza del virus",
+       "tool": "pen",
+       "near": "c",
+       "side": "below",
+       "size": "s",
+       "say": "fabriquen"
+      },
+      {
+       "id": "m2",
+       "mark": "underline",
+       "on": "arn",
+       "color": "red",
+       "say": "pieza"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "narration": "Tu sistema inmunitario detecta esa pieza extraña y la ataca. Así aprende a reconocerla y produce defensas llamadas anticuerpos.",
+   "scene": {
+    "type": "whiteboard",
+    "props": {
+     "items": [
+      {
+       "id": "t2",
+       "write": "Defensa",
+       "tool": "marker",
+       "ink": "green",
+       "zone": "top-row",
+       "size": "l",
+       "say": "inmunitario"
+      },
+      {
+       "id": "b",
+       "draw": "shield_check",
+       "zone": "left",
+       "size": "l",
+       "say": "detecta"
+      },
+      {
+       "id": "e",
+       "draw": "magnifier",
+       "zone": "centre",
+       "size": "l",
+       "say": "extraña"
+      },
+      {
+       "id": "em0_e",
+       "mark": "circle",
+       "on": "e",
+       "color": "red",
+       "say": "ataca"
+      },
+      {
+       "id": "em1_b",
+       "mark": "circle",
+       "on": "b",
+       "color": "blue",
+       "say": "reconocerla"
+      },
+      {
+       "id": "an",
+       "draw": "antibody",
+       "zone": "right",
+       "size": "l",
+       "say": "anticuerpos"
+      },
+      {
+       "id": "a3",
+       "connect": "arrow",
+       "from": "e",
+       "to": "an",
+       "color": "green"
+      },
+      {
+       "id": "la",
+       "write": "Anticuerpos",
+       "tool": "pen",
+       "near": "an",
+       "side": "below",
+       "size": "s"
+      },
+      {
+       "id": "m3",
+       "mark": "circle",
+       "on": "an",
+       "color": "red"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "narration": "Y lo importante: guarda memoria. Si el virus de verdad llega, tu cuerpo ya sabe responder rápido. Una vacuna es memoria sin enfermedad.",
+   "scene": {
+    "type": "whiteboard",
+    "props": {
+     "items": [
+      {
+       "id": "br",
+       "draw": "brain",
+       "zone": "bottom-left",
+       "size": "l",
+       "say": "memoria"
+      },
+      {
+       "id": "vr",
+       "draw": "virus",
+       "zone": "bottom-right",
+       "size": "l",
+       "say": "virus"
+      },
+      {
+       "id": "a4",
+       "connect": "arrow",
+       "from": "vr",
+       "to": "br",
+       "color": "red",
+       "say": "llega"
+      },
+      {
+       "id": "em0_vr",
+       "mark": "circle",
+       "on": "vr",
+       "color": "red",
+       "say": "sabe"
+      },
+      {
+       "id": "em1_br",
+       "mark": "circle",
+       "on": "br",
+       "color": "blue",
+       "say": "vacuna"
+      },
+      {
+       "id": "k",
+       "write": "Memoria\nsin enfermedad",
+       "tool": "marker",
+       "ink": "blue",
+       "zone": "bottom",
+       "size": "l",
+       "say": "enfermedad"
+      },
+      {
+       "id": "m4",
+       "mark": "double_underline",
+       "on": "k",
+       "color": "red"
+      }
+     ],
+     "board": "same"
+    }
+   }
+  }
+ ],
+ "captions": true,
+ "frame": {
+  "aspect": "9:16",
+  "resolution": "1080p",
+  "width": 1080,
+  "height": 1920,
+  "orientation": "portrait",
+  "platform": "other"
+ },
+ "language": "es",
+ "whiteboard": {
+  "decision": "whiteboard",
+  "reason": "asked",
+  "asked": true
+ }
+}

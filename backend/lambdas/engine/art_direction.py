@@ -524,12 +524,12 @@ def _enforce_cartoon(plan: Dict[str, Any], d: Direction, repairs: List[Dict[str,
         taken: List[str] = []
         plan["voices"] = {}
         for c in cast:
-            plan["voices"][c] = presenter_policy.voice_for(c, language, taken)
+            plan["voices"][c] = presenter_policy.voice_for(c, language, taken, plan.get("region"))   # one accent for the whole cast: the viewer's
             taken.append(plan["voices"][c])
     else:
         for b in beats:
             b.pop("speaker", None)
-        plan["voices"] = {"narrator": presenter_policy.voice_for(cast[0], language)}
+        plan["voices"] = {"narrator": presenter_policy.voice_for(cast[0], language, None, plan.get("region"))}
     # --- every beat in the cartoon world
     total = sum(beat_seconds(b) for b in beats) or 1.0
     only_s, prev_only = 0.0, False

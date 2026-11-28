@@ -4,6 +4,9 @@ One choice instead of the scattered `style` / `presenter` wishes (which keep wor
   * `look`   : auto | real | whiteboard | cartoon            (`presenters` is accepted as another name for `cartoon`)
   * `cast`   : "auto" or 1 to 3 character ids                (look `cartoon` only; 2 or 3 = a conversation between them)
   * `extras` : a list of switches the look allows; today only `board` on `cartoon` (the characters explain on a hand-drawn board)
+  * `cast` entries may also be `{"id": "fox", "language": "fr"}`: that character speaks its OWN language (docs/CREATE_API.md "Characters that speak different languages").
+    Normalised to the same id list plus a `cast_languages` map, so a client (and the engine) that only knows ids keeps working.
+  * `translation` : auto | on | off, the translation line under lines spoken in another language than the video's
 
 This module is the contract's single home for the three users that must agree: the launcher (`parse`: a bad value is a 400), the request check and the launcher's
 202 answer (`resolve`: what the video will get and, when it cannot be given as chosen, why), and capabilities (`capabilities`: the picker, the cast, the previews).
@@ -31,6 +34,9 @@ CONVERSATION_MIN_SECONDS = 20                        # two or three characters n
 BEST_ASPECTS = {"auto": ["16:9", "9:16", "1:1", "4:5"], "real": ["16:9", "9:16", "1:1", "4:5"], "whiteboard": ["16:9", "1:1"], "cartoon": ["16:9", "1:1", "4:5"]}
 # Topics each character suits (shown under the face in the cast picker; the automatic casting uses the same idea: engine/presenter_policy.CAST words)
 TOPICS = {"ines": "school", "david": "technology", "priya": "health", "mateo": "food", "fox": "kids", "owl": "science", "bear": "feelings", "cat": "gadgets", "parrot": "travel", "turtle": "nature"}
+TRANSLATIONS = ("auto", "on", "off")
+LANGUAGE_MIN_SECONDS = {2: 20, 3: 30}                # six seconds a line: three languages need 30 s, two need 20 s (design doc 2.9)
+WOMEN_ONLY = ("nl", "pl", "fi")                      # the voice catalogue has no man's voice in these (docs/LANGUAGES.md)
 RECIPES = ("footage", "whiteboard", "presenter", "conversation", "presenter_board", "conversation_board")
 
 
@@ -43,9 +49,26 @@ def clean_look(v: Any) -> Optional[str]:
     return v if isinstance(v, str) and v in LOOKS else None
 
 
+def polyglot_enabled() -> bool:
+    """Server switch POLYGLOT (characters that speak different languages; docs/MULTILINGUAL_CONVERSATIONS_DESIGN_2026-11-27.md): off where nothing is set."""
+    return os.environ.get("POLYGLOT", "").lower() in ("1", "true")
+
+
+def stage_languages() -> List[str]:
+    """The languages a character can speak on this stage: the engine's `voices.enabled()` (server setting VIDEO_LANGUAGES), read here without importing the engine when it is not beside this module."""
+    try:
+        from engine import voices
+        return list(voices.enabled())
+    except Exception:   # noqa: BLE001 - the request-check function ships `common` only: read the same setting
+        ready = ("en", "es", "fr", "de", "it", "pt", "nl", "pl", "fi")
+        asked = [x.strip().lower() for x in os.environ.get("VIDEO_LANGUAGES", "en,es").split(",")]
+        return [x for x in ready if x in asked] or ["en", "es"]
+
+
 def parse(body: Dict[str, Any]) -> Dict[str, Any]:
-    """The look part of a create request, normalised: {} when nothing was chosen, else {"look": id, "cast"?: [ids], "extras"?: [ids]}.
-    Absent or `auto` values are left out (so a request that chooses nothing is stored and fingerprinted exactly as before). Raises `Invalid`."""
+    """The look part of a create request, normalised: {} when nothing was chosen, else {"look": id, "cast"?: [ids], "cast_languages"?: {id: language}, "extras"?: [ids]},
+    and `translation` ("on" | "off") when chosen. Absent or `auto` values are left out (so a request that chooses nothing is stored and fingerprinted exactly as before).
+    A `cast` entry is an id or {"id", "language"}. Raises `Invalid`."""
     out: Dict[str, Any] = {}
     look = None
     if body.get("look") is not None:
@@ -53,11 +76,35 @@ def parse(body: Dict[str, Any]) -> Dict[str, Any]:
         if look is None:
             raise Invalid("'look' must be one of: " + ", ".join(LOOKS))
     cast: List[str] = []
+    cast_languages: Dict[str, str] = {}
     if body.get("cast") is not None and body["cast"] != "auto":
         raw = body["cast"]
-        if not isinstance(raw, list) or not (1 <= len(raw) <= MAX_CAST) or any(not isinstance(c, str) or c not in CAST_IDS for c in raw) or len(set(raw)) != len(raw):
-            raise Invalid(f"'cast' must be 'auto' or a list of 1 to {MAX_CAST} different character ids: " + ", ".join(CAST_IDS))
-        cast = list(raw)
+        bad = f"'cast' must be 'auto' or a list of 1 to {MAX_CAST} different character ids (or {{\"id\", \"language\"}} objects): " + ", ".join(CAST_IDS)
+        if not isinstance(raw, list) or not (1 <= len(raw) <= MAX_CAST):
+            raise Invalid(bad)
+        ids: List[str] = []
+        for entry in raw:
+            if isinstance(entry, dict):
+                if set(entry) - {"id", "language"} or not isinstance(entry.get("id"), str):
+                    raise Invalid(bad)
+                cid, lang = entry["id"], entry.get("language")
+            else:
+                cid, lang = entry, None
+            if not isinstance(cid, str) or cid not in CAST_IDS:
+                raise Invalid(bad)
+            ids.append(cid)
+            if lang is not None and lang != "auto":
+                if not isinstance(lang, str) or lang not in stage_languages():
+                    raise Invalid(f"the language of '{cid}' must be one of: " + ", ".join(stage_languages()))
+                cast_languages[cid] = lang
+        if len(set(ids)) != len(ids):
+            raise Invalid(bad)
+        cast = ids
+    if body.get("translation") is not None:
+        if body["translation"] not in TRANSLATIONS:
+            raise Invalid("'translation' must be one of: " + ", ".join(TRANSLATIONS))
+        if body["translation"] != "auto":
+            out["translation"] = body["translation"]
     extras: List[str] = []
     if body.get("extras") is not None:
         raw = body["extras"]
@@ -75,6 +122,8 @@ def parse(body: Dict[str, Any]) -> Dict[str, Any]:
         out["look"] = look
         if cast:
             out["cast"] = cast
+            if cast_languages:
+                out["cast_languages"] = cast_languages
         if extras:
             out["extras"] = extras
     return out
@@ -84,7 +133,7 @@ def from_legacy(options: Dict[str, Any]) -> Dict[str, Any]:
     """The chosen look of a request: its own `look`, else the old `style` field where it always meant the whole video (`real`, `whiteboard`).
     `style: "cartoon"` and `presenter: "<id>"` keep their old, softer meaning (docs/CREATE_API.md "Looks")."""
     if clean_look(options.get("look")) not in (None, "auto"):
-        return {k: options[k] for k in ("look", "cast", "extras") if options.get(k)} | {"look": clean_look(options["look"])}
+        return {k: options[k] for k in ("look", "cast", "extras", "cast_languages") if options.get(k)} | {"look": clean_look(options["look"])}
     if options.get("style") in ("real", "whiteboard"):
         return {"look": options["style"]}
     return {}
@@ -133,7 +182,33 @@ def resolve(options: Dict[str, Any], lang: Optional[str] = None, *, media_count:
            "note": i18n.t(f"look.choice.{reason}", lang, look=i18n.t(f"cap.pick.{look}", lang)) if reason else None}
     if applied == "cartoon":
         out["cast"] = cast or "auto"
+    asked_languages = {k: v for k, v in (c.get("cast_languages") or {}).items() if k in (c.get("cast") or [])}
+    if asked_languages or options.get("translation"):
+        out["languages"] = _languages_answer(asked_languages, cast, applied, seconds, options, lang)
+        if out["languages"]["note"] and not out["note"]:
+            out["note"] = out["languages"]["note"]
     return out
+
+
+def _languages_answer(asked: Dict[str, str], cast: List[str], applied: str, seconds: float, options: Dict[str, Any], lang: Optional[str]) -> Dict[str, Any]:
+    """What becomes of `cast_languages` (design doc 2.2): {"by_character": {id: language} that will be used, "translation", "reason": None | code, "note": None | sentence}.
+    Never a refusal: where the languages cannot be given the video is made without them and `reason` says why.
+    Reasons: not_available (this stage has no POLYGLOT), needs_cartoon (the look is not cartoon), needs_two (one character cannot take turns with itself),
+    too_short (three languages need 30 s: the third is dropped)."""
+    used, reason = dict(asked), None
+    video_language = str(options.get("language") or "")
+    if used and not polyglot_enabled():
+        used, reason = {}, "not_available"
+    elif used and applied != "cartoon":
+        used, reason = {}, "needs_cartoon"
+    elif used and len(cast) < 2:
+        if not (len(used) == 1 and next(iter(used.values())) == video_language):   # one character speaking the video's own language is just a character
+            reason = "needs_two"
+        used = {}
+    elif used and len(cast) == 3 and 0 < seconds < LANGUAGE_MIN_SECONDS[3]:
+        used, reason = {k: v for k, v in used.items() if k in cast[:2]}, "too_short"
+    note = i18n.t(f"look.choice.lang_{reason}", lang, n=len(cast) if reason == "too_short" else 0) if reason else None
+    return {"by_character": used, "translation": options.get("translation") or "auto", "reason": reason, "note": note}
 
 
 def answer(options: Dict[str, Any], lang: Optional[str] = None, **kw: Any) -> Dict[str, Any]:
@@ -197,5 +272,64 @@ def capabilities(loc: str, cast: List[Dict[str, Any]], *, f: Optional[Dict[str, 
         "cast": {"param": "cast", "default": "auto", "min": 1, "max": MAX_CAST, "available": available("cartoon", f),
                  "auto": {"id": "auto", "label": i18n.t("cap.cast.auto", loc), "note": i18n.t("cap.cast.auto_note", loc)},
                  "conversation": {"from": 2, "min_seconds": CONVERSATION_MIN_SECONDS, "note": i18n.t("cap.cast.conversation_note", loc)},
-                 "members": [{**m, "kind": "animal" if m["id"] in ANIMALS else "person", "topic": i18n.t(f"cap.cast.topic.{TOPICS[m['id']]}", loc)} for m in cast if m["id"] in CAST_IDS]},
+                 "members": [{**m, "kind": "animal" if m["id"] in ANIMALS else "person", "topic": i18n.t(f"cap.cast.topic.{TOPICS[m['id']]}", loc),
+                              "languages": member_languages(m["id"], loc)} for m in cast if m["id"] in CAST_IDS],
+                 "languages": language_options(loc, f)},
     }
+
+
+def _voice_table() -> List[Dict[str, Any]]:
+    try:
+        from engine import voice_data
+        return list(voice_data.VOICES)
+    except Exception:   # noqa: BLE001 - without the engine there is no voice catalogue: no language options
+        return []
+
+
+def character_gender(cid: str) -> Optional[str]:
+    """'female' | 'male': the gender of the voice the character has by default (the first English voice of the cast table, as the engine casts the other languages)."""
+    try:
+        from engine import presenter_policy, voices
+        return voices.CATALOG[presenter_policy.CAST[cid]["voices"]["en"][0]][2]
+    except Exception:   # noqa: BLE001
+        return None
+
+
+def voices_of(language: str) -> Dict[str, int]:
+    """{"female": n, "male": n} generative voices the catalogue has for the language (engine/voice_data.py)."""
+    out = {"female": 0, "male": 0}
+    for v in _voice_table():
+        if v.get("language") == language and "generative" in (v.get("engines") or ["generative"]):
+            out[v["gender"]] = out.get(v["gender"], 0) + 1
+    return out
+
+
+def language_options(loc: str, f: Optional[Dict[str, bool]] = None) -> Dict[str, Any]:
+    """`capabilities.looks.cast.languages`: whether characters may speak their own language here, the languages that have a voice, and the translation switch."""
+    from common import lang_names
+    on = polyglot_enabled() and available("cartoon", f)
+    langs = []
+    for code in stage_languages():
+        n = voices_of(code)
+        if n["female"] + n["male"]:
+            langs.append({"id": code, "label": lang_names.name_of(code, native=True), "voices": n, "women_only": n["male"] == 0})
+    return {"param": "cast[].language", "available": on, "max": MAX_CAST, "min_cast": 2, "note": i18n.t("cap.cast.languages_note", loc),
+            "min_seconds": {str(k): v for k, v in LANGUAGE_MIN_SECONDS.items()}, "options": langs if on else [],
+            "translation": {"param": "translation", "default": "auto", "options": [{"id": t, "label": i18n.t(f"cap.cast.translation.{t}", loc)} for t in TRANSLATIONS]}}
+
+
+def member_languages(cid: str, loc: str) -> List[Dict[str, Any]]:
+    """The languages a character can speak: [{"id", "voices": n, "note": None | "women_only" sentence}]. A language with only women's voices (nl, pl, fi) is offered to a
+    man's character with a note: it speaks with a woman's voice."""
+    from common import lang_names
+    if not polyglot_enabled():
+        return []
+    gender, out = character_gender(cid), []
+    for code in stage_languages():
+        n = voices_of(code)
+        total = n["female"] + n["male"]
+        if not total:
+            continue
+        women_only = gender == "male" and n["male"] == 0
+        out.append({"id": code, "voices": n.get(gender or "female", total) or total, "note": i18n.t("cap.cast.lang_women_only", loc, language=lang_names.name_of(code, native=True)) if women_only else None})
+    return out

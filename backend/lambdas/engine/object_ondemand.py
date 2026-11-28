@@ -64,9 +64,10 @@ def _items(plan: Dict[str, Any]):
             yield from (sc.get("props") or {}).get("items") or []
 
 
-def missing(plan: Dict[str, Any], limit: int, sure: float = 0.55) -> List[Tuple[str, str]]:
+def missing(plan: Dict[str, Any], limit: int, sure: float = 0.55, refused: Optional[Dict[str, str]] = None) -> List[Tuple[str, str]]:
     """(id, name) of the drawings the boards asked for and the library does not really have. In order, distinct, at most `limit`.
-    A name that could never be a general library drawing (a brand, a flag, text, a person) is left as it is."""
+    A name that could never be a general library drawing (a brand, a flag, text, a person) is left as it is. `refused`, when given, collects name -> why for
+    every name the free filters refuse (the policy's word lists first, then a brand or text word, then a personal wording): `fill` logs each as a decision."""
     from common import catalog_privacy
 
     out: List[Tuple[str, str]] = []
@@ -75,12 +76,30 @@ def missing(plan: Dict[str, Any], limit: int, sure: float = 0.55) -> List[Tuple[
         if not name:
             continue
         oid = object_id(name)
-        if not NAME_RE.match(name) or len(oid) < 3 or len(name.split()) > 4 or _BANNED.search(name) or catalog_privacy.personal_reason(name) not in (None, "address"):
+        if not NAME_RE.match(name) or len(oid) < 3 or len(name.split()) > 4:
             continue
-        if media_policy.text_reason(name):   # the ONE safety policy's word lists: such a drawing is never made for the library; the label stays
+        # the ONE safety policy's word lists: such a drawing is never made for the library; the label stays. A clearly benign compound ("queen bee", "water gun",
+        # "baby elephant": media_policy.BENIGN) is read as a plain noun by the lists and by the privacy filter, which only knows single words
+        personal = catalog_privacy.personal_reason(media_policy.cleared(name))
+        why = media_policy.text_reason(name) or ("banned word" if _BANNED.search(name) else None) or (f"personal ({personal})" if personal not in (None, "address") else None)
+        if why:
+            if refused is not None:
+                refused.setdefault(name, why)
             continue
         if oid not in [o for o, _ in out] and len(out) < limit:
             out.append((oid, name))
+    return out
+
+
+def descriptions(plan: Dict[str, Any], sure: float = 0.55) -> Dict[str, str]:
+    """object id -> what the director said the object LOOKS like (`describe` on the item, 3 to 24 plain English words), for the drawings that are asked for. Only a
+    description that the policy's word lists and the plain-English check let through is kept; a refused one is dropped and the drawing is made from its name alone."""
+    out: Dict[str, str] = {}
+    for it in _items(plan):
+        name = _wanted(it, sure)
+        d = " ".join(str(it.get("describe") or "").split()) if isinstance(it, dict) and name else ""
+        if name and d and 3 <= len(d.split()) <= 24 and len(d) <= 160 and re.fullmatch(r"[A-Za-z ,\-]+", d) and not media_policy.text_reason(d) and media_policy.english_only(d):
+            out.setdefault(object_id(name), d.lower())
     return out
 
 
@@ -90,7 +109,7 @@ def apply(plan: Dict[str, Any], made: Dict[str, str], sure: float = 0.55) -> int
     for it in _items(plan):
         name = _wanted(it, sure)
         if name and object_id(name) in made:
-            for k in ("write", "boxed", "hand", "tool", "align", "asked", "match"):
+            for k in ("write", "boxed", "hand", "tool", "align", "asked", "match", "describe"):
                 it.pop(k, None)
             it["draw"] = made[object_id(name)]
             n += 1
@@ -169,9 +188,12 @@ def tracer_maker(name: str) -> Maker:
     failing raises here and the boards keep what they had. Only plain English names go in; packages and their thumbnails come back."""
     import base64
 
-    def make(objs: List[Tuple[str, str]], timeout: float) -> Tuple[List[Dict[str, Any]], Dict[str, Any]]:
+    def make(objs: List[Tuple[str, str]], timeout: float, describe: Optional[Dict[str, str]] = None) -> Tuple[List[Dict[str, Any]], Dict[str, Any]]:
         try:
-            raw = (_invoke or _lambda_invoke)(name, json.dumps({"action": "make", "objects": [[o, n] for o, n in objs], "timeout": timeout}).encode(), timeout + 2.0)
+            body: Dict[str, Any] = {"action": "make", "objects": [[o, n] for o, n in objs], "timeout": timeout}
+            if describe:
+                body["describe"] = dict(describe)      # optional: a tracer that does not know the key ignores it
+            raw = (_invoke or _lambda_invoke)(name, json.dumps(body).encode(), timeout + 2.0)
         except Exception as e:   # noqa: BLE001 - not there, not allowed, throttled, or no answer in time
             code = str(getattr(e, "response", {}).get("Error", {}).get("Code") or type(e).__name__)
             late = "timeout" in code.lower() or "timed out" in str(e).lower()
@@ -199,9 +221,9 @@ def default_maker() -> Optional[Maker]:
         if not object_maker.available():
             return None
 
-        def make(objs: List[Tuple[str, str]], timeout: float) -> Tuple[List[Dict[str, Any]], Dict[str, Any]]:
+        def make(objs: List[Tuple[str, str]], timeout: float, describe: Optional[Dict[str, str]] = None) -> Tuple[List[Dict[str, Any]], Dict[str, Any]]:
             try:
-                return object_maker.make(objs, timeout)
+                return object_maker.make(objs, timeout, describe=describe)
             except object_maker.Refused as e:
                 raise Refused(e.kind, billed=e.billed) from None
         return make
@@ -295,6 +317,24 @@ def load_dynamic(store: Optional[cs.Store] = None) -> int:
         return 0
 
 
+def count_reuse(plan: Dict[str, Any], video_id: str, store: cs.Store) -> int:
+    """How many drawings on this plan's boards the library got on demand EARLIER (rows under WOBJ). Each is counted like a library clip or image that a video
+    reuses: the row's `uses` and distinct `videos`, the day's `used_library`, the metric. The report could not say whether a drawing we paid for was ever used
+    again. Best effort: a counter never costs a plan."""
+    try:
+        ids = {str(it.get("draw")) for it in _items(plan) if isinstance(it, dict) and it.get("draw")}
+        mine = sorted(str(r["sk"]) for r in store.query(WOBJ) if str(r["sk"]) in ids and r.get("status", "active") == "active") if ids else []
+        for oid in mine:
+            store.add(WOBJ, oid, {"uses": 1}, sets={"videos": [lib.video_ref(video_id)]}, fields={"last_used": int(time.time())})
+        if mine:
+            ondemand.emit("Used", len(mine), Source="library", Media=MEDIA)
+            ondemand._stat(store, MEDIA, used_library=len(mine))
+        return len(mine)
+    except Exception:   # noqa: BLE001
+        logging.exception("reuse of library drawings not counted")
+        return 0
+
+
 # ----------------------------------------------------------------------------- the safety policy on the finished drawings
 def _policy_gate(pkgs: List[Dict[str, Any]], stats: Dict[str, Any]) -> Tuple[List[Dict[str, Any]], Dict[str, Any], Dict[str, str]]:
     """Every drawing the maker accepted is shown to the policy's vision check (common/media_policy.py), in parallel. -> (the drawings that passed, stats, {id: why} of
@@ -329,9 +369,11 @@ def fill(plan: Dict[str, Any], *, video_id: str, ctx: Optional[Dict[str, Any]], 
         store = cs.current()
         if store is None:
             return out
+        count_reuse(plan, video_id, store)   # drawings of our library that an earlier video had made: every plan reuses them, and the report counts it
         cfg = clip_config.config()
-        want = missing(plan, int(cfg["object_max_per_call"]), float(cfg["object_sure_score"]))
-        if not want:
+        free_refused: Dict[str, str] = {}
+        want = missing(plan, int(cfg["object_max_per_call"]), float(cfg["object_sure_score"]), refused=free_refused)
+        if not want and not free_refused:
             return out
         out["asked"] = [n for _, n in want]
         kind = ondemand.entitlement(ctx)
@@ -343,6 +385,11 @@ def fill(plan: Dict[str, Any], *, video_id: str, ctx: Optional[Dict[str, Any]], 
                 out["reason"] = why
                 ondemand.decision(store, why, MEDIA)
                 return out
+        for name, why in free_refused.items():   # a name the free filters refused (the word lists, mostly) used to leave no trace: one decision each, like every other refusal
+            ondemand.decision(store, f"filter:{why}", MEDIA, name=name)
+        if not want:
+            out["reason"] = "filter"
+            return out
         maker = _maker or default_maker()
         if maker is None:
             out["reason"] = "no_tracer"
@@ -374,10 +421,13 @@ def fill(plan: Dict[str, Any], *, video_id: str, ctx: Optional[Dict[str, Any]], 
         store.put(ledger[0], ledger[1], {"at": int(t), "media": MEDIA, "outcome": "started", "brief": ", ".join(n for _, n in asks)[:200], "kind": kind, "reserved_usd": price, "charged_usd": price,
                                          "account": lib.account_ref(str(ctx["user_id"])), "video": lib.video_ref(video_id), "allowance_usd": allowance, "asked_n": len(asks), "ttl": int(t) + 500 * 86400})
         box: Dict[str, Any] = {}
+        wrote = descriptions(plan, float(cfg["object_sure_score"]))
+        described = {en_id: wrote[origin[en_id]] for en_id, _ in asks if origin.get(en_id) in wrote}      # id of the English name -> what it looks like (the generator is sent it with the name)
+        out["described"] = sorted(described)
 
         def run() -> None:
             try:
-                pkgs, stats = maker(asks, float(cfg["object_timeout_s"]))
+                pkgs, stats = maker(asks, float(cfg["object_timeout_s"]), **({"describe": described} if described else {}))
                 box["pkgs"], box["stats"], box["policy"] = _policy_gate(pkgs, stats or {})   # the same after-generation check as clips and images, on every drawing
             except Refused as e:
                 box["error"], box["billed"] = e.kind, e.billed

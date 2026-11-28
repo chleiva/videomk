@@ -1,21 +1,18 @@
 import SwiftUI
 import VideoMKCore
 
-/// The one Options sheet of Create (docs/UX_2026_REDESIGN.md 4.2): everything the three pills do not carry. For (all platforms, so VoiceOver users have
-/// every choice in one place), Look swatches, Quality, Subtitles, Language and the Format tiles. Formats the account cannot use are hidden, not dimmed.
+/// The one Options sheet of Create (docs/UX_2026_REDESIGN.md 4.2): everything the pills do not carry. Quality, Subtitles, Language and the Format tiles.
+/// The platform and the look are the pills on the dock and are not repeated here (two ways to set one thing is how "Auto" gets confusing).
+/// Formats the account cannot use are hidden, not dimmed.
 struct CreateOptionsSheet: View {
     @Bindable var create: CreateModel
     @Environment(\.dismiss) private var dismiss
     private var form: CreateForm { create.form }
 
-    @Environment(\.dynamicTypeSize) private var typeSize
-
     var body: some View {
         FittedSheet {
             VStack(alignment: .leading, spacing: Theme.Space.xl) {
                 SheetHeader(title: tr("create.options"), closeLabel: tr("common.done"), closeID: "optionsDone") { dismiss() }
-                group(tr("create.what_is_it_for")) { forChips }
-                group(create.caps.looks == nil ? tr("create.look") : tr("create.colours")) { looks }      // with the look picker, "Look" is the pill's word: these are the colours
                 resolutionControl
                 VStack(spacing: 0) {
                     Toggle(isOn: $create.form.captions) { Label(tr("create.subtitles"), systemImage: "captions.bubble").font(.role(.body)).foregroundStyle(Theme.text) }
@@ -30,54 +27,6 @@ struct CreateOptionsSheet: View {
 
     private func group<C: View>(_ title: String, @ViewBuilder content: () -> C) -> some View {
         VStack(alignment: .leading, spacing: Theme.Space.s) { SectionLabel(title); content() }
-    }
-
-    // for
-
-    private var forChips: some View {
-        WrapLayout(spacing: Theme.Space.s) {
-            ForEach(PlatformChips.make(create.caps)) { chip in
-                let selected = form.chip(create.caps)?.id == chip.id && !form.isCustom(create.caps)
-                ChoiceChip(title: chip.id == "other" ? tr("pill.video") : chip.label, selected: selected, spoken: chip.supported ? chip.label : tr("create.chip_soon_a11y", chip.label, create.caps.aspectName(chip.aspect)), identifier: "optPlatform-\(chip.id)") {
-                    create.form.select(chip); Haptics.play(.selection)
-                }
-                .disabled(!chip.supported)
-            }
-        }
-        .accessibilityElement(children: .contain)
-    }
-
-    // look
-
-    /// Four swatches in a row; at the largest text sizes two rows of two, so every name is whole and the same size.
-    @ViewBuilder private var looks: some View {
-        let all: [VideoLook?] = [nil] + VideoLook.allCases.map { Optional($0) }
-        if typeSize.isAccessibilitySize {
-            VStack(spacing: Theme.Space.m) {
-                HStack(alignment: .top, spacing: Theme.Space.m) { ForEach(all.prefix(2), id: \.self) { look($0) } }
-                HStack(alignment: .top, spacing: Theme.Space.m) { ForEach(all.suffix(2), id: \.self) { look($0) } }
-            }
-        } else {
-            HStack(alignment: .top, spacing: Theme.Space.m) { ForEach(all, id: \.self) { look($0) } }
-        }
-    }
-
-    private func look(_ look: VideoLook?) -> some View {
-        let selected = form.look == look
-        let title = look?.title ?? tr("create.look_auto")
-        return Button { create.form.look = look; Haptics.play(.selection) } label: {
-            VStack(spacing: 6) {
-                LookSwatch(look: look).aspectRatio(typeSize.isAccessibilitySize ? 2 : 3 / 3.6, contentMode: .fit).clipShape(RoundedRectangle(cornerRadius: Theme.Radii.thumb, style: .continuous))
-                    .padding(3).overlay(RoundedRectangle(cornerRadius: Theme.Radii.thumb + 3, style: .continuous).strokeBorder(Theme.primary, lineWidth: selected ? 2 : 0))
-                HStack(spacing: 3) {
-                    if selected { Image(systemName: "checkmark").font(.role(.caption, weight: .bold)).accessibilityHidden(true) }
-                    Text(title).font(.role(.footnote, weight: selected ? .semibold : .regular)).lineLimit(typeSize.isAccessibilitySize ? 2 : 1).multilineTextAlignment(.center)
-                }
-                .foregroundStyle(selected ? Theme.primary : Theme.text)
-            }
-        }
-        .buttonStyle(.plain).frame(maxWidth: .infinity)
-        .accessibilityLabel(look == nil ? tr("create.look_auto_a11y") : title).accessibilityAddTraits(selected ? .isSelected : []).accessibilityIdentifier("look-\(look?.rawValue ?? "auto")")
     }
 
     // quality
@@ -151,35 +100,11 @@ struct CreateOptionsSheet: View {
 /// The frame shape, drawn to its real proportions (16:9, 9:16, 1:1 and 4:5 are told apart at a glance).
 struct AspectGlyph: View {
     let ratio: String
+    var line: CGFloat = 2
+    var radius: CGFloat = 4
     var body: some View {
         let parts = ratio.split(separator: ":").compactMap { Double($0) }
         let r = parts.count == 2 && parts[1] > 0 ? parts[0] / parts[1] : 16.0 / 9.0
-        RoundedRectangle(cornerRadius: 4, style: .continuous).strokeBorder(lineWidth: 2).aspectRatio(r, contentMode: .fit).accessibilityHidden(true)
-    }
-}
-
-/// The little preview of a look: abstract, drawn, no assets.
-struct LookSwatch: View {
-    let look: VideoLook?
-    var body: some View {
-        ZStack {
-            switch look {
-            case nil:
-                Theme.primaryContainer
-                Image(systemName: "sparkles").font(.role(.title, weight: .regular)).foregroundStyle(Theme.primary)
-            case .midnight?:
-                LinearGradient(colors: [Color(hex: 0x1C2150), Color(hex: 0x0C0F28)], startPoint: .top, endPoint: .bottom)
-                lines([Theme.toastAccent, Color(hex: 0x7C80FF), Color(hex: 0x5F63F0)])
-            case .paper?:
-                Color(hex: 0xF6EEE2)
-                lines([Color(hex: 0x3B3226), Color(hex: 0x8C7F66), Color(hex: 0xB9AC92)])
-            case .sunrise?:
-                LinearGradient(colors: [Color(hex: 0xFFA763), Color(hex: 0xF0506E)], startPoint: .top, endPoint: .bottom)
-                lines([.white, .white.opacity(0.7), .white.opacity(0.45)])
-            }
-        }
-    }
-    private func lines(_ colors: [Color]) -> some View {
-        VStack(spacing: 6) { ForEach(Array(colors.enumerated()), id: \.offset) { _, c in Capsule().fill(c).frame(height: 3).padding(.horizontal, 18) } }
+        RoundedRectangle(cornerRadius: radius, style: .continuous).strokeBorder(lineWidth: line).aspectRatio(r, contentMode: .fit).accessibilityHidden(true)
     }
 }

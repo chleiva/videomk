@@ -40,7 +40,7 @@ CAST: Dict[str, Dict[str, Any]] = {
     "mateo": {"name": "Mateo", "role": "chef", "voices": ["Stephen"], "size": 1.03, "scene": "home_garden_backyard", "line": "Hey, I'm Mateo. Good food starts with fresh, simple ingredients."},
     "fox": {"name": "Fox", "role": "guide mascot", "voices": ["Gregory", "Joanna"], "size": 0.95, "scene": "autumn_forest_path", "line": "Hi! I'm Fox, your guide. Follow me, and let's explore together!"},
     # the animal cast (docs/PRESENTERS.md): used by vector_character_presenter_demo.py only
-    "owl": {"name": "Hugo", "role": "owl professor", "voices": ["Brian", "Matthew"], "size": 0.95, "scene": "library_interior_view", "line": "Good day, I'm Hugo. Every question is the start of a discovery."},
+    "owl": {"name": "Otto", "role": "owl professor", "voices": ["Brian", "Matthew"], "size": 0.95, "scene": "library_interior_view", "line": "Good day, I'm Otto. Every question is the start of a discovery."},
     "bear": {"name": "Bruno", "role": "wellbeing friend", "voices": ["Stephen", "Matthew"], "size": 1.04, "scene": "bedroom_window_morning", "line": "Hello, I'm Bruno. Let's take a slow, deep breath together."},
     "cat": {"name": "Mika", "role": "tech explorer", "voices": ["Olivia", "Salli"], "size": 0.96, "scene": "robotics_lab_window", "line": "Hi, I'm Mika. Let's open it up and see how it works!"},
     "parrot": {"name": "Paco", "role": "language and travel guide", "voices": ["Pedro", "Sergio"], "size": 0.94, "scene": "tropical_river_jungle", "line": "¡Hola! Soy Paco. ¿Listos para viajar?"},

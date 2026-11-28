@@ -11,6 +11,7 @@ import logging
 import os
 import time
 import uuid
+from decimal import Decimal
 from typing import Any, Dict, Optional, Tuple
 
 import boto3
@@ -20,7 +21,7 @@ from common.http import json_response
 from common.identity import extract_cognito_sub
 import plan_gate
 import video_retry
-from common import deck_limits, i18n, intake, library, look_choice, looks, ops_switches, safety, usage, wallet, watermark_store
+from common import deck_limits, dictation, i18n, intake, library, look_choice, looks, ops_switches, safety, usage, wallet, watermark_store
 from engine import format_options, presenter_policy, watermark_spec
 from common.photo_ids import MAX_PHOTOS, PhotoError, upload_key, valid_media_ids, valid_media_meta
 
@@ -117,6 +118,11 @@ def validate_options(body: Dict[str, Any]) -> Dict[str, Any]:
         if out.get("media") or out.get("library_media"):
             raise BadRequest(i18n.Localized("deck.with_photos"))
         out["deck"] = body["deck"]
+    if body.get("dictation_ids") is not None:   # paid dictations used to write this request (POST .../dictation): ids only; their cost is charged to the video in the handler (c_stt)
+        ids = body["dictation_ids"]
+        if not isinstance(ids, list) or len(ids) > dictation.MAX_IDS_PER_VIDEO or not all(isinstance(i, str) and dictation.ID_RE.match(i) for i in ids):
+            raise BadRequest(f"'dictation_ids' must be a list of at most {dictation.MAX_IDS_PER_VIDEO} dictation ids")
+        out["dictation_ids"] = ids
     if "captions" in body and body["captions"] is not None:
         if not isinstance(body["captions"], bool):
             raise BadRequest("'captions' must be true or false")
@@ -182,7 +188,7 @@ def apply_watermark(user_id: str, options: Dict[str, Any], loc: str) -> Optional
         profile = watermark_store.get_profile(user_id) if requested is None else None
         needs_logo = (requested or profile or {}).get("mode") == "custom"
         spec = watermark_store.resolve(requested, profile, premium=premium, forced=forced,
-                                       has_logo=watermark_store.has_logo(user_id) if needs_logo else False, modes=wr.get("modes"))
+                                       has_logo=watermark_store.has_logo(user_id) if needs_logo else False, modes=wr.get("modes"), test=bool(wr.get("test")))
         if forced and wr.get("by_plan"):
             spec = watermark_store.forced_spec(spec)
     except watermark_store.WatermarkError as e:
@@ -356,6 +362,14 @@ def handler(event: Dict[str, Any], context: Any):
         logger.error("STATE_MACHINE_ARN is not configured")
         return json_response(500, {"message": i18n.t("err.server_config", loc)})
 
+    dictation_ids = options.pop("dictation_ids", None)   # not part of the video's options (nothing downstream reads them): only the cost is kept
+    stt_extra: Dict[str, Any] = {}
+    if dictation_ids:
+        try:
+            stt_seconds, stt_usd, dictation_ids = dictation.totals(user_id, dictation_ids)
+        except ValueError:
+            return json_response(400, {"message": "'dictation_ids' must be your own recent dictations"})
+        stt_extra = {"c_stt": Decimal(str(round(stt_usd, 6))), "stt_seconds": Decimal(str(round(stt_seconds, 3))), "cost_usd": Decimal(str(round(stt_usd, 6))), "dictation_ids": dictation_ids}
     region = request_region(event)
     if region:
         options["region"] = region
@@ -440,7 +454,7 @@ def handler(event: Dict[str, Any], context: Any):
 
     try:
         _register_intent(user_id, prompt, video_id, usage_day, idempotent=idempotent, credits=credits, charge=charged, resolution=resolution,
-                         request={"options": options, "library_media": library_ids}, extra=plan_gate.record(gate, credits))
+                         request={"options": options, "library_media": library_ids}, extra={**plan_gate.record(gate, credits), **stt_extra})
         resp = _sfn.start_execution(
             stateMachineArn=sm_arn,
             name=video_id,  # one execution per video; duplicate starts fail fast

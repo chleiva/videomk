@@ -185,10 +185,10 @@ def test_the_knobs_parameter_is_not_owned_by_the_stack_so_a_deploy_can_never_res
 
 
 def test_plans_stay_frugal_with_cloudformation_resources(synth):
-    """The stack is close to CloudFormation's 500 resources: plans may add at most 36, the device routes 12 more, and the whole QA stack must keep room to grow."""
+    """The stack is close to CloudFormation's 500 resources: plans may add at most 46, the device routes 12 more, and the whole QA stack must keep room to grow."""
     flags = dict(deckToVideo="1", imageCatalog="1", socialGoogle="1", socialApple="1", intakeEnabled="1")
     off, on, dev = (len(synth(**flags, **x)["Resources"]) for x in ({"plans": "0"}, {}, {"deviceProof": "1"}))
-    assert on - off <= 34 and dev - on <= 12 and dev <= 470, (off, on, dev)
+    assert on - off <= 44 and dev - on <= 12 and dev <= 480, (off, on, dev)   # 34 -> 44 and 470 -> 480: paid dictation adds 8 (function, role, policy, route, preflight, alarm)
 
 
 def test_every_plans_function_can_be_called_by_the_api(synth):
@@ -197,3 +197,18 @@ def test_every_plans_function_can_be_called_by_the_api(synth):
         logical = next(k for k, v in of(t, "AWS::Lambda::Function").items() if v["Properties"].get("FunctionName") == name)
         perms = [p["Properties"] for p in of(t, "AWS::Lambda::Permission").values() if logical in json.dumps(p["Properties"]["FunctionName"])]
         assert len(perms) == 1 and perms[0]["Principal"] == "apigateway.amazonaws.com" and "execute-api" in json.dumps(perms[0]["SourceArn"]), name
+
+
+def test_paid_dictation_is_additive_least_privilege_and_has_a_route_with_preflight(synth):
+    t = synth()
+    f = fn(t, "dictation_api")
+    assert f["Properties"]["Timeout"] == 30 and env(t, "dictation_api")["OPENAI_SSM_PARAM"] == "/videomk/openai_api_key" and env(t, "dictation_api")["PLANS_ENABLED"] == "1"
+    acts = {a for s in statements(t, "dictation_api") for a in s["actions"]}
+    assert "ssm:GetParameter" in acts and "dynamodb:UpdateItem" in acts and not {a for a in acts if a.startswith(("s3:", "sns:", "states:", "bedrock:", "cognito"))}
+    ent = [s for s in statements(t, "dictation_api") if "Entitlements" in s["resources"]]
+    assert ent and all(s["actions"] == ["dynamodb:GetItem"] for s in ent)   # the entitlements table stays read-only for it
+    paths = {r["Properties"]["PathPart"] for r in of(t, "AWS::ApiGateway::Resource").values()}
+    assert "dictation" in paths
+    methods = [m["Properties"] for m in of(t, "AWS::ApiGateway::Method").values() if "dictation" in json.dumps(m["Properties"].get("ResourceId", ""))]
+    assert sorted(m["HttpMethod"] for m in methods) == ["OPTIONS", "POST"] and next(m for m in methods if m["HttpMethod"] == "POST")["AuthorizationType"] == "COGNITO_USER_POOLS"
+    assert not [k for k, v in of(t, "AWS::DynamoDB::Table").items() if "Dictation" in k]   # no new table

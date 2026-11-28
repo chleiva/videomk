@@ -119,7 +119,7 @@ def test_exactly_one_of_the_older_policies_is_on_per_direction():
         assert (v.allowed, w.allowed, p.allowed) == on
         if p.allowed:
             assert p.every and p.cap(9) == 9 and p.prompt_block() == "" and p.cast_ids == d.cast and v.share == ad.BACKDROP_ONLY_SHARE
-    assert "CARTOON VIDEO" in ad.prompt_block(ad.Direction("presenter", cast=["owl"])) and "Hugo" in ad.prompt_block(ad.Direction("presenter", cast=["owl"]))
+    assert "CARTOON VIDEO" in ad.prompt_block(ad.Direction("presenter", cast=["owl"])) and "Otto" in ad.prompt_block(ad.Direction("presenter", cast=["owl"]))
     talk = ad.prompt_block(ad.Direction("conversation", cast=["fox", "bear"]), minutes=1.0)
     assert "CONVERSATION" in talk and '"talk": true' in talk and "fox, bear" in talk and "about 10 beats" in talk
     assert "HAND-DRAWN BOARD" in ad.prompt_block(ad.Direction("presenter_board", cast=["owl"])) and ad.prompt_block(ad.Direction("footage")) == "" and ad.prompt_block(ad.Direction("whiteboard")) == ""

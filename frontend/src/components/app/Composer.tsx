@@ -2,9 +2,10 @@
 // popover for everything else, Create with its price. Everything the server offers comes from capabilities (docs/CREATE_API.md); the AI decides voice, music and pace.
 // Same flow as the apps: request check (kind questions, or a polite "we can't make this") then generate; a retry can never bill twice (same request id).
 import "../../styles/app-b.css";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Sheet, Spinner } from "../ui";
-import { AIcon as Icon } from "./icons";
+import { AIcon as Icon, shapeGlyph } from "./icons";
+import { hasFinishedVideo } from "./firstVideo";
 import { Menu, Popover, Segmented } from "./Menu";
 import DeckPicker, { useDeck } from "../DeckPicker";
 import MediaPicker from "./MediaPicker";
@@ -23,7 +24,7 @@ import { AUTO, loadLook, lookHints, normalizeChoice, optionOf, presetFor, rememb
 import type { LookChoice } from "../../lib/looks";
 import { createLock, planName } from "../../lib/plan";
 import { DECK_ASPECT, deckAspectWarning, deckCredits, deckGenerateExtras, deckMinutes } from "../../lib/deck";
-import { appendDictation, dictationSupported, speechLang, startDictation } from "../../lib/dictation";
+import { dictationSupported, speechLang, startDictation } from "../../lib/dictation";
 import type { Dictation } from "../../lib/dictation";
 import { APP_PATHS } from "../../lib/links";
 import { rememberPrompt } from "../../lib/prompts";
@@ -32,7 +33,7 @@ import { directDeps } from "../../lib/uploadDeps";
 import { useLocale } from "../../lib/useLocale";
 import type { Photo } from "../../lib/library";
 
-const EXAMPLES = ["create.example1", "create.example2", "create.example3", "create.example4"];
+const EXAMPLES = ["create.example1", "create.example2", "create.example3"];   // three (the apps show the same three); two on a short window (CSS)
 const MEDIA_SELECTION = "vmk_media_selection";   // My media keeps its ticked photos here while the composer is open, so Back returns to the same selection
 const HANDOFF = "vmk_compose_library";       // My media -> "Make a video": the chosen photos wait here for the composer
 // The scene-style row stays hidden until the server's VECTOR_SCENES switch is on in this environment (docs/VECTOR_SCENE_POLICY.md): set PUBLIC_SCENE_STYLE=1 at build time then.
@@ -72,28 +73,32 @@ export default function Composer() {
   const [lookLine, setLookLine] = useState<string | null>(null);   // one line when a chosen look went back to Auto (photos or a deck were attached)
   const briefNote = useRef<string | undefined>(undefined);
   const [stage, setStage] = useState<Stage>({ k: "form" });
-  const [hint, setHint] = useState<{ text: string; credits?: boolean } | null>(null);
+  const [hint, setHint] = useState<{ text: string; credits?: boolean; soft?: boolean } | null>(null);   // soft: a tap on the inactive Create said what is missing; it fades by itself
+  const [finished, setFinished] = useState<boolean | null>(null);   // has this account finished a video (null: not known yet)
   const [sending, setSending] = useState(false);
   const [other, setOther] = useState("");
   const [picker, setPicker] = useState(false);
   const [libPicks, setLibPicks] = useState<LibPick[]>([]);
   const [previews, setPreviews] = useState<Record<string, string>>({});
   const [listening, setListening] = useState(false);
-  const [micError, setMicError] = useState(false);
+  const [micError, setMicError] = useState<null | "denied" | "language">(null);
   const [picked, setPicked] = useState<number | null>(null);   // the length chosen for a deck video (null: the deck's suggestion)
   const req = useRef<{ key: string; id: string }>({ key: "", id: "" });
   const area = useRef<HTMLTextAreaElement>(null);
   const files = useRef<HTMLInputElement>(null);
   const deckInput = useRef<HTMLInputElement>(null);
   const dict = useRef<Dictation | null>(null);
-  const dictBase = useRef("");
+  const textNow = useRef("");   // what the box holds right now: dictation reads it to notice hand edits
   const urls = useRef<string[]>([]);
-  const formEl = useRef<HTMLFormElement>(null);
+  const topEl = useRef<HTMLDivElement>(null);   // prompt, photos, notes: locked (inert, dimmed) while a request is checked or sent
+  const toolRow = useRef<HTMLDivElement>(null);
   const checkRun = useRef(0);   // a request check that was cancelled must not act when its answer arrives late
 
   const photos = useUploadQueue(directDeps);
   const lockedNow = sending || stage.k === "checking";
-  useEffect(() => { const el = formEl.current; if (!el) return; el.toggleAttribute("inert", lockedNow); if (lockedNow) (document.activeElement as HTMLElement | null)?.blur?.(); }, [lockedNow]);
+  useEffect(() => { const el = topEl.current; if (!el) return; el.toggleAttribute("inert", lockedNow); if (lockedNow) (document.activeElement as HTMLElement | null)?.blur?.(); }, [lockedNow]);
+
+  useEffect(() => { if (!hint?.soft) return; const id = window.setTimeout(() => setHint(null), 4500); return () => window.clearTimeout(id); }, [hint]);
 
   useEffect(() => {
     let alive = true;
@@ -111,12 +116,14 @@ export default function Composer() {
       setForm(normalize({ ...defaultForm(cc, loadSaved()), pick: loadLook() ?? AUTO, ...pre, text: prompt }, cc));   // the look chosen last time, when it is still offered
     });
     getWallet().then((w) => { if (alive) { setWallet(w); setWalletRead(true); } });
+    hasFinishedVideo().then((v) => { if (alive) setFinished(v); });
     setLibPicks(readHandoff());
     return () => { alive = false; dict.current?.stop(); urls.current.forEach((u) => URL.revokeObjectURL(u)); };
   }, []);
 
   const c = caps ?? FALLBACK_CAPS;
   const f = form;
+  textNow.current = f?.text ?? "";
   const set = useCallback((patch: Partial<Form>) => setForm((x) => (x ? normalize({ ...x, ...patch }, c) : x)), [c]);
   const deck = useDeck(c.deck);
   const ready = deck.state.k === "ready" ? deck.state : null;
@@ -161,10 +168,15 @@ export default function Composer() {
   const canDictate = useMemo(() => dictationSupported(), []);
   function toggleDictation() {
     if (listening) { dict.current?.stop(); return; }
-    setMicError(false);
-    dictBase.current = f?.text ?? "";
-    const d = startDictation(speechLang(locale), (heard) => setForm((x) => (x ? { ...x, text: appendDictation(dictBase.current, heard).slice(0, 1500) } : x)), (why) => { setListening(false); if (why === "denied") setMicError(true); area.current?.focus(); });
-    if (d) { dict.current = d; setListening(true); } else setMicError(true);
+    setMicError(null);
+    const d = startDictation({
+      lang: speechLang(locale),
+      getText: () => textNow.current,
+      setText: (text) => setForm((x) => (x ? { ...x, text } : x)),
+      maxLength: 1500,
+      onEnd: (why) => { setListening(false); if (why === "denied") setMicError("denied"); else if (why === "language") setMicError("language"); area.current?.focus(); },
+    });
+    if (d) { dict.current = d; setListening(true); } else setMicError("denied");
   }
 
   // ---- price
@@ -182,6 +194,22 @@ export default function Composer() {
   const gate = walletRead ? createLock(wallet, c.plans) : null;
   const nameOfPlan = (id: string | null) => planName(wallet?.plans ?? c.plans, id);
   const fitHint = totalPhotos > capacity ? (() => { const better = minutesForPhotos(totalPhotos, c); return better ? t("create.photos_fit_better", { n: capacity, total: totalPhotos, length: lengthLabel(minutes), better: lengthLabel(better) }) : t("create.photos_fit", { n: capacity, total: totalPhotos, length: lengthLabel(minutes) }); })() : null;
+
+  // Create sits at the end of the tool row. When the row cannot hold the tools and Create (large text, zoom, a narrow window) Create moves to a row of its own, full width:
+  // the layout the brief keeps as the fallback. Measured, not guessed: class off, does Create wrap? class on if so. Synchronous, so nothing flashes.
+  useLayoutEffect(() => {
+    const row = toolRow.current; if (!row) return;
+    const measure = () => {
+      const go = row.querySelector<HTMLElement>(".compose-go"), cl = row.querySelector<HTMLElement>(".tool-cluster"); if (!go || !cl) return;
+      row.classList.remove("is-stacked");
+      const say = row.querySelector<HTMLElement>(".tool-listening");
+      row.classList.toggle("is-stacked", go.getBoundingClientRect().top > cl.getBoundingClientRect().top + 8 || (!!say && say.scrollWidth > say.clientWidth + 1));
+    };
+    measure();
+    if (typeof ResizeObserver === "undefined") return;
+    const ro = new ResizeObserver(measure); ro.observe(row.parentElement ?? row);
+    return () => ro.disconnect();
+  }, [!!f && !!caps, locale, listening, credits, totalPhotos, deckActive, lockedNow]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ---- sending
   const options = () => buildOptions(f!, c, live, lookCtx);
@@ -216,13 +244,13 @@ export default function Composer() {
 
   async function submit(e?: React.FormEvent) {
     e?.preventDefault();
-    if (!f || sending || stage.k !== "form" || busyDeck || addingPhotos) return;
+    if (!f || sending || stage.k !== "form" || busyDeck || addingPhotos || listening) return;
     const text = f.text.trim();
     if (ready) {
       if (!enough) { setHint({ text: t("create.not_enough", { needed: credits, balance: wallet?.balance ?? 0 }), credits: true }); return; }
       await generate(); return;   // the prompt is optional with a deck; the deck is checked on the server
     }
-    if (!text) { area.current?.focus(); return; }
+    if (!text) { setHint({ text: t("create.need_text"), soft: true }); area.current?.focus(); return; }   // the inactive Create stays tappable: it says what is missing
     if (text.length < 15) { setHint({ text: t("gen.more_detail") }); area.current?.focus(); return; }
     if (!enough) { setHint({ text: t("create.not_enough", { needed: credits, balance: wallet?.balance ?? 0 }), credits: true }); return; }
     if (!live || c.intake === false) { await generate(); return; }
@@ -263,7 +291,15 @@ export default function Composer() {
 
   const pv = pillValues(f, c, t("create.other_platform"));
   const lookLabel = (l: string) => t(`create.look_${l}`);
-  const forItems = c.platforms.map((p) => ({ id: p.id, label: p.id === "other" ? t("create.other_platform") : p.label, checked: f.platform === p.id }));
+  const aspects = c.aspects.filter((a) => a.ready);
+  // For: the platforms the server lists, then the shapes no platform starts with (Square, Portrait): the Format row of the Options sheet moved here, so a shape is chosen in ONE place
+  const extraShapes = aspects.filter((a) => !c.platforms.some((p) => p.id !== "other" && p.aspect === a.id));
+  const onShape = f.platform === "other" && extraShapes.some((a) => a.id === f.aspect);
+  const forItems = [
+    ...c.platforms.map((p) => ({ id: p.id, label: p.id === "other" ? t("create.other_platform") : p.label, checked: f.platform === p.id && !onShape })),
+    ...extraShapes.map((a) => ({ id: `shape:${a.id}`, label: a.label, checked: onShape && f.aspect === a.id })),
+  ];
+  const forLabel = onShape ? shapeName(f.aspect, c) : pv.for;
   const lenRows = lengthMenu(c, f);
   const lengthItems = [
     ...(ready ? [{ id: "suggested", label: t("deck.suggested_chip", { length: lengthLabel(ready.suggested_minutes) }), checked: picked === null }] : []),
@@ -272,11 +308,16 @@ export default function Composer() {
   const lookItems = LOOKS.map((l) => ({ id: l, label: <span className="look-item"><i className={`swatch swatch-${l}`} aria-hidden="true" />{lookLabel(l)}</span>, checked: f.look === l }));
   const wm = c.watermark;
   const quality = qualityChoices(c, f);
-  const aspects = c.aspects.filter((a) => a.ready);
   const questionTitle = stage.k === "questions" ? t("create.questions_title") : stage.k === "stop" ? (stage.kind === "paused" ? t("create.paused_title") : t("create.cant_make_title")) : "";
   const locked = sending || stage.k === "checking";   // from the tap until the answer: nothing on the form can change, and it says what is happening
   const canSend = !sending && !busyDeck && !addingPhotos && stage.k === "form" && (ready ? true : f.text.trim().length > 0);
+  const inactive = !canSend || listening;   // Create stays tappable: the tap says what is missing (opaque fill, no glow)
+  const why = listening ? "create.state_listening" : addingPhotos || busyDeck ? "create.state_wait" : "create.state_need_text";
+  const costWords = t("create.credits", { n: credits });
   const empty = !f.text.trim() && !deckActive && totalPhotos === 0;
+  // the price is taught once: until this account has a finished video, "2 credits. You have 11."; afterwards the balance lives in the header chip and shows here only when low
+  const spendable = wallet && !wallet.unlimited && enough;
+  const caption = !spendable || locked || hint ? null : finished === false ? t("create.first_caption", { credits: costWords, balance: wallet!.balance }) : wallet!.balance < 2 * credits ? t("create.credits_left", { n: wallet!.balance }) : null;
 
   return (
     <section className="page compose">
@@ -285,9 +326,10 @@ export default function Composer() {
         <h1 className="compose-title">{t("create.heading")}</h1>
       </div>
 
-      <form ref={formEl} className={`composer-card ${locked ? "is-locked" : ""}`} aria-busy={locked} onSubmit={submit} onDragOver={(e) => { if (e.dataTransfer.types.includes("Files")) e.preventDefault(); }} onDrop={(e) => { if (e.dataTransfer.files.length) { e.preventDefault(); addFiles(e.dataTransfer.files); } }}>
+      <form className={`composer-card ${locked ? "is-locked" : ""}`} aria-busy={locked} onSubmit={submit} onDragOver={(e) => { if (e.dataTransfer.types.includes("Files")) e.preventDefault(); }} onDrop={(e) => { if (e.dataTransfer.files.length) { e.preventDefault(); addFiles(e.dataTransfer.files); } }}>
+        <div className="composer-top" ref={topEl}>
         <label htmlFor="create-text" className="sr-only-vmk">{t("create.prompt_label")}</label>
-        <textarea id="create-text" ref={area} data-autofocus autoFocus rows={3} className="compose-text" value={f.text} maxLength={1500} placeholder={ready ? t("deck.placeholder") : t("create.placeholder")} aria-describedby="create-hint"
+        <textarea id="create-text" ref={area} data-autofocus autoFocus rows={3} className="compose-text" value={f.text} readOnly={listening} maxLength={1500} placeholder={ready ? t("deck.placeholder") : t("create.placeholder")} aria-describedby="create-hint"
           onChange={(e) => { setHint(null); set({ text: e.target.value }); }}
           onKeyDown={(e) => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); void submit(); } }}
           onPaste={(e) => { const pics = pictureFiles(Array.from(e.clipboardData.files)); if (pics.length) { e.preventDefault(); addFiles(pics); } }} />
@@ -316,78 +358,89 @@ export default function Composer() {
 
         {deckActive && c.deck && live && <DeckPicker caps={c.deck} deck={deck} />}
 
-        {lookLine && <p className="look-reset" role="status">{lookLine}</p>}{/* right above the pill it explains; it goes with the next choice */}
-        <div className="composer-bar">
-          <div className="composer-tools">
-            <Menu label={t("create.add_photos")} className="tool" triggerClass="icon-btn tool-btn" trigger={<Icon name="image" size={22} />} align="start"
-              items={[{ id: "device", label: t("create.from_device"), disabled: room === 0 || deckActive }, { id: "media", label: t("create.from_media"), disabled: room === 0 || deckActive }]}
-              onPick={(id) => { if (id === "device") files.current?.click(); else setPicker(true); }} />
-            {c.deck && live && <button type="button" className="icon-btn tool-btn" aria-label={t("deck.add_title")} title={t("deck.add_title")} disabled={totalPhotos > 0 || busyDeck} onClick={() => deckInput.current?.click()}><Icon name="slides" size={22} /></button>}
-            {canDictate && <button type="button" className={`icon-btn tool-btn ${listening ? "is-live" : ""}`} aria-pressed={listening} aria-label={listening ? t("create.dictating") : t("create.dictate")} title={t("create.dictate")} onClick={toggleDictation}><Icon name="mic" size={22} /></button>}
-          </div>
-
-          <div className="composer-pills">
-            {c.platforms.length > 0 && <Menu label={t("create.pill_for")} triggerClass="pill" trigger={<><span className="pill-k">{t("create.pill_for_k")}</span><span>{pv.for}</span><Icon name="chevdown" size={16} /></>} items={forItems} onPick={(id) => setForm(selectPlatform(f, c, id))} />}
-            <Menu label={t("create.pill_length")} triggerClass="pill" trigger={<><span>{ready ? lengthLabel(minutes) : pv.length}</span><Icon name="chevdown" size={16} /></>} items={lengthItems}
-              onPick={(id) => (ready ? setPicked(id === "suggested" ? null : Number(id)) : set({ minutes: Number(id) }))} />
-            {looks ? <LookPicker caps={looks} choice={pick} ctx={lookCtx} planName={nameOfPlan} onChange={choosePick} /> : <Menu label={t("create.pill_look")} triggerClass="pill" trigger={<><span className="pill-k">{t("create.pill_look_k")}</span><span className="pill-v">{lookLabel(f.look)}</span><span className="pill-phone">{t("create.pill_look_phone", { look: lookLabel(f.look) })}</span><Icon name="chevdown" size={16} /></>} items={lookItems} onPick={(id) => set({ look: id as Form["look"] })} />}
-            {live && (
-              <Popover label={t("create.options")} triggerClass="icon-btn tool-btn" trigger={<Icon name="sliders" size={22} />}>
-                {(close) => (
-                  <div className="opts">
-                    <div className="opts-head"><h2 className="h2">{t("create.options")}</h2><button type="button" className="btn btn-tonal btn-sm" onClick={close}>{t("create.done")}</button></div>
-                    {aspects.length > 1 && <div className="opt"><p className="label" id="o-format">{t("create.format")}</p><Segmented label={t("create.format")} value={f.aspect} options={aspects.map((a) => ({ id: a.id, label: a.label }))} onChange={(v) => set({ aspect: v })} /></div>}
-                    {quality.length > 1 && <div className="opt"><p className="label">{t("create.resolution")}</p><Segmented label={t("create.resolution")} value={f.resolution} options={quality.map((r) => ({ id: r.id, label: r.label, disabled: r.available === false, hint: r.available === false ? nameOfPlan(r.requires_plan ?? null) ?? undefined : r.credits_multiplier > 1 ? `${r.credits_multiplier}×` : undefined }))} onChange={(v) => set({ resolution: v })} />
-                      {resolutionsFor(c, f.aspect).find((r) => r.id === f.resolution)?.credits_multiplier! > 1 && <p className="hint">{t("create.cost_4k_double")}</p>}</div>}
-                    <label className="opt-row" htmlFor="o-captions"><span>{t("create.subtitles")}</span><input id="o-captions" type="checkbox" role="switch" className="vm-switch" checked={f.captions} onChange={(e) => set({ captions: e.target.checked })} /></label>
-                    {c.languages.length > 0 && <label className="opt-row" htmlFor="o-lang"><span>{t("create.narration")}</span><select id="o-lang" className="field field-inline" value={f.language} onChange={(e) => set({ language: e.target.value })}><option value="auto">{t("create.lang_auto")}</option>{c.languages.map((l) => <option key={l.id} value={l.id}>{l.label}</option>)}</select></label>}
-                    {looks && <div className="opt"><p className="label">{t("create.colors")}</p><Segmented label={t("create.colors")} value={f.look} options={LOOKS.map((l) => ({ id: l, label: lookLabel(l) }))} onChange={(v) => set({ look: v })} /></div>}
-                    {SCENE_STYLE_ON && !looks && !ready && <div className="opt"><p className="label">{t("create.scenes_title")}</p><Segmented label={t("create.scenes_a11y")} value={f.scenes} options={[{ id: "auto", label: t("create.scenes_auto") }, { id: "cartoon", label: t("create.scenes_illustrated") }, { id: "real", label: t("create.scenes_real") }]} onChange={(v) => set({ scenes: v })} /><p className="hint">{t("create.scenes_hint")}</p></div>}
-                    {wm && <div className="opt"><p className="label">{t("create.wm_title")}</p>
-                      <Segmented label={t("create.wm_title")} value={f.watermark ?? "saved"} options={[
-                        ...(wm.forced ? [] : [{ id: "saved", label: t("create.wm_saved") }]),
-                        ...wm.modes.map((m) => ({ id: m.id, label: t(m.id === "none" ? "create.wm_none" : m.id === "videomk" ? "create.wm_videomk" : m.available ? "create.wm_custom" : "create.wm_custom_locked"), disabled: !m.available })),
-                      ]} onChange={(v) => set({ watermark: v === "saved" ? null : (v as Form["watermark"]) })} />
-                      {wm.forced && <p className="hint">{t("create.wm_forced")}</p>}</div>}
-                    <p className="hint">{t("create.options_note")}</p>
-                  </div>
-                )}
-              </Popover>
-            )}
-          </div>
-
-          <button type="submit" className="btn btn-primary compose-go" disabled={!canSend} aria-busy={sending || stage.k === "checking"} aria-label={t("create.cta_a11y", { credits: t("create.credits", { n: credits }) })}>
-            {sending || stage.k === "checking" ? <><Spinner /><span>{t("create.cta_word")}</span></> : addingPhotos ? <><Spinner /><span>{t("create.photos_wait")}</span></> : <><span>{t("create.cta_word")}</span><span className="go-cost"><Icon name="bolt" size={16} />{credits}</span></>}
-          </button>
+        {/* status: only what there is to say (nothing persistent: the placeholder says what to do) */}
+        <div className="compose-notes" aria-live="polite">
+          {micError && <p className="hint hint-bad" role="status">{t(micError === "language" ? "create.dictate_language" : "create.dictate_denied")}</p>}
+          {hint && <p id="create-hint" className="hint hint-bad" role="status">{hint.text}{hint.credits && <> <a href={APP_PATHS.credits}>{t("create.see_credits")}</a></>}</p>}
+          {!hint && <p id="create-hint" className="sr-only-vmk" />}
+          {!hint && wallet && !wallet.unlimited && !enough && <p className="hint">{t("create.not_enough", { needed: credits, balance: wallet.balance })} <a href={APP_PATHS.credits}>{t("create.see_credits")}</a></p>}
+          {limit != null && platform && <p className="hint">{t("create.max_length", { platform: platform.label, length: lengthLabel(limit) })}</p>}
+          {fitHint && <p className="hint">{fitHint}</p>}
+          {advice && <p className="hint">{advice}</p>}
+          {lh?.minSeconds != null && <p className="hint">{t("create.pick_min", { look: lookName, length: lengthLabel(lh.minSeconds / 60) })}{longer != null && <> <button type="button" className="cost-link" onClick={() => set({ minutes: longer })}>{t("create.pick_use", { length: lengthLabel(longer) })}</button></>}</p>}
+          {lh?.minSeconds == null && lh?.conversationSeconds != null && <p className="hint">{t("create.pick_talk_min", { length: lengthLabel(lh.conversationSeconds / 60) })}{longer != null && <> <button type="button" className="cost-link" onClick={() => set({ minutes: longer })}>{t("create.pick_use", { length: lengthLabel(longer) })}</button></>}</p>}
+          {lh?.bestAspects && <p className="hint">{t("create.pick_best", { look: lookName, shape: shapeName(lh.bestAspects[0], c) })} <button type="button" className="cost-link" onClick={() => set({ aspect: lh.bestAspects![0] })}>{t("create.pick_use_shape", { shape: shapeName(lh.bestAspects[0], c) })}</button></p>}
+          {ready && deckAspectWarning(f.aspect) && <p className="hint">{t("deck.vertical_warn")} <button type="button" className="cost-link" onClick={() => set({ aspect: DECK_ASPECT })}>{t("deck.use_landscape")}</button></p>}
         </div>
+
+        {lookLine && <p className="look-reset" role="status">{lookLine}</p>}{/* right above the pill it explains; it goes with the next choice */}
+        </div>
+
+        {locked ? (
+          <div className="create-capsule" role="status">
+            <Spinner /><span>{sending ? t("create.starting") : t("create.checking")}</span>
+            {!sending && <button type="button" className="btn btn-line btn-sm" onClick={cancelCheck}>{t("create.cancel")}</button>}
+          </div>
+        ) : (
+          <div className="composer-bar">
+            {/* ONE row of pills (made for, length, look; the Characters pill only when the look has a cast). A fifth control never goes here: extras live in Options. */}
+            <div className="composer-pills">
+              {c.platforms.length > 0 && <Menu label={t("create.pill_for")} triggerClass="pill" trigger={<><Icon name={shapeGlyph(f.aspect)} size={16} className="pill-glyph" /><span className="pill-v">{forLabel}</span><Icon name="chevdown" size={16} /></>} items={forItems}
+                onPick={(id) => (id.startsWith("shape:") ? setForm(normalize({ ...f, platform: "other", aspect: id.slice(6) }, c)) : setForm(selectPlatform(f, c, id)))} />}
+              <Menu label={t("create.pill_length")} triggerClass="pill" trigger={<><Icon name="clock" size={16} className="pill-glyph" /><span className="pill-v">{ready ? lengthLabel(minutes) : pv.length}</span><Icon name="chevdown" size={16} /></>} items={lengthItems}
+                onPick={(id) => (ready ? setPicked(id === "suggested" ? null : Number(id)) : set({ minutes: Number(id) }))} />
+              {looks ? <LookPicker caps={looks} choice={pick} ctx={lookCtx} planName={nameOfPlan} onChange={choosePick} /> : <Menu label={t("create.pill_look")} triggerClass="pill" trigger={<><Icon name="sparkle" size={16} className="pill-glyph" /><span className="pill-v">{lookLabel(f.look)}</span><Icon name="chevdown" size={16} /></>} items={lookItems} onPick={(id) => set({ look: id as Form["look"] })} />}
+            </div>
+
+            {/* ONE tool row: photo, mic and Options on the left, Create (with its price) at the trailing end */}
+            <div className="composer-tools" ref={toolRow}>
+              <div className="tool-cluster">
+                {!deckActive && (
+                  <Menu label={t("create.add_photos")} className="tool" triggerClass="icon-btn tool-btn" disabled={listening} trigger={<><Icon name="addphoto" size={22} />{totalPhotos > 0 && <span className="tool-badge" aria-hidden="true">{totalPhotos}</span>}</>} align="start"
+                    items={[{ id: "device", label: t("create.from_device"), disabled: room === 0 }, { id: "media", label: t("create.from_media"), disabled: room === 0 },
+                      ...(c.deck && live ? [{ id: "deck", label: t("deck.add_title"), disabled: totalPhotos > 0 || busyDeck }] : [])]}
+                    onPick={(id) => { if (id === "device") files.current?.click(); else if (id === "media") setPicker(true); else deckInput.current?.click(); }} />
+                )}
+                {canDictate && <button type="button" className={`icon-btn tool-btn ${listening ? "is-live" : ""}`} aria-label={listening ? t("create.dictate_stop") : t("create.dictate")} title={listening ? t("create.dictate_stop") : t("create.dictate")} onClick={toggleDictation}><Icon name={listening ? "stop" : "mic"} size={22} /></button>}
+                {live && (
+                  <Popover label={t("create.options")} className="opts-root" triggerClass="tool-btn tool-options" disabled={listening} trigger={<><Icon name="sliders" size={22} /><span className="tool-options-label">{t("create.options")}</span></>}>
+                    {(close) => (
+                      <div className="opts">
+                        <div className="opts-head"><h2 className="h2">{t("create.options")}</h2><button type="button" className="btn btn-tonal btn-sm" onClick={close}>{t("create.done")}</button></div>
+                        {quality.length > 1 && <div className="opt"><p className="label">{t("create.resolution")}</p><Segmented label={t("create.resolution")} value={f.resolution} options={quality.map((r) => ({ id: r.id, label: r.label, disabled: r.available === false, hint: r.available === false ? nameOfPlan(r.requires_plan ?? null) ?? undefined : r.credits_multiplier > 1 ? `${r.credits_multiplier}×` : undefined }))} onChange={(v) => set({ resolution: v })} />
+                          {resolutionsFor(c, f.aspect).find((r) => r.id === f.resolution)?.credits_multiplier! > 1 && <p className="hint">{t("create.cost_4k_double")}</p>}</div>}
+                        <label className="opt-row" htmlFor="o-captions"><span>{t("create.subtitles")}</span><input id="o-captions" type="checkbox" role="switch" className="vm-switch" checked={f.captions} onChange={(e) => set({ captions: e.target.checked })} /></label>
+                        {c.languages.length > 0 && <label className="opt-row" htmlFor="o-lang"><span>{t("create.narration")}</span><select id="o-lang" className="field field-inline" value={f.language} onChange={(e) => set({ language: e.target.value })}><option value="auto">{t("create.lang_auto")}</option>{c.languages.map((l) => <option key={l.id} value={l.id}>{l.label}</option>)}</select></label>}
+                        {looks && <div className="opt"><p className="label">{t("create.colors")}</p><Segmented label={t("create.colors")} value={f.look} options={LOOKS.map((l) => ({ id: l, label: lookLabel(l) }))} onChange={(v) => set({ look: v })} /></div>}
+                        {SCENE_STYLE_ON && !looks && !ready && <div className="opt"><p className="label">{t("create.scenes_title")}</p><Segmented label={t("create.scenes_a11y")} value={f.scenes} options={[{ id: "auto", label: t("create.scenes_auto") }, { id: "cartoon", label: t("create.scenes_illustrated") }, { id: "real", label: t("create.scenes_real") }]} onChange={(v) => set({ scenes: v })} /><p className="hint">{t("create.scenes_hint")}</p></div>}
+                        {wm && <div className="opt"><p className="label">{t("create.wm_title")}</p>
+                          <Segmented label={t("create.wm_title")} value={f.watermark ?? "saved"} options={[
+                            ...(wm.forced ? [] : [{ id: "saved", label: t("create.wm_saved") }]),
+                            ...wm.modes.map((m) => ({ id: m.id, label: t(m.id === "none" ? "create.wm_none" : m.id === "videomk" ? "create.wm_videomk" : m.available ? "create.wm_custom" : "create.wm_custom_locked"), disabled: !m.available })),
+                          ]} onChange={(v) => set({ watermark: v === "saved" ? null : (v as Form["watermark"]) })} />
+                          {wm.forced && <p className="hint">{t("create.wm_forced")}</p>}</div>}
+                        <p className="hint">{t("create.options_note")}</p>
+                      </div>
+                    )}
+                  </Popover>
+                )}
+                {listening && <span className="tool-listening"><span className="live-dot" aria-hidden="true" />{t("create.dictating")}</span>}
+              </div>
+
+              <button type="submit" className={`btn btn-primary compose-go ${inactive ? "is-inactive" : ""}`} aria-disabled={inactive || undefined} aria-describedby="create-state" aria-label={t("create.cta_name")}>
+                <span>{t("create.cta_word")}</span><span className="go-cost"><Icon name="bolt" size={16} />{credits}</span>
+              </button>
+              <span id="create-state" className="sr-only-vmk">{inactive ? t(why) : t("create.state_ready", { credits: costWords })}</span>
+            </div>
+            {caption && <p className="compose-balance">{caption}</p>}
+          </div>
+        )}
         <input ref={files} type="file" hidden tabIndex={-1} accept="image/*" multiple onChange={(e) => { addFiles(e.target.files); e.target.value = ""; }} />
         {c.deck && <input ref={deckInput} type="file" hidden tabIndex={-1} accept={c.deck.formats.map((x) => (x === "pdf" ? ".pdf" : ".pptx")).join(",")} onChange={(e) => { const file = e.target.files?.[0]; if (file) void deck.begin(file); e.target.value = ""; }} />}
       </form>
 
-      {locked && (
-        <p className="compose-progress" role="status">
-          <Spinner /><span>{sending ? t("create.starting") : t("create.checking")}</span>
-          {!sending && <button type="button" className="btn btn-line btn-sm" onClick={cancelCheck}>{t("create.cancel")}</button>}
-        </p>
-      )}
-
-      <div className="compose-notes" aria-live="polite">
-        {listening && <p className="hint"><span className="live-dot" aria-hidden="true" /> {t("create.dictating")}</p>}
-        {micError && <p className="hint hint-bad" role="status">{t("create.dictate_denied")}</p>}
-        {hint && <p id="create-hint" className="hint hint-bad" role="status">{hint.text}{hint.credits && <> <a href={APP_PATHS.credits}>{t("create.see_credits")}</a></>}</p>}
-        {!hint && <p id="create-hint" className="sr-only-vmk" />}
-        {!hint && wallet && !wallet.unlimited && !enough && <p className="hint">{t("create.not_enough", { needed: credits, balance: wallet.balance })} <a href={APP_PATHS.credits}>{t("create.see_credits")}</a></p>}
-        {!hint && wallet && !wallet.unlimited && enough && !locked && <p className="compose-balance">{t("create.credits_left", { n: wallet.balance })}</p>}
-        {limit != null && platform && <p className="hint">{t("create.max_length", { platform: platform.label, length: lengthLabel(limit) })}</p>}
-        {fitHint && <p className="hint">{fitHint}</p>}
-        {advice && <p className="hint">{advice}</p>}
-        {lh?.minSeconds != null && <p className="hint">{t("create.pick_min", { look: lookName, length: lengthLabel(lh.minSeconds / 60) })}{longer != null && <> <button type="button" className="cost-link" onClick={() => set({ minutes: longer })}>{t("create.pick_use", { length: lengthLabel(longer) })}</button></>}</p>}
-        {lh?.minSeconds == null && lh?.conversationSeconds != null && <p className="hint">{t("create.pick_talk_min", { length: lengthLabel(lh.conversationSeconds / 60) })}{longer != null && <> <button type="button" className="cost-link" onClick={() => set({ minutes: longer })}>{t("create.pick_use", { length: lengthLabel(longer) })}</button></>}</p>}
-        {lh?.bestAspects && <p className="hint">{t("create.pick_best", { look: lookName, shape: shapeName(lh.bestAspects[0], c) })} <button type="button" className="cost-link" onClick={() => set({ aspect: lh.bestAspects![0] })}>{t("create.pick_use_shape", { shape: shapeName(lh.bestAspects[0], c) })}</button></p>}
-        {ready && deckAspectWarning(f.aspect) && <p className="hint">{t("deck.vertical_warn")} <button type="button" className="cost-link" onClick={() => set({ aspect: DECK_ASPECT })}>{t("deck.use_landscape")}</button></p>}
-      </div>
-
-      {empty && (
+      {/* the example chips are a first-run help: only while the field is empty and the account has no finished video */}
+      {empty && finished === false && (
         <div className="chips compose-examples" role="group" aria-label={t("create.try_one")}>
           {EXAMPLES.map((k) => <button key={k} type="button" className="chip" onClick={() => { setHint(null); set({ text: t(k) }); area.current?.focus(); }}><Icon name="sparkle" size={15} />{t(k)}</button>)}
         </div>

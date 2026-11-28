@@ -60,12 +60,17 @@ def lambda_handler(event, context=None):
     why = media_policy.text_reason(*[n for _, n in objs])   # the caller already checked; the function refuses on its own too, whoever calls it
     if why:
         return {"refused": why, "billed": False}
+    described = {}
+    for oid, d in (event.get("describe") or {}).items() if isinstance(event.get("describe"), dict) else []:      # optional: what an object looks like; anything not plain, short and clean is dropped
+        if isinstance(oid, str) and isinstance(d, str) and oid in [o for o, _ in objs] and 3 <= len(d.split()) <= 24 and len(d) <= 160 and re.fullmatch(r"[a-z ,\-]+", d) \
+                and not media_policy.text_reason(d) and media_policy.english_only(d):
+            described[oid] = d
     try:
         timeout = max(5.0, min(MAX_TIMEOUT_S, float(event.get("timeout") or 30.0)))
     except (TypeError, ValueError):
         timeout = 30.0
     try:
-        pkgs, stats = object_maker.make(objs, timeout)
+        pkgs, stats = object_maker.make(objs, timeout, **({"describe": described} if described else {}))
     except object_maker.Refused as e:
         logging.warning("tracer refused: %s (billed=%s)", e.kind, e.billed)
         return {"refused": e.kind, "billed": e.billed}

@@ -180,7 +180,7 @@ def test_auto_only_where_it_fits_and_never_on_photos_decks_news_or_whiteboard(mo
     # a Spanish children's video with no topic of another animal gets the parrot; fun videos and English ones keep the fox
     assert pp.decide("El ciclo del agua para niños", skill_ids=["kids-family"], language="es").character == "parrot"
     assert pp.decide("Algo divertido sobre calcetines", skill_ids=["funny-light"], language="es").character == "fox"
-    assert pp.voice_for("parrot", "es") == "Pedro" and pp.voice_for("owl", "en") == "Brian" and pp.voice_for("bear", "en") == "Stephen"
+    assert pp.voice_for("parrot", "es") == "Carlos" and pp.voice_for("owl", "en") == "Brian" and pp.voice_for("bear", "en") == "Stephen"   # Spanish: the lively man (it was Pedro)
     monkeypatch.setenv("PRESENTERS", "0")
     off = pp.decide("The water cycle for kids, explained by a fox", skill_ids=["kids-family"])
     assert not off.allowed and off.reason == "flag_off" and off.prompt_block() == ""
@@ -230,7 +230,7 @@ def test_enforce_sets_character_voice_cap_and_opens_and_closes_with_the_presente
         if b["scene"]["type"] == "presenter":
             b["scene"]["props"] = E.sanitize(b["scene"]["props"])
     pp.enforce(es, pp.decide("El ciclo del agua, con una doctora como presentadora", skill_ids=["kids-family"], language="es"))
-    assert es["voices"] == {"narrator": "Mia"} and es["presenter"]["character"] == "priya"
+    assert es["voices"] == {"narrator": "Lupe"} and es["presenter"]["character"] == "priya"
     assert pp.backdrops(plan, ["autumn_forest_path", "lake"]) == 2 and plan["beats"][0]["scene"]["props"]["backdrop"] == "autumn_forest_path"
     off = {"beats": beats(pres)}
     assert pp.enforce(off, pp.Policy(False, "kind_of_video")) == [] and off["presenter"]["decision"] == "no" and "voices" not in off
@@ -302,7 +302,7 @@ def test_capabilities_lists_the_cast_with_labels_in_both_languages(monkeypatch):
     en, es = capabilities_api.presenter("en", True), capabilities_api.presenter("es", True)
     assert en["param"] == "presenter" and en["default"] == "auto" and en["available"] is True and [o["id"] for o in en["options"]] == ["auto", "none"]
     assert [c["id"] for c in en["cast"]] == list(pp.ORDER) and [c["id"] for c in en["cast"]][:5] == ["ines", "david", "priya", "mateo", "fox"]
-    assert [c["name"] for c in en["cast"]] == ["Inés", "David", "Priya", "Mateo", "Fox", "Hugo", "Bruno", "Mika", "Paco", "Tula"]
+    assert [c["name"] for c in en["cast"]] == ["Inés", "David", "Priya", "Mateo", "Fox", "Otto", "Bruno", "Mika", "Paco", "Tula"]
     assert [c["role"] for c in en["cast"]] == ["Teacher", "Engineer", "Doctor", "Chef", "Guide for children", "Owl professor", "Caring bear", "Curious cat", "Travelling parrot", "Wise turtle"]
     assert [c["role"] for c in es["cast"]] == ["Profesora", "Ingeniero", "Doctora", "Chef", "Guía para niños", "Búho profesor", "Oso cariñoso", "Gata curiosa", "Loro viajero", "Tortuga sabia"]
     assert all(c["thumbnail"].startswith("data:image/png;base64,") and len(c["thumbnail"]) < 8000 for c in en["cast"])

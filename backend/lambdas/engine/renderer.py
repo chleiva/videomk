@@ -15,7 +15,7 @@ from .frame import Frame
 from .scenes import SCENES
 from .scenes.formats import draw_framed, is_native
 from .scenes.base import SceneCtx
-from .scenes.captions import draw_captions
+from .scenes.captions import draw_captions, draw_translation, translation_height
 from .theme import get_theme
 
 
@@ -163,10 +163,12 @@ class Renderer:
             with numfmt.language_scope(self.ctx.language):
                 rep = draw_framed(cv, draw[0], sc.get("props") or {}, max(0.0, lt), float(sc["duration"]), self.theme, self.ctx, bg_t=bg_t, ambience=amb)
             self.fallbacks[str(sc.get("id", ""))] = dict(rep, type=sc["type"])
-        if self.ctx.captions:
-            words = sc.get("words")
-            if words:
-                draw_captions(cv, self.theme, words, lt, fr)
+        words = sc.get("words") if self.ctx.captions else None
+        tr = sc.get("translation")   # a line spoken in another language than the video's (engine/plan_langs.py): its translation row shows even with captions off
+        if words:
+            draw_captions(cv, self.theme, words, lt, fr, translation_height(cv, fr, tr) if tr else 0.0)
+        if tr:
+            draw_translation(cv, self.theme, tr, lt, fr)
         if self.big and not self.draft:   # 4K: straight from the supersampled canvas to the output size (never through the 1080 design size)
             return cv.to_rgb((self.out_w, self.out_h))
         return cv.to_rgb()   # design size; frame_at scales it to the output size

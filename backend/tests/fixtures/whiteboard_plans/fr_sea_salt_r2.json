@@ -1,0 +1,313 @@
+{
+ "beats": [
+  {
+   "narration": "Pourquoi la mer est-elle salée, alors que la pluie et les rivières sont douces ? Tout commence au ciel : la pluie tombe sur les montagnes et les roches.",
+   "scene": {
+    "type": "whiteboard",
+    "props": {
+     "items": [
+      {
+       "id": "t",
+       "write": "Mer salée ?",
+       "tool": "marker",
+       "zone": "top",
+       "size": "l",
+       "say": "salée"
+      },
+      {
+       "id": "q",
+       "draw": "question_mark",
+       "zone": "top-left",
+       "size": "m",
+       "say": "pluie"
+      },
+      {
+       "id": "c",
+       "draw": "rain_cloud",
+       "zone": "top-right",
+       "size": "l",
+       "say": "douces"
+      },
+      {
+       "id": "cl",
+       "write": "pluie",
+       "tool": "pen",
+       "near": "c",
+       "side": "below",
+       "size": "s",
+       "say": "ciel"
+      },
+      {
+       "id": "em0_cl",
+       "mark": "underline",
+       "on": "cl",
+       "color": "red",
+       "say": "pluie"
+      },
+      {
+       "id": "m",
+       "draw": "mountain",
+       "zone": "right",
+       "size": "l",
+       "say": "montagnes"
+      },
+      {
+       "id": "ml",
+       "write": "roches",
+       "tool": "pen",
+       "near": "m",
+       "side": "below",
+       "size": "s",
+       "say": "roches"
+      },
+      {
+       "id": "u",
+       "mark": "underline",
+       "on": "t",
+       "color": "red"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "narration": "La pluie est un peu acide. Elle grignote lentement les roches et en détache de minuscules particules : les sels minéraux. Les rivières les emportent vers la mer.",
+   "scene": {
+    "type": "whiteboard",
+    "props": {
+     "items": [
+      {
+       "id": "r",
+       "draw": "river",
+       "zone": "centre",
+       "size": "l",
+       "say": "acide"
+      },
+      {
+       "id": "em0_r",
+       "mark": "circle",
+       "on": "r",
+       "color": "red",
+       "say": "lentement"
+      },
+      {
+       "id": "rl",
+       "write": "sels minéraux",
+       "tool": "pen",
+       "near": "r",
+       "side": "below",
+       "size": "s",
+       "say": "particules"
+      },
+      {
+       "id": "w",
+       "draw": "sea_waves",
+       "zone": "left",
+       "size": "l",
+       "say": "rivières"
+      },
+      {
+       "id": "a3",
+       "connect": "arrow",
+       "from": "r",
+       "to": "w",
+       "color": "blue",
+       "say": "emportent"
+      },
+      {
+       "id": "wl",
+       "write": "mer",
+       "tool": "pen",
+       "near": "w",
+       "side": "below",
+       "size": "s",
+       "say": "mer"
+      },
+      {
+       "id": "cr",
+       "mark": "circle",
+       "on": "rl",
+       "color": "red"
+      }
+     ],
+     "board": "same"
+    }
+   }
+  },
+  {
+   "narration": "Là, le soleil fait évaporer l'eau, mais le sel reste. Pendant des millions d'années, il s'accumule. Aujourd'hui, un kilo d'eau de mer contient environ 35 grammes de sel.",
+   "scene": {
+    "type": "whiteboard",
+    "props": {
+     "items": [
+      {
+       "id": "t2",
+       "write": "Le sel s'accumule",
+       "tool": "marker",
+       "zone": "top",
+       "size": "l",
+       "say": "fait"
+      },
+      {
+       "id": "s",
+       "draw": "sun",
+       "zone": "top-right",
+       "size": "l",
+       "say": "mais"
+      },
+      {
+       "id": "ws",
+       "draw": "sea_waves",
+       "zone": "right",
+       "size": "l",
+       "say": "reste"
+      },
+      {
+       "id": "a4",
+       "connect": "wavy",
+       "from": "ws",
+       "to": "s",
+       "color": "orange",
+       "say": "des"
+      },
+      {
+       "id": "cal",
+       "draw": "calendar",
+       "zone": "centre",
+       "size": "l",
+       "say": "danne"
+      },
+      {
+       "id": "em1_cal",
+       "mark": "circle",
+       "on": "cal",
+       "color": "blue",
+       "say": "s'accumule"
+      },
+      {
+       "id": "sc",
+       "draw": "scale_balance",
+       "zone": "bottom-left",
+       "size": "l",
+       "say": "kilo"
+      },
+      {
+       "id": "scl",
+       "write": "eau de mer",
+       "tool": "pen",
+       "near": "sc",
+       "side": "above",
+       "size": "s",
+       "say": "mer"
+      },
+      {
+       "id": "n",
+       "write": "35 g / kg",
+       "tool": "marker",
+       "ink": "blue",
+       "zone": "bottom",
+       "size": "xl",
+       "say": "35"
+      },
+      {
+       "id": "bx",
+       "mark": "circle",
+       "on": "n",
+       "color": "red",
+       "say": "sel"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "narration": "Le sel ne s'évapore pas, il s'ajoute. Retenez : les rivières apportent le sel, le soleil enlève l'eau, et la mer reste salée.",
+   "scene": {
+    "type": "whiteboard",
+    "props": {
+     "items": [
+      {
+       "id": "sw",
+       "write": "sel",
+       "tool": "marker",
+       "ink": "blue",
+       "zone": "left",
+       "size": "l",
+       "say": "s'évapore"
+      },
+      {
+       "id": "su",
+       "mark": "underline",
+       "on": "sw",
+       "color": "red",
+       "say": "s'ajoute"
+      },
+      {
+       "id": "r2",
+       "draw": "river",
+       "zone": "top-left",
+       "size": "m",
+       "say": "rivières"
+      },
+      {
+       "id": "a5",
+       "connect": "arrow",
+       "from": "r2",
+       "to": "sw",
+       "color": "blue",
+       "say": "sel"
+      },
+      {
+       "id": "sol",
+       "write": "soleil",
+       "tool": "pen",
+       "near": "sw",
+       "side": "below",
+       "size": "s",
+       "say": "soleil"
+      },
+      {
+       "id": "em0_sol",
+       "mark": "circle",
+       "on": "sol",
+       "color": "blue",
+       "say": "l'eau"
+      },
+      {
+       "id": "k",
+       "write": "Rivières + soleil = mer salée",
+       "tool": "marker",
+       "ink": "green",
+       "zone": "bottom-right",
+       "size": "l",
+       "say": "mer"
+      },
+      {
+       "id": "d",
+       "mark": "double_underline",
+       "on": "k",
+       "color": "red",
+       "say": "salée"
+      }
+     ],
+     "board": "same"
+    }
+   }
+  }
+ ],
+ "captions": true,
+ "frame": {
+  "aspect": "16:9",
+  "resolution": "1080p",
+  "width": 1920,
+  "height": 1080,
+  "orientation": "landscape",
+  "platform": "other"
+ },
+ "language": "fr",
+ "whiteboard": {
+  "decision": "whiteboard",
+  "reason": "asked",
+  "asked": true
+ }
+}

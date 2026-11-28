@@ -99,6 +99,10 @@ def _sanitize(props: Dict[str, Any]) -> Dict[str, Any]:
                         o["fill"] = False
                 else:                                  # not in the library: its name, written in a box
                     o["write"], o["boxed"] = name.replace("_", " ")[:28], True
+                if ("boxed" in o or "asked" in o) and isinstance(it.get("describe"), str):      # what the director says it looks like: sent to the drawer if it is made (engine/object_ondemand.py)
+                    text_ = " ".join(re.sub(r"[^A-Za-z ,\-]", " ", it["describe"]).split())[:160]
+                    if len(text_.split()) >= 3:
+                        o["describe"] = text_
             else:
                 text = "\n".join(_clean_text(line) for line in str(it.get("write") or "").split("\n")[:5] if _clean_text(line))
                 if not text:

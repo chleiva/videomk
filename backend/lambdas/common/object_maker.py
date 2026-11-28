@@ -114,7 +114,7 @@ def sheet(prompt: str, size: str, timeout: float, *, key: Optional[str] = None, 
 
 
 def make(objs: List[Tuple[str, str]], timeout: float, *, key: Optional[str] = None, opener: Optional[Callable[..., Any]] = None,
-         moderate: Optional[Callable[..., Optional[str]]] = None) -> Tuple[List[Dict[str, Any]], Dict[str, Any]]:
+         moderate: Optional[Callable[..., Optional[str]]] = None, describe: Optional[Dict[str, str]] = None) -> Tuple[List[Dict[str, Any]], Dict[str, Any]]:
     """-> (accepted packages, stats). stats: sheet_s, sheet_usd, cut_s, object_s, total_s, rejected {id: why}, thumbs {id: JPEG of the finished drawing}."""
     mods = load()
     if mods is None:
@@ -124,7 +124,9 @@ def make(objs: List[Tuple[str, str]], timeout: float, *, key: Optional[str] = No
 
     t0, n = time.time(), lib_build.COLS * lib_build.ROWS
     objs = list(objs)[:n]
-    subjects = [name for _, name in objs] + ["a small plain circle"] * (n - len(objs))
+    describe = describe or {}
+    # a short description of what the object looks like goes to the generator with its name (round 2: "sundial" alone came back as a clock or a stick)
+    subjects = [f"{name}, {describe[oid]}" if describe.get(oid) else name for oid, name in objs] + ["a small plain circle"] * (n - len(objs))
     prompt = gen_art.HOUSE.format(n=n, cols=lib_build.COLS, rows=lib_build.ROWS, subjects="; ".join(f"({i + 1}) {s}" for i, s in enumerate(subjects)))
     png, usd = sheet(prompt, gen_art.SIZE, timeout, key=key, opener=opener, moderate=moderate)
     stats: Dict[str, Any] = {"sheet_s": round(time.time() - t0, 1), "sheet_usd": round(usd, 4), "rejected": {}, "thumbs": {}}

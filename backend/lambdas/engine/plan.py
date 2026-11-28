@@ -130,6 +130,25 @@ def no_notes_text() -> str:
     return ("(none) No sources were found for this topic. Stay general and well known: no specific numbers, dates, names, quantities, studies or quotes except those in the request itself; "
             "do not invent examples presented as facts.")
 
+# How the script is WORDED for the voice (2026-11-27, docs/POLLY_LIVELY_DEFAULTS_2026-11-27.md). Polly's lively voices take their melody from the text: no tag
+# adds expression, the wording does. Measured on plans written with and without this rule and said by the default voice. It is deliberately modest: the lively
+# rewrite of the first study (two exclamations and a question in sixty words) moved the voice most and read like a children's programme.
+SPOKEN_RHYTHM_RULE = (
+    "- Spoken rhythm. The narration is read by a voice that takes its melody from the words, so write it the way a good presenter talks, in the video's language:\n"
+    "  * Vary the length of the sentences: a short one after a long one, never three of the same shape in a row.\n"
+    "  * Ask a real question where a curious viewer would ask one (the hook, a turn in the story) and answer it at once: one or two in a short video, never one in every beat.\n"
+    "  * Link the ideas with the words people use when they talk (so, but, because, that is why: their natural equivalents in the video's language) and use the "
+    "everyday spoken forms of the language (contractions where it has them) rather than written, formal ones.\n"
+    "  * Write numbers the way they are said: rounded when the exact figure is not the point (\"about 300\", \"almost half\", \"one in four\"), at most two in a sentence.\n"
+    "  * It stays an explainer for adults unless the brief says otherwise: calm and clear, at most one exclamation mark in the whole video and only where something "
+    "is truly surprising, no \"wow\", no talking down, and no slogan as a last line that only says the point again.\n")
+
+
+def spoken_rhythm_rule() -> str:
+    """The rule above, unless the server setting SPOKEN_RHYTHM is 0 (to compare videos with and without it)."""
+    return "" if os.environ.get("SPOKEN_RHYTHM", "1") == "0" else SPOKEN_RHYTHM_RULE
+
+
 def search_language_rule(language: str) -> str:
     """Stock photo and clip libraries are searched in English. English and Spanish videos keep the prompt they always had."""
     if language in ("en", "es"):
@@ -177,7 +196,7 @@ Voices: never a voice name of your own choosing. For each speaker say what you W
 Rules:
 - Open with a hook in the first beat (a surprising fact or question), not "Welcome to...". End with a takeaway.
 - Narration is written for the ear: short sentences, concrete words, no markdown, no emoji, no stage directions.
-- Vary the visuals: never use the same scene type more than twice in a row; prefer diagrams, charts and timelines over bullets when the content is structured.
+{spoken_rhythm_rule()}- Vary the visuals: never use the same scene type more than twice in a row; prefer diagrams, charts and timelines over bullets when the content is structured.
 {images_rule(max_images_per_minute, clips=allow_clips and os.environ.get('CLIPS_ENABLED', '1') != '0')}
 {music_rules(music_tracks)}
 - Be accurate. Use the grounding notes for facts and numbers. If something is uncertain, say so or leave it out.
@@ -351,7 +370,7 @@ def photo_frame_s(target_minutes: float) -> float:
 
 def words_per_s(language: str = "en") -> float:
     """The words a second the budget counts on, in this language. English and Spanish: SPOKEN_WORDS_PER_S, as always. The other languages say more or
-    fewer WORDS in the same time (French 3.03 a second, Finnish 1.95, measured: engine/length.WORDS_PER_S), so the same budget in words gave a French video
+    fewer WORDS in the same time (French 3.41 a second, Finnish 1.95, measured: engine/length.WORDS_PER_S), so the same budget in words gave a French video
     whose narration ended 10 s early and would give a Finnish one that has to be cut: their budget is the English one in the proportion of the real rates."""
     from . import length
 
@@ -863,6 +882,8 @@ def _validate_plan(plan: Dict[str, Any], *, max_beats: int = MAX_BEATS, language
         sp = voice_mod.speaker_id(b.get("speaker"))
         if sp:
             beat["speaker"] = sp
+        if _s(b.get("translation"), 400) and not silent:   # a line of a multilingual conversation, said again in the video's language (engine/polyglot.py); no other plan has one
+            beat["translation"] = _s(b.get("translation"), 400)
         if _s(b.get("chapter"), 60):
             beat["chapter"] = _s(b.get("chapter"), 60)
         beats.append(beat)

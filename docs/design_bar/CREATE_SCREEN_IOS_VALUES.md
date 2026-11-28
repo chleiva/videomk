@@ -1,0 +1,2 @@
+# iOS Create v2 values
+Pills: one row, leading glyph, 44 pt min touch. Tool row: photo-plus, mic, Options (icon + label) 48 pt tools; Create pill 48 pt high, min width 112, label + bolt + credits, label never truncates (fixedSize). Create inactive: opaque fill, secondary label, still tappable. Accessibility sizes: Create on its own row, 52 pt, full width; dock text capped at accessibility1. Recording: filled red Stop, "Listening..." centred, attach/Options disabled, Create inactive.

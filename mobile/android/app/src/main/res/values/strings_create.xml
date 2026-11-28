@@ -144,6 +144,8 @@
     <string name="dictation_network">Dictation needs an internet connection right now. You can type your idea instead.</string>
     <string name="dictation_error_keyboard">Dictation isn\'t working right now, so use the microphone key on your keyboard.</string>
     <string name="dictation_error">Dictation isn\'t available right now. You can type your idea instead.</string>
+    <string name="dictation_language_unavailable_keyboard">Dictation isn\'t available in %1$s on this phone, so use the microphone key on your keyboard.</string>
+    <string name="dictation_language_unavailable">Dictation isn\'t available in %1$s on this phone. You can type your idea instead.</string>
     <plurals name="create_add_photos_selected_desc">
         <item quantity="one">Add photos. %1$d selected</item>
         <item quantity="other">Add photos. %1$d selected</item>

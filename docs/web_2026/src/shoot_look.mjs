@@ -226,7 +226,7 @@ await run("cartoon", {}, async (page, log) => {
   check("Cartoon + Fox + Bruno + board: look, cast (ids in order), extras in generate", b?.look === "cartoon" && JSON.stringify(b.cast) === '["fox","bear"]' && JSON.stringify(b.extras) === '["board"]', JSON.stringify(b));
   check("... and the same three keys in the options of brief", brief?.options?.look === "cartoon" && JSON.stringify(brief.options.cast) === '["fox","bear"]' && JSON.stringify(brief.options.extras) === '["board"]', JSON.stringify(brief));
   await go(page);
-  check("the last choice is remembered on this device", (await page.locator(".look-pill-v").textContent()) === "Cartoon" && (await page.locator(".look-pill-faces .face-img").count()) === 2);
+  check("the last choice is remembered on this device", (await page.locator(".look-pill-v").textContent()) === "Cartoon" && (await page.locator(".cast-pill .face-img").count()) === 2);   // the faces moved from the Look pill to the Characters pill (create redesign)
 });
 await run("keyboard", {}, async (page, log) => {
   await go(page); await page.locator("#create-text").fill(TEXT.en);
