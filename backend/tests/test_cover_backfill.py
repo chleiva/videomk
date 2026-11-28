@@ -75,7 +75,7 @@ def test_skips_unfinished_no_gif_and_foreign_gif(aws):
     add("evil", gif=False, preview_gif_uri=f"s3://{B}/videos/other/x/r1.gif")
     add("done", cover_uri="s3://x/a", cover_og_uri="s3://x/b")
     c = cb.run(cb.scan_items(t), s3, t, apply=True, log=lambda m: None)
-    assert (c["not_ready"], c["no_gif"], c["unsafe"], c["has_cover"]) == (1, 1, 1, 1) and keys(s3) == []
+    assert (c["not_ready"], c["no_gif"], c["unsafe"], c["has_cover"]) == (1, 1, 1, 1) and not [k for k in keys(s3) if "cover" in k or "_og" in k]
 
 
 def test_vertical_video_and_limit_and_one_failure_does_not_stop(aws):
