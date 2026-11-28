@@ -302,6 +302,32 @@ NEIGHBOURS = (   # topic stems -> neighbouring places a cartoon backdrop may sho
 )
 
 
+SEA_RE = re.compile(r"\b(?:seas?|seaside|seashore|oceans?|oceanic|beach\w*|coast\w*|shores?|tides?|waves?|whales?|dolphins?|marine|lighthouses?|islands?|lakes?|rivers?|harbou?rs?|reefs?|underwater|playas?|oc[eé]anos?|costas?)\b", re.I)
+SEA_WORDS = {"sea", "ocean", "beach", "lake", "river", "coast", "shore", "harbour", "harbor", "pond", "reef", "waves", "underwater", "lagoon", "bay", "cove", "marina"}
+
+
+def sea_topic(text: str) -> bool:
+    """The request is about the sea, a beach, a lake or a river: its backdrop must be a place of water and shore, never an unrelated meadow (docs/SEA_BACKDROP_2_2026-11-28.md)."""
+    return bool(SEA_RE.search(text or ""))
+
+
+def _sea_ids() -> set:
+    """The catalog backdrops whose own title, id or tags name a place of water."""
+    try:
+        from common import vector_catalog as vc
+
+        return {it["id"] for it in vc.load_index()["items"]
+                if SEA_WORDS & ({w for w in str(it["id"]).lower().split("_")} | {str(t).lower() for t in it.get("tags") or []} | {w for w in str(it.get("title") or "").lower().split()})}
+    except Exception:  # noqa: BLE001
+        logging.exception("vector catalog index unreadable")
+        return set()
+
+
+def themed_ground(text: str) -> str:
+    """The drawn ground that fits the request's place: sand and sea for a sea topic, else the meadow floor."""
+    return stand_zone.BEACH_ID if sea_topic(text) else stand_zone.PROC_ID
+
+
 def _neighbour_queries(prompt: str) -> List[str]:
     low = " " + (prompt or "").lower()
     return [q for stems, q in NEIGHBOURS if any((" " + st) in low or ("-" + st) in low for st in stems)]
@@ -312,9 +338,13 @@ def stand_backdrops(v: vector_policy.Policy, prompt: str, aspect: str, n_cast: i
     is over those only, so it cannot end with a topic's backdrops that all refuse the cast), THEN they are ranked by the topic (the request, the director's setting, and neighbouring
     places: the sea also searches beach and coast). A topic-near one (score >= CREDIBLE) wins; else the neutral one that fits the open-ground query best (a meadow, a park); when
     nothing can be scored (no search), or no catalog backdrop holds the cast, the drawn ground (stand_zone.PROC_ID) stays: characters always stand on something."""
+    sea = sea_topic(prompt) or sea_topic(str((v.judged or {}).get("scene") or ""))
     cap = stand_zone.capable(aspect, n_cast, _catalog_ids())
+    if sea:   # a topic of water keeps its place: only water backdrops may hold the cast, else the drawn beach (sand floor, sea behind), never a meadow
+        wet = _sea_ids()
+        cap = [i for i in cap if i in wet]
     if not cap:
-        return [stand_zone.PROC_ID]
+        return [themed_ground(prompt) if sea else stand_zone.PROC_ID]
     run = v.search or search
     if run is vector_policy._default_search:   # its floor (a score of 0.30) is for the menu of scenes; here every score is wanted
         run = None
@@ -339,6 +369,8 @@ def stand_backdrops(v: vector_policy.Policy, prompt: str, aspect: str, n_cast: i
     near = [i for i in sorted(topic, key=lambda i: -topic[i]) if topic[i] >= CREDIBLE][:3]
     if near:
         return near
+    if sea:
+        return [stand_zone.BEACH_ID]
     neutral = scores(NEUTRAL_QUERY)
     return [i for i in sorted(neutral, key=lambda i: -neutral[i])][:3] or [stand_zone.PROC_ID]
 
@@ -661,8 +693,8 @@ def _enforce_cartoon(plan: Dict[str, Any], d: Direction, repairs: List[Dict[str,
     if len(stand) < len(backdrops):
         repairs.append({"beat": -1, "from": "backdrops " + ",".join(b for b in backdrops if b not in stand), "to": "none", "why": "no ground for the cast on those backdrops"})
     if not stand and pres:   # no catalog backdrop holds this cast here (or none was offered): the drawn ground, so the characters always stand on something
-        stand = [stand_zone.PROC_ID]
-        repairs.append({"beat": -1, "from": "no backdrop", "to": stand_zone.PROC_ID, "why": "the characters stand on the drawn ground"})
+        stand = [themed_ground(" ".join([str(plan.get("title") or "")] + [str(b.get("narration") or "") for b in beats]))]
+        repairs.append({"beat": -1, "from": "no backdrop", "to": stand[0], "why": "the characters stand on the drawn ground"})
     backdrops = stand
     for b in pres:   # a backdrop an earlier step set that cannot hold the cast is replaced, or taken off (the plain background stays)
         p0 = b["scene"]["props"]

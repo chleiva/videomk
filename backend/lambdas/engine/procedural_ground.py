@@ -68,12 +68,48 @@ def _hills(cv: Canvas, hz: float, base: float, amp: float, phase: float, color: 
     cv.polygon(pts, fill=color + (255,))
 
 
-def draw(cv: Canvas, th: Any, ctx: Any, lt: float = 0.0) -> None:
-    """The ground of `ctx.frame`'s shape over the whole canvas."""
+SAND_LIGHT: RGB = (236, 212, 150)
+SAND_DARK: RGB = (150, 124, 84)
+SEA_LIGHT: RGB = (64, 156, 196)
+SEA_DARK: RGB = (28, 74, 112)
+
+
+def _beach(p: dict, th: Any) -> dict:
+    """The palette of the sea ground: the floor is DRY SAND (never water), the sea lies above the horizon."""
+    dark = p["dark"]
+    white, black = (255, 255, 255), (0, 0, 0)
+    sand = SAND_DARK if dark else SAND_LIGHT
+    sea = SEA_DARK if dark else SEA_LIGHT
+    q = dict(p)
+    q.update(ground_top=_mix(sand, tuple(th.bg_bottom[:3]), 0.12 if dark else 0.04), ground_bot=_mix(sand, black, 0.22 if dark else 0.14),
+             rim=_mix(white, sea, 0.15), far=_mix(sea, p["sky_bot"], 0.35), near=sea, sea_far=_mix(sea, p["sky_bot"], 0.55), sea_near=_mix(sea, black, 0.10))
+    return q
+
+
+def _sea(cv: Canvas, hz: float, p: dict, lt: float) -> None:
+    """The sea: a band that reaches from a far horizon down to the foam line at `hz`, a few drifting glints."""
+    W, ss = cv.W, cv.ss
+    top = hz * 0.80
+    cv.im.paste(_gradient(W * ss, max(2, int((hz - top) * ss) + 2), p["sea_far"], p["sea_near"]), (0, int(top * ss)))
+    for i in range(7):
+        y = top + (hz - top) * (0.12 + 0.13 * i)
+        x = (W * (0.10 + 0.37 * i) + lt * (8 + 2 * i)) % (W * 1.2) - W * 0.1
+        w = W * (0.05 + 0.012 * i)
+        cv.rrect(x, y, w, max(2.0, (hz - top) * 0.025), 2, fill=(255, 255, 255, 90 if not p["dark"] else 50))
+    for k in range(14):   # foam: small white scallops along the shore line
+        x = W * (k + 0.5) / 14
+        cv.ellipse(x, hz - 1, W * 0.034, max(3.0, (hz - top) * 0.05), fill=(255, 255, 255, 170))
+
+
+def draw(cv: Canvas, th: Any, ctx: Any, lt: float = 0.0, kind: str = sz.PROC_ID) -> None:
+    """The ground of `ctx.frame`'s shape over the whole canvas (`kind`: stand_zone.PROC_ID, a meadow, or stand_zone.BEACH_ID, sea above and a sand floor)."""
     fr = ctx.frame
     W, H, ss = cv.W, cv.H, cv.ss
-    hz = (sz.horizon(fr.aspect) or 0.62) * H
+    hz = (sz.horizon(fr.aspect, kind) or 0.62) * H
     p = palette(th)
+    beach = kind == sz.BEACH_ID
+    if beach:
+        p = _beach(p, th)
     full_w = W * ss
     # sky
     cv.im.paste(_gradient(full_w, max(2, int(hz * ss) + 2), p["sky_top"], p["sky_bot"]), (0, 0))
@@ -94,8 +130,11 @@ def draw(cv: Canvas, th: Any, ctx: Any, lt: float = 0.0) -> None:
         for dx, dy, kx, ky in ((0, 0, 1.0, 0.34), (-0.42, 0.10, 0.62, 0.26), (0.40, 0.12, 0.66, 0.27)):
             cv.ellipse(cx + dx * cw, hz * cy + dy * cw * 0.5, cw * kx * 0.6, cw * ky * 0.6, fill=p["cloud"] + (alpha,))
     # two rows of hills
-    _hills(cv, hz, hz + 2, hz * 0.30, 0.6, p["far"], (1.3, 3.1, 7.0))
-    _hills(cv, hz, hz + 2, hz * 0.14, 2.4, p["near"], (2.1, 4.6, 9.0))
+    if beach:
+        _sea(cv, hz, p, lt)
+    else:
+        _hills(cv, hz, hz + 2, hz * 0.30, 0.6, p["far"], (1.3, 3.1, 7.0))
+        _hills(cv, hz, hz + 2, hz * 0.14, 2.4, p["near"], (2.1, 4.6, 9.0))
     # the floor: from the horizon to the bottom edge
     cv.im.paste(_gradient(full_w, max(2, int((H - hz) * ss) + 2), p["ground_top"], p["ground_bot"]), (0, int(hz * ss)))
     cv.rrect(0, hz - 1, W, max(6.0, H * 0.006), 0, fill=p["rim"] + (200,))   # the light rim of the floor's far edge
@@ -110,5 +149,8 @@ def draw(cv: Canvas, th: Any, ctx: Any, lt: float = 0.0) -> None:
         x, y = W * fx, hz + (H - hz) * fy
         t = u * 0.012 * s
         col = _mix(p["ground_top"], (0, 0, 0), 0.20)
+        if beach:   # sand has no grass: a small pebble
+            cv.ellipse(x, y, t * 2.2, t * 1.1, fill=col + (255,))
+            continue
         for dx, lean in ((-1.4, -0.5), (0.0, 0.0), (1.4, 0.5)):
             cv.polygon([(x + dx * t - t * 0.5, y), (x + dx * t + t * 0.5, y), (x + dx * t + lean * t * 1.4, y - t * 2.6)], fill=col + (255,))

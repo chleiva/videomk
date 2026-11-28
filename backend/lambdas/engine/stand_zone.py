@@ -26,6 +26,8 @@ ZONES_PATH = os.environ.get("STAND_ZONES_PATH") or os.path.join(os.path.dirname(
 ASPECT_RATIO = {"16:9": 16 / 9, "9:16": 9 / 16, "1:1": 1.0, "4:5": 0.8}
 NATIVE_RATIO = {"16:9": 16 / 9, "9:16": 9 / 16}
 PROC_ID = "ground_floor"     # the DRAWN ground (engine/procedural_ground.py): a backdrop type of its own whose zone is stored like any other (native "any": drawn for every shape)
+BEACH_ID = "ground_beach"   # the drawn ground of a SEA topic: sea and sky above the horizon, a sand floor below it (the same zone geometry; docs/SEA_BACKDROP_2_2026-11-28.md)
+DRAWN = (PROC_ID, BEACH_ID)  # every drawn ground: no package, nothing to fetch, never a pick of the catalog search
 SERVED = {"16:9": ("16:9", "1:1"), "9:16": ("9:16", "4:5"), "any": ("16:9", "9:16", "1:1", "4:5")}   # the video shapes a backdrop is offered for (engine/vector_policy.SCENE_SHAPE): a scene is never stretched to another shape
 MASK_W = 192                  # the mask is drawn this wide (the other side follows the shape): 0.5 percent of the width per cell
 SNAP_BOTTOM = 0.07           # the same at the bottom: outlines of a model end a little short of the picture edge
@@ -73,9 +75,9 @@ def usable(scene_id: str) -> bool:
     return bool(e and e.get("usable") and not e.get("disabled") and e.get("ground"))
 
 
-def horizon(aspect: str) -> Optional[float]:
-    """Where the drawn ground (PROC_ID) begins in a frame of this shape, as a share of the height; None for a catalog backdrop."""
-    e = entry(PROC_ID)
+def horizon(aspect: str, scene_id: str = PROC_ID) -> Optional[float]:
+    """Where a drawn ground (PROC_ID, BEACH_ID) begins in a frame of this shape, as a share of the height; None for a catalog backdrop."""
+    e = entry(scene_id)
     h = (e or {}).get("horizon")
     return float(h[aspect]) if isinstance(h, dict) and aspect in h else None
 
@@ -405,7 +407,7 @@ def max_cast(scene_id: str, aspect: str) -> int:
 def capable(aspect: str, n: int, ids: Optional[Sequence[str]] = None) -> List[str]:
     """Every catalog backdrop (or those of `ids`) that can hold a cast of `n` in this shape, sorted by id; the drawn ground is not among them (it is the last resort, never a pick)."""
     pool = list(ids) if ids is not None else sorted((_data().get("zones") or {}))
-    return [s for s in pool if s != PROC_ID and holds(s, aspect, n)]
+    return [s for s in pool if s not in DRAWN and holds(s, aspect, n)]
 
 
 def eligible(scene_ids: Sequence[str], aspect: str, n: int) -> List[str]:

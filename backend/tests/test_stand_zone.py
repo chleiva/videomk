@@ -88,7 +88,7 @@ def test_the_sea_conversation_that_floated_on_the_lighthouse_cliff_now_stands_on
     assert sz.violations(plan, "9:16") == []
     plan2 = json.load(open(os.path.join(FIX, "cartoon_sea_lighthouse_9x16.json")))
     ad.enforce(plan2, ad.Direction("conversation", by="you", chosen="cartoon", cast=["fox", "bear", "owl"]), backdrops=["tall_lighthouse_cliff"], aspect="9:16")
-    assert {b["scene"]["props"].get("backdrop") for b in plan2["beats"]} == {sz.PROC_ID}   # nothing offered holds the cast: the drawn ground, never the empty background
+    assert {b["scene"]["props"].get("backdrop") for b in plan2["beats"]} == {sz.BEACH_ID}   # a sea topic and nothing wet holds the cast: the drawn BEACH (sea, sand floor), never a meadow or the empty background
     assert sz.violations(plan2, "9:16") == []
 
 
@@ -169,7 +169,7 @@ def test_a_three_character_conversation_always_gets_a_backdrop_with_a_valid_grou
     # a search that fails altogether
     def boom(q, a, k):
         raise RuntimeError("down")
-    assert ad.stand_backdrops(_policy(search=boom), SEA, asp, 3, None) == [sz.PROC_ID]
+    assert ad.stand_backdrops(_policy(search=boom), SEA, asp, 3, None) == [sz.BEACH_ID]
 
 
 def test_selection_is_cast_first_the_sea_in_9x16_never_puts_the_cast_in_the_water():
