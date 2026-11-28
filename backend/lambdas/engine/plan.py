@@ -1117,13 +1117,18 @@ def generate_plan(topic: str, notes: str, target_minutes: float, llm: Callable[[
     raise ValueError(f"could not obtain a valid plan: {last_err}")
 
 
-def ensure_video_clips(plan: Dict[str, Any], assets: List[Dict[str, Any]], aspect: str = "16:9", resolution: Optional[str] = "1080p") -> List[str]:
+def ensure_video_clips(plan: Dict[str, Any], assets: List[Dict[str, Any]], aspect: str = "16:9", resolution: Optional[str] = "1080p", user_text: str = "") -> List[str]:
     """After the plan is valid: every `user_clip` scene names a clip that exists (else it becomes the stock clip of its alt text), its `fit` is the planner's choice when that is
     sensible and the rule's otherwise (common/vidup.settle_fit: never a blurry full-frame clip), and every clip the person gave is used (a clip nobody placed gets a beat of its
     own before the closing one: their footage is never dropped). Returns warnings."""
     from common import vidup
     by_id = {a["id"]: a for a in assets}
     warns: List[str] = []
+    for b in plan["beats"]:   # the description is context for the planner, never narration or captions: a sentence that copies it (or the clip's transcript) is removed
+        clean, dropped = vidup.scrub_narration(b.get("narration") or "", assets, user_text)
+        if dropped:
+            b["narration"] = clean
+            warns.append(f"beat {b['id']}: narration copied the clip description, removed: " + " | ".join(d[:60] for d in dropped))
     used: set = set()
     for b in plan["beats"]:
         sc = b["scene"]
@@ -1147,7 +1152,7 @@ def ensure_video_clips(plan: Dict[str, Any], assets: List[Dict[str, Any]], aspec
             bid = new_beat_id(None, taken)
             taken.add(bid)
             said = (a.get("summary") or "").strip().rstrip(".")
-            text = (said[:1].upper() + said[1:] + ".") if len(said.split()) >= 3 else "Here is a moment from the clip."
+            text = "Here is a moment from the clip."   # never the description read aloud: it is context for the planner (the alt text below is not spoken or captioned)
             sc = {"type": "clip", "props": {"user_clip": a["id"], "fit": vidup.settle_fit(None, a["w"], a["h"], aspect, resolution), "alt": (said or "My video clip")[:70]}}
             plan["beats"].insert(at + k, {"id": bid, "narration": text, "scene": sc})
         warns.append("added scenes for unused video clips: " + ", ".join(a["id"] for a in missing))

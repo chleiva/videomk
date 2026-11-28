@@ -213,3 +213,45 @@ def test_the_plan_limits_the_clips_per_video():
             with pytest.raises(plans.PlanError) as e:
                 plans.check_create(opts, plan, cfg)
             assert e.value.code == "plan_video_clips" and e.value.requires_plan in ("pro", "max")
+
+
+# ---- the clip's description is context for the planner, never narration or captions (docs/TITLES_AND_CLIP_NARRATION_2026-11-28.md)
+RED = {"id": "V1", "clip": "a" * 32, "w": 1920, "h": 1080, "duration": 5.0, "audio": True, "key": "k.mp4", "audio_key": "k.m4a",
+       "lines": ["The clip opens on a plain red screen", "Then vertical color bars appear with moving diagonal lines"], "summary": "The clip opens on a plain red screen, then color bars and a pink checkered square appear.",
+       "speech": "Stations showed fixed test cards when no programme was on."}
+
+
+def test_the_planner_is_told_the_description_is_never_narration_or_captions():
+    block = V.planner_block([RED], "16:9", "1080p")
+    assert "THE DESCRIPTION IS FOR YOU ONLY" in block and "NEVER read, quote, paraphrase or translate it" in block and "must never say those words" in block
+
+
+@pytest.mark.parametrize("said", [
+    "The clip opens on a plain red screen, then color bars and a pink checkered square appear.",     # the summary, verbatim
+    "The clip opens on a plain red screen.",                                                         # a line, verbatim
+    "Then vertical color bars appear with moving lines.",                                            # near verbatim
+    "Stations showed fixed test cards when no programme was on.",                                    # the clip's own words said by the narrator
+])
+def test_narration_that_copies_the_description_or_the_transcript_is_removed(said):
+    out, dropped = V.scrub_narration(f"Before TV shows ended, screens had a ritual. {said} It mattered to engineers.", [RED])
+    assert dropped == [said] and out == "Before TV shows ended, screens had a ritual. It mattered to engineers."
+
+
+def test_story_narration_around_the_picture_is_kept_and_the_users_own_words_may_be_quoted():
+    story = "Engineers relied on these patterns to tune every set. A plain red screen was the simplest of them."
+    assert V.scrub_narration(story, [RED]) == (story, [])
+    quoted = "Stations showed fixed test cards when no programme was on."
+    assert V.scrub_narration(quoted, [RED], user_text=f'Say "{quoted}" in the video') == (quoted, [])
+    assert V.scrub_narration("Hello there.", []) == ("Hello there.", [])
+
+
+def test_ensure_video_clips_strips_the_copied_sentences_warns_and_never_reads_the_summary_for_an_unused_clip():
+    raw = _raw({"type": "clip", "props": {"user_clip": "V1", "alt": "test card"}}, {"type": "bullets", "props": {"heading": "H", "items": ["a", "b"]}})
+    plan, _ = plan_mod.validate_plan(raw)
+    plan["beats"][0]["narration"] = "The clip opens on a plain red screen. Every channel signed off like this."
+    warns = plan_mod.ensure_video_clips(plan, [RED], "16:9", "1080p")
+    assert plan["beats"][0]["narration"] == "Every channel signed off like this." and any("copied the clip description" in w for w in warns)
+    unused, _ = plan_mod.validate_plan(_raw({"type": "bullets", "props": {"heading": "H", "items": ["a", "b"]}}, {"type": "bullets", "props": {"heading": "H2", "items": ["a", "b"]}}))
+    plan_mod.ensure_video_clips(unused, [RED], "16:9", "1080p")
+    added = [b for b in unused["beats"] if b["scene"]["props"].get("user_clip") == "V1"][0]
+    assert "red screen" not in added["narration"].lower() and added["narration"] == "Here is a moment from the clip."

@@ -93,7 +93,7 @@ def test_whiteboard_scores_and_plans_are_identical_with_and_without_a_watermark(
 def test_captions_and_content_bands_are_the_pre_watermark_ones_in_every_shape(aspect):
     f = Frame.parse(aspect)
     want_caption = {"16:9": 1010, "9:16": 1600, "1:1": 1020, "4:5": 1290}[aspect]
-    want_top = {"16:9": 70, "9:16": 150, "1:1": 70, "4:5": 80}[aspect]   # the shape's own margin: no band for a mark (the 06842e0 bands of 144 / 52 / 40 are gone)
+    want_top = {"16:9": 70, "9:16": 310, "1:1": 150, "4:5": 150}[aspect]   # a constant of the shape, just under the lowest the corner mark reaches; the same for every account, it does not follow the mark
     assert f.caption["bottom"] == want_caption and f.margin_top == want_top and f.box(True)[1] == want_top
     for spec in MODES.values():
         r = Renderer(_tl(aspect, watermark=spec), draft=True)

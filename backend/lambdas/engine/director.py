@@ -147,7 +147,7 @@ def direct(prompt: str, *, minutes: float, ask_small: Ask, ask_big: Callable[[st
     if not plan.get("legit"):
         return {"legit": False, "reason": plan.get("reason", "")}
     if video_assets:   # the person's own clips: placed, never dropped, fit settled by the rules (engine/plan.ensure_video_clips)
-        warnings += plan_mod.ensure_video_clips(plan, video_assets, (options or {}).get("aspect") or "16:9", resolution)
+        warnings += plan_mod.ensure_video_clips(plan, video_assets, (options or {}).get("aspect") or "16:9", resolution, user_text=prompt)
     if region:   # before the cast is given its voices: the characters of a video speak with the viewer's accent (presenter_policy.voice_for)
         plan["region"] = region
     warnings += vector_policy.enforce(plan, vpolicy)   # only catalog ids, the share cap, never two in a row; records plan["vector"]
