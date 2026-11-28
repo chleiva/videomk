@@ -113,6 +113,7 @@ class VideoUploadStack(Stack):
             fn.add_to_role_policy(iam.PolicyStatement(actions=["dynamodb:GetItem", "dynamodb:PutItem", "dynamodb:UpdateItem", "dynamodb:DeleteItem", "dynamodb:Query"], resources=[usage_arn],
                                                       conditions={"ForAllValues:StringLike": {"dynamodb:LeadingKeys": mine}}))
             fn.add_to_role_policy(iam.PolicyStatement(actions=["dynamodb:GetItem"], resources=[flags_arn], conditions={"ForAllValues:StringEquals": {"dynamodb:LeadingKeys": ["ops:switches"]}}))   # the kill switch
+        self.api_fn.add_to_role_policy(iam.PolicyStatement(actions=["dynamodb:GetItem"], resources=[flags_arn]))   # the account's own flags row (entitlements -> wallet.is_unlimited reads it by user id; read only, like every runtime function)
         self.api_fn.add_to_role_policy(iam.PolicyStatement(actions=["dynamodb:GetItem"], resources=[ent_arn]))
         self.api_fn.add_to_role_policy(iam.PolicyStatement(actions=["dynamodb:Query", "dynamodb:GetItem"], resources=[safety_arn]))   # is the account paused or on hold?
         self.api_fn.add_to_role_policy(iam.PolicyStatement(actions=["ssm:GetParameter"], resources=[arn("ssm", "parameter" + main["plans_param"])]))

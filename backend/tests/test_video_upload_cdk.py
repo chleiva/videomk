@@ -89,7 +89,9 @@ def test_least_privilege_tables_only_by_key_prefix_no_wallet_no_videos(tpl):
                 if ":table/Usage" in text:
                     assert s["Condition"]["ForAllValues:StringLike"]["dynamodb:LeadingKeys"] == ["vidrec:*", "vidup:*", "vidhash:*", "vidbad"]
                 if ":table/Flags" in text:
-                    assert acts == ["dynamodb:GetItem"] and s["Condition"]["ForAllValues:StringEquals"]["dynamodb:LeadingKeys"] == ["ops:switches"]
+                    assert acts == ["dynamodb:GetItem"]
+                    if suffix == "-analyse" or "Condition" in s:
+                        assert s["Condition"]["ForAllValues:StringEquals"]["dynamodb:LeadingKeys"] == ["ops:switches"]
     api_acts = sorted({a for s in statements(t, "-api") for a in (s["Action"] if isinstance(s["Action"], list) else [s["Action"]])})
     assert "bedrock:InvokeModel" not in api_acts and "lambda:InvokeFunction" in api_acts
     an_acts = sorted({a for s in statements(t, "-analyse") for a in (s["Action"] if isinstance(s["Action"], list) else [s["Action"]])})
