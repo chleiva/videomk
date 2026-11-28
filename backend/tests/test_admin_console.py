@@ -427,3 +427,15 @@ def test_the_logo_files_are_the_brand_masters():
     brand = os.path.join(ROOT, "..", "docs", "brand", "final")
     for copy, master in (("logo-light.svg", "lockup-horizontal-light.svg"), ("logo-dark.svg", "lockup-horizontal-dark.svg"), ("favicon.svg", "favicon.svg")):
         assert open(os.path.join(SITE, copy), "rb").read() == open(os.path.join(brand, master), "rb").read()
+
+
+def test_the_dictation_switch_is_a_console_switch_the_customer_side_reads_and_the_page_words_it(world):
+    assert "stop_dictation" in c.SWITCHES and c.SWITCH_WORDS["stop_dictation"] == "Dictation"
+    from common import dictation
+    assert dictation.STOP_SWITCH == ops_switches.DICTATION == "stop_dictation"
+    res = admin_act.handler(event(auth_age=40, body={"switch": "stop_dictation", "stopped": True}), None)
+    assert res["statusCode"] == 200 and json.loads(res["body"])["switches"]["stop_dictation"] is True
+    assert ops_switches.stopped(dictation.STOP_SWITCH) and not ops_switches.stopped(ops_switches.NEW_VIDEOS)
+    assert [s for s, _ in world.sent] == ["Dictation switched OFF"]
+    js = open(os.path.join(os.path.dirname(__file__), "..", "admin_console", "site", "app.js")).read()
+    assert "stop_dictation: { name: 'Dictation'" in js

@@ -3,6 +3,7 @@
   stop_new_videos    generate and "Try again" answer 503 `maintenance` with a localized sentence; videos already being made finish; watching, the library,
                      cancel and delete keep working
   stop_free_videos   the day's free budget reads as 0 (common/free_grants.py): free credits cannot be spent, paid credits work
+  stop_dictation     paid dictation (common/dictation.py) answers as switched off; typing and everything else keep working
 
 Where: ONE item in the account-flags table, key `ops:switches` (no account id has that shape). Every function that serves a request can already READ that
 table and none can write it, so the main stack needs no new permission or resource. The only writers are the admin console's "act" function (its policy
@@ -21,8 +22,8 @@ from typing import Any, Dict, Optional
 logger = logging.getLogger()
 
 ITEM_KEY = "ops:switches"
-NEW_VIDEOS, FREE_VIDEOS = "stop_new_videos", "stop_free_videos"
-SWITCHES = (NEW_VIDEOS, FREE_VIDEOS)
+NEW_VIDEOS, FREE_VIDEOS, DICTATION = "stop_new_videos", "stop_free_videos", "stop_dictation"
+SWITCHES = (NEW_VIDEOS, FREE_VIDEOS, DICTATION)
 RETRY_AFTER_S = 300
 MESSAGES = {
     "en": "VideoMK is briefly paused for maintenance. Your videos are safe. Please try again in a little while.",

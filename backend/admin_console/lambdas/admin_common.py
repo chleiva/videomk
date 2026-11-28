@@ -14,8 +14,8 @@ from typing import Any, Dict, Optional
 import boto3
 
 SWITCH_ITEM = "ops:switches"                       # the same item the launcher reads (lambdas/common/ops_switches.py); a test holds the two together
-SWITCHES = ("stop_new_videos", "stop_free_videos")
-SWITCH_WORDS = {"stop_new_videos": "New videos", "stop_free_videos": "Free videos"}
+SWITCHES = ("stop_new_videos", "stop_free_videos", "stop_dictation")
+SWITCH_WORDS = {"stop_new_videos": "New videos", "stop_free_videos": "Free videos", "stop_dictation": "Dictation"}
 STEP_UP_SECONDS = 300                              # a switch needs a sign-in (passkey, or password + authenticator code) made in the last 5 minutes
 # the free plan's knobs the console SHOWS (never writes); the same defaults as lambdas/common/plans.KNOBS (a test compares them)
 BUDGET_DEFAULTS = {"free_daily_budget_credits": 15, "free_budget_unlimited": False, "cost_per_credit_usd": 0.15}

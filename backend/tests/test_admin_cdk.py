@@ -139,7 +139,7 @@ def test_the_act_function_can_flip_the_two_switches_and_nothing_else(t):
     for acts, _, cond in ddb:
         assert json.loads(cond)["ForAllValues:StringEquals"]["dynamodb:LeadingKeys"] == ["ops:switches"]   # ONE item: not the unlimited flag, not a safety hold, not storage
     upd = json.loads(next(cond for acts, _, cond in ddb if acts == ["dynamodb:UpdateItem"]))
-    assert upd["ForAllValues:StringEquals"]["dynamodb:Attributes"] == admin_stack.SWITCH_FIELDS == ["user_id", "stop_new_videos", "stop_free_videos", "updated_at", "updated_by"]
+    assert upd["ForAllValues:StringEquals"]["dynamodb:Attributes"] == admin_stack.SWITCH_FIELDS == ["user_id", "stop_new_videos", "stop_free_videos", "stop_dictation", "updated_at", "updated_by"]
     put = next(res for acts, res, _ in st if acts == ["s3:PutObject"])
     assert "audit/*" in put and next(iter(k for k in of(t, "AWS::S3::Bucket") if k.startswith("Audit"))) in put
     env = fn(t, "act")[1]["Properties"]["Environment"]["Variables"]

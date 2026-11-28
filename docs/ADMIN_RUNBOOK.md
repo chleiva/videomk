@@ -45,6 +45,14 @@ aws dynamodb update-item $P --table-name $FLAGS --key '{"user_id":{"S":"ops:swit
 ```
 Back on: `{"BOOL":false}`. Your own sentence instead of the standard one (optional, both languages): add `message_en = :e, message_es = :s` to the same command.
 
+**Stop paid dictation** (speech to text for Pro and Max: the microphone answers as switched off; typing and everything else keep working). Also a console switch ("Dictation"). Live within a minute.
+```
+aws dynamodb update-item $P --table-name $FLAGS --key '{"user_id":{"S":"ops:switches"}}' \
+  --update-expression "SET stop_dictation = :v, updated_at = :t, updated_by = :b" \
+  --expression-attribute-values '{":v":{"BOOL":true},":t":{"S":"'$(date -u +%FT%TZ)'"},":b":{"S":"cli"}}'
+```
+Back on: `{"BOOL":false}`.
+
 **Suspend one account**: `python backend/scripts/safety_admin.py hold <email or id>` / `clear` (unchanged; the console does not do this yet).
 
 **Stop one video that is stuck**
