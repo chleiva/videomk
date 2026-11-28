@@ -8,7 +8,7 @@ from typing import Any, Dict
 import logging
 import time
 
-from common import free_grants, i18n, look_choice, looks as look_flags, ops_switches, plans, wallet, watermark_store
+from common import dictation, free_grants, i18n, look_choice, looks as look_flags, ops_switches, plans, wallet, watermark_store
 from common.http import json_response
 from common.identity import extract_cognito_sub
 from engine import format_options
@@ -30,6 +30,7 @@ def add_plan(body: Dict[str, Any], user: str, event: Dict[str, Any], loc: str) -
         r["requires_plan"] = None if r["available"] else plans.lowest_plan(lambda x, rid=r["id"]: rid in x["resolutions"])
     body["lengths"].update({"plan_max_seconds": limits["max_seconds"], "plan_max_minutes": limits["max_minutes"],
                             "locked": [x for x in w["plan"]["locked"] if x["feature"] == "length"]})
+    body["dictation"] = dictation.capabilities(user, limits)   # paid "Better dictation": show it when `available`, explain with `premium`/`requires_plan`/`paused` (docs/CREATE_API.md "Paid dictation")
     body["plan_max_photos"] = min(int(body.get("max_photos") or limits["photos_per_video"]), limits["photos_per_video"])
 
 

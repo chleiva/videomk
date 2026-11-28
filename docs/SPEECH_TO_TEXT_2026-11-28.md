@@ -1,5 +1,7 @@
 # Paid speech-to-text (dictation) for paying customers: research and plan (2026-11-28)
 
+**Status (2026-11-28, branch `paid-dictation`): the BACKEND is built, tested and NOT deployed; no client is built.** Work packages 1 to 4 are done (section 9 says what and how it was verified); 5 to 10 are open (clients, privacy page, store forms, QA trial, real-voice evaluation). Decisions taken by the lead with the owner's approval on 2026-11-28: OpenAI `gpt-transcribe` batch as default behind a provider interface (Scribe v3 slot reserved, not built); **Pro and Max** get it, Free keeps the native engines; **daily caps Pro 600 s, Max 1,200 s** (they replace the 900/3,600 proposed below, reasoning in section 8), 6-minute and 3 MB clip limit, a global daily ceiling and a kill switch; OpenAI approved as voice processor and the privacy wording approved (draft in `docs/LEGAL_DRAFT_NOTES.md`, section 9 there).
+
 Scope: **speech INPUT** (the person dictates the video request). It is not the "Polly only for speech" rule, which is about the voice of the videos (speech OUTPUT). Free customers keep the phone's built-in engine and the browser's; paying customers (Pro and Max) get a server-side model.
 
 Labels: **V** = the provider's own page, read today 2026-11-28. **S** = a third party (named). **T** = measured by me today in our QA account. **CNV** = could not verify (what was tried is said). Prices are USD, list, pay as you go.
@@ -128,7 +130,7 @@ Add these lines to `docs/COSTS.md` (done in the same commit).
 
 **Upload path: direct to a small Lambda (recommended), no S3.** `POST /users/{user_id}/dictation` with the audio as a binary body (API Gateway/Lambda limit 6 MB, we cap at 3 MB and 360 seconds). The Lambda checks plan right and quota, calls OpenAI with the key from SSM (`/videomk/openai_api_key`, already present in QA; the app never holds a key), returns `{text, language, seconds, id}`, and writes only counters (seconds, model, language, cost) to DynamoDB. **The audio is never stored by us**: nothing to leak, nothing to delete on account deletion, and it keeps the privacy copy short. Presigned S3 upload is the fallback only if recordings must exceed about 4 MB (10+ minutes) or we later want retries from stored audio (we should not).
 
-**Plan right and caps.** New right on each plan in `backend/lambdas/common/plans.py` (`PLANS` dict): `stt_premium` (False for free, True for pro and max) and `stt_seconds_per_day` (proposal: Pro 900, Max 3,600; Free 0), plus knobs in `KNOBS`: `stt_enabled` (kill switch), `stt_max_clip_seconds` (default 360), `stt_global_daily_seconds` (a ceiling across all users, like `free_daily_budget_credits`). Daily usage counted in UTC per user in DynamoDB (atomic `ADD` with a condition), the same way the plans' other daily counters work. 900 seconds a day costs at most $0.07, 3,600 at most $0.27, per user per day: the worst-case abuse bound. Over quota or plan lacking the right returns the existing structured plan error (so the app shows the upgrade or "come back tomorrow" text), and the app falls back to native.
+**Plan right and caps.** New right on each plan in `backend/lambdas/common/plans.py` (`PLANS` dict): `stt_premium` (False for free, True for pro and max) and `stt_seconds_per_day` (**decided: Pro 600, Max 1,200; Free 0**, section 8), plus knobs in `KNOBS`: `stt_enabled` (kill switch), `stt_max_clip_seconds` (default 360), `stt_global_daily_seconds` (a ceiling across all users, like `free_daily_budget_credits`). Daily usage counted in UTC per user in DynamoDB (atomic `ADD` with a condition), the same way the plans' other daily counters work. 600 seconds a day costs at most $0.045, 1,200 at most $0.09, per user per day: the worst-case abuse bound (section 8). Over quota or plan lacking the right returns the existing structured plan error (so the app shows the upgrade or "come back tomorrow" text), and the app falls back to native.
 
 **Cost record.** `c_stt` is added where `c_speech` is built. Because dictation precedes the video, the create-video request carries the list of `dictation ids` used (or the app sums them); the launcher sums their cost from the dictation records into `c_stt` and `stt_seconds`, and adds it to `cost_usd`. Files touched: `backend/lambdas/sf_launcher.py` or the create handler, `backend/scripts/cost_report.py`, `backend/admin_console/lambdas/admin_rollup.py`, `backend/lambdas/video_retry.py` (does not re-charge), `docs/COSTS.md`. Dictations never used in a video are still counted in a daily "dictation without video" line in cost_report so nothing is hidden.
 
@@ -159,8 +161,8 @@ Total for packages 1 to 6, 8 and 9: about 5.5 to 6 days.
 ## 7. Owner decisions and risks
 
 Decisions:
-1. Which plans get "Better dictation": Pro and Max (proposed) or Max only? Pro costs at most $0.07 per user per day at the 900 s cap.
-2. Daily caps (proposal: Pro 900 s, Max 3,600 s, a clip max of 6 minutes) and a global daily ceiling.
+1. Which plans get "Better dictation": Pro and Max (proposed) or Max only? Pro costs at most $0.045 per user per day at the 600 s cap.
+2. Daily caps (decided: Pro 600 s, Max 1,200 s, a clip max of 6 minutes; section 8) and a global daily ceiling.
 3. Approve OpenAI as the processor of voice, and the privacy-policy and store-form changes (App Store "Audio Data", Play Data safety).
 4. Supply an ElevenLabs (and optionally Deepgram) API key if a head-to-head on real voices is wanted; I did not sign up.
 5. Does Free get a trial of better dictation (for example 3 clips a day)? Not proposed; cost is small (about $0.002 a clip) but the abuse surface is larger.
@@ -175,7 +177,7 @@ Risks:
 - **Abuse:** bounded by per-user daily seconds, clip length, a global ceiling, and the plan check (dictation endpoint is paid-only).
 - **Unreported:** I did not check Korean on any model; Latin American accents on real voices are untested.
 
-## 8. Addendum (2026-11-28, evening): Azure, ElevenLabs, AWS hosting, residency, second provider
+## 11. Addendum (2026-11-28, evening): Azure, ElevenLabs, AWS hosting, residency, second provider
 
 Labels as above (V = provider's own page read today; CNV = could not verify). No spending, no sign-ups.
 
@@ -199,3 +201,75 @@ Labels as above (V = provider's own page read today; CNV = could not verify). No
 
 ### When a second provider is worth adding
 Add it **behind the provider interface from day one of the build (work package 1) but turn it on only for a reason**: (a) **outage fallback** is the strongest reason, since one OpenAI incident would otherwise silently return paid users to the phone engine, which is acceptable for a short time but not for days; a second key on a different company (Azure Fast transcription for EU residency and no-retention terms, or ElevenLabs Scribe v3 for accuracy) is cheap insurance and the fallback only costs money when used; (b) **accuracy**: switch the default or route by language only if the real-voice test (work package 10) shows a clear gap for a language we sell, most likely Korean, Dutch or accented Spanish, because the independent index favours Scribe v3 (1.95 %) and MAI-Transcribe-2 (2.04 %) over GPT-4o Transcribe (3.96 %) but has no number for `gpt-transcribe`; (c) **cost** is not a reason now, since the whole spread between providers is under $0.003 a minute (about $100 a month at the 5-minute, 1,000-user scenario); (d) **a regulatory or enterprise customer** that demands EU-only processing. Until one of those happens, run one provider plus the native fallback and a nightly canary clip.
+
+## 8. Daily caps, justified by real use (owner decision, 2026-11-28)
+
+The owner asked for caps that follow what a plan's credits can actually produce, not round numbers. A credit is about one minute of video; one dictated request is at most one clip of 6 minutes, in practice 1 to 5 minutes (the plan's own range).
+
+| Plan | Credits a month | Videos a day, about | Dictation a day that covers it | **Cap (`stt_seconds_per_day`)** | Worst case: cap used every day for 30 days | Share of the plan price |
+|---|---|---|---|---|---|---|
+| Free | 0 (welcome credits only) | | none: native engines | 0 (`stt_premium` false) | $0 | |
+| Pro | 30 | about 1 | up to 5 min for that video, plus one retake | **600 s (10 min)** | 300 min = **$1.35** | 9 % of $14.99 |
+| Max | 120 | about 4 | 4 videos x up to 5 min | **1,200 s (20 min)** | 600 min = **$2.70** | 7 % of $39.99 |
+
+Arithmetic: 600 s x 30 days = 18,000 s = 300 min x $0.0045 = $1.35; 1,200 s x 30 = 36,000 s = 600 min x $0.0045 = $2.70. These are the absolute ceilings (nobody reaches them: the section 4 scenario assumes 1 to 5 minutes per video, which is a small part of the cap). They are plan settings in `common/plans.PLANS` (`stt_seconds_per_day`), asserted by `tests/test_dictation.py::test_the_caps_are_the_justified_ones_and_are_plan_settings`, so changing a plan's cap is a one-line change and the test then says what the new worst case costs. A re-record counts: every recording is charged (and counted against the cap) by its real length as the provider reports it.
+
+Other limits (knobs, change without a deploy with `scripts/plans_admin.py config set <knob> <value>`): `stt_max_clip_seconds` 360 (also the app's limit), `stt_global_daily_seconds` 100,000 (all accounts, one UTC day; about $7.50; reached = every dictation answers 503 `dictation_paused` until 00:00 UTC), `stt_enabled` true (kill switch). A second kill switch, the ops item `stop_dictation` (exactly `true` stops, like the other switches; fails open), can be set by hand in the account-flags table `ops:switches` item; the admin console does not show it yet. Unlimited test accounts (never in production) have Max's rights and a ceiling of `UNLIMITED_DAILY_STT_SECONDS` (default 7,200).
+
+## 9. Backend as built (2026-11-28)
+
+| Piece | Where |
+|---|---|
+| Provider interface + OpenAI adapter (`gpt-transcribe`, price table, error mapping, language hint) | `backend/lambdas/common/stt.py` (`PROVIDERS` has the reserved slot for Scribe v3) |
+| Metering (per user per day, global ceiling), records, plan check, capabilities block | `backend/lambdas/common/dictation.py`; counters and records live in the **existing usage table** (keys `stt:<user>`, `stt:global`, `sttrec:<user>`), so no new table |
+| Lambda and route `POST /users/{user_id}/dictation` | `backend/lambdas/dictation_api.py`; stack: `backend/plans_feature.py` (inside the plans construct; 9 resources, CORS preflight, Cognito auth, alarm on function errors) |
+| Plan rights `stt_premium`, `stt_seconds_per_day`; knobs `stt_enabled`, `stt_max_clip_seconds`, `stt_global_daily_seconds`; `locked` and `limits` carry them | `backend/lambdas/common/plans.py` |
+| `GET .../capabilities` field `dictation` | `backend/lambdas/capabilities_api.py` |
+| Cost: optional `dictation_ids` on the create request; `c_stt`, `stt_seconds` and `dictation_ids` on the video row; `c_stt` is part of `cost_usd`; a retry does not charge it again (`c_stt` is in `video_retry.COST_ATTRS`: the attempt's counter restarts, the old total moves to `cost_usd_before`) | `sf_launcher.py`, `engine/costs.py` (`PARTS`), `video_retry.py`, `scripts/cost_report.py` |
+| Tests | `tests/test_stt.py` (12), `tests/test_dictation.py` (31), `tests/test_plans_cdk.py` (one new test, frugal bounds raised by 10) |
+
+Decisions made while building:
+- **Request body is JSON with base64 audio, not a binary body.** A binary body needs `binaryMediaTypes` on the whole REST API (a change to an existing resource). Base64 of 3 MB is 4 MB, under API Gateway's 10 MB and Lambda's 6 MB limits.
+- **Language hint, measured against the real API on 2026-11-28:** one language goes in the plain `language` form field; two or more in repeated `languages[]` fields. `languages=["es"]` as one JSON-text field is refused (`invalid_value`), which was the earlier failure. Auto-detect with no hint also works.
+- **Seconds** are what the provider reports (`usage.seconds`, whole seconds), else the app's claim, else an estimate from the size. The allowance is reserved from the claim first (atomic, with a condition), then corrected to the real length; at most one clip can pass the cap, the next one is refused. A provider failure releases the whole reservation: a failed dictation costs nothing.
+- **Not added to the day index.** `c_stt` is on the video row and in `cost_usd`, but NOT in `backend_stack.USAGE_DAY_FIELDS` (the GSI projection): changing a global secondary index's projection needs the index to be recreated, which is not additive. Effect: the admin console's cost-parts rollup shows the dictation cost inside `cost_usd` but not as its own part until the index is recreated. Open item.
+- **"Dictation without a video" line in cost_report: not built.** The records are in the usage table (`sttrec:`), kept 40 days; the report script reads only the videos table today. Open item (package 4 remainder).
+- **Reserved concurrency was not set** (the account's unreserved pool matters more than one function's isolation); the global ceiling and the error alarm are the controls.
+- **Real check (T, QA account eu-west-1, 2026-11-28):** four calls through `common/stt.py` with Polly neural clips (5 s each): `['es']`, `['en','es']`, auto, `['en']`: all correct, the language came back as `es` / `en`, billing 5 s = $0.000375 each; plus six curl probes of the form encodings. Total spend below USD 0.01 (budget was 0.10). The Lambda itself (API Gateway, Cognito, SSM key) is NOT deployed, so the end-to-end route is not verified.
+
+## 10. Client contract (iOS, Android, web: not built yet)
+
+**Show "Better dictation"** when `GET /users/{user_id}/capabilities` answers `dictation.available == true`. The block:
+
+```json
+"dictation": {"premium": true, "available": true, "paused": false, "seconds_per_day": 600, "seconds_left_today": 540,
+              "max_clip_seconds": 360, "max_clip_bytes": 3145728, "requires_plan": null, "provider": "openai"}
+```
+
+`premium` false = the plan lacks it (show the upgrade hint for `requires_plan`, `"pro"`; there is no buy button while `can_upgrade` is false); `paused` true = switch or knob (use native silently); `available` false with `premium` true = today's seconds are used. `plan.limits` also carries `stt_premium` and `stt_seconds_per_day`, and `plan.locked` lists `{"feature": "stt_premium", "value": true, "requires_plan": "pro"}` for Free.
+
+**Request:** `POST /users/{user_id}/dictation`, Cognito token like every call, plus `X-Locale`:
+
+```json
+{"audio": "<base64 of the recording>", "mime": "audio/webm;codecs=opus", "seconds": 23.4, "languages": ["es"], "prompt": "A request for a short explainer video"}
+```
+
+`audio` (required, at most 3 MB decoded), `mime` (required: `audio/webm`, `audio/ogg`, `audio/mp4`, `audio/m4a`, `audio/aac`, `audio/mpeg`, `audio/wav`, `audio/flac`; parameters after `;` are fine), `seconds` (optional but send it: the length the app measured; more than 360 is refused), `languages` (optional, up to 4 ISO 639-1 codes: the UI language plus the person's chosen ones; none = auto-detect), `prompt` (optional context or names from the draft, at most 400 characters). Record mono, 16 kHz where possible, 24 to 32 kbps (5 minutes is about 1 MB).
+
+**Answer 200:** `{"id": "<32 hex>", "text": "...", "language": "es", "seconds": 23.0, "seconds_left_today": 577, "max_clip_seconds": 360}`. Append `text` at the cursor inside the dictated span only. Keep `id`; every id that produced text in the request is sent as `dictation_ids` in the create request (below). Re-records: send all the ids you paid for.
+
+**Errors** (JSON `{code, message (localized), ...}`; on every one the app falls back to the phone's engine and may show `message`):
+
+| HTTP | `code` | Meaning |
+|---|---|---|
+| 400 | `bad_audio` | not base64, empty, unknown `mime`, or the provider could not read it |
+| 401 / 403 | none (`message`) | no token / path user is not the signed-in user |
+| 403 | `dictation_plan` | Free plan (`requires_plan: "pro"`, `feature: "dictation"`, `can_upgrade`) |
+| 413 | `dictation_too_long` | more than 360 s or 3 MB |
+| 429 | `dictation_quota` | today's seconds are used (`Retry-After: 3600`; `requires_plan` is `"max"` for Pro, `null` for Max: it comes back at 00:00 UTC) |
+| 502 | `dictation_failed` | the provider failed; nothing was charged |
+| 503 | `dictation_paused` | kill switch or the global ceiling |
+
+**Create request:** `POST .../videos` (generate) accepts the optional `"dictation_ids": ["<id>", ...]` (at most 20, each a dictation of this account less than 40 days old; repeats count once). Wrong shape or another account's id is a 400 and nothing starts. The cost of those dictations is recorded on the video as `c_stt` (and `stt_seconds`), added to `cost_usd`; they are not charged again on a retry. The field is not part of the video's options.
+
+**Privacy copy** for the apps (in-app disclosure, before the first better dictation): the recording is sent to OpenAI only to turn speech into text; we do not keep the audio, only its length and cost. Full wording: `docs/LEGAL_DRAFT_NOTES.md` section 9.
