@@ -1,0 +1,387 @@
+{
+ "beats": [
+  {
+   "narration": "¿Cómo sabe tu cuerpo defenderse de un virus que nunca ha visto? Una vacuna se lo enseña antes del ataque.",
+   "scene": {
+    "type": "whiteboard",
+    "props": {
+     "items": [
+      {
+       "id": "t",
+       "write": "Vacunas",
+       "zone": "top-row",
+       "size": "l",
+       "say": "virus"
+      },
+      {
+       "id": "v",
+       "draw": "virus",
+       "zone": "left",
+       "size": "m",
+       "say": "nunca"
+      },
+      {
+       "id": "s",
+       "draw": "shield_check",
+       "zone": "right",
+       "size": "m",
+       "say": "vacuna"
+      },
+      {
+       "id": "m",
+       "mark": "underline",
+       "on": "t",
+       "color": "red",
+       "say": "antes"
+      },
+      {
+       "id": "p",
+       "draw": "person_standing",
+       "zone": "centre",
+       "size": "l",
+       "say": "ataque"
+      },
+      {
+       "id": "a1",
+       "connect": "arrow",
+       "from": "v",
+       "to": "p",
+       "color": "red"
+      },
+      {
+       "id": "a2",
+       "connect": "arrow",
+       "from": "s",
+       "to": "p",
+       "color": "green"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "narration": "La vacuna contiene un microbio debilitado o muerto, o solo un trozo de él.",
+   "scene": {
+    "type": "whiteboard",
+    "props": {
+     "items": [
+      {
+       "id": "sy",
+       "draw": "syringe",
+       "zone": "bottom-left",
+       "size": "l",
+       "say": "vacuna"
+      },
+      {
+       "id": "sl",
+       "write": "vacuna",
+       "tool": "pen",
+       "near": "sy",
+       "side": "below",
+       "size": "m",
+       "say": "contiene"
+      },
+      {
+       "id": "b",
+       "draw": "bacteria",
+       "zone": "bottom-right",
+       "size": "l",
+       "say": "debilitado"
+      },
+      {
+       "id": "a3",
+       "connect": "arrow",
+       "from": "sy",
+       "to": "b",
+       "color": "blue",
+       "say": "muerto"
+      },
+      {
+       "id": "ag",
+       "write": "antígeno",
+       "ink": "blue",
+       "zone": "bottom",
+       "size": "l",
+       "say": "solo"
+      },
+      {
+       "id": "m2",
+       "mark": "circle",
+       "on": "ag",
+       "color": "red",
+       "say": "trozo"
+      }
+     ],
+     "board": "same"
+    }
+   }
+  },
+  {
+   "narration": "Tu sistema inmunitario lo detecta como un intruso. Los linfocitos y los anticuerpos reaccionan, pero sin que llegues a enfermar.",
+   "scene": {
+    "type": "whiteboard",
+    "props": {
+     "items": [
+      {
+       "id": "t2",
+       "write": "Respuesta",
+       "zone": "top-row",
+       "size": "l",
+       "say": "inmunitario"
+      },
+      {
+       "id": "vr",
+       "draw": "virus",
+       "zone": "centre",
+       "size": "m",
+       "say": "intruso"
+      },
+      {
+       "id": "c",
+       "draw": "cell",
+       "zone": "left",
+       "size": "l",
+       "say": "linfocitos"
+      },
+      {
+       "id": "ab",
+       "draw": "antibody",
+       "zone": "bottom-left",
+       "size": "l",
+       "say": "reaccionan"
+      },
+      {
+       "id": "a4",
+       "connect": "arrow",
+       "from": "c",
+       "to": "ab",
+       "color": "blue"
+      },
+      {
+       "id": "m2",
+       "mark": "underline",
+       "on": "t2",
+       "color": "red",
+       "say": "llegues"
+      },
+      {
+       "id": "f",
+       "draw": "face_happy",
+       "zone": "right",
+       "size": "l",
+       "say": "enfermar"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "narration": "Y lo más importante: guardan memoria. Si el microbio real aparece algún día, tu cuerpo lo reconoce y responde mucho más rápido.",
+   "scene": {
+    "type": "whiteboard",
+    "props": {
+     "items": [
+      {
+       "id": "br",
+       "draw": "brain",
+       "zone": "bottom",
+       "size": "l",
+       "say": "memoria"
+      },
+      {
+       "id": "vv",
+       "draw": "virus",
+       "zone": "bottom-right",
+       "size": "m",
+       "say": "microbio"
+      },
+      {
+       "id": "vl",
+       "write": "microbio",
+       "tool": "pen",
+       "near": "vv",
+       "side": "below",
+       "size": "s",
+       "say": "aparece"
+      },
+      {
+       "id": "em0_vv",
+       "mark": "circle",
+       "on": "vv",
+       "color": "red",
+       "say": "día"
+      },
+      {
+       "id": "a5",
+       "connect": "arrow",
+       "from": "vv",
+       "to": "br",
+       "color": "red",
+       "say": "reconoce"
+      },
+      {
+       "id": "m3",
+       "mark": "circle",
+       "on": "br",
+       "color": "green",
+       "say": "responde"
+      },
+      {
+       "id": "rp",
+       "write": "rápido",
+       "tool": "marker",
+       "ink": "green",
+       "near": "br",
+       "side": "below",
+       "size": "m",
+       "say": "rápido"
+      }
+     ],
+     "board": "same"
+    }
+   }
+  },
+  {
+   "narration": "Además, cuando se vacuna a mucha gente, el microbio casi no encuentra a quién contagiar. Eso protege también a quienes no pueden vacunarse.",
+   "scene": {
+    "type": "whiteboard",
+    "props": {
+     "items": [
+      {
+       "id": "t3",
+       "write": "Inmunidad colectiva",
+       "zone": "top-row",
+       "size": "l",
+       "say": "gente"
+      },
+      {
+       "id": "g",
+       "draw": "family",
+       "zone": "right",
+       "size": "l",
+       "say": "microbio"
+      },
+      {
+       "id": "em0_g",
+       "mark": "circle",
+       "on": "g",
+       "color": "red",
+       "say": "encuentra"
+      },
+      {
+       "id": "sh",
+       "draw": "shield_check",
+       "zone": "left",
+       "size": "m",
+       "say": "contagiar"
+      },
+      {
+       "id": "a6",
+       "connect": "arrow",
+       "from": "sh",
+       "to": "g",
+       "color": "green",
+       "say": "protege"
+      },
+      {
+       "id": "m4",
+       "mark": "underline",
+       "on": "t3",
+       "color": "red",
+       "say": "también"
+      },
+      {
+       "id": "o",
+       "draw": "old_person",
+       "zone": "bottom-left",
+       "size": "m",
+       "say": "vacunarse"
+      },
+      {
+       "id": "a7",
+       "connect": "arrow",
+       "from": "g",
+       "to": "o",
+       "color": "green"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "narration": "Por eso la vacunación ayudó a erradicar la viruela en todo el mundo y a eliminar la polio y el tétanos en muchos países.",
+   "scene": {
+    "type": "whiteboard",
+    "props": {
+     "items": [
+      {
+       "id": "gl",
+       "draw": "earth_globe",
+       "zone": "centre",
+       "size": "l",
+       "say": "erradicar"
+      },
+      {
+       "id": "vi",
+       "write": "viruela",
+       "ink": "red",
+       "zone": "bottom",
+       "size": "m",
+       "say": "viruela"
+      },
+      {
+       "id": "ck",
+       "mark": "tick",
+       "on": "vi",
+       "color": "green",
+       "say": "mundo"
+      },
+      {
+       "id": "po",
+       "write": "polio\ntétanos",
+       "ink": "blue",
+       "zone": "bottom-right",
+       "size": "m",
+       "say": "polio"
+      },
+      {
+       "id": "em0_po",
+       "mark": "underline",
+       "on": "po",
+       "color": "red",
+       "say": "tetano"
+      }
+     ],
+     "board": "same"
+    }
+   }
+  },
+  {
+   "narration": "Una vacuna no te infecta: te entrena. Tu cuerpo aprende primero, y así, cuando llega el enemigo de verdad, ya sabe luchar.",
+   "scene": {
+    "type": "whiteboard",
+    "props": {
+     "items": [
+      {
+       "id": "k",
+       "write": "Vacuna = entrenamiento",
+       "ink": "blue",
+       "zone": "middle-row",
+       "size": "xl",
+       "say": "entrena"
+      },
+      {
+       "id": "u",
+       "mark": "double_underline",
+       "on": "k",
+       "color": "red",
+       "say": "aprende"
+      }
+     ]
+    }
+   }
+  }
+ ],
+ "captions": true,
+ "language": "es"
+}

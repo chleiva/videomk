@@ -24,11 +24,12 @@ sending different timezones earns nothing extra.
 20 / 45 / 500 credits for $9.99 / $19.99 / $199.99 (about $0.50 / $0.44 / $0.40 per credit), relabelled from the earlier 100 / 220 / 2400 at 5
 credits per minute: same economics.
 
-## Cost basis (estimates, +-30%; measure again with real data)
-About $0.02 fixed plus $0.04 per minute (voice $0.027/min with Polly generative, render about $0.015/min, planning the rest):
-1 min is about $0.06, 3 min $0.14, 12 min $0.50. Worst cost per credit is a 1-minute video, about $0.06, so a $0.50 credit is about 8x
-before store fees (about 5-7x after). Free exposure per active free user (daily credit set to 1 on 2026-11-23): first month 5 + 29 = 34 credits, about $1.70-2.05 if every one is used
-(realistically a fraction of that), then about 30 credits a month, $1.50-1.80. The daily amount is a server setting (`WALLET_DAILY_CREDITS`).
+## Cost basis (corrected 2026-11-28 with QA measurements)
+The earlier estimate (about $0.02 fixed plus $0.04 per minute, "1 min is about $0.06") was the plain look's script only and left out the render and the whiteboard review: it is **wrong as a cost per credit**.
+Measured on QA (`docs/COSTS.md`, `docs/COST_LEVERS_2026-11-28.md`): a 1-minute video costs about **$0.22 to $0.24 per credit including the render** (one 1-minute Spanish whiteboard video: script $0.233, speech $0.036,
+render $0.029, total $0.269; the whiteboard script call with its board review is the biggest part, $0.14 to $0.33). A plain-look 1-minute video measured $0.048 on average before the render (`docs/COSTS.md`, 41 videos), so the $0.22 to $0.24 is the figure to plan with until a measurement of every look says otherwise.
+Plan on **$0.22 to $0.24 per credit**, not $0.06: a $0.50 credit is then about 2x cost before store fees (about 1.6x after), not 8x. Free exposure per active free user (daily credit set to 1 on 2026-11-23): first month 5 + 29 = 34 credits,
+about $7 to $8 if every one is used at this cost (realistically a fraction of that), then about 30 credits a month, $6.60 to $7.20. The daily amount is a server setting (`WALLET_DAILY_CREDITS`); the free exposure figures above must be reviewed with it.
 
 ## Abuse controls
 Built: spend is conditional per bucket (no overspend under concurrency), refunds are idempotent, daily claim limited per UTC day,
