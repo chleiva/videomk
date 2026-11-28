@@ -1,0 +1,6 @@
+# Android Create v2: status
+
+Brief items 1-7: done in code. Asserted by `CreateDockTest` (JVM, 8 tests) and `CreateV2UiTest` (8 device tests): one dock with pills above one tool row, Create at the trailing end and at least 112 x 48 dp, 48 dp targets, helper line gone, chips and caption only before the first finished video, low-balance caption, inactive Create tappable with its explanation, creating replaces the dock with the capsule, recording (Stop, Listening between tools and Create, photo and Options off), Options without format chips, Create on its own full-width 52 dp row at font scale 2.0.
+`UxBudgetTest` (JVM) passes unchanged in the full unit run (476 tests, 0 failures); its budget was not tightened to the new smaller dock. Review findings by id: NOT individually mapped (review file not walked line by line).
+Captures: ~/Downloads/videomk-looks/review-create-v2/android (light, dark, es, large 200%, small 360x640, small-large), all looked at except the lock/format menu shots of every mode.
+Not verified: real speech recognizer (recording state is forced), real TalkBack, a physical device, tablets/foldables, the rest of the instrumented suites (only LookUiTest and CreateV2UiTest run).

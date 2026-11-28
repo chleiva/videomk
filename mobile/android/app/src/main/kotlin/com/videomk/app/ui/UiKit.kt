@@ -165,14 +165,17 @@ fun GlassIconButton(
     filled: Boolean = false, enabled: Boolean = true, badge: String? = null, size: Dp = Vmk.minTouch, onDark: Boolean = false, tint: Color? = null,
     /** Floating over content (the selection bar): an opaque surface circle with the one soft shadow instead of the tonal fill. */
     raised: Boolean = false,
+    /** Recording: the filled Stop on the danger colour. */
+    danger: Boolean = false,
 ) {
     val container = when {
+        danger -> Vmk.colors.danger
         filled -> null
         onDark -> Color.Black.copy(alpha = 0.45f)
         raised -> Vmk.colors.surface
         else -> Vmk.colors.surfaceRaised
     }
-    val iconTint = tint ?: if (filled) Vmk.colors.onPrimary else if (onDark) Color.White else Vmk.colors.text
+    val iconTint = tint ?: if (filled || danger) Vmk.colors.onPrimary else if (onDark) Color.White else Vmk.colors.text
     TooltipBox(
         positionProvider = TooltipDefaults.rememberPlainTooltipPositionProvider(),
         tooltip = { PlainTooltip { Text(description) } },
@@ -186,7 +189,7 @@ fun GlassIconButton(
                 contentAlignment = Alignment.Center,
             ) {
                 Box(
-                    Modifier.size(size - 4.dp).then(if (raised) Modifier.vmkShadow(2, CircleShape, Vmk.colors.dark) else Modifier).clip(CircleShape).then(if (filled) Modifier.background(Vmk.gradient) else Modifier.background(container!!)),
+                    Modifier.size(size - 4.dp).then(if (raised) Modifier.vmkShadow(2, CircleShape, Vmk.colors.dark) else Modifier).clip(CircleShape).then(if (filled && !danger) Modifier.background(Vmk.gradient) else Modifier.background(container!!)),
                     contentAlignment = Alignment.Center,
                 ) { Icon(icon, null, tint = iconTint, modifier = Modifier.size(22.dp)) }
             }
@@ -205,7 +208,7 @@ fun GlassIconButton(
  */
 @Composable
 fun Pill(
-    value: String, description: String, modifier: Modifier = Modifier, icon: ImageVector? = null, expanded: Boolean, onExpandedChange: (Boolean) -> Unit, locked: Boolean = false,
+    value: String, description: String, modifier: Modifier = Modifier, icon: ImageVector? = null, leading: (@Composable () -> Unit)? = null, expanded: Boolean, onExpandedChange: (Boolean) -> Unit, locked: Boolean = false,
     menu: @Composable () -> Unit,
 ) {
     Box(modifier) {
@@ -216,9 +219,10 @@ fun Pill(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Row(
-                Modifier.heightIn(min = Vmk.iconButton).clip(CircleShape).background(Vmk.colors.surfaceRaised).padding(start = Vmk.space.l, end = if (locked) Vmk.space.l else Vmk.space.m),
-                verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp),
+                Modifier.heightIn(min = Vmk.iconButton).clip(CircleShape).background(Vmk.colors.surfaceRaised).padding(start = 10.dp, end = if (locked) 10.dp else 6.dp),
+                verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp),
             ) {
+                leading?.invoke()
                 if (icon != null) Icon(icon, null, tint = Vmk.colors.primary, modifier = Modifier.size(18.dp))
                 Text(value, style = MaterialTheme.typography.labelLarge, color = if (locked) Vmk.colors.textSecondary else Vmk.colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false))
                 if (!locked) Icon(Sym.ExpandMore, null, tint = Vmk.colors.textSecondary, modifier = Modifier.size(18.dp))
@@ -233,7 +237,7 @@ fun Pill(
  * An empty [value] draws the accessory alone (where the word does not fit); TalkBack still hears [description] and [spoken].
  */
 @Composable
-fun PillButton(value: String, description: String, modifier: Modifier = Modifier, spoken: String = value, locked: Boolean = false, onClick: () -> Unit, accessory: (@Composable () -> Unit)? = null) {
+fun PillButton(value: String, description: String, modifier: Modifier = Modifier, spoken: String = value, locked: Boolean = false, onClick: () -> Unit, leading: (@Composable () -> Unit)? = null, accessory: (@Composable () -> Unit)? = null) {
     Row(
         modifier.heightIn(min = Vmk.minTouch).wrapContentSize(Alignment.CenterStart).clip(CircleShape)
             .clickable(enabled = !locked, role = Role.Button, onClickLabel = description, onClick = onClick)
@@ -241,9 +245,10 @@ fun PillButton(value: String, description: String, modifier: Modifier = Modifier
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Row(
-            Modifier.heightIn(min = Vmk.iconButton).clip(CircleShape).background(Vmk.colors.surfaceRaised).padding(start = Vmk.space.l, end = if (locked) Vmk.space.l else Vmk.space.m),
-            verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp),
+            Modifier.heightIn(min = Vmk.iconButton).clip(CircleShape).background(Vmk.colors.surfaceRaised).padding(start = 10.dp, end = if (locked) 10.dp else 6.dp),
+            verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp),
         ) {
+            leading?.invoke()
             if (value.isNotEmpty()) Text(value, style = MaterialTheme.typography.labelLarge, color = if (locked) Vmk.colors.textSecondary else Vmk.colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false))
             accessory?.invoke()
             if (!locked) Icon(Sym.ExpandMore, null, tint = Vmk.colors.textSecondary, modifier = Modifier.size(18.dp))

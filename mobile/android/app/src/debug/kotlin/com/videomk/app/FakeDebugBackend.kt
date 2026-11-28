@@ -46,7 +46,9 @@ class FakeDebugBackend(private val deckDemo: Boolean = false) : Backend {
         val why = if (Txt.localeTag == "es") "Un proceso paso a paso se entiende mejor dibujado." else "A step-by-step process is clearest drawn."
         return list.map { if (it.id == "v1") it.copy(look = AppliedLook("auto", "whiteboard", why = why, byAuto = true)) else it }
     }
-    override suspend fun listVideos(): List<VideoItem> = withLooks(allVideos())
+    /** `files/fake_no_finished`: an account with no finished video yet (Create shows the example chips and the first-video caption). */
+    private fun noFinished(): Boolean = java.io.File("/data/data/com.videomk.app/files/fake_no_finished").exists()
+    override suspend fun listVideos(): List<VideoItem> = withLooks(allVideos()).let { l -> if (noFinished()) l.filter { it.status !is VideoStatus.Complete } else l }
     private fun allVideos(): List<VideoItem> {
         val list = if (finished()) videos.map { if (it.id == "v2") it.copy(status = VideoStatus.Complete, durationSeconds = 62.0, making = null, editable = true, videoUrl = "https://example.com/v2.mp4", previewGifUrl = pic("s_forest.jpg")) else it } else videos.toList()
         return if (deckDemo) deckVideos + list else list

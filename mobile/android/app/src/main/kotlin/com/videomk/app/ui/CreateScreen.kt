@@ -100,6 +100,7 @@ import androidx.compose.ui.res.stringResource
 import com.videomk.app.core.displayName
 import com.videomk.app.core.Brief
 import com.videomk.app.core.ComposerLogic
+import com.videomk.app.core.CreateDock
 import com.videomk.app.core.CreateOptions
 import com.videomk.app.core.CreatePlatforms
 import com.videomk.app.core.CreatePrefs
@@ -187,6 +188,8 @@ fun CreateScreen(app: AppViewModel, composer: ComposerViewModel, onClose: () -> 
     // a Free account with nothing to spend and no free video available: the plans and the showcase instead of a form that cannot work
     val gate = if (com.videomk.app.DebugHooks.balanceOverride(context) != null) null else com.videomk.app.core.CreateGate.locked(state.wallet, caps.plans)
     val announcement = statusAnnouncement(status)
+    // the keyboard is open on arrival: the prompt is the first thing, on every platform
+    LaunchedEffect(gate == null) { if (gate == null) { runCatching { focus.requestFocus() }; keyboard?.show() } }
     val photoTotal = composer.totalPhotos
     val comingSoonText = stringResource(R.string.create_coming_soon)
     val photoHint = PhotoCapacity.hint(photoTotal, options.minutes, lengths).takeIf { status.sendReady }
@@ -277,29 +280,17 @@ fun CreateScreen(app: AppViewModel, composer: ComposerViewModel, onClose: () -> 
     val capsule = CreateCapsule.view(phase, uploading)
     val aura by androidx.compose.animation.core.animateFloatAsState(if (locked) 1f else 0f, tween(if (still) DesignTokens.Motion.reducedFade else 320), label = "aura")
     val dim by androidx.compose.animation.core.animateFloatAsState(if (locked) 0.5f else 1f, tween(DesignTokens.Motion.select), label = "dim")
-    val showExamples = composer.text.isEmpty() && typing == null && !deckState.attached && photoTotal == 0 && !listening && !locked
+    val hasFinished = CreateDock.hasFinishedVideo(state.loadState is LoadState.Loaded, state.videos.any { it.status is com.videomk.app.core.VideoStatus.Complete })
+    val showExamples = CreateDock.showExamples(composer.text.isEmpty(), typing != null, deckState.attached || photoTotal > 0, listening, locked, hasFinished)
+    val creating = capsule is CreateCapsule.View.Live
 
     androidx.compose.foundation.layout.BoxWithConstraints(Modifier.fillMaxSize().background(Vmk.colors.background).vmkAura(aura).statusBarsPadding().windowInsetsPadding(WindowInsets.ime.union(WindowInsets.navigationBars)).testTag("createScreen")) {
-        // on a short window (keyboard up at a large text size) the controls scroll with the prompt, so the Create button and the caret always fit
-        val compact = maxHeight < 460.dp || (isLargeText() && maxHeight < 620.dp)
-        val controls: @Composable () -> Unit = {
-            Column(Modifier.fillMaxWidth().then(if (locked) Modifier.alpha(dim).lockTouches() else Modifier), verticalArrangement = Arrangement.spacedBy(Vmk.space.xs)) {
-                // photos and mic on the left, options on the right: three quiet icons (gone while a request runs: only Cancel is offered then)
-                if (!locked) Row(Modifier.fillMaxWidth().offset(x = (-2).dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Vmk.space.s)) {
-                    // the photo icon is a menu, each row goes straight to its picker: the phone's own photo picker, Media, and a presentation where the server offers it
-                    if (!deckState.attached) Box {
-                        GlassIconButton(Sym.AddPhotoAlternate, stringResource(R.string.create_add_photos), { haptics.play(DesignTokens.Haptic.Selection); photoMenu = true }, Modifier.testTag("photoButton"), badge = AddPhotosLogic.badge(photoTotal))
-                        VmkMenu(photoMenu, { photoMenu = false }) {
-                            VmkMenuItem(stringResource(R.string.photo_menu_library), Sym.Image, Modifier.testTag("photoMenuLibrary")) { photoMenu = false; pickFromPhone() }
-                            if (container?.mediaApi != null) VmkMenuItem(stringResource(R.string.nav_tab_media), Sym.PhotoLibrary, Modifier.testTag("photoMenuMedia")) { photoMenu = false; composer.openAddPhotos(1) }
-                            if (caps.deck != null) VmkMenuItem(stringResource(R.string.photo_menu_presentation), Sym.Slideshow, Modifier.testTag("addDeck")) { photoMenu = false; addDeck() }
-                        }
-                    }
-                    GlassIconButton(if (listening) Sym.Stop else Sym.Mic, stringResource(if (listening) R.string.create_stop_dictation else R.string.create_dictate_desc), ::onMic, Modifier.testTag("micButton"), filled = listening)
-                    if (listening) Text(stringResource(R.string.composer_listening), style = MaterialTheme.typography.bodySmall, color = Vmk.colors.danger, modifier = Modifier.weight(1f)) else Spacer(Modifier.weight(1f))
-                    GlassIconButton(Sym.Tune, stringResource(R.string.create_options), { optionsOpen = true }, Modifier.testTag("optionsMenu"))
-                }
-                // three pills (platform, length, look): each shows its value, so the state is the label
+        // on a short window (keyboard up at a large text size) the pills scroll with the prompt; the tool row and Create stay put, so Create and the caret always fit
+        val compact = maxHeight < 270.dp || (isLargeText() && maxHeight < 620.dp)
+        val chipCount = CreateDock.chipCount(maxHeight.value)
+        // ONE dock. Row 1: the pills (what it is for, how long, which look; Characters only for a look with a cast), each with a leading glyph.
+        val pills: @Composable () -> Unit = {
+            Column(Modifier.fillMaxWidth().then(if (locked) Modifier.alpha(dim).lockTouches() else Modifier)) {
                 val chips = remember(caps) { CreatePlatforms.chips(caps).filter { it.enabled } }
                 val forDesc = stringResource(R.string.create_what_for)
                 val lengthDesc = stringResource(R.string.create_length)
@@ -307,8 +298,8 @@ fun CreateScreen(app: AppViewModel, composer: ComposerViewModel, onClose: () -> 
                 // the look was changed for the person (photos sent it back to Auto, a look moved the length): said right above the pill it is about
                 composer.lookNotice?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary, modifier = Modifier.fillMaxWidth().padding(bottom = Vmk.space.xs).semantics { liveRegion = androidx.compose.ui.semantics.LiveRegionMode.Polite }.testTag("lookNotice")) }
                 val picker = caps.lookPicker
-                PillRows(Modifier.fillMaxWidth().testTag("pills")) {
-                    Pill(platformPillValue(options, caps), forDesc, Modifier.testTag("pillFor"), expanded = forOpen, onExpandedChange = { haptics.play(DesignTokens.Haptic.Selection); forOpen = it }, locked = locked) {
+                PillRows(Modifier.fillMaxWidth().testTag("pills"), gap = 6.dp) {
+                    Pill(platformPillValue(options, caps), forDesc, Modifier.testTag("pillFor"), leading = { FormatGlyph(options.aspect) }, expanded = forOpen, onExpandedChange = { haptics.play(DesignTokens.Haptic.Selection); forOpen = it }, locked = locked) {
                         for (c in chips) androidx.compose.material3.DropdownMenuItem(
                             text = { Text(c.label, fontWeight = if (c.id == options.platform && !CreatePlatforms.isCustom(options, caps)) FontWeight.Bold else FontWeight.Normal) },
                             trailingIcon = { if (c.id == options.platform && !CreatePlatforms.isCustom(options, caps)) Icon(Sym.Check, null, tint = Vmk.colors.primary) },
@@ -316,7 +307,7 @@ fun CreateScreen(app: AppViewModel, composer: ComposerViewModel, onClose: () -> 
                         )
                     }
                     val maxMinutes = CreatePlatforms.chip(caps, options.platform)?.takeIf { it.enabled }?.maxMinutes
-                    Pill(if (options.useSuggestedLength && deckState is DeckState.Ready) stringResource(R.string.deck_suggested) else Lengths.short(options.minutes), lengthDesc, Modifier.testTag("pillLength"), expanded = lengthOpen, onExpandedChange = { haptics.play(DesignTokens.Haptic.Selection); lengthOpen = it }, locked = locked) {
+                    Pill(if (options.useSuggestedLength && deckState is DeckState.Ready) stringResource(R.string.deck_suggested) else Lengths.short(options.minutes), lengthDesc, Modifier.testTag("pillLength"), leading = { PillGlyph(Sym.Schedule) }, expanded = lengthOpen, onExpandedChange = { haptics.play(DesignTokens.Haptic.Selection); lengthOpen = it }, locked = locked) {
                         (deckState as? DeckState.Ready)?.let { ready ->
                             LengthMenuRow(stringResource(R.string.deck_suggested) + " · " + Lengths.short(ready.info.suggestedMinutes), ready.info.suggestedCredits, options.useSuggestedLength, balance != null && ready.info.suggestedCredits > balance, true, "length-suggested") { lengthOpen = false; composer.useSuggestedLength() }
                         }
@@ -333,27 +324,56 @@ fun CreateScreen(app: AppViewModel, composer: ComposerViewModel, onClose: () -> 
                         if (anyOver && maxMinutes != null) Text(stringResource(R.string.create_over_max, CreatePlatforms.chip(caps, options.platform)!!.label, Lengths.clock(maxMinutes)), style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary, modifier = Modifier.padding(horizontal = Vmk.space.l, vertical = Vmk.space.s).widthIn(max = 240.dp))
                     }
                     // with the server's look picker the pill says the look only and opens the sheet of four tiles (the characters have their own pill); without it (an older server): the menu it always was
-                    if (picker != null) PillButton(com.videomk.app.core.LookRules.pillLabel(options.lookChoice, picker), lookDesc, Modifier.testTag("pillLook"), locked = locked, onClick = { haptics.play(DesignTokens.Haptic.Selection); focusManager.clearFocus(); composer.dismissLookNotice(); lookSheet = true })
-                    else Pill(options.look?.let { stringResource(R.string.create_summary_look, it.displayName()) } ?: stringResource(R.string.create_summary_look_auto), lookDesc, Modifier.testTag("pillLook"), expanded = lookOpen, onExpandedChange = { haptics.play(DesignTokens.Haptic.Selection); lookOpen = it }, locked = locked) {
+                    if (picker != null) PillButton(com.videomk.app.core.LookRules.pillLabel(options.lookChoice, picker), lookDesc, Modifier.testTag("pillLook"), locked = locked, onClick = { haptics.play(DesignTokens.Haptic.Selection); focusManager.clearFocus(); composer.dismissLookNotice(); lookSheet = true }, leading = { PillGlyph(Sym.Sparkle) })
+                    else Pill(options.look?.let { stringResource(R.string.create_summary_look, it.displayName()) } ?: stringResource(R.string.create_summary_look_auto), lookDesc, Modifier.testTag("pillLook"), leading = { PillGlyph(Sym.Sparkle) }, expanded = lookOpen, onExpandedChange = { haptics.play(DesignTokens.Haptic.Selection); lookOpen = it }, locked = locked) {
                         for (l in listOf<VideoLook?>(null) + VideoLook.entries) androidx.compose.material3.DropdownMenuItem(
                             text = { Text(l?.displayName() ?: stringResource(R.string.create_look_auto), fontWeight = if (options.look == l) FontWeight.Bold else FontWeight.Normal) },
                             trailingIcon = { if (options.look == l) Icon(Sym.Check, null, tint = Vmk.colors.primary) },
                             onClick = { lookOpen = false; haptics.play(DesignTokens.Haptic.Selection); composer.updateOptions(options.copy(look = l)) }, modifier = Modifier.testTag("look-${l?.wire ?: "auto"}"),
                         )
                     }
-                    // only for a look with characters: who explains it. The chosen faces (or the sparkle of "we choose") sit in the pill; it opens the Characters sheet.
-                    // The second form is the faces alone, for where the word does not fit in two rows of pills (large text, small phones); TalkBack hears "Characters" either way.
+                    // only for a look with characters: who explains it. The chosen faces (or the people glyph of "we choose") lead the word; it opens the Characters sheet.
+                    // The second form is the glyph or faces alone, for where the word does not fit in two rows of pills (large text, small phones); TalkBack hears "Characters" either way.
                     if (picker != null && composer.lookHasCast) {
                         val castDesc = stringResource(R.string.looks_cast)
                         val faces = options.lookChoice.cast.mapNotNull { picker.cast?.member(it) }
                         val spoken = com.videomk.app.core.LookRules.castSpoken(options.lookChoice, picker)
                         val open = { haptics.play(DesignTokens.Haptic.Selection); focusManager.clearFocus(); composer.dismissLookNotice(); castSheet = true }
-                        for (compact in listOf(false, true)) PillButton(if (compact) "" else castDesc, castDesc, Modifier.testTag("pillCast"), spoken = spoken, locked = locked, onClick = open) {
-                            if (faces.isEmpty()) { if (compact) Icon(Sym.Person, null, tint = Vmk.colors.text, modifier = Modifier.size(18.dp)); Sparkle(size = 14.dp) } else PillFaces(faces)
-                        }
+                        for (compactForm in listOf(false, true)) PillButton(if (compactForm) "" else castDesc, castDesc, Modifier.testTag("pillCast"), spoken = spoken, locked = locked, onClick = open, leading = { if (faces.isEmpty()) PillGlyph(Sym.Person) else PillFaces(faces) })
                     }
                 }
             }
+        }
+        // Row 2: photos, mic and Options on the left, Create at the trailing end (it drops to its own row at large text or where it does not fit)
+        val toolRow: @Composable () -> Unit = {
+            val createCredits = if (offer != null) Lengths.credits(offer) * maxOf(1, options.creditsMultiplier) else options.credits
+            val priceKnown = !deckState.attached || deckState is DeckState.Ready      // not while a presentation is still being read: its price is not known yet
+            val createState = CreateDock.createState(status.sendReady, offer != null, creating = false)
+            // "Create" alone, or with the length the balance pays for: "Create · 1 min" (one tap makes that video)
+            val createLabel = if (offer != null) stringResource(R.string.create_with_length, Lengths.short(offer)) else stringResource(R.string.create_create_video)
+            val spokenLabel = if (offer != null) createLabel else stringResource(R.string.create_video_desc)
+            val stateText = if (createState == CreateDock.CreateState.Active) pluralStringResource(R.plurals.create_state_ready, createCredits, createCredits)
+                else stringResource(if (status.fix != null) R.string.create_state_not_ready_fix else R.string.create_state_not_ready, status.text)
+            DockToolRow(
+                Modifier.fillMaxWidth(),
+                tools = {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        // the photo icon is a menu, each row goes straight to its picker: the phone's own photo picker, Media, and a presentation where the server offers it
+                        if (!deckState.attached) Box {
+                            GlassIconButton(Sym.AddPhotoAlternate, stringResource(R.string.create_add_photos), { haptics.play(DesignTokens.Haptic.Selection); photoMenu = true }, Modifier.testTag("photoButton"), enabled = !listening, badge = AddPhotosLogic.badge(photoTotal))
+                            VmkMenu(photoMenu, { photoMenu = false }) {
+                                VmkMenuItem(stringResource(R.string.photo_menu_library), Sym.Image, Modifier.testTag("photoMenuLibrary")) { photoMenu = false; pickFromPhone() }
+                                if (container?.mediaApi != null) VmkMenuItem(stringResource(R.string.nav_tab_media), Sym.PhotoLibrary, Modifier.testTag("photoMenuMedia")) { photoMenu = false; composer.openAddPhotos(1) }
+                                if (caps.deck != null) VmkMenuItem(stringResource(R.string.photo_menu_presentation), Sym.Slideshow, Modifier.testTag("addDeck")) { photoMenu = false; addDeck() }
+                            }
+                        }
+                        GlassIconButton(if (listening) Sym.Stop else Sym.Mic, stringResource(if (listening) R.string.create_stop_dictation else R.string.create_dictate_desc), ::onMic, Modifier.testTag("micButton"), danger = listening)
+                        OptionsButton(labelled = !listening, enabled = !listening, onClick = { focusManager.clearFocus(); optionsOpen = true }, modifier = Modifier.testTag("optionsMenu"))
+                    }
+                },
+                middle = { if (listening) Text(stringResource(R.string.composer_listening), style = MaterialTheme.typography.bodySmall, color = Vmk.colors.danger, maxLines = 1, softWrap = false, modifier = Modifier.testTag("listeningHint")) },
+                create = { CreatePill(createState, createLabel, spokenLabel, createCredits.takeIf { priceKnown }, stateText, if (createState == CreateDock.CreateState.Active) createLabel else stringResource(R.string.create_explain_not_ready), onClick = ::tapCreate) },
+            )
         }
         Column(Modifier.fillMaxSize()) {
             // the screen is the title: only the way out
@@ -365,9 +385,9 @@ fun CreateScreen(app: AppViewModel, composer: ComposerViewModel, onClose: () -> 
             Column(Modifier.weight(1f).verticalScroll(scroll).padding(horizontal = Vmk.space.screen), verticalArrangement = Arrangement.spacedBy(Vmk.space.l)) {
                 Column(Modifier.fillMaxWidth().then(if (locked) Modifier.alpha(dim).lockTouches() else Modifier), verticalArrangement = Arrangement.spacedBy(Vmk.space.l)) {
                     PromptField(composer, listening || typing != null, focus, deck = deckState.attached)
-                    if (showExamples) FlowRow(Modifier.fillMaxWidth().testTag("createExamples"), horizontalArrangement = Arrangement.spacedBy(Vmk.space.s)) {
+                    if (showExamples && chipCount > 0) FlowRow(Modifier.fillMaxWidth().testTag("createExamples"), horizontalArrangement = Arrangement.spacedBy(Vmk.space.s)) {
                         val use = stringResource(R.string.create_example_use)
-                        for ((i, res) in listOf(R.string.create_example_bees, R.string.create_example_focus, R.string.create_example_forests).withIndex()) {
+                        for ((i, res) in listOf(R.string.create_example_bees, R.string.create_example_focus, R.string.create_example_forests).take(chipCount).withIndex()) {
                             val t = stringResource(res)
                             SparkleChip(t, { haptics.play(DesignTokens.Haptic.Selection); focusManager.clearFocus(); typing = t }, Modifier.testTag("example-$i"), onClickLabel = use)
                         }
@@ -400,26 +420,33 @@ fun CreateScreen(app: AppViewModel, composer: ComposerViewModel, onClose: () -> 
                     }
                     if (photoHint != null) PhotoHintBlock(photoHint, hintFix, composer, options)
                 }
-                if (compact) controls()
+                if (compact && !creating) pills()
                 Spacer(Modifier.size(Vmk.space.s))
             }
 
-            // what never goes away: the controls, Create (the one primary action) and one caption
-            Column(Modifier.fillMaxWidth().padding(horizontal = Vmk.space.screen).padding(top = Vmk.space.s, bottom = Vmk.space.m), verticalArrangement = Arrangement.spacedBy(Vmk.space.s)) {
-                if (!compact) controls()
+            // what never goes away: the dock (pills, then photos / mic / Options with Create), one sentence above it when something needs saying, one caption under it
+            Column(Modifier.fillMaxWidth().padding(horizontal = Vmk.space.l).padding(top = Vmk.space.s, bottom = Vmk.space.m).testTag("createDock"), verticalArrangement = Arrangement.spacedBy(Vmk.space.s)) {
                 composer.inlineError?.let { m ->
                     Row(Modifier.fillMaxWidth().testTag("createError").semantics { liveRegion = androidx.compose.ui.semantics.LiveRegionMode.Assertive }, verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Vmk.space.s)) {
                         Icon(Sym.Warning, null, tint = Vmk.colors.danger, modifier = Modifier.size(18.dp))
                         Text(stringResource(R.string.create_error_retry, m), style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.text)
                     }
                 }
-                androidx.compose.animation.AnimatedContent(capsule is CreateCapsule.View.Live, transitionSpec = { androidx.compose.animation.fadeIn(tween(if (still) DesignTokens.Motion.reducedFade else 220)) togetherWith androidx.compose.animation.fadeOut(tween(DesignTokens.Motion.reducedFade)) }, label = "capsule") { live ->
+                androidx.compose.animation.AnimatedContent(creating, transitionSpec = { androidx.compose.animation.fadeIn(tween(if (still) DesignTokens.Motion.reducedFade else 220)) togetherWith androidx.compose.animation.fadeOut(tween(DesignTokens.Motion.reducedFade)) }, label = "capsule") { live ->
                     if (live) (capsule as? CreateCapsule.View.Live ?: CreateCapsule.View.Live(CreateCapsule.Step.Starting, false)).let { LiveCapsule(it, onCancel = { haptics.play(DesignTokens.Haptic.Selection); composer.dismissSheet() }) }
                     else Column(verticalArrangement = Arrangement.spacedBy(Vmk.space.s)) {
-                        CreateButton(status.sendReady, if (offer != null) Lengths.credits(offer) * maxOf(1, options.creditsMultiplier) else options.credits, status.text, status.fix != null, offer, ::tapCreate)
-                        if (status.kind == StatusKind.Ready || status.kind == StatusKind.PhotoHint || (status.kind == StatusKind.TooShort && composer.text.isEmpty() && pulse == 0 && !deckState.attached)) {
-                            Text(if (balance != null) pluralStringResource(R.plurals.create_credits_left, balance, balance) else "", style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary, textAlign = androidx.compose.ui.text.style.TextAlign.Center, modifier = Modifier.fillMaxWidth().testTag("costLine"))
-                        } else StatusLine(if (offer != null) status.copy(fix = null) else status, flash.value, shake.value, ::applyFix)
+                        // calm: nothing is wrong, so the sentence stays away and (maybe) the caption speaks
+                        val calm = status.kind == StatusKind.Ready || status.kind == StatusKind.PhotoHint || status.kind == StatusKind.Listening || status.kind == StatusKind.Idle ||
+                            (status.kind == StatusKind.TooShort && composer.text.isEmpty() && pulse == 0 && !deckState.attached)
+                        if (!calm) StatusLine(if (offer != null) status.copy(fix = null) else status, flash.value, shake.value, ::applyFix)
+                        if (!compact) pills()
+                        toolRow()
+                        val cost = if (offer != null) Lengths.credits(offer) * maxOf(1, options.creditsMultiplier) else options.credits
+                        when (val cap = CreateDock.caption(calm, balance, cost, hasFinished, priceKnown = !deckState.attached || deckState is DeckState.Ready)) {
+                            is CreateDock.Caption.FirstVideo -> DockCaption(pluralStringResource(R.plurals.create_first_cost, cap.cost, cap.cost, cap.balance))
+                            is CreateDock.Caption.Low -> DockCaption(pluralStringResource(R.plurals.create_credits_left, cap.balance, cap.balance))
+                            CreateDock.Caption.None -> Unit
+                        }
                     }
                 }
             }
@@ -497,32 +524,6 @@ private fun PhotoHintBlock(hint: String, fix: Double?, composer: ComposerViewMod
             val f = com.videomk.app.core.StatusFix(fix)
             FixChip(f.label(), f.description(), Modifier.testTag("photoFixChip")) { composer.setLength(fix) }
         }
-    }
-}
-
-/**
- * Create: the ONE primary button, full width, never absent. The verb on the left and its price on the right. With nothing to send yet it is tonal and a tap explains why.
- */
-@Composable
-private fun CreateButton(ready: Boolean, credits: Int, reason: String, hasFix: Boolean, offer: Double?, onClick: () -> Unit) {
-    val shape = CircleShape
-    val active = ready || offer != null
-    // "Create" alone, or with the length the balance pays for: "Create · 1 min" (one tap makes that video)
-    val createLabel = if (offer != null) stringResource(R.string.create_with_length, Lengths.short(offer)) else stringResource(R.string.create_create_video)
-    val boxState = if (active) pluralStringResource(R.plurals.create_state_ready, credits, credits)
-        else stringResource(if (hasFix) R.string.create_state_not_ready_fix else R.string.create_state_not_ready, reason)
-    // when it cannot send it LOOKS like it cannot: an opaque quiet fill, no glow. The tap still answers (it says what is missing).
-    val c = if (active) Vmk.colors.onPrimary else Vmk.colors.textSecondary
-    Row(
-        Modifier.fillMaxWidth().heightIn(min = Vmk.primaryButton).then(if (active) Modifier.vmkGlow(shape) else Modifier).clip(shape).then(if (active) Modifier.background(Vmk.gradient) else Modifier.background(Vmk.colors.surface3))
-            .clickable(role = Role.Button, onClickLabel = if (active) createLabel else stringResource(R.string.create_explain_not_ready), onClick = onClick)
-            .semantics { contentDescription = createLabel; stateDescription = boxState }.testTag("sendButton")
-            .padding(horizontal = Vmk.space.xxl, vertical = Vmk.space.m),
-        verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Vmk.space.s),
-    ) {
-        Text(createLabel, style = VmkType.cta, color = c, modifier = Modifier.weight(1f))
-        Icon(Sym.Bolt, null, tint = c, modifier = Modifier.size(18.dp))
-        Text("$credits", style = VmkType.cta, color = c)
     }
 }
 
