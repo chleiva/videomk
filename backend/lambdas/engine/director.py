@@ -35,7 +35,8 @@ def direct(prompt: str, *, minutes: float, ask_small: Ask, ask_big: Callable[[st
            web_provider: Any = None, ask_tools: Optional[researcher.AskTools] = None, today: Optional[str] = None,
            budget: Optional[researcher.Budget] = None, photos: Optional[List[Dict[str, Any]]] = None,
            max_images_per_minute: Optional[float] = None, music_tracks: Optional[List[Dict[str, Any]]] = None, story: Optional[Dict[str, Any]] = None,
-           options: Optional[Dict[str, Any]] = None, vector_search: Optional[Callable[..., List[Dict[str, Any]]]] = None) -> Dict[str, Any]:
+           options: Optional[Dict[str, Any]] = None, vector_search: Optional[Callable[..., List[Dict[str, Any]]]] = None,
+           video_assets: Optional[List[Dict[str, Any]]] = None, resolution: Optional[str] = None) -> Dict[str, Any]:
     """Returns {"legit": False, "reason": ...} or {"legit": True, "plan": ..., "warnings": [...], "fetched": [titles], "research": {...}}.
     With a `web_provider` the brief is first classified: time-sensitive briefs get a web research agent, the rest the cheap encyclopedia path."""
     region = voices.clean_region(region)
@@ -95,7 +96,7 @@ def direct(prompt: str, *, minutes: float, ask_small: Ask, ask_big: Callable[[st
             poly_options, poly_note = polyglot_mod.shape_options(options, poly, prompt, skill_ids=skill_ids, language=language, minutes=minutes)
             if poly_note:
                 poly.notes.append(poly_note)
-    direction = art_direction.decide(prompt, options=poly_options, skill_ids=skill_ids, photos=photos, research_mode=info["mode"], minutes=minutes, language=language,
+    direction = art_direction.decide(prompt, options=poly_options, skill_ids=skill_ids, photos=photos or video_assets or None,   # the person's own clips are their footage too: the look stays footage research_mode=info["mode"], minutes=minutes, language=language,
                                      ask=lambda sys_, usr: ask_small(sys_, usr, 320))
     vpolicy, wpolicy, ppolicy = art_direction.policies(direction, prompt, options=options, skill_ids=skill_ids, minutes=minutes, expected_beats=n_expected, language=language,
                                                        vector_search=vector_search, ask=(lambda sys_, usr: ask_small(sys_, usr, 160)) if vector_policy.enabled() else None)
@@ -137,9 +138,12 @@ def direct(prompt: str, *, minutes: float, ask_small: Ask, ask_big: Callable[[st
             written_from = [notes] + list(sinfo.get("notes") or [])
         else:
             plan, warnings = plan_mod.generate_plan(prompt, notes, minutes, ask_big, language=language, region=region, today=today if info["mode"] == "web" else None, photos=photos,
-                                                      allow_clips=info["mode"] != "web", music_tracks=music_tracks, craft=craft, story=story, **rate)
+                                                      allow_clips=info["mode"] != "web", music_tracks=music_tracks, craft=craft, story=story, video_assets=video_assets,
+                                                      frame={"aspect": (options or {}).get("aspect") or "16:9", "resolution": resolution}, **rate)
     if not plan.get("legit"):
         return {"legit": False, "reason": plan.get("reason", "")}
+    if video_assets:   # the person's own clips: placed, never dropped, fit settled by the rules (engine/plan.ensure_video_clips)
+        warnings += plan_mod.ensure_video_clips(plan, video_assets, (options or {}).get("aspect") or "16:9", resolution)
     if region:   # before the cast is given its voices: the characters of a video speak with the viewer's accent (presenter_policy.voice_for)
         plan["region"] = region
     warnings += vector_policy.enforce(plan, vpolicy)   # only catalog ids, the share cap, never two in a row; records plan["vector"]

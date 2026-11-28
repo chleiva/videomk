@@ -237,3 +237,21 @@ def build_sfx_track(events: Sequence[Tuple[float, str, float]], duration: float,
         j = min(n, i + s.size)
         out[i:j] += s[: j - i] * gain
     return np.stack([out, out], axis=1)
+
+
+def build_clip_audio_track(items: Sequence[Tuple[float, float, np.ndarray]], duration: float, sr: int = MIX_SR) -> np.ndarray:
+    """The person's own clips' sound placed on the timeline. items: (start_s, longest_s, mono samples at `sr`); each is cut to its scene and faded 30 ms at both ends. Returns stereo (n,2)."""
+    n = int(duration * sr)
+    out = np.zeros(n, np.float32)
+    for start, longest, s in items:
+        i = int(start * sr)
+        if i < 0 or i >= n or s is None or s.size == 0:
+            continue
+        s = s[: int(longest * sr)].astype(np.float32).copy()
+        f = min(s.size // 2, int(0.03 * sr))
+        if f > 1:
+            s[:f] *= np.linspace(0, 1, f, dtype=np.float32)
+            s[-f:] *= np.linspace(1, 0, f, dtype=np.float32)
+        j = min(n, i + s.size)
+        out[i:j] += s[: j - i]
+    return np.stack([out, out], axis=1)

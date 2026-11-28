@@ -270,6 +270,7 @@
     var since = sw.updated_at ? ' since ' + hhmm(sw.updated_at) + ' UTC' : '';
     if (sw.stop_new_videos) bad.push('New videos are OFF' + since + '.');
     if (sw.stop_free_videos) warn.push('Free videos are OFF' + since + '.');
+    if (sw.stop_video_upload) warn.push('Video upload is OFF' + since + '.');
     if (sw.error) warn.push('The switches could not be read.');
     var hr = meta.hour || {}, fin = (hr.failed || 0) + (hr.complete || 0);
     if (hr.failed >= 3 && fin && hr.failed / fin > 0.2) bad.push('Videos are failing: ' + hr.failed + ' of ' + fin + ' in the last hour.');
@@ -352,7 +353,8 @@
   }
   var WORDS = {
     stop_new_videos: { name: 'New videos', off: 'Nobody can start or retry a video. Videos being made finish. Watching, the library and sign-in keep working.', on: 'Everyone can make videos.' },
-    stop_free_videos: { name: 'Free videos', off: 'Free credits cannot be spent. Paid credits work.', on: 'Free credits can be spent, within the daily budget.' }
+    stop_free_videos: { name: 'Free videos', off: 'Free credits cannot be spent. Paid credits work.', on: 'Free credits can be spent, within the daily budget.' },
+    stop_video_upload: { name: 'Video upload', off: 'Nobody can add a video clip. Clips already ready and photos keep working.', on: 'Everyone allowed by their plan can add video clips.' }
   };
   function switchesCard(sw) {
     var kids = [el('h2', { text: 'Switches' })];

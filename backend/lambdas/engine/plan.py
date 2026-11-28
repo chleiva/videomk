@@ -645,6 +645,8 @@ def sanitize_props(stype: str, p: Dict[str, Any]) -> Dict[str, Any]:
         if len(clean) < 2:
             raise ValueError("a gallery needs at least 2 different image queries")
         return {"image_queries": clean[:6], "alt": _s(p.get("alt") or clean[0], 70), **_word_prop(p)}
+    if stype == "clip" and re.match(r"^V[1-9]$", str(p.get("user_clip") or "").strip().upper()):   # the person's own uploaded clip (docs/VIDEO_UPLOAD_2026-11-28.md): ids are checked by ensure_video_clips
+        return {"user_clip": str(p["user_clip"]).strip().upper(), "fit": _s(p.get("fit"), 8).lower(), "alt": _s(p.get("alt") or "My video clip", 70), **_word_prop(p)}
     if stype == "clip":
         many: List[str] = []   # a montage: 2-4 generic wordings of what is being talked about, in order, one clip each
         for q in (p.get("clip_queries") if isinstance(p.get("clip_queries"), list) else []):
@@ -825,11 +827,11 @@ def _validate_plan(plan: Dict[str, Any], *, max_beats: int = MAX_BEATS, language
             if rejects is not None and not silent:
                 rejects.append({"narration": narration, "scene": scene_in, "error": str(e)[:200]})
             scene = _fallback_scene(narration)
-        if scene["type"] == "clip" and not allow_clips:  # current events: generic footage would mislead, so the beat becomes a photograph of the same subject
+        if scene["type"] == "clip" and not allow_clips and not scene["props"].get("user_clip"):  # current events: generic footage would mislead, so the beat becomes a photograph of the same subject
             q = scene["props"]["clip_query"]
             scene = {"type": "image", "props": {"image_query": q, "alt": scene["props"].get("alt") or q, "ken_burns": "in"}}
             warnings.append(f"beat {i}: clip replaced by an image (no stock footage for current events)")
-        if scene["type"] == "clip" and not silent:
+        if scene["type"] == "clip" and not silent and not scene["props"].get("user_clip"):
             qs = clip_queries(scene["props"])
             if len(qs) >= 2 and nwords < 2 * WORDS_PER_MONTAGE_CLIP:   # too little narration for a sequence: one clip
                 scene["props"].pop("clip_queries", None)
@@ -1009,13 +1011,17 @@ def validate_plan(plan: Dict[str, Any], **kw: Any) -> Tuple[Dict[str, Any], List
 
 def generate_plan(topic: str, notes: str, target_minutes: float, llm: Callable[[str, str], str], *, retries: int = 1, language: str = "en", region: Optional[str] = None, today: Optional[str] = None,
                   photos: Optional[List[Dict[str, Any]]] = None, max_images_per_minute: float = DEFAULT_MAX_IMAGES_PER_MINUTE,
-                  allow_clips: bool = True, music_tracks: Optional[List[Dict[str, Any]]] = None, craft: str = "", story: Optional[Dict[str, Any]] = None) -> Tuple[Dict[str, Any], List[str]]:
-    """llm(system, user) -> text. One repair attempt feeds the validation error back to the model."""
+                  allow_clips: bool = True, music_tracks: Optional[List[Dict[str, Any]]] = None, craft: str = "", story: Optional[Dict[str, Any]] = None,
+                  video_assets: Optional[List[Dict[str, Any]]] = None, frame: Optional[Dict[str, Any]] = None) -> Tuple[Dict[str, Any], List[str]]:
+    """llm(system, user) -> text. One repair attempt feeds the validation error back to the model. `video_assets`: the person's own clips (common/vidup.assets_for_plan), described to the model."""
     max_images_per_minute = min(MAX_IMAGES_PER_MINUTE, max(0.0, float(max_images_per_minute)))
     slots = photo_slots(photos, story)
     if expected_words(target_minutes, slots, language) >= 250:
         retries = max(retries, 2)   # a long video may need a length repair on top of the other checks
     user = build_user_prompt(topic, notes, target_minutes, today, photos, story, language)
+    if video_assets:
+        from common import vidup
+        user += vidup.planner_block(video_assets, str((frame or {}).get("aspect") or "16:9"), (frame or {}).get("resolution"))
     last_err: Optional[Exception] = None
     over: Optional[Tuple[Dict[str, Any], List[str], List[Dict[str, Any]]]] = None   # QUALITY_FIXES: a valid script that was only too long (kept if the trimmed one is worse)
     for attempt in range(retries + 1):
@@ -1093,3 +1099,41 @@ def generate_plan(topic: str, notes: str, target_minutes: float, llm: Callable[[
             plan["_rejected_scenes"] = rejects
         return plan, warns
     raise ValueError(f"could not obtain a valid plan: {last_err}")
+
+
+def ensure_video_clips(plan: Dict[str, Any], assets: List[Dict[str, Any]], aspect: str = "16:9", resolution: Optional[str] = "1080p") -> List[str]:
+    """After the plan is valid: every `user_clip` scene names a clip that exists (else it becomes the stock clip of its alt text), its `fit` is the planner's choice when that is
+    sensible and the rule's otherwise (common/vidup.settle_fit: never a blurry full-frame clip), and every clip the person gave is used (a clip nobody placed gets a beat of its
+    own before the closing one: their footage is never dropped). Returns warnings."""
+    from common import vidup
+    by_id = {a["id"]: a for a in assets}
+    warns: List[str] = []
+    used: set = set()
+    for b in plan["beats"]:
+        sc = b["scene"]
+        if sc["type"] != "clip" or "user_clip" not in sc["props"]:
+            continue
+        pr = sc["props"]
+        a = by_id.get(pr["user_clip"])
+        if a is None or pr["user_clip"] in used:   # an unknown or repeated clip: ordinary stock footage of what the alt says
+            alt = str(pr.get("alt") or "").strip()
+            b["scene"] = {"type": "clip", "props": {"clip_query": alt, "alt": alt[:70]}} if alt else {"type": "title", "props": {"title": "", "subtitle": ""}}
+            warns.append(f"beat {b['id']}: video clip {pr['user_clip']} is unknown or repeated")
+            continue
+        used.add(pr["user_clip"])
+        pr["fit"] = vidup.settle_fit(pr.get("fit"), a["w"], a["h"], aspect, resolution)
+        pr["user_clip"] = a["id"]
+    missing = [a for a in assets if a["id"] not in used]
+    if missing:
+        taken = {b["id"] for b in plan["beats"]}
+        at = max(1, len(plan["beats"]) - 1)
+        for k, a in enumerate(missing):
+            bid = new_beat_id(None, taken)
+            taken.add(bid)
+            said = (a.get("summary") or "").strip().rstrip(".")
+            text = (said[:1].upper() + said[1:] + ".") if len(said.split()) >= 3 else "Here is a moment from the clip."
+            sc = {"type": "clip", "props": {"user_clip": a["id"], "fit": vidup.settle_fit(None, a["w"], a["h"], aspect, resolution), "alt": (said or "My video clip")[:70]}}
+            plan["beats"].insert(at + k, {"id": bid, "narration": text, "scene": sc})
+        warns.append("added scenes for unused video clips: " + ", ".join(a["id"] for a in missing))
+    plan["video_assets"] = [{k: a.get(k) for k in ("id", "key", "audio_key", "w", "h", "duration", "audio")} for a in assets]
+    return warns

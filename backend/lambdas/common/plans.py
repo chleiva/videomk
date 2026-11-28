@@ -25,13 +25,16 @@ ORDER = ("free", "pro", "max")
 PLANS: Dict[str, Dict[str, Any]] = {
     "free": {"id": "free", "name": "Free", "rank": 0, "credits_per_month": 0, "rollover_months": 0, "credits_cap": 0, "max_seconds": 60,
              "resolutions": ["720p", "1080p"], "watermark_modes": ["videomk"], "watermark_forced": True, "storage_bytes": 2 * GB, "photos_per_video": 10,
-             "priority_queue": False, "premium_looks": False, "commercial_use": False, "stt_premium": False, "stt_seconds_per_day": 0},
+             "priority_queue": False, "premium_looks": False, "commercial_use": False, "stt_premium": False, "stt_seconds_per_day": 0,
+             "video_upload": True, "video_clips_per_day": 3, "video_clips_per_video": 2},
     "pro": {"id": "pro", "name": "Pro", "rank": 1, "credits_per_month": 30, "rollover_months": 0, "credits_cap": 30, "max_seconds": 300,
             "resolutions": ["720p", "1080p"], "watermark_modes": ["none", "videomk", "moments"], "watermark_forced": False, "storage_bytes": 100 * GB, "photos_per_video": 30,
-            "priority_queue": False, "premium_looks": False, "commercial_use": True, "stt_premium": True, "stt_seconds_per_day": 600},
+            "priority_queue": False, "premium_looks": False, "commercial_use": True, "stt_premium": True, "stt_seconds_per_day": 600,
+            "video_upload": True, "video_clips_per_day": 10, "video_clips_per_video": 4},
     "max": {"id": "max", "name": "Max", "rank": 2, "credits_per_month": 120, "rollover_months": 1, "credits_cap": 240, "max_seconds": 720,
             "resolutions": ["720p", "1080p", "2160p"], "watermark_modes": ["none", "videomk", "moments", "custom"], "watermark_forced": False, "storage_bytes": 300 * GB, "photos_per_video": 60,
-            "priority_queue": True, "premium_looks": True, "commercial_use": True, "stt_premium": True, "stt_seconds_per_day": 1200},
+            "priority_queue": True, "premium_looks": True, "commercial_use": True, "stt_premium": True, "stt_seconds_per_day": 1200,
+            "video_upload": True, "video_clips_per_day": 25, "video_clips_per_video": 6},
 }
 # What the apps need to show a paywall later (docs/PLANS_PROPOSAL_2026-11-27.md section 5.6). Prices are the US base; the stores are the source of truth once products exist.
 PRICES_USD = {"pro": {"monthly": 14.99, "yearly": 149.99}, "max": {"monthly": 39.99, "yearly": 399.99}}
@@ -73,6 +76,8 @@ KNOBS: Dict[str, tuple] = {
     "stt_enabled": (True, "bool", None, None),                   # kill switch of paid dictation (docs/SPEECH_TO_TEXT_2026-11-28.md); False: POST .../dictation answers 503 `dictation_paused` and the apps use the phone's engine
     "stt_max_clip_seconds": (360, "int", 5, 900),                # longest single dictation clip (the app's limit too)
     "stt_global_daily_seconds": (100000, "int", 0, 100_000_000), # ALL paid dictation of ALL accounts in one UTC day (100000 s = about $7.50); reached = paused until 00:00 UTC. 0 = none
+    "vidup_enabled": (True, "bool", None, None),                 # kill switch of video upload (docs/VIDEO_UPLOAD_2026-11-28.md); False: new uploads answer 503 `video_upload_paused`. The ops item `stop_video_upload` does the same from the admin console
+    "vidup_global_daily_usd": (5.0, "float", 0.0, 100000.0),     # ALL clip analysis of ALL accounts in one UTC day, worst case reserved per clip (about $0.03); reached = paused until 00:00 UTC. 0 = none
     "claim_retention_days": (730, "int", 30, 3650),              # how long a free-allowance claim (a salted hash, nothing else) is kept
 }
 CADENCES = ("daily", "weekly")
@@ -248,6 +253,12 @@ def check_create(options: Dict[str, Any], plan: str, cfg: Optional[Dict[str, Any
     if photos > int(r["photos_per_video"]):
         need = lowest_plan(lambda x: photos <= x["photos_per_video"], cfg)
         raise PlanError("plan_photos", "plan.photos", plan=plan, requires_plan=need, feature="photos", limit={"photos_per_video": r["photos_per_video"]}, max=r["photos_per_video"])
+    clips = len(options.get("video_assets") or [])
+    if clips and not r.get("video_upload", True):
+        raise PlanError("plan_video_upload", "plan.video_upload", plan=plan, requires_plan=lowest_plan(lambda x: x["video_upload"], cfg), feature="video_upload")
+    if clips > int(r["video_clips_per_video"]):
+        need = lowest_plan(lambda x: clips <= x["video_clips_per_video"], cfg)
+        raise PlanError("plan_video_clips", "plan.video_clips", plan=plan, requires_plan=need, feature="video_clips", limit={"video_clips_per_video": r["video_clips_per_video"]}, max=r["video_clips_per_video"])
     if r["premium_looks"]:
         options["premium_looks"] = True
 
@@ -256,7 +267,8 @@ def public_limits(r: Dict[str, Any]) -> Dict[str, Any]:
     return {"max_seconds": r["max_seconds"], "max_minutes": round(r["max_seconds"] / 60.0, 4), "resolutions": r["resolutions"], "watermark_modes": r["watermark_modes"],
             "watermark_forced": r["watermark_forced"], "storage_bytes": r["storage_bytes"], "photos_per_video": r["photos_per_video"], "priority_queue": r["priority_queue"],
             "premium_looks": r["premium_looks"], "commercial_use": r["commercial_use"], "credits_per_month": r["credits_per_month"], "rollover_months": r["rollover_months"],
-            "credits_cap": r["credits_cap"], "stt_premium": r["stt_premium"], "stt_seconds_per_day": r["stt_seconds_per_day"]}
+            "credits_cap": r["credits_cap"], "stt_premium": r["stt_premium"], "stt_seconds_per_day": r["stt_seconds_per_day"],
+            "video_upload": r["video_upload"], "video_clips_per_day": r["video_clips_per_day"], "video_clips_per_video": r["video_clips_per_video"]}
 
 
 def locked(plan: str, cfg: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:

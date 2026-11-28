@@ -115,7 +115,7 @@ def test_english_text_is_unchanged(key, params, text):
 
 
 def test_every_english_key_is_in_the_golden_table():
-    assert {k for k, _, _ in ENGLISH_BEFORE} >= {k for k in i18n.EN if not k.startswith(("cap.", "deck.", "uploads.too_many_decks", "feedback.", "wm.", "retry.", "making.", "plan.", "dictation.", "look.", "intake.", "polyglot."))}   # the deck, watermark, retry, Making and look-note messages are new (tests/test_deck.py, tests/test_watermark.py, tests/test_video_retry.py, tests/test_making_status.py and tests/test_intake_looks.py and tests/test_polyglot.py check them)
+    assert {k for k, _, _ in ENGLISH_BEFORE} >= {k for k in i18n.EN if not k.startswith(("cap.", "deck.", "uploads.too_many_decks", "feedback.", "wm.", "retry.", "making.", "plan.", "dictation.", "vidup.", "look.", "intake.", "polyglot."))}   # the deck, watermark, retry, Making and look-note messages are new (tests/test_deck.py, tests/test_watermark.py, tests/test_video_retry.py, tests/test_making_status.py and tests/test_intake_looks.py and tests/test_polyglot.py check them)
 
 
 # ---------- Spanish where a locale is sent, English where not

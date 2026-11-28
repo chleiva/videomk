@@ -146,6 +146,9 @@ def build_timeline(
         if stype == "clip":
             if info.get("clip_asset"):
                 props = {"asset": info["clip_asset"], "alt": props.get("alt", ""), **({"word": props["word"]} if props.get("word") else {}), **({"credit": info["credit"]} if info.get("credit") else {})}
+                if info.get("user_clip"):   # the person's own clip: how it is placed (fill / fit / card) and its own sound, when they chose it (docs/VIDEO_UPLOAD_2026-11-28.md)
+                    uc = info["user_clip"]
+                    props = {**props, "fit": uc.get("fit") or "fill", **({"clip_audio": uc["audio_key"]} if uc.get("audio_key") else {}), "user_clip": True}
             elif info.get("asset"):  # no footage found: a still photo of the same subject keeps the beat visual
                 stype, props = "image", {"asset": info["asset"], "alt": props.get("alt", ""), "ken_burns": "in", **({"credit": info["credit"]} if info.get("credit") else {})}
             else:
@@ -248,7 +251,7 @@ def beat_info_from_plan(plan: Dict[str, Any]) -> List[Dict[str, Any]]:
     out = []
     for b in plan["beats"]:
         m = b.get("media") or {}
-        out.append({"duration": m["duration"], "asset": m.get("asset"), "clip_asset": m.get("clip_asset"), "gallery": m.get("gallery"), "words_key": m.get("words_key"), "credit": m.get("credit"), "audio_key": m.get("audio_key"), "silent": bool(m.get("silent")), "element": m.get("element"), "element_failed": bool(m.get("element_failed"))})
+        out.append({"duration": m["duration"], "asset": m.get("asset"), "clip_asset": m.get("clip_asset"), "user_clip": m.get("user_clip"), "gallery": m.get("gallery"), "words_key": m.get("words_key"), "credit": m.get("credit"), "audio_key": m.get("audio_key"), "silent": bool(m.get("silent")), "element": m.get("element"), "element_failed": bool(m.get("element_failed"))})
     return out
 
 

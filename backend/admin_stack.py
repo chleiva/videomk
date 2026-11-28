@@ -58,7 +58,7 @@ AUDIT_DAYS = 400
 STEP_UP_SECONDS = 300
 TOKEN_MINUTES, RENEWAL_MINUTES = 10, 60
 SWITCH_ITEM = "ops:switches"
-SWITCH_FIELDS = ["user_id", "stop_new_videos", "stop_free_videos", "updated_at", "updated_by"]
+SWITCH_FIELDS = ["user_id", "stop_new_videos", "stop_free_videos", "stop_video_upload", "updated_at", "updated_by"]
 USAGE_DAY_INDEX = "GSI_UsageDay"
 # the attributes the rollup job may read from a video record: the keys and backend_stack.USAGE_DAY_FIELDS (a test holds the two lists together). Never the prompt.
 VIDEO_FIELDS = ["video_id", "usage_day", "created_at", "status", "plan", "user_id", "cost_usd", "c_speech", "c_script", "c_research", "c_photos", "c_stock", "c_deck", "duration_s",

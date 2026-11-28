@@ -1,0 +1,4 @@
+# The video-upload functions' layer (backend/vidup_stack.py): Pillow for the contact sheet and poster, and a static ffmpeg for probing, trimming and sampling (imageio-ffmpeg bundles
+# one; there is no ffprobe, common/vidup_media.py reads the facts from `ffmpeg -i`). Every package is a manylinux wheel:  backend/layers/build_layer.sh vidup_deps
+Pillow==10.4.0
+imageio-ffmpeg==0.6.0

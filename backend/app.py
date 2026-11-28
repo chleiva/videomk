@@ -50,6 +50,26 @@ if app.node.try_get_context("objectTracer"):  # the whiteboard tracer function (
                       env=cdk.Environment(account=_cfg["account"], region=_cfg["region"]))
     app.synth()
     raise SystemExit(0)
+if app.node.try_get_context("vidupStack"):   # video upload (docs/VIDEO_UPLOAD_2026-11-28.md): a stack of its own, near-500-resource main stack
+    from backend_stack import _web_origins
+    from vidup_stack import VideoUploadStack, main_stack_values as _vidup_main
+    _stage = str(app.node.try_get_context("stage") or "")
+    with open(os.path.join(os.path.dirname(__file__), "stages.json")) as f:
+        _cfg = json.load(f)[_stage]
+    _cli = os.getenv("CDK_DEFAULT_ACCOUNT")
+    if _cli and _cli != _cfg["account"]:
+        raise SystemExit(f"Refusing: stage '{_stage}' belongs to account {_cfg['account']} but credentials are for {_cli}.")
+    _given = app.node.try_get_context("vidupMainValues")
+    if _given:
+        _main = json.loads(_given) if isinstance(_given, str) else _given
+    else:
+        import boto3
+        _main = _vidup_main(boto3.Session(profile_name=_cfg["profile"], region_name=_cfg["region"]))
+    VideoUploadStack(app, f"videomk-{_stage}-vidup", stage=_stage, main=_main, web_origins=_web_origins(_cfg), is_prod=_stage == "prod",
+                     plan_model_id=str(app.node.try_get_context("planModelId") or ""), review_model_id=str(app.node.try_get_context("reviewModelId") or ""),
+                     analyse_concurrency=int(app.node.try_get_context("vidupConcurrency") or 5), env=cdk.Environment(account=_cfg["account"], region=_cfg["region"]))
+    app.synth()
+    raise SystemExit(0)
 stage = app.node.try_get_context("stage")
 with open(os.path.join(os.path.dirname(__file__), "stages.json")) as f:
     stages = json.load(f)

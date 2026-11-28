@@ -1,13 +1,14 @@
 """Step 4b (parallel to rendering): narration + generated music + sfx -> one AAC track."""
 import logging
 import os
+import subprocess
 import tempfile
 from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Dict
 
 import numpy as np
 
-from .. import audio, awsio, library, pipeline
+from .. import audio, awsio, library, media, pipeline
 
 
 def _load_wav(key: str, tmp: str):
@@ -40,7 +41,22 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 tracks[tid] = library.decode(path)
             except Exception:
                 logging.warning("music track %s is unavailable; the synth stands in", tid)
-        pipeline.make_audio(tl, beats, out, track_loader=tracks.get)
+        clip_audio: Dict[str, Any] = {}
+        for sc in tl["scenes"]:   # the person's own clips' sound (docs/VIDEO_UPLOAD_2026-11-28.md): only files of this video's own assets, a missing one is simply silent
+            key = (sc.get("props") or {}).get("clip_audio")
+            if not key or key in clip_audio:
+                continue
+            if not (isinstance(key, str) and key.startswith(pfx + "assets/uclip_") and ".." not in key):
+                raise ValueError("timeline references clip audio outside this video")
+            try:
+                src, wav = os.path.join(tmp, "ca_in.m4a"), os.path.join(tmp, f"ca_{len(clip_audio)}.wav")
+                awsio.download(key, src)
+                subprocess.run([media.ffmpeg_bin(), "-y", "-hide_banner", "-loglevel", "error", "-nostdin", "-i", src, "-ac", "1", "-ar", str(audio.MIX_SR), "-c:a", "pcm_s16le", wav], check=True, timeout=60)
+                clip_audio[key] = audio.read_wav(wav)[0]
+            except Exception:   # noqa: BLE001
+                logging.warning("clip audio %s is unavailable; that clip plays without its sound", key)
+                clip_audio[key] = None
+        pipeline.make_audio(tl, beats, out, track_loader=tracks.get, clip_audio_loader=clip_audio.get if clip_audio else None)
         key = f"{pfx}audio/mix_r{rev}_{event.get('mode', 'final')}.m4a"
         awsio.upload(out, key, "audio/mp4", working=True)
     return {"key": key}

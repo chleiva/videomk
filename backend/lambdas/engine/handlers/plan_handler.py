@@ -178,6 +178,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         result = _deck_result(event, video_id, user_id, prompt, minutes, spent, ask_small, ask_big, catalog)
     else:
         result = director.direct(prompt, minutes=minutes, ask_small=ask_small, ask_big=ask_big, language=None if event.get("language") in (None, "auto") else event.get("language"),   # auto: detected from the description
+                                 video_assets=event.get("video_assets") or None, resolution=event.get("resolution"),
                                  options={**{k: event.get(k) for k in ("platform", "aspect", "brief", "style", "presenter", "look", "cast", "extras")}, "end_card": bool(isinstance(event.get("watermark"), dict) and event["watermark"].get("mode") == "videomk" and event["watermark"].get("end_card"))},   # end_card: the closing card is part of the length asked (engine/length.py)
                                  region=event.get("region"), theme=event.get("theme"), web_provider=provider, ask_tools=ask_tools, photos=photos, story=story,
                                  max_images_per_minute=event.get("max_images_per_minute", float(os.environ.get("MAX_IMAGES_PER_MINUTE", "10"))),
