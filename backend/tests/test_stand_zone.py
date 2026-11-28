@@ -172,7 +172,7 @@ def test_a_three_character_conversation_always_gets_a_backdrop_with_a_valid_grou
     assert ad.stand_backdrops(_policy(search=boom), SEA, asp, 3, None) == [sz.PROC_ID]
 
 
-def test_selection_is_cast_first_the_sea_in_9x16_gets_the_beach_not_nothing():
+def test_selection_is_cast_first_the_sea_in_9x16_never_puts_the_cast_in_the_water():
     def search(q, asp, k):   # the real scores of the sea request (QA catalog, Cohere Embed v4): the full prompt matches no backdrop well, the neighbouring words match the beach
         sc = {"tall_space_vertical": 0.236, "tall_sunset_beach_vertical": 0.1863, "tall_ocean_lighthouse_night": 0.1829}
         if "beach" in q:
@@ -180,8 +180,40 @@ def test_selection_is_cast_first_the_sea_in_9x16_gets_the_beach_not_nothing():
         return [{"id": i, "score": s} for i, s in sc.items()]
     v = _policy(search=search)
     ids = ad.stand_backdrops(v, SEA, "9:16", 3, None)
-    assert ids[0] == "tall_sunset_beach_vertical" and all(sz.holds(i, "9:16", 3) for i in ids)
+    # the beach's dry sand lies below the caption lines in 9:16 (the sea and the foam line fill the rest): it is refused, and the drawn ground (a floor of its own) stays
+    assert "tall_sunset_beach_vertical" not in ids and all(sz.holds(i, "9:16", 3) for i in ids)
     assert not any(i in ids for i in ("tall_space_vertical", "tall_ocean_lighthouse_night"))   # those cannot hold three characters
+
+
+def test_the_vertical_beach_has_no_ground_where_the_sea_and_the_foam_line_are():   # the QA sea video of 2026-11-28: feet stood in the shallow water band
+    for asp in ("9:16", "4:5"):
+        m = sz._mask("tall_sunset_beach_vertical", asp)
+        if m is None:
+            continue
+        y0, y1 = sz._crop("9:16", asp)[1], sz._crop("9:16", asp)[3]
+        rows = [r for r in range(m.shape[0]) if m[r].any()]
+        if rows:   # the first ground row of the picture is on dry sand: 0.79 of the picture and below
+            assert y0 + (rows[0] / m.shape[0]) * (y1 - y0) >= 0.79 - 1e-6
+    assert not sz.holds("tall_sunset_beach_vertical", "9:16", 1)
+
+
+def test_feet_of_whole_figures_stay_above_the_caption_lines_in_every_shape():
+    from types import SimpleNamespace
+    from engine.frame import Frame
+    for asp in ("1:1", "4:5", "9:16", "16:9"):
+        fr = Frame.parse(asp, "1080p")
+        top = sz.caption_top(fr)
+        assert 0.6 < top < 0.9
+        for n in (2, 3):
+            lay = sz.layout_for({"character": "fox", "side": "left", "backdrop": sz.PROC_ID, "cast": ["fox", "bear", "owl"][:n]}, asp)
+            if lay.get("floor") is not None:
+                assert lay["floor"] / fr.H <= top + 1e-6, (asp, n, lay["floor"] / fr.H, top)
+    for sid in USABLE:   # and every stored placement of a whole figure
+        for asp, ln in ZONES[sid]["ground_line"].items():
+            for n in ln["casts"]:
+                lay = sz.layout_for(sz._cast_props(sid, n), asp)
+                if lay.get("floor") is not None and not lay.get("unplaced"):
+                    assert lay["floor"] / Frame.parse(asp, "1080p").H <= sz.caption_top(Frame.parse(asp, "1080p")) + 1e-6, (sid, asp, n)
 
 
 def test_a_topic_without_a_credible_capable_match_gets_a_neutral_capable_backdrop_not_none():

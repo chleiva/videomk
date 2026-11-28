@@ -71,7 +71,7 @@ def _sanitize(props: Dict[str, Any]) -> Dict[str, Any]:
         out["points"] = points
     ch = p.get("chart")
     if isinstance(ch, dict) and isinstance(ch.get("labels"), list) and isinstance(ch.get("values"), list):
-        pairs = [(_s(l, 14), _num(v)) for l, v in zip(ch["labels"], ch["values"])]
+        pairs = [(_s(l, 24), _num(v)) for l, v in zip(ch["labels"], ch["values"])]
         pairs = [(l, v) for l, v in pairs if l and v is not None and v >= 0][:MAX_BARS]
         if len(pairs) >= 2 and max(v for _, v in pairs) > 0:
             out["chart"] = {"labels": [l for l, _ in pairs], "values": [round(v, 4) for _, v in pairs], "unit": _s(ch.get("unit"), 6)}
@@ -338,7 +338,8 @@ def _stand_one(bd: str, ctx: SceneCtx, l: Dict[str, Any]) -> Optional[Dict[str, 
         return yy - fh >= top + 10 and (yy - fh * 1.05 - 20) - (top + 10) >= sz.MIN_CONTENT * H
 
     shift = 0.25 if (full or not fr.landscape) else 0.07
-    pl = sz.place(bd, fr.aspect, prefs, foot_y=l["ground"] / H, ppu=ppu, W=W, H=H, full=full, max_shift=shift, accept=accept if full else None)
+    pl = sz.place(bd, fr.aspect, prefs, foot_y=l["ground"] / H, ppu=ppu, W=W, H=H, full=full, max_shift=shift, accept=accept if full else None,
+                  cap_top=sz.caption_top(fr) if (full and ctx.captions) else None)
     if pl is None:
         return None
     ppu2 = ppu * pl.scale
@@ -420,6 +421,15 @@ def group_layout(props: Dict[str, Any], ctx: SceneCtx) -> Dict[str, Any]:
         ground = fr.H + GROUP_CUT[n] * 290.0 * ppu           # smaller figures are cut a little lower on the body, so the heads stay high in the picture
         content = (c0 * fr.W, max(f["content"][1], ctx.top + 20), c1 * fr.W, min(f["content"][3], ctx.bottom + 40))
         sides = [1 if x < (c0 + c1) / 2 else -1 for x in xs]
+    elif fr.W / fr.H >= 0.7 and ctx.captions:
+        # square and 4:5 with captions: the figures are WHOLE, their feet just above the caption lines (the waist-cut row had its legs and feet running behind the captions)
+        xs, k = GROUP_ROW[n]
+        from ... import stand_zone as _sz
+        floor = _sz.caption_top(fr) * fr.H - 8.0
+        figure = (floor - ctx.top) * 0.40 * k
+        ppu, ground, lift = figure / 290.0, floor, 0.0
+        content = (fr.margin_x * 0.6, ctx.top + 10, fr.W - fr.margin_x * 0.6, floor - figure * 1.05 - 20)
+        sides = [1 if x < 0.5 else -1 for x in xs]
     elif fr.W / fr.H >= 0.7:
         xs, k = GROUP_ROW[n]
         base = float(ctx.bottom) + 46 if ctx.captions else float(fr.H)      # the row is cut at the caption band, not behind it (a single presenter's waist is: here the row would lose its faces)
@@ -508,6 +518,14 @@ def _panel(cv: Canvas, rect: Tuple[float, float, float, float], th: Theme, alpha
         cv.card(x0, y0, x1 - x0, y1 - y0, th, r=32, alpha=alpha)
 
 
+def _early(times: List[float]) -> List[float]:
+    """A card is never empty for long: whatever the narration cues say, the first item starts within 0.7 s of the scene and each next within 0.6 s of the one before."""
+    out: List[float] = []
+    for i, t in enumerate(times):
+        out.append(min(float(t), 0.7 + 0.6 * i))
+    return out
+
+
 def _draw_points(cv: Canvas, props: Dict[str, Any], rect: Tuple[float, float, float, float], lt: float, dur: float, th: Theme, ts: float) -> None:
     x0, y0, x1, y1 = rect
     pad = (54 if y1 - y0 > 520 else 38) * ts
@@ -523,25 +541,36 @@ def _draw_points(cv: Canvas, props: Dict[str, Any], rect: Tuple[float, float, fl
             cv.text((x0 + x1) / 2, ty + i * size * 1.16 + (1 - ease_out_cubic(a)) * 18, ln, "bold", size, with_alpha(th.text, a), anchor="ma")
         cv.rrect((x0 + x1) / 2 - 60 * ts, ty + len(lines) * size * 1.16 + 18 * ts, 120 * ts * ease_out_cubic(a), 8 * ts, 4 * ts, fill=with_alpha(th.accent, a))
         return
-    if heading:
+    n = len(points)
+    times = _early(reveal_times(n, dur, props.get("cues")))
+    y_start = y
+
+    def fit_points(top: float) -> float:   # one size for every point: the largest at which all of them fit the card below `top`
+        sz = 60 * ts
+        while sz > 26 * ts:
+            chip_ = sz * 1.14
+            tw_ = w - chip_ - 26 * ts
+            blocks_ = [cv.wrap(p, "semibold", sz, tw_) for p in points]
+            need = sum(max(chip_, len(b) * sz * 1.2) for b in blocks_) + (n - 1) * 26 * ts
+            if need <= y1 - pad - top and all(len(b) <= 3 for b in blocks_):
+                break
+            sz -= 3 * ts
+        return sz
+
+    hsize, hlines, hbottom = 0.0, [], y_start
+    if heading:   # the heading gives way to the points: the box it may take shrinks until the points are readable (40 units), never below the heading's own floor
+        for box in ((180 if n_pts <= 3 else 96), 130, 96, 70):
+            hsize, hlines = cv.fit_text(heading, "bold", w, box * ts, 76 * ts, 38 * ts)
+            hbottom = y_start + min(2, len(hlines)) * hsize * 1.14 + 16 * ts + 48 * ts
+            if not points or fit_points(hbottom) >= 40 * ts:
+                break
         a = progress(lt, 0.2, 0.45)
-        size, lines = cv.fit_text(heading, "bold", w, (180 if n_pts <= 3 else 96) * ts, 76 * ts, 38 * ts)
-        for i, ln in enumerate(lines[:2]):
-            cv.text(x0 + pad, y + i * size * 1.14, ln, "bold", size, with_alpha(th.text, a))
-        y += min(2, len(lines)) * size * 1.14 + 16 * ts
+        for i, ln in enumerate(hlines[:2]):
+            cv.text(x0 + pad, y + i * hsize * 1.14, ln, "bold", hsize, with_alpha(th.text, a))
+        y += min(2, len(hlines)) * hsize * 1.14 + 16 * ts
         cv.rrect(x0 + pad, y, 110 * ts * ease_out_cubic(a), 8 * ts, 4 * ts, fill=with_alpha(th.accent, a))
         y += 48 * ts
-    n = len(points)
-    times = reveal_times(n, dur, props.get("cues"))
-    size = 60 * ts
-    while size > 26 * ts:   # one size for every point: the largest at which all of them fit the card
-        chip = size * 1.14
-        tw = w - chip - 26 * ts
-        blocks = [cv.wrap(p, "semibold", size, tw) for p in points]
-        need = sum(max(chip, len(b) * size * 1.2) for b in blocks) + (n - 1) * 26 * ts
-        if need <= y1 - pad - y and all(len(b) <= 3 for b in blocks):
-            break
-        size -= 3 * ts
+    size = fit_points(y)
     chip = size * 1.14
     tw = w - chip - 26 * ts
     blocks = [cv.wrap(p, "semibold", size, tw)[:3] for p in points]
@@ -577,9 +606,9 @@ def _draw_chart(cv: Canvas, props: Dict[str, Any], rect: Tuple[float, float, flo
             cv.text(x0 + pad, y + i * size * 1.14, ln, "bold", size, with_alpha(th.text, a))
         y += min(2, len(lines)) * size * 1.14 + 30 * ts
     n = len(values)
-    times = reveal_times(n, dur, props.get("cues"))
+    times = _early(reveal_times(n, dur, props.get("cues")))
     top = max(values) or 1.0
-    base = y1 - pad - 52 * ts
+    base = y1 - pad - (52 + (30 if any(cv.measure(l, 'semibold', 24 * ts) > (x1 - x0 - 2 * pad) / max(1, n) - 10 for l in labels) else 0)) * ts
     area_h = base - y - 60 * ts
     slot = (x1 - x0 - 2 * pad) / n
     bw = min(slot * 0.62, 170 * ts)
@@ -596,7 +625,8 @@ def _draw_chart(cv: Canvas, props: Dict[str, Any], rect: Tuple[float, float, flo
             dec = 0 if float(v).is_integer() else 1
             txt = numfmt.format_number(round(v * a, dec) if a < 1 else v, dec, False) + unit
             cv.text(cx, base - h - 14 * ts, txt, "bold", 40 * ts, with_alpha(th.text, a), anchor="ms")
-        cv.text(cx, base + 14 * ts, lab, "semibold", lsize, with_alpha(th.muted, 1.0), anchor="ma")
+        for j, ln in enumerate(cv.wrap(lab, "semibold", lsize, slot - 10)[:2]):   # a label wider than its slot goes on a second line instead of running into the next one
+            cv.text(cx, base + 14 * ts + j * lsize * 1.15, ln, "semibold", lsize, with_alpha(th.muted, 1.0), anchor="ma")
 
 
 def _draw_picture(cv: Canvas, props: Dict[str, Any], rect: Tuple[float, float, float, float], lt: float, th: Theme, ctx: SceneCtx, ts: float) -> bool:
