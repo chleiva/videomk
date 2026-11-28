@@ -434,6 +434,10 @@ def step_videos(user: str, budget: Budget) -> Dict[str, int]:
     rows = _video_rows(user, budget)
     vids = _video_ids(user, rows, budget)
     files = 0
+    from common import share_revoke
+    for r in rows:   # shared links first: the token lives on the row, which goes last
+        if r.get("user_id") == user and r.get("share_token"):
+            share_revoke.revoke_item(r)
     for v in vids:
         for p in ASSET_VIDEO_PREFIXES:
             files += _s3_delete_prefix(bucket, p.format(v=v), budget)

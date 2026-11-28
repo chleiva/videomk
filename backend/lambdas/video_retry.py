@@ -27,7 +27,7 @@ from botocore.exceptions import ClientError
 from common.http import json_response
 from common.identity import extract_cognito_sub
 import plan_gate
-from common import i18n, library, usage, wallet
+from common import i18n, library, share_revoke, usage, wallet
 from common.photo_ids import upload_key
 from engine import format_options
 
@@ -510,6 +510,7 @@ def delete_handler(event: Dict[str, Any], context: Any = None) -> Dict[str, Any]
             wallet.refund_video(item)   # exactly once; a failed, cancelled or rejected video costs nothing. A finished video was delivered: deleting it refunds nothing
         except Exception:   # noqa: BLE001
             logger.exception("VIDEO_DELETE_REFUND_FAILED video=%s", video_id)
+    share_revoke.revoke_item(item)   # the shared link dies with the video (no-op when sharing is not set up; never blocks the delete)
     try:
         _table().delete_item(Key={"video_id": video_id}, ConditionExpression="user_id = :u AND #s = :was", ExpressionAttributeNames={"#s": "status"},
                              ExpressionAttributeValues={":u": user, ":was": status})
