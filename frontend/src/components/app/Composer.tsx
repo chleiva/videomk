@@ -13,6 +13,13 @@ import LookPicker from "./LookPicker";
 import CreateLocked from "./CreateLocked";
 import Shortcuts from "./Shortcuts";
 import { useUploadQueue } from "./useUploadQueue";
+import { useClipUploads } from "./useClipUploads";
+import ClipSheet from "./ClipSheet";
+import type { ClipPick } from "./ClipSheet";
+import { ClipNotes, ClipTile, RecentClipsSheet } from "./ClipTile";
+import { clipDeps } from "../../lib/videoClipDeps";
+import { clipAnnouncementKey, looksLikeVideo, videoAssetsExtra, videoGate } from "../../lib/videoClips";
+import type { Clip } from "../../lib/videoClips";
 import { newRequestId, startGeneration, getWallet } from "../../lib/api";
 import type { Wallet } from "../../lib/api";
 import {
@@ -124,6 +131,23 @@ export default function Composer() {
   const checkRun = useRef(0);   // a request check that was cancelled must not act when its answer arrives late
 
   const photos = useUploadQueue(directDeps);
+  // the person's own video clips (docs/VIDEO_UPLOAD_CLIENTS_2026-11-28.md): sent to capabilities.video_upload.api_url, shown in the same strip as the photos
+  const vcaps = caps?.video_upload;
+  const clipDepsNow = useMemo(() => (vcaps ? clipDeps(vcaps.apiUrl) : null), [vcaps?.apiUrl]); // eslint-disable-line react-hooks/exhaustive-deps
+  const clips = useClipUploads(clipDepsNow);
+  const [clipFile, setClipFile] = useState<File | null>(null);     // the picked video, while the "Add a video" dialog is open
+  const [recent, setRecent] = useState(false);
+  const videoInput = useRef<HTMLInputElement>(null);
+  const recordInput = useRef<HTMLInputElement>(null);
+  const clipKey = clipAnnouncementKey(clips.items);
+  useEffect(() => {   // screen-reader line for a clip: when its state changes, never per progress tick
+    const k = clipKey.split(":")[0];
+    const text: Record<string, string> = { up: t("create.clip_a11y_up"), check: t("create.clip_checking"), slow: t("create.clip_slow"), ready: t("create.clip_a11y_ready"), bad: t("create.clip_a11y_bad") };
+    if (k && text[k]) setAnnounce(text[k]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [clipKey]);
+  const clipsReadyN = clips.items.filter((i) => i.state === "ready").length;
+  useEffect(() => { if (clipsReadyN > 0) void getCapabilities().then((x) => { if (x) setCaps(x); }); }, [clipsReadyN]);   // today's clips left changed
   const lockedNow = sending || stage.k === "checking";
   useEffect(() => { const el = topEl.current; if (!el) return; el.toggleAttribute("inert", lockedNow); if (lockedNow) (document.activeElement as HTMLElement | null)?.blur?.(); }, [lockedNow]);
 
@@ -167,9 +191,18 @@ export default function Composer() {
   const addingPhotos = photos.items.some((i) => i.state === "queued" || i.state === "preparing" || i.state === "uploading");
   const totalPhotos = directItems.filter((i) => i.state !== "failed" && i.state !== "unsupported" && i.state !== "no_space").length + libPicks.length;
   const room = Math.max(0, MAX_VIDEO_PHOTOS - totalPhotos);
+  // ---- clips: photos and clips share the strip; a clip that failed or was refused does not count toward the video's limit
+  const clipItems = clips.items;
+  const clipCount = clipItems.filter((i) => i.state !== "failed" && i.state !== "rejected" && i.state !== "cancelled").length;
+  const clipsBusy = clipItems.some((i) => i.state === "hashing" || i.state === "uploading" || i.state === "analysing");
+  const clipRoom = vcaps ? Math.max(0, vcaps.clipsPerVideo - clipCount) : 0;
+  const gateV = vcaps ? videoGate(vcaps) : null;
+  const clipReady = clipItems.filter((i) => i.state === "ready").length;
+  const stripEmpty = directItems.length === 0 && libPicks.length === 0 && clipItems.length === 0;
+  const canRecord = useMemo(() => { try { return typeof matchMedia === "function" && matchMedia("(pointer: coarse)").matches; } catch { return false; } }, []);
 
   // ---- the look: a look that is not made from the person's own photos or slides goes back to Auto when they are attached, with one line that says so
-  const lookCtx = useMemo(() => ({ photos: totalPhotos > 0, deck: deckActive }), [totalPhotos, deckActive]);
+  const lookCtx = useMemo(() => ({ photos: totalPhotos > 0 || clipCount > 0, deck: deckActive }), [totalPhotos, clipCount, deckActive]);
   const pick = f?.pick ?? AUTO;
   useEffect(() => {
     if (!c.looks) return;
@@ -190,6 +223,26 @@ export default function Composer() {
     const next: Record<string, string> = {};
     keys.forEach((k, i) => { const u = URL.createObjectURL(take[i]); urls.current.push(u); next[k] = u; });
     setPreviews((p) => ({ ...p, ...next }));
+  }
+  /** A video was picked, dropped or pasted: the dialog asks the two questions before anything is uploaded. Only when the server offers it and it is open. */
+  function pickVideo(list: File[]) {
+    if (!vcaps || !list.length) return;
+    if (gateV && !gateV.open) { setHint({ text: t(gateV.reason === "paused" ? "create.clip_locked_paused" : gateV.reason === "quota" ? "create.clip_locked_quota" : "create.clip_locked_plan", { plan: nameOfPlan(gateV.plan) ?? gateV.plan ?? "" }) }); return; }
+    if (clipRoom <= 0) { setHint({ text: t("create.clip_max", { n: vcaps.clipsPerVideo }) }); return; }
+    if (list.length > 1) setHint({ text: t("create.clip_one_at_a_time"), soft: true });
+    setClipFile(list[0]);
+  }
+  function addClip(p: ClipPick) {
+    setClipFile(null);
+    if (p.poster) urls.current.push(p.poster);
+    clips.uploader?.add({ blob: p.blob, name: p.name, contentType: p.contentType, useAudio: p.useAudio, poster: p.poster, aspect: p.aspect, trimmedLocally: p.trimmedLocally });
+  }
+  function useRecent(c: Clip) { setRecent(false); clips.uploader?.addReady(c); }
+  /** What a drop or a paste brought: pictures to the photo queue, the first video to the dialog. */
+  function addMixed(list: File[]) {
+    const vids = vcaps ? list.filter(looksLikeVideo) : [];
+    if (vids.length) pickVideo(vids);
+    addFiles(list.filter((f) => !vids.includes(f)));
   }
   function removePhoto(key: string) { photos.queue.remove(key); const u = previews[key]; if (u) { URL.revokeObjectURL(u); setPreviews((p) => { const { [key]: _x, ...rest } = p; return rest; }); } }
 
@@ -280,7 +333,7 @@ export default function Composer() {
     const text = f.text.trim();
     const { target_minutes: _len, ...rest } = options();
     const base = ready ? { ...rest, ...deckGenerateExtras(ready.id, picked) } : options();
-    const sent = { ...base, ...(ready ? {} : mediaExtras(directReady, libPicks.map((p) => p.id), photos.queue.metaById())), ...dictIds.current.extra() };
+    const sent = { ...base, ...(ready ? {} : { ...mediaExtras(directReady, libPicks.map((p) => p.id), photos.queue.metaById()), ...videoAssetsExtra(clips.uploader?.readyIds() ?? [], vcaps?.clipsPerVideo) }), ...dictIds.current.extra() };
     const key = JSON.stringify([text, sent, brief ?? null]);
     if (req.current.key !== key) req.current = { key, id: newRequestId() };   // same request, same id: a retry cannot bill twice
     try {
@@ -306,7 +359,7 @@ export default function Composer() {
 
   async function submit(e?: React.FormEvent) {
     e?.preventDefault();
-    if (!f || sending || stage.k !== "form" || busyDeck || addingPhotos || listening) return;
+    if (!f || sending || stage.k !== "form" || busyDeck || addingPhotos || clipsBusy || listening) return;
     const text = f.text.trim();
     if (ready) {
       if (!enough) { setHint({ text: t("create.not_enough", { needed: credits, balance: wallet?.balance ?? 0 }), credits: true }); return; }
@@ -372,9 +425,9 @@ export default function Composer() {
   const quality = qualityChoices(c, f);
   const questionTitle = stage.k === "questions" ? t("create.questions_title") : stage.k === "stop" ? (stage.kind === "paused" ? t("create.paused_title") : t("create.cant_make_title")) : "";
   const locked = sending || stage.k === "checking";   // from the tap until the answer: nothing on the form can change, and it says what is happening
-  const canSend = !sending && !busyDeck && !addingPhotos && stage.k === "form" && (ready ? true : f.text.trim().length > 0);
+  const canSend = !sending && !busyDeck && !addingPhotos && !clipsBusy && stage.k === "form" && (ready ? true : f.text.trim().length > 0);
   const inactive = !canSend || listening;   // Create stays tappable: the tap says what is missing (opaque fill, no glow)
-  const why = listening ? "create.state_listening" : addingPhotos || busyDeck ? "create.state_wait" : "create.state_need_text";
+  const why = listening ? "create.state_listening" : addingPhotos || clipsBusy || busyDeck ? "create.state_wait" : "create.state_need_text";
   const costWords = t("create.credits", { n: credits });
   const empty = !f.text.trim() && !deckActive && totalPhotos === 0;
   // the price is taught once: until this account has a finished video, "2 credits. You have 11."; afterwards the balance lives in the header chip and shows here only when low
@@ -388,16 +441,16 @@ export default function Composer() {
         <h1 className="compose-title">{t("create.heading")}</h1>
       </div>
 
-      <form className={`composer-card ${locked ? "is-locked" : ""}`} aria-busy={locked} onSubmit={submit} onDragOver={(e) => { if (e.dataTransfer.types.includes("Files")) e.preventDefault(); }} onDrop={(e) => { if (e.dataTransfer.files.length) { e.preventDefault(); addFiles(e.dataTransfer.files); } }}>
+      <form className={`composer-card ${locked ? "is-locked" : ""}`} aria-busy={locked} onSubmit={submit} onDragOver={(e) => { if (e.dataTransfer.types.includes("Files")) e.preventDefault(); }} onDrop={(e) => { if (e.dataTransfer.files.length) { e.preventDefault(); addMixed(Array.from(e.dataTransfer.files)); } }}>
         <div className="composer-top" ref={topEl}>
         <label htmlFor="create-text" className="sr-only-vmk">{t("create.prompt_label")}</label>
         <textarea id="create-text" ref={area} data-autofocus autoFocus rows={3} className={`compose-text ${inserted ? "is-inserted" : ""}`} value={f.text} readOnly={listening} maxLength={1500} placeholder={ready ? t("deck.placeholder") : t("create.placeholder")} aria-describedby="create-hint"
           onChange={(e) => { setHint(null); set({ text: e.target.value }); }}
           onKeyDown={(e) => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); void submit(); } }}
-          onPaste={(e) => { const pics = pictureFiles(Array.from(e.clipboardData.files)); if (pics.length) { e.preventDefault(); addFiles(pics); } }} />
+          onPaste={(e) => { const all = Array.from(e.clipboardData.files); if (pictureFiles(all).length || (vcaps && all.some(looksLikeVideo))) { e.preventDefault(); addMixed(all); } }} />
 
-        {(directItems.length > 0 || libPicks.length > 0) && (
-          <div className="attach-strip" role="list" aria-label={t("create.photos_n", { n: totalPhotos })}>
+        {!stripEmpty && (
+          <div className="attach-strip" role="list" aria-label={[totalPhotos > 0 ? t("create.photos_n", { n: totalPhotos }) : "", clipItems.length ? t("create.clip_n", { n: clipItems.length }) : ""].filter(Boolean).join(", ")}>
             {libPicks.map((p) => (
               <div key={p.id} role="listitem" className="attach"><img src={p.thumb_url} alt="" /><button type="button" className="attach-x" aria-label={t("create.photo_remove")} onClick={() => setLibPicks((x) => x.filter((y) => y.id !== p.id))}><Icon name="close" size={14} /></button></div>
             ))}
@@ -409,9 +462,12 @@ export default function Composer() {
                 <button type="button" className="attach-x" aria-label={t("create.photo_remove")} onClick={() => removePhoto(i.key)}><Icon name="close" size={14} /></button>
               </div>
             ))}
-            <p className="attach-count">{t("create.photos_n", { n: totalPhotos })}</p>
+            {clipItems.map((i) => <ClipTile key={i.key} item={i} t={t} used={vcaps?.usedSeconds} onRemove={() => clips.uploader?.remove(i.key)} />)}
+            <p className="attach-count">{[totalPhotos > 0 || clipItems.length === 0 ? t("create.photos_n", { n: totalPhotos }) : "", clipItems.length ? t("create.clip_n", { n: clipItems.length }) : ""].filter(Boolean).join(" · ")}</p>
           </div>
         )}
+        {clipItems.length > 0 && <ClipNotes items={clipItems} t={t} onRetry={(k) => clips.uploader?.retry(k)} onRemove={(k) => clips.uploader?.remove(k)} />}
+        {clipItems.some((i) => i.state === "ready" || i.state === "analysing" || i.state === "uploading") && <p className="hint">{t("create.clip_use_line")}</p>}
         {(photos.summary.unsupported > 0 || photos.summary.failed > 0) && (
           <p className="hint hint-bad" role="status">
             {photos.summary.unsupported > 0 && t("create.photos_unreadable", { n: photos.summary.unsupported })} {photos.summary.failed > 0 && <>{t("create.photos_failed", { n: photos.summary.failed })} <button type="button" className="cost-link" onClick={() => photos.queue.retryFailed()}>{t("create.photos_retry")}</button></>}
@@ -463,10 +519,13 @@ export default function Composer() {
             <div className="composer-tools" ref={toolRow}>
               <div className="tool-cluster">
                 {!deckActive && (
-                  <Menu label={t("create.add_photos")} className="tool" triggerClass="icon-btn tool-btn" disabled={listening} trigger={<><Icon name="addphoto" size={22} />{totalPhotos > 0 && <span className="tool-badge" aria-hidden="true">{totalPhotos}</span>}</>} align="start"
-                    items={[{ id: "device", label: t("create.from_device"), disabled: room === 0 }, { id: "media", label: t("create.from_media"), disabled: room === 0 },
-                      ...(c.deck && live ? [{ id: "deck", label: t("deck.add_title"), disabled: totalPhotos > 0 || busyDeck }] : [])]}
-                    onPick={(id) => { if (id === "device") files.current?.click(); else if (id === "media") setPicker(true); else deckInput.current?.click(); }} />
+                  <Menu label={t(vcaps ? "create.add_media" : "create.add_photos")} className="tool" triggerClass="icon-btn tool-btn" disabled={listening} trigger={<><Icon name="addphoto" size={22} />{totalPhotos + clipItems.length > 0 && <span className="tool-badge" aria-hidden="true">{totalPhotos + clipItems.length}</span>}</>} align="start"
+                    items={[{ id: "device", label: t(vcaps ? "create.photos_from_device" : "create.from_device"), disabled: room === 0 }, { id: "media", label: t(vcaps ? "create.photos_from_media" : "create.from_media"), disabled: room === 0 },
+                      ...(vcaps && gateV ? [{ id: "video", disabled: !gateV.open || clipRoom === 0, label: <span className="clip-menu-l">{t("create.add_video")}{!gateV.open && <small className="clip-menu-why">{t(gateV.reason === "paused" ? "create.clip_locked_paused" : gateV.reason === "quota" ? "create.clip_locked_quota" : "create.clip_locked_plan", { plan: nameOfPlan(gateV.plan) ?? gateV.plan ?? "" })}</small>}</span> },
+                        ...(canRecord && gateV.open ? [{ id: "record", label: t("create.record_video"), disabled: clipRoom === 0 }] : []),
+                        ...(gateV.open || clipItems.length ? [{ id: "recent", label: t("create.recent_clips"), disabled: clipRoom === 0 || !gateV.open }] : [])] : []),
+                      ...(c.deck && live ? [{ id: "deck", label: t("deck.add_title"), disabled: totalPhotos > 0 || clipCount > 0 || busyDeck }] : [])]}
+                    onPick={(id) => { if (id === "device") files.current?.click(); else if (id === "media") setPicker(true); else if (id === "video") videoInput.current?.click(); else if (id === "record") recordInput.current?.click(); else if (id === "recent") setRecent(true); else deckInput.current?.click(); }} />
                 )}
                 {(canDictate || useBetter) && <button type="button" className={`icon-btn tool-btn ${listening ? "is-live" : ""}`} aria-label={listening ? t("create.dictate_stop") : t("create.dictate")} title={listening ? t("create.dictate_stop") : t("create.dictate")} onClick={() => void toggleDictation()} disabled={working}><Icon name={listening ? "stop" : "mic"} size={22} /></button>}
                 {live && (
@@ -506,6 +565,8 @@ export default function Composer() {
           </div>
         )}
         <input ref={files} type="file" hidden tabIndex={-1} accept="image/*" multiple onChange={(e) => { addFiles(e.target.files); e.target.value = ""; }} />
+        {vcaps && <input ref={videoInput} type="file" hidden tabIndex={-1} accept="video/mp4,video/quicktime,video/webm,.mp4,.m4v,.mov,.webm" onChange={(e) => { pickVideo(Array.from(e.target.files ?? [])); e.target.value = ""; }} />}
+        {vcaps && canRecord && <input ref={recordInput} type="file" hidden tabIndex={-1} accept="video/*" capture="environment" onChange={(e) => { pickVideo(Array.from(e.target.files ?? [])); e.target.value = ""; }} />}
         {c.deck && <input ref={deckInput} type="file" hidden tabIndex={-1} accept={c.deck.formats.map((x) => (x === "pdf" ? ".pdf" : ".pptx")).join(",")} onChange={(e) => { const file = e.target.files?.[0]; if (file) void deck.begin(file); e.target.value = ""; }} />}
       </form>
 
@@ -516,6 +577,8 @@ export default function Composer() {
         </div>
       )}
 
+      {clipFile && vcaps && <ClipSheet file={clipFile} caps={vcaps} t={t} onCancel={() => setClipFile(null)} onChooseAnother={() => { setClipFile(null); setTimeout(() => videoInput.current?.click(), 30); }} onAdd={addClip} />}
+      {recent && vcaps && <RecentClipsSheet caps={vcaps} t={t} taken={clips.items.map((i) => i.id ?? "")} room={clipRoom} onUse={useRecent} onClose={() => setRecent(false)} />}
       {picker && <MediaPicker max={room} initialQuery={f.text} onClose={() => setPicker(false)} onUse={(photos: Photo[]) => { setPicker(false); setLibPicks((x) => [...x, ...photos.filter((p) => !x.some((y) => y.id === p.id)).map((p) => ({ id: p.id, thumb_url: p.thumb_url }))].slice(0, MAX_VIDEO_PHOTOS)); }} />}
 
       {(stage.k === "questions" || stage.k === "stop") && (
