@@ -8,7 +8,7 @@ from generate_video.db import set_attributes, update_status
 
 from common import making
 
-from .. import assets, awsio, costs, making_progress, media, pipeline
+from .. import assets, awsio, costs, final_stage, making_progress, media, pipeline
 
 OUTPUT_BUCKET = os.environ.get("ASSETS_BUCKET", "videomk.com")
 
@@ -65,6 +65,12 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         got = media.ffprobe_duration(mp4)
         if abs(got - float(tl["duration"])) > 1.0:
             raise RuntimeError(f"stitched duration {got:.2f}s != timeline {tl['duration']:.2f}s")
+        if tl.get("watermark"):   # the watermark and the closing card are the LAST step, on the finished watermark-free master (engine/final_stage.py; docs/WATERMARK_DECOUPLED_2026-11-28.md)
+            from .render_chunk_handler import make_image_loader
+            marked = os.path.join(tmp, "out_marked.mp4")
+            final_stage.export(tl, mp4, audio_path, marked, draft=(mode == "preview"), image_loader=make_image_loader(video_id), tmp=tmp)
+            mp4 = marked
+            got = media.ffprobe_duration(mp4)
 
         base = f"videos/{user_id}/{video_id}/"
         if mode == "preview":

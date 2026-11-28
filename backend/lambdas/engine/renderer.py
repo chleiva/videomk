@@ -4,12 +4,11 @@ import bisect
 import os
 import sys
 import zlib
-from typing import Any, Callable, Dict, Iterator, List, Optional
+from typing import Any, Callable, Dict, Iterator, List, Optional, Tuple
 
 from PIL import Image
 
 from . import numfmt
-from . import watermark as watermark_mod
 from .canvas import Canvas
 from .frame import Frame
 from .scenes import SCENES
@@ -71,6 +70,15 @@ def release_caches() -> int:
     return n
 
 
+def output_size(timeline: Dict[str, Any], draft: bool = False) -> Tuple[int, int]:
+    """The pixel size of the frames a timeline renders to (also what the final stage, engine/final_stage.py, needs to draw the watermark at the real size)."""
+    W, H = int(timeline.get("width", 1920)), int(timeline.get("height", 1080))
+    fr = timeline.get("frame")
+    frame = Frame.parse(fr.get("aspect"), fr.get("resolution")) if isinstance(fr, dict) and fr.get("aspect") else Frame.from_size(W, H)
+    dw, dh = (frame.design_w, frame.design_h) if frame.scale_factor > 1.0 else (W, H)   # a draft of a 4K video is the same small preview as a 1080p one
+    return (max(2, dw // 4 * 2), max(2, dh // 4 * 2)) if draft else (W, H)   # draft: half size, kept even (yuv420p): 4:5 at 1080p is 540x674, not 675
+
+
 class Renderer:
     def __init__(self, timeline: Dict[str, Any], image_loader: Optional[Callable[[str], Optional[Image.Image]]] = None, draft: bool = False,
                  clip_loader: Optional[Callable[[str], Any]] = None):
@@ -84,8 +92,7 @@ class Renderer:
         self.frame = Frame.parse(fr.get("aspect"), fr.get("resolution")) if isinstance(fr, dict) and fr.get("aspect") else Frame.from_size(self.W, self.H)
         self.big = self.frame.scale_factor > 1.0   # 4K: the output is larger than the design canvas
         self.ss = 1 if draft else (SS_4K if self.big else 2)  # draft: no supersampling, half-size output (the downscale antialiases)
-        dw, dh = (self.frame.design_w, self.frame.design_h) if self.big else (self.W, self.H)   # a draft of a 4K video is the same small preview as a 1080p one
-        self.out_w, self.out_h = (max(2, dw // 4 * 2), max(2, dh // 4 * 2)) if draft else (self.W, self.H)   # draft: half size, kept even (yuv420p): 4:5 at 1080p is 540x674, not 675
+        self.out_w, self.out_h = output_size(timeline, draft)
         self.fallbacks: Dict[str, Dict[str, Any]] = {}   # scene id -> framed-fallback report (scale, min_text_px, readable), for the preview tooling
         self.theme = get_theme(timeline.get("theme", "midnight"))
         self.bg_anim = _bg_anim(timeline, self.theme.name)
@@ -104,14 +111,6 @@ class Renderer:
         self._cover_img: Optional[Image.Image] = None
         self._image_loader = image_loader
         self._images: Dict[str, Optional[Image.Image]] = {}
-        # the watermark (docs/WATERMARK.md): drawn last on every frame, at the output size; None when the timeline has none
-        self.wm = watermark_mod.build(timeline.get("watermark"), self.frame, (self.out_w, self.out_h), self.ctx.captions, image_loader)
-        if self.wm is not None and self.wm.inset:   # a mark in a top corner: every scene's content box starts below it (seen on QA: a 9:16 logo on a list heading)
-            self.frame = self.frame.with_top_inset(self.wm.inset)
-            self.ctx.frame = self.frame
-        if self.wm is not None and self.wm.cap_lift:   # 16:9 with the mark under the captions: the captions sit higher, leaving it a band of its own
-            self.frame = self.frame.with_cap_lift(self.wm.cap_lift)
-            self.ctx.frame = self.frame
 
     # ----- assets
     def _load_image(self, key: str) -> Optional[Image.Image]:
@@ -197,9 +196,6 @@ class Renderer:
         if self._cover_cfg is not None and t < float(self._cover_cfg.get("blend_s", 0.4)):   # frame 0 IS the cover; it dissolves into the opening (no flash, same length, audio untouched)
             a = max(0.0, t) / float(self._cover_cfg.get("blend_s", 0.4))
             img = Image.blend(self._cover_frame(), img, a * a * (3 - 2 * a))
-        if self.wm is not None:   # last of all, at output pixels: never scaled with the picture, fades in with the video and out with the closing fade
-            k = max(0.0, min(1.0, (t - (self.total - OUTRO_FADE_S)) / OUTRO_FADE_S)) if self.outro else 0.0
-            img = self.wm.apply(img, t, first=self.lead is None, outro_k=k)
         return img
 
     def _compose(self, t: float) -> Image.Image:

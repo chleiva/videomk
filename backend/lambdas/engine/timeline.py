@@ -70,9 +70,21 @@ def shortest(plan: Dict[str, Any], speech: Sequence[float], fit_seconds: float) 
         total += max(MIN_SCENE, sp) if beat.get("silent") else max(MIN_SCENE, length_mod.LEAD_FLOOR + sp + length_mod.TAIL_FLOOR)
     if beats and not beats[0].get("silent"):
         total += intro
-    wm0 = watermark_spec.parse(plan.get("watermark"), strict=False)
-    card = watermark_spec.END_CARD_S if wm0 and wm0.get("mode") == "videomk" and wm0.get("end_card") else 0.0
-    return total + outro, (max(1.0, float(fit_seconds) - card) if fit_seconds else 0.0)
+    return total + outro, (max(1.0, float(fit_seconds)) if fit_seconds else 0.0)   # the watermark and its closing card are added after all this (engine/final_stage.py): they never change the length fit
+
+
+def end_card_timeline(timeline: Dict[str, Any]) -> Dict[str, Any]:
+    """A one-scene timeline of the closing 'Made with VideoMK' card (silent, the video's own theme, shape and language), rendered by the final stage (engine/final_stage.py) and
+    appended after the finished video: it is never part of the video's own timeline, scene times, length fit, audio or segment cache keys."""
+    from . import language as lang_mod
+
+    props = {"title": lang_mod.made_with(timeline.get("language")), "subtitle": "videomk.com"}
+    d = watermark_spec.END_CARD_S
+    sc = {"id": "endcard", "type": "title", "start": 0.0, "duration": d, "props": props, "words": [], "audio_key": None, "silent": True,
+          "narration_offset": 0.0, "cues": [round(c, 3) for c in SCENES["title"][1](props, d)[:8]], "transition": "none"}
+    return {"fps": timeline["fps"], "width": timeline["width"], "height": timeline["height"], "theme": timeline.get("theme", "midnight"), "captions": False,
+            "language": timeline.get("language", "en"), "scenes": [sc], "lead": None, "outro": True, "duration": d,
+            **({"frame": timeline["frame"]} if timeline.get("frame") else {})}
 
 
 def build_timeline(
@@ -102,11 +114,6 @@ def build_timeline(
         out[-1] += outro
         return out
 
-    wm0 = watermark_spec.parse(plan.get("watermark"), strict=False)
-    card = watermark_spec.END_CARD_S if wm0 and wm0.get("mode") == "videomk" and wm0.get("end_card") else 0.0
-    if card:   # the closing "Made with VideoMK" card is part of the video's length: the scenes aim that much shorter, so the whole video still lands on the length asked (seen on QA: 32.8 s for 30)
-        min_seconds = max(0.0, min_seconds - card) if min_seconds else min_seconds
-        fit_seconds = max(1.0, fit_seconds - card) if fit_seconds else fit_seconds
     if fit_seconds:   # a first render: the pace is worked out from the measured audio
         LEAD_S, TAIL_S = length_mod.tighten(sum(1 for b in plan["beats"] if not b.get("silent")), sum(lengths(LEAD, TAIL)), fit_seconds, LEAD, TAIL)
     else:             # an edit keeps the pace its video was made with
@@ -193,14 +200,8 @@ def build_timeline(
     wm = watermark_spec.parse(plan.get("watermark"), strict=False)   # the plan's watermark option (docs/WATERMARK.md): none/absent = nothing added anywhere
     if wm and wm["mode"] == "none":
         wm = None
-    if wm and wm.get("end_card") and scenes:   # optional closing card (VideoMK mark only): a silent 'Made with VideoMK' scene after the last one
-        from . import language as lang_mod
-        props = {"title": lang_mod.made_with(plan.get("language")), "subtitle": "videomk.com"}
-        scenes.append({"id": "endcard", "type": "title", "start": round(t, 4), "duration": watermark_spec.END_CARD_S, "props": props, "words": [], "audio_key": None, "silent": True,
-                       "narration_offset": 0.0, "cues": [round(c, 3) for c in SCENES["title"][1](props, watermark_spec.END_CARD_S)[:8]], "transition": "fade"})
-        t += watermark_spec.END_CARD_S
     if wm and wm.get("mode") == "videomk" and wm.get("presence") == "moments":   # the mark comes and goes: its appearances are fixed here, once, for the whole video
-        wm = {**wm, "windows": watermark_spec.moments(scenes, t, watermark_spec.END_CARD_S if wm.get("end_card") else 0.0)}
+        wm = {**wm, "windows": watermark_spec.moments(scenes, t, 0.0)}   # the content only: the closing card is appended after it by the final stage
     if any(sc["type"] == "whiteboard" for sc in scenes):   # the whiteboard look (docs/WHITEBOARD.md): consecutive boards are panels of one big board
         from . import whiteboard_policy
 
@@ -295,7 +296,6 @@ def chunk_plan(timeline: Dict[str, Any], target_seconds: float = 30, draft: bool
             "captions": timeline.get("captions", True), "language": timeline.get("language", "en"), "draft": draft,
             "scenes": [_scene_fingerprint(x) for x in scenes[lo:hi]],
             "lead": _scene_fingerprint(scenes[lo - 1]) if lo > 0 else None, "outro": hi == len(scenes),
-            **({"wm": _chunk_watermark(timeline, lo, hi), "first": lo == 0, "wmv": 4} if timeline.get("watermark") else {}),   # the mark is part of every frame (and fades in on the first chunk only; a 'moments' mark: this chunk's own appearances)
             **({"bg": timeline["background"]} if timeline.get("background") else {}),   # the animated background, when the plan has one
             **({"cover": timeline["cover"]} if timeline.get("cover") and lo == 0 else {}),   # the designed opening frames (engine/cover.py): the first chunk only
         }, sort_keys=True, ensure_ascii=False).encode("utf-8")).hexdigest()[:24]
@@ -321,19 +321,6 @@ def chunk_timeline(timeline: Dict[str, Any], lo: int, hi: int) -> Dict[str, Any]
         "captions": timeline.get("captions", True), "language": timeline.get("language", "en"), "scenes": sub, "lead": scenes[lo - 1] if lo > 0 else None,
         "outro": hi == len(scenes), "duration": round(sum(float(x["duration"]) for x in sub), 6),
         **({"frame": timeline["frame"]} if timeline.get("frame") else {}),
-        **({"watermark": _chunk_watermark(timeline, lo, hi)} if timeline.get("watermark") else {}),
         **({"background": timeline["background"]} if timeline.get("background") else {}),
         **({"cover": timeline["cover"]} if timeline.get("cover") and lo == 0 else {}),   # the designed opening frames: the first chunk only
     }
-
-
-def _chunk_watermark(timeline: Dict[str, Any], lo: int, hi: int) -> Dict[str, Any]:
-    """The watermark as the chunk of scenes [lo, hi) needs it: unchanged, except that the appearances of a 'moments' mark are given in the chunk's own time
-    (a chunk is rendered from t = 0), and only those that touch it."""
-    wm = timeline["watermark"]
-    if not isinstance(wm, dict) or "windows" not in wm:
-        return wm
-    scenes = timeline["scenes"]
-    base = float(scenes[lo]["start"])
-    dur = sum(float(x["duration"]) for x in scenes[lo:hi])
-    return {**wm, "windows": watermark_spec.shift_windows(wm["windows"], base, dur)}

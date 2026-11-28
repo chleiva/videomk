@@ -104,6 +104,15 @@ def fit_speech(plan: Dict[str, Any], video_id: str, asked: float) -> list:
     return cuts
 
 
+def plan_chunks(tl: Dict[str, Any], mode: str = "final"):
+    """(big, the render chunks) of a timeline: what the render step fans out over. Also how the final stage's re-export finds a video's cached segments (scripts/watermark_reexport.py)."""
+    frame = tl.get("frame") or {}
+    big = bool(format_options.is_4k(frame.get("resolution")) and mode != "preview")   # the final render of a 4K video: the 10 GB render function; everything else may use the HD one (engine_v2.py)
+    vector = any(sc.get("type") == "vector_scene" or (sc.get("type") == "presenter" and (sc.get("props") or {}).get("backdrop")) for sc in tl["scenes"])   # a character in front of a cartoon scene draws that scene too
+    chunks = chunk_plan(tl, CHUNK_SECONDS_4K, draft=False, max_frames=CHUNK_MAX_FRAMES_4K) if big else chunk_plan(tl, CHUNK_SECONDS, draft=(mode == "preview"), max_frames=CHUNK_MAX_FRAMES_VECTOR if vector else 0)
+    return big, chunks
+
+
 def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     video_id = str(event["video_id"])
     rev = int(event.get("rev", 1))
@@ -163,7 +172,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     tl["language"] = plan.get("language", "en")
     key = f"{pfx}timeline_r{rev}.json"
     awsio.put_json(key, tl)
-    big = bool(format_options.is_4k(frame["resolution"]) and mode != "preview")   # the final render of a 4K video: the 10 GB render function; everything else may use the HD one (engine_v2.py)
+    big, chunks = plan_chunks(tl, mode)
     return {
         "video_id": video_id,
         "user_id": event.get("user_id"),
@@ -173,7 +182,5 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         "mode": mode,
         "timeline_key": key,
         "duration": tl["duration"],
-        "chunks": [{**c, "video_id": video_id, "timeline_key": key, "big": big} for c in (
-            chunk_plan(tl, CHUNK_SECONDS_4K, draft=False, max_frames=CHUNK_MAX_FRAMES_4K) if big
-            else chunk_plan(tl, CHUNK_SECONDS, draft=(mode == "preview"), max_frames=CHUNK_MAX_FRAMES_VECTOR if any(sc.get("type") == "vector_scene" or (sc.get("type") == "presenter" and (sc.get("props") or {}).get("backdrop")) for sc in tl["scenes"]) else 0))],   # a character in front of a cartoon scene draws that scene too
+        "chunks": [{**c, "video_id": video_id, "timeline_key": key, "big": big} for c in chunks],
     }

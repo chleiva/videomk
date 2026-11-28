@@ -10,7 +10,7 @@ import os
 from functools import lru_cache
 from typing import Any, Callable, Dict, Optional, Tuple
 
-from PIL import Image, ImageFilter, ImageStat
+from PIL import Image, ImageFilter
 
 from . import watermark_spec as ws
 from .frame import Frame
@@ -20,7 +20,6 @@ ASSETS = os.path.join(os.path.dirname(__file__), "assets", "watermark")
 SHADOW_ALPHA = 0.62        # of the mark's own alpha
 SHADOW_BLUR = 0.10         # blur radius as a share of the mark height
 SHADOW_DROP = 0.035        # downward offset as a share of the mark height
-OUTRO_FADE_S = 0.7         # the renderer's closing fade to black (renderer.OUTRO_FADE_S): the mark leaves with the picture
 INK = (17, 20, 43)         # the brand ink (#11142b): the mark on a light picture (a white mark would vanish there; docs/brand/README.md: never light-on-light)
 LIGHT_FROM, LIGHT_TO = 0.55, 0.66   # mean brightness (0..1) under the mark where it starts and finishes turning from white to ink: a smooth blend, so nothing flips between frames
 
@@ -69,17 +68,16 @@ def _scaled_alpha(layer: Image.Image, k: float) -> Image.Image:
 
 
 class Watermark:
-    """Built once per Renderer. `apply(img, t)` returns the frame with the mark on it (the frame itself, changed in place)."""
+    """The artwork of one watermark at one output size: `layer` (white + shadow, or the logo), `layer_ink` (ink + glow; None for a custom logo), `pos` (where the layers' top-left goes, output px)
+    and `rect_px` (the mark itself, output px: the area whose brightness decides white or ink)."""
 
     def __init__(self, spec: Dict[str, Any], frame: Frame, out_size: Tuple[int, int], captions: bool = True, loader: Optional[Callable[[str], Any]] = None):
         self.spec = spec
         self.layer: Optional[Image.Image] = None   # the artwork as supplied (white mark, or the person's logo)
         self.layer_ink: Optional[Image.Image] = None   # the videomk mark in ink, for light pictures (None for a custom logo: the person's colours stay)
         self.pos = (0, 0)
-        self.cap_lift = 0
-        self.inset = 0   # design units the scenes start lower by, so a top-corner mark has a band of its own (watermark_spec.content_inset)
-        self.fade = ws.FADE_IN_S
-        self.windows = spec.get("windows", []) if spec.get("mode") == "videomk" and spec.get("presence") == "moments" else None   # presence 'moments': when it is on screen (this chunk's times); None = always
+        self.rect_px = (0, 0, 0, 0)
+        self.info: Dict[str, Any] = {}
         out_w, out_h = out_size
         scale = out_w / float(frame.W)   # design units -> output pixels (a draft is half size, 4K is twice)
         logo, ratio = None, None
@@ -89,10 +87,7 @@ class Watermark:
                 log.warning("WATERMARK_LOGO_UNREADABLE asset=%s: no watermark drawn", spec.get("asset"))
                 return
             ratio = logo.width / float(logo.height)
-        frame = frame.with_top_inset(0)   # placed on the shape itself, never on a frame that already carries the band
         lay = ws.layout(spec, frame, ratio, captions)
-        self.inset = ws.content_inset(lay, frame)
-        self.cap_lift = int(lay.get("cap_lift", 0))   # 16:9 with the mark under the captions: they sit this much higher (Frame.cap_lift)
         x0, y0, x1, y1 = lay["rect"]
         w_px, h_px = max(2, int(round((x1 - x0) * scale))), max(2, int(round((y1 - y0) * scale)))
         key = ("custom:" + str(spec.get("hash") or spec.get("asset")) if logo is not None else spec.get("style", "mark"), w_px, h_px)
@@ -116,38 +111,10 @@ class Watermark:
         except Exception:   # noqa: BLE001 - a bad logo must never fail the render
             return None
 
-    def apply(self, img: Image.Image, t: float = 0.0, *, first: bool = False, outro_k: float = 0.0) -> Image.Image:
-        """`first`: this is the first chunk of the video, so the mark fades in over FADE_IN_S; `outro_k` (0..1): how far the closing fade to black has gone."""
-        if self.layer is None:
-            return img
-        k = 1.0
-        if self.windows is not None:   # it comes and goes: a pure function of the time (the timeline wrote the appearances, every chunk has its own copy)
-            k = ws.moment_alpha(self.windows, t)
-        elif first and t < self.fade:
-            u = max(0.0, t) / self.fade
-            k *= u * u * (3 - 2 * u)
-        k *= 1.0 - max(0.0, min(1.0, outro_k))
-        if k <= 0.003:
-            return img
-        x, y = self.pos
-        box = (max(0, x), max(0, y), min(img.width, x + self.layer.width), min(img.height, y + self.layer.height))
-        if box[2] <= box[0] or box[3] <= box[1]:
-            return img
-        region = img.crop(box).convert("RGBA")
-        s = self._light(region) if self.layer_ink is not None else 0.0   # 0 = dark picture (white mark) .. 1 = light picture (ink mark)
-        for layer, share in ((self.layer, 1.0 - s), (self.layer_ink, s)):
-            if layer is None or share * k <= 0.003:
-                continue
-            lay = _scaled_alpha(layer, share * k)
-            region.alpha_composite(lay.crop((box[0] - x, box[1] - y, box[2] - x, box[3] - y)))
-        img.paste(region.convert("RGB"), box[:2])
-        return img
-
     @staticmethod
-    def _light(region: Image.Image) -> float:
-        """How light the picture under the mark is, as a smooth 0..1 blend weight (mean brightness, then a smoothstep between LIGHT_FROM and LIGHT_TO)."""
-        m = ImageStat.Stat(region.convert("L")).mean[0] / 255.0
-        u = max(0.0, min(1.0, (m - LIGHT_FROM) / (LIGHT_TO - LIGHT_FROM)))
+    def light(mean: float) -> float:
+        """How light a picture of mean brightness `mean` (0..1) under the mark is, as a smooth 0..1 weight (a smoothstep between LIGHT_FROM and LIGHT_TO): 0 = white mark, 1 = ink mark."""
+        u = max(0.0, min(1.0, (mean - LIGHT_FROM) / (LIGHT_TO - LIGHT_FROM)))
         return u * u * (3 - 2 * u)
 
 

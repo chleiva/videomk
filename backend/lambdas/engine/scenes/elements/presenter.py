@@ -635,7 +635,7 @@ class _Sub:
     """What the whiteboard element reads from a scene context, for a board that is only a part of the picture."""
 
     def __init__(self, w: float, h: float, pad: float):
-        self.frame = type("F", (), {"W": w, "H": h, "aspect": "board", "top_inset": 0})()
+        self.frame = type("F", (), {"W": w, "H": h, "aspect": "board"})()
         self.box = (pad, pad, w - pad, h - pad)
         self.captions = False
 

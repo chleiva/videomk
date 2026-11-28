@@ -187,7 +187,7 @@ _STILLS: Dict[str, Image.Image] = {}     # the finished pictures of other panels
 
 
 def geometry(ctx: SceneCtx, w: int, h: int) -> Dict[str, Any]:
-    """The board for this frame: the content box (above the captions, below a top watermark band) becomes the board, the rest of the frame is paper around it.
+    """The board for this frame: the content box (above the captions) becomes the board, the rest of the frame is paper around it.
     The board is BOARD_K design units wide per design unit of the box: smaller than the standalone demos' 2.0, because the whole board is the picture (one
     framing per board, no close views): drawings and writing must be a good size seen whole."""
     fr = ctx.frame
@@ -259,7 +259,7 @@ def _portrait(ctx: SceneCtx) -> bool:
 
 def _still(lite: Dict[str, Any], ctx: SceneCtx, w: int, h: int) -> Image.Image:
     """Another panel of the big board, finished: its items laid out exactly as its own scene lays them out (layout does not depend on timing)."""
-    key = hashlib.sha1(json.dumps([lite, w, h, ctx.frame.aspect, ctx.frame.top_inset, bool(ctx.captions)], sort_keys=True, default=str).encode()).hexdigest()
+    key = hashlib.sha1(json.dumps([lite, w, h, ctx.frame.aspect, bool(ctx.captions)], sort_keys=True, default=str).encode()).hexdigest()
     im = _STILLS.get(key)
     if im is None:
         try:
@@ -298,7 +298,7 @@ WALL_GAP = (0.03, 0.05)       # paper between the boards of the final overview, 
 def wall_views(m: int, cols: int, rows: int, geo_box: Tuple[float, float, float, float], frame_wh: Tuple[float, float]):
     """The final overview as geometry, in frame widths (x) and frame heights (y). The boards' CONTENT boxes tile a wall (the paper margins and the caption band
     of each frame are not repeated between them), and the last view shows the whole wall inside this frame's content box: above the captions, clear of the
-    watermark band. -> (origins of every board's frame on the wall, the first view = the last board's frame, the last view); a view is (x, y, width)."""
+    top margin. -> (origins of every board's frame on the wall, the first view = the last board's frame, the last view); a view is (x, y, width)."""
     fx0, fy0, fw, fh = geo_box[0] / frame_wh[0], geo_box[1] / frame_wh[1], geo_box[2] / frame_wh[0], geo_box[3] / frame_wh[1]
     gx, gy = WALL_GAP
     origins = [((i % cols) * (fw + gx), (i // cols) * (fh + gy)) for i in range(m)]
@@ -350,7 +350,7 @@ def _draw(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, theme: Theme
     w, h = max(2, cv.im.width // 2), max(2, cv.im.height // 2)
     lt = max(0.0, lt)
     core_props = {k: v for k, v in props.items() if k not in ("prev", "wall", "panel")}
-    key = hashlib.sha1(json.dumps([core_props, len(props.get("wall") or []), bool(props.get("prev")), round(dur, 3), w, h, ctx.frame.aspect, ctx.frame.top_inset, bool(ctx.captions)], sort_keys=True, default=str).encode()).hexdigest()
+    key = hashlib.sha1(json.dumps([core_props, len(props.get("wall") or []), bool(props.get("prev")), round(dur, 3), w, h, ctx.frame.aspect, bool(ctx.captions)], sort_keys=True, default=str).encode()).hexdigest()
     try:
         if _STATE.get("key") != key:
             _STATE.clear()
