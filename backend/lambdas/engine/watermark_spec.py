@@ -21,7 +21,9 @@ from .frame import Frame
 
 MODES = ("none", "videomk", "custom")
 POSITIONS = ("auto", "tl", "tr", "bl", "br")
-SIZES: Dict[str, float] = {"small": 0.050, "medium": 0.070}   # mark height as a share of the frame's short side
+SIZES: Dict[str, float] = {"small": 0.075, "medium": 0.100}   # the mark alone (and a custom logo): its height as a share of the frame's short side (2026-11-28: was 0.05 / 0.07, too small to read)
+LOCKUP_W: Dict[str, float] = {"small": 0.26, "medium": 0.34}  # the videomk lockup (mark + the word): its WIDTH as a share of the short side: 281 design px (small) of a 1080 short side; the word's capitals are then 34 design px (22 px at 720p)
+CAPTION_LIFT = 40            # 16:9 with the mark in a bottom corner: the captions sit this many design units higher, leaving a band under them for the mark
 STYLES = ("mark", "lockup")
 PRESENCES = ("always", "moments")
 KEYS = {"mode", "position", "opacity", "size", "style", "end_card", "presence"}
@@ -35,7 +37,7 @@ MOMENT_MIN_GAP_S = 12.0      # between the end of one appearance and the start o
 MOMENT_END_CLEAR_S = 1.0     # the last appearance is gone this long before the closing card or the final fade
 # a scene whose point is a number landing or a ranking settling: the mark does not arrive at its start
 EMPHASIS_SCENES = frozenset({"counter", "stat", "bar_race", "pie", "chart", "ranking", "scale_compare"})
-DEFAULT_OPACITY = 0.65
+DEFAULT_OPACITY = 0.9
 OPACITY_MIN, OPACITY_MAX = 0.2, 1.0
 MARGIN = 0.035           # of the short side
 MARGIN_MIN = 0.020
@@ -44,12 +46,9 @@ GAP = 10.0               # design units kept clear of a protected zone
 CONTENT_GAP = 18.0       # design units between a top-corner mark and the first line of the scene under it
 FADE_IN_S = 0.6
 END_CARD_S = 2.4
-MAX_LOGO_RATIO = 6.3     # the widest a custom logo may be drawn, as a multiple of the mark height (the VideoMK lockup is 4.27: well inside)
+MAX_LOGO_RATIO = 4.3     # the widest a custom logo may be drawn, as a multiple of the mark height (a lockup-shaped logo: as wide as the VideoMK lockup, 4.27)
 MARK_RATIO = 1120 / 1024     # width / height of assets/watermark/mark.png (the play and two stars, 2026-11-27)
 LOCKUP_RATIO = 4369 / 1024   # and of lockup.png (the mark, then "VideoMK" in Inter)
-LOCKUP_SCALE = 0.92          # the lockup is drawn at this share of the mark's height. It is set by the WORD: in this lockup the capitals are 51 % of the height, so 0.92 keeps
-                             # them 25 design px for 'small' (17 px at 720p), the size the word had in the previous lockup (0.76 of a drawing whose word was 62 % of its height).
-                             # 'small' is 212 x 50 design px, a fifth of the width of a vertical video (the previous one was 257 x 41, a quarter)
 
 AUTO_POSITION = {"16:9": "br", "1:1": "tl", "4:5": "tl", "9:16": "tl"}   # square and 4:5: the captions take almost the whole bottom width, so the quiet corner is the top left
 _OTHERS = {"tl": ("bl", "br", "tr"), "tr": ("br", "bl", "tl"), "bl": ("tl", "tr", "br"), "br": ("tr", "tl", "bl")}
@@ -231,9 +230,11 @@ def credit_rect(frame: Frame) -> Rect:
 
 def mark_box(frame: Frame, spec: Dict[str, Any], ratio: float) -> Tuple[float, float]:
     """(w, h) in design units of the mark for this size: height is a share of the short side; a wide logo is limited to MAX_LOGO_RATIO times the height."""
-    h = SIZES.get(spec.get("size", "small"), SIZES["small"]) * min(frame.W, frame.H)
+    short = float(min(frame.W, frame.H))
     if spec.get("mode") == "videomk" and spec.get("style") == "lockup":
-        h *= LOCKUP_SCALE
+        w = LOCKUP_W.get(spec.get("size", "small"), LOCKUP_W["small"]) * short
+        return w, w / ratio
+    h = SIZES.get(spec.get("size", "small"), SIZES["small"]) * short
     w = h * ratio
     if w > h * MAX_LOGO_RATIO:
         w, h = h * MAX_LOGO_RATIO, h * MAX_LOGO_RATIO / ratio
@@ -281,9 +282,10 @@ def layout(spec: Dict[str, Any], frame: Frame, logo_ratio: Optional[float] = Non
     else:   # the default corner shrinks a little (to 70 %), then the other corners are tried at full size, then smaller
         tries = [(pos, s) for s in SHRINK_STEPS[:3]] + [(c, 1.0) for c in order[1:]] + [(pos, SHRINK_STEPS[3])] + [(c, s) for c in order[1:] for s in SHRINK_STEPS[1:]]
     for candidate, s in tries:
-        zones: List[Rect] = ([caption_rect(frame)] if captions else []) + ([credit_rect(frame)] if candidate == "tr" else [])
+        lift = CAPTION_LIFT if frame.landscape and candidate in ("bl", "br") else 0   # 16:9: the captions rise for a mark under them
+        zones: List[Rect] = ([caption_rect(frame.with_cap_lift(lift))] if captions else []) + ([credit_rect(frame)] if candidate == "tr" else [])
         for m in margins:
             rect = _corner(candidate, area, w0 * s, h0 * s, m)
             if not any(intersects(rect, z, GAP) for z in zones):
-                return {"rect": rect, "position": candidate, "scale": s, "moved": candidate != pos}
-    return {"rect": _corner(pos, area, w0 * SHRINK_STEPS[-1], h0 * SHRINK_STEPS[-1], margins[-1]), "position": pos, "scale": SHRINK_STEPS[-1], "moved": False, "overlaps": True}
+                return {"rect": rect, "position": candidate, "scale": s, "moved": candidate != pos, "cap_lift": lift if captions else 0}
+    return {"rect": _corner(pos, area, w0 * SHRINK_STEPS[-1], h0 * SHRINK_STEPS[-1], margins[-1]), "position": pos, "scale": SHRINK_STEPS[-1], "moved": False, "overlaps": True, "cap_lift": 0}

@@ -124,7 +124,7 @@ def is_premium(user: str, item: Optional[Dict[str, Any]] = None, now: Optional[f
 # (mark + the word), small, in the quiet corner of the shape, there for the whole video, and the closing "Made with videomk" card. Nothing of it can be chosen away.
 FORCED_SPEC: Dict[str, Any] = {"mode": "videomk", "style": "lockup", "presence": "always", "end_card": True, "position": "auto", "size": "small", "opacity": ws.DEFAULT_OPACITY}
 PREMIUM_DEFAULT_PRESENCE = "moments"
-TEST_DEFAULT_SPEC: Dict[str, Any] = {**FORCED_SPEC, "presence": "moments"}   # test accounts: the lockup in short moments plus the end card; the whole-video mark is a choice   # a premium account that keeps the videomk mark gets the gentle form unless it says otherwise
+TEST_DEFAULT_SPEC: Dict[str, Any] = dict(FORCED_SPEC)   # test / owner accounts (owner 28 Nov, R171 follow-up): the lockup for the WHOLE video plus the closing card, like a free account; they may still choose 'moments' or none
 def rights(user: str, item: Optional[Dict[str, Any]] = None, now: Optional[float] = None) -> Dict[str, Any]:
     """{premium (own logo), forced (the videomk mark cannot be removed), modes (the modes the plan allows, None where plans are off), by_plan, plan}."""
     from common import plans
@@ -175,7 +175,7 @@ def capabilities(user: str, locale: Optional[str] = None) -> Dict[str, Any]:
             "presences": [{"id": "always", "available": True, "label": i18n.t("wm.presence.always", loc), "note": i18n.t("wm.presence.always_note", loc)},
                           {"id": "moments", "available": may_moments, **({"requires": "premium"} if not may_moments else {}), **({"requires_plan": None if may_moments else _plan_for_mode("moments")} if wr["by_plan"] else {}),
                            "label": i18n.t("wm.presence.moments", loc), "note": i18n.t("wm.presence.moments_note", loc)}],
-            "default_presence": PREMIUM_DEFAULT_PRESENCE if may_moments and (premium or wr["by_plan"] or wr.get("test")) else "always",
+            "default_presence": PREMIUM_DEFAULT_PRESENCE if may_moments and (premium or wr["by_plan"]) and not wr.get("test") else "always",   # a test / owner account starts on 'always' (28 Nov)
             "opacity": {"min": ws.OPACITY_MIN, "max": ws.OPACITY_MAX, "default": ws.DEFAULT_OPACITY},
             "premium": premium, "forced": forced, "end_card": True,
             **({"forced_watermark": dict(FORCED_SPEC), "forced_note": i18n.t("wm.forced_note", loc)} if forced else {}),
@@ -190,7 +190,7 @@ def resolve(requested: Optional[Dict[str, Any]], profile: Optional[Dict[str, Any
     explicit = requested is not None
     spec = dict(requested if explicit else (profile or {}))
     if not spec:
-        spec = dict(TEST_DEFAULT_SPEC) if test else ({"mode": "videomk"} if forced else {"mode": "none"})   # a test account carries the gentle brand by default: short moments plus the closing card (owner 27 Nov, second decision); it can choose "always" or none
+        spec = dict(TEST_DEFAULT_SPEC) if test else ({"mode": "videomk"} if forced else {"mode": "none"})   # a test account carries the brand by default: the lockup for the whole video plus the closing card (owner 28 Nov); it can choose 'moments' or none
     mode = spec.get("mode", "none")
     if modes is not None and explicit and mode != "custom" and mode not in modes:   # plans: an explicit request for a mode the plan lacks is refused with the plan that has it
         raise WatermarkError(403, "plan.watermark", "plan_watermark", extra={"feature": "watermark", "requires_plan": _plan_for_mode(mode)})
@@ -212,7 +212,7 @@ def resolve(requested: Optional[Dict[str, Any]], profile: Optional[Dict[str, Any
             raise WatermarkError(403, "plan.watermark", "plan_watermark", extra={"feature": "watermark", "requires_plan": _plan_for_mode("moments")})
         spec.pop("presence", None)   # a saved setting from a plan that ended
     if mode == "videomk" and spec.get("presence") not in ws.PRESENCES and may_moments:
-        spec["presence"] = PREMIUM_DEFAULT_PRESENCE   # (test accounts and premium: the gentle form unless they say 'always')
+        spec["presence"] = "always" if test else PREMIUM_DEFAULT_PRESENCE   # (premium: the gentle form unless they say 'always'; a test / owner account: the whole video)
     out = ws.parse(spec, strict=False) or {"mode": "none"}
     return out
 
@@ -258,13 +258,30 @@ def logo_link(user: str) -> Optional[str]:
     return s3().generate_presigned_url("get_object", Params={"Bucket": bucket(), "Key": logo_key(user), "ResponseContentType": "image/png"}, ExpiresIn=LOGO_LINK_SECONDS)
 
 
+def effective_default(user: str) -> Dict[str, Any]:
+    """What a video gets when nothing is saved and nothing is asked (the same rule `resolve` applies): a test / owner account the lockup always on plus the end card, a free
+    account the forced mark, everyone else no watermark."""
+    wr = rights(user)
+    if wr.get("test"):
+        return ws.parse(TEST_DEFAULT_SPEC, strict=False) or {"mode": "none"}
+    if wr["forced"]:
+        return ws.parse(FORCED_SPEC, strict=False) or {"mode": "none"}
+    return {"mode": "none"}
+
+
 def public_profile(user: str) -> Dict[str, Any]:
-    """What GET /watermark returns: the saved settings (defaults filled in) and whether a logo is stored."""
+    """What GET /watermark returns: the saved settings (defaults filled in) and whether a logo is stored. With nothing saved it shows the EFFECTIVE default (what a video
+    would get) and says so with `is_default: true` (not saved), so an app row never claims "none" while generation applies the brand."""
     prof = get_profile(user)
     logo = has_logo(user)
     base = {"mode": "none", "position": "auto", "opacity": ws.DEFAULT_OPACITY, "size": "small", "style": "mark", "end_card": False}
+    if not prof:
+        eff = effective_default(user)
+        if eff.get("mode") != "none":
+            return {**base, **{k: v for k, v in eff.items() if k in base}, **({"presence": eff["presence"]} if eff.get("presence") in ws.PRESENCES else {}),
+                    "is_default": True, "has_logo": logo, **({"logo_url": logo_link(user)} if logo else {})}
     return {**base, **{k: v for k, v in prof.items() if k in base}, **({"presence": prof["presence"]} if prof.get("presence") in ws.PRESENCES else {}),
-            "has_logo": logo, **({"logo_url": logo_link(user)} if logo else {})}
+            "is_default": False, "has_logo": logo, **({"logo_url": logo_link(user)} if logo else {})}
 
 
 # ----------------------------------------------------------------------------- the logo upload

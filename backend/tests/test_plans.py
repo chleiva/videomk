@@ -347,7 +347,7 @@ def put_logo(p, user=USER):
 def test_free_videos_always_carry_the_videomk_mark_with_the_name_and_the_end_card(launcher, plans_on):
     assert launch(launcher, target_minutes=0.5)["statusCode"] == 202
     wm = started(launcher)["watermark"]
-    assert (wm["mode"], wm["style"], wm["end_card"]) == ("videomk", "lockup", True) and wm["opacity"] >= 0.65
+    assert (wm["mode"], wm["style"], wm["end_card"]) == ("videomk", "lockup", True) and wm["opacity"] >= 0.9
     r = launch(launcher, target_minutes=0.5, watermark={"mode": "none"})
     assert r["statusCode"] == 403 and body_of(r)["code"] == "plan_watermark" and body_of(r)["requires_plan"] == "pro"
     assert body_of(r)["plan"] == "free" and body_of(r)["can_upgrade"] is False                # like every plan refusal: which plan the account has, and that nothing can be bought yet
@@ -358,7 +358,7 @@ def test_free_videos_always_carry_the_videomk_mark_with_the_name_and_the_end_car
     # the person may still choose the corner and the size, but cannot fade the mark away or drop the name
     assert launch(launcher, target_minutes=0.5, watermark={"mode": "videomk", "position": "tl", "size": "medium", "opacity": 0.2, "style": "mark", "end_card": False})["statusCode"] == 202
     wm = started(launcher)["watermark"]
-    assert (wm["position"], wm["size"], wm["style"], wm["end_card"], wm["opacity"]) == ("tl", "medium", "lockup", True, 0.65)
+    assert (wm["position"], wm["size"], wm["style"], wm["end_card"], wm["opacity"]) == ("tl", "medium", "lockup", True, 0.9)
     store.put_profile(USER, {"mode": "none"})                                                # a setting saved while on a plan: falls back quietly
     assert launch(launcher, target_minutes=0.5)["statusCode"] == 202 and started(launcher)["watermark"]["mode"] == "videomk"
 

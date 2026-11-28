@@ -152,7 +152,7 @@ def test_an_always_on_mark_is_there_for_the_whole_video_as_before():
 # ---------------------------------------------------------------- who gets what
 def test_a_free_account_under_the_policy_always_gets_the_lockup_for_the_whole_video_with_the_closing_card():
     f = dict(premium=False, forced=True, has_logo=False)
-    want = {"mode": "videomk", "style": "lockup", "presence": "always", "end_card": True, "position": "auto", "size": "small", "opacity": 0.65}
+    want = {"mode": "videomk", "style": "lockup", "presence": "always", "end_card": True, "position": "auto", "size": "small", "opacity": ws.DEFAULT_OPACITY}
     for requested in (None, {"mode": "none"}, {"mode": "videomk", "style": "mark"}, {"mode": "videomk", "presence": "moments"}, {"mode": "videomk", "opacity": 0.2, "size": "medium", "position": "tr", "end_card": False}):
         for profile in (None, {"mode": "none"}, {"mode": "videomk", "presence": "moments", "opacity": 0.2}, {"mode": "custom"}):
             assert store.resolve(requested, profile, **f) == want

@@ -17,12 +17,12 @@ from .frame import Frame
 
 log = logging.getLogger(__name__)
 ASSETS = os.path.join(os.path.dirname(__file__), "assets", "watermark")
-SHADOW_ALPHA = 0.45        # of the mark's own alpha
-SHADOW_BLUR = 0.07         # blur radius as a share of the mark height
+SHADOW_ALPHA = 0.62        # of the mark's own alpha
+SHADOW_BLUR = 0.10         # blur radius as a share of the mark height
 SHADOW_DROP = 0.035        # downward offset as a share of the mark height
 OUTRO_FADE_S = 0.7         # the renderer's closing fade to black (renderer.OUTRO_FADE_S): the mark leaves with the picture
 INK = (17, 20, 43)         # the brand ink (#11142b): the mark on a light picture (a white mark would vanish there; docs/brand/README.md: never light-on-light)
-LIGHT_FROM, LIGHT_TO = 0.52, 0.74   # mean brightness (0..1) under the mark where it starts and finishes turning from white to ink: a smooth blend, so nothing flips between frames
+LIGHT_FROM, LIGHT_TO = 0.55, 0.66   # mean brightness (0..1) under the mark where it starts and finishes turning from white to ink: a smooth blend, so nothing flips between frames
 
 
 def _fit(img: Image.Image, w: int, h: int) -> Image.Image:
@@ -76,6 +76,7 @@ class Watermark:
         self.layer: Optional[Image.Image] = None   # the artwork as supplied (white mark, or the person's logo)
         self.layer_ink: Optional[Image.Image] = None   # the videomk mark in ink, for light pictures (None for a custom logo: the person's colours stay)
         self.pos = (0, 0)
+        self.cap_lift = 0
         self.inset = 0   # design units the scenes start lower by, so a top-corner mark has a band of its own (watermark_spec.content_inset)
         self.fade = ws.FADE_IN_S
         self.windows = spec.get("windows", []) if spec.get("mode") == "videomk" and spec.get("presence") == "moments" else None   # presence 'moments': when it is on screen (this chunk's times); None = always
@@ -91,6 +92,7 @@ class Watermark:
         frame = frame.with_top_inset(0)   # placed on the shape itself, never on a frame that already carries the band
         lay = ws.layout(spec, frame, ratio, captions)
         self.inset = ws.content_inset(lay, frame)
+        self.cap_lift = int(lay.get("cap_lift", 0))   # 16:9 with the mark under the captions: they sit this much higher (Frame.cap_lift)
         x0, y0, x1, y1 = lay["rect"]
         w_px, h_px = max(2, int(round((x1 - x0) * scale))), max(2, int(round((y1 - y0) * scale)))
         key = ("custom:" + str(spec.get("hash") or spec.get("asset")) if logo is not None else spec.get("style", "mark"), w_px, h_px)
