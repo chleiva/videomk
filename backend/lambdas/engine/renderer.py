@@ -109,6 +109,9 @@ class Renderer:
         if self.wm is not None and self.wm.inset:   # a mark in a top corner: every scene's content box starts below it (seen on QA: a 9:16 logo on a list heading)
             self.frame = self.frame.with_top_inset(self.wm.inset)
             self.ctx.frame = self.frame
+        if self.wm is not None and self.wm.cap_lift:   # 16:9 with the mark under the captions: the captions sit higher, leaving it a band of its own
+            self.frame = self.frame.with_cap_lift(self.wm.cap_lift)
+            self.ctx.frame = self.frame
 
     # ----- assets
     def _load_image(self, key: str) -> Optional[Image.Image]:

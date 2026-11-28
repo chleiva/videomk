@@ -295,7 +295,7 @@ def chunk_plan(timeline: Dict[str, Any], target_seconds: float = 30, draft: bool
             "captions": timeline.get("captions", True), "language": timeline.get("language", "en"), "draft": draft,
             "scenes": [_scene_fingerprint(x) for x in scenes[lo:hi]],
             "lead": _scene_fingerprint(scenes[lo - 1]) if lo > 0 else None, "outro": hi == len(scenes),
-            **({"wm": _chunk_watermark(timeline, lo, hi), "first": lo == 0, "wmv": 3} if timeline.get("watermark") else {}),   # the mark is part of every frame (and fades in on the first chunk only; a 'moments' mark: this chunk's own appearances)
+            **({"wm": _chunk_watermark(timeline, lo, hi), "first": lo == 0, "wmv": 4} if timeline.get("watermark") else {}),   # the mark is part of every frame (and fades in on the first chunk only; a 'moments' mark: this chunk's own appearances)
             **({"bg": timeline["background"]} if timeline.get("background") else {}),   # the animated background, when the plan has one
             **({"cover": timeline["cover"]} if timeline.get("cover") and lo == 0 else {}),   # the designed opening frames (engine/cover.py): the first chunk only
         }, sort_keys=True, ensure_ascii=False).encode("utf-8")).hexdigest()[:24]

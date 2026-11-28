@@ -38,6 +38,7 @@ class Frame:
     aspect: str = DEFAULT_ASPECT
     resolution: str = DEFAULT_RESOLUTION
     top_inset: int = 0   # design units the content box starts lower by: the band a top-corner watermark sits in (docs/WATERMARK.md); 0 for every video without one
+    cap_lift: int = 0    # design units the captions sit higher by: 16:9 with a bottom-corner watermark leaves a band under them for it (docs/WATERMARK.md); 0 for every other video
 
     # ----- pixel size
     @property
@@ -122,7 +123,11 @@ class Frame:
     def with_top_inset(self, inset: float) -> "Frame":
         """This frame with its content box starting `inset` design units lower (never negative, at most a tenth of the height: a band, not a layout change)."""
         n = int(max(0, min(self.design_h // 10, round(inset))))
-        return self if n == self.top_inset else Frame(self.aspect, self.resolution, n)
+        return self if n == self.top_inset else Frame(self.aspect, self.resolution, n, self.cap_lift)
+
+    def with_cap_lift(self, lift: float) -> "Frame":
+        n = int(max(0, min(120, round(lift))))
+        return self if n == self.cap_lift else Frame(self.aspect, self.resolution, self.top_inset, n)
 
     @property
     def right_reserve(self) -> int:
@@ -131,7 +136,9 @@ class Frame:
     @property
     def caption(self) -> Dict[str, float]:
         """Caption placement in design units: bottom (y of the box's bottom edge), size (font), max_w (text width), x0/x1 (the span the box is centred in), words (per page)."""
-        return dict(_CAPTION[self.aspect], max_lines=2)
+        c = dict(_CAPTION[self.aspect], max_lines=2)
+        c["bottom"] = c["bottom"] - self.cap_lift
+        return c
 
     def content_bottom(self, captions: bool = True) -> int:
         return (_CONTENT_BOTTOM_CAP if captions else _CONTENT_BOTTOM_NOCAP)[self.aspect]

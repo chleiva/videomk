@@ -31,7 +31,7 @@ def test_parse_defaults_and_none():
     assert ws.parse(None) is None
     assert ws.parse({"mode": "none"}) == {"mode": "none"}
     d = ws.parse({"mode": "videomk"})
-    assert d == {"mode": "videomk", "position": "auto", "opacity": 0.65, "size": "small", "style": "mark", "end_card": False}
+    assert d == {"mode": "videomk", "position": "auto", "opacity": ws.DEFAULT_OPACITY, "size": "small", "style": "mark", "end_card": False}
     assert ws.parse({"mode": "custom", "position": "tl", "opacity": 0.5, "size": "medium"}) == {"mode": "custom", "position": "tl", "opacity": 0.5, "size": "medium"}   # no style or end card for a custom logo
 
 
@@ -45,7 +45,7 @@ def test_strict_parse_refuses_anything_invalid(raw):
 
 def test_lenient_parse_falls_back_instead_of_failing():
     out = ws.parse({"mode": "videomk", "position": "x", "opacity": 9, "size": "huge", "style": "z", "end_card": 3}, strict=False)
-    assert out == {"mode": "videomk", "position": "auto", "opacity": 0.65, "size": "small", "style": "mark", "end_card": False}
+    assert out == {"mode": "videomk", "position": "auto", "opacity": ws.DEFAULT_OPACITY, "size": "small", "style": "mark", "end_card": False}
     assert ws.parse({"mode": "custom", "asset": "generation/v2/v/assets/watermark.png", "hash": "ab" * 8}, strict=False)["asset"].endswith("watermark.png")
     assert ws.parse({"mode": "videomk", "asset": "x"}, strict=False).get("asset") is None   # only a custom logo has a file
 
@@ -70,7 +70,7 @@ def test_every_option_stays_in_the_frame_and_off_the_captions_and_the_credit(asp
                     assert not lay.get("overlaps"), (aspect, spec, ratio, lay)
                     assert 0 <= x0 < x1 <= f.W and 0 <= y0 < y1 <= f.H, (aspect, spec, lay)
                     if captions:
-                        assert not ws.intersects(lay["rect"], ws.caption_rect(f)), (aspect, spec, ratio, lay)
+                        assert not ws.intersects(lay["rect"], ws.caption_rect(f.with_cap_lift(lay["cap_lift"]))), (aspect, spec, ratio, lay)
                     if lay["position"] == "tr":
                         assert not ws.intersects(lay["rect"], ws.credit_rect(f)), (aspect, spec, ratio, lay)
                     if pos == "auto" and aspect == "9:16":
@@ -79,13 +79,41 @@ def test_every_option_stays_in_the_frame_and_off_the_captions_and_the_credit(asp
 
 
 def test_the_default_corner_per_shape_and_the_size():
+    """The default (the lockup, small) is a fixed share of the short side in every shape (legibility, 2026-11-28): 26 % wide, 281 x 66 design px; 'medium' 34 %."""
     for aspect, corner in {"16:9": "br", "9:16": "tl", "1:1": "tl", "4:5": "tl"}.items():
         f = Frame.parse(aspect)
-        lay = ws.layout({"mode": "videomk"}, f, None, True)
-        assert lay["position"] == corner and lay["scale"] == 1.0 and not lay["moved"]
+        lay = ws.layout({"mode": "videomk", "style": "lockup"}, f, None, True)
+        assert lay["position"] == corner and lay["scale"] == 1.0 and not lay["moved"], (aspect, lay)
         x0, y0, x1, y1 = lay["rect"]
-        assert abs((y1 - y0) - 0.05 * 1080) < 0.01 and abs((x1 - x0) / (y1 - y0) - ws.MARK_RATIO) < 0.01   # small = 5 % of the short side
-        assert abs((ws.layout({"mode": "videomk", "size": "medium"}, f, None, True)["rect"][3] - ws.layout({"mode": "videomk", "size": "medium"}, f, None, True)["rect"][1]) - 0.07 * 1080) < 0.01
+        assert abs((x1 - x0) - 0.26 * 1080) < 0.01 and abs((x1 - x0) / (y1 - y0) - ws.LOCKUP_RATIO) < 0.01
+        assert abs(ws.mark_box(f, {"mode": "videomk", "style": "lockup", "size": "medium"}, ws.LOCKUP_RATIO)[0] - 0.34 * 1080) < 0.01
+        mk = ws.layout({"mode": "videomk"}, f, None, True)   # the mark alone: 7.5 % of the short side tall (it may shrink a little beside the 16:9 captions)
+        assert abs((mk["rect"][3] - mk["rect"][1]) - 0.075 * 1080 * mk["scale"]) < 0.01
+
+
+def test_the_lockup_is_legible_in_every_shape_and_resolution():
+    """The word's capitals (51 % of the lockup height) stay at least 22 px tall at 720p for the default, and the lockup is never a smaller share of the short side than 26 %."""
+    for aspect in ASPECTS:
+        for res, short in (("720p", 720), ("1080p", 1080), ("2160p", 2160)):
+            f = Frame.parse(aspect, res)
+            lay = ws.layout({"mode": "videomk", "style": "lockup"}, f, None, True)
+            h_px = (lay["rect"][3] - lay["rect"][1]) * short / 1080
+            assert lay["scale"] == 1.0 and 0.51 * h_px >= 0.51 * 66 * short / 1080 - 0.5 and 0.51 * h_px >= 22 * 720 / 1080 * (short / 720) - 0.5, (aspect, res)
+
+
+def test_16_9_raises_the_captions_for_a_bottom_corner_mark_only():
+    f = Frame.parse("16:9")
+    lay = ws.layout({"mode": "videomk", "style": "lockup"}, f, None, True)
+    assert lay["cap_lift"] == ws.CAPTION_LIFT and f.with_cap_lift(lay["cap_lift"]).caption["bottom"] == f.caption["bottom"] - ws.CAPTION_LIFT
+    assert lay["rect"][1] >= ws.caption_rect(f.with_cap_lift(lay["cap_lift"]))[3]   # the mark is under the (raised) caption box
+    assert ws.layout({"mode": "videomk", "style": "lockup", "position": "tl"}, f, None, True)["cap_lift"] == 0
+    assert ws.layout({"mode": "videomk", "style": "lockup"}, Frame.parse("9:16"), None, True)["cap_lift"] == 0
+    assert Renderer(_tl("16:9", watermark={"mode": "videomk", "style": "lockup"})).frame.caption["bottom"] == f.caption["bottom"] - ws.CAPTION_LIFT
+    assert Renderer(_tl("16:9")).frame.caption["bottom"] == f.caption["bottom"]   # without a mark nothing moves
+
+
+def test_the_default_opacity_is_strong_enough_to_read():
+    assert ws.DEFAULT_OPACITY >= 0.85
 
 
 def test_an_explicit_corner_is_kept_when_nothing_is_in_the_way():
@@ -99,7 +127,7 @@ def test_an_explicit_corner_is_kept_when_nothing_is_in_the_way():
 def test_a_wide_logo_is_limited_to_the_lockup_width():
     f = Frame.parse("16:9")
     x0, y0, x1, y1 = ws.layout({"mode": "custom", "position": "tl", "size": "small"}, f, 20.0, False)["rect"]
-    assert abs((x1 - x0) - ws.MAX_LOGO_RATIO * 0.05 * 1080) < 0.5 and abs((x1 - x0) / (y1 - y0) - 20.0) < 0.05   # the width is capped at 6.3 x the mark height, the shape kept
+    assert abs((x1 - x0) - ws.MAX_LOGO_RATIO * 0.075 * 1080) < 0.5 and abs((x1 - x0) / (y1 - y0) - 20.0) < 0.05   # the width is capped at 6.3 x the mark height, the shape kept
 
 
 # ======================================================================== frames of the real renderer
@@ -112,14 +140,22 @@ def _tl(aspect="16:9", resolution="1080p", theme="midnight", watermark=None, cap
     return tl
 
 
-def _frame(tl, t=1.2, draft=True, loader=None, first=False, band=0):
+def _frame(tl, t=1.2, draft=True, loader=None, first=False, band=0, like=None):
     r = Renderer(tl, image_loader=loader, draft=draft)
+    if like is not None:   # a frame without the mark but laid out like one that has it (the scenes' band, the captions' lift)
+        band = like.inset
+        r.frame = r.frame.with_cap_lift(like.cap_lift)
     if band:   # a frame WITHOUT the mark but with the band a top-corner mark reserves, so the only difference to the marked frame is the mark itself
         r.frame = r.frame.with_top_inset(band)
-        r.ctx.frame = r.frame
+    r.ctx.frame = r.frame
     if not first:
         r.lead = object()   # a chunk that is not the first: the mark is already fully in
     return r, r.frame_at(t).convert("RGB")
+
+
+def _wm(tl):
+    """The Watermark of a timeline's renderer (for `like=`: a frame laid out as the marked one is, so the mark is the only difference)."""
+    return Renderer(tl).wm
 
 
 def _bbox(a, b, thr=6):
@@ -131,7 +167,7 @@ def _bbox(a, b, thr=6):
 @pytest.mark.parametrize("aspect", ASPECTS)
 def test_the_mark_is_where_the_layout_says_and_as_big(aspect):
     r, marked = _frame(_tl(aspect, watermark={"mode": "videomk"}))
-    _, plain = _frame(_tl(aspect), band=r.wm.inset)
+    _, plain = _frame(_tl(aspect), like=r.wm)
     box = _bbox(plain, marked)
     assert box is not None
     scale = r.out_w / r.frame.W
@@ -144,9 +180,9 @@ def test_the_mark_is_where_the_layout_says_and_as_big(aspect):
 @pytest.mark.parametrize("aspect,resolution,draft", [("16:9", "720p", False), ("9:16", "1080p", True), ("1:1", "720p", True), ("4:5", "1080p", True), ("16:9", "2160p", False)])
 def test_the_mark_is_drawn_at_the_output_size_in_every_resolution(aspect, resolution, draft):
     r, marked = _frame(_tl(aspect, resolution, watermark={"mode": "videomk"}), draft=draft)
-    _, plain = _frame(_tl(aspect, resolution), draft=draft, band=r.wm.inset)
+    _, plain = _frame(_tl(aspect, resolution), draft=draft, like=r.wm)
     box = _bbox(plain, marked)
-    expect_h = 0.05 * min(r.out_w, r.out_h)   # 5 % of the short side of what is really output
+    expect_h = 0.075 * min(r.out_w, r.out_h)   # 5 % of the short side of what is really output
     assert marked.size == (r.out_w, r.out_h) and box and 0.8 * expect_h <= (box[3] - box[1]) <= 1.45 * expect_h
 
 
@@ -166,8 +202,8 @@ def test_the_same_frame_twice_is_identical():
 
 def test_opacity_changes_how_strong_the_mark_is():
     def strength(op):
-        _, plain = _frame(_tl())
-        _, marked = _frame(_tl(watermark={"mode": "videomk", "opacity": op}))
+        r, marked = _frame(_tl(watermark={"mode": "videomk", "opacity": op}))
+        _, plain = _frame(_tl(), like=r.wm)
         return int(np.abs(np.asarray(plain, np.int16) - np.asarray(marked, np.int16)).sum())
     lo, mid, hi = strength(0.2), strength(0.65), strength(1.0)
     assert lo < mid < hi and hi > 2.5 * lo
@@ -175,26 +211,27 @@ def test_opacity_changes_how_strong_the_mark_is():
 
 def test_the_mark_fades_in_on_the_first_chunk_only_and_goes_with_the_closing_fade():
     t = _tl(watermark={"mode": "videomk"}, outro=True)
-    _, plain0 = _frame(_tl(outro=True), t=0.0, first=True)
+    lk = _wm(t)
+    _, plain0 = _frame(_tl(outro=True), t=0.0, first=True, like=lk)
     _, m0 = _frame(t, t=0.0, first=True)
     _, m_mid = _frame(t, t=0.3, first=True)
     _, m_full = _frame(t, t=1.2, first=True)
-    _, p_mid = _frame(_tl(outro=True), t=0.3, first=True)
-    _, p_full = _frame(_tl(outro=True), t=1.2, first=True)
+    _, p_mid = _frame(_tl(outro=True), t=0.3, first=True, like=lk)
+    _, p_full = _frame(_tl(outro=True), t=1.2, first=True, like=lk)
     assert _bbox(plain0, m0, thr=1) is None                                        # frame 0 of the video: nothing yet
     s_mid, s_full = [int(np.abs(np.asarray(p, np.int16) - np.asarray(m, np.int16)).sum()) for p, m in ((p_mid, m_mid), (p_full, m_full))]
     assert 0 < s_mid < s_full
     _, mid_chunk = _frame(t, t=0.0, first=False)                                    # a later chunk starts with the mark fully in
     assert _bbox(plain0, mid_chunk) is not None
-    _, plain_end = _frame(_tl(outro=True), t=5.99)
+    _, plain_end = _frame(_tl(outro=True), t=5.99, like=lk)
     _, wm_end = _frame(t, t=5.99)
-    assert _bbox(plain_end, wm_end, thr=1) is None or int(np.abs(np.asarray(plain_end, np.int16) - np.asarray(wm_end, np.int16)).max()) <= 2   # gone with the picture
+    assert _bbox(plain_end, wm_end, thr=1) is None or int(np.abs(np.asarray(plain_end, np.int16) - np.asarray(wm_end, np.int16)).max()) <= 4   # gone with the picture
 
 
 def test_a_light_picture_gets_the_ink_mark_and_a_dark_one_the_white_mark():
     def core(theme):
         r, marked = _frame(_tl(theme=theme, watermark={"mode": "videomk", "opacity": 1.0}))
-        _, plain = _frame(_tl(theme=theme))
+        _, plain = _frame(_tl(theme=theme), like=r.wm)
         d = np.abs(np.asarray(plain, np.int16) - np.asarray(marked, np.int16)).max(axis=2)
         px = np.asarray(marked, np.float32)[d > 120]
         return px.mean() if len(px) else None
@@ -210,8 +247,8 @@ def test_the_mark_never_lands_on_the_captions():
                 spec = {"mode": "videomk", "position": pos, "style": style, "size": "medium"}
                 r, with_all = _frame(_tl(aspect, watermark=spec, words=WORDS))
                 _, no_caps = _frame(_tl(aspect, watermark=spec, captions=False))
-                _, only_caps = _frame(_tl(aspect), t=1.2, band=r.wm.inset)
-                _, nothing = _frame(_tl(aspect, captions=False), band=r.wm.inset)
+                _, only_caps = _frame(_tl(aspect), t=1.2, like=r.wm)
+                _, nothing = _frame(_tl(aspect, captions=False), like=r.wm)
                 cap_box = _bbox(nothing, only_caps)
                 wm_box = _bbox(only_caps, with_all)
                 assert cap_box is not None and wm_box is not None
@@ -224,7 +261,7 @@ LIST = {"heading": "Lighthouse facts", "items": ["Warn of rocks and reefs", "Gui
 
 
 @pytest.mark.parametrize("aspect", ["9:16", "1:1", "4:5"])
-@pytest.mark.parametrize("spec", [{"mode": "videomk"}, {"mode": "videomk", "style": "lockup", "size": "medium"}, {"mode": "videomk", "position": "tl", "style": "lockup"}])   # (a lockup asked for top right now fits bottom right in 1:1 and 4:5 since it is drawn smaller: watermark_spec.LOCKUP_SCALE)
+@pytest.mark.parametrize("spec", [{"mode": "videomk"}, {"mode": "videomk", "style": "lockup", "size": "medium"}, {"mode": "videomk", "position": "tl", "style": "lockup"}])   # (a lockup asked for top right now fits bottom right in 1:1 and 4:5 since it is drawn smaller: watermark_spec.LOCKUP_W)
 def test_a_top_corner_mark_gets_its_own_band_above_the_content(aspect, spec):
     f = Frame.parse(aspect)
     lay = ws.layout(spec, f, None, True)
@@ -277,7 +314,7 @@ def _png(w=300, h=120, color=(220, 30, 40, 255)):
 def test_a_custom_logo_is_drawn_in_its_own_colours_and_an_unreadable_one_draws_nothing():
     spec = {"mode": "custom", "asset": "generation/v2/v/assets/watermark.png", "hash": "abc", "opacity": 1.0, "position": "br"}
     r, marked = _frame(_tl(watermark=spec), loader=lambda k: _png())
-    _, plain = _frame(_tl())
+    _, plain = _frame(_tl(), like=r.wm)
     box = _bbox(plain, marked)
     assert box is not None
     px = np.asarray(marked, np.float32)[box[1]:box[3], box[0]:box[2]].reshape(-1, 3)
@@ -285,7 +322,7 @@ def test_a_custom_logo_is_drawn_in_its_own_colours_and_an_unreadable_one_draws_n
     assert len(red) > 0.4 * len(px)                                               # still red: the person's colours are not tinted
     for loader in (lambda k: None, lambda k: (_ for _ in ()).throw(OSError("gone"))):
         r2, none = _frame(_tl(watermark=spec), loader=loader)
-        assert r2.wm is None and _bbox(plain, none, thr=0) is None
+        assert r2.wm is None and _bbox(_frame(_tl())[1], none, thr=0) is None
 
 
 # ======================================================================== timeline and chunks
@@ -391,7 +428,7 @@ def test_a_request_gets_its_watermark_and_nothing_when_none(launcher, wm_on):
     assert _launch(launcher)["statusCode"] == 202 and "watermark" not in sent(launcher)
     assert _launch(launcher, watermark={"mode": "none"}, target_minutes=2)["statusCode"] == 202 and "watermark" not in sent(launcher)
     assert _launch(launcher, watermark={"mode": "videomk", "position": "tl", "end_card": True}, target_minutes=3)["statusCode"] == 202
-    assert sent(launcher)["watermark"] == {"mode": "videomk", "position": "tl", "opacity": 0.65, "size": "small", "style": "mark", "end_card": True}
+    assert sent(launcher)["watermark"] == {"mode": "videomk", "position": "tl", "opacity": ws.DEFAULT_OPACITY, "size": "small", "style": "mark", "end_card": True}
 
 
 def test_custom_needs_premium_and_a_logo_and_costs_nothing_when_refused(launcher, wm_on):
@@ -416,19 +453,34 @@ def test_a_pro_plan_and_an_unlimited_test_account_are_premium_but_a_lapsed_plan_
 
 
 def test_an_unlimited_test_account_carries_the_name_by_default_and_can_remove_it(launcher, wm_on, monkeypatch):
-    """Owner decision 2026-11-27: every video made by a test account has the gentle brand (lockup in short moments plus the closing end card; second decision, the whole-video mark is a choice) unless the account says otherwise; customers are untouched."""
+    """Owner decisions 2026-11-27 and 28: every video made by a test / owner account has the lockup for the WHOLE video plus the closing end card (the 28 Nov decision reverts the earlier 'moments' default) unless the account says otherwise; customers are untouched."""
     _flags(wm_on, USER, unlimited=True)
     assert _launch(launcher)["statusCode"] == 202
     wm = sent(launcher)["watermark"]
-    assert wm["mode"] == "videomk" and wm["style"] == "lockup" and wm.get("presence") == "moments" and wm["end_card"] is True
+    assert wm["mode"] == "videomk" and wm["style"] == "lockup" and wm.get("presence") == "always" and wm["end_card"] is True
     assert _launch(launcher, watermark={"mode": "none"}, target_minutes=2)["statusCode"] == 202 and "watermark" not in sent(launcher)     # the setting removes it
-    assert _launch(launcher, watermark={"mode": "videomk", "presence": "always"}, target_minutes=3)["statusCode"] == 202
-    assert sent(launcher)["watermark"]["presence"] == "always"                                                                        # and can make it constant
+    assert _launch(launcher, watermark={"mode": "videomk", "presence": "moments"}, target_minutes=3)["statusCode"] == 202
+    assert sent(launcher)["watermark"]["presence"] == "moments"                                                                       # and can make it come and go
     store.put_profile(USER, {"mode": "none"})                                                                                          # a saved choice is honoured
     assert _launch(launcher, target_minutes=1)["statusCode"] == 202 and "watermark" not in sent(launcher)
-    store.put_profile(USER, {"mode": "videomk"})                                                                                       # saved mark without a stated presence: the gentle form
-    assert _launch(launcher, target_minutes=2)["statusCode"] == 202 and sent(launcher)["watermark"].get("presence") == "moments"
-    assert store.capabilities(USER)["default_presence"] == "moments"
+    store.put_profile(USER, {"mode": "videomk"})                                                                                       # saved mark without a stated presence: the whole video
+    assert _launch(launcher, target_minutes=2)["statusCode"] == 202 and sent(launcher)["watermark"].get("presence") == "always"
+    assert store.capabilities(USER)["default_presence"] == "always"
+
+
+def test_get_watermark_shows_the_effective_default_when_nothing_is_saved(launcher, wm_on, monkeypatch):
+    """The app row must not say 'none' while generation applies the brand: GET shows what a video would get, marked is_default (not saved)."""
+    _flags(wm_on, USER, unlimited=True)
+    st, b = call("GET", "")
+    assert st == 200 and b["watermark"]["is_default"] is True
+    assert {k: b["watermark"][k] for k in ("mode", "style", "presence", "end_card", "position", "size", "opacity")} == {"mode": "videomk", "style": "lockup", "presence": "always", "end_card": True, "position": "auto", "size": "small", "opacity": ws.DEFAULT_OPACITY}
+    assert b["capabilities"]["default_presence"] == "always"
+    store.put_profile(USER, {"mode": "none"})                                                         # saved: shown as saved
+    st, b = call("GET", "")
+    assert b["watermark"]["mode"] == "none" and b["watermark"]["is_default"] is False
+    monkeypatch.setenv("FORCE_WATERMARK", "1")                                                         # a free account under the policy: the forced mark, as a default
+    st, b = call("GET", "", user=OTHER)
+    assert b["watermark"]["mode"] == "videomk" and b["watermark"]["is_default"] is True
 
 
 def test_the_test_account_default_never_reaches_a_customer_or_production(launcher, wm_on, monkeypatch):
@@ -471,7 +523,7 @@ def test_the_plan_step_copies_a_custom_logo_into_the_videos_own_folder(monkeypat
     monkeypatch.setattr(awsio, "put_bytes", lambda k, b, ct="x", *a, **kw: puts.__setitem__(k, b))
     out = plan_handler._watermark({"watermark": {"mode": "custom", "size": "medium"}}, "vid12345", USER)
     assert out["mode"] == "custom" and out["asset"] == "generation/v2/vid12345/assets/watermark.png" and len(out["hash"]) == 16 and puts[out["asset"]] == b"PNGDATA"
-    assert plan_handler._watermark({"watermark": {"mode": "videomk"}}, "vid12345", USER) == {"mode": "videomk", "position": "auto", "opacity": 0.65, "size": "small", "style": "mark", "end_card": False}
+    assert plan_handler._watermark({"watermark": {"mode": "videomk"}}, "vid12345", USER) == {"mode": "videomk", "position": "auto", "opacity": ws.DEFAULT_OPACITY, "size": "small", "style": "mark", "end_card": False}
     assert plan_handler._watermark({}, "vid12345", USER) is None and plan_handler._watermark({"watermark": {"mode": "none"}}, "vid12345", USER) is None
     data.clear()   # the logo vanished between the request and the plan step
     assert plan_handler._watermark({"watermark": {"mode": "custom"}}, "vid12345", USER) is None
@@ -501,11 +553,11 @@ def png_bytes(w=400, h=160, color=(10, 120, 240, 255), pad=30):
 
 def test_get_before_anything_is_saved(wm_on):
     st, b = call("GET", "")
-    assert st == 200 and b["watermark"] == {"mode": "none", "position": "auto", "opacity": 0.65, "size": "small", "style": "mark", "end_card": False, "has_logo": False}
+    assert st == 200 and b["watermark"] == {"mode": "none", "position": "auto", "opacity": ws.DEFAULT_OPACITY, "size": "small", "style": "mark", "end_card": False, "is_default": False, "has_logo": False}
     c = b["capabilities"]
     assert [m["id"] for m in c["modes"]] == ["none", "videomk", "custom"] and c["premium"] is False and c["forced"] is False
     assert {m["id"]: m["available"] for m in c["modes"]} == {"none": True, "videomk": True, "custom": False}
-    assert c["positions"] == ["auto", "tl", "tr", "bl", "br"] and c["sizes"] == ["small", "medium"] and c["opacity"] == {"min": 0.2, "max": 1.0, "default": 0.65}
+    assert c["positions"] == ["auto", "tl", "tr", "bl", "br"] and c["sizes"] == ["small", "medium"] and c["opacity"] == {"min": 0.2, "max": 1.0, "default": ws.DEFAULT_OPACITY}
 
 
 def test_the_api_needs_the_signed_in_user_and_the_feature(wm_on, monkeypatch):

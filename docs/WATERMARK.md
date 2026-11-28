@@ -1,5 +1,18 @@
 # Watermark (requirement R098, owner 2026-11-27)
 
+## 0. Legibility recalibration (owner 2026-11-28, R171 follow-up: "the watermark is KEY for marketing and must be LEGIBLE in every video and every format")
+This section supersedes the sizes, opacity and presence defaults below (older text is kept for history).
+| | now | before |
+|---|---|---|
+| Lockup size | **width = a share of the short side: small 26 % (281 x 66 design px; capitals 34 design px, 22 px at 720p), medium 34 %** (`watermark_spec.LOCKUP_W`), the same in every shape and resolution | small 212 x 50 (16:9: 148 x 35, i.e. 60 px on a 640 px frame) |
+| Mark alone / custom logo | height 7.5 % / 10 % of the short side (`SIZES`); a logo at most 4.3 x its height wide | 5 % / 7 % |
+| Opacity | default **0.9** (`DEFAULT_OPACITY`; free accounts cannot go under it) | 0.65 |
+| Backing | no plate: a wider, stronger soft shadow (white mark) / glow (ink mark), alpha 0.62, blur 10 % of the height; ink on light pictures, white on dark, blended over mean brightness 0.55..0.66 (a narrow band: a wide one left a washed-out grey on mid-tone pictures) | alpha 0.45, blur 7 %, band 0.52..0.74 |
+| Position | 16:9 **bottom right**: the captions rise 40 design px (`CAPTION_LIFT`, `Frame.cap_lift`, only in 16:9 videos that carry a bottom-corner mark) so the mark has a band of its own under them; 9:16 **top left under the platform header** (x 38, y 200: clear of the header (top 162), the buttons column on the right and the caption/description band at the bottom, which is why the bottom right is not used in 9:16); 1:1 and 4:5 **top left** (the captions take the width of the bottom) | 16:9 bottom right in a 35 px slot beside the captions |
+| Content band | scenes of 9:16 / 1:1 / 4:5 start below the mark (144 / 52 / 40 design px for the default lockup) | 109 / 27 / 17 |
+| Presence | test / owner accounts: **`always` plus the end card** (the 27 Nov `moments` default is reverted; they may still choose `moments` or none); free accounts: `always`; premium (not test): `moments` unless stated | test: `moments` |
+`GET /users/{u}/watermark` with nothing saved answers the **effective default** (a test account: the lockup always on plus the end card; a free account under the policy: the forced mark; others: none) with `"is_default": true`; a saved profile answers `"is_default": false`. `capabilities.watermark.default_presence` is `always` for a test account. Proof: contact sheets (6 looks x 4 aspects x 720p / 1080p, 4K for 16:9 and 9:16) in `~/Downloads/videomk-looks/web/watermark2/`. Segment hashes carry `wmv` 4.
+
 > "A non-disruptive watermark that I can use to create promotional videos. With my premium account, when I add the company watermark, I can create videos that I can share ... with the videomk logo there, so people know it was created using videomk."
 
 Backend and engine are built (flag on by default, nothing visible to users until the apps send or save the option). The apps and the web app only need to add the option (section 7).
@@ -14,7 +27,7 @@ Backend and engine are built (flag on by default, nothing visible to users until
 | Rule | Value |
 |---|---|
 | Size | `small` = mark height 5 % of the short side (54 px at 1080p), `medium` = 7 %. A wide logo is capped at 6.3 x that height (the VideoMK lockup is 4.27 x; the mark alone 1.09 x). Drawn for the real output size from a 1024 px source that is only scaled down: crisp at 720p, 1080p and 4K (checked at 100 %). |
-| Opacity | 0.2 to 1.0, default **0.65** |
+| Opacity | 0.2 to 1.0, default **0.9** (see section 0) |
 | Margin | 3.5 % of the short side (2 % when something is near) |
 | Colour | videomk mark: **white with a soft dark shadow on dark or mid pictures, brand ink (#11142b) with a soft white glow on light pictures**, blended smoothly by the brightness under the mark (never light-on-light; docs/brand/README.md). A custom logo is never tinted (it gets only the soft shadow). |
 | Fade | In over 0.6 s at the start of the video (first chunk only); out with the closing fade to black. |
