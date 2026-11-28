@@ -283,6 +283,69 @@ def rooms(lay: Dict[str, Any], fig: Optional[Dict[str, Any]], geom: Any, size: f
 
 # ----------------------------------------------------------------------------- layout
 def layout(props: Dict[str, Any], ctx: SceneCtx) -> Dict[str, Any]:
+    """Where the character(s) stand and where the content goes. Over a catalog backdrop the feet are put ON ITS GROUND (engine/stand_zone.py): `unplaced` is set when the ground
+    cannot hold them (the backdrop is then not drawn, the plain background stays)."""
+    lay = _layout_plain(props, ctx)
+    return _stand(props, ctx, lay) if props.get("backdrop") else lay
+
+
+def _stand(props: Dict[str, Any], ctx: SceneCtx, lay: Dict[str, Any]) -> Dict[str, Any]:
+    side = props.get("side") if props.get("side") in SIDES else "left"
+    tries = [(side, lay)]
+    if len(props.get("cast") or []) < 2:   # one character: the other side of the picture may have the ground
+        other = "right" if side == "left" else "left"
+        tries.append((other, _layout_plain({**props, "side": other}, ctx)))
+    for _, l in tries:
+        out = _stand_one(props["backdrop"], ctx, l)
+        if out is not None:
+            return out
+    return {**lay, "unplaced": True}
+
+
+def _stand_one(bd: str, ctx: SceneCtx, l: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    from ... import stand_zone as sz
+
+    fr = ctx.frame
+    W, H = float(fr.W), float(fr.H)
+    figs = l.get("figures")
+    full = l.get("floor") is not None
+    prefs = [f["x"] / W for f in figs] if figs else [l["x"] / W]
+    ppu = figs[0]["ppu"] if figs else l["ppu"]
+    top = float(ctx.top)
+
+    def accept(y: float, p: float) -> bool:   # the head stays in the picture and the card above keeps room
+        fh, yy = 290.0 * p, y * H
+        return yy - fh >= top + 10 and (yy - fh * 1.05 - 20) - (top + 10) >= sz.MIN_CONTENT * H
+
+    shift = 0.25 if (full or not fr.landscape) else 0.07
+    pl = sz.place(bd, fr.aspect, prefs, foot_y=l["ground"] / H, ppu=ppu, W=W, H=H, full=full, max_shift=shift, accept=accept if full else None)
+    if pl is None:
+        return None
+    ppu2 = ppu * pl.scale
+    ground = pl.y * H if full else l["ground"]
+    out = {**l, "ppu": ppu2, "ground": ground}
+    if full:
+        figure = 290.0 * ppu2
+        out["floor"] = ground
+        out["content"] = (fr.margin_x * 0.8, ctx.top + 10, fr.W - fr.margin_x * 0.8, ground - figure * 1.05 - 20)
+    if not figs:
+        out["x"], out["ppu"] = pl.xs[0] * W, ppu2
+        return out
+    mid = (l["content"][0] + l["content"][2]) / 2 if fr.landscape else W / 2
+    speaker = next((f for f in figs if f["toward"] == 0.0), figs[0])
+    new = []
+    for f, x in zip(figs, pl.xs):
+        new.append({**f, "x": x * W, "ppu": ppu2, "ground": ground, "content_side": 1 if x * W < mid else -1})
+    sx = new[figs.index(speaker)]["x"]
+    for f in new:
+        if f["toward"] != 0.0:
+            f["toward"] = 1.0 if sx > f["x"] else -1.0
+    me = new[figs.index(speaker)]
+    out.update(figures=new, x=me["x"], ppu=ppu2, side="left" if me["content_side"] > 0 else "right")
+    return out
+
+
+def _layout_plain(props: Dict[str, Any], ctx: SceneCtx) -> Dict[str, Any]:
     """Where the character stands and where the content goes, in design units. Wide, square and 4:5 frames: the character at one side from the waist up, the content
     beside it. 9:16: the content above, the whole character below it, standing just over the caption band."""
     fr = ctx.frame
@@ -599,7 +662,7 @@ def _draw(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, th: Theme, c
     figures = lay.get("figures") or [None]
     ts = 1.0 if fr.landscape else min(1.12, fr.type_scale)
     backdrop = False
-    if props.get("backdrop"):   # a cartoon scene of the catalog behind the presenter (its own element draws it; no package -> the plain background stays)
+    if props.get("backdrop") and not lay.get("unplaced"):   # a cartoon scene of the catalog behind the presenter (its own element draws it; no package, or no ground for the cast -> the plain background stays)
         from . import vector_scene as vse
         if vse.package_folder(props["backdrop"]) is not None:
             vse._draw(cv, {"catalog_id": props["backdrop"]}, lt, dur, th, ctx)

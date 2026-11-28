@@ -19,7 +19,7 @@ import logging
 import re
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
-from . import presenter_policy, vector_policy, whiteboard_policy
+from . import presenter_policy, stand_zone, vector_policy, whiteboard_policy
 
 RECIPES = ("footage", "whiteboard", "presenter", "conversation", "presenter_board", "conversation_board")
 LOOK_OF = {"footage": "real", "whiteboard": "whiteboard", "presenter": "cartoon", "conversation": "cartoon", "presenter_board": "cartoon", "conversation_board": "cartoon"}
@@ -254,7 +254,25 @@ def policies(d: Direction, prompt: str, *, options: Optional[Dict[str, Any]] = N
         if vector_policy.enabled():   # the backdrops: cartoon scenes of the catalog that fit the topic (the person's look, so a loose match is fine)
             v = vector_policy.decide(prompt, options={**o, "style": "cartoon"}, skill_ids=skill_ids, minutes=minutes, expected_beats=expected_beats, search=vector_search, ask=ask)
             v.share, v.first_ok = BACKDROP_ONLY_SHARE, False
+            v.stand_ids = stand_backdrops(v, prompt, aspect, len(d.cast))
     return v, w, p
+
+
+def stand_backdrops(v: vector_policy.Policy, prompt: str, aspect: str, n_cast: int) -> List[str]:
+    """The backdrops characters may stand on in this video: the cartoon scenes the policy offered whose stand zone holds the cast in this shape (engine/stand_zone.py); when none of
+    them does, the catalog is searched wider for the topic and the first backdrops that do are taken. Empty = the plain background (a backdrop is never one the cast would float on)."""
+    if not v.allowed:
+        return []
+    ids = stand_zone.eligible(v.ids(), aspect, n_cast)
+    if ids or v.search is None:
+        return ids
+    try:
+        found = v.search(vector_policy._search_query(prompt), aspect, 60) or []
+    except Exception:  # noqa: BLE001 - the catalog is an improvement, never a requirement
+        logging.exception("stand backdrop search failed")
+        return []
+    ranked = [c["id"] for c in sorted(found, key=lambda c: -float(c.get("score", 0))) if isinstance(c, dict) and c.get("id") and float(c.get("score", 0)) >= vector_policy.MIN_SCORE_SOFT]
+    return stand_zone.eligible(ranked, aspect, n_cast)[:3]
 
 
 def conversation_beats(minutes: float) -> int:
@@ -497,7 +515,7 @@ def _enforce_whiteboard(plan: Dict[str, Any], repairs: List[Dict[str, Any]], san
         repairs.append({"beat": i, "from": t, "to": "whiteboard", "why": why})
 
 
-def _enforce_cartoon(plan: Dict[str, Any], d: Direction, repairs: List[Dict[str, Any]], sanitize_presenter: Callable[[Dict[str, Any]], Dict[str, Any]], backdrops: List[str]) -> Dict[str, Any]:
+def _enforce_cartoon(plan: Dict[str, Any], d: Direction, repairs: List[Dict[str, Any]], sanitize_presenter: Callable[[Dict[str, Any]], Dict[str, Any]], backdrops: List[str], aspect: str = "16:9") -> Dict[str, Any]:
     """Every beat a character scene (or, rarely, a full-screen cartoon scene); who speaks which beat, with which voice, where everyone stands, what stays on the card."""
     beats = plan.get("beats") or []
     language = str(plan.get("language") or "en")[:2]
@@ -559,6 +577,18 @@ def _enforce_cartoon(plan: Dict[str, Any], d: Direction, repairs: List[Dict[str,
             repairs.append({"beat": i, "from": "presenter card", "to": "presenter board", "why": "the content beside the character is the hand-drawn board"})
     # --- one set: a backdrop behind every character scene (the same one for a stretch of beats), and what a line without content keeps showing
     pres = [b for b in beats if (b.get("scene") or {}).get("type") == "presenter"]
+    # characters stand ON the ground of a backdrop: only backdrops whose stand zone holds this cast in this shape (engine/stand_zone.py); the rest stay for scenes without characters
+    stand = stand_zone.eligible(backdrops, aspect, len(cast))
+    if len(stand) < len(backdrops):
+        repairs.append({"beat": -1, "from": "backdrops " + ",".join(b for b in backdrops if b not in stand), "to": "none", "why": "no ground for the cast on those backdrops"})
+    backdrops = stand
+    for b in pres:   # a backdrop an earlier step set that cannot hold the cast is replaced, or taken off (the plain background stays)
+        p0 = b["scene"]["props"]
+        if p0.get("backdrop") and p0["backdrop"] not in stand:
+            if stand:
+                p0["backdrop"] = stand[0]
+            else:
+                p0.pop("backdrop", None)
     # a conversation stays in ONE place (the characters do not move); a presenter changes the set once, half way, in a video long enough to have two parts
     stretch = (len(pres) + 1) // 2 if len(backdrops) >= 2 and len(cast) == 1 and len(pres) >= 6 else len(pres) or 1
     held: Optional[Dict[str, Any]] = None
@@ -576,13 +606,15 @@ def _enforce_cartoon(plan: Dict[str, Any], d: Direction, repairs: List[Dict[str,
                 p["heading"] = str(plan.get("title") or _card_text(str(b.get("narration") or "")))[:48]
         elif content:
             held = content
+    for v in stand_zone.strip_violations(plan, aspect):   # the hard check: no foot point off the ground (nothing is left over a backdrop that fails it)
+        repairs.append({"beat": v["beat"], "from": "backdrop " + v["backdrop"], "to": "none", "why": "stand zone: " + v["why"]})
     if isinstance(plan.get("vector"), dict):   # the cartoon scenes' own record follows what is left after the conversions
         plan["vector"]["used"] = [{"beat": i, "id": b["scene"]["props"].get("catalog_id")} for i, b in enumerate(beats) if (b.get("scene") or {}).get("type") == "vector_scene"]
         plan["vector"]["backdrops"] = sorted({b["scene"]["props"]["backdrop"] for b in pres if b["scene"]["props"].get("backdrop")})
     return {"cast": cast, "voices": dict(plan["voices"]), "backdrop_only_s": round(only_s, 1)}
 
 
-def enforce(plan: Dict[str, Any], d: Optional[Direction], *, backdrops: Optional[List[str]] = None, sanitize_board: Any = None, sanitize_presenter: Any = None) -> List[str]:
+def enforce(plan: Dict[str, Any], d: Optional[Direction], *, backdrops: Optional[List[str]] = None, sanitize_board: Any = None, sanitize_presenter: Any = None, aspect: str = "16:9") -> List[str]:
     """After the plan is cleaned and the older policies have run: every scene fits the direction, or is converted. Records `plan["look"]` (the direction, the share of
     the time in the look before and after, every repair). Returns warnings. Never raises: a look is never a reason for a failed video."""
     if d is None:
@@ -600,7 +632,7 @@ def enforce(plan: Dict[str, Any], d: Optional[Direction], *, backdrops: Optional
         elif d.look == "whiteboard":
             _enforce_whiteboard(plan, repairs, sanitize_board)
         else:
-            extra = _enforce_cartoon(plan, d, repairs, sanitize_presenter, list(backdrops or []))
+            extra = _enforce_cartoon(plan, d, repairs, sanitize_presenter, list(backdrops or []), aspect)
             plan["presenter"] = {"decision": "presenter", "reason": "look", "asked": d.by != "auto", "character": extra["cast"][0], "scenes": sum(1 for b in plan.get("beats") or [] if (b.get("scene") or {}).get("type") == "presenter"),
                                  "of": len(plan.get("beats") or []), "cast": {c: c for c in extra["cast"]} if len(extra["cast"]) >= 2 else {"narrator": extra["cast"][0]}, "voices": extra["voices"]}
     except Exception:  # noqa: BLE001 - recorded, never fatal

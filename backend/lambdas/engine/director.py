@@ -152,7 +152,7 @@ def direct(prompt: str, *, minutes: float, ask_small: Ask, ask_big: Callable[[st
         warnings += presenter_policy.enforce(plan, ppolicy)
     if direction.look == "cartoon":   # the character is in every scene by design
         warnings = [w for w in warnings if "presenter twice in a row" not in w]
-    warnings += art_direction.enforce(plan, direction, backdrops=vpolicy.ids() if vpolicy.allowed else [])   # every scene fits the direction or is converted to it; records plan["look"]
+    warnings += art_direction.enforce(plan, direction, backdrops=vpolicy.backdrop_ids(), aspect=vpolicy.aspect)   # every scene fits the direction or is converted to it; records plan["look"]
     polyglot_mod.prepare(plan, poly)   # records plan["polyglot"] and gives each speaker a voice of its language (the cartoon repair above cast them all in the main language)
     rejected = plan.pop("_rejected_scenes", None) or []
     if fetch_errors:
@@ -220,7 +220,7 @@ def direct(prompt: str, *, minutes: float, ask_small: Ask, ask_big: Callable[[st
                                    "unused": story.get("unused", [])}
     plan["sources"] = sources
     if direction.look != "real":   # the steps after the first check (scene repair, grounding, the length fit) cannot take a scene out of the look, but the record is made again on the final plan
-        warnings += [w for w in art_direction.enforce(plan, direction, backdrops=vpolicy.ids() if vpolicy.allowed else []) if w.startswith("look ")]
+        warnings += [w for w in art_direction.enforce(plan, direction, backdrops=vpolicy.backdrop_ids(), aspect=vpolicy.aspect) if w.startswith("look ")]
     if poly is not None and poly.speakers:   # last, after every repair and the length fit: each line in its speaker's language, translations, the audit
         warnings += polyglot_mod.finish(plan, poly, lambda sys_, usr: ask_small(sys_, usr, 3000))
         info["polyglot"] = {**poly.summary(), "audit_ok": (plan.get("polyglot") or {}).get("audit", {}).get("ok")}
