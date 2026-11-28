@@ -9,11 +9,13 @@ Options (one dict, the same in the request, the profile, the plan and the timeli
   end_card  true | false (default false)                                      only for mode 'videomk': 2.4 s 'Made with VideoMK' card after the last scene
   presence  'always' (there for the whole video) | 'moments' (fades in for about 4 s near the start and about every 30 s, see `moments`)   only for mode 'videomk'
 
-Placement is worked out in DESIGN units (the frame's 1080-short-side canvas) and never covers the captions, the clip credit line or (auto, 9:16) the platform UI zones:
-  16:9  bottom right, 3.5 % margin;  9:16  top left under the platform header (TikTok / Reels / Shorts keep the bottom 320 and the right 130 for their own buttons);
-  1:1 and 4:5  top left (the captions use almost the whole bottom width).
-If the wanted corner would touch a protected zone the mark first takes the smaller margin (2 %), then shrinks (a corner the person chose: down to 60 %; the default corner: to 70 %
-and then the other corners are tried at full size), then moves to the next corner.
+The watermark is an independent layer applied at the very END (engine/final_stage.py), after the scenes, the captions and the music are made: nothing here is read by the scenes,
+the renderer, the plan, the timeline's scene times, the length fit or a segment's cache key. Placement is worked out in DESIGN units (the frame's 1080-short-side canvas):
+  16:9  bottom right, 2 % margin (just under the captions' text);  9:16  top left under the platform header (TikTok / Reels / Shorts keep the top 160, the bottom 320 and the right 130 for
+  their own buttons: x 38, y 200);  1:1 and 4:5  top left. The content does NOT move for the mark: it may sit over a scene's margin or the paper edge; it stays readable by the shadow or glow
+  and the choice of white or ink from the brightness measured under it in the finished frames (final_stage.py).
+If the wanted corner would touch the captions' text box or the credit line the mark first takes the smaller margin (2 %), then shrinks (a corner the person chose: down to 60 %; the default
+corner: to 70 % and then the other corners are tried at full size), then moves to the next corner. A pure function of the frame shape: the same for every account and every plan.
 """
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -23,7 +25,6 @@ MODES = ("none", "videomk", "custom")
 POSITIONS = ("auto", "tl", "tr", "bl", "br")
 SIZES: Dict[str, float] = {"small": 0.075, "medium": 0.100}   # the mark alone (and a custom logo): its height as a share of the frame's short side (2026-11-28: was 0.05 / 0.07, too small to read)
 LOCKUP_W: Dict[str, float] = {"small": 0.26, "medium": 0.34}  # the videomk lockup (mark + the word): its WIDTH as a share of the short side: 281 design px (small) of a 1080 short side; the word's capitals are then 34 design px (22 px at 720p)
-CAPTION_LIFT = 40            # 16:9 with the mark in a bottom corner: the captions sit this many design units higher, leaving a band under them for the mark
 STYLES = ("mark", "lockup")
 PRESENCES = ("always", "moments")
 KEYS = {"mode", "position", "opacity", "size", "style", "end_card", "presence"}
@@ -43,7 +44,6 @@ MARGIN = 0.035           # of the short side
 MARGIN_MIN = 0.020
 SHRINK_STEPS = (1.0, 0.85, 0.7, 0.6)
 GAP = 10.0               # design units kept clear of a protected zone
-CONTENT_GAP = 18.0       # design units between a top-corner mark and the first line of the scene under it
 FADE_IN_S = 0.6
 END_CARD_S = 2.4
 MAX_LOGO_RATIO = 4.3     # the widest a custom logo may be drawn, as a multiple of the mark height (a lockup-shaped logo: as wide as the VideoMK lockup, 4.27)
@@ -218,12 +218,12 @@ def caption_rect(frame: Frame) -> Rect:
     w = cap["max_w"] + (2 * pad_x if frame.landscape else 0)
     h = lines * cap["size"] * 1.32 + 2 * pad_y
     cx = (cap["x0"] + cap["x1"]) / 2
-    return (cx - w / 2, cap["bottom"] - h, cx + w / 2, float(cap["bottom"]))
+    return (cx - w / 2, cap["bottom"] - h, cx + w / 2, float(cap["bottom"]) - pad_y)   # the text's own extent: the box's empty bottom padding is not protected (16:9: the mark sits under the text, in the strip below the box)
 
 
 def credit_rect(frame: Frame) -> Rect:
     """The clip / photo credit line (top right, up to 90 characters)."""
-    y = 40 if frame.landscape else max(40, frame.base_margin_top - 30)
+    y = 40 if frame.landscape else max(40, frame.margin_top - 30)
     size = 22 if frame.landscape else 26
     return (frame.W - 40 - 720.0, y - 8.0, frame.W - 40.0, y + size + 8.0)
 
@@ -253,15 +253,6 @@ def _corner(pos: str, area: Rect, w: float, h: float, m: float) -> Rect:
     return (x, y, x + w, y + h)
 
 
-def content_inset(lay: Dict[str, Any], frame: Frame) -> int:
-    """How far the scenes' content box must start lower so a mark in a TOP corner sits in a band of its own instead of on a heading (seen on QA: a 9:16 logo on the
-    first letters of a list heading). 0 for a bottom corner (the caption band is already kept clear) and when the mark is above the content anyway."""
-    if lay.get("position") not in ("tl", "tr") or frame.landscape:   # 16:9 scenes sit at fixed heights and keep 140 at the sides: the mark alone fits beside them (a wide logo in a chosen top corner can still touch a heading)
-        return 0
-    need = lay["rect"][3] + CONTENT_GAP - frame.base_margin_top
-    return int(max(0, min(frame.design_h // 10, round(need))))
-
-
 def effective_position(spec: Dict[str, Any], frame: Frame) -> str:
     pos = spec.get("position", "auto")
     return AUTO_POSITION.get(frame.aspect, "br") if pos == "auto" else pos
@@ -269,7 +260,7 @@ def effective_position(spec: Dict[str, Any], frame: Frame) -> str:
 
 def layout(spec: Dict[str, Any], frame: Frame, logo_ratio: Optional[float] = None, captions: bool = True) -> Dict[str, Any]:
     """Where the mark goes: {'rect': (x0, y0, x1, y1) in design units, 'position': the corner used, 'scale': 1.0 .. 0.6 of the wanted size, 'moved': True when the other corner was used}.
-    Deterministic and pure: the same answer for every frame of the video."""
+    Deterministic and pure: the same answer for every frame of the video, for every account and every plan (the content never moves for it)."""
     pos = effective_position(spec, frame)
     ratio = ratio_of(spec, logo_ratio)
     w0, h0 = mark_box(frame, spec, ratio)
@@ -281,11 +272,11 @@ def layout(spec: Dict[str, Any], frame: Frame, logo_ratio: Optional[float] = Non
         tries = [(pos, s) for s in SHRINK_STEPS] + [(c, s) for c in order[1:] for s in SHRINK_STEPS]
     else:   # the default corner shrinks a little (to 70 %), then the other corners are tried at full size, then smaller
         tries = [(pos, s) for s in SHRINK_STEPS[:3]] + [(c, 1.0) for c in order[1:]] + [(pos, SHRINK_STEPS[3])] + [(c, s) for c in order[1:] for s in SHRINK_STEPS[1:]]
+    cap_zone: List[Tuple[Rect, float]] = [(caption_rect(frame), 0.0)] if captions else []
     for candidate, s in tries:
-        lift = CAPTION_LIFT if frame.landscape and candidate in ("bl", "br") else 0   # 16:9: the captions rise for a mark under them
-        zones: List[Rect] = ([caption_rect(frame.with_cap_lift(lift))] if captions else []) + ([credit_rect(frame)] if candidate == "tr" else [])
+        zones: List[Tuple[Rect, float]] = cap_zone + ([(credit_rect(frame), GAP)] if candidate == "tr" else [])
         for m in margins:
             rect = _corner(candidate, area, w0 * s, h0 * s, m)
-            if not any(intersects(rect, z, GAP) for z in zones):
-                return {"rect": rect, "position": candidate, "scale": s, "moved": candidate != pos, "cap_lift": lift if captions else 0}
-    return {"rect": _corner(pos, area, w0 * SHRINK_STEPS[-1], h0 * SHRINK_STEPS[-1], margins[-1]), "position": pos, "scale": SHRINK_STEPS[-1], "moved": False, "overlaps": True, "cap_lift": 0}
+            if not any(intersects(rect, z, g) for z, g in zones):
+                return {"rect": rect, "position": candidate, "scale": s, "moved": candidate != pos}
+    return {"rect": _corner(pos, area, w0 * SHRINK_STEPS[-1], h0 * SHRINK_STEPS[-1], margins[-1]), "position": pos, "scale": SHRINK_STEPS[-1], "moved": False, "overlaps": True}

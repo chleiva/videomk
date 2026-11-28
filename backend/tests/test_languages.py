@@ -228,7 +228,7 @@ def test_research_and_the_closing_card_follow_the_language():
     assert all("VideoMK" in language.made_with(lang) and language.made_with(lang) != language.made_with("en") for lang in NEW)
     plan = {"language": "de", "watermark": {"mode": "videomk", "end_card": True}, "beats": [{"id": "b1", "narration": "Hallo Welt.", "scene": {"type": "title", "props": {"title": "A"}}}]}
     tl = timeline.build_timeline(plan, [{"duration": 1.0}], video_id="v")
-    assert tl["scenes"][-1]["props"]["title"] == "Erstellt mit VideoMK"
+    assert timeline.end_card_timeline({**tl, "language": "de"})["scenes"][0]["props"]["title"] == "Erstellt mit VideoMK"   # the card is made by the final stage, in the video's language
 
 
 def test_the_description_labels_are_in_the_language_of_the_video():

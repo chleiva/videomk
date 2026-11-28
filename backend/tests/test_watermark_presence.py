@@ -9,8 +9,7 @@ import numpy as np
 import pytest
 
 from common import i18n, watermark_store as store
-from engine import watermark_spec as ws
-from engine.renderer import Renderer
+from engine import final_stage, timeline as timeline_mod, watermark_spec as ws
 from engine.timeline import build_timeline, chunk_plan, chunk_timeline
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
@@ -92,61 +91,33 @@ MOMENTS = {"mode": "videomk", "style": "lockup", "presence": "moments", "end_car
 ALWAYS = {**MOMENTS, "presence": "always"}
 
 
-def test_the_timeline_fixes_the_appearances_once_and_every_chunk_gets_its_own_times():
+def test_the_timeline_fixes_the_appearances_once_for_the_final_stage_and_no_chunk_sees_them():
     tl = build_timeline(_plan(8, MOMENTS), [{"duration": 9.0}] * 8, video_id="v")
     wins = tl["watermark"]["windows"]
-    assert wins[0] == [1.2, 6.4] and len(wins) >= 2 and tl["scenes"][-1]["id"] == "endcard" and wins[-1][1] <= tl["duration"] - ws.END_CARD_S - 1.0
+    assert wins[0] == [1.2, 6.4] and len(wins) >= 2 and all(s["id"] != "endcard" for s in tl["scenes"]) and wins[-1][1] <= tl["duration"] - 1.0   # the content only: the card comes after it
     assert "windows" not in build_timeline(_plan(8, ALWAYS), [{"duration": 9.0}] * 8, video_id="v")["watermark"]
-    chunks = chunk_plan(tl, 10)
-    for c in chunks:
-        sub = chunk_timeline(tl, c["lo"], c["hi"])
-        base = tl["scenes"][c["lo"]]["start"]
-        for a, b in sub["watermark"]["windows"]:
-            assert [round(a + base, 3), round(b + base, 3)] in wins                              # the same appearances, in the chunk's own time
-        for t in np.arange(0.0, sub["duration"], 0.25):                                           # and the same visibility at every moment as the whole video
-            assert ws.moment_alpha(sub["watermark"]["windows"], t) == pytest.approx(ws.moment_alpha(wins, t + base), abs=1e-6)
+    for c in chunk_plan(tl, 10):   # the render chunks know nothing of the mark: the watermark is the final stage's
+        assert "watermark" not in chunk_timeline(tl, c["lo"], c["hi"])
 
 
-def test_chunk_hashes_follow_the_presence_and_where_the_chunk_sits():
+def test_chunk_hashes_do_not_depend_on_the_mark_at_all():
     a = build_timeline(_plan(8, ALWAYS), [{"duration": 9.0}] * 8, video_id="v")
     m = build_timeline(_plan(8, MOMENTS), [{"duration": 9.0}] * 8, video_id="v")
-    ha, hm = [c["hash"] for c in chunk_plan(a, 10)], [c["hash"] for c in chunk_plan(m, 10)]
-    assert len(ha) == len(hm) and all(x != y for x, y in zip(ha, hm))                          # another presence, another picture
-    locals_ = [json.dumps(chunk_timeline(m, c["lo"], c["hi"])["watermark"]["windows"]) for c in chunk_plan(m, 10)]
-    assert len(set(locals_)) > 1                                                                 # what is hashed is the chunk's own appearances: a chunk with the mark and one without never share a segment
-    assert hm == [c["hash"] for c in chunk_plan(build_timeline(_plan(8, MOMENTS), [{"duration": 9.0}] * 8, video_id="v"), 10)]
+    p = build_timeline(_plan(8), [{"duration": 9.0}] * 8, video_id="v")
+    ha, hm, hp = ([c["hash"] for c in chunk_plan(t, 10)] for t in (a, m, p))
+    assert ha == hm == hp   # another presence or none: the same segments, so a customer who upgrades gets the same cached scenes
 
 
-def _mark_strength(img, plain):
-    return float(np.abs(np.asarray(img, np.int16) - np.asarray(plain, np.int16)).mean())
-
-
-def test_frames_show_the_mark_only_in_its_moments_and_chunks_agree_with_the_whole_video():
+def test_the_envelope_expression_is_the_moments_the_timeline_wrote():
     tl = build_timeline(_plan(5, MOMENTS), [{"duration": 9.0}] * 5, video_id="v")
-    tl["captions"] = False
-    plain = {k: v for k, v in tl.items() if k != "watermark"}
-    r, rp = Renderer(tl, draft=True), Renderer(plain, draft=True)
-    seen = {t: _mark_strength(r.frame_at(t), rp.frame_at(t)) for t in (0.5, 1.5, 3.0, 6.2, 8.0, 15.0)}
-    assert seen[0.5] == 0.0 and seen[8.0] == 0.0 and seen[15.0] == 0.0 and seen[3.0] > 0.02      # absent in the first second and between appearances, there in the middle of one
-    assert 0.0 < seen[1.5] < seen[3.0] and 0.0 < seen[6.2] < seen[3.0]                          # the fades
-    wins = tl["watermark"]["windows"]
-    assert len(wins) >= 2
-    second = wins[1]
-    c = next(c for c in chunk_plan(tl, 10) if tl["scenes"][c["lo"]]["start"] <= second[0] + 2.0 < tl["scenes"][c["hi"] - 1]["start"] + tl["scenes"][c["hi"] - 1]["duration"])
-    sub = chunk_timeline(tl, c["lo"], c["hi"])
-    sub["captions"] = False
-    base = tl["scenes"][c["lo"]]["start"]
-    rc = Renderer(sub, draft=True)
-    for t in (second[0] + 0.3, second[0] + 2.0, second[1] - 0.2, second[1] + 1.0):
-        if base <= t < base + sub["duration"]:
-            assert _mark_strength(rc.frame_at(t - base), r.frame_at(t)) < 0.01                  # the chunk on its own draws the frame the whole video draws: no pop at a boundary
-
-
-def test_an_always_on_mark_is_there_for_the_whole_video_as_before():
-    tl = build_timeline(_plan(4, ALWAYS), [{"duration": 9.0}] * 4, video_id="v")
-    tl["captions"] = False
-    r, rp = Renderer(tl, draft=True), Renderer({k: v for k, v in tl.items() if k != "watermark"}, draft=True)
-    assert all(_mark_strength(r.frame_at(t), rp.frame_at(t)) > 0.02 for t in (1.0, 8.0, 15.0, 30.0))
+    spec = tl["watermark"]
+    wins = spec["windows"]
+    assert final_stage.envelope(spec, tl["duration"], 0.5) == 0.0 and final_stage.envelope(spec, tl["duration"], 3.0) == 1.0 and 0.0 < final_stage.envelope(spec, tl["duration"], 1.5) < 1.0
+    for t in np.arange(0.0, tl["duration"], 0.37):
+        assert final_stage.envelope(spec, tl["duration"], t) == pytest.approx(ws.moment_alpha(wins, t), abs=1e-9)
+    always = {"mode": "videomk"}
+    d = 20.0
+    assert final_stage.envelope(always, d, 0.0) == 0.0 and final_stage.envelope(always, d, 5.0) == 1.0 and final_stage.envelope(always, d, d) < 1e-9   # in over 0.6 s, gone with the closing fade
 
 
 # ---------------------------------------------------------------- who gets what
@@ -214,16 +185,16 @@ def test_the_policy_is_on_in_both_stages_and_the_stack_reads_it():
     assert 'stage_cfg.get("forceWatermark")' in src and 'try_get_context("forceWatermark") is not None' in src   # stages.json decides unless -c forceWatermark=0|1 says otherwise
 
 
-def test_the_closing_card_counts_towards_the_length_asked():
-    """A free video always ends with the 2.4 s card: the scenes aim that much shorter, so the video is still at least the length asked and not 2.4 s over it."""
-    for speech, asked in ((3.0, 30), (8.8, 60), (9.3, 60)):       # too short (held longer), about right, a little long (pauses shortened)
+def test_the_closing_card_never_changes_the_length_fit():
+    """The card is appended after the finished video (engine/final_stage.py): the scenes aim at the length asked exactly as without a watermark, the timeline is the same."""
+    for speech, asked in ((3.0, 30), (8.8, 60), (9.3, 60)):
         n = 6
         with_card = build_timeline(_plan(n, ALWAYS), [{"duration": speech}] * n, video_id="v", min_seconds=asked, fit_seconds=asked)
         without = build_timeline(_plan(n), [{"duration": speech}] * n, video_id="v", min_seconds=asked, fit_seconds=asked)
-        assert with_card["scenes"][-1]["id"] == "endcard" and asked <= with_card["duration"] <= asked * 1.05 + 0.01, (speech, with_card["duration"])
-        assert asked <= without["duration"] <= asked * 1.05 + 0.01 and abs(with_card["duration"] - without["duration"]) < 1.6   # the same length with or without the card
-    no_card = {**ALWAYS, "end_card": False}
-    assert build_timeline(_plan(6, no_card), [{"duration": 3.0}] * 6, video_id="v", min_seconds=30, fit_seconds=30)["duration"] >= 30
+        assert [(s["id"], s["start"], s["duration"]) for s in with_card["scenes"]] == [(s["id"], s["start"], s["duration"]) for s in without["scenes"]]
+        assert with_card["duration"] == without["duration"] and with_card.get("pace") == without.get("pace")
+    plan = _plan(6, ALWAYS)
+    assert timeline_mod.shortest(plan, [3.0] * 6, 30) == timeline_mod.shortest(_plan(6), [3.0] * 6, 30)
 
 
 def test_with_plans_the_plan_decides_who_may_use_moments(monkeypatch):

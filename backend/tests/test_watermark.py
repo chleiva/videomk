@@ -16,8 +16,7 @@ from common import deletion, usage, wallet, watermark_store as store
 from engine import awsio, watermark as wm, watermark_spec as ws
 from engine.frame import ASPECTS, Frame
 from engine.handlers import plan_handler
-from engine.renderer import Renderer
-from engine.timeline import build_timeline, chunk_plan, chunk_timeline
+from engine.timeline import build_timeline, chunk_plan, chunk_timeline, end_card_timeline
 from tests.test_create_options import _plan, _run_timeline, post, sent
 from tests.test_hardening import _event, launcher  # noqa: F401  (the fixture)
 
@@ -70,7 +69,7 @@ def test_every_option_stays_in_the_frame_and_off_the_captions_and_the_credit(asp
                     assert not lay.get("overlaps"), (aspect, spec, ratio, lay)
                     assert 0 <= x0 < x1 <= f.W and 0 <= y0 < y1 <= f.H, (aspect, spec, lay)
                     if captions:
-                        assert not ws.intersects(lay["rect"], ws.caption_rect(f.with_cap_lift(lay["cap_lift"]))), (aspect, spec, ratio, lay)
+                        assert not ws.intersects(lay["rect"], ws.caption_rect(f)), (aspect, spec, ratio, lay)   # the captions are where they always are
                     if lay["position"] == "tr":
                         assert not ws.intersects(lay["rect"], ws.credit_rect(f)), (aspect, spec, ratio, lay)
                     if pos == "auto" and aspect == "9:16":
@@ -101,15 +100,13 @@ def test_the_lockup_is_legible_in_every_shape_and_resolution():
             assert lay["scale"] == 1.0 and 0.51 * h_px >= 0.51 * 66 * short / 1080 - 0.5 and 0.51 * h_px >= 22 * 720 / 1080 * (short / 720) - 0.5, (aspect, res)
 
 
-def test_16_9_raises_the_captions_for_a_bottom_corner_mark_only():
+def test_16_9_default_mark_sits_under_the_captions_text_without_moving_them():
+    """The captions are where they always are (no lift); the 16:9 lockup takes the corner strip under the text of the widest caption box."""
     f = Frame.parse("16:9")
     lay = ws.layout({"mode": "videomk", "style": "lockup"}, f, None, True)
-    assert lay["cap_lift"] == ws.CAPTION_LIFT and f.with_cap_lift(lay["cap_lift"]).caption["bottom"] == f.caption["bottom"] - ws.CAPTION_LIFT
-    assert lay["rect"][1] >= ws.caption_rect(f.with_cap_lift(lay["cap_lift"]))[3]   # the mark is under the (raised) caption box
-    assert ws.layout({"mode": "videomk", "style": "lockup", "position": "tl"}, f, None, True)["cap_lift"] == 0
-    assert ws.layout({"mode": "videomk", "style": "lockup"}, Frame.parse("9:16"), None, True)["cap_lift"] == 0
-    assert Renderer(_tl("16:9", watermark={"mode": "videomk", "style": "lockup"})).frame.caption["bottom"] == f.caption["bottom"] - ws.CAPTION_LIFT
-    assert Renderer(_tl("16:9")).frame.caption["bottom"] == f.caption["bottom"]   # without a mark nothing moves
+    assert lay["position"] == "br" and lay["scale"] == 1.0 and "cap_lift" not in lay
+    assert lay["rect"][1] >= ws.caption_rect(f)[3]   # under the caption text
+    assert f.caption["bottom"] == 1010 and not hasattr(f, "cap_lift") and not hasattr(f, "top_inset")
 
 
 def test_the_default_opacity_is_strong_enough_to_read():
@@ -131,240 +128,39 @@ def test_a_wide_logo_is_limited_to_the_lockup_width():
 
 
 # ======================================================================== frames of the real renderer
-def _tl(aspect="16:9", resolution="1080p", theme="midnight", watermark=None, captions=True, scene="title", props=None, dur=6.0, words=None, outro=False, lead=None):
-    fr = Frame.parse(aspect, resolution)
-    sc = {"id": "t", "type": scene, "start": 0.0, "duration": dur, "props": props or {"title": "A calm title", "subtitle": "with a subtitle"}, "words": WORDS if words is None else words, "transition": "none"}
-    tl = {"scenes": [sc], "theme": theme, "captions": captions, "duration": dur, "width": fr.width, "height": fr.height, "fps": 30, "outro": outro, "frame": {"aspect": aspect, "resolution": resolution}}
-    if watermark is not None:
-        tl["watermark"] = watermark
-    return tl
-
-
-def _frame(tl, t=1.2, draft=True, loader=None, first=False, band=0, like=None):
-    r = Renderer(tl, image_loader=loader, draft=draft)
-    if like is not None:   # a frame without the mark but laid out like one that has it (the scenes' band, the captions' lift)
-        band = like.inset
-        r.frame = r.frame.with_cap_lift(like.cap_lift)
-    if band:   # a frame WITHOUT the mark but with the band a top-corner mark reserves, so the only difference to the marked frame is the mark itself
-        r.frame = r.frame.with_top_inset(band)
-    r.ctx.frame = r.frame
-    if not first:
-        r.lead = object()   # a chunk that is not the first: the mark is already fully in
-    return r, r.frame_at(t).convert("RGB")
-
-
-def _wm(tl):
-    """The Watermark of a timeline's renderer (for `like=`: a frame laid out as the marked one is, so the mark is the only difference)."""
-    return Renderer(tl).wm
-
-
-def _bbox(a, b, thr=6):
-    d = np.abs(np.asarray(a, np.int16) - np.asarray(b, np.int16)).max(axis=2) > thr
-    ys, xs = np.where(d)
-    return (xs.min(), ys.min(), xs.max() + 1, ys.max() + 1) if len(xs) else None
-
-
-@pytest.mark.parametrize("aspect", ASPECTS)
-def test_the_mark_is_where_the_layout_says_and_as_big(aspect):
-    r, marked = _frame(_tl(aspect, watermark={"mode": "videomk"}))
-    _, plain = _frame(_tl(aspect), like=r.wm)
-    box = _bbox(plain, marked)
-    assert box is not None
-    scale = r.out_w / r.frame.W
-    x0, y0, x1, y1 = [v * scale for v in ws.layout({"mode": "videomk"}, r.frame, None, True)["rect"]]
-    pad = 0.2 * (y1 - y0)   # the soft shadow reaches a little past the mark
-    assert box[0] >= x0 - pad and box[1] >= y0 - pad and box[2] <= x1 + pad and box[3] <= y1 + pad
-    assert (box[3] - box[1]) >= 0.8 * (y1 - y0) and (box[2] - box[0]) >= 0.8 * (x1 - x0)
-
-
-@pytest.mark.parametrize("aspect,resolution,draft", [("16:9", "720p", False), ("9:16", "1080p", True), ("1:1", "720p", True), ("4:5", "1080p", True), ("16:9", "2160p", False)])
-def test_the_mark_is_drawn_at_the_output_size_in_every_resolution(aspect, resolution, draft):
-    r, marked = _frame(_tl(aspect, resolution, watermark={"mode": "videomk"}), draft=draft)
-    _, plain = _frame(_tl(aspect, resolution), draft=draft, like=r.wm)
-    box = _bbox(plain, marked)
-    expect_h = 0.075 * min(r.out_w, r.out_h)   # 5 % of the short side of what is really output
-    assert marked.size == (r.out_w, r.out_h) and box and 0.8 * expect_h <= (box[3] - box[1]) <= 1.45 * expect_h
-
-
-def test_without_a_watermark_or_with_none_the_frame_is_exactly_what_it_was():
-    for wmk in (None, {"mode": "none"}):
-        _, a = _frame(_tl(watermark=wmk))
-        _, b = _frame(_tl())
-        assert _bbox(a, b, thr=0) is None
-
-
-def test_the_same_frame_twice_is_identical():
-    t = _tl(watermark={"mode": "videomk", "style": "lockup"})
-    _, a = _frame(t)
-    _, b = _frame(t)
-    assert _bbox(a, b, thr=0) is None
-
-
-def test_opacity_changes_how_strong_the_mark_is():
-    def strength(op):
-        r, marked = _frame(_tl(watermark={"mode": "videomk", "opacity": op}))
-        _, plain = _frame(_tl(), like=r.wm)
-        return int(np.abs(np.asarray(plain, np.int16) - np.asarray(marked, np.int16)).sum())
-    lo, mid, hi = strength(0.2), strength(0.65), strength(1.0)
-    assert lo < mid < hi and hi > 2.5 * lo
-
-
-def test_the_mark_fades_in_on_the_first_chunk_only_and_goes_with_the_closing_fade():
-    t = _tl(watermark={"mode": "videomk"}, outro=True)
-    lk = _wm(t)
-    _, plain0 = _frame(_tl(outro=True), t=0.0, first=True, like=lk)
-    _, m0 = _frame(t, t=0.0, first=True)
-    _, m_mid = _frame(t, t=0.3, first=True)
-    _, m_full = _frame(t, t=1.2, first=True)
-    _, p_mid = _frame(_tl(outro=True), t=0.3, first=True, like=lk)
-    _, p_full = _frame(_tl(outro=True), t=1.2, first=True, like=lk)
-    assert _bbox(plain0, m0, thr=1) is None                                        # frame 0 of the video: nothing yet
-    s_mid, s_full = [int(np.abs(np.asarray(p, np.int16) - np.asarray(m, np.int16)).sum()) for p, m in ((p_mid, m_mid), (p_full, m_full))]
-    assert 0 < s_mid < s_full
-    _, mid_chunk = _frame(t, t=0.0, first=False)                                    # a later chunk starts with the mark fully in
-    assert _bbox(plain0, mid_chunk) is not None
-    _, plain_end = _frame(_tl(outro=True), t=5.99, like=lk)
-    _, wm_end = _frame(t, t=5.99)
-    assert _bbox(plain_end, wm_end, thr=1) is None or int(np.abs(np.asarray(plain_end, np.int16) - np.asarray(wm_end, np.int16)).max()) <= 4   # gone with the picture
-
-
-def test_a_light_picture_gets_the_ink_mark_and_a_dark_one_the_white_mark():
-    def core(theme):
-        r, marked = _frame(_tl(theme=theme, watermark={"mode": "videomk", "opacity": 1.0}))
-        _, plain = _frame(_tl(theme=theme), like=r.wm)
-        d = np.abs(np.asarray(plain, np.int16) - np.asarray(marked, np.int16)).max(axis=2)
-        px = np.asarray(marked, np.float32)[d > 120]
-        return px.mean() if len(px) else None
-    dark, light = core("midnight"), core("paper")
-    assert dark is not None and dark > 200      # white on the dark theme
-    assert light is not None and light < 90     # ink on the light theme
-
-
-def test_the_mark_never_lands_on_the_captions():
-    for aspect in ASPECTS:
-        for pos in ws.POSITIONS:
-            for style in ws.STYLES:
-                spec = {"mode": "videomk", "position": pos, "style": style, "size": "medium"}
-                r, with_all = _frame(_tl(aspect, watermark=spec, words=WORDS))
-                _, no_caps = _frame(_tl(aspect, watermark=spec, captions=False))
-                _, only_caps = _frame(_tl(aspect), t=1.2, like=r.wm)
-                _, nothing = _frame(_tl(aspect, captions=False), like=r.wm)
-                cap_box = _bbox(nothing, only_caps)
-                wm_box = _bbox(only_caps, with_all)
-                assert cap_box is not None and wm_box is not None
-                inter = not (wm_box[2] <= cap_box[0] or wm_box[0] >= cap_box[2] or wm_box[3] <= cap_box[1] or wm_box[1] >= cap_box[3])
-                assert not inter, (aspect, pos, style, cap_box, wm_box)
-
-
-# ======================================================================== a top-corner mark has a band of its own (QA 2026-11-27: a 9:16 logo sat on a list heading)
-LIST = {"heading": "Lighthouse facts", "items": ["Warn of rocks and reefs", "Guide ships into harbors", "Fewer shine today"]}
-
-
-@pytest.mark.parametrize("aspect", ["9:16", "1:1", "4:5"])
-@pytest.mark.parametrize("spec", [{"mode": "videomk"}, {"mode": "videomk", "style": "lockup", "size": "medium"}, {"mode": "videomk", "position": "tl", "style": "lockup"}])   # (a lockup asked for top right now fits bottom right in 1:1 and 4:5 since it is drawn smaller: watermark_spec.LOCKUP_W)
-def test_a_top_corner_mark_gets_its_own_band_above_the_content(aspect, spec):
-    f = Frame.parse(aspect)
-    lay = ws.layout(spec, f, None, True)
-    inset = ws.content_inset(lay, f)
-    assert lay["position"] in ("tl", "tr") and 0 <= inset <= f.design_h // 10
-    assert (inset > 0) == (lay["rect"][3] + ws.CONTENT_GAP > f.margin_top)   # a chosen corner of 9:16 sits in the platform header, above the content: nothing to move
-    assert f.with_top_inset(inset).margin_top >= lay["rect"][3] + ws.CONTENT_GAP - 0.5   # the content box starts below the mark
-    assert f.with_top_inset(inset).base_margin_top == f.margin_top and f.with_top_inset(0) is f   # the shape's own margin (credit line, mark placement) does not move
-    r, marked = _frame(_tl(aspect, watermark=spec, scene="bullets", props=LIST, words=[]), t=5.0)
-    assert r.frame.top_inset == inset and r.ctx.frame.top_inset == inset and r.ctx.top == f.margin_top + inset
-    # the heading is drawn below the mark: with the band, nothing of the scene differs from the bare background inside the mark's rectangle
-    _, scene = _frame(_tl(aspect, scene="bullets", props=LIST, words=[]), t=5.0, band=inset)
-    _, bare = _frame(_tl(aspect, scene="bullets", props={"heading": "", "items": [""]}, words=[]), t=5.0, band=inset)
-    k = r.out_w / f.W
-    x0, y0, x1, y1 = [int(round(v * k)) for v in lay["rect"]]
-    a, b = np.asarray(scene, np.int16)[y0:y1, x0:x1], np.asarray(bare, np.int16)[y0:y1, x0:x1]
-    assert np.abs(a - b).max() <= 6, (aspect, spec)
-    _, old = _frame(_tl(aspect, scene="bullets", props=LIST, words=[]), t=5.0)   # the frame as it was without the band, for the default corner: the heading ran under a wide mark
-    if spec.get("size") == "medium":
-        assert np.abs(np.asarray(old, np.int16)[y0:y1, x0:x1] - b).max() > 40
-
-
-def test_no_band_for_a_bottom_corner_for_landscape_or_without_a_watermark():
-    for aspect in ASPECTS:
-        f = Frame.parse(aspect)
-        assert Renderer(_tl(aspect)).frame.top_inset == 0 and Renderer(_tl(aspect, watermark={"mode": "none"})).frame is f
-    land = Frame.parse("16:9")
-    for pos in ws.POSITIONS:
-        assert ws.content_inset(ws.layout({"mode": "videomk", "position": pos, "style": "lockup"}, land, None, True), land) == 0
-    tall = Frame.parse("9:16")
-    lay = ws.layout({"mode": "videomk", "position": "br"}, tall, None, False)   # captions off: the chosen bottom corner is free
-    assert lay["position"] == "br" and ws.content_inset(lay, tall) == 0
-    assert Frame.parse("9:16").with_top_inset(10_000).top_inset == 192 and Frame.parse("9:16").with_top_inset(-5).top_inset == 0   # a band, never a layout change
-
-
-def test_the_band_is_part_of_the_segment_hash_so_old_segments_are_not_reused():
-    tl = _tl("9:16", watermark={"mode": "videomk"})
-    plain = _tl("9:16")
-    assert chunk_plan(tl)[0]["hash"] != chunk_plan(plain)[0]["hash"]
-    import hashlib, json as _json  # noqa: E401
-    assert '"wmv"' not in _json.dumps(chunk_plan(plain)) and hashlib   # nothing new in a video without a mark (its hash is covered by the existing test)
-
-
 def _png(w=300, h=120, color=(220, 30, 40, 255)):
     im = Image.new("RGBA", (w, h), (0, 0, 0, 0))
     im.paste(Image.new("RGBA", (w - 40, h - 20), color), (20, 10))
     return im
 
 
-def test_a_custom_logo_is_drawn_in_its_own_colours_and_an_unreadable_one_draws_nothing():
-    spec = {"mode": "custom", "asset": "generation/v2/v/assets/watermark.png", "hash": "abc", "opacity": 1.0, "position": "br"}
-    r, marked = _frame(_tl(watermark=spec), loader=lambda k: _png())
-    _, plain = _frame(_tl(), like=r.wm)
-    box = _bbox(plain, marked)
-    assert box is not None
-    px = np.asarray(marked, np.float32)[box[1]:box[3], box[0]:box[2]].reshape(-1, 3)
-    red = px[(px[:, 0] > 180) & (px[:, 1] < 80)]
-    assert len(red) > 0.4 * len(px)                                               # still red: the person's colours are not tinted
-    for loader in (lambda k: None, lambda k: (_ for _ in ()).throw(OSError("gone"))):
-        r2, none = _frame(_tl(watermark=spec), loader=loader)
-        assert r2.wm is None and _bbox(_frame(_tl())[1], none, thr=0) is None
-
-
 # ======================================================================== timeline and chunks
-def test_the_timeline_carries_the_watermark_and_the_chunk_hashes_follow_it(monkeypatch):
+def test_the_timeline_carries_the_watermark_for_the_final_stage_and_the_chunks_and_hashes_ignore_it(monkeypatch):
     plain, _ = _run_timeline(monkeypatch, _plan())
     assert "watermark" not in plain
     p = _plan()
     p["watermark"] = {"mode": "videomk", "size": "medium"}
     tl, out = _run_timeline(monkeypatch, p)
     assert tl["watermark"]["mode"] == "videomk" and tl["watermark"]["size"] == "medium"
-    a, b = chunk_plan(plain, 10), chunk_plan(tl, 10)
-    assert [c["hash"] for c in a] != [c["hash"] for c in b]
-    assert chunk_timeline(tl, 0, 1)["watermark"] == tl["watermark"] and "watermark" not in chunk_timeline(plain, 0, 1)
+    assert [c["hash"] for c in chunk_plan(plain, 10)] == [c["hash"] for c in chunk_plan(tl, 10)]   # the mark is not part of any scene segment
+    assert "watermark" not in chunk_timeline(tl, 0, 1) and "watermark" not in chunk_timeline(plain, 0, 1)
     p2 = _plan()
     p2["watermark"] = {"mode": "none"}
     tl2, _ = _run_timeline(monkeypatch, p2)
-    assert "watermark" not in tl2 and [c["hash"] for c in chunk_plan(tl2, 10)] == [c["hash"] for c in a]   # 'none' changes nothing, caches included
+    assert "watermark" not in tl2
 
 
-def test_a_changed_logo_or_option_makes_new_segments():
-    base = _tl(watermark={"mode": "custom", "asset": "k", "hash": "aa"})
-    other = _tl(watermark={"mode": "custom", "asset": "k", "hash": "bb"})
-    base["scenes"][0]["start"] = other["scenes"][0]["start"] = 0.0
-    assert chunk_plan(base, 10)[0]["hash"] != chunk_plan(other, 10)[0]["hash"]
-
-
-def test_the_optional_end_card_is_one_silent_scene_after_the_last():
+def test_the_optional_end_card_is_not_a_scene_and_adds_no_duration_to_the_timeline():
     plan = _plan()
     infos = [{"duration": 3.0}] * len(plan["beats"])
     plain = build_timeline(plan, infos, video_id="v")
     plan["watermark"] = {"mode": "videomk", "end_card": True}
     tl = build_timeline(plan, infos, video_id="v")
-    assert len(tl["scenes"]) == len(plain["scenes"]) + 1
-    last = tl["scenes"][-1]
-    assert last["type"] == "title" and last["silent"] and last["words"] == [] and last["audio_key"] is None and last["props"]["title"] == "Made with VideoMK"
-    assert abs(tl["duration"] - plain["duration"] - ws.END_CARD_S) < 1e-6 and abs(last["start"] - plain["duration"]) < 1e-6
-    plan["language"] = "es"
-    assert build_timeline(plan, infos, video_id="v")["scenes"][-1]["props"]["title"] == "Hecho con VideoMK"
-    plan["watermark"] = {"mode": "videomk", "end_card": False}
-    assert len(build_timeline(plan, infos, video_id="v")["scenes"]) == len(plain["scenes"])
-    plan["watermark"] = {"mode": "custom", "end_card": True, "asset": "k"}
-    assert len(build_timeline(plan, infos, video_id="v")["scenes"]) == len(plain["scenes"])   # a custom logo has no 'Made with VideoMK' card
+    assert [s["id"] for s in tl["scenes"]] == [s["id"] for s in plain["scenes"]] and tl["duration"] == plain["duration"] and tl["watermark"]["end_card"] is True
+    card = end_card_timeline({**tl, "language": "en", "frame": {"aspect": "16:9", "resolution": "1080p"}})   # the card is its own one-scene timeline, made by the final stage
+    sc = card["scenes"][0]
+    assert sc["type"] == "title" and sc["silent"] and sc["words"] == [] and sc["audio_key"] is None and sc["props"]["title"] == "Made with VideoMK" and card["duration"] == ws.END_CARD_S
+    assert end_card_timeline({**tl, "language": "es"})["scenes"][0]["props"]["title"] == "Hecho con VideoMK"
 
 
 # ======================================================================== the policy
