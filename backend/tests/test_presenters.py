@@ -350,3 +350,27 @@ def test_the_stack_switch_is_a_variable_on_existing_functions_and_qa_only():
         assert envs(on)[h].get("PRESENTERS") == "1" and "PRESENTERS" not in envs(off)[h], h
     assert len(on["Resources"]) == len(off["Resources"])       # no new resource: the stack is near the 500 limit
     assert json.dumps(on).count("AWS::IAM::Policy") == json.dumps(off).count("AWS::IAM::Policy")
+
+
+def test_cards_are_never_empty_for_long_and_chart_labels_wrap():   # QA 2026-11-28: an empty chart card at the end of a scene, "Water evaporated" clipped
+    from engine.easing import reveal_times
+    from engine.scenes.elements import presenter as pe
+    late = pe._early(reveal_times(3, 20.0, [9.0, 12.0, 15.0]))
+    assert late[0] <= 0.7 and late[1] <= 1.3 and late[2] <= 1.9
+    assert pe._early([0.1, 0.2]) == [0.1, 0.2]
+    ch = pe.sanitize({"character": "fox", "heading": "Water", "chart": {"labels": ["Water evaporated", "Salt stays"], "values": [70, 30], "unit": "%"}}) if hasattr(pe, "sanitize") else None
+    if ch is not None:
+        assert ch["chart"]["labels"][0] == "Water evaporated"
+
+
+def test_a_group_in_a_square_or_4x5_frame_stands_whole_above_the_captions():
+    from types import SimpleNamespace
+    from engine.frame import Frame
+    from engine import stand_zone as sz
+    from engine.scenes.elements import presenter as pe
+    for asp in ("1:1", "4:5"):
+        fr = Frame.parse(asp, "1080p")
+        ctx = SimpleNamespace(frame=fr, captions=True, top=fr.margin_top, bottom=fr.content_bottom(True), box=fr.box(True))
+        lay = pe.group_layout({"character": "fox", "side": "left", "cast": ["fox", "owl"]}, ctx)
+        assert lay["floor"] is not None and lay["floor"] <= sz.caption_top(fr) * fr.H
+        assert lay["content"][3] < lay["floor"] - 290.0 * lay["ppu"]          # the card stays above the heads

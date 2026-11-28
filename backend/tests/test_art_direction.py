@@ -313,3 +313,17 @@ def test_the_board_beside_a_character_is_drawn_while_it_speaks(tmp_path, monkeyp
     assert ink(late) > ink(early) + 200                                                                              # more is written at the end than at the start
     el.release()
     assert not el._BOARD
+
+
+def test_the_characters_the_words_name_win_when_only_the_look_was_chosen():   # QA 2026-11-28: "a fox and a bear explain how bees make honey" came out as fox and owl
+    from engine import art_direction as ad
+    assert ad.named_cast("a fox and a bear explain how bees make honey, cartoon") == ["fox", "bear"]
+    assert ad.named_cast("un zorro y un oso explican las abejas") == ["fox", "bear"]
+    assert ad.named_cast("Why the sky is blue, explained by a fox") == ["fox"]
+    assert ad.named_cast("how bears hibernate") == [] and ad.named_cast("a video about bears explains honey") == []   # an animal that is the topic is not the cast
+    a = ad.asked("a fox and a bear explain how bees make honey, cartoon", {"look": "cartoon"})
+    assert a["cast"] == ["fox", "bear"] and a["n"] == 2
+    d = ad.decide("a fox and a bear explain how bees make honey, cartoon", options={"look": "cartoon"}, minutes=1.0)
+    assert d.cast[:2] == ["fox", "bear"]
+    assert ad.asked("how bears hibernate", {"look": "cartoon"})["cast"] == []
+    assert ad.asked("a fox and a bear explain it", {"look": "cartoon", "cast": ["cat"]})["cast"] == ["cat"]   # an explicit cast field beats words

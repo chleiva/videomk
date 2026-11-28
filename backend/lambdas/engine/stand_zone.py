@@ -239,8 +239,15 @@ class Placement:
         return f"Placement(xs={[round(x, 3) for x in self.xs]}, y={self.y:.3f}, scale={self.scale:.2f})"
 
 
+def caption_top(frame: Any) -> float:
+    """Where the caption lines of a frame begin, as a share of the height (design units: the band is `max_lines` lines of the caption size above `bottom`, plus the pill's padding).
+    Feet of a whole figure stay above it (docs/SEA_DEFECTS_2026-11-28.md); read only: the caption position itself is the frame's business."""
+    c = frame.caption
+    return (float(c["bottom"]) - c.get("max_lines", 2) * float(c["size"]) * 1.32 - 30.0) / float(frame.H)
+
+
 def place(scene_id: str, aspect: str, prefs: Sequence[float], *, foot_y: float, ppu: float, W: float, H: float, full: bool, max_shift: float = 0.5,
-          accept: Optional[Callable[[float, float], bool]] = None) -> Optional[Placement]:
+          accept: Optional[Callable[[float, float], bool]] = None, cap_top: Optional[float] = None) -> Optional[Placement]:
     """Feet on the ground of `scene_id` for characters whose preferred slots are `prefs` (shares of the width, in screen order).
     foot_y: the nominal foot row (share of the height; above 1 for a figure cut at the waist, whose feet are under the frame). ppu: the figure's scale at that row (design units per drawing unit).
     full: the whole figure is in the frame (its row may move up to find ground; smaller with distance). Otherwise the row stays and only the slots move sideways.
@@ -265,6 +272,8 @@ def place(scene_id: str, aspect: str, prefs: Sequence[float], *, foot_y: float, 
         cand = [foot_y + LOWER - dr / mh for dr in range(int(round((0.40 + LOWER) * mh)) + 1)]   # from a little below the nominal floor (the caption lines start a little lower) upward
         ref_y = foot_y
     for y in cand:
+        if cap_top is not None and y > cap_top + 1e-9:   # the feet stay above the caption lines
+            continue
         row = min(mh - 1, max(0, int(y * mh)))
         if y * mh < 2:
             break
@@ -375,6 +384,14 @@ def derive_lines(scene_id: str) -> Dict[str, Dict[str, Any]]:
                     lo -= 1 / mh
                 while hi + 1 / mh <= min(y + 0.02, 0.999) and _fit_row(m, int((hi + 1 / mh) * mh), [fig["x"] / fr.W], half, pitch, 1.0):
                     hi += 1 / mh
+                for k in [c for c in casts if c != n]:   # a smaller cast may be laid out another way (square and 4:5 with captions: one presenter is cut at the waist, a group stands whole)
+                    try:
+                        lk = layout_for(_cast_props(scene_id, k), asp)
+                    except Exception:  # noqa: BLE001
+                        continue
+                    if not lk.get("unplaced"):
+                        yk = min(lk["ground"] / fr.H, 1.0)
+                        lo, hi = min(lo, yk), max(hi, yk)
                 out[asp] = {"y": round(y, 4), "band": [round(lo, 4), round(hi, 4)], "figure_h": round(290.0 * ppu / fr.H, 4), "max_cast": n, "casts": sorted(casts)}
     finally:
         DERIVING = False

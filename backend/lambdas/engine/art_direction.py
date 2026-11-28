@@ -86,6 +86,30 @@ def cast_in_words(prompt: str) -> List[str]:
     return [cid for _, cid in sorted(found)][:3]
 
 
+_VERB_RE = re.compile(r"\b(?:explains?|explaining|explain|presents?|presenting|discuss\w*|talks?|talking|chat\w*|teach\w*|tells?|telling|narrat\w*|shows?|hosts?|"
+                      r"explican?|cuentan?|hablan?|presentan?|ense[ñn]an?|charlan?)\b", re.I)
+_BY_CAST_RE = re.compile(r"\b(?:explained|presented|narrated|hosted|told|taught) by\b(.{0,80})|\b(?:explicad[oa]s?|presentad[oa]s?|narrad[oa]s?|contad[oa]s?) por\b(.{0,80})", re.I)
+
+
+def named_cast(prompt: str) -> List[str]:
+    """Characters the request puts IN FRONT of the camera: the subject of the explaining ("a fox and a bear explain how bees make honey", "un zorro y un oso explican ...") or the
+    ones it is "explained by". An animal that is only the topic ("how bears hibernate", "a story about a cat") is not named here. At most three, in the order named."""
+    text = " ".join(str(prompt or "").split())
+    found: List[str] = []
+    for m in _BY_CAST_RE.finditer(text):
+        found += cast_in_words(m.group(1) or m.group(2) or "")
+    m = _VERB_RE.search(text)
+    if m:
+        head = re.split(r"[.!?;:]", text[:m.start()])[-1]
+        head = re.split(r"\b(?:about|on|of|sobre|acerca)\b", head, maxsplit=1)[0]   # "a video about bears explains" -> the subject is not the cast
+        found += cast_in_words(head)
+    out: List[str] = []
+    for c in found:
+        if c not in out:
+            out.append(c)
+    return out[:3]
+
+
 def asked(prompt: str, options: Dict[str, Any]) -> Optional[Dict[str, Any]]:
     """The look the person chose, in the terms of the contract: {"look", "cast": [...], "board": bool, "by": "you" (a field) | "words"}; None when nothing was chosen.
     The `look` field wins; then the older fields (`style`, `presenter`); then plain words."""
@@ -93,7 +117,10 @@ def asked(prompt: str, options: Dict[str, Any]) -> Optional[Dict[str, Any]]:
 
     c = look_choice.from_legacy(options)
     if c:
-        return {"look": c["look"], "cast": list(c.get("cast") or []), "board": "board" in (c.get("extras") or []), "by": "you", "n": len(c.get("cast") or []) or None}
+        cast = list(c.get("cast") or [])
+        if c["look"] == "cartoon" and not cast and options.get("presenter") != "none":   # the look was chosen but not the cast ("auto"): characters the words name still win
+            cast = named_cast(prompt)
+        return {"look": c["look"], "cast": cast, "board": "board" in (c.get("extras") or []), "by": "you", "n": len(cast) or None}
     pres = options.get("presenter") if isinstance(options.get("presenter"), str) else None
     if pres in presenter_policy.CAST:
         return {"look": "cartoon", "cast": [pres], "board": False, "by": "you", "n": 1}
