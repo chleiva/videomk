@@ -49,10 +49,11 @@ _EN_BY_REGION = {"GB": "Amy", "IE": "Niamh", "AU": "Olivia", "NZ": "Aria", "ZA":
 _LATAM = set("MX AR CO CL PE VE EC GT CU BO DO HN PY SV NI CR PA UY PR".split())
 # The other languages: a LIVELY voice of the viewer's accent wherever Polly has one (every voice measured on 2026-11-27: docs/POLLY_LIVELY_DEFAULTS_2026-11-27.md).
 # French (France) was Léa (steady) and is Ambre. An accent whose voices are all steady keeps its own voice, never another accent's lively one: Canadian French
-# (Gabrielle; Liam measures the same), Belgian French (Isabelle, its only voice), Dutch of the Netherlands (Laura, its only voice; the Flemish Lisa is lively) and
-# Polish (Ola; Ewa measures the same).
-_BY_REGION = {"fr": {"CA": "Gabrielle", "BE": "Isabelle"}, "de": {"AT": "Hannah", "CH": "Sabrina"}, "nl": {"BE": "Lisa"}}
-_DEFAULT = {"fr": "Ambre", "de": "Vicki", "it": "Beatrice", "pt": "Camila", "nl": "Laura", "pl": "Ola", "fi": "Suvi", "ko": "Seoyeon"}
+# (Gabrielle; Liam measures the same) and Polish (Ola; Ewa measures the same). Two owner decisions of 2026-11-28 set that rule aside: ALL Dutch videos use the
+# lively Flemish Lisa (nl-BE; Laura, nl-NL, steady, is the second voice: Polly has no Dutch man) and Belgian French uses Ambre (fr-FR, lively) instead of
+# Isabelle (steady, still in the catalogue for a brief that names her).
+_BY_REGION = {"fr": {"CA": "Gabrielle"}, "de": {"AT": "Hannah", "CH": "Sabrina"}}
+_DEFAULT = {"fr": "Ambre", "de": "Vicki", "it": "Beatrice", "pt": "Camila", "nl": "Lisa", "pl": "Ola", "fi": "Suvi", "ko": "Seoyeon"}
 # Polly's "generative" engine is two families of voices, and they do not speak alike (measured 2026-11-27, docs/VOICE_QUALITY_IT_ES_2026-11-27.md).
 # These 18 give the same audio every time for the same text, read each sentence alone, ignore what the text is about, and move their pitch about as little as
 # the neural engine does (Bianca: 2.8 semitones of spread on a children's passage, Lucia 3.3, Mia 3.2). The other 37 (Vicki, Ruth, Amy, Beatrice, Lorenzo,

@@ -62,7 +62,7 @@ Two changes to the aligner, both for every language: a Hangul block counts as a 
 ## Known limits of the seven new languages
 
 1. **Nobody who speaks them has watched a video yet.** The plan audit checks structure, cast and language code, not prose quality. First step on QA: one video per language, watched by a native speaker where possible.
-2. **Voices were not chosen by ear.** Since 2026-11-27 the default of each accent is a lively voice where Polly has one, chosen by measured pitch movement (`docs/POLLY_LIVELY_DEFAULTS_2026-11-27.md`); Canadian and Belgian French, Dutch of the Netherlands and Polish have only steady voices.
+2. **Voices were not chosen by ear.** Since 2026-11-27 the default of each accent is a lively voice where Polly has one, chosen by measured pitch movement (`docs/POLLY_LIVELY_DEFAULTS_2026-11-27.md`); Canadian French and Polish have only steady voices. Owner's decision 2026-11-28: every Dutch video uses the lively Flemish Lisa (Laura is the second voice) and Belgian French uses Ambre (fr-FR) instead of Isabelle; neither was judged by a native listener.
 3. **Few voices in three languages:** Dutch 2 and Polish 2 (all women), Finnish 1. A request for a male narrator there gets a woman's voice and the plan records it (`voice_notes`).
 4. **Wishes written in the request are read in English and Spanish only** where they are read by rules: "whiteboard", "cartoon", "with a presenter", "no background", gestures cued by "first, second". In other languages the request check (a model) still understands the look asked for, but the rule-based shortcuts do not fire. The video is made; the wish may be missed.
 5. **Numbers:** German, Italian, Dutch and Portuguese more often group thousands with a point (12.345,6); we write 12 345,6, which is correct and unambiguous but less customary.
@@ -81,7 +81,7 @@ Two changes to the aligner, both for every language: a Hangul block counts as a 
 | English (Ruth), Spanish (Lucia) | 2.63 (median of 174 videos); budget 2.4, unchanged | 89 | 130 |
 | French (Ambre since 2026-11-27; Léa was 3.03) | 3.41 | 116 | 169 |
 | Portuguese (Camila) | 3.09 | 105 | 153 |
-| Dutch (Laura) | 2.79 (one passage) | 95 | 138 |
+| Dutch (Lisa since 2026-11-28, 5 beats; Laura was 2.79) | 2.83 | 95 | 138 |
 | German (Vicki) | 2.66 | 90 | 131 |
 | Italian (Beatrice since 2026-11-27, on real beats; Bianca was 2.59) | 2.54 | 86 | 125 |
 | Polish (Ola) | 2.37 | 80 | 117 |
